@@ -7,23 +7,28 @@ import math
 
 #This program compares a user's replay with others in order to see how close the cursor movement is to eachother
 #The test replays here are Cookiezi's Timefreeze  FC, _Ryuk's FC, and a replay botted copy of Cookiezi's FC
-#The distances of the x and y coordinates of each play are compared against eachother
+#The distances of the x and y coordinates of each play are compared against each-other
 #The average distance of the cursor between the legit and copied Cookiezi play is about 13 pixels
 #The average distance of the cursor between the legit _Ryuk play and Cookiezi play is about 156 pixels
 
+pathToUserReplay = "C:\\Users\\Travis\\source\\repos\\ReplaySBS\\ReplaySBS\\replays\\userReplay\\"
 
+pathToOtherReplays = "C:\\Users\\Travis\\source\\repos\\ReplaySBS\\ReplaySBS\\replays\\otherReplays\\"
 
+averageDistances = [] #Stores the average distances between the user's replay and the all the ones it was checked against
+    
 def checkDiffInReplays():
     
-    replays = []
-    userOsrList = [f for f in listdir("E:\\testing") if isfile(join("E:\\testing", f))]
+    
+    userOsrList = [f for f in listdir(pathToUserReplay) if isfile(join(pathToUserReplay, f))]
     
     userCorrds = [] # Where the coordinates of the user's replay will be stored
     otherCoords = [] # Where the coordinates of the other replays will be stored
 
+    
     # Parse user replay
-    for userOsr in userOsrList:
-        userOsr = "E:\\testing\\" + userOsr
+    for userOsr in userOsrList: #For every user replay (should only be one for now)
+        userOsr = pathToUserReplay + userOsr
         print("User Osr: " + userOsr)
         userReplay = parse_replay_file(userOsr)
         playData = userReplay.play_data
@@ -31,90 +36,82 @@ def checkDiffInReplays():
         for play in playData:
              userCorrds.append((play.x, play.y))
             
-           
-        #for i in range(len(userCorrds)):
-            #print(userCorrds[i])
-
-        otherCoords = parseOtherReplays()
-
-        #for i in range(len(otherCoords)):
-            #print(otherCoords[i])
-
-
-    averageDistance = computeSimilarity(userCorrds, otherCoords)
-
-    print("Average Distance " +str(averageDistance))
-    print(len(userCorrds))
-    print(len(otherCoords))
-
-
-def parseOtherReplays(): # Parse other replays
-    osrList = [f for f in listdir("E:\\testing\\compareReplays") if isfile(join("E:\\testing\\compareReplays", f))]
+        parseOtherReplays(userCorrds) #parses the other replay, then checks for similarity
+        
+    
+def parseOtherReplays(userCoords): # Parse other replays
+    osrList = [f for f in listdir(pathToOtherReplays) if isfile(join(pathToOtherReplays, f))]
     for osr in osrList:
-        replayXs = []
-        replayYs = []
-
+        
         otherCoords = []
         
         print("Replay Osr: " + osr)
-        osr = "E:\\testing\\compareReplays\\" + osr
+        osr = pathToOtherReplays + osr
+        
         replay = parse_replay_file(osr)
         playData = replay.play_data
+        
         for play in playData:
-            replayXs = replayXs + [play.x]
-            replayYs = replayYs + [play.y]
-
             otherCoords.append((play.x, play.y))
+    
+        averageDistance = (computeSimilarity(userCoords, otherCoords))
+        
+        averageDistances.append((averageDistance, osr)) #appends the osr filename and the average distance 
+        
+        print("Average distance is " +str(averageDistance))
     
     return otherCoords
             
             
-def computeSimilarity(userCoords, otherCoords ): #Calculates distance between the cursor between the users replay and the other replay
+def computeSimilarity(userCoords, otherCoords ): # Calculates distance between the cursor between the users replay and the other replay
    
     distances = []
     totalDistance = 0
     
-    allCoords = list(zip(userCoords, otherCoords))
+    allCoords = list(zip(userCoords, otherCoords)) # Combines the replay coordinates from both replays into one list so we can iterate through it at the same time
 
-    length = int(len(allCoords) *0.10)
+    length = int(len(allCoords) *0.10) # Use this to set the length of the replays you want to compare. I found bugs if the entire replay is used due to outliers at the very end skewing the average
+    
     for i in range(length):
         
         #print("Both")
-        #print(allCoords[i])
+        #print(allCoords[i]) # prints the list of both replays coordinates at that frame
         #print("User Coords")
-        #print(allCoords[i][0]) #[i][0] user coords [i][1] other coords
+        #print(allCoords[i][0]) # [i][0] use to access user coords | [i][1]  to access other replay's coords
         
-        #print(allCoords[i][0][1]) #user coords x value, y value would be [i][0][1]
+        #print(allCoords[i][0][1]) # user coords x value
+        #print(allCoords[i][0][1]) # user coords y value
+        #print("Other Coords") 
+        #print(allCoords[i][1]) # used to access other replay's coords
+        #print(allCoords[i][1][0]) # other coords x
+        #print(allCoords[i][1][1]) # other coords y
         
-        #print("Other Coords")
-        #print(allCoords[i][1])
-        #print(allCoords[i][1][0]) #other coords x
-        #print(allCoords[i][1][1]) #other coords y
+        x2 = allCoords[i][0][0] # user coords x
+        x1 = allCoords[i][1][0] # other coords x
         
-        x2 = allCoords[i][0][0] #user coords x
-        x1 = allCoords[i][1][0] #other coords x
+        y2 = allCoords[i][0][1] # user coords y
+        y1 = allCoords[i][1][1] # other coords y
         
-        y2 = allCoords[i][0][1] #user coords y
-        y1 = allCoords[i][1][1] #other coords y
+        distance = math.sqrt((x2 - x1)**2 + (y2- y1)**2) #uses distance formula to compute difference in the cursor values between the replays. May use different algorithm later
         
-        distance = math.sqrt((x2 - x1)**2 + (y2- y1)**2)
         print(distance)
 
         distances.append(distance)
 
+    # calculates and returns the average distance of the points
     for i in range(len(distances)):
         totalDistance = totalDistance + distances[i]
     
     averageDistance = (totalDistance/len(distances))
-
-
-
+     
     return averageDistance
     
 
-    
-
-
-
 
 checkDiffInReplays()
+
+#Summary of findings, needs to be cleaned up
+print("")
+print("SUMMARY OF FINDINGS")
+for i in range(len(averageDistances)):
+    print(averageDistances[i]) #prints all the average distances
