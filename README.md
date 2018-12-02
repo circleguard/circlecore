@@ -4,7 +4,7 @@ This project is aimed at trying to create an anti-cheat for the rhythm game osu!
 
 ## Getting Started
 
-You will need to install Python 3+ as well as pip to install the osrparse module
+You will need to install [Python 3+](https://www.python.org/downloads/) and use pip to install the osrparse module
 
 ```
 pip install osrparse
