@@ -12,6 +12,8 @@ pathToOtherReplays = "C:\\Users\\Travis\\source\\repos\\ReplaySBS\\ReplaySBS\\re
 
 
 averageDistances = [] #Stores the average distances between the user's replay and the all the ones it was checked against
+flaggedReplays = [] #if the average distance is really low, store it here
+cheatedReplays = [] #if the average distance is so low, there is no chance its legit
     
 def checkDiffInReplays():
     
@@ -53,6 +55,12 @@ def parseOtherReplays(userCoords): # Parse other replays
         averageDistance = (computeSimilarity(userCoords, otherCoords))
         
         averageDistances.append((averageDistance, osr)) #appends the osr filename and the average distance 
+
+        if averageDistance < 60: 
+            flaggedReplays.append((averageDistance, osr))
+
+        if averageDistance < 30:
+            cheatedReplays.append((averageDistance, osr))
         
         print("Average distance is " +str(averageDistance))
     
@@ -109,5 +117,15 @@ checkDiffInReplays()
 #Summary of findings, needs to be cleaned up
 print("")
 print("SUMMARY OF FINDINGS")
-for i in range(len(averageDistances)):
-    print(averageDistances[i]) #prints all the average distances
+print("Here are the certainly stolen replays")
+for i in range(len(cheatedReplays)):
+    print(cheatedReplays[i])
+
+print("Here are the sketchy replays, need manual verification")
+
+for i in range(len(flaggedReplays)):
+    print(flaggedReplays[i])
+
+#All replays 
+#for i in range(len(averageDistances)):
+    #print(averageDistances[i]) #prints all the average distances
