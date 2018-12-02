@@ -5,15 +5,11 @@ from os.path import isfile, join
 import difflib
 import math
 
-#This program compares a user's replay with others in order to see how close the cursor movement is to eachother
-#The test replays here are Cookiezi's Timefreeze  FC, _Ryuk's FC, and a replay botted copy of Cookiezi's FC
-#The distances of the x and y coordinates of each play are compared against each-other
-#The average distance of the cursor between the legit and copied Cookiezi play is about 13 pixels
-#The average distance of the cursor between the legit _Ryuk play and Cookiezi play is about 156 pixels
-
+#Paths to replays
 pathToUserReplay = "C:\\Users\\Travis\\source\\repos\\ReplaySBS\\ReplaySBS\\replays\\userReplay\\"
 
 pathToOtherReplays = "C:\\Users\\Travis\\source\\repos\\ReplaySBS\\ReplaySBS\\replays\\otherReplays\\"
+
 
 averageDistances = [] #Stores the average distances between the user's replay and the all the ones it was checked against
     
