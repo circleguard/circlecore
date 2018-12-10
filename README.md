@@ -1,6 +1,6 @@
 # ReplaySBS
 
-This project is aimed at trying to create an anti-cheat for the rhythm game osu!, specifically to catch cheaters who use Replay Stealing software. While it is nearly impossible to detect if someone uses their own replays to submut (whether edited or just sped up). Many people choose to steal other player's replays and submit them as their own instead. This program aims to catch these stolen replays. 
+This project is aimed at trying to create an anti-cheat for the rhythm game osu!, specifically to catch cheaters who use Replay Stealing software. While it is nearly impossible to detect if someone uses their own replays to submit (whether edited or just sped up). Many people choose to steal other player's replays and submit them as their own instead. This program aims to catch these stolen replays. 
 
 ## Getting Started
 
