@@ -24,7 +24,7 @@ Realistically you can have the replays anywhere on your machine, just change the
 ## How it works/Proof of concept
 - This program compares a user's replay with others in order to see how close the cursor movement is to eachother
 - The test replays here are Cookiezi's Timefreeze  FC, _Ryuk's FC, and a replay botted copy of Cookiezi's FC
-- The distances of the x and y coordinates of each play are compared against each-other
+- The distances of the x and y coordinates of each play are compared against each-other, this will be replaced with some other algorithm
 - The average distance of the cursor between the legit and copied Cookiezi play is about 13 pixels
 - The average distance of the cursor between the legit _Ryuk play and Cookiezi play is about 156 pixels
 
