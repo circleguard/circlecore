@@ -24,7 +24,7 @@ Realistically you can have the replays anywhere on your machine, just change the
 ## How it works/Proof of concept
 - This program compares a user's replay with others in order to see how close the cursor movement is to eachother
 - The test replays here are Cookiezi's Timefreeze  FC, _Ryuk's FC, and a replay botted copy of Cookiezi's FC
-- The distances of the x and y coordinates of each play are compared against each-other
+- The distances of the x and y coordinates of each play are compared against each-other, this will be replaced with some other algorithm
 - The average distance of the cursor between the legit and copied Cookiezi play is about 13 pixels
 - The average distance of the cursor between the legit _Ryuk play and Cookiezi play is about 156 pixels
 
@@ -35,6 +35,8 @@ Realistically you can have the replays anywhere on your machine, just change the
    - find an alternative to /api/get_replay as it's rate limited to 10 requests per min
    - once found find an efficient way to download all avaliable replays from that mapset to check against
    - potentially give each replay a unique score based upon average cursor postion to store in a database, that way all replays don't need to be downloaded all the time
-3. osu! client integration 
+3. Come up with another method of comparing replays
+   -Could be using statistics or other complex math things that are a bit over my head
+4. osu! client integration 
    - Check scores upon score submission
    - Includes a user's previously submitted score(s) on that map. 
