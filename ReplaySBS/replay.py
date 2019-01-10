@@ -1,10 +1,16 @@
 import math
+import requests
+import base64
 
-from config import REPLAY_PORTION
+import osrparse
+
+from config import REPLAY_PORTION, API_REPLAY
 
 class Replay:
-    def __init__(self, replay_data):
-        self.player_name = replay_data.player_name
+    def __init__(self, replay_data, player_name=None):
+        # player_name is only passed if we parse the data straight from lzma which does not include username
+        # so we provide it manually from get_scores
+        self.player_name = replay_data.player_name if player_name is None else player_name 
         self.play_data = replay_data.play_data
         self.average_distance = ""
         
@@ -24,21 +30,11 @@ class Replay:
         for data in check_replay_data:
             coords_check.append((data.x, data.y))
 
-        print(len(coords_user))
-        # print(coords_user[-500:])
-        print(len(coords_check))
-        # print(coords_check[-68:])
-
         coords = list(zip(coords_user, coords_check))
 
         distance_total = 0
         length = int(len(coords) * REPLAY_PORTION)
-        for i, data in enumerate(coords[0:length]):
-            user = data[0]
-            check = data[1]
-            # if i % 10 == 0:
-                # input()
-                # print("{} <-> {}".format(user, check))
+        for user, check in coords[0:length]:
             x1 = user[0]
             x2 = check[0]
             y1 = user[1]
@@ -52,3 +48,13 @@ class Replay:
 
         return str(distance_average) + players
  
+    @staticmethod
+    def from_map(map_id, user_id, username):
+        replay_data_string = requests.get(API_REPLAY.format(map_id, user_id)).json()["content"]
+        # convert to bytes so the lzma can be deocded with osrparse
+        replay_data_bytes = base64.b64decode(replay_data_string)
+        return Replay(osrparse.parse_replay(replay_data_bytes, pure_lzma=True), player_name=username)
+
+    @staticmethod
+    def from_path(path):
+        return Replay(osrparse.parse_replay_file(path))

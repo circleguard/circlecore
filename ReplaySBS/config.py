@@ -15,3 +15,4 @@ REPLAY_PORTION = 1
 
 API_BASE = "https://osu.ppy.sh/api/"
 API_REPLAY = API_BASE + "get_replay?k=" + API_KEY + "&m=0&b={}&u={}"
+API_SCORES = API_BASE + "get_scores?k=" + API_KEY + "&m=0&b={}"
