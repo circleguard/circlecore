@@ -24,11 +24,21 @@ class Replay:
         for data in check_replay_data:
             coords_check.append((data.x, data.y))
 
+        print(len(coords_user))
+        # print(coords_user[-500:])
+        print(len(coords_check))
+        # print(coords_check[-68:])
+
         coords = list(zip(coords_user, coords_check))
 
         distance_total = 0
         length = int(len(coords) * REPLAY_PORTION)
-        for user, check in coords[0:length]:
+        for i, data in enumerate(coords[0:length]):
+            user = data[0]
+            check = data[1]
+            # if i % 10 == 0:
+                # input()
+                # print("{} <-> {}".format(user, check))
             x1 = user[0]
             x2 = check[0]
             y1 = user[1]
