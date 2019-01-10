@@ -17,7 +17,7 @@ class Replay:
         get_xy = lambda event: (event.x, event.y)
         
         coords_user = np.array(list(map(get_xy, user_replay.play_data)))
-        coords_user_p = coords_user
+        coords_user_slice = coords_user
         coords_check = np.array(list(map(get_xy, check_replay.play_data)))
 
         length = min(len(coords_user), len(coords_check))
@@ -25,9 +25,9 @@ class Replay:
         
         stats = []
         for i in range(offset):
-            coords_user = coords_user_p[20:length + 20]
+            coords_user_slice = coords_user[i:length + i]
         
-            difference = coords_user - coords_check
+            difference = coords_user_slice - coords_check
         
             distance = (difference ** 2).sum(axis = 1) ** 0.5
         

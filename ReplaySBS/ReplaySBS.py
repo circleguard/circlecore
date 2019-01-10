@@ -12,15 +12,10 @@ def main():
     for osr_path in PATH_REPLAYS_USER:
         user_replay_data = parse_replay_file(osr_path)
         user_replay = Replay(user_replay_data)
-        
-        global test
-        test = user_replay
 
         for osr_path in PATH_REPLAYS_CHECK:
             check_replay_data = parse_replay_file(osr_path)
             check_replay = Replay(check_replay_data)
-            global test2
-            test2 = check_replay
 
             print(Replay.compute_similarity(user_replay, check_replay))
         
