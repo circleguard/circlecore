@@ -13,8 +13,8 @@ def main():
         if(args.user_id):
             user_replay = Replay.from_map(args.map_id, args.user_id, args.user_id)
         
-
-        for check_id in [x["user_id"] for x in requests.get(API_SCORES).json()]:
+        url = API_SCORES.format(args.map_id)
+        for check_id in [x["user_id"] for x in requests.get(url).json()]:
             check_replay = Replay.from_map(args.map_id, check_id, args.user_id)
             print(Replay.compute_similarity(user_replay, check_replay))
 
