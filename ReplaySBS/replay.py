@@ -1,11 +1,19 @@
-#from config import REPLAY_PORTION
 import numpy as np
+import math
+import requests
+import base64
+
+import osrparse
+
+from config import API_REPLAY
 
 class Replay:
     """This class represents a replay as its cursor positions and playername."""
+    def __init__(self, replay_data, player_name=None):
+        # player_name is only passed if we parse the data straight from lzma which does not include username
+        # so we provide it manually from get_scores
+        self.player_name = replay_data.player_name if player_name is None else player_name 
 
-    def __init__(self, replay_data):
-        self.player_name = replay_data.player_name
         # play_data takes the shape of a list of ReplayEvents
         # with fields x, y, keys_pressed and time_since_previous_action
         self.play_data = replay_data.play_data
@@ -57,3 +65,14 @@ class Replay:
 
         return str(mu) + ", " + str(sigma) + players
 
+ 
+    @staticmethod
+    def from_map(map_id, user_id, username):
+        replay_data_string = requests.get(API_REPLAY.format(map_id, user_id)).json()["content"]
+        # convert to bytes so the lzma can be deocded with osrparse
+        replay_data_bytes = base64.b64decode(replay_data_string)
+        return Replay(osrparse.parse_replay(replay_data_bytes, pure_lzma=True), player_name=username)
+
+    @staticmethod
+    def from_path(path):
+        return Replay(osrparse.parse_replay_file(path))
