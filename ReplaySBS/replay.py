@@ -2,6 +2,7 @@ import numpy as np
 import math
 import requests
 import base64
+import itertools as itr
 
 import osrparse
 
@@ -18,6 +19,7 @@ class Replay:
         # with fields x, y, keys_pressed and time_since_previous_action
         self.play_data = replay_data.play_data
         self.average_distance = ""
+        self.length = len(self.play_data)
 
     @staticmethod
     def compute_similarity(user_replay, check_replay):
@@ -26,14 +28,12 @@ class Replay:
         """
         players = " ({} vs {})".format(user_replay.player_name, check_replay.player_name)
 
-        get_xy = lambda event: (event.x, event.y)
-
         # get all coordinates in numpy arrays so that they're arranged like:
         # [ x_1 x_2 ... x_n
         #   y_1 y_2 ... y_n ]
         # indexed by columns first.
-        coords1 = np.array(list(map(get_xy, user_replay.play_data)))
-        coords2 = np.array(list(map(get_xy, check_replay.play_data)))
+        coords1 = user_replay.as_array()
+        coords2 = check_replay.as_array()
 
         # switch if the second is longer, so that coords1 is always the longest.
         if len(coords2) > len(coords1):
@@ -65,7 +65,15 @@ class Replay:
 
         return str(mu) + ", " + str(sigma) + players
 
- 
+    @staticmethod
+    def interpolate(data1, data2):
+        """Interpolates the longer of the datas to match the timestamps of the shorter."""
+        # TODO
+        if len(data1) < len(data2):
+            (data1, data2) = (data2, data1)
+
+        itr.dropwhile(lambda e: e, data1)
+        
     @staticmethod
     def from_map(map_id, user_id, username):
         replay_data_string = requests.get(API_REPLAY.format(map_id, user_id)).json()["content"]
@@ -76,3 +84,27 @@ class Replay:
     @staticmethod
     def from_path(path):
         return Replay(osrparse.parse_replay_file(path))
+
+    def as_array(self):
+        """Gets the playdata as a np array with time as the first axis.
+        [ x_1 x_2 ... x_n
+          y_1 y_2 ... y_n ]
+        """
+        
+        return np.array(list(map(lambda e: (e.x, e.y), self.play_data)))
+
+    def as_list_with_timestamps(self):
+        """Gets the playdata as a list of tuples of absolute time, x and y."""
+
+        # get all offsets sum all offsets before it to get all absolute times
+        timestamps = np.fromiter(map(lambda e: e.time_since_previous_action, self.play_data), np.float)
+        timestamps = timestamps.cumsum()
+
+        # zip timestamps back to data and map t, x, y to tuples
+        combined = zip(timestamps, self.play_data)
+
+        txy = list(map(lambda z: (z[0], z[1].x, z[1].y), combined))
+        # sort to ensure time goes forward as you move through the data
+        # in case someone decides to make time go backwards anyway
+        txy.sort(key=lambda d: d[0])
+        return txy
