@@ -8,6 +8,27 @@ import osrparse
 
 from config import API_REPLAY
 
+class Interpolation:
+    """A utility class containing coordinate interpolations."""
+
+    @staticmethod
+    def linear(x1, x2, r):
+        """Linearly interpolates coordinate tuples x1 and x2 with ratio r."""
+
+        return ((1 - r) * x1[0] + r * x2[0], (1 - r) * x1[1] + r * x2[1])
+
+    @staticmethod
+    def before(x1, x2, r):
+        """Returns the startpoint of the range."""
+
+        return x1
+
+    @staticmethod
+    def after(x1, x2, r):
+        """Returns the endpoint of the range."""
+
+        return x2
+
 class Replay:
     """This class represents a replay as its cursor positions and playername."""
     def __init__(self, replay_data, player_name=None):
@@ -33,20 +54,20 @@ class Replay:
         # [ x_1 x_2 ... x_n
         #   y_1 y_2 ... y_n ]
         # indexed by columns first.
-        coords1 = user_replay.as_array()
-        coords2 = check_replay.as_array()
+        data1 = user_replay.as_array()
+        data2 = check_replay.as_array()
 
-        # switch if the second is longer, so that coords1 is always the longest.
-        if len(coords2) > len(coords1):
-            (coords1, coords2) = (coords2, coords1)
+        # switch if the second is longer, so that data1 is always the longest.
+        if len(data2) > len(data1):
+            (data1, data2) = (data2, data1)
             
-        shortest = len(coords2)
-        difference = len(coords1) - len(coords2)
+        shortest = len(data2)
+        difference = len(data1) - len(data2)
 
         stats = []
         for offset in range(difference):
-            # offset coords1 and calculate the distance for all sets of coordinates.
-            distance = coords1[offset:shortest + offset] - coords2
+            # offset data1 and calculate the distance for all sets of coordinates.
+            distance = data1[offset:shortest + offset] - data2
 
             # square all numbers and sum over the second axis (add row 2 to row 1),
             # finally take the square root of each number to get all distances.
@@ -67,13 +88,79 @@ class Replay:
         return str(mu) + ", " + str(sigma) + players
 
     @staticmethod
-    def interpolate(data1, data2):
+    def compute_data_similarity(data1, data2):
+        # test function
+
+        data1 = np.array(data1)
+        data2 = np.array(data2)
+        
+        # switch if the second is longer, so that data1 is always the longest.
+        if len(data2) > len(data1):
+            (data1, data2) = (data2, data1)
+            
+        shortest = len(data2)
+
+        distance = data1[:shortest] - data2
+        distance[np.isnan(distance)] = 0
+        # square all numbers and sum over the second axis (add row 2 to row 1),
+        # finally take the square root of each number to get all distances.
+        # [ x_1 x_2 ... x_n   => [ x_1 ** 2 ... x_n ** 2 
+        #   y_1 y_2 ... y_n ] =>   y_1 ** 2 ... y_n ** 2 ]
+        # => [ x_1 ** 2 + y_1 ** 2 ... x_n ** 2 + y_n ** 2 ]
+        # => [ d_1 ... d_2 ]
+        distance = (distance ** 2).sum(axis=1) ** 0.5
+
+        mu, sigma = distance.mean(), distance.std()
+
+        return (mu, sigma)
+
+    @staticmethod
+    def interpolate(data1, data2, interpolation=Interpolation.linear):
         """Interpolates the longer of the datas to match the timestamps of the shorter."""
-        # TODO
-        if len(data1) < len(data2):
+
+        # if the first timestamp in data2 is before the first in data1 switch
+        # so data1 always has some timestamps before data2.
+        if data1[0][0] > data2[0][0]:
             (data1, data2) = (data2, data1)
 
-        itr.dropwhile(lambda e: e, data1)
+        # get the smallest index of the timestamps after the first timestamp in data2.
+        i = next((i for (i, p) in enumerate(data1) if p[0] > data2[0][0]))
+
+        # remove all earlier timestamps, if data1 is longer than data2 keep one more
+        # so that the longest always starts before the shorter dataset.
+        data1 = data1[i:] if len(data1) < len(data2) else data[i - 1:]
+
+        if len(data1) > len(data2):
+            (data1, data2) = (data2, data1)
+
+        # for each point in data1 interpolate the points around the timestamp in data2.
+        j = 0
+        inter = []
+        for between in data1:
+            # move up to the last timestamp in data2 before the current timestamp.
+            while j < len(data2) - 1 and data2[j][0] < between[0]:
+                j += 1
+
+            if j == len(data2) - 1:
+                break
+            
+            before = data2[j]
+            after = data2[j + 1]
+
+            # calculate time differences
+            # dt1 =  ---2       , data1
+            # dt2 = 1-------3   , data2
+            dt1 = between[0] - before[0]
+            dt2 = after[0] - before[0]
+
+            # interpolate the coordinates in data2
+            # according to the ratios of the time differences
+            x_inter = interpolation(before[1:], after[1:], dt1 / dt2)
+            t_inter = between[0]
+
+            inter.append((t_inter, *x_inter))
+
+        return (data1, inter)
         
     @staticmethod
     def from_map(map_id, user_id, username):
@@ -102,10 +189,8 @@ class Replay:
         timestamps = np.array([e.time_since_previous_action for e in self.play_data])
         timestamps = timestamps.cumsum()
 
-        # zip timestamps back to data and map t, x, y to tuples
-        combined = zip(timestamps, self.play_data)
-
-        txy = [(z[0], z[1].x, z[1].y) for z in combined]
+        # zip timestamps back to data and convert t, x, y to tuples
+        txy = [(z[0], z[1].x, z[1].y) for z in zip(timestamps, self.play_data)]
         # sort to ensure time goes forward as you move through the data
         # in case someone decides to make time go backwards anyway
         txy.sort(key=lambda p: p[0])
