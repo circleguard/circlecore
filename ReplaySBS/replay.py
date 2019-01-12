@@ -23,7 +23,8 @@ class Replay:
 
     @staticmethod
     def compute_similarity(user_replay, check_replay):
-        """Compare two plays and return their average distance
+        """
+        Compare two plays and return their average distance
         and standard deviation of distances.
         """
         players = " ({} vs {})".format(user_replay.player_name, check_replay.player_name)
@@ -86,25 +87,26 @@ class Replay:
         return Replay(osrparse.parse_replay_file(path))
 
     def as_array(self):
-        """Gets the playdata as a np array with time as the first axis.
+        """
+        Gets the playdata as a np array with time as the first axis.
         [ x_1 x_2 ... x_n
           y_1 y_2 ... y_n ]
         """
         
-        return np.array(list(map(lambda e: (e.x, e.y), self.play_data)))
+        return np.array([(e.x, e.y) for e in self.play_data])
 
     def as_list_with_timestamps(self):
         """Gets the playdata as a list of tuples of absolute time, x and y."""
 
         # get all offsets sum all offsets before it to get all absolute times
-        timestamps = np.fromiter(map(lambda e: e.time_since_previous_action, self.play_data), np.float)
+        timestamps = np.array([e.time_since_previous_action for e in self.play_data])
         timestamps = timestamps.cumsum()
 
         # zip timestamps back to data and map t, x, y to tuples
         combined = zip(timestamps, self.play_data)
 
-        txy = list(map(lambda z: (z[0], z[1].x, z[1].y), combined))
+        txy = [(z[0], z[1].x, z[1].y) for z in combined]
         # sort to ensure time goes forward as you move through the data
         # in case someone decides to make time go backwards anyway
-        txy.sort(key=lambda d: d[0])
+        txy.sort(key=lambda p: p[0])
         return txy
