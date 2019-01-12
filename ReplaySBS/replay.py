@@ -101,7 +101,6 @@ class Replay:
         shortest = len(data2)
 
         distance = data1[:shortest] - data2
-        distance[np.isnan(distance)] = 0
         # square all numbers and sum over the second axis (add row 2 to row 1),
         # finally take the square root of each number to get all distances.
         # [ x_1 x_2 ... x_n   => [ x_1 ** 2 ... x_n ** 2 
@@ -136,14 +135,18 @@ class Replay:
         # for each point in data1 interpolate the points around the timestamp in data2.
         j = 0
         inter = []
+        clean = []
         for between in data1:
+            # keep a clean version with only values that can be interpolated properly.
+            clean.append(between)
+
             # move up to the last timestamp in data2 before the current timestamp.
             while j < len(data2) - 1 and data2[j][0] < between[0]:
                 j += 1
 
             if j == len(data2) - 1:
                 break
-            
+
             before = data2[j]
             after = data2[j + 1]
 
@@ -153,14 +156,22 @@ class Replay:
             dt1 = between[0] - before[0]
             dt2 = after[0] - before[0]
 
+            # skip trying to interpolate to this event
+            # if its surrounding events are not set apart in time
+            # and replace it with the event before it
+            if dt2 == 0:
+                inter.append((between[0], *before[1:]))
+                continue
+
             # interpolate the coordinates in data2
             # according to the ratios of the time differences
             x_inter = interpolation(before[1:], after[1:], dt1 / dt2)
+               
             t_inter = between[0]
 
             inter.append((t_inter, *x_inter))
 
-        return (data1, inter)
+        return (clean, inter)
         
     @staticmethod
     def from_map(map_id, user_id, username):
@@ -195,3 +206,6 @@ class Replay:
         # in case someone decides to make time go backwards anyway
         txy.sort(key=lambda p: p[0])
         return txy
+
+# fail fast
+np.seterr(all='raise')
