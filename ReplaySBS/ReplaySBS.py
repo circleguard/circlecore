@@ -18,7 +18,6 @@ def main():
             check_replay = Replay.from_map(args.map_id, check_id, args.user_id)
             print(Replay.compute_similarity(user_replay, check_replay))
 
-
     # checks every replay listed in PATH_REPLAYS_USER against every replay listed in PATH_REPLAYS_CHECK
     for osr_path in PATH_REPLAYS_USER:
         user_replay = Replay.from_path(osr_path)
@@ -27,8 +26,15 @@ def main():
             check_replay_data = parse_replay_file(osr_path2)
             check_replay = Replay(check_replay_data)
 
-            print(Replay.compute_similarity(user_replay, check_replay))
-        
+            data1 = user_replay.as_list_with_timestamps()
+            data2 = check_replay.as_list_with_timestamps()
 
+            (data1, data2) = Replay.interpolate(data1, data2)
+
+            data1 = [(d[1], d[2]) for d in data1]
+            data2 = [(d[1], d[2]) for d in data2]
+        
+            print(user_replay.player_name + " vs " + check_replay.player_name)
+            print(Replay.compute_data_similarity(data1, data2))
 if __name__ == '__main__':
     main()
