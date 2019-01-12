@@ -13,7 +13,7 @@ For docstrings, follow [google's style](https://github.com/google/styleguide/blo
 
 ### General
 
-Where possible, list comprehension is prefered over lambdas.
+Where possible, list comprehensions are generally prefered over lambdas.
 
 ```python
 my_list = [x for x in my_list if x.attribute == value] # PREFERRED
