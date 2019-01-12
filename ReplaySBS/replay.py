@@ -1,10 +1,8 @@
-import numpy as np
-import math
-import requests
 import base64
-import itertools as itr
-
 import osrparse
+import requests
+
+import numpy as np
 
 from config import API_REPLAY
 
@@ -34,7 +32,7 @@ class Replay:
     def __init__(self, replay_data, player_name=None):
         # player_name is only passed if we parse the data straight from lzma which does not include username
         # so we provide it manually from get_scores
-        self.player_name = replay_data.player_name if player_name is None else player_name 
+        self.player_name = replay_data.player_name if player_name is None else player_name
 
         # play_data takes the shape of a list of ReplayEvents
         # with fields x, y, keys_pressed and time_since_previous_action
@@ -60,7 +58,7 @@ class Replay:
         # switch if the second is longer, so that data1 is always the longest.
         if len(data2) > len(data1):
             (data1, data2) = (data2, data1)
-            
+
         shortest = len(data2)
         difference = len(data1) - len(data2)
 
@@ -71,7 +69,7 @@ class Replay:
 
             # square all numbers and sum over the second axis (add row 2 to row 1),
             # finally take the square root of each number to get all distances.
-            # [ x_1 x_2 ... x_n   => [ x_1 ** 2 ... x_n ** 2 
+            # [ x_1 x_2 ... x_n   => [ x_1 ** 2 ... x_n ** 2
             #   y_1 y_2 ... y_n ] =>   y_1 ** 2 ... y_n ** 2 ]
             # => [ x_1 ** 2 + y_1 ** 2 ... x_n ** 2 + y_n ** 2 ]
             # => [ d_1 ... d_2 ]
@@ -89,21 +87,23 @@ class Replay:
 
     @staticmethod
     def compute_data_similarity(data1, data2):
-        # test function
-
+        """
+        Compares two coordinate datasets and returns their average distance
+        and standard deviation.
+        """
         data1 = np.array(data1)
         data2 = np.array(data2)
-        
+
         # switch if the second is longer, so that data1 is always the longest.
         if len(data2) > len(data1):
             (data1, data2) = (data2, data1)
-            
+
         shortest = len(data2)
 
         distance = data1[:shortest] - data2
         # square all numbers and sum over the second axis (add row 2 to row 1),
         # finally take the square root of each number to get all distances.
-        # [ x_1 x_2 ... x_n   => [ x_1 ** 2 ... x_n ** 2 
+        # [ x_1 x_2 ... x_n   => [ x_1 ** 2 ... x_n ** 2
         #   y_1 y_2 ... y_n ] =>   y_1 ** 2 ... y_n ** 2 ]
         # => [ x_1 ** 2 + y_1 ** 2 ... x_n ** 2 + y_n ** 2 ]
         # => [ d_1 ... d_2 ]
@@ -127,7 +127,7 @@ class Replay:
 
         # remove all earlier timestamps, if data1 is longer than data2 keep one more
         # so that the longest always starts before the shorter dataset.
-        data1 = data1[i:] if len(data1) < len(data2) else data[i - 1:]
+        data1 = data1[i:] if len(data1) < len(data2) else data1[i - 1:]
 
         if len(data1) > len(data2):
             (data1, data2) = (data2, data1)
@@ -166,13 +166,13 @@ class Replay:
             # interpolate the coordinates in data2
             # according to the ratios of the time differences
             x_inter = interpolation(before[1:], after[1:], dt1 / dt2)
-               
+
             t_inter = between[0]
 
             inter.append((t_inter, *x_inter))
 
         return (clean, inter)
-        
+
     @staticmethod
     def from_map(map_id, user_id, username):
         replay_data_string = requests.get(API_REPLAY.format(map_id, user_id)).json()["content"]
@@ -190,7 +190,7 @@ class Replay:
         [ x_1 x_2 ... x_n
           y_1 y_2 ... y_n ]
         """
-        
+
         return np.array([(e.x, e.y) for e in self.play_data])
 
     def as_list_with_timestamps(self):
