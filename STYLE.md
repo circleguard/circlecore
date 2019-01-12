@@ -36,6 +36,6 @@ Follow general git conventions when committing:
 * Start descriptions with a lowercase letter
 * If the commit addresses a specific issue, reference that issue in the commit summary (`closes #6`)
 
-Pull Requests with messy history may be converted to a squash merge at the mantainer's disgression.
+Pull Requests with messy history may be converted to a squash merge at the mantainer's discretion.
 
 Finally, thou shalt not commit directly to master.
