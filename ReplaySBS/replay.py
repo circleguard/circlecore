@@ -111,7 +111,7 @@ class Replay:
 
         (mu, sigma) = Replay.compute_data_similarity(data1, data2)
 
-        return "mu = {}, sigma = {} {}".format(mu, sigma, players)
+        return (mu, sigma, players)
 
     @staticmethod
     def compute_data_similarity(data1, data2):

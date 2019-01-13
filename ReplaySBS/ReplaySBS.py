@@ -15,7 +15,12 @@ def main():
 
         for check_id in Downloader.users_from_beatmap(args.map_id):
             check_replay = Replay.from_map(args.map_id, check_id, check_id)
-            print(Replay.compute_similarity(user_replay, check_replay))
+            result = Replay.compute_similarity(user_replay, check_replay)
+            mean = result[0]
+            sigma = result[1]
+            players = result[2]
+            if(mean < 20):
+                print("Similarity = {:.1f} {}".format(mean, players))
         
         return
 
