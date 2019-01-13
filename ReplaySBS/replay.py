@@ -167,6 +167,11 @@ class Replay:
             # according to the ratios of the time differences
             x_inter = interpolation(before[1:], after[1:], dt1 / dt2)
 
+            # filter out interpolation artifacts which send outliers even further away
+            if abs(x_inter[0]) > 600 or abs(x_inter[1]) > 600:
+                inter.append(between)
+                continue
+
             t_inter = between[0]
 
             inter.append((t_inter, *x_inter))
