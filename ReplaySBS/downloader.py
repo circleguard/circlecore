@@ -52,7 +52,10 @@ class Downloader():
             The lzma bytestring returned by the api.
         """
 
-        return requests.get(API_REPLAY.format(map_id, user_id)).json()["content"]
+        Downloader.check_ratelimit()
+        lzma = requests.get(API_REPLAY.format(map_id, user_id)).json()["content"]
+        Downloader.heavy_load += 1
+        return lzma
 
     @staticmethod
     def check_ratelimit():
@@ -72,4 +75,9 @@ class Downloader():
     @staticmethod
     def enforce_ratelimit():
         difference = datetime.now() - Downloader.start_time
-        time.sleep(difference.seconds)
+        seconds_passed = difference.seconds
+        if(seconds_passed > Downloader.RATELIMIT_RESET):
+            return
+
+        # sleep the remainder of the reset cycle so we guarantee it's been that long since the first request
+        time.sleep(Downloader.RATELIMIT_RESET - seconds_passed) 
