@@ -1,11 +1,10 @@
 import base64
-import osrparse
 import requests
 
 import numpy as np
+import osrparse
 
 import downloader
-from config import API_REPLAY
 
 class Interpolation:
     """A utility class containing coordinate interpolations."""
@@ -89,6 +88,30 @@ class Replay:
         player_name = parsed_replay.player_name
 
         return Replay(check_replay_data, player_name)
+
+    @staticmethod
+    def compute_similarity(user_replay, check_replay):
+        """
+        Compare two plays and return their average distance
+        and standard deviation of distances.
+        """
+
+        players = " ({} vs {})".format(user_replay.player_name, check_replay.player_name)
+        # get all coordinates in numpy arrays so that they're arranged like:
+        # [ x_1 x_2 ... x_n
+        #   y_1 y_2 ... y_n ]
+        # indexed by columns first.
+        data1 = user_replay.as_list_with_timestamps()
+        data2 = check_replay.as_list_with_timestamps()
+
+        (data1, data2) = Replay.interpolate(data1, data2)
+
+        data1 = [d[1:] for d in data1]
+        data2 = [d[1:] for d in data2]
+
+        (mu, sigma) = Replay.compute_data_similarity(data1, data2)
+
+        return "mu = {}, sigma = {} {}".format(mu, sigma, players)
 
     @staticmethod
     def compute_data_similarity(data1, data2):
@@ -178,6 +201,11 @@ class Replay:
             # interpolate the coordinates in data2
             # according to the ratios of the time differences
             x_inter = interpolation(before[1:], after[1:], dt1 / dt2)
+
+            # filter out interpolation artifacts which send outliers even further away
+            if abs(x_inter[0]) > 600 or abs(x_inter[1]) > 600:
+                inter.append(between)
+                continue
 
             t_inter = between[0]
 
