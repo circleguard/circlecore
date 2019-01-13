@@ -4,7 +4,7 @@ import itertools
 
 from downloader import Downloader
 from replay import Replay
-from config import PATH_REPLAYS_USER, PATH_REPLAYS_CHECK
+from config import PATH_REPLAYS_USER, PATH_REPLAYS_CHECK, WHITELIST
 
 def main():
     """checks all replays in PATH_REPLAYS_USER against all replays in PATH_REPLAYS_CHECK"""
@@ -29,6 +29,9 @@ def main():
         replays = [Replay.from_map(args.map_id, check_id, check_id) for check_id in Downloader.users_from_beatmap(args.map_id)]
         print("comparing all replays (1225 combinations)")
         for replay1, replay2 in itertools.combinations(replays, 2):
+            if(replay1.player_name in WHITELIST and replay2.player_name in WHITELIST):
+                continue # don't waste time comparing two 100% clean players
+                
             result = Replay.compute_similarity(replay1, replay2)
             mean = result[0]
             sigma = result[1]
