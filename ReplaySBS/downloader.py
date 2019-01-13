@@ -15,6 +15,7 @@ class Downloader():
     Manages interactions with the osu api - keeps track of 
     ratelimits for different types of requests, and self-ratelimits by sleeping the thread.
     """
+
     RATELIMIT = 100 # true ratelimit is 1200 for normal requests but we should keep activity sub 100.
     RATELIMIT_HEAVY = 10 # true replay ratelimit is 10/min
     RATELIMIT_RESET = 60 # time in seconds until the api refreshes our ratelimits
@@ -35,6 +36,7 @@ class Downloader():
         """
         Returns a list of all user ids of the top 50 plays on the given beatmap.
         """
+        
         Downloader.check_ratelimit()
         url = API_SCORES.format(map_id)
         users = [x["user_id"] for x in requests.get(url).json()]
@@ -56,7 +58,7 @@ class Downloader():
     def check_ratelimit():
         # first check if we've refreshed our ratelimits yet
         difference = datetime.now() - Downloader.start_time
-        if(difference.seconds > RATELIMIT_RESET):
+        if(difference.seconds > Downloader.RATELIMIT_RESET):
             Downloader.load = 0
             Downloader.heavy_load = 0
             Downloader.start_time = datetime.now()
