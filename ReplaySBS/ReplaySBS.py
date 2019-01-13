@@ -1,4 +1,3 @@
-from osrparse import parse_replay_file
 from argparser import argparser
 import requests
 
@@ -15,16 +14,25 @@ def main():
         
         url = API_SCORES.format(args.map_id)
         for check_id in [x["user_id"] for x in requests.get(url).json()]:
-            check_replay = Replay.from_map(args.map_id, check_id, args.user_id)
-            print(Replay.compute_similarity(user_replay, check_replay))
+            check_replay = Replay.from_map(args.map_id, check_id, check_id)
+            
+            data1 = user_replay.as_list_with_timestamps()
+            data2 = check_replay.as_list_with_timestamps()
+
+            (data1, data2) = Replay.interpolate(data1, data2)
+
+            data1 = [(d[1], d[2]) for d in data1]
+            data2 = [(d[1], d[2]) for d in data2]
+        
+            print(user_replay.player_name + " vs " + check_replay.player_name)
+            print(Replay.compute_data_similarity(data1, data2))
 
     # checks every replay listed in PATH_REPLAYS_USER against every replay listed in PATH_REPLAYS_CHECK
     for osr_path in PATH_REPLAYS_USER:
         user_replay = Replay.from_path(osr_path)
 
         for osr_path2 in PATH_REPLAYS_CHECK:
-            check_replay_data = parse_replay_file(osr_path2)
-            check_replay = Replay(check_replay_data)
+            check_replay = Replay.from_path(osr_path2)
 
             data1 = user_replay.as_list_with_timestamps()
             data2 = check_replay.as_list_with_timestamps()
