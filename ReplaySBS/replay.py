@@ -1,10 +1,10 @@
 import base64
-import osrparse
 import requests
 
 import numpy as np
+import osrparse
 
-from config import API_REPLAY
+from downloader import Downloader
 
 class Interpolation:
     """A utility class containing coordinate interpolations."""
@@ -28,17 +28,66 @@ class Interpolation:
         return x2
 
 class Replay:
-    """This class represents a replay as its cursor positions and playername."""
-    def __init__(self, replay_data, player_name=None):
-        # player_name is only passed if we parse the data straight from lzma which does not include username
-        # so we provide it manually from get_scores
-        self.player_name = replay_data.player_name if player_name is None else player_name
+    """
+    This class represents a replay as its cursor positions and playername.
 
-        # play_data takes the shape of a list of ReplayEvents
-        # with fields x, y, keys_pressed and time_since_previous_action
-        self.play_data = replay_data.play_data
-        self.average_distance = ""
-        self.length = len(self.play_data)
+    Attributes:
+        List replay_data: A list of osrpasrse.ReplayEvent objects, containing
+                          x, y, time_since_previous_action, and keys_pressed.
+        String player_name: The player who set the replay.
+    """
+
+    def __init__(self, replay_data, player_name):
+        """
+        Initializes a Replay instance.
+
+        Args:
+            List replay_data: A list of osrpasrse.ReplayEvent objects, containing
+                              x, y, time_since_previous_action, and keys_pressed.
+            String player_name: The player who set the replay.
+        """
+
+        self.player_name = player_name
+        self.play_data = replay_data
+
+    @staticmethod
+    def from_map(map_id, user_id):
+        """
+        Creates a Replay instance from a replay by the given user on the given map.
+
+        Args:
+            String map_id: The map_id to download the replay from
+            String user_id: The user id to download the replay of. 
+                            Also used as the username of the Replay
+
+        Returns:
+            The Replay instance created with the given information
+        """
+
+        replay_data_string = Downloader.replay_data(map_id, user_id)
+        # convert to bytes so the lzma can be deocded with osrparse
+        replay_data_bytes = base64.b64decode(replay_data_string)
+        parsed_replay = osrparse.parse_replay(replay_data_bytes, pure_lzma=True)
+        replay_data = parsed_replay.play_data
+        return Replay(replay_data, user_id)
+
+    @staticmethod
+    def from_path(path):
+        """
+        Creates a Replay instance from the data contained by file at the given path
+
+        Args:
+            [String or Path] path: The absolute path to the replay file
+
+        Returns:
+            The Replay instance created from the given path
+        """
+
+        parsed_replay = osrparse.parse_replay_file(path)
+        check_replay_data = parsed_replay.play_data
+        player_name = parsed_replay.player_name
+
+        return Replay(check_replay_data, player_name)
 
     @staticmethod
     def compute_similarity(user_replay, check_replay):
@@ -46,51 +95,37 @@ class Replay:
         Compare two plays and return their average distance
         and standard deviation of distances.
         """
-        players = " ({} vs {})".format(user_replay.player_name, check_replay.player_name)
 
+        players = " ({} vs {})".format(user_replay.player_name, check_replay.player_name)
         # get all coordinates in numpy arrays so that they're arranged like:
         # [ x_1 x_2 ... x_n
         #   y_1 y_2 ... y_n ]
         # indexed by columns first.
-        data1 = user_replay.as_array()
-        data2 = check_replay.as_array()
+        data1 = user_replay.as_list_with_timestamps()
+        data2 = check_replay.as_list_with_timestamps()
 
-        # switch if the second is longer, so that data1 is always the longest.
-        if len(data2) > len(data1):
-            (data1, data2) = (data2, data1)
+        (data1, data2) = Replay.interpolate(data1, data2)
 
-        shortest = len(data2)
-        difference = len(data1) - len(data2)
+        data1 = [d[1:] for d in data1]
+        data2 = [d[1:] for d in data2]
 
-        stats = []
-        for offset in range(difference):
-            # offset data1 and calculate the distance for all sets of coordinates.
-            distance = data1[offset:shortest + offset] - data2
+        (mu, sigma) = Replay.compute_data_similarity(data1, data2)
 
-            # square all numbers and sum over the second axis (add row 2 to row 1),
-            # finally take the square root of each number to get all distances.
-            # [ x_1 x_2 ... x_n   => [ x_1 ** 2 ... x_n ** 2
-            #   y_1 y_2 ... y_n ] =>   y_1 ** 2 ... y_n ** 2 ]
-            # => [ x_1 ** 2 + y_1 ** 2 ... x_n ** 2 + y_n ** 2 ]
-            # => [ d_1 ... d_2 ]
-            distance = (distance ** 2).sum(axis=1) ** 0.5
-
-            # throw a tuple of the average and variance of distances on the list.
-            stats.append((distance.mean(), distance.std()))
-
-        # get the statistics of the offset with the smallest average distance.
-        stats.sort(key=lambda stat: stat[0])
-
-        (mu, sigma) = stats[0]
-
-        return str(mu) + ", " + str(sigma) + players
+        return (mu, sigma, players)
 
     @staticmethod
     def compute_data_similarity(data1, data2):
         """
-        Compares two coordinate datasets and returns their average distance
-        and standard deviation.
+        Finds the similarity and standard deviation between two datasets.
+
+        Args:
+            List data1: A list of tuples containing the (x, y) coordinate of points
+            List data2: A list of tuples containing the (x, y) coordinate of points
+
+        Returns:
+            A tuple containing (similarity value, standard deviation) between the two datasets
         """
+
         data1 = np.array(data1)
         data2 = np.array(data2)
 
@@ -167,22 +202,17 @@ class Replay:
             # according to the ratios of the time differences
             x_inter = interpolation(before[1:], after[1:], dt1 / dt2)
 
+            # filter out interpolation artifacts which send outliers even further away
+            if abs(x_inter[0]) > 600 or abs(x_inter[1]) > 600:
+                inter.append(between)
+                continue
+
             t_inter = between[0]
 
             inter.append((t_inter, *x_inter))
 
         return (clean, inter)
 
-    @staticmethod
-    def from_map(map_id, user_id, username):
-        replay_data_string = requests.get(API_REPLAY.format(map_id, user_id)).json()["content"]
-        # convert to bytes so the lzma can be deocded with osrparse
-        replay_data_bytes = base64.b64decode(replay_data_string)
-        return Replay(osrparse.parse_replay(replay_data_bytes, pure_lzma=True), player_name=username)
-
-    @staticmethod
-    def from_path(path):
-        return Replay(osrparse.parse_replay_file(path))
 
     def as_array(self):
         """

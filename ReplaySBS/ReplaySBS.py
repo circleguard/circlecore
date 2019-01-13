@@ -1,40 +1,82 @@
-from osrparse import parse_replay_file
 from argparser import argparser
 import requests
+import itertools
 
+from downloader import Downloader
 from replay import Replay
-from config import PATH_REPLAYS_USER, PATH_REPLAYS_CHECK, API_SCORES
+from config import PATH_REPLAYS_USER, PATH_REPLAYS_CHECK, WHITELIST
+
+args = argparser.parse_args()
 
 def main():
-    """checks all replays in PATH_REPLAYS_USER against all replays in PATH_REPLAYS_CHECK"""
+    """
+    Checks certain replays against certain others depending on what flags were set.
+    """
 
-    args = argparser.parse_args()
-    if(args.map_id):
-        if(args.user_id):
-            user_replay = Replay.from_map(args.map_id, args.user_id, args.user_id)
+    
+    if(args.local):
+        if(args.map_id and args.user_id):
+             # compare every local replay with just the given user + map replay
+            replay2 = Replay.from_map(args.map_id, args.user_id)
+            for osr_path in PATH_REPLAYS_USER:
+                replay1 = Replay.from_path(osr_path)
+                compare_replays(replay1, replay2)
+            return
+        if(args.map_id):
+            # compare every local replay with every leaderboard entry
+            replays = [Replay.from_path(path) for path in PATH_REPLAYS_USER]
+            compare_replays_against_leaderboard(replays, args.map_id)
+            return
+
+        else:
+            # checks every replay listed in PATH_REPLAYS_USER against every replay listed in PATH_REPLAYS_CHECK
+            for osr_path in PATH_REPLAYS_USER:
+                user_replay = Replay.from_path(osr_path)
+
+                for osr_path2 in PATH_REPLAYS_CHECK:
+                    check_replay = Replay.from_path(osr_path2)
+                    compare_replays(user_replay, check_replay)
+            return
+
+
+    if(args.map_id and args.user_id): # passed both -m and -u but not -l
+        user_replay = Replay.from_map(args.map_id, args.user_id)
+
+        for check_id in Downloader.users_from_beatmap(args.map_id, args.number):
+            check_replay = Replay.from_map(args.map_id, check_id)
+            compare_replays(user_replay, check_replay)
         
-        url = API_SCORES.format(args.map_id)
-        for check_id in [x["user_id"] for x in requests.get(url).json()]:
-            check_replay = Replay.from_map(args.map_id, check_id, args.user_id)
-            print(Replay.compute_similarity(user_replay, check_replay))
+        return
 
-    # checks every replay listed in PATH_REPLAYS_USER against every replay listed in PATH_REPLAYS_CHECK
-    for osr_path in PATH_REPLAYS_USER:
-        user_replay = Replay.from_path(osr_path)
+    if(args.map_id): # only passed -m
+        # get all 50 top replays
+        replays = [Replay.from_map(args.map_id, check_id) for check_id in Downloader.users_from_beatmap(args.map_id, args.number)]
+        print("comparing all replays (1225 combinations)")
+        for replay1, replay2 in itertools.combinations(replays, 2):
+            if(replay1.player_name in WHITELIST and replay2.player_name in WHITELIST):
+                continue # don't waste time comparing two 100% clean players
 
-        for osr_path2 in PATH_REPLAYS_CHECK:
-            check_replay_data = parse_replay_file(osr_path2)
-            check_replay = Replay(check_replay_data)
+            compare_replays(replay1, replay2)
+        return
 
-            data1 = user_replay.as_list_with_timestamps()
-            data2 = check_replay.as_list_with_timestamps()
 
-            (data1, data2) = Replay.interpolate(data1, data2)
+def compare_replays_against_leaderboard(local_replays, map_id):
+    user_ids = Downloader.users_from_beatmap(args.map_id, args.number)
+    # from_map is ratelimited heavily so make sure to only do this operation once, then filter later
+    beatmap_replays = [Replay.from_map(map_id, user_id) for user_id in user_ids]
+    for local_replay in local_replays:
+        # get rid of the user we're checking if they exist (will return ~0 similarity)
+        _beatmap_replays = [replay for replay in beatmap_replays if replay.player_name != local_replay.player_name]
+        for beatmap_replay in _beatmap_replays:
+            compare_replays(local_replay, beatmap_replay)
 
-            data1 = [(d[1], d[2]) for d in data1]
-            data2 = [(d[1], d[2]) for d in data2]
-        
-            print(user_replay.player_name + " vs " + check_replay.player_name)
-            print(Replay.compute_data_similarity(data1, data2))
+def compare_replays(replay1, replay2):
+    result = Replay.compute_similarity(replay1, replay2)
+    mean = result[0]
+    # sigma = result[1]
+    players = result[2]
+    if(mean < args.threshold):
+        print("{:.1f} similarity {}".format(mean, players))
+ 
 if __name__ == '__main__':
     main()
