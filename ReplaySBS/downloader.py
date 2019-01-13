@@ -80,4 +80,6 @@ class Downloader():
             return
 
         # sleep the remainder of the reset cycle so we guarantee it's been that long since the first request
-        time.sleep(Downloader.RATELIMIT_RESET - seconds_passed) 
+        sleep_seconds = Downloader.RATELIMIT_RESET - seconds_passed
+        print("Ratelimited. Sleeping {} seconds".format(sleep_seconds))
+        time.sleep(sleep_seconds) 
