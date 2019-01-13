@@ -51,7 +51,8 @@ class Downloader():
         Returns:
             The lzma bytestring returned by the api.
         """
-
+        
+        print("Requesting replay by {} on map {}".format(user_id, map_id))
         Downloader.check_ratelimit()
         lzma = requests.get(API_REPLAY.format(map_id, user_id)).json()["content"]
         Downloader.heavy_load += 1
@@ -59,12 +60,14 @@ class Downloader():
 
     @staticmethod
     def check_ratelimit():
+        """
+        Checks if we need to enforce any ratelimits, or reset our ratelimits because 
+        it's been more than RATELIMIT_RESET since the last request (see Downloader.reset_loads for more)
+        """
         # first check if we've refreshed our ratelimits yet
         difference = datetime.now() - Downloader.start_time
         if(difference.seconds > Downloader.RATELIMIT_RESET):
-            Downloader.load = 0
-            Downloader.heavy_load = 0
-            Downloader.start_time = datetime.now()
+            Downloader.reset_loads()
             return
 
         # then if we're going to hit either the normal or the heavy ratelimit, enforce that before we do
@@ -74,6 +77,10 @@ class Downloader():
     
     @staticmethod
     def enforce_ratelimit():
+        """
+        Enforces the ratelimit by sleeping the thread until it's safe to make requests again.
+        """
+
         difference = datetime.now() - Downloader.start_time
         seconds_passed = difference.seconds
         if(seconds_passed > Downloader.RATELIMIT_RESET):
@@ -81,5 +88,20 @@ class Downloader():
 
         # sleep the remainder of the reset cycle so we guarantee it's been that long since the first request
         sleep_seconds = Downloader.RATELIMIT_RESET - seconds_passed
-        print("Ratelimited. Sleeping {} seconds".format(sleep_seconds))
-        time.sleep(sleep_seconds) 
+        print("Ratelimited. Sleeping for {} seconds".format(sleep_seconds))
+        time.sleep(sleep_seconds)
+        # reset all values afterward. We're guaranteed to have refreshed a ratelimit
+        Downloader.reset_loads()
+
+    @staticmethod
+    def reset_loads():
+        """
+        Sets the load and heavy_load to 0 and sets the start_time to the current time.
+
+        If it's been over RATELIMIT_RESET seconds since the last request, we can reset 
+        all of our limits and start with fresh ratelimits.
+        """
+
+        Downloader.load = 0
+        Downloader.heavy_load = 0
+        Downloader.start_time = datetime.now()
