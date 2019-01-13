@@ -2,8 +2,7 @@ import os
 from os.path import isfile, join
 import pathlib
 
-#from secret import API_KEY
-API_KEY = ""
+from secret import API_KEY
 
 PATH_REPLAYS = pathlib.Path(__file__).parent / "replays"
 
