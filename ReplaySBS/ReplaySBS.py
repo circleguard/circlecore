@@ -20,7 +20,7 @@ def main():
             sigma = result[1]
             players = result[2]
             if(mean < 20):
-                print("Similarity = {:.1f} {}".format(mean, players))
+                print("{:.1f} similarity {}".format(mean, players))
         
         return
 
@@ -34,7 +34,7 @@ def main():
             sigma = result[1]
             players = result[2]
             if(mean < 20):
-                print("Similarity = {:.1f} {}".format(mean, players))
+                print("{:.1f} similarity {}".format(mean, players))
        
         return
         
