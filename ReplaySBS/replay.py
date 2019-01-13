@@ -67,8 +67,9 @@ class Replay:
         replay_data_string = requests.get(API_REPLAY.format(map_id, user_id)).json()["content"]
         # convert to bytes so the lzma can be deocded with osrparse
         replay_data_bytes = base64.b64decode(replay_data_string)
-        
-        return Replay(osrparse.parse_replay(replay_data_bytes, pure_lzma=True), username)
+        parsed_replay = osrparse.parse_replay(replay_data_bytes, pure_lzma=True)
+        replay_data = parsed_replay.play_data
+        return Replay(replay_data, username)
 
     @staticmethod
     def from_path(path):
