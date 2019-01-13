@@ -1,8 +1,9 @@
 from argparser import argparser
 import requests
 
+import downloader
 from replay import Replay
-from config import PATH_REPLAYS_USER, PATH_REPLAYS_CHECK, API_SCORES
+from config import PATH_REPLAYS_USER, PATH_REPLAYS_CHECK
 
 def main():
     """checks all replays in PATH_REPLAYS_USER against all replays in PATH_REPLAYS_CHECK"""
@@ -12,8 +13,7 @@ def main():
         if(args.user_id):
             user_replay = Replay.from_map(args.map_id, args.user_id, args.user_id)
         
-        url = API_SCORES.format(args.map_id)
-        for check_id in [x["user_id"] for x in requests.get(url).json()]:
+        for check_id in downloader.users_from_beatmap(args.map_id):
             check_replay = Replay.from_map(args.map_id, check_id, check_id)
             
             data1 = user_replay.as_list_with_timestamps()
@@ -44,5 +44,6 @@ def main():
         
             print(user_replay.player_name + " vs " + check_replay.player_name)
             print(Replay.compute_data_similarity(data1, data2))
+
 if __name__ == '__main__':
     main()
