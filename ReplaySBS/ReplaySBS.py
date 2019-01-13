@@ -25,16 +25,7 @@ def main():
         for osr_path2 in PATH_REPLAYS_CHECK:
             check_replay_data = parse_replay_file(osr_path2)
             check_replay = Replay(check_replay_data)
-
-            data1 = user_replay.as_list_with_timestamps()
-            data2 = check_replay.as_list_with_timestamps()
-
-            (data1, data2) = Replay.interpolate(data1, data2)
-
-            data1 = [(d[1], d[2]) for d in data1]
-            data2 = [(d[1], d[2]) for d in data2]
         
-            print(user_replay.player_name + " vs " + check_replay.player_name)
-            print(Replay.compute_data_similarity(data1, data2))
+            print(Replay.compute_similarity(user_replay, check_replay))
 if __name__ == '__main__':
     main()

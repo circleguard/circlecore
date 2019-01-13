@@ -52,38 +52,17 @@ class Replay:
         # [ x_1 x_2 ... x_n
         #   y_1 y_2 ... y_n ]
         # indexed by columns first.
-        data1 = user_replay.as_array()
-        data2 = check_replay.as_array()
+        data1 = user_replay.as_list_with_timestamps()
+        data2 = check_replay.as_list_with_timestamps()
 
-        # switch if the second is longer, so that data1 is always the longest.
-        if len(data2) > len(data1):
-            (data1, data2) = (data2, data1)
+        (data1, data2) = Replay.interpolate(data1, data2)
 
-        shortest = len(data2)
-        difference = len(data1) - len(data2)
+        data1 = [d[1:] for d in data1]
+        data2 = [d[1:] for d in data2]
 
-        stats = []
-        for offset in range(difference):
-            # offset data1 and calculate the distance for all sets of coordinates.
-            distance = data1[offset:shortest + offset] - data2
+        (mu, sigma) = Replay.compute_data_similarity(data1, data2)
 
-            # square all numbers and sum over the second axis (add row 2 to row 1),
-            # finally take the square root of each number to get all distances.
-            # [ x_1 x_2 ... x_n   => [ x_1 ** 2 ... x_n ** 2
-            #   y_1 y_2 ... y_n ] =>   y_1 ** 2 ... y_n ** 2 ]
-            # => [ x_1 ** 2 + y_1 ** 2 ... x_n ** 2 + y_n ** 2 ]
-            # => [ d_1 ... d_2 ]
-            distance = (distance ** 2).sum(axis=1) ** 0.5
-
-            # throw a tuple of the average and variance of distances on the list.
-            stats.append((distance.mean(), distance.std()))
-
-        # get the statistics of the offset with the smallest average distance.
-        stats.sort(key=lambda stat: stat[0])
-
-        (mu, sigma) = stats[0]
-
-        return str(mu) + ", " + str(sigma) + players
+        return "mu = {}, sigma = {} {}".format(mu, sigma, players)
 
     @staticmethod
     def compute_data_similarity(data1, data2):
