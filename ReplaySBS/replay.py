@@ -1,9 +1,7 @@
 import base64
 import requests
-
 import numpy as np
 import osrparse
-
 from downloader import Downloader
 
 class Interpolation:
@@ -111,7 +109,7 @@ class Replay:
 
         (mu, sigma) = Replay.compute_data_similarity(data1, data2)
 
-        return "mu = {}, sigma = {} {}".format(mu, sigma, players)
+        return (mu, sigma, players)
 
     @staticmethod
     def compute_data_similarity(data1, data2):
