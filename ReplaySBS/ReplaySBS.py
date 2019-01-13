@@ -1,7 +1,7 @@
 from argparser import argparser
 import requests
 
-import downloader
+from downloader import Downloader
 from replay import Replay
 from config import PATH_REPLAYS_USER, PATH_REPLAYS_CHECK
 
@@ -12,8 +12,10 @@ def main():
     if(args.map_id):
         if(args.user_id):
             user_replay = Replay.from_map(args.map_id, args.user_id, args.user_id)
+        else:
+            user_replay = Replay.from_path(PATH_REPLAYS_USER[0])
         
-        for check_id in downloader.users_from_beatmap(args.map_id):
+        for check_id in Downloader.users_from_beatmap(args.map_id):
             check_replay = Replay.from_map(args.map_id, check_id, check_id)
             print(Replay.compute_similarity(user_replay, check_replay))
 
