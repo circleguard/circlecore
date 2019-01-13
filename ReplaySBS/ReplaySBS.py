@@ -27,8 +27,14 @@ def main():
     if(args.map_id): # only passed -m
         # get all 50 top replays
         replays = [Replay.from_map(args.map_id, check_id, check_id) for check_id in Downloader.users_from_beatmap(args.map_id)]
+        print("comparing all replays (1225 combinations)")
         for replay1, replay2 in itertools.combinations(replays, 2):
-            print(Replay.compute_similarity(replay1, replay2))
+            result = Replay.compute_similarity(replay1, replay2)
+            mean = result[0]
+            sigma = result[1]
+            players = result[2]
+            if(mean < 20):
+                print("Similarity = {:.1f} {}".format(mean, players))
        
         return
         
