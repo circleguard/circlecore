@@ -4,7 +4,7 @@ import requests
 import numpy as np
 import osrparse
 
-import downloader
+from downloader import Downloader
 
 class Interpolation:
     """A utility class containing coordinate interpolations."""
@@ -64,7 +64,7 @@ class Replay:
             The Replay instance created with the given information
         """
 
-        replay_data_string = downloader.replay_data(map_id, user_id)
+        replay_data_string = Downloader.replay_data(map_id, user_id)
         # convert to bytes so the lzma can be deocded with osrparse
         replay_data_bytes = base64.b64decode(replay_data_string)
         parsed_replay = osrparse.parse_replay(replay_data_bytes, pure_lzma=True)
