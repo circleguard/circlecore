@@ -15,17 +15,7 @@ def main():
         
         for check_id in downloader.users_from_beatmap(args.map_id):
             check_replay = Replay.from_map(args.map_id, check_id, check_id)
-            
-            data1 = user_replay.as_list_with_timestamps()
-            data2 = check_replay.as_list_with_timestamps()
-
-            (data1, data2) = Replay.interpolate(data1, data2)
-
-            data1 = [(d[1], d[2]) for d in data1]
-            data2 = [(d[1], d[2]) for d in data2]
-        
-            print(user_replay.player_name + " vs " + check_replay.player_name)
-            print(Replay.compute_data_similarity(data1, data2))
+            print(Replay.compute_similarity(user_replay, check_replay))
 
     # checks every replay listed in PATH_REPLAYS_USER against every replay listed in PATH_REPLAYS_CHECK
     for osr_path in PATH_REPLAYS_USER:
