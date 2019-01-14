@@ -51,14 +51,14 @@ class Replay:
         self.play_data = replay_data
 
     @staticmethod
-    def from_map(map_id, user_id, username):
+    def from_map(map_id, user_id):
         """
         Creates a Replay instance from a replay by the given user on the given map.
 
         Args:
             String map_id: The map_id to download the replay from
-            String user_id: The user id to download the replay of
-            String username: The name of the user that set the replay
+            String user_id: The user id to download the replay of. 
+                            Also used as the username of the Replay
 
         Returns:
             The Replay instance created with the given information
@@ -69,7 +69,7 @@ class Replay:
         replay_data_bytes = base64.b64decode(replay_data_string)
         parsed_replay = osrparse.parse_replay(replay_data_bytes, pure_lzma=True)
         replay_data = parsed_replay.play_data
-        return Replay(replay_data, username)
+        return Replay(replay_data, user_id)
 
     @staticmethod
     def from_path(path):
