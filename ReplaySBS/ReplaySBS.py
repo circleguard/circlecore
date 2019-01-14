@@ -21,6 +21,7 @@ def main():
             for osr_path in PATH_REPLAYS_USER:
                 replay1 = Replay.from_path(osr_path)
                 compare_replays(replay1, replay2)
+            return
         if(args.map_id):
             # compare every local replay with every leaderboard entry
             replays = [Replay.from_path(path) for path in PATH_REPLAYS_USER]
@@ -35,7 +36,7 @@ def main():
                 for osr_path2 in PATH_REPLAYS_CHECK:
                     check_replay = Replay.from_path(osr_path2)
                     compare_replays(user_replay, check_replay)
-
+            return
 
 
     if(args.map_id and args.user_id): # passed both -m and -u but not -l
@@ -72,7 +73,7 @@ def compare_replays_against_leaderboard(local_replays, map_id):
 def compare_replays(replay1, replay2):
     result = Replay.compute_similarity(replay1, replay2)
     mean = result[0]
-    sigma = result[1]
+    # sigma = result[1]
     players = result[2]
     if(args.threshold < 20):
         print("{:.1f} similarity {}".format(mean, players))
