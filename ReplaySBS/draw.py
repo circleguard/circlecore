@@ -2,6 +2,7 @@ import numpy as np
 import matplotlib.pyplot as plt
 from matplotlib.animation import FuncAnimation
 from replay import Replay
+import timeit
 
 
 class Draw():
@@ -14,7 +15,11 @@ class Draw():
 
         # implement naming data in interpolation
         # if you want a guarantee about the order of the returned data
-        (data1, data2) = Replay.interpolate(data1, data2)
+        fps = 60
+        dt = 1 / fps
+        
+        data1 = Replay.resample(data1, fps)
+        data2 = Replay.resample(data2, fps)
 
         # replace with constants for screen sizes
         data1 = [(512 - d[1], 384 - d[2]) for d in data1]
@@ -28,11 +33,10 @@ class Draw():
         plot2 = plt.plot(data2[0], data2[1], "blue")[0]
 
         for i in range(len(data1[0])):
-            plot1.set_xdata(data1[0][:i])
-            plot1.set_ydata(data1[1][:i])
+            plot1.set_xdata(data1[0][i - 100:i])
+            plot1.set_ydata(data1[1][i - 100:i])
 
-            plot2.set_xdata(data2[0][0:i])
-            plot2.set_ydata(data2[1][0:i])
+            plot2.set_xdata(data2[0][i - 100:i])
+            plot2.set_ydata(data2[1][i - 100:i])
 
-            plt.draw()
-            plt.pause(0.0001)
+            plt.pause(dt)

@@ -211,6 +211,29 @@ class Replay:
 
         return (clean, inter)
 
+    @staticmethod
+    def resample(timestamped, frequency):
+        """Resample timestamped data at the given frequency."""
+        
+        i = 0
+        t = timestamped[0][0]
+        t_max = timestamped[-1][0]
+
+        resampled = []
+
+        while t < t_max:
+            while timestamped[i][0] < t:
+                i += 1
+
+            dt1 = t - timestamped[i - 1][0]
+            dt2 = timestamped[i][0] - timestamped[i - 1][0]
+            
+            inter = Interpolation.linear(timestamped[i - 1][1:], timestamped[i][1:], dt1 / dt2)
+
+            resampled.append((t, *inter))
+            t += 1000 / frequency
+
+        return resampled
 
     def as_array(self):
         """
