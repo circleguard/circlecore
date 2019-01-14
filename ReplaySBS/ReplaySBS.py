@@ -35,10 +35,14 @@ def main():
             if(mean < 20):
                 print("Similarity = {:.1f} {}".format(mean, players))
                 answer = input("Would you like to see a visualization of both replays? ")
-                if answer == 'Yes' or 'yes' or 'y' or 'Y':
+                if answer[0].lower() == "y":
                     data1 = user_replay.play_data
                     data2 = check_replay.play_data
-                    Draw().draw_replays(data1, data2)
+                    Draw.draw_replays(data1, data2)
+
+                else:
+
+                    exit()
             else:
                 print("No stolen replays were found")
 
