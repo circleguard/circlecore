@@ -49,6 +49,9 @@ class Downloader():
     def users_from_beatmap(map_id):
         """
         Returns a list of all user ids of the top 50 plays on the given beatmap.
+
+        Args:
+            String map_id: The map id to get a list of users from.
         """
         
         response = requests.get(API_SCORES.format(map_id)).json()
@@ -64,6 +67,10 @@ class Downloader():
     def replay_data(map_id, user_id):
         """
         Queries the api for replay data from the given user on the given map.
+
+        Args:
+            String map_id: The map id to get the replay off of.
+            String user_id: The user id to get the replay of.
 
         Returns:
             The lzma bytestring returned by the api.
@@ -83,8 +90,11 @@ class Downloader():
         """
         Checks the given api response for a ratelimit error.
 
+        Args:
+            String response: The response to check.
+
         Returns:
-            True if the key is ratelimited, false otherwise.
+            True if the key is ratelimited, False otherwise.
         """
         if("error" in response):
             return True
