@@ -9,27 +9,30 @@ class Draw():
     @staticmethod
     def draw_replays(user_replay, check_replay):
 
-        user_coords_x, check_coords_x = [], []
-        user_coords_y, check_coords_y = [], []
+        data1 = user_replay.as_list_with_timestamps()
+        data2 = check_replay.as_list_with_timestamps()
 
-        for frame in user_replay:
-            user_coords_x.append(512-frame.x)
-            user_coords_y.append(384-frame.y)
+        # implement naming data in interpolation
+        # if you want a guarantee about the order of the returned data
+        (data1, data2) = Replay.interpolate(data1, data2)
 
-        for frame in check_replay:
-            check_coords_x.append(512-frame.x)
-            check_coords_y.append(384-frame.y)
+        # replace with constants for screen sizes
+        data1 = [(512 - d[1], 384 - d[2]) for d in data1]
+        data2 = [(512 - d[1], 384 - d[2]) for d in data2]
+
+        data1 = np.transpose(data1)
+        data2 = np.transpose(data2)
 
         plt.ion()
-        user_plot= plt.plot(user_coords_x, user_coords_y, "red")[0]
-        checked_plot = plt.plot(check_coords_x, check_coords_y, "blue")[0]
+        plot1 = plt.plot(data1[0], data1[1], "red")[0]
+        plot2 = plt.plot(data2[0], data2[1], "blue")[0]
 
-        for i in range(len(user_coords_x)):
-            user_plot.set_xdata(user_coords_x[0:i])
-            user_plot.set_ydata(user_coords_y[0:i])
+        for i in range(len(data1[0])):
+            plot1.set_xdata(data1[0][:i])
+            plot1.set_ydata(data1[1][:i])
 
-            checked_plot.set_xdata(check_coords_x[0:i])
-            checked_plot.set_ydata(check_coords_y[0:i])
+            plot2.set_xdata(data2[0][0:i])
+            plot2.set_ydata(data2[1][0:i])
 
             plt.draw()
             plt.pause(0.0001)

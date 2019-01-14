@@ -36,9 +36,7 @@ def main():
                 print("Similarity = {:.1f} {}".format(mean, players))
                 answer = input("Would you like to see a visualization of both replays? ")
                 if answer[0].lower() == "y":
-                    data1 = user_replay.play_data
-                    data2 = check_replay.play_data
-                    Draw.draw_replays(data1, data2)
+                    Draw.draw_replays(user_replay, check_replay)
 
                 else:
 
