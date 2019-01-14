@@ -1,7 +1,6 @@
 import requests
 from datetime import datetime
 import time
-import functools
 
 import secret
 from config import API_SCORES, API_REPLAY
