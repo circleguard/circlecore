@@ -9,7 +9,7 @@ from config import API_SCORES, API_REPLAY
 def api(function):
     """
     Decorator that checks if we can refresh the time at which we started our requests because 
-    it's been more than RATELIMIT_RESET since the first request of the cycle (see Downloader.reset_loads for more).
+    it's been more than RATELIMIT_RESET since the first request of the cycle.
 
     If we've refreshed our ratelimits, sets start_time to be the current datetime.
     """

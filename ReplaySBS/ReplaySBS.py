@@ -75,7 +75,7 @@ def compare_replays(replay1, replay2):
     mean = result[0]
     # sigma = result[1]
     players = result[2]
-    if(args.threshold < 20):
+    if(mean < args.threshold):
         print("{:.1f} similarity {}".format(mean, players))
  
 if __name__ == '__main__':
