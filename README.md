@@ -1,42 +1,55 @@
 # ReplaySBS
 
-This project is aimed at trying to create an anti-cheat for the rhythm game osu!, specifically to catch cheaters who use Replay Stealing software. While it is nearly impossible to detect if someone uses their own replays to submit (whether edited or just sped up). Many people choose to steal other player's replays and submit them as their own instead. This program aims to catch these stolen replays. 
+This project is aimed at creating an anti-cheat for the rhythm game osu!. Currently it can detect cheaters who use Replay Stealing software (taking someone else's replay and submitting it as their own).
 
 ## Getting Started
 
-You will need to install [Python 3+](https://www.python.org/downloads/) and use pip to install the osrparse module
+You will need to install [Python 3+](https://www.python.org/downloads/) and then install the dependencies for this project:
 
-```
-pip install osrparse
-```
-
-You will also need to edit the path of the folders that hold the replays on your own machine to the top of the python file
-On my machine it is as follows: 
-
-```
-pathToUserReplay = "C:\\Users\\Travis\\source\\repos\\ReplaySBS\\ReplaySBS\\replays\\userReplay\\"
-
-pathToOtherReplays = "C:\\Users\\Travis\\source\\repos\\ReplaySBS\\ReplaySBS\\replays\\otherReplays\\"
+```bash
+$ pip install git+git://github.com/tybug/osu-replay-parser
 ```
 
-Realistically you can have the replays anywhere on your machine, just change the path!
 
-## How it works/Proof of concept
-- This program compares a user's replay with others in order to see how close the cursor movement is to eachother
-- The test replays here are Cookiezi's Timefreeze  FC, _Ryuk's FC, and a replay botted copy of Cookiezi's FC
-- The distances of the x and y coordinates of each play are compared against each-other, this will be replaced with some other algorithm
-- The average distance of the cursor between the legit and copied Cookiezi play is about 13 pixels
-- The average distance of the cursor between the legit _Ryuk play and Cookiezi play is about 156 pixels
+## Usage
+
+Currently, this repository can only detect replay stealers.
+
+Run the program from the command line, with the following optional flags.
+
+| Flag | Usage |
+| --- | --- |
+| -h, --help | displays the messages below |
+| -m, --map | checks the leaderboard on the given beatmap id against each other |
+| -u, --user | checks only the given user against the other leaderboard replays. Must be set with -m |
+| -l, --local | compare scores under the user/ directory to a beatmap leaderboard (if set with just -m), a score set by a user on a beatmap (if set with -m and -u) or other locally saved replays (default behavior) |
+| -t, --threshold | sets the similarity threshold to print comparisons that score under it. Defaults to 20 |
+| -n, --number | how many replays to get from a beatmap. No effect if not set with -m. Defaults to 50. **Please note higher numbers take exponentially longer** |
+
+### Some Examples
+
+```bash
+# compares https://osu.ppy.sh/u/1019489's replay on https://osu.ppy.sh/b/1776628 with the 49 other leaderboard replays
+$ python ReplaySBS.py -m 1776628 -u 1019489
+
+# compares the top 57 leaderboard replays against the other top 57 replays (57 choose 2 comparisons)
+$ python ReplaySBS.py -m 1618546 -n 57
+
+# compares all replays under user/ with the top 50 scores on https://osu.ppy.sh/b/1611251
+$ python ReplaySBS.py -l -m 1611251
+
+# compares all replays under user/ with all replays under compare/
+$ python ReplaySBS.py
+```
+
+This means that if you have a replay from a player and want to see if it's stolen, you should place it in the user/ directory and run with the -l and -m flags.
 
 
-## TODO
-1. Check for HR plays that were flipped and played No-mod
-2. Integrate using the osu! api
-   - find an alternative to /api/get_replay as it's rate limited to 10 requests per min
-   - once found find an efficient way to download all avaliable replays from that mapset to check against
-   - potentially give each replay a unique score based upon average cursor postion to store in a database, that way all replays don't need to be downloaded all the time
-3. Come up with another method of comparing replays
-   -Could be using statistics or other complex math things that are a bit over my head
-4. osu! client integration 
-   - Check scores upon score submission
-   - Includes a user's previously submitted score(s) on that map. 
+## Methodology
+- This program compares the x and y positions of two replays to determine the average distance apart of the cursors.
+    -   Since the time's rarely match up perfectly, the coordinates from one replay are interpolated from two points in the other replay to estimate its position at the same time
+
+
+## Developement
+
+This project is currently maintained by [tybug](https://github.com/tybug), [sam](https://github.com/samuelhklumpers), and [trafis](https://github.com/Smitty1298). Developemental discussion is currently kept private but that may change with an official, working release of the program.
