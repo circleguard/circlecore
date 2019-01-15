@@ -17,7 +17,7 @@ class Draw():
         # if you want a guarantee about the order of the returned data
         fps = 60
         dt = 1 / fps
-        
+
         data1 = Replay.resample(data1, fps)
         data2 = Replay.resample(data2, fps)
 
@@ -28,9 +28,12 @@ class Draw():
         data1 = np.transpose(data1)
         data2 = np.transpose(data2)
 
+        # create plot for each replay and add legend with player names
         plt.ion()
-        plot1 = plt.plot(data1[0], data1[1], "red")[0]
-        plot2 = plt.plot(data2[0], data2[1], "blue")[0]
+        fig, ax = plt.subplots()
+        plot1 = plt.plot(data1[0], data1[1], "red", label = user_replay.player_name )[0]
+        plot2 = plt.plot(data2[0], data2[1], "blue", label = check_replay.player_name  )[0]
+        legend = ax.legend()
 
         for i in range(len(data1[0])):
             plot1.set_xdata(data1[0][i - 100:i])
