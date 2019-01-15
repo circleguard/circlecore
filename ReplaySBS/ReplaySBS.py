@@ -66,7 +66,7 @@ def compare_replays_against_leaderboard(local_replays, map_id):
     beatmap_replays = [Replay.from_map(map_id, user_id) for user_id in user_ids]
     for local_replay in local_replays:
         # get rid of the user we're checking if they exist (will return ~0 similarity)
-        _beatmap_replays = [replay != local_replay.player_name for replay in beatmap_replays]
+        _beatmap_replays = [replay for replay in beatmap_replays if replay.player_name != local_replay.player_name]
         for beatmap_replay in _beatmap_replays:
             compare_replays(local_replay, beatmap_replay)
 
