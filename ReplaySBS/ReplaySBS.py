@@ -42,7 +42,7 @@ def main():
     if(args.map_id and args.user_id): # passed both -m and -u but not -l
         user_replay = Replay.from_map(args.map_id, args.user_id)
 
-        for check_id in Downloader.users_from_beatmap(args.map_id):
+        for check_id in Downloader.users_from_beatmap(args.map_id, args.number):
             check_replay = Replay.from_map(args.map_id, check_id)
             compare_replays(user_replay, check_replay)
         
@@ -50,7 +50,7 @@ def main():
 
     if(args.map_id): # only passed -m
         # get all 50 top replays
-        replays = [Replay.from_map(args.map_id, check_id) for check_id in Downloader.users_from_beatmap(args.map_id)]
+        replays = [Replay.from_map(args.map_id, check_id) for check_id in Downloader.users_from_beatmap(args.map_id, args.number)]
         print("comparing all replays (1225 combinations)")
         for replay1, replay2 in itertools.combinations(replays, 2):
             if(replay1.player_name in WHITELIST and replay2.player_name in WHITELIST):
@@ -61,7 +61,7 @@ def main():
 
 
 def compare_replays_against_leaderboard(local_replays, map_id):
-    user_ids = Downloader.users_from_beatmap(args.map_id)
+    user_ids = Downloader.users_from_beatmap(args.map_id, args.number)
     # from_map is ratelimited heavily so make sure to only do this operation once, then filter later
     beatmap_replays = [Replay.from_map(map_id, user_id) for user_id in user_ids]
     for local_replay in local_replays:

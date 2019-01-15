@@ -46,15 +46,18 @@ class Downloader():
 
     @api
     @staticmethod
-    def users_from_beatmap(map_id):
+    def users_from_beatmap(map_id, num=50):
         """
         Returns a list of all user ids of the top 50 plays on the given beatmap.
 
         Args:
             String map_id: The map id to get a list of users from.
+            Integer num: The number of ids to fetch. Defaults to 50
         """
-        
-        response = requests.get(API_SCORES.format(map_id)).json()
+
+        if(num > 100 or num < 0):
+            raise Exception("The number of top plays to fetch must be between 0 and 100!")
+        response = requests.get(API_SCORES.format(map_id, num)).json()
         if(Downloader.check_response(response)):
             Downloader.enforce_ratelimit()
             return Downloader.users_from_beatmap(map_id)
