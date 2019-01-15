@@ -8,6 +8,7 @@ from draw import Draw
 
 def main():
     """checks all replays in PATH_REPLAYS_USER against all replays in PATH_REPLAYS_CHECK"""
+    global animation
 
     args = argparser.parse_args()
     if(args.map_id):
@@ -36,7 +37,7 @@ def main():
                 print("Similarity = {:.1f} {}".format(mean, players))
                 answer = input("Would you like to see a visualization of both replays? ")
                 if answer[0].lower() == "y":
-                    Draw.draw_replays(user_replay, check_replay)
+                    animation = Draw.draw_replays(user_replay, check_replay)
 
                 else:
 
