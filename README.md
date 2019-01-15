@@ -24,7 +24,7 @@ Run the program from the command line, with the following optional flags.
 | -u, --user | checks only the given user against the other leaderboard replays. Must be set with -m |
 | -l, --local | compare scores under the user/ directory to a beatmap leaderboard (if set with just -m), a score set by a user on a beatmap (if set with -m and -u) or other locally saved replays (default behavior) |
 | -t, --threshold | sets the similarity threshold to print comparisons that score under it. Defaults to 20 |
-| -n, --number | how many replays to get from a beatmap. No effect if not set with -m. Defaults to 50. **Please note higher numbers take exponentially longer** |
+| -n, --number | how many replays to get from a beatmap. No effect if not set with -m. Defaults to 50. **Note: the time complexity of the comparisons scales with O(n^2)** |
 
 ### Some Examples
 

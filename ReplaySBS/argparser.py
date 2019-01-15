@@ -14,4 +14,4 @@ argparser.add_argument("-l", "--local", help=("compare scores under the user/ di
 argparser.add_argument("-t", "--threshold", help="sets the similarity threshold to print results that score under it. Defaults to 20", type=int, default=20)
 
 argparser.add_argument("-n", "--number", help="how many replays to get from a beatmap. No effect if not set with -m. Defaults to 50." 
-                                              "PLEASE NOTE HIGHER NUMBERS TAKE EXPONENTIALLY LONGER.", type=int, default=50)
+                                              "NOTE: THE TIME COMPLEXITY OF THE COMPARISONS WILL SCALE WITH O(n^2).", type=int, default=50)
