@@ -9,7 +9,7 @@ argparser.add_argument("-u", "--user", dest="user_id",
 
 argparser.add_argument("-l", "--local", help=("compare scores under the user/ directory to a beatmap leaderboard (if set with -m), "
                                              "a score set by a user on a beatmap (if set with -m and -u) or other locally "
-                                            "saved replays (default behavior)"))
+                                            "saved replays (default behavior)"), action="store_true")
 
 argparser.add_argument("-t", "--threshold", help="sets the similarity threshold to print results that score under it. Defaults to 20", type=int, default=20)
 
