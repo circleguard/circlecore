@@ -29,6 +29,7 @@ class Draw():
         # create plot for each replay and add legend with player names
         plt.ion()
         fig, ax = plt.subplots()
+        
         plot1 = plt.plot('x', 'y', "red", animated=True, label=user_replay.player_name)[0]
         plot2 = plt.plot('', '', "blue", animated=True, label=check_replay.player_name)[0]
         legend = ax.legend()
