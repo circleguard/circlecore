@@ -1,4 +1,7 @@
 import numpy as np
+import matplotlib
+if(matplotlib.get_backend() == "MacOSX"):
+    matplotlib.use("TkAgg")
 import matplotlib.pyplot as plt
 import itertools as itr
 from matplotlib.animation import FuncAnimation
