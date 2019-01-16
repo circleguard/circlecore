@@ -27,7 +27,6 @@ class Draw():
         data2 = np.transpose(data2)
 
         # create plot for each replay and add legend with player names
-        plt.ion()
         fig, ax = plt.subplots()
         
         plot1 = plt.plot('x', 'y', "red", animated=True, label=user_replay.player_name)[0]
@@ -45,7 +44,7 @@ class Draw():
             return plot1, plot2
 
         animation = FuncAnimation(fig, update, frames=itr.count(100), init_func=init, blit=True, interval=dt)
-        plt.show()
+        plt.show(block=True)
 
         # keep a reference to this otherwise it will get garbage collected instantly and not play.
         return animation

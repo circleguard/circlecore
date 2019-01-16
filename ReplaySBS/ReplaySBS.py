@@ -1,5 +1,5 @@
-from argparser import argparser
 import requests
+from argparser import argparser
 
 from downloader import Downloader
 from replay import Replay
@@ -40,11 +40,9 @@ def main():
                     animation = Draw.draw_replays(user_replay, check_replay)
 
                 else:
-
                     exit()
             else:
                 print("No stolen replays were found")
-
 
 if __name__ == '__main__':
     main()
