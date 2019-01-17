@@ -147,12 +147,18 @@ class Replay:
         return (mu, sigma)
 
     @staticmethod
-    def interpolate(data1, data2, interpolation=Interpolation.linear):
-        """Interpolates the longer of the datas to match the timestamps of the shorter."""
+    def interpolate(data1, data2, interpolation=Interpolation.linear, unflip=False):
+        """
+        Interpolates the longer of the datas to match the timestamps of the shorter.
+        Will preserve the order of data1 and 2 if unflip is set.
+        """
+
+        flipped = False
 
         # if the first timestamp in data2 is before the first in data1 switch
         # so data1 always has some timestamps before data2.
         if data1[0][0] > data2[0][0]:
+            flipped = not flipped
             (data1, data2) = (data2, data1)
 
         # get the smallest index of the timestamps after the first timestamp in data2.
@@ -163,6 +169,7 @@ class Replay:
         data1 = data1[i:] if len(data1) < len(data2) else data1[i - 1:]
 
         if len(data1) > len(data2):
+            flipped = not flipped
             (data1, data2) = (data2, data1)
 
         # for each point in data1 interpolate the points around the timestamp in data2.
@@ -208,6 +215,9 @@ class Replay:
             t_inter = between[0]
 
             inter.append((t_inter, *x_inter))
+
+        if unflip and flipped:
+            (clean, inter) = (inter, clean)
 
         return (clean, inter)
 
