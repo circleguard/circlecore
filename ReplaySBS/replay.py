@@ -235,6 +235,26 @@ class Replay:
 
         return resampled
 
+    @staticmethod
+    def skip_breaks(timestamped, break_threshold=1000):
+        """
+        Eliminates pauses and breaks between events
+        longer than the specified threshold in ms.
+        """
+        total_break_time = 0
+
+        skipped = []
+        t_prev = timestamped[0][0]
+        for event in timestamped:
+            dt = event[0] - t_prev
+            
+            if dt > break_threshold:
+                total_break_time += dt
+
+            skipped.append((event[0] - dt, *event[1:]))
+            
+        return skipped
+        
     def as_array(self):
         """
         Gets the playdata as a np array with time as the first axis.
