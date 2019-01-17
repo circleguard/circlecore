@@ -1,4 +1,4 @@
-# ReplaySBS
+# Osu!AntiCheat
 
 This project is aimed at creating an anti-cheat for the rhythm game osu!. Currently it can detect cheaters who use Replay Stealing software (taking someone else's replay and submitting it as their own).
 
@@ -7,7 +7,7 @@ This project is aimed at creating an anti-cheat for the rhythm game osu!. Curren
 You will need to install [Python 3+](https://www.python.org/downloads/) and then install the dependencies for this project:
 
 ```bash
-$ pip install git+git://github.com/tybug/osu-replay-parser
+$ pip install git+git://github.com/osu-anticheat/osu-replay-parser
 ```
 
 
