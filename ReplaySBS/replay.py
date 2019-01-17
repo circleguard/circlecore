@@ -265,15 +265,6 @@ class Replay:
             t_prev = event[0]
             
         return skipped
-        
-    def as_array(self):
-        """
-        Gets the playdata as a np array with time as the first axis.
-        [ x_1 x_2 ... x_n
-          y_1 y_2 ... y_n ]
-        """
-
-        return np.array([(e.x, e.y) for e in self.play_data])
 
     def as_list_with_timestamps(self):
         """Gets the playdata as a list of tuples of absolute time, x and y."""
