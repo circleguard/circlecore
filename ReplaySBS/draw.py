@@ -14,6 +14,13 @@ class Draw():
         data1 = user_replay.as_list_with_timestamps()
         data2 = check_replay.as_list_with_timestamps()
 
+        # synchronize and interpolate
+        (data1, data2) = Replay.interpolate(data1, data2, unflip=True)
+
+        # skip breaks (risk pain if you don't sync first)
+        data1 = Replay.skip_breaks(data1)
+        data2 = Replay.skip_breaks(data2)
+
         # implement naming data in interpolation
         # if you want a guarantee about the order of the returned data
         fps = 60

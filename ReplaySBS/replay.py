@@ -261,7 +261,8 @@ class Replay:
             if dt > break_threshold:
                 total_break_time += dt
 
-            skipped.append((event[0] - dt, *event[1:]))
+            skipped.append((event[0] - total_break_time, *event[1:]))
+            t_prev = event[0]
             
         return skipped
         
