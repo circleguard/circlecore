@@ -82,7 +82,7 @@ def compare_replays(replay1, replay2):
         
         answer = input("Would you like to see a visualization of both replays? ")
         if answer[0].lower() == "y":
-            animation = Draw.draw_replays(user_replay, check_replay)
+            animation = Draw.draw_replays(replay1, replay2)
  
 if __name__ == '__main__':
     main()
