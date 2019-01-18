@@ -30,16 +30,16 @@ Run the program from the command line, with the following optional flags.
 
 ```bash
 # compares https://osu.ppy.sh/u/1019489's replay on https://osu.ppy.sh/b/1776628 with the 49 other leaderboard replays
-$ python ReplaySBS.py -m 1776628 -u 1019489
+$ python anticheat.py -m 1776628 -u 1019489
 
 # compares the top 57 leaderboard replays against the other top 57 replays (57 choose 2 comparisons)
-$ python ReplaySBS.py -m 1618546 -n 57
+$ python anticheat.py -m 1618546 -n 57
 
 # compares all replays under user/ with the top 50 scores on https://osu.ppy.sh/b/1611251
-$ python ReplaySBS.py -l -m 1611251
+$ python anticheat.py -l -m 1611251
 
 # compares all replays under user/ with all replays under compare/
-$ python ReplaySBS.py
+$ python anticheat.py
 ```
 
 This means that if you have a replay from a player and want to see if it's stolen, you should place it in the user/ directory and run with the -l and -m flags.
