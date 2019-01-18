@@ -14,8 +14,8 @@ class Draw():
         Show an animation of both replays overlayed on top of eachother.
 
         Args:
-            Replay user_replay: The first Replay to draw
-            Replay check_replay: The second Replay to draw
+            Replay user_replay: The first Replay to draw.
+            Replay check_replay: The second Replay to draw.
         """
 
         data1 = user_replay.as_list_with_timestamps()
