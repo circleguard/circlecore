@@ -5,23 +5,31 @@ import osrparse
 from downloader import Downloader
 
 class Interpolation:
-    """A utility class containing coordinate interpolations."""
+    """An utility class containing coordinate interpolations."""
 
     @staticmethod
     def linear(x1, x2, r):
-        """Linearly interpolates coordinate tuples x1 and x2 with ratio r."""
+        """
+        Linearly interpolates coordinate tuples x1 and x2 with ratio r.
+
+        Args:
+            float x1: The startpoint of the interpolation.
+            float x2: The endpoint of the interpolation.
+            float r: The ratio of the points to interpolate to.
+        """
 
         return ((1 - r) * x1[0] + r * x2[0], (1 - r) * x1[1] + r * x2[1])
 
     @staticmethod
     def before(x1, x2, r):
-        """Returns the startpoint of the range."""
+        """
+        Returns the startpoint of the range.
 
-        return x1
-
-    @staticmethod
-    def after(x1, x2, r):
-        """Returns the endpoint of the range."""
+        Args:
+            float x1: The startpoint of the interpolation.
+            float x2: The endpoint of the interpolation.
+            float r: Ignored.
+        """
 
         return x2
 
@@ -92,6 +100,12 @@ class Replay:
         """
         Compare two plays and return their average distance
         and standard deviation of distances.
+
+        Args:
+            Replay user_replay: The replay being checked.
+            Replay check_replay: The replay being checked against
+        Returns:
+            A tuple containing (average distance, standard deviation) between the replays.
         """
 
         players = " ({} vs {})".format(user_replay.player_name, check_replay.player_name)
@@ -121,7 +135,7 @@ class Replay:
             List data2: A list of tuples containing the (x, y) coordinate of points
 
         Returns:
-            A tuple containing (similarity value, standard deviation) between the two datasets
+            A tuple containing (average distance, standard deviation) between the two datasets
         """
 
         data1 = np.array(data1)
@@ -150,7 +164,21 @@ class Replay:
     def interpolate(data1, data2, interpolation=Interpolation.linear, unflip=False):
         """
         Interpolates the longer of the datas to match the timestamps of the shorter.
-        Will preserve the order of data1 and 2 if unflip is set.
+
+        Args:
+            List data1: A list of tuples of (t, x, y)
+            List data2: A list of tuples of (t, x, y)
+            bool unflip: Preserves input order of data1 and data2 if True
+
+        Returns:
+            If unflip:
+                The tuple (data1, data2), where one is interpolated to the other
+                and said other without uninterpolatable points.
+            Else:
+                The tuple (clean, inter), respectively the shortest of
+                the datasets without uninterpolatable points and the longest
+                interpolated to the timestamps of shortest.
+                
         """
 
         flipped = False
@@ -223,7 +251,16 @@ class Replay:
 
     @staticmethod
     def resample(timestamped, frequency):
-        """Resample timestamped data at the given frequency."""
+        """
+        Resample timestamped data at the given frequency.
+
+        Args:
+            List timestamped: A list of tuples of (t, x, y)
+            float frequency: The frequency to resample data to in Hz
+
+        Returns
+            A list of tuples of (t, x, y) with constant time interval 1 / frequency
+        """
         
         i = 0
         t = timestamped[0][0]
@@ -250,6 +287,13 @@ class Replay:
         """
         Eliminates pauses and breaks between events
         longer than the specified threshold in ms.
+
+        Args:
+            List timestamped: A list of tuples of (t, x, y)
+            int break_threshold: The smallest pause in events to be recognized as a break
+
+        Returns:
+            A list of tuples of (t, x, y) without breaks
         """
         total_break_time = 0
 
@@ -267,7 +311,12 @@ class Replay:
         return skipped
 
     def as_list_with_timestamps(self):
-        """Gets the playdata as a list of tuples of absolute time, x and y."""
+        """
+        Gets the playdata as a list of tuples of absolute time, x and y.
+
+        Returns:
+            A list of tuples of (t, x, y)
+        """
 
         # get all offsets sum all offsets before it to get all absolute times
         timestamps = np.array([e.time_since_previous_action for e in self.play_data])
