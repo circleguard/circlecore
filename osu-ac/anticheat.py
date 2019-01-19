@@ -19,7 +19,7 @@ def main():
     global animation
 
     if(args.local):
-        # get all local user replays (used in ever --local case)
+        # get all local user replays (used in every --local case)
         replays1 = [Replay.from_path(osr_path) for osr_path in PATH_REPLAYS_USER]
         if(args.map_id and args.user_id):
             # compare every local replay with just the given user + map replay

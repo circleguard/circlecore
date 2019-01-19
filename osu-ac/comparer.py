@@ -80,9 +80,10 @@ class Comparer:
         """
 
         mean = result[0]
+        sigma = result[1]
         if(mean > self.threshold):
             return
-        print("{:.1f} similarity ({} vs {})".format(mean, replay1.player_name, replay2.player_name))
+        print("{:.1f} similarity, {:.1f} std deviation ({} vs {})".format(mean, sigma, replay1.player_name, replay2.player_name))
         answer = input("Would you like to see a visualization of both replays? ")
         if answer[0].lower() == "y":
             animation = Draw.draw_replays(replay1, replay2)
