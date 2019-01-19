@@ -1,6 +1,6 @@
 class Investigator:
     """
-    An interface for checking isolated replays for cheats. 
+    A class for checking isolated replays for cheats. 
 
     See Also:
         Comparer

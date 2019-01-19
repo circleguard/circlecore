@@ -8,7 +8,7 @@ from config import WHITELIST
 
 class Comparer:
     """
-    An interface for managing a set of replay comparisons. 
+    A class for managing a set of replay comparisons. 
     
     Attributes:
         List replays1: A list of Replay instances to compare against replays2.
@@ -43,7 +43,7 @@ class Comparer:
     def compare(self, mode):
         """
         If mode is "double", compares all replays in replays1 against all replays in replays2.
-        If mode is "single", compares all replays in replays1 against all other replays in replays1 (len(replays1) choose 2 comparisons)
+        If mode is "single", compares all replays in replays1 against all other replays in replays1 (len(replays1) choose 2 comparisons).
         In both cases, prints the result of each comparison according to _print_result.
 
         Args:
