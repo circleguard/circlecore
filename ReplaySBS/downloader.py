@@ -2,7 +2,6 @@ import requests
 from datetime import datetime
 import time
 
-import secret
 from config import API_SCORES, API_REPLAY
 
 
@@ -26,7 +25,7 @@ def api(function):
 class Downloader():
     """
     This class is not meant to be instantiated, instead only static methods and class variables used.
-    This is because we only use one api key for the entire project, and making all methods static provides
+    This is because we only use one api key for the entire project, and making all methods static provides.
     cleaner access than passing around a single Downloader class.
 
     Manages interactions with the osu api - if the api ratelimits the key we wait until we refresh our ratelimits
@@ -52,7 +51,7 @@ class Downloader():
 
         Args:
             String map_id: The map id to get a list of users from.
-            Integer num: The number of ids to fetch. Defaults to 50
+            Integer num: The number of ids to fetch. Defaults to 50.
         """
 
         if(num > 100 or num < 0):
@@ -99,6 +98,7 @@ class Downloader():
         Returns:
             True if the key is ratelimited, False otherwise.
         """
+        
         if("error" in response):
             return True
         else:

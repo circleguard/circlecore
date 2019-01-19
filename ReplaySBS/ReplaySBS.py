@@ -1,5 +1,6 @@
-from argparser import argparser
 import requests
+from argparser import argparser
+from draw import Draw
 import itertools
 
 from downloader import Downloader
@@ -12,8 +13,10 @@ def main():
     """
     Checks certain replays against certain others depending on what flags were set.
     """
-
     
+    # keep this otherwise the animation gets garbage collected
+    global animation
+
     if(args.local):
         if(args.map_id and args.user_id):
              # compare every local replay with just the given user + map replay
@@ -38,7 +41,6 @@ def main():
                     compare_replays(user_replay, check_replay)
             return
 
-
     if(args.map_id and args.user_id): # passed both -m and -u but not -l
         user_replay = Replay.from_map(args.map_id, args.user_id)
 
@@ -59,7 +61,6 @@ def main():
             compare_replays(replay1, replay2)
         return
 
-
 def compare_replays_against_leaderboard(local_replays, map_id):
     user_ids = Downloader.users_from_beatmap(args.map_id, args.number)
     # from_map is ratelimited heavily so make sure to only do this operation once, then filter later
@@ -75,8 +76,13 @@ def compare_replays(replay1, replay2):
     mean = result[0]
     # sigma = result[1]
     players = result[2]
+    
     if(mean < args.threshold):
         print("{:.1f} similarity {}".format(mean, players))
+        
+        answer = input("Would you like to see a visualization of both replays? ")
+        if answer[0].lower() == "y":
+            animation = Draw.draw_replays(replay1, replay2)
  
 if __name__ == '__main__':
     main()
