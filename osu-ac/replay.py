@@ -40,7 +40,7 @@ class Replay:
     Attributes:
         List replay_data: A list of osrpasrse.ReplayEvent objects, containing
                           x, y, time_since_previous_action, and keys_pressed.
-        String player_name: The player who set the replay.
+        String player_name: The player who set the replay. Often given as a player id.
     """
 
     def __init__(self, replay_data, player_name):
@@ -94,71 +94,6 @@ class Replay:
         player_name = parsed_replay.player_name
 
         return Replay(check_replay_data, player_name)
-
-    @staticmethod
-    def compute_similarity(user_replay, check_replay):
-        """
-        Compare two plays and return their average distance
-        and standard deviation of distances.
-
-        Args:
-            Replay user_replay: The replay being checked.
-            Replay check_replay: The replay being checked against.
-        Returns:
-            A tuple containing (average distance, standard deviation) between the replays.
-        """
-
-        players = " ({} vs {})".format(user_replay.player_name, check_replay.player_name)
-        # get all coordinates in numpy arrays so that they're arranged like:
-        # [ x_1 x_2 ... x_n
-        #   y_1 y_2 ... y_n ]
-        # indexed by columns first.
-        data1 = user_replay.as_list_with_timestamps()
-        data2 = check_replay.as_list_with_timestamps()
-
-        (data1, data2) = Replay.interpolate(data1, data2)
-
-        data1 = [d[1:] for d in data1]
-        data2 = [d[1:] for d in data2]
-
-        (mu, sigma) = Replay.compute_data_similarity(data1, data2)
-
-        return (mu, sigma, players)
-
-    @staticmethod
-    def compute_data_similarity(data1, data2):
-        """
-        Finds the similarity and standard deviation between two datasets.
-
-        Args:
-            List data1: A list of tuples containing the (x, y) coordinate of points.
-            List data2: A list of tuples containing the (x, y) coordinate of points.
-
-        Returns:
-            A tuple containing (average distance, standard deviation) between the two datasets.
-        """
-
-        data1 = np.array(data1)
-        data2 = np.array(data2)
-
-        # switch if the second is longer, so that data1 is always the longest.
-        if len(data2) > len(data1):
-            (data1, data2) = (data2, data1)
-
-        shortest = len(data2)
-
-        distance = data1[:shortest] - data2
-        # square all numbers and sum over the second axis (add row 2 to row 1),
-        # finally take the square root of each number to get all distances.
-        # [ x_1 x_2 ... x_n   => [ x_1 ** 2 ... x_n ** 2
-        #   y_1 y_2 ... y_n ] =>   y_1 ** 2 ... y_n ** 2 ]
-        # => [ x_1 ** 2 + y_1 ** 2 ... x_n ** 2 + y_n ** 2 ]
-        # => [ d_1 ... d_2 ]
-        distance = (distance ** 2).sum(axis=1) ** 0.5
-
-        mu, sigma = distance.mean(), distance.std()
-
-        return (mu, sigma)
 
     @staticmethod
     def interpolate(data1, data2, interpolation=Interpolation.linear, unflip=False):
