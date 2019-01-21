@@ -75,12 +75,13 @@ class Replay:
         """
 
         replay_data_string = Loader.replay_data(map_id, user_id)
-        # convert to bytes so the lzma can be deocded with osrparse
+        # convert to bytes so the lzma can be deocded with osrparse.
         replay_data_bytes = base64.b64decode(replay_data_string)
         parsed_replay = osrparse.parse_replay(replay_data_bytes, pure_lzma=True)
         replay_data = parsed_replay.play_data
         if(cache):
-            Cacher.cache(map_id, user_id, replay_data)
+            # Bytes is actually smaller than the b64 encoded string here, so we store that (TODO: compress (well) before storage)
+            Cacher.cache(map_id, user_id, replay_data_bytes)
         return Replay(replay_data, user_id)
 
     @staticmethod

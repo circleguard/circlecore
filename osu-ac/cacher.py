@@ -1,3 +1,5 @@
+import sqlite3
+from config import PATH_DB
 class Cacher:
     """
     Handles compressing and caching replay data to a database.
@@ -5,6 +7,9 @@ class Cacher:
     This class should not be instantiated because only one database connection is used, and static
     methods provide cleaner access than passing around a Cacher class.
     """
+
+    conn = sqlite3.connect(PATH_DB)
+    cursor = conn.cursor()
 
     def __init__(self):
         """
@@ -25,7 +30,20 @@ class Cacher:
         """
 
         compressed_string = Cacher.compress(lzma_string)
-        # conn.execute("INSERT INTO cache VALUES(?, ?, ?)", [map_id, user_id, compressed_string])
+        Cacher.write("INSERT INTO replays VALUES(?, ?, ?)", [map_id, user_id, compressed_string])
+
+    @staticmethod
+    def write(statement, args):
+        """
+        Writes an sql statement with the given args to the databse.
+
+        Args:
+            String statement: The prepared sql statement to execute.
+            List args: The values to insert into the prepared sql statement.
+                       Must be of length equal to the number of missing values in the statement.
+        """
+        Cacher.cursor.execute(statement, args)
+        Cacher.conn.commit()
 
     @staticmethod
     def compress(lzma_string):
@@ -38,4 +56,4 @@ class Cacher:
         Returns:
             A compressed bytestring from the given bytestring
         """
-        pass
+        return lzma_string
