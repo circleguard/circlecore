@@ -7,7 +7,7 @@ from config import API_SCORES, API_REPLAY
 
 def api(function):
     """
-    Decorator that checks if we can refresh the time at which we started our requests because 
+    Decorator that checks if we can refresh the time at which we started our requests because
     it's been more than RATELIMIT_RESET since the first request of the cycle.
 
     If we've refreshed our ratelimits, sets start_time to be the current datetime.
@@ -17,7 +17,7 @@ def api(function):
         difference = datetime.now() - Downloader.start_time
         if(difference.seconds > Downloader.RATELIMIT_RESET):
             Downloader.start_time = datetime.now()
-            
+
         return function.__func__(*args, **kwargs) # then call the function, use __func__ because it's static
     return wrapper
 
@@ -26,7 +26,7 @@ class Downloader():
     """
     Manages interactions with the osu api - if the api ratelimits the key we wait until we refresh our ratelimits
     and retry the request.
-    
+
     This class is not meant to be instantiated, instead only static methods and class variables used.
     This is because we only use one api key for the entire project, and making all methods static provides
     cleaner access than passing around a single Downloader class.
@@ -63,7 +63,7 @@ class Downloader():
 
         users = [x["user_id"] for x in response]
         return users
-    
+
     @api
     @staticmethod
     def replay_data(map_id, user_id):
@@ -77,7 +77,7 @@ class Downloader():
         Returns:
             The lzma bytestring returned by the api.
         """
-        
+
         print("Requesting replay by {} on map {}".format(user_id, map_id))
         response = requests.get(API_REPLAY.format(map_id, user_id)).json()
         if(Downloader.check_response(response)):
@@ -98,7 +98,7 @@ class Downloader():
         Returns:
             True if the key is ratelimited, False otherwise.
         """
-        
+
         if("error" in response):
             return True
         else:

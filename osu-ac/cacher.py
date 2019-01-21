@@ -25,7 +25,7 @@ class Cacher:
         """
 
         compressed_string = Cacher.compress(lzma_string)
-        # conn.execute("INSERT INTO cache VALUES(?, ?, ?)", [map_id, user_id, compressed_string]) 
+        # conn.execute("INSERT INTO cache VALUES(?, ?, ?)", [map_id, user_id, compressed_string])
 
     @staticmethod
     def compress(lzma_string):
