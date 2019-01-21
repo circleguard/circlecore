@@ -50,7 +50,15 @@ class Comparer:
             String mode: One of either "double" or "single", determining how to choose which replays to compare.
         """
 
-        iterator = itertools.product(self.replays1, self.replays2) if mode == "double" else itertools.combinations(self.replays1, 2)
+        if(mode == "double"):
+            print("comparing first set of replays to second set of replays")
+            iterator = itertools.product(self.replays1, self.replays2)
+        elif (mode == "single"):
+            print("comparing first set of replays to itself")
+            iterator = itertools.combinations(self.replays1, 2)
+        else:
+            raise Exception("`mode` must be one of 'double' or 'single'")
+        
         for replay1, replay2 in iterator:
             if(self.check_names(replay1.player_name, replay2.player_name)):
                 continue
