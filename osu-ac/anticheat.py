@@ -23,14 +23,14 @@ def main():
         replays1 = [Replay.from_path(osr_path) for osr_path in PATH_REPLAYS_USER]
         if(args.map_id and args.user_id):
             # compare every local replay with just the given user + map replay
-            replays2 = [Replay.from_map(args.map_id, args.user_id)]
+            replays2 = [Replay.from_map(args.map_id, args.user_id, args.cache)]
             comparer = Comparer(args.threshold, replays1, replays2=replays2)
             comparer.compare(mode="double")
             return
         if(args.map_id):
             # compare every local replay with every leaderboard entry
             user_ids = Downloader.users_from_beatmap(args.map_id, args.number)
-            replays2 = [Replay.from_map(args.map_id, user_id) for user_id in user_ids]
+            replays2 = [Replay.from_map(args.map_id, user_id, args.cache) for user_id in user_ids]
             comparer = Comparer(args.threshold, replays1, replays2=replays2)
             comparer.compare(mode="double")
             return
@@ -43,16 +43,16 @@ def main():
             return
 
     if(args.map_id and args.user_id): # passed both -m and -u but not -l
-        replays1 = [Replay.from_map(args.map_id, args.user_id)]
+        replays1 = [Replay.from_map(args.map_id, args.user_id, args.cache)]
         user_ids = Downloader.users_from_beatmap(args.map_id, args.number)
-        replays2 = [Replay.from_map(args.map_id, user_id) for user_id in user_ids]
+        replays2 = [Replay.from_map(args.map_id, user_id, args.cache) for user_id in user_ids]
         comparer = Comparer(args.threshold, replays1, replays2=replays2)
         comparer.compare(mode="double")
         return
 
     if(args.map_id): # only passed -m
         # get all 50 top replays
-        replays = [Replay.from_map(args.map_id, check_id) for check_id in Downloader.users_from_beatmap(args.map_id, args.number)]
+        replays = [Replay.from_map(args.map_id, check_id, args.cache) for check_id in Downloader.users_from_beatmap(args.map_id, args.number)]
         comparer = Comparer(args.threshold, replays)
         comparer.compare(mode="single")
         return

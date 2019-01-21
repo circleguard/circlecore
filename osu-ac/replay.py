@@ -1,8 +1,11 @@
 import base64
 import requests
+
 import numpy as np
 import osrparse
+
 from downloader import Downloader
+from cacher import Cacher
 
 class Interpolation:
     """A utility class containing coordinate interpolations."""
@@ -43,6 +46,7 @@ class Replay:
         String player_name: The player who set the replay. Often given as a player id.
     """
 
+
     def __init__(self, replay_data, player_name):
         """
         Initializes a Replay instance.
@@ -57,12 +61,12 @@ class Replay:
         self.play_data = replay_data
 
     @staticmethod
-    def from_map(map_id, user_id):
+    def from_map(map_id, user_id, cache):
         """
         Creates a Replay instance from a replay by the given user on the given map.
 
         Args:
-            String map_id: The map_id to download the replay from
+            String map_id: The map_id to download the replay from.
             String user_id: The user id to download the replay of. 
                             Also used as the username of the Replay.
 
@@ -75,6 +79,8 @@ class Replay:
         replay_data_bytes = base64.b64decode(replay_data_string)
         parsed_replay = osrparse.parse_replay(replay_data_bytes, pure_lzma=True)
         replay_data = parsed_replay.play_data
+        if(cache):
+            Cacher.cache(map_id, user_id, replay_data)
         return Replay(replay_data, user_id)
 
     @staticmethod

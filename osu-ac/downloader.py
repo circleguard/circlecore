@@ -24,12 +24,12 @@ def api(function):
 
 class Downloader():
     """
-    This class is not meant to be instantiated, instead only static methods and class variables used.
-    This is because we only use one api key for the entire project, and making all methods static provides.
-    cleaner access than passing around a single Downloader class.
-
     Manages interactions with the osu api - if the api ratelimits the key we wait until we refresh our ratelimits
     and retry the request.
+    
+    This class is not meant to be instantiated, instead only static methods and class variables used.
+    This is because we only use one api key for the entire project, and making all methods static provides
+    cleaner access than passing around a single Downloader class.
     """
 
     RATELIMIT_RESET = 60 # time in seconds until the api refreshes our ratelimits
