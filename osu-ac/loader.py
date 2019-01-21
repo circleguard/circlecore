@@ -14,22 +14,22 @@ def api(function):
     """
     def wrapper(*args, **kwargs):
         # check if we've refreshed our ratelimits yet
-        difference = datetime.now() - Downloader.start_time
-        if(difference.seconds > Downloader.RATELIMIT_RESET):
-            Downloader.start_time = datetime.now()
+        difference = datetime.now() - Loader.start_time
+        if(difference.seconds > Loader.RATELIMIT_RESET):
+            Loader.start_time = datetime.now()
 
         return function.__func__(*args, **kwargs) # then call the function, use __func__ because it's static
     return wrapper
 
 
-class Downloader():
+class Loader():
     """
     Manages interactions with the osu api - if the api ratelimits the key we wait until we refresh our ratelimits
     and retry the request.
 
     This class is not meant to be instantiated, instead only static methods and class variables used.
     This is because we only use one api key for the entire project, and making all methods static provides
-    cleaner access than passing around a single Downloader class.
+    cleaner access than passing around a single Loader class.
     """
 
     RATELIMIT_RESET = 60 # time in seconds until the api refreshes our ratelimits
@@ -57,9 +57,9 @@ class Downloader():
         if(num > 100 or num < 0):
             raise Exception("The number of top plays to fetch must be between 0 and 100!")
         response = requests.get(API_SCORES.format(map_id, num)).json()
-        if(Downloader.check_response(response)):
-            Downloader.enforce_ratelimit()
-            return Downloader.users_from_beatmap(map_id)
+        if(Loader.check_response(response)):
+            Loader.enforce_ratelimit()
+            return Loader.users_from_beatmap(map_id)
 
         users = [x["user_id"] for x in response]
         return users
@@ -80,9 +80,9 @@ class Downloader():
 
         print("Requesting replay by {} on map {}".format(user_id, map_id))
         response = requests.get(API_REPLAY.format(map_id, user_id)).json()
-        if(Downloader.check_response(response)):
-            Downloader.enforce_ratelimit()
-            return Downloader.replay_data(map_id, user_id)
+        if(Loader.check_response(response)):
+            Loader.enforce_ratelimit()
+            return Loader.replay_data(map_id, user_id)
 
         return response["content"]
 
@@ -110,12 +110,12 @@ class Downloader():
         Enforces the ratelimit by sleeping the thread until it's safe to make requests again.
         """
 
-        difference = datetime.now() - Downloader.start_time
+        difference = datetime.now() - Loader.start_time
         seconds_passed = difference.seconds
-        if(seconds_passed > Downloader.RATELIMIT_RESET):
+        if(seconds_passed > Loader.RATELIMIT_RESET):
             return
 
         # sleep the remainder of the reset cycle so we guarantee it's been that long since the first request
-        sleep_seconds = Downloader.RATELIMIT_RESET - seconds_passed
+        sleep_seconds = Loader.RATELIMIT_RESET - seconds_passed
         print("Ratelimited. Sleeping for {} seconds".format(sleep_seconds))
         time.sleep(sleep_seconds)

@@ -4,7 +4,7 @@ import requests
 import numpy as np
 import osrparse
 
-from downloader import Downloader
+from loader import Loader
 from cacher import Cacher
 
 class Interpolation:
@@ -67,14 +67,14 @@ class Replay:
 
         Args:
             String map_id: The map_id to download the replay from.
-            String user_id: The user id to download the replay of. 
+            String user_id: The user id to download the replay of.
                             Also used as the username of the Replay.
 
         Returns:
             The Replay instance created with the given information.
         """
 
-        replay_data_string = Downloader.replay_data(map_id, user_id)
+        replay_data_string = Loader.replay_data(map_id, user_id)
         # convert to bytes so the lzma can be deocded with osrparse
         replay_data_bytes = base64.b64decode(replay_data_string)
         parsed_replay = osrparse.parse_replay(replay_data_bytes, pure_lzma=True)
@@ -119,7 +119,7 @@ class Replay:
                 The tuple (clean, inter), respectively the shortest of
                 the datasets without uninterpolatable points and the longest
                 interpolated to the timestamps of shortest.
-                
+
         """
 
         flipped = False
@@ -202,7 +202,7 @@ class Replay:
         Returns
             A list of tuples of (t, x, y) with constant time interval 1 / frequency.
         """
-        
+
         i = 0
         t = timestamped[0][0]
         t_max = timestamped[-1][0]
@@ -215,7 +215,7 @@ class Replay:
 
             dt1 = t - timestamped[i - 1][0]
             dt2 = timestamped[i][0] - timestamped[i - 1][0]
-            
+
             inter = Interpolation.linear(timestamped[i - 1][1:], timestamped[i][1:], dt1 / dt2)
 
             resampled.append((t, *inter))
@@ -242,13 +242,13 @@ class Replay:
         t_prev = timestamped[0][0]
         for event in timestamped:
             dt = event[0] - t_prev
-            
+
             if dt > break_threshold:
                 total_break_time += dt
 
             skipped.append((event[0] - total_break_time, *event[1:]))
             t_prev = event[0]
-            
+
         return skipped
 
     def as_list_with_timestamps(self):
