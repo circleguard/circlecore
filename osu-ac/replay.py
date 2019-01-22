@@ -7,6 +7,27 @@ import osrparse
 from loader import Loader
 from cacher import Cacher
 
+
+def check_cache(function):
+    """
+    Decorator that checks if the replay by the given user_id on the given map_id is already cached.
+    If so, returns the cached string instead of requesting it from the api.
+
+    Note that map_id and user_id must be the first and second arguments to the function respectively.
+    """
+
+    def wrapper(*args, **kwargs):
+        map_id = args[0]
+        user_id = args[1]
+        result = Cacher.check_cache(map_id, user_id)
+        if(result):
+            print("replay cached")
+            return result
+        else:
+            function(*args, **kwargs)
+    return wrapper
+
+
 class Interpolation:
     """A utility class containing coordinate interpolations."""
 
@@ -61,6 +82,7 @@ class Replay:
         self.play_data = replay_data
 
     @staticmethod
+    @check_cache
     def from_map(map_id, user_id, cache):
         """
         Creates a Replay instance from a replay by the given user on the given map.

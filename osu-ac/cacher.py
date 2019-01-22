@@ -1,5 +1,8 @@
 import sqlite3
+
 from config import PATH_DB
+
+
 class Cacher:
     """
     Handles compressing and caching replay data to a database.
@@ -31,6 +34,24 @@ class Cacher:
 
         compressed_string = Cacher.compress(lzma_string)
         Cacher.write("INSERT INTO replays VALUES(?, ?, ?)", [map_id, user_id, compressed_string])
+
+    @staticmethod
+    def check_cache(map_id, user_id):
+        """
+        Checks if a replay exists on the given map_id by the given user_id, and returns the lzma string if so.
+
+        Args:
+            String map_id: The map_id to check in combination with the user_id
+            String user_id: The user_id to check in combination with the user_id
+
+        Returns:
+            The lzma bytestring that would have been returned by decoding the base64 api response, or None if it wasn't cached.
+        """
+
+        result = Cacher.cursor.execute("SELECT replay_data FROM replays WHERE map_id=? AND user_id=?", [map_id, user_id]).fetchone()
+        return result[0] if result else None
+
+
 
     @staticmethod
     def write(statement, args):
