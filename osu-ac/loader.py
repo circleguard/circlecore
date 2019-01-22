@@ -18,7 +18,7 @@ def api(function):
         if(difference.seconds > Loader.RATELIMIT_RESET):
             Loader.start_time = datetime.now()
 
-        return function.__func__(*args, **kwargs) # then call the function, use __func__ because it's static
+        return function(*args, **kwargs)
     return wrapper
 
 
@@ -43,8 +43,8 @@ class Loader():
 
         raise Exception("This class is not meant to be instantiated. Use the static methods instead")
 
-    @api
     @staticmethod
+    @api
     def users_from_beatmap(map_id, num=50):
         """
         Returns a list of all user ids of the top 50 plays on the given beatmap.
@@ -64,8 +64,8 @@ class Loader():
         users = [x["user_id"] for x in response]
         return users
 
-    @api
     @staticmethod
+    @api
     def replay_data(map_id, user_id):
         """
         Queries the api for replay data from the given user on the given map.
