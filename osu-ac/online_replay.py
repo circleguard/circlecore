@@ -51,7 +51,7 @@ class OnlineReplay(Replay):
 
     @staticmethod
     @check_cache
-    def from_map(map_id, user_id, cache):
+    def from_map(map_id, user_id, cache, replay_id):
         """
         Creates a Replay instance from a replay by the given user on the given map.
 
@@ -71,5 +71,5 @@ class OnlineReplay(Replay):
         replay_data = parsed_replay.play_data
         if(cache):
             # Bytes is actually smaller than the b64 encoded string here, so we store that (TODO: compress (well) before storage)
-            Cacher.cache(map_id, user_id, replay_data_bytes)
+            Cacher.cache(map_id, user_id, replay_data_bytes, replay_id)
         return OnlineReplay(replay_data, user_id)

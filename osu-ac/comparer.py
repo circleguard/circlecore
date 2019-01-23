@@ -8,12 +8,12 @@ from config import WHITELIST
 
 class Comparer:
     """
-    A class for managing a set of replay comparisons. 
-    
+    A class for managing a set of replay comparisons.
+
     Attributes:
         List replays1: A list of Replay instances to compare against replays2.
-        List replays2: A list of Replay instances to be compared against. Optional, defaulting to None. No attempt to error check 
-                       this is made - if a compare() call is made, the program will throw an AttributeError. Be sure to only call 
+        List replays2: A list of Replay instances to be compared against. Optional, defaulting to None. No attempt to error check
+                       this is made - if a compare() call is made, the program will throw an AttributeError. Be sure to only call
                        methods that involve the first set of replays if this argument is not passed.
         Integer threshold: If a comparison scores below this value, the result is printed.
 
@@ -30,8 +30,8 @@ class Comparer:
 
         Args:
             List replays1: A list of Replay instances to compare against replays2.
-            List replays2: A list of Replay instances to be compared against. Optional, defaulting to None. No attempt to error check 
-                           this is made - if a compare() call is made, the program will throw an AttributeError. Be sure to only call 
+            List replays2: A list of Replay instances to be compared against. Optional, defaulting to None. No attempt to error check
+                           this is made - if a compare() call is made, the program will throw an AttributeError. Be sure to only call
                            methods that involve the first set of replays.
             Integer threshold: If a comparison scores below this value, the result is printed.
         """
@@ -58,7 +58,7 @@ class Comparer:
             iterator = itertools.combinations(self.replays1, 2)
         else:
             raise Exception("`mode` must be one of 'double' or 'single'")
-        
+
         for replay1, replay2 in iterator:
             if(self.check_names(replay1.player_name, replay2.player_name)):
                 continue

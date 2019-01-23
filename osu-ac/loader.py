@@ -2,7 +2,7 @@ import requests
 from datetime import datetime
 import time
 
-from config import API_SCORES, API_REPLAY
+from config import API_SCORES_ALL, API_SCORES_USER, API_REPLAY
 
 
 def api(function):
@@ -41,28 +41,46 @@ class Loader():
         This class should never be instantiated. All methods are static.
         """
 
-        raise Exception("This class is not meant to be instantiated. Use the static methods instead")
+        raise Exception("This class is not meant to be instantiated. Use the static methods instead.")
 
     @staticmethod
     @api
-    def users_from_beatmap(map_id, num=50):
+    def users_info(map_id, num=50):
         """
-        Returns a list of all user ids of the top 50 plays on the given beatmap.
+        Returns a dict mapping the user_id to their replay_id for the top given number of replays
 
         Args:
             String map_id: The map id to get a list of users from.
             Integer num: The number of ids to fetch. Defaults to 50.
         """
 
-        if(num > 100 or num < 0):
-            raise Exception("The number of top plays to fetch must be between 0 and 100!")
-        response = requests.get(API_SCORES.format(map_id, num)).json()
+        if(num > 100 or num < 1):
+            raise Exception("The number of top plays to fetch must be between 1 and 100 inclusive!")
+        response = requests.get(API_SCORES_ALL.format(map_id, num)).json()
         if(Loader.check_response(response)):
             Loader.enforce_ratelimit()
-            return Loader.users_from_beatmap(map_id)
+            return Loader.users_info(map_id, num=num)
 
-        users = [x["user_id"] for x in response]
-        return users
+        info = {x["user_id"]: x["score_id"] for x in response} # map user id to score id
+        return info
+
+    @staticmethod
+    @api
+    def user_info(map_id, user_id):
+        """
+        Returns a dict mapping a user_id to their replay_id for the given user on the given map.
+
+        Args:
+            String map_id: The map id to get the replay_id from.
+            String user_id: The user id to get the replay_id from.
+        """
+
+        response = requests.get(API_SCORES_USER.format(map_id, user_id)).json()
+        if(Loader.check_response(response)):
+            Loader.enforce_ratelimit()
+            return Loader.user_info(map_id, user_id)
+        info = {x["user_id"]: x["score_id"] for x in response} # map user id to score id, should only be one response
+        return info
 
     @staticmethod
     @api

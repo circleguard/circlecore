@@ -22,7 +22,7 @@ class Cacher:
         raise Exception("This class is not meant to be instantiated. Use the static methods instead")
 
     @staticmethod
-    def cache(map_id, user_id, lzma_string):
+    def cache(map_id, user_id, lzma_string, replay_id):
         """
         Writes the given lzma string to the database, linking it to the given map and user.
 
@@ -30,10 +30,23 @@ class Cacher:
             String map_id: The map id to insert into the db.
             String user_id: The user id to insert into the db.
             String lzma_string: The lzma_string to insert into the db.
+            String replay_id: The id of the replay, which changes when a user overwrites their score.
         """
 
         compressed_string = Cacher.compress(lzma_string)
-        Cacher.write("INSERT INTO replays VALUES(?, ?, ?)", [map_id, user_id, compressed_string])
+        Cacher.write("INSERT INTO replays VALUES(?, ?, ?, ?)", [map_id, user_id, compressed_string, replay_id])
+
+    @staticmethod
+    def revalidate():
+        """
+        Clears the cache of replays that are no longer in the top 100 for that map,
+        and redownloads the replay if the user has overwritten their score since it was cached.
+        // TODO: use replay_id to check for changes
+        """
+
+        return
+
+
 
     @staticmethod
     def check_cache(map_id, user_id):

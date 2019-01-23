@@ -18,7 +18,9 @@ PATH_REPLAYS_CHECK = [join(PATH_REPLAYS_CHECK_STUB, f) for f in os.listdir(PATH_
 
 API_BASE = "https://osu.ppy.sh/api/"
 API_REPLAY = API_BASE + "get_replay?k=" + API_KEY + "&m=0&b={}&u={}"
-API_SCORES = API_BASE + "get_scores?k=" + API_KEY + "&m=0&b={}&limit={}"
+API_SCORES_ALL = API_BASE + "get_scores?k=" + API_KEY + "&m=0&b={}&limit={}"
+API_SCORES_USER = API_BASE + "get_scores?k=" + API_KEY + "&m=0&b={}&u={}"
+
             # cookiezi, ryuk,      rafis,     azr8,   toy,
 WHITELIST = ["124493", "6304246", "2558286", "2562987", "2757689"]
 
