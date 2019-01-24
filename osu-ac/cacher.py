@@ -95,6 +95,7 @@ class Cacher:
         """
         return lzma_string
 
+    @staticmethod
     def __PackInt24(integer):
         """
         Converts an integer to a 24 bit bytes object.
@@ -111,6 +112,7 @@ class Cacher:
         output = output[:-1]
         return output
 
+    @staticmethod
     def __UnpackInt24(intbytes):
         """
         Converts a 24 bit bytes object to an integer.
