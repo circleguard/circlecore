@@ -27,7 +27,7 @@ def check_cache(function):
             replay_data = osrparse.parse_replay(lzma, pure_lzma=True).play_data
             return Replay(replay_data, user_id)
         else:
-            function(*args, **kwargs)
+            return function(*args, **kwargs)
     return wrapper
 
 class OnlineReplay(Replay):
