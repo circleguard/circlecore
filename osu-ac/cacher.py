@@ -161,14 +161,20 @@ class Cacher:
             x = int(round(x * 16))
             y = int(round(y * 16))
 
+
+            #Prevent the coordinates from being too large for a short. If this happens, the cursor is way offscreen anyway.
+            if x <= -0x8000: x = -0x8000
+            elif x >= 0x7FFF: x = 0x7FFF
+            if y <= -0x8000: y = -0x8000
+            elif y >= 0x7FFF: y = 0x7FFF
+            
+
             #w: signed 24bit integer
             #x: signed short
             #y: signed short
             #z: unsigned char
-            try:
-                raw += Cacher.__PackInt24(w) + struct.pack('<hhB', x, y, z)
-            except struct.error as e:
-                print(f'Warning: unable to pack frame. X:{x}, Y:{y}, Z:{z}')
+            raw += Cacher.__PackInt24(w) + struct.pack('<hhB', x, y, z)
+
             
         compressed = lzma.compress(raw, format=2)
         return compressed
