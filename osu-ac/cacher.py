@@ -34,8 +34,7 @@ class Cacher:
             String replay_id: The id of the replay, which changes when a user overwrites their score.
         """
 
-        compressed_string = Cacher.compress(lzma_string)
-        packed_osr = wtc.compress(compressed_string)
+        packed_osr = Cacher.compress(lzma_string)
         Cacher.write("INSERT INTO replays VALUES(?, ?, ?, ?)", [map_id, user_id, packed_osr, replay_id])
 
     @staticmethod
@@ -92,4 +91,4 @@ class Cacher:
         Returns:
             A compressed bytestring from the given bytestring
         """
-        return lzma_string
+        return wtc.compress(lzma_string)
