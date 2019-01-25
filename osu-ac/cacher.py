@@ -106,7 +106,7 @@ class Cacher:
         Returns:
             A 24 bit int as bytes
         """
-        if integer not in range(-0x800000, 0x800000):
+        if not (-0x800000 <= integer < 0x800000):
             raise ValueError('Value must be between -0x800000 and 0x800000')
         output = struct.pack('<i', integer)
         output = output[:-1]
