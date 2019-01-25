@@ -2,6 +2,7 @@ import sqlite3
 
 from config import PATH_DB
 
+import wtc
 
 class Cacher:
     """
@@ -11,7 +12,7 @@ class Cacher:
     methods provide cleaner access than passing around a Cacher class.
     """
 
-    conn = sqlite3.connect(PATH_DB)
+    conn = sqlite3.connect(str(PATH_DB))
     cursor = conn.cursor()
 
     def __init__(self):
@@ -33,8 +34,8 @@ class Cacher:
             String replay_id: The id of the replay, which changes when a user overwrites their score.
         """
 
-        compressed_string = Cacher.compress(lzma_string)
-        Cacher.write("INSERT INTO replays VALUES(?, ?, ?, ?)", [map_id, user_id, compressed_string, replay_id])
+        packed_osr = Cacher.compress(lzma_string)
+        Cacher.write("INSERT INTO replays VALUES(?, ?, ?, ?)", [map_id, user_id, packed_osr, replay_id])
 
     @staticmethod
     def revalidate():
@@ -62,7 +63,7 @@ class Cacher:
         """
 
         result = Cacher.cursor.execute("SELECT replay_data FROM replays WHERE map_id=? AND user_id=?", [map_id, user_id]).fetchone()
-        return result[0] if result else None
+        return wtc.decompress(result[0]) if result else None
 
 
 
@@ -90,4 +91,4 @@ class Cacher:
         Returns:
             A compressed bytestring from the given bytestring
         """
-        return lzma_string
+        return wtc.compress(lzma_string)
