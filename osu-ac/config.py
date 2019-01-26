@@ -4,7 +4,8 @@ import pathlib
 
 from secret import API_KEY
 
-PATH_REPLAYS = pathlib.Path(__file__).parent / "replays"
+PATH_ROOT = pathlib.Path(__file__).parent
+PATH_REPLAYS = PATH_ROOT / "replays"
 
 # names of replays to check
 PATH_REPLAYS_USER_STUB = join(PATH_REPLAYS, "user")
@@ -17,6 +18,10 @@ PATH_REPLAYS_CHECK = [join(PATH_REPLAYS_CHECK_STUB, f) for f in os.listdir(PATH_
 
 API_BASE = "https://osu.ppy.sh/api/"
 API_REPLAY = API_BASE + "get_replay?k=" + API_KEY + "&m=0&b={}&u={}"
-API_SCORES = API_BASE + "get_scores?k=" + API_KEY + "&m=0&b={}&limit={}"
-            # cookiezi, ryuk,      rafis,     azr8,   toy, 
+API_SCORES_ALL = API_BASE + "get_scores?k=" + API_KEY + "&m=0&b={}&limit={}"
+API_SCORES_USER = API_BASE + "get_scores?k=" + API_KEY + "&m=0&b={}&u={}"
+
+            # cookiezi, ryuk,      rafis,     azr8,   toy,
 WHITELIST = ["124493", "6304246", "2558286", "2562987", "2757689"]
+
+PATH_DB = PATH_ROOT / "db" / "cache.db" # /absolute/path/db/cache.db
