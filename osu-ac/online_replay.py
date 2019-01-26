@@ -64,9 +64,9 @@ class OnlineReplay(Replay):
             The Replay instance created with the given information.
         """
 
-        lzma_string = Loader.replay_data(map_id, user_id)
-        parsed_replay = osrparse.parse_replay(lzma_string, pure_lzma=True)
+        lzma_bytes = Loader.replay_data(map_id, user_id)
+        parsed_replay = osrparse.parse_replay(lzma_bytes, pure_lzma=True)
         replay_data = parsed_replay.play_data
         if(cache):
-            Cacher.cache(map_id, user_id, lzma_string, replay_id)
+            Cacher.cache(map_id, user_id, lzma_bytes, replay_id)
         return OnlineReplay(replay_data, user_id)

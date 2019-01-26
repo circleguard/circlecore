@@ -94,7 +94,7 @@ class Loader():
             String user_id: The user id to get the replay of.
 
         Returns:
-            The lzma string (b64 decoded response) returned by the api.
+            The lzma bytes (b64 decoded response) returned by the api.
         """
 
         print("Requesting replay by {} on map {}".format(user_id, map_id))
