@@ -8,6 +8,7 @@ You will need to install [Python 3+](https://www.python.org/downloads/) and then
 
 ```bash
 $ pip install git+git://github.com/osu-anticheat/osu-replay-parser
+$ pip install git+git://github.com/osu-anticheat/wtc-lzma-compressor
 ```
 
 
