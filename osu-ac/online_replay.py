@@ -70,6 +70,5 @@ class OnlineReplay(Replay):
         parsed_replay = osrparse.parse_replay(lzma_string, pure_lzma=True)
         replay_data = parsed_replay.play_data
         if(cache):
-            # Bytes is actually smaller than the b64 encoded string here, so we store that (TODO: compress (well) before storage)
             Cacher.cache(map_id, user_id, lzma_string, replay_id)
         return OnlineReplay(replay_data, user_id)

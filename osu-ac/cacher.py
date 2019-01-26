@@ -1,8 +1,8 @@
 import sqlite3
 
-from config import PATH_DB
-
 import wtc
+
+from config import PATH_DB
 
 class Cacher:
     """
@@ -52,11 +52,11 @@ class Cacher:
     @staticmethod
     def check_cache(map_id, user_id):
         """
-        Checks if a replay exists on the given map_id by the given user_id, and returns the lzma string if so.
+        Checks if a replay exists on the given map_id by the given user_id, and returns the decompressed wtc (equivelant to an lzma) string if so.
 
         Args:
-            String map_id: The map_id to check in combination with the user_id
-            String user_id: The user_id to check in combination with the user_id
+            String map_id: The map_id to check in combination with the user_id.
+            String user_id: The user_id to check in combination with the user_id.
 
         Returns:
             The lzma bytestring that would have been returned by decoding the base64 api response, or None if it wasn't cached.
@@ -77,18 +77,20 @@ class Cacher:
             List args: The values to insert into the prepared sql statement.
                        Must be of length equal to the number of missing values in the statement.
         """
+
         Cacher.cursor.execute(statement, args)
         Cacher.conn.commit()
 
     @staticmethod
     def compress(lzma_string):
         """
-        Compresses the lzma string to a smaller format to store in the database.
+        Compresses the lzma string to a (smaller) wtc string to store in the database.
 
         Args:
-            String lzma_string: The lzma bytestring, returned by the api for replays, to compress
+            String lzma_string: The lzma bytestring, returned by the api for replays, to compress.
 
         Returns:
-            A compressed bytestring from the given bytestring
+            A compressed bytestring from the given bytestring.
         """
+
         return wtc.compress(lzma_string)
