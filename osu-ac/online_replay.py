@@ -64,9 +64,7 @@ class OnlineReplay(Replay):
             The Replay instance created with the given information.
         """
 
-        lzma_b64 = Loader.replay_data(map_id, user_id)
-        # convert to bytes so the lzma can be deocded with osrparse.
-        lzma_string = base64.b64decode(lzma_b64)
+        lzma_string = Loader.replay_data(map_id, user_id)
         parsed_replay = osrparse.parse_replay(lzma_string, pure_lzma=True)
         replay_data = parsed_replay.play_data
         if(cache):
