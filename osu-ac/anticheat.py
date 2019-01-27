@@ -1,3 +1,12 @@
+import pathlib
+
+ROOT_PATH = pathlib.Path(__file__).parent
+if(not (ROOT_PATH / "secret.py").is_file()):
+    key = input("Please enter your api key below - you can get it from https://osu.ppy.sh/p/api. "
+                "This will only ever be stored locally, and is necessary to retrieve replay data.\n")
+    with open(ROOT_PATH / "secret.py", mode="x") as secret:
+        secret.write("API_KEY = '{}'".format(key))
+
 import sys
 import requests
 import itertools
