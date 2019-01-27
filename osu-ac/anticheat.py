@@ -1,8 +1,9 @@
+import sys
 import requests
-from argparser import argparser
-from draw import Draw
 import itertools
 
+from argparser import argparser
+from draw import Draw
 from loader import Loader
 from local_replay import LocalReplay
 from online_replay import OnlineReplay
@@ -36,6 +37,7 @@ class Anticheat:
             self._run_map()
         else:
             print("Please set either --local (-l) or --map (-m)! ")
+            sys.exit(1)
 
     def _run_local(self):
 
