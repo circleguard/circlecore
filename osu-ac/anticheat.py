@@ -30,7 +30,6 @@ class Anticheat:
         Starts loading and detecting replays based on the args passed through the command line.
         """
 
-
         if(self.args.local):
             self._run_local()
         elif(self.args.map_id):
@@ -66,7 +65,7 @@ class Anticheat:
 
         args = self.args
         # if doing anything online, revalidate cache
-        Cacher.revalidate()
+        Cacher.revalidate(args.map_id, self.users_info)
 
         if(args.map_id and args.user_id): # passed both -m and -u but not -l
             replays2 = [OnlineReplay.from_map(args.map_id, user_id, args.cache, replay_id) for user_id, replay_id in self.users_info.items()]

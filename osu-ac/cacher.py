@@ -2,6 +2,7 @@ import sqlite3
 
 import wtc
 
+from loader import Loader
 from config import PATH_DB
 
 class Cacher:
@@ -26,28 +27,42 @@ class Cacher:
     def cache(map_id, user_id, lzma_bytes, replay_id):
         """
         Writes the given lzma bytes to the database, linking it to the given map and user.
+        If an entry with the given map_id and user_id already exists, it is overwritten with
+        the given lzma_bytes (after compression) and replay_id.
+
+        The lzma string is compressed with wtc compression. See Cacher.compress and wtc.compress for more.
 
         Args:
             String map_id: The map id to insert into the db.
             String user_id: The user id to insert into the db.
-            Bytes lzma_bytes: The lzma bytes to insert into the db.
+            Bytes lzma_bytes: The lzma bytes to compress and insert into the db.
             String replay_id: The id of the replay, which changes when a user overwrites their score.
         """
 
         compressed_bytes = Cacher.compress(lzma_bytes)
-        Cacher.write("INSERT INTO replays VALUES(?, ?, ?, ?)", [map_id, user_id, compressed_bytes, replay_id])
+        result = Cacher.cursor.execute("SELECT COUNT(1) FROM replays WHERE map_id=? AND user_id=?", [map_id, user_id]).fetchone()[0]
+        if(result): # already exists so we overwrite (this happens when we call Cacher.revalidate)
+            Cacher.write("UPDATE replays SET replay_data=?, replay_id=? WHERE map_id=? AND user_id=?", [compressed_bytes, replay_id, map_id, user_id])
+        else: # else just insert
+            Cacher.write("INSERT INTO replays VALUES(?, ?, ?, ?)", [map_id, user_id, compressed_bytes, replay_id])
 
     @staticmethod
-    def revalidate():
+    def revalidate(map_id, user_to_replay):
         """
-        Clears the cache of replays that are no longer in the top 100 for that map,
-        and redownloads the replay if the user has overwritten their score since it was cached.
-        // TODO: use replay_id to check for changes
+        Re-caches a stored replay if one of the given users has overwritten their score on the given map since it was cached.
+
+        Args:
+            String map_id: The map to revalidate.
+            Dictionary user_to_replay: The up tp date mapping of user_id to replay_id to revalidate.
         """
 
-        return
-
-
+        result = Cacher.cursor.execute("SELECT user_id, replay_id FROM replays WHERE map_id=?", [map_id]).fetchall()
+        for user_id, local_replay_id in result:
+            online_replay_id = user_to_replay[user_id]
+            if(local_replay_id != online_replay_id): # local (outdated) id does not match online (updated) id
+                print("replay outdated, redownloading...", end="")
+                Cacher.cache(map_id, user_id, Loader.replay_data(map_id, user_id), online_replay_id)
+                print("cached")
 
     @staticmethod
     def check_cache(map_id, user_id):
