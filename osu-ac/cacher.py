@@ -2,6 +2,7 @@ import sqlite3
 
 import wtc
 
+from loader import Loader
 from config import PATH_DB
 
 class Cacher:
@@ -23,31 +24,45 @@ class Cacher:
         raise Exception("This class is not meant to be instantiated. Use the static methods instead")
 
     @staticmethod
-    def cache(map_id, user_id, lzma_string, replay_id):
+    def cache(map_id, user_id, lzma_bytes, replay_id):
         """
-        Writes the given lzma string to the database, linking it to the given map and user.
+        Writes the given lzma bytes to the database, linking it to the given map and user.
+        If an entry with the given map_id and user_id already exists, it is overwritten with
+        the given lzma_bytes (after compression) and replay_id.
+
+        The lzma string is compressed with wtc compression. See Cacher.compress and wtc.compress for more.
 
         Args:
             String map_id: The map id to insert into the db.
             String user_id: The user id to insert into the db.
-            String lzma_string: The lzma_string to insert into the db.
+            Bytes lzma_bytes: The lzma bytes to compress and insert into the db.
             String replay_id: The id of the replay, which changes when a user overwrites their score.
         """
 
-        packed_osr = Cacher.compress(lzma_string)
-        Cacher.write("INSERT INTO replays VALUES(?, ?, ?, ?)", [map_id, user_id, packed_osr, replay_id])
+        compressed_bytes = Cacher.compress(lzma_bytes)
+        result = Cacher.cursor.execute("SELECT COUNT(1) FROM replays WHERE map_id=? AND user_id=?", [map_id, user_id]).fetchone()[0]
+        if(result): # already exists so we overwrite (this happens when we call Cacher.revalidate)
+            Cacher.write("UPDATE replays SET replay_data=?, replay_id=? WHERE map_id=? AND user_id=?", [compressed_bytes, replay_id, map_id, user_id])
+        else: # else just insert
+            Cacher.write("INSERT INTO replays VALUES(?, ?, ?, ?)", [map_id, user_id, compressed_bytes, replay_id])
 
     @staticmethod
-    def revalidate():
+    def revalidate(map_id, user_to_replay):
         """
-        Clears the cache of replays that are no longer in the top 100 for that map,
-        and redownloads the replay if the user has overwritten their score since it was cached.
-        // TODO: use replay_id to check for changes
+        Re-caches a stored replay if one of the given users has overwritten their score on the given map since it was cached.
+
+        Args:
+            String map_id: The map to revalidate.
+            Dictionary user_to_replay: The up tp date mapping of user_id to replay_id to revalidate.
         """
 
-        return
-
-
+        result = Cacher.cursor.execute("SELECT user_id, replay_id FROM replays WHERE map_id=?", [map_id]).fetchall()
+        for user_id, local_replay_id in result:
+            online_replay_id = user_to_replay[user_id]
+            if(local_replay_id != online_replay_id): # local (outdated) id does not match online (updated) id
+                print("replay outdated, redownloading...", end="")
+                Cacher.cache(map_id, user_id, Loader.replay_data(map_id, user_id), online_replay_id)
+                print("cached")
 
     @staticmethod
     def check_cache(map_id, user_id):
@@ -59,7 +74,7 @@ class Cacher:
             String user_id: The user_id to check in combination with the user_id.
 
         Returns:
-            The lzma bytestring that would have been returned by decoding the base64 api response, or None if it wasn't cached.
+            The lzma bytes that would have been returned by decoding the base64 api response, or None if it wasn't cached.
         """
 
         result = Cacher.cursor.execute("SELECT replay_data FROM replays WHERE map_id=? AND user_id=?", [map_id, user_id]).fetchone()
@@ -82,15 +97,15 @@ class Cacher:
         Cacher.conn.commit()
 
     @staticmethod
-    def compress(lzma_string):
+    def compress(lzma_bytes):
         """
         Compresses the lzma string to a (smaller) wtc string to store in the database.
 
         Args:
-            String lzma_string: The lzma bytestring, returned by the api for replays, to compress.
+            Bytes lzma_bytes: The lzma bytes, returned by the api for replays, to compress.
 
         Returns:
-            A compressed bytestring from the given bytestring.
+            A compressed bytes from the given bytes, using lossy wtc compression.
         """
 
-        return wtc.compress(lzma_string)
+        return wtc.compress(lzma_bytes)

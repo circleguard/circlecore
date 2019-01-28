@@ -1,8 +1,18 @@
+import pathlib
+
+ROOT_PATH = pathlib.Path(__file__).parent
+if(not (ROOT_PATH / "secret.py").is_file()):
+    key = input("Please enter your api key below - you can get it from https://osu.ppy.sh/p/api. "
+                "This will only ever be stored locally, and is necessary to retrieve replay data.\n")
+    with open(ROOT_PATH / "secret.py", mode="x") as secret:
+        secret.write("API_KEY = '{}'".format(key))
+
+import sys
 import requests
-from argparser import argparser
-from draw import Draw
 import itertools
 
+from argparser import argparser
+from draw import Draw
 from loader import Loader
 from local_replay import LocalReplay
 from online_replay import OnlineReplay
@@ -30,13 +40,13 @@ class Anticheat:
         Starts loading and detecting replays based on the args passed through the command line.
         """
 
-
         if(self.args.local):
             self._run_local()
         elif(self.args.map_id):
             self._run_map()
         else:
             print("Please set either --local (-l) or --map (-m)! ")
+            sys.exit(1)
 
     def _run_local(self):
 
@@ -66,7 +76,7 @@ class Anticheat:
 
         args = self.args
         # if doing anything online, revalidate cache
-        Cacher.revalidate()
+        Cacher.revalidate(args.map_id, self.users_info)
 
         if(args.map_id and args.user_id): # passed both -m and -u but not -l
             replays2 = [OnlineReplay.from_map(args.map_id, user_id, args.cache, replay_id) for user_id, replay_id in self.users_info.items()]
