@@ -4,7 +4,7 @@ This project is aimed at creating an anti-cheat for the rhythm game osu!. Curren
 
 ## Getting Started
 
-You will need to install [Python 3+](https://www.python.org/downloads/) and then install the dependencies for this project:
+You will need to install [Python 3+](https://www.python.org/downloads/) if you don't have it already, and then install the dependencies for this project:
 
 ```bash
 $ pip install git+git://github.com/osu-anticheat/osu-replay-parser
