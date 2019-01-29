@@ -11,6 +11,7 @@ $ pip install git+git://github.com/osu-anticheat/osu-replay-parser
 $ pip install git+git://github.com/osu-anticheat/wtc-lzma-compressor
 $ pip install numpy
 $ pip install matplotlib
+$ pip install requests
 ```
 
 
