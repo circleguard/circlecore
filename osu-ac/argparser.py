@@ -18,3 +18,6 @@ argparser.add_argument("-n", "--number", help="how many replays to get from a be
 
 argparser.add_argument("-c", "--cache", help="If set, locally caches replays so they don't have to be redownloaded when checking the same map multiple times.",
                                         action="store_true")
+
+argparser.add_argument("-s", "--single", help="Compare all replays under user/ with all other replays under user/. No effect if not set with -l",
+                                        action="store_true")
