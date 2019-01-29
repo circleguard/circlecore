@@ -26,6 +26,10 @@ class Anticheat:
     def __init__(self, args):
         """
         Initializes an Anticheat instance.
+
+        [SimpleNamespace or argparse.Namespace] args:
+            A namespace-like object representing how and what to compare. An example may look like
+            `Namespace(cache=False, local=False, map_id=None, number=50, threshold=20, user_id=None)`
         """
 
         self.args = args
