@@ -1,4 +1,4 @@
-# osu!antiCheat
+# osu!anticheat
 
 This project ultimately aims to create a comprehensive, player-run anticheat. A by no means complete list of cheats includes replay stealing, relax, replay editing, and timewarp.
 
