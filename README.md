@@ -85,6 +85,8 @@ If run with -c (or with the appropriate option checked in the GUI), downloaded r
 
 This project is maintained by [tybug](https://github.com/tybug), [sam](https://github.com/samuelhklumpers), and [trafis](https://github.com/Smitty1298).
 
+If you have feedback on the program, are interested in contributing, or just want to keep an eye on developement, you can find our discord server here: https://discord.gg/VNnkTjm. We're a friendly bunch and would love any help you can offer!
+
 ## Credits
 
 Thanks to [kszlim](https://github.com/kszlim), whose [replay parser](https://github.com/kszlim/osu-replay-parser) formed the basis of [our modified replay parser](https://github.com/osu-anticheat/osu-replay-parser).
