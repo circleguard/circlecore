@@ -1,5 +1,6 @@
 import numpy as np
 import osrparse
+from enums import Mod
 
 class Interpolation:
     """A utility class containing coordinate interpolations."""
@@ -38,6 +39,7 @@ class Replay:
         List replay_data: A list of osrpasrse.ReplayEvent objects, containing
                           x, y, time_since_previous_action, and keys_pressed.
         String player_name: The player who set the replay. Often given as a player id.
+        Frozenset enabled_mods: A frozen set containing Mod enums, representing which mods were enabled on the replay.
     """
 
     def __init__(self, replay_data, player_name, enabled_mods):
@@ -47,13 +49,30 @@ class Replay:
         Args:
             List replay_data: A list of osrpasrse.ReplayEvent objects, containing
                               x, y, time_since_previous_action, and keys_pressed.
-            String player_name: The player who set the replay.
-            Integer enabled_mods: The enabled mods on the replay.
+            String player_name: An identifier marking the player that did the replay. Name or user id are common.
+            [Frozenset or Integer] enabled_mods: A frozenset containing Mod enums, or base10 representation of
+                                                 the enabled mods on the replay.
         """
 
         self.player_name = player_name
         self.play_data = replay_data
-        self.enabled_mods = enabled_mods
+        # we good if it's already a frozenset
+        if(type(enabled_mods) is frozenset):
+            self.enabled_mods = enabled_mods
+            return
+
+        # Else make it one; taken directly from
+        # https://github.com/kszlim/osu-replay-parser/blob/master/osrparse/replay.py#L64
+        def bits(n):
+            if n == 0:
+                yield 0
+            while n:
+                b = n & (~n+1)
+                yield b
+                n ^= b
+        bit_values_gen = bits(enabled_mods)
+        self.enabled_mods = frozenset(Mod(mod_val) for mod_val in bit_values_gen)
+
 
     @staticmethod
     def interpolate(data1, data2, interpolation=Interpolation.linear, unflip=False):

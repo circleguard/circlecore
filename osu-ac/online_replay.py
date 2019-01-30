@@ -59,7 +59,7 @@ class OnlineReplay(Replay):
             String map_id: The map_id to download the replay from.
             String user_id: The user id to download the replay of.
                             Also used as the username of the Replay.
-            Integer enabled_mods: The bitwise number representing the enabled mods
+            Integer enabled_mods: The base10 number representing the enabled mods
 
         Returns:
             The Replay instance created with the given information.
