@@ -11,7 +11,7 @@ class LocalReplay(Replay):
         OnlineReplay
     """
 
-    def __init__(self, replay_data, player_name):
+    def __init__(self, replay_data, player_name, enabled_mods):
         """
         Initializes a LocalReplay instance.
 
@@ -19,7 +19,7 @@ class LocalReplay(Replay):
         this is intented to be called internally by LocalReplay.from_path.
         """
 
-        Replay.__init__(self, replay_data, player_name)
+        Replay.__init__(self, replay_data, player_name, enabled_mods)
 
 
     @staticmethod
@@ -36,6 +36,7 @@ class LocalReplay(Replay):
 
         parsed_replay = osrparse.parse_replay_file(path)
         check_replay_data = parsed_replay.play_data
+        enabled_mods = int(parsed_replay.mod_combination)
         player_name = parsed_replay.player_name
 
-        return LocalReplay(check_replay_data, player_name)
+        return LocalReplay(check_replay_data, player_name, enabled_mods)

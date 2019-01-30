@@ -12,7 +12,7 @@ def check_cache(function):
     Decorator that checks if the replay by the given user_id on the given map_id is already cached.
     If so, returns a Replay instance from the cached string instead of requesting it from the api.
 
-    Note that map_id and user_id must be the first and second arguments to the function respectively.
+    Note that map_id, user_id, and enabled_mods must be the first, second, and third arguments to the function respectively.
 
     Returns:
         A Replay instance from the cached replay if it was cached, or the return value of the function if not.
@@ -21,10 +21,11 @@ def check_cache(function):
     def wrapper(*args, **kwargs):
         map_id = args[0]
         user_id = args[1]
+        enabled_mods = args[2]
         lzma = Cacher.check_cache(map_id, user_id)
         if(lzma):
             replay_data = osrparse.parse_replay(lzma, pure_lzma=True).play_data
-            return Replay(replay_data, user_id)
+            return Replay(replay_data, user_id, enabled_mods)
         else:
             return function(*args, **kwargs)
     return wrapper
@@ -38,7 +39,7 @@ class OnlineReplay(Replay):
         LocalReplay
     """
 
-    def __init__(self, replay_data, player_name):
+    def __init__(self, replay_data, player_name, enabled_mods):
         """
         Initializes an OnlineReplay instance.
 
@@ -46,11 +47,11 @@ class OnlineReplay(Replay):
         this is intented to be called internally by OnlineReplay.from_map.
         """
 
-        Replay.__init__(self, replay_data, player_name)
+        Replay.__init__(self, replay_data, player_name, enabled_mods)
 
     @staticmethod
     @check_cache
-    def from_map(map_id, user_id, cache, replay_id):
+    def from_map(map_id, user_id, cache, replay_id, enabled_mods):
         """
         Creates a Replay instance from a replay by the given user on the given map.
 
@@ -58,6 +59,7 @@ class OnlineReplay(Replay):
             String map_id: The map_id to download the replay from.
             String user_id: The user id to download the replay of.
                             Also used as the username of the Replay.
+            Integer enabled_mods: The bitwise number representing the enabled mods
 
         Returns:
             The Replay instance created with the given information.
@@ -68,4 +70,4 @@ class OnlineReplay(Replay):
         replay_data = parsed_replay.play_data
         if(cache):
             Cacher.cache(map_id, user_id, lzma_bytes, replay_id)
-        return OnlineReplay(replay_data, user_id)
+        return OnlineReplay(replay_data, user_id, enabled_mods)

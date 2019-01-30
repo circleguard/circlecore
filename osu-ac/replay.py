@@ -40,7 +40,7 @@ class Replay:
         String player_name: The player who set the replay. Often given as a player id.
     """
 
-    def __init__(self, replay_data, player_name):
+    def __init__(self, replay_data, player_name, enabled_mods):
         """
         Initializes a Replay instance.
 
@@ -48,10 +48,12 @@ class Replay:
             List replay_data: A list of osrpasrse.ReplayEvent objects, containing
                               x, y, time_since_previous_action, and keys_pressed.
             String player_name: The player who set the replay.
+            Integer enabled_mods: The enabled mods on the replay.
         """
 
         self.player_name = player_name
         self.play_data = replay_data
+        self.enabled_mods = enabled_mods
 
     @staticmethod
     def interpolate(data1, data2, interpolation=Interpolation.linear, unflip=False):
