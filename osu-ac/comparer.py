@@ -65,6 +65,8 @@ class Comparer:
             result = Comparer._compare_two_replays(replay1, replay2)
             self._print_result(result, replay1, replay2)
 
+        print("done comparing")
+
     def check_names(self, player1, player2):
         """
         Returns True if both players are in the whitelist or are the same name, False otherwise.
