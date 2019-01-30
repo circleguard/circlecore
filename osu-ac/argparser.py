@@ -22,5 +22,5 @@ argparser.add_argument("-c", "--cache", help="If set, locally caches replays so 
 argparser.add_argument("--single", help="Compare all replays under user/ with all other replays under user/. No effect if not set with -l",
                                         action="store_true")
 
-argparser.add_argument("-s", "--silent", help="If set, you will not be asked if you want to see a visualization of comparisons under the threshold",
+argparser.add_argument("-s", "--silent", help="If set, you will not be prompted for a visualization of comparisons under the threshold",
                                          action="store_true")

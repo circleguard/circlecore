@@ -1,10 +1,11 @@
 import tkinter
 from tkinter import ttk, Tk, N, W, E, S, StringVar, TclError
 from types import SimpleNamespace
+import threading
 
 from anticheat import Anticheat
 
-def run_anticheat():
+def run():
     """
     Runs the anticheat with the options given in the gui.
     """
@@ -14,9 +15,19 @@ def run_anticheat():
     _local = local.get()
     _threshold = threshold.get()
     _number = num.get()
-    _cache=cache.get()
-    anticheat = Anticheat(SimpleNamespace(map_id=_map_id, user_id=_user_id, local=_local, threshold=_threshold, number=_number, cache=_cache))
-    anticheat.run()
+    _cache = cache.get()
+    _single = single.get()
+    _silent = silent.get()
+
+
+    def run_anticheat():
+        anticheat = Anticheat(SimpleNamespace(map_id=_map_id, user_id=_user_id, local=_local, threshold=_threshold,
+                                              number=_number, cache=_cache, single=_single, silent=_silent))
+        anticheat.run()
+
+    thread = threading.Thread(target=run_anticheat)
+    thread.start()
+
 
 # Root and Frames configuration
 root = Tk()
@@ -39,6 +50,10 @@ compare_to_map = tkinter.BooleanVar(value=False)
 num = tkinter.IntVar(value=50)
 cache = tkinter.BooleanVar(value=False)
 
+# unimplemented
+single = tkinter.BooleanVar(value=False)
+silent = tkinter.BooleanVar(value=False)
+
 # Make visual elements for main frame
 map_label = ttk.Label(main, text="Map id:")
 map_label.grid(row=0, column=0)
@@ -52,7 +67,7 @@ user_label.grid(row=1, column=0)
 user_entry = ttk.Entry(main, width=14, textvariable=user_id)
 user_entry.grid(row=1, column=1)
 
-run_button = ttk.Button(main, text="Run", command=run_anticheat)
+run_button = ttk.Button(main, text="Run", command=run)
 run_button.grid(row=2, column=1)
 
 # Make visual elements for options frame

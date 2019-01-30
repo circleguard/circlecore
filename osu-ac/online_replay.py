@@ -12,17 +12,18 @@ def check_cache(function):
     Decorator that checks if the replay by the given user_id on the given map_id is already cached.
     If so, returns a Replay instance from the cached string instead of requesting it from the api.
 
-    Note that map_id, user_id, and enabled_mods must be the first, second, and third arguments to the function respectively.
+    Note that cacher, map_id, user_id, and enabled_mods must be the first, second, third, and fifth arguments to the function respectively.
 
     Returns:
         A Replay instance from the cached replay if it was cached, or the return value of the function if not.
     """
 
     def wrapper(*args, **kwargs):
-        map_id = args[0]
-        user_id = args[1]
-        enabled_mods = args[2]
-        lzma = Cacher.check_cache(map_id, user_id)
+        cacher = args[0]
+        map_id = args[1]
+        user_id = args[2]
+        enabled_mods = args[4]
+        lzma = cacher.check_cache(map_id, user_id)
         if(lzma):
             replay_data = osrparse.parse_replay(lzma, pure_lzma=True).play_data
             return Replay(replay_data, user_id, enabled_mods)
@@ -51,14 +52,16 @@ class OnlineReplay(Replay):
 
     @staticmethod
     @check_cache
-    def from_map(map_id, user_id, cache, replay_id, enabled_mods):
+    def from_map(cacher, map_id, user_id, replay_id, enabled_mods):
         """
         Creates a Replay instance from a replay by the given user on the given map.
 
         Args:
+            Cacher cacher: A cacher object containing a database connection.
             String map_id: The map_id to download the replay from.
             String user_id: The user id to download the replay of.
                             Also used as the username of the Replay.
+            String replay_id: The id of the replay we are retrieving (used to cache).
             Integer enabled_mods: The base10 number representing the enabled mods
 
         Returns:
@@ -68,6 +71,5 @@ class OnlineReplay(Replay):
         lzma_bytes = Loader.replay_data(map_id, user_id)
         parsed_replay = osrparse.parse_replay(lzma_bytes, pure_lzma=True)
         replay_data = parsed_replay.play_data
-        if(cache):
-            Cacher.cache(map_id, user_id, lzma_bytes, replay_id)
+        cacher.cache(map_id, user_id, lzma_bytes, replay_id)
         return OnlineReplay(replay_data, user_id, enabled_mods)

@@ -104,7 +104,8 @@ class Comparer:
 
         answer = input("Would you like to see a visualization of both replays? ")
         if (answer and answer[0].lower().strip() == "y"):
-            animation = Draw.draw_replays(replay1, replay2)
+            draw = Draw(replay1, replay2)
+            animation = draw.run()
 
     @staticmethod
     def _compare_two_replays(replay1, replay2):

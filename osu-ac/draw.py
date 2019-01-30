@@ -8,18 +8,37 @@ from matplotlib.animation import FuncAnimation
 from replay import Replay
 
 class Draw():
-    @staticmethod
-    def draw_replays(user_replay, check_replay):
+    """
+    Displays a visualization of two replays.
+
+    Attributes:
+        Replay replay1: The first replay to draw.
+        Replay replay2: The second replay to draw.
+    """
+
+    def __init__(self, replay1, replay2):
         """
-        Show an animation of both replays overlayed on top of eachother.
+        Initializes a Draw instance.
 
         Args:
-            Replay user_replay: The first Replay to draw.
-            Replay check_replay: The second Replay to draw.
+            Replay replay1: The first replay to draw.
+            Replay replay2: The second replay to draw.
         """
 
-        data1 = user_replay.as_list_with_timestamps()
-        data2 = check_replay.as_list_with_timestamps()
+        self.replay1 = replay1
+        self.replay2 = replay2
+
+    def run(self):
+        """
+        Displays a visualization of two replays on top of each other.
+
+        Args:
+            Replay replay1: The first Replay to draw.
+            Replay replay2: The second Replay to draw.
+        """
+
+        data1 = self.replay1.as_list_with_timestamps()
+        data2 = self.replay2.as_list_with_timestamps()
 
         # synchronize and interpolate
         (data1, data2) = Replay.interpolate(data1, data2, unflip=True)
@@ -45,10 +64,9 @@ class Draw():
 
         # create plot for each replay and add legend with player names
         fig, ax = plt.subplots()
-        
-        plot1 = plt.plot('x', 'y', "red", animated=True, label=user_replay.player_name)[0]
-        plot2 = plt.plot('', '', "blue", animated=True, label=check_replay.player_name)[0]
-        legend = ax.legend()
+
+        plot1 = plt.plot('x', 'y', "red", animated=True, label=self.replay1.player_name)[0]
+        plot2 = plt.plot('', '', "blue", animated=True, label=self.replay2.player_name)[0]
 
         def init():
             ax.set_xlim(0, 512)
