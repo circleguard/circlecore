@@ -1,4 +1,4 @@
-# Osu!AntiCheat
+# osu!AntiCheat
 
 This project is aimed at creating an anti-cheat for the rhythm game osu!. Currently it can detect cheaters who use Replay Stealing software (taking someone else's replay and submitting it as their own).
 
@@ -7,11 +7,7 @@ This project is aimed at creating an anti-cheat for the rhythm game osu!. Curren
 You will need to install [Python 3+](https://www.python.org/downloads/) if you don't have it already, and then install the dependencies for this project:
 
 ```bash
-$ pip install git+git://github.com/osu-anticheat/osu-replay-parser
-$ pip install git+git://github.com/osu-anticheat/wtc-lzma-compressor
-$ pip install numpy
-$ pip install matplotlib
-$ pip install requests
+$ pip install -r requirements.txt
 ```
 
 
