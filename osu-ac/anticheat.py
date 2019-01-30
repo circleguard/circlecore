@@ -59,25 +59,25 @@ class Anticheat:
         replays1 = [LocalReplay.from_path(osr_path) for osr_path in PATH_REPLAYS_USER]
         if(args.map_id and args.user_id):
             # compare every local replay with just the given user + map replay
-            comparer = Comparer(args.threshold, replays1, replays2=self.replays_check)
+            comparer = Comparer(args.threshold, args.silent, replays1, replays2=self.replays_check)
             comparer.compare(mode="double")
             return
         if(args.map_id):
             # compare every local replay with every leaderboard entry
             replays2 = [OnlineReplay.from_map(args.map_id, user_id, args.cache, replay_info[0], replay_info[1]) for user_id, replay_info in self.users_info.items()]
-            comparer = Comparer(args.threshold, replays1, replays2=replays2)
+            comparer = Comparer(args.threshold, args.silent, replays1, replays2=replays2)
             comparer.compare(mode="double")
             return
 
         if(args.single):
             # checks every replay listed in PATH_REPLAYS_USER against every other replay there
-            comparer = Comparer(args.threshold, replays1)
+            comparer = Comparer(args.threshold, args.silent, replays1)
             comparer.compare(mode="single")
             return
         else:
             # checks every replay listed in PATH_REPLAYS_USER against every replay listed in PATH_REPLAYS_CHECK
             replays2 = [LocalReplay.from_path(osr_path) for osr_path in PATH_REPLAYS_CHECK]
-            comparer = Comparer(args.threshold, replays1, replays2=replays2)
+            comparer = Comparer(args.threshold, args.silent, replays1, replays2=replays2)
             comparer.compare(mode="double")
             return
 
@@ -89,14 +89,14 @@ class Anticheat:
 
         if(args.map_id and args.user_id): # passed both -m and -u but not -l
             replays2 = [OnlineReplay.from_map(args.map_id, user_id, args.cache, replay_info[0], replay_info[1]) for user_id, replay_info in self.users_info.items()]
-            comparer = Comparer(args.threshold, self.replays_check, replays2=replays2)
+            comparer = Comparer(args.threshold, args.silent, self.replays_check, replays2=replays2)
             comparer.compare(mode="double")
             return
 
         if(args.map_id): # only passed -m
             # get all 50 top replays
             replays = [OnlineReplay.from_map(args.map_id, user_id, args.cache, replay_info[0], replay_info[1]) for user_id, replay_info in self.users_info.items()]
-            comparer = Comparer(args.threshold, replays)
+            comparer = Comparer(args.threshold, args.silent, replays)
             comparer.compare(mode="single")
             return
 

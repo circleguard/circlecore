@@ -21,7 +21,7 @@ class Comparer:
         Investigator
     """
 
-    def __init__(self, threshold, replays1, replays2=None):
+    def __init__(self, threshold, silent, replays1, replays2=None):
         """
         Initializes a Comparer instance.
 
@@ -29,16 +29,20 @@ class Comparer:
         Comparing 1 to 2 is the same as comparing 2 to 1.
 
         Args:
+            Integer threshold: If a comparison scores below this value, the result is printed.
+            Boolean silent: If true, visualization prompts will be ignored and only results will be printed.
             List replays1: A list of Replay instances to compare against replays2.
             List replays2: A list of Replay instances to be compared against. Optional, defaulting to None. No attempt to error check
                            this is made - if a compare() call is made, the program will throw an AttributeError. Be sure to only call
                            methods that involve the first set of replays.
-            Integer threshold: If a comparison scores below this value, the result is printed.
         """
+
+        self.threshold = threshold
+        self.silent = silent
 
         self.replays1 = replays1
         self.replays2 = replays2
-        self.threshold = threshold
+
 
     def compare(self, mode):
         """
@@ -96,7 +100,7 @@ class Comparer:
         print("{:.1f} similarity, {:.1f} std deviation ({} vs {})".format(mean, sigma, replay1.player_name, replay2.player_name))
         answer = input("Would you like to see a visualization of both replays? ")
 
-        if (answer and answer[0].lower().strip() == "y"):
+        if ((not self.silent) and answer and answer[0].lower().strip() == "y"):
             animation = Draw.draw_replays(replay1, replay2)
 
     @staticmethod
