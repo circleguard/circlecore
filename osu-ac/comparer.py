@@ -5,6 +5,7 @@ import numpy as np
 from draw import Draw
 from replay import Replay
 from config import WHITELIST
+from enums import Mod
 
 class Comparer:
     """
@@ -113,6 +114,22 @@ class Comparer:
         and standard deviation of distances.
         """
 
+
+        print(replay1.enabled_mods)
+        if Mod.HardRock in replay1.enabled_mods:
+            print('Yes')
+        print(replay2.enabled_mods)
+        if Mod.HardRock in replay2.enabled_mods:
+            print('yes')
+
+
+        #if Mod.HardRock in replay1.enabled_mods and Mod.HardRock in replay2.enabled_mods or Mod.Hardrock in replay2.enabled_mods and Mod.HardRock in replay1.enabled_mods:
+            #print("Hey its works")
+        #else:
+            #print("Booo")
+
+
+
         # get all coordinates in numpy arrays so that they're arranged like:
         # [ x_1 x_2 ... x_n
         #   y_1 y_2 ... y_n ]
@@ -126,6 +143,8 @@ class Comparer:
         # remove time from each tuple
         data1 = [d[1:] for d in data1]
         data2 = [d[1:] for d in data2]
+
+
 
         (mu, sigma) = Comparer._compute_data_similarity(data1, data2)
 
