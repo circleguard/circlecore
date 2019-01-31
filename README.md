@@ -8,7 +8,7 @@ As of the v1.0 release, we only attempt to detect the first item in that list - 
 
 ## Getting Started
 
-You will need to install [Python 3+](https://www.python.org/downloads/) if you don't have it already, and then install the dependencies for this project:
+You will need to install [Python 3.6+](https://www.python.org/downloads/) if you don't have it already, and then install the dependencies for this project:
 
 ```bash
 $ pip install -r requirements.txt
