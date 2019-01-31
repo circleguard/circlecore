@@ -6,6 +6,7 @@ import matplotlib.pyplot as plt
 import itertools as itr
 from matplotlib.animation import FuncAnimation
 from replay import Replay
+from enums import Mod
 
 class Draw():
     @staticmethod
@@ -20,6 +21,18 @@ class Draw():
 
         data1 = user_replay.as_list_with_timestamps()
         data2 = check_replay.as_list_with_timestamps()
+
+        if Mod.HardRock.value in [mod.value for mod in user_replay.enabled_mods] and Mod.HardRock.value not in [mod.value for mod in check_replay.enabled_mods]:
+            for d in data1:
+                d[1] = 384 - d[1]
+            #print(user_replay.player_name + user_replay.enabled_mods)
+
+        if Mod.HardRock.value in [mod.value for mod in check_replay.enabled_mods] and Mod.HardRock.value not in [mod.value for mod in user_replay.enabled_mods]:
+            for d in data1:
+                d[1] = 384 - d[1]
+
+            #print(check_replay.player_name) + str(check_replay.enabled_mods)
+
 
         # synchronize and interpolate
         (data1, data2) = Replay.interpolate(data1, data2, unflip=True)
@@ -36,6 +49,7 @@ class Draw():
         data1 = Replay.resample(data1, fps)
         data2 = Replay.resample(data2, fps)
 
+
         # replace with constants for screen sizes
         data1 = [(512 - d[1], 384 - d[2]) for d in data1]
         data2 = [(512 - d[1], 384 - d[2]) for d in data2]
@@ -45,7 +59,7 @@ class Draw():
 
         # create plot for each replay and add legend with player names
         fig, ax = plt.subplots()
-        
+
         plot1 = plt.plot('x', 'y', "red", animated=True, label=user_replay.player_name)[0]
         plot2 = plt.plot('', '', "blue", animated=True, label=check_replay.player_name)[0]
         legend = ax.legend()
