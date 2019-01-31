@@ -40,9 +40,10 @@ class Replay:
                           x, y, time_since_previous_action, and keys_pressed.
         String player_name: The player who set the replay. Often given as a player id.
         Frozenset enabled_mods: A frozen set containing Mod enums, representing which mods were enabled on the replay.
+        Integer replay_id: The id of the replay, if the replay was retrieved from online. None if retrieved locally.
     """
 
-    def __init__(self, replay_data, player_name, enabled_mods):
+    def __init__(self, replay_data, player_name, enabled_mods, replay_id=None):
         """
         Initializes a Replay instance.
 
@@ -52,10 +53,13 @@ class Replay:
             String player_name: An identifier marking the player that did the replay. Name or user id are common.
             [Frozenset or Integer] enabled_mods: A frozenset containing Mod enums, or base10 representation of
                                                  the enabled mods on the replay.
+            Integer replay_id: The id of the replay, if the replay was retrieved from online. Defaults to None.
         """
 
-        self.player_name = player_name
         self.play_data = replay_data
+        self.player_name = player_name
+        self.replay_id = replay_id
+
         # we good if it's already a frozenset
         if(type(enabled_mods) is frozenset):
             self.enabled_mods = enabled_mods

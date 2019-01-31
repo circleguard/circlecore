@@ -40,7 +40,7 @@ class OnlineReplay(Replay):
         LocalReplay
     """
 
-    def __init__(self, replay_data, player_name, enabled_mods):
+    def __init__(self, replay_data, player_name, enabled_mods, replay_id):
         """
         Initializes an OnlineReplay instance.
 
@@ -48,7 +48,7 @@ class OnlineReplay(Replay):
         this is intented to be called internally by OnlineReplay.from_map.
         """
 
-        Replay.__init__(self, replay_data, player_name, enabled_mods)
+        Replay.__init__(self, replay_data, player_name, enabled_mods, replay_id)
 
     @staticmethod
     @check_cache
@@ -72,4 +72,4 @@ class OnlineReplay(Replay):
         parsed_replay = osrparse.parse_replay(lzma_bytes, pure_lzma=True)
         replay_data = parsed_replay.play_data
         cacher.cache(map_id, user_id, lzma_bytes, replay_id)
-        return OnlineReplay(replay_data, user_id, enabled_mods)
+        return OnlineReplay(replay_data, user_id, enabled_mods, replay_id)

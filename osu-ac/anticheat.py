@@ -8,7 +8,6 @@ if(not (ROOT_PATH / "secret.py").is_file()):
         secret.write("API_KEY = '{}'".format(key))
 
 import sys
-import requests
 import itertools
 
 from argparser import argparser

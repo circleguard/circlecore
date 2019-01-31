@@ -97,7 +97,14 @@ class Comparer:
         sigma = result[1]
         if(mean > self.threshold):
             return
-        print("{:.1f} similarity, {:.1f} std deviation ({} vs {})".format(mean, sigma, replay1.player_name, replay2.player_name))
+
+        # if they were both set online, we don't get dates from
+        first_score = None
+        if(replay1.replay_id and replay2.replayid):
+            first_score = replay1.player_name if(replay1.replay_id < replay2.replayid) else replay2.replayid
+
+        print("{:.1f} similarity, {:.1f} std deviation ({} vs {}{})"
+              .format(mean, sigma, replay1.player_name, replay2.player_name, " - {} set first".format(first_score) if first_score else ""))
 
         if(self.silent):
             return
