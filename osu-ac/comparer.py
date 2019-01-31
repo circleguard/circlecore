@@ -114,6 +114,13 @@ class Comparer:
         and standard deviation of distances.
         """
 
+        # flip if necessary first, then compare data
+        flip1 = Mod.HardRock.value in [mod.value for mod in replay1.enabled_mods]
+        flip2 = Mod.HardRock.value in [mod.value for mod in replay2.enabled_mods]
+        if(flip1 ^ flip2): # xor, if one has hr but not the other
+            replay1.flip()
+
+
         # get all coordinates in numpy arrays so that they're arranged like:
         # [ x_1 x_2 ... x_n
         #   y_1 y_2 ... y_n ]
@@ -128,17 +135,8 @@ class Comparer:
         data1 = [d[1:] for d in data1]
         data2 = [d[1:] for d in data2]
 
-        #Checks if HR is enabled in one replay and not the other, if so, flip the hr play
-        if Mod.HardRock.value in [mod.value for mod in replay1.enabled_mods] and Mod.HardRock.value not in [mod.value for mod in replay2.enabled_mods]:
-            for d in data1:
-                d[1] = 384 - d[1]
-
-        if Mod.HardRock.value in [mod.value for mod in replay2.enabled_mods] and Mod.HardRock.value not in [mod.value for mod in replay1.enabled_mods]:
-            for d in data1:
-                d[1] = 384 - d[1]
-
         (mu, sigma) = Comparer._compute_data_similarity(data1, data2)
-
+        print(mu)
         return (mu, sigma)
 
     @staticmethod

@@ -22,18 +22,6 @@ class Draw():
         data1 = user_replay.as_list_with_timestamps()
         data2 = check_replay.as_list_with_timestamps()
 
-        if Mod.HardRock.value in [mod.value for mod in user_replay.enabled_mods] and Mod.HardRock.value not in [mod.value for mod in check_replay.enabled_mods]:
-            for d in data1:
-                d[1] = 384 - d[1]
-            #print(user_replay.player_name + user_replay.enabled_mods)
-
-        if Mod.HardRock.value in [mod.value for mod in check_replay.enabled_mods] and Mod.HardRock.value not in [mod.value for mod in user_replay.enabled_mods]:
-            for d in data1:
-                d[1] = 384 - d[1]
-
-            #print(check_replay.player_name) + str(check_replay.enabled_mods)
-
-
         # synchronize and interpolate
         (data1, data2) = Replay.interpolate(data1, data2, unflip=True)
 

@@ -74,6 +74,15 @@ class Replay:
         self.enabled_mods = frozenset(Mod(mod_val) for mod_val in bit_values_gen)
 
 
+    def flip(self):
+        """
+        Flips the replay's coordinates about the x axis.
+        Comparable to the equivelant replay but with the HR mod added.
+        """
+
+        for frame in self.play_data:
+            frame.y = 384 - frame.y
+
     @staticmethod
     def interpolate(data1, data2, interpolation=Interpolation.linear, unflip=False):
         """
