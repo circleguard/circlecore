@@ -44,7 +44,9 @@ class Comparer:
 
         # filter beatmaps we had no data for - see Loader.replay_data and OnlineReplay.from_map
         self.replays1 = [replay for replay in replays1 if replay is not None]
-        self.replays2 = [replay for replay in replays2 if replay is not None]
+
+        if(replays2):
+            self.replays2 = [replay for replay in replays2 if replay is not None]
 
     def compare(self, mode):
         """
@@ -130,13 +132,13 @@ class Comparer:
         if(mean > self.threshold):
             return
 
-        # if they were both set online, we don't get dates from
-        first_score = None
+        # if they were both set locally, we don't get replay ids to compare
+        last_score = None
         if(replay1.replay_id and replay2.replay_id):
-            first_score = replay1.player_name if(replay1.replay_id < replay2.replay_id) else replay2.player_name
+            last_score = replay1.player_name if(replay1.replay_id > replay2.replay_id) else replay2.player_name
 
         print("{:.1f} similarity, {:.1f} std deviation ({} vs {}{})"
-              .format(mean, sigma, replay1.player_name, replay2.player_name, " - {} set first".format(first_score) if first_score else ""))
+              .format(mean, sigma, replay1.player_name, replay2.player_name, " - {} set later".format(last_score) if last_score else ""))
 
         if(self.silent):
             return

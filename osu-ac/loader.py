@@ -49,9 +49,10 @@ class Loader():
     @api
     def users_info(map_id, num=50):
         """
-        Returns a dict mapping the user_id to a list containing their replay_id and the enabled mods for the top given number of replays.
+        Returns a dict mapping each user_id to a list containing [username, replay_id, enabled mods]
+        for the top given number of replays on the given map.
 
-        EX: {"1234567": ["295871732", "15"]} # numbers may not be accurate to true mod bits or user ids
+        EX: {"1234567": ["tybug", "295871732", 15]} # numbers may not be accurate to true mod bits or user ids
 
         Args:
             String map_id: The map id to get a list of users from.
@@ -65,14 +66,14 @@ class Loader():
             Loader.enforce_ratelimit()
             return Loader.users_info(map_id, num=num)
 
-        info = {x["user_id"]: [x["score_id"], int(x["enabled_mods"])] for x in response} # map user id to score id and mod bit
+        info = {x["user_id"]: [x["username"], x["score_id"], int(x["enabled_mods"])] for x in response} # map user id to username, score id and mod bit
         return info
 
     @staticmethod
     @api
     def user_info(map_id, user_id):
         """
-        Returns a dict mapping a user_id to a list containing their replay_id and the enabled mods on a given map.
+        Returns a dict mapping a user_id to a list containing their [username, replay_id, enabled mods] on a given map.
 
         Args:
             String map_id: The map id to get the replay_id from.
@@ -83,7 +84,8 @@ class Loader():
         if(Loader.check_response(response)):
             Loader.enforce_ratelimit()
             return Loader.user_info(map_id, user_id)
-        info = {x["user_id"]: [x["score_id"], int(x["enabled_mods"])] for x in response} # map user id to score id and mod bit, should only be one response
+        info = {x["user_id"]: [x["username"], x["score_id"], int(x["enabled_mods"])] for x in response} # map user id to username, score id and mod bit,
+                                                                                                        # should only be one response
         return info
 
     @staticmethod

@@ -58,12 +58,13 @@ class Cacher:
 
         Args:
             String map_id: The map to revalidate.
-            Dictionary user_to_replay: The up tp date mapping of user_id to replay_id to revalidate.
+            Dictionary user_to_replay: The up to date mapping of user_id to [username, replay_id, enabled_mods] to revalidate.
+                                       Only contains information for a single map.
         """
 
         result = self.cursor.execute("SELECT user_id, replay_id FROM replays WHERE map_id=?", [map_id]).fetchall()
         for user_id, local_replay_id in result:
-            online_replay_id = user_to_replay[user_id]
+            online_replay_id = user_to_replay[user_id][1]
             if(local_replay_id != online_replay_id): # local (outdated) id does not match online (updated) id
                 print("replay outdated, redownloading...", end="")
                 # this **could** conceivable be the source of a logic error by Loader.replay_data returning None and the cache storing None,
