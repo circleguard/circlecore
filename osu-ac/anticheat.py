@@ -64,7 +64,7 @@ class Anticheat:
             return
         if(args.map_id):
             # compare every local replay with every leaderboard entry
-            replays2 = [OnlineReplay.from_map(self.cacher, args.map_id, user_id, replay_info[0], replay_info[1]) for user_id, replay_info in self.users_info.items()]
+            replays2 = OnlineReplay.from_user_info(self.cacher, args.map_id, self.users_info)
             comparer = Comparer(args.threshold, args.silent, replays1, replays2=replays2)
             comparer.compare(mode="double")
             return
@@ -88,14 +88,14 @@ class Anticheat:
         self.cacher.revalidate(args.map_id, self.users_info)
 
         if(args.map_id and args.user_id): # passed both -m and -u but not -l
-            replays2 = [OnlineReplay.from_map(self.cacher, args.map_id, user_id, replay_info[0], replay_info[1]) for user_id, replay_info in self.users_info.items()]
+            replays2 = OnlineReplay.from_user_info(self.cacher, args.map_id, self.users_info)
             comparer = Comparer(args.threshold, args.silent, self.replays_check, replays2=replays2)
             comparer.compare(mode="double")
             return
 
         if(args.map_id): # only passed -m
             # get all 50 top replays
-            replays = [OnlineReplay.from_map(self.cacher, args.map_id, user_id, replay_info[0], replay_info[1]) for user_id, replay_info in self.users_info.items()]
+            replays = OnlineReplay.from_user_info(self.cacher, args.map_id, self.users_info)
             comparer = Comparer(args.threshold, args.silent, replays)
             comparer.compare(mode="single")
             return

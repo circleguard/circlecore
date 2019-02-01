@@ -3,6 +3,7 @@ from datetime import datetime
 import time
 import base64
 
+from enums import Error
 from config import API_SCORES_ALL, API_SCORES_USER, API_REPLAY
 
 
@@ -96,15 +97,25 @@ class Loader():
             String user_id: The user id to get the replay of.
 
         Returns:
-            The lzma bytes (b64 decoded response) returned by the api.
+            The lzma bytes (b64 decoded response) returned by the api, or None if the replay was not available.
+
+        Raises:
+            Exception if the api response with an error we don't know.
         """
 
         print("Requesting replay by {} on map {}".format(user_id, map_id))
         response = requests.get(API_REPLAY.format(map_id, user_id)).json()
 
-        if(Loader.check_response(response)):
+        error = Loader.check_response(response)
+        if(error == Error.NO_REPLAY):
+            print("Could not find any replay data for user {} on map {}".format(user_id, map_id))
+            return None
+        elif(error == Error.RATELIMITED):
             Loader.enforce_ratelimit()
             return Loader.replay_data(map_id, user_id)
+        elif(error == Error.UNKOWN):
+            raise Exception("unkown error when requesting replay by {} on map {}. Please lodge an issue with the devs immediately".format(user_id, map_id))
+
 
         return base64.b64decode(response["content"])
 
@@ -115,14 +126,19 @@ class Loader():
         Checks the given api response for a ratelimit error.
 
         Args:
-            String response: The response to check.
+            String response: The api-returned response to check.
 
         Returns:
-            True if the key is ratelimited, False otherwise.
+            An Error enum corresponding to the type of error if there was an error, or False otherwise.
         """
 
         if("error" in response):
-            return True
+            if(response["error"] == Error.RATELIMITED.value):
+                return Error.RATELIMITED
+            elif(response["error"] == Error.NO_REPLAY.value):
+                return Error.NO_REPLAY
+            else:
+                return Error.UNKOWN
         else:
             return False
 

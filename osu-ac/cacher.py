@@ -33,6 +33,8 @@ class Cacher:
 
         The lzma string is compressed with wtc compression. See Cacher.compress and wtc.compress for more.
 
+        A call to this method has no effect if the Cacher's should_cache is False.
+
         Args:
             String map_id: The map id to insert into the db.
             String user_id: The user id to insert into the db.
@@ -64,6 +66,9 @@ class Cacher:
             online_replay_id = user_to_replay[user_id]
             if(local_replay_id != online_replay_id): # local (outdated) id does not match online (updated) id
                 print("replay outdated, redownloading...", end="")
+                # this **could** conceivable be the source of a logic error by Loader.replay_data returning None and the cache storing None,
+                # but since we only re-cache when we already stored a replay by them their future replay shouldn't ever be unavailable.
+                # We don't even know why some replays are unavailable though, so it's possible.
                 self.cache(map_id, user_id, Loader.replay_data(map_id, user_id), online_replay_id)
                 print("cached")
 

@@ -1,5 +1,11 @@
 from enum import Enum
 
+# strings taken from osu api error responses
+class Error(Enum):
+    NO_REPLAY   = "Replay not available."
+    RATELIMITED = "Requesting too fast! Slow your operation, cap'n!"
+    UNKOWN = "Unkown error."
+
 class Mod(Enum):
     NoMod          = 0
     NoFail         = 1

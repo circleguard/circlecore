@@ -51,6 +51,25 @@ class OnlineReplay(Replay):
         Replay.__init__(self, replay_data, player_name, enabled_mods, replay_id)
 
     @staticmethod
+    def from_user_info(cacher, map_id, user_info):
+        """
+        Creates a list of Replay instances for the users listed in user_info on the given map.
+
+        Args:
+            Cacher cacher: A cacher object containing a database connection.
+            String map_id: The map_id to download the replays from.
+            Dictionary user_info: A dict mapping a user_id to a list containing their replay_id and the enabled mods on a given map.
+                                  See Loader.users_info
+
+        Returns:
+            A list of Replay instances from the given information, with entries with no replay data available excluded.
+        """
+
+        replays = [OnlineReplay.from_map(cacher, map_id, user_id, replay_info[0], replay_info[1]) for user_id, replay_info in user_info.items()]
+        replays = [replay for replay in replays if replay is not None] # filter beatmaps we had no data for - see Loader.replay_data and OnlineReplay.from_map
+        return replays
+
+    @staticmethod
     @check_cache
     def from_map(cacher, map_id, user_id, replay_id, enabled_mods):
         """
@@ -65,10 +84,12 @@ class OnlineReplay(Replay):
             Integer enabled_mods: The base10 number representing the enabled mods
 
         Returns:
-            The Replay instance created with the given information.
+            The Replay instance created with the given information, or None if the replay was not available.
         """
 
         lzma_bytes = Loader.replay_data(map_id, user_id)
+        if(lzma_bytes is None):
+            return None
         parsed_replay = osrparse.parse_replay(lzma_bytes, pure_lzma=True)
         replay_data = parsed_replay.play_data
         cacher.cache(map_id, user_id, lzma_bytes, replay_id)
