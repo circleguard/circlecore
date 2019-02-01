@@ -14,7 +14,7 @@ You will need to install [Python 3+](https://www.python.org/downloads/) if you d
 $ pip install -r requirements.txt
 ```
 
-For those not well versed in git or command line, [here is a walkthrough of setting the program up](https://www.youtube.com/watch?v=wWQWAYRIUqA&t=82), with timestamps in the description. Note that due to the highly beta state this program is in, some parts of the video may already be outdated by the time you watch it.
+For those not well versed in git or command line, [here is a video walkthrough of setting the program up](https://www.youtube.com/watch?v=Ozs2grxUyHw), with timestamps in the description. Note that due to the highly beta state this program is in, some parts of the video may already be outdated by the time you watch it.
 
 
 ## Usage
