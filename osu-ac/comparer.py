@@ -21,7 +21,7 @@ class Comparer:
         Investigator
     """
 
-    def __init__(self, threshold, silent, replays1, replays2=None):
+    def __init__(self, threshold, auto, silent, replays1, replays2=None):
         """
         Initializes a Comparer instance.
 
@@ -30,6 +30,7 @@ class Comparer:
 
         Args:
             Integer threshold: If a comparison scores below this value, the result is printed.
+            Boolean auto: If true, will set the threshold to the average - threshold * standard deviation afterwards.
             Boolean silent: If true, visualization prompts will be ignored and only results will be printed.
             List replays1: A list of Replay instances to compare against replays2.
             List replays2: A list of Replay instances to be compared against. Optional, defaulting to None. No attempt to error check
@@ -38,6 +39,7 @@ class Comparer:
         """
 
         self.threshold = threshold
+        self.auto = auto
         self.silent = silent
 
         self.replays1 = replays1
@@ -63,11 +65,29 @@ class Comparer:
         else:
             raise Exception("`mode` must be one of 'double' or 'single'")
 
+        results = {}
+
         for replay1, replay2 in iterator:
             if(self.check_names(replay1.player_name, replay2.player_name)):
                 continue
             result = Comparer._compare_two_replays(replay1, replay2)
-            self._print_result(result, replay1, replay2)
+
+            if self.auto:
+                results[(replay1, replay2)] = result
+            else:
+                self._print_result(result, replay1, replay2)
+
+        if self.auto:
+            similarities = [result[0] for result in results.values()]
+
+            mu, sigma = np.mean(similarities), np.std(similarities)
+
+            self.threshold = mu - self.threshold * sigma
+
+            for key in results:
+                self._print_result(results[key], *key)
+                
+                
 
         print("done comparing")
 

@@ -53,6 +53,7 @@ cache = tkinter.BooleanVar(value=False)
 # unimplemented
 single = tkinter.BooleanVar(value=False)
 silent = tkinter.BooleanVar(value=False)
+auto_thresh = tkinter.BooleanVar(value=False)
 
 # Make visual elements for main frame
 map_label = ttk.Label(main, text="Map id:")
