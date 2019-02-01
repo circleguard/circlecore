@@ -42,7 +42,7 @@ For the former, run the anticheat.py file with some or all of the following flag
 | -c, --cache | if set, locally caches replays so they don't have to be redownloaded when checking the same map multiple times |
 | --single | compare all replays under user/ with all other replays under user/. No effect if not set with -l |
 | -s, --silent | if set, you will not be prompted for a visualization of comparisons under the threshold. Results will still be printed |
-
+| -v, --verify | Takes 3 positional arguments - map id, user1 id and user2 id. Verifies that the scores are steals of each other |
 
 #### Some Examples
 
