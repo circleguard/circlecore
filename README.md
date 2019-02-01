@@ -1,3 +1,8 @@
+**PLEASE JOIN OUR DISCORD AND REPORT CHEATERS THERE. Public reporting to /r/osureport will allow for cheaters to overwrite their stolen score before staff can get to them. The link to our discord can be found below**
+
+https://discord.gg/wanBtNY
+
+
 # osu!anticheat
 
 This project ultimately aims to create a comprehensive, player-run anticheat. A by no means complete list of cheats includes replay stealing, relax, replay editing, and timewarp.
