@@ -81,8 +81,8 @@ class Comparer:
             mu, sigma = np.mean(similarities), np.std(similarities)
 
             self.threshold = mu - self.stddevs * sigma
-
-            print(f'Standard deviation of similarities: {sigma:.2f}, {"in" if sigma / mu < 0.2 else ""}significant')
+            print("\n\nAutomatically determined threshold limit: {:.1f}\nAverage threshold: {:.1f}".format(self.threshold, mu))
+            print(f"Standard deviation of similarities: {sigma:.2f}, {'in' if sigma / mu < 0.2 else ''}significant\n\n")
 
             for key in results:
                 self._print_result(results[key], key[0], key[1])
