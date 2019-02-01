@@ -84,6 +84,8 @@ class Comparer:
 
             self.threshold = mu - self.threshold * sigma
 
+            print(f'Standard deviation of similarities: {sigma:.2f}, {"in" if sigma / mu < 0.2 else ""}significant')
+
             for key in results:
                 self._print_result(results[key], *key)
                 
