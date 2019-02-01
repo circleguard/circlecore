@@ -101,7 +101,7 @@ class Comparer:
         # if they were both set online, we don't get dates from
         first_score = None
         if(replay1.replay_id and replay2.replay_id):
-            first_score = replay1.player_name if(replay1.replay_id < replay2.replay_id) else replay2.replay_id
+            first_score = replay1.player_name if(replay1.replay_id < replay2.replay_id) else replay2.player_name
 
         print("{:.1f} similarity, {:.1f} std deviation ({} vs {}{})"
               .format(mean, sigma, replay1.player_name, replay2.player_name, " - {} set first".format(first_score) if first_score else ""))
