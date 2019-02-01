@@ -66,7 +66,6 @@ class OnlineReplay(Replay):
         """
 
         replays = [OnlineReplay.from_map(cacher, map_id, user_id, replay_info[0], replay_info[1]) for user_id, replay_info in user_info.items()]
-        replays = [replay for replay in replays if replay is not None] # filter beatmaps we had no data for - see Loader.replay_data and OnlineReplay.from_map
         return replays
 
     @staticmethod

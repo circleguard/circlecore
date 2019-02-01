@@ -42,9 +42,9 @@ class Comparer:
         self.stddevs = stddevs
         self.silent = silent
 
-        self.replays1 = replays1
-        self.replays2 = replays2
-
+        # filter beatmaps we had no data for - see Loader.replay_data and OnlineReplay.from_map
+        self.replays1 = [replay for replay in replays1 if replay is not None]
+        self.replays2 = [replay for replay in replays2 if replay is not None]
 
     def compare(self, mode):
         """
