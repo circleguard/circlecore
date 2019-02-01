@@ -37,6 +37,7 @@ For the former, run the anticheat.py file with some or all of the following flag
 | -u, --user | checks only the given user against the other leaderboard replays. Must be set with -m |
 | -l, --local | compare scores under the user/ directory to a beatmap leaderboard (if set with just -m), a score set by a user on a beatmap (if set with -m and -u) or other locally saved replays (default behavior) |
 | -t, --threshold | sets the similarity threshold to print comparisons that score under it. Defaults to 20 |
+| -a, --auto-threshold | sets the number of standard deviations from the average similarity the threshold will automatically be set to. Overrides -t  **Note: If more than [[https://latex.codecogs.com/gif.latex?\frac{1}{2}&space;-&space;\frac{1}{2}&space;\mathbf{erf}\frac{a}{\sqrt{2}}]] of the input is stolen this may cause false negatives** |
 | -n, --number | how many replays to get from a beatmap. No effect if not set with -m. Defaults to 50. **Note: the time complexity of the comparisons scales with O(n^2)** |
 | -c, --cache | if set, locally caches replays so they don't have to be redownloaded when checking the same map multiple times |
 | --single | compare all replays under user/ with all other replays under user/. No effect if not set with -l |
@@ -51,6 +52,9 @@ $ python anticheat.py -m 1776628 -u 1019489
 
 # compares the top 57 leaderboard replays against the other top 57 replays (57 choose 2 comparisons)
 $ python anticheat.py -m 1618546 -n 57
+
+# compares the top 50 leaderboard replays against the other top 50 replays (50 choose 2 comparisons) and sets the threshold to be one standard deviation below the average similarity.
+$ python anticheat.py -m 1618546 -n 50 -a 1.0
 
 # compares all replays under user/ with the top 50 scores on https://osu.ppy.sh/b/1611251
 $ python anticheat.py -l -m 1611251

@@ -21,7 +21,7 @@ class Comparer:
         Investigator
     """
 
-    def __init__(self, threshold, replays1, replays2=None):
+    def __init__(self, threshold, silent, replays1, replays2=None, stddevs=None):
         """
         Initializes a Comparer instance.
 
@@ -29,16 +29,22 @@ class Comparer:
         Comparing 1 to 2 is the same as comparing 2 to 1.
 
         Args:
+            Integer threshold: If a comparison scores below this value, the result is printed.
+            Boolean silent: If true, visualization prompts will be ignored and only results will be printed.
             List replays1: A list of Replay instances to compare against replays2.
             List replays2: A list of Replay instances to be compared against. Optional, defaulting to None. No attempt to error check
                            this is made - if a compare() call is made, the program will throw an AttributeError. Be sure to only call
                            methods that involve the first set of replays.
-            Integer threshold: If a comparison scores below this value, the result is printed.
+            Float stddevs: If set, the threshold will be automatically set to this many standard deviations below the average similarity for the comparisons.
         """
+
+        self.threshold = threshold
+        self.stddevs = stddevs
+        self.silent = silent
 
         self.replays1 = replays1
         self.replays2 = replays2
-        self.threshold = threshold
+
 
     def compare(self, mode):
         """
@@ -59,11 +65,38 @@ class Comparer:
         else:
             raise Exception("`mode` must be one of 'double' or 'single'")
 
-        for replay1, replay2 in iterator:
-            if(self.check_names(replay1.player_name, replay2.player_name)):
-                continue
-            result = Comparer._compare_two_replays(replay1, replay2)
-            self._print_result(result, replay1, replay2)
+
+
+        # automatically determine threshold based on standard deviations of similarities if stddevs is set
+        if(self.stddevs):
+            results = {}
+            for replay1, replay2 in iterator:
+                if(self.check_names(replay1.player_name, replay2.player_name)):
+                    continue
+                result = Comparer._compare_two_replays(replay1, replay2)
+                results[(replay1, replay2)] = result
+
+            similarities = [result[0] for result in results.values()]
+
+            mu, sigma = np.mean(similarities), np.std(similarities)
+
+            self.threshold = mu - self.stddevs * sigma
+            print("\n\nAutomatically determined threshold limit: {:.1f}\nAverage similarity: {:.1f}".format(self.threshold, mu))
+            print(f"Standard deviation of similarities: {sigma:.2f}, {'in' if sigma / mu < 0.2 else ''}significant\n\n")
+
+            for key in results:
+                self._print_result(results[key], key[0], key[1])
+        # else print normally
+        else:
+            for replay1, replay2 in iterator:
+                if(self.check_names(replay1.player_name, replay2.player_name)):
+                    continue
+                result = Comparer._compare_two_replays(replay1, replay2)
+                self._print_result(result, replay1, replay2)
+
+
+
+        print("done comparing")
 
     def check_names(self, player1, player2):
         """
@@ -89,13 +122,25 @@ class Comparer:
 
         mean = result[0]
         sigma = result[1]
+
         if(mean > self.threshold):
             return
-        print("{:.1f} similarity, {:.1f} std deviation ({} vs {})".format(mean, sigma, replay1.player_name, replay2.player_name))
-        answer = input("Would you like to see a visualization of both replays? ")
 
+        # if they were both set online, we don't get dates from
+        first_score = None
+        if(replay1.replay_id and replay2.replay_id):
+            first_score = replay1.player_name if(replay1.replay_id < replay2.replay_id) else replay2.player_name
+
+        print("{:.1f} similarity, {:.1f} std deviation ({} vs {}{})"
+              .format(mean, sigma, replay1.player_name, replay2.player_name, " - {} set first".format(first_score) if first_score else ""))
+
+        if(self.silent):
+            return
+
+        answer = input("Would you like to see a visualization of both replays? ")
         if (answer and answer[0].lower().strip() == "y"):
-            animation = Draw.draw_replays(replay1, replay2)
+            draw = Draw(replay1, replay2)
+            animation = draw.run()
 
     @staticmethod
     def _compare_two_replays(replay1, replay2):

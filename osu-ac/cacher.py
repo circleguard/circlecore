@@ -9,28 +9,31 @@ class Cacher:
     """
     Handles compressing and caching replay data to a database.
 
-    This class should not be instantiated because only one database connection is used, and static
-    methods provide cleaner access than passing around a Cacher class.
+    Each Cacher instance maintains its own database connection.
+    Be wary of instantiating too many.
     """
 
-    conn = sqlite3.connect(str(PATH_DB))
-    cursor = conn.cursor()
-
-    def __init__(self):
+    def __init__(self, cache):
         """
-        This class should never be instantiated. All methods are static.
+        Initializes a Cacher instance.
+
+        Args:
+            Boolean cache: Whether replays should be cached or not.
         """
 
-        raise Exception("This class is not meant to be instantiated. Use the static methods instead")
+        self.should_cache = cache
+        self.conn = sqlite3.connect(str(PATH_DB))
+        self.cursor = self.conn.cursor()
 
-    @staticmethod
-    def cache(map_id, user_id, lzma_bytes, replay_id):
+    def cache(self, map_id, user_id, lzma_bytes, replay_id):
         """
         Writes the given lzma bytes to the database, linking it to the given map and user.
         If an entry with the given map_id and user_id already exists, it is overwritten with
         the given lzma_bytes (after compression) and replay_id.
 
         The lzma string is compressed with wtc compression. See Cacher.compress and wtc.compress for more.
+
+        A call to this method has no effect if the Cacher's should_cache is False.
 
         Args:
             String map_id: The map id to insert into the db.
@@ -39,15 +42,17 @@ class Cacher:
             String replay_id: The id of the replay, which changes when a user overwrites their score.
         """
 
-        compressed_bytes = Cacher.compress(lzma_bytes)
-        result = Cacher.cursor.execute("SELECT COUNT(1) FROM replays WHERE map_id=? AND user_id=?", [map_id, user_id]).fetchone()[0]
-        if(result): # already exists so we overwrite (this happens when we call Cacher.revalidate)
-            Cacher.write("UPDATE replays SET replay_data=?, replay_id=? WHERE map_id=? AND user_id=?", [compressed_bytes, replay_id, map_id, user_id])
-        else: # else just insert
-            Cacher.write("INSERT INTO replays VALUES(?, ?, ?, ?)", [map_id, user_id, compressed_bytes, replay_id])
+        if(not self.should_cache):
+            return
 
-    @staticmethod
-    def revalidate(map_id, user_to_replay):
+        compressed_bytes = Cacher.compress(lzma_bytes)
+        result = self.cursor.execute("SELECT COUNT(1) FROM replays WHERE map_id=? AND user_id=?", [map_id, user_id]).fetchone()[0]
+        if(result): # already exists so we overwrite (this happens when we call Cacher.revalidate)
+            self.write("UPDATE replays SET replay_data=?, replay_id=? WHERE map_id=? AND user_id=?", [compressed_bytes, replay_id, map_id, user_id])
+        else: # else just insert
+            self.write("INSERT INTO replays VALUES(?, ?, ?, ?)", [map_id, user_id, compressed_bytes, replay_id])
+
+    def revalidate(self, map_id, user_to_replay):
         """
         Re-caches a stored replay if one of the given users has overwritten their score on the given map since it was cached.
 
@@ -56,16 +61,18 @@ class Cacher:
             Dictionary user_to_replay: The up tp date mapping of user_id to replay_id to revalidate.
         """
 
-        result = Cacher.cursor.execute("SELECT user_id, replay_id FROM replays WHERE map_id=?", [map_id]).fetchall()
+        result = self.cursor.execute("SELECT user_id, replay_id FROM replays WHERE map_id=?", [map_id]).fetchall()
         for user_id, local_replay_id in result:
             online_replay_id = user_to_replay[user_id]
             if(local_replay_id != online_replay_id): # local (outdated) id does not match online (updated) id
                 print("replay outdated, redownloading...", end="")
-                Cacher.cache(map_id, user_id, Loader.replay_data(map_id, user_id), online_replay_id)
+                # this **could** conceivable be the source of a logic error by Loader.replay_data returning None and the cache storing None,
+                # but since we only re-cache when we already stored a replay by them their future replay shouldn't ever be unavailable.
+                # We don't even know why some replays are unavailable though, so it's possible.
+                self.cache(map_id, user_id, Loader.replay_data(map_id, user_id), online_replay_id)
                 print("cached")
 
-    @staticmethod
-    def check_cache(map_id, user_id):
+    def check_cache(self, map_id, user_id):
         """
         Checks if a replay exists on the given map_id by the given user_id, and returns the decompressed wtc (equivelant to an lzma) string if so.
 
@@ -77,13 +84,10 @@ class Cacher:
             The lzma bytes that would have been returned by decoding the base64 api response, or None if it wasn't cached.
         """
 
-        result = Cacher.cursor.execute("SELECT replay_data FROM replays WHERE map_id=? AND user_id=?", [map_id, user_id]).fetchone()
+        result = self.cursor.execute("SELECT replay_data FROM replays WHERE map_id=? AND user_id=?", [map_id, user_id]).fetchone()
         return wtc.decompress(result[0]) if result else None
 
-
-
-    @staticmethod
-    def write(statement, args):
+    def write(self, statement, args):
         """
         Writes an sql statement with the given args to the databse.
 
@@ -93,8 +97,9 @@ class Cacher:
                        Must be of length equal to the number of missing values in the statement.
         """
 
-        Cacher.cursor.execute(statement, args)
-        Cacher.conn.commit()
+        self.cursor.execute(statement, args)
+        self.conn.commit()
+
 
     @staticmethod
     def compress(lzma_bytes):

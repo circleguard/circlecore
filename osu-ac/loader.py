@@ -3,6 +3,7 @@ from datetime import datetime
 import time
 import base64
 
+from enums import Error
 from config import API_SCORES_ALL, API_SCORES_USER, API_REPLAY
 
 
@@ -48,7 +49,9 @@ class Loader():
     @api
     def users_info(map_id, num=50):
         """
-        Returns a dict mapping the user_id to their replay_id for the top given number of replays
+        Returns a dict mapping the user_id to a list containing their replay_id and the enabled mods for the top given number of replays.
+
+        EX: {"1234567": ["295871732", "15"]} # numbers may not be accurate to true mod bits or user ids
 
         Args:
             String map_id: The map id to get a list of users from.
@@ -62,14 +65,14 @@ class Loader():
             Loader.enforce_ratelimit()
             return Loader.users_info(map_id, num=num)
 
-        info = {x["user_id"]: x["score_id"] for x in response} # map user id to score id
+        info = {x["user_id"]: [x["score_id"], int(x["enabled_mods"])] for x in response} # map user id to score id and mod bit
         return info
 
     @staticmethod
     @api
     def user_info(map_id, user_id):
         """
-        Returns a dict mapping a user_id to their replay_id for the given user on the given map.
+        Returns a dict mapping a user_id to a list containing their replay_id and the enabled mods on a given map.
 
         Args:
             String map_id: The map id to get the replay_id from.
@@ -80,7 +83,7 @@ class Loader():
         if(Loader.check_response(response)):
             Loader.enforce_ratelimit()
             return Loader.user_info(map_id, user_id)
-        info = {x["user_id"]: x["score_id"] for x in response} # map user id to score id, should only be one response
+        info = {x["user_id"]: [x["score_id"], int(x["enabled_mods"])] for x in response} # map user id to score id and mod bit, should only be one response
         return info
 
     @staticmethod
@@ -94,15 +97,25 @@ class Loader():
             String user_id: The user id to get the replay of.
 
         Returns:
-            The lzma bytes (b64 decoded response) returned by the api.
+            The lzma bytes (b64 decoded response) returned by the api, or None if the replay was not available.
+
+        Raises:
+            Exception if the api response with an error we don't know.
         """
 
         print("Requesting replay by {} on map {}".format(user_id, map_id))
         response = requests.get(API_REPLAY.format(map_id, user_id)).json()
 
-        if(Loader.check_response(response)):
+        error = Loader.check_response(response)
+        if(error == Error.NO_REPLAY):
+            print("Could not find any replay data for user {} on map {}".format(user_id, map_id))
+            return None
+        elif(error == Error.RATELIMITED):
             Loader.enforce_ratelimit()
             return Loader.replay_data(map_id, user_id)
+        elif(error == Error.UNKOWN):
+            raise Exception("unkown error when requesting replay by {} on map {}. Please lodge an issue with the devs immediately".format(user_id, map_id))
+
 
         return base64.b64decode(response["content"])
 
@@ -113,14 +126,19 @@ class Loader():
         Checks the given api response for a ratelimit error.
 
         Args:
-            String response: The response to check.
+            String response: The api-returned response to check.
 
         Returns:
-            True if the key is ratelimited, False otherwise.
+            An Error enum corresponding to the type of error if there was an error, or False otherwise.
         """
 
         if("error" in response):
-            return True
+            if(response["error"] == Error.RATELIMITED.value):
+                return Error.RATELIMITED
+            elif(response["error"] == Error.NO_REPLAY.value):
+                return Error.NO_REPLAY
+            else:
+                return Error.UNKOWN
         else:
             return False
 
