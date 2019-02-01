@@ -43,14 +43,30 @@ class Anticheat:
         """
         Starts loading and detecting replays based on the args passed through the command line.
         """
-
-        if(self.args.local):
+        if(self.args.verify):
+            self._run_verify()
+        elif(self.args.local):
             self._run_local()
         elif(self.args.map_id):
             self._run_map()
         else:
             print("Please set either --local (-l) or --map (-m)! ")
             sys.exit(1)
+
+    def _run_verify(self):
+        args = self.args
+
+        map_id = self.args.verify[0]
+        user1_id = self.args.verify[1]
+        user2_id = self.args.verify[2]
+
+        user1_info = Loader.user_info(map_id, user1_id)
+        user2_info = Loader.user_info(map_id, user2_id)
+        replay1 = OnlineReplay.from_user_info(self.cacher, map_id, user1_info)
+        replay2 = OnlineReplay.from_user_info(self.cacher, map_id, user2_info)
+
+        comparer = Comparer(args.threshold, args.silent, replay1, replays2=replay2)
+        comparer.compare(mode="double")
 
     def _run_local(self):
 

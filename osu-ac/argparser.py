@@ -26,3 +26,5 @@ argparser.add_argument("--single", help="Compare all replays under user/ with al
 
 argparser.add_argument("-s", "--silent", help="If set, you will not be prompted for a visualization of comparisons under the threshold",
                                          action="store_true")
+
+argparser.add_argument("-v", "--verify", help="Takes 3 positional arguments - map id, user1 id and user2 id. Verifies that the scores are steals of each other", nargs=3)
