@@ -108,7 +108,10 @@ class Loader():
 
         error = Loader.check_response(response)
         if(error == Error.NO_REPLAY):
-            print("Could not find any replay data for user {} on map {}".format(user_id, map_id))
+            print("Could not find any replay data for user {} on map {}, skipping".format(user_id, map_id))
+            return None
+        elif(error == Error.RETRIEVAL_FAILED):
+            print("Replay retrieval failed for user {} on map {}, skipping".format(user_id, map_id))
             return None
         elif(error == Error.RATELIMITED):
             Loader.enforce_ratelimit()
@@ -133,10 +136,9 @@ class Loader():
         """
 
         if("error" in response):
-            if(response["error"] == Error.RATELIMITED.value):
-                return Error.RATELIMITED
-            elif(response["error"] == Error.NO_REPLAY.value):
-                return Error.NO_REPLAY
+            for error in Error:
+                if(response["error"] == error.value):
+                    return error
             else:
                 return Error.UNKOWN
         else:
