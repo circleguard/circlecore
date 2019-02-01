@@ -13,7 +13,7 @@ argparser.add_argument("-l", "--local", help=("compare scores under the user/ di
 
 argparser.add_argument("-t", "--threshold", help="sets the similarity threshold to print results that score under it. Defaults to 20", type=int, default=20)
 
-argparser.add_argument("-a", "--auto-threshold", help="Sets the threshold to a number of standard deviations below the average similarity", type=float, default=-1, dest="auto_thresh")
+argparser.add_argument("-a", "--auto", help="Sets the threshold to a number of standard deviations below the average similarity", type=float, dest="stddevs")
 
 argparser.add_argument("-n", "--number", help="how many replays to get from a beatmap. No effect if not set with -m. Must be between 1 and 100 inclusive,"
                                               "defaults to 50. NOTE: THE TIME COMPLEXITY OF THE COMPARISONS WILL SCALE WITH O(n^2).", type=int, default=50)

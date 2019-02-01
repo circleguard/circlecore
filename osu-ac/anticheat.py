@@ -58,30 +58,30 @@ class Anticheat:
         # get all local user replays (used in every --local case)
         replays1 = [LocalReplay.from_path(osr_path) for osr_path in PATH_REPLAYS_USER]
 
-        auto = args.auto_thresh > -1.0
-        threshold = args.auto_thresh if auto else args.threshold
+        threshold = args.threshold
+        stddevs = args.stddevs
 
         if(args.map_id and args.user_id):
             # compare every local replay with just the given user + map replay
-            comparer = Comparer(threshold, auto, args.silent, replays1, replays2=self.replays_check)
+            comparer = Comparer(threshold, args.silent, replays1, replays2=self.replays_check, stddevs=stddevs)
             comparer.compare(mode="double")
             return
         if(args.map_id):
             # compare every local replay with every leaderboard entry
             replays2 = OnlineReplay.from_user_info(self.cacher, args.map_id, self.users_info)
-            comparer = Comparer(threshold, auto, args.silent, replays1, replays2=replays2)
+            comparer = Comparer(threshold, args.silent, replays1, replays2=replays2, stddevs=stddevs)
             comparer.compare(mode="double")
             return
 
         if(args.single):
             # checks every replay listed in PATH_REPLAYS_USER against every other replay there
-            comparer = Comparer(threshold, auto, args.silent, replays1)
+            comparer = Comparer(threshold, stddevs, args.silent, replays1)
             comparer.compare(mode="single")
             return
         else:
             # checks every replay listed in PATH_REPLAYS_USER against every replay listed in PATH_REPLAYS_CHECK
             replays2 = [LocalReplay.from_path(osr_path) for osr_path in PATH_REPLAYS_CHECK]
-            comparer = Comparer(threshold, auto, args.silent, replays1, replays2=replays2)
+            comparer = Comparer(threshold, args.silent, replays1, replays2=replays2, stddevs=stddevs)
             comparer.compare(mode="double")
             return
 
@@ -89,22 +89,22 @@ class Anticheat:
 
         args = self.args
 
-        auto = args.auto_thresh > -1.0
-        threshold = args.auto_thresh if auto else args.threshold
-        
+        threshold = args.threshold
+        stddevs = args.stddevs
+
         # if doing anything online, revalidate cache
         self.cacher.revalidate(args.map_id, self.users_info)
 
         if(args.map_id and args.user_id): # passed both -m and -u but not -l
             replays2 = OnlineReplay.from_user_info(self.cacher, args.map_id, self.users_info)
-            comparer = Comparer(threshold, auto, args.silent, self.replays_check, replays2=replays2)
+            comparer = Comparer(threshold, args.silent, self.replays_check, replays2=replays2, stddevs=stddevs)
             comparer.compare(mode="double")
             return
 
         if(args.map_id): # only passed -m
             # get all 50 top replays
             replays = OnlineReplay.from_user_info(self.cacher, args.map_id, self.users_info)
-            comparer = Comparer(threshold, auto, args.silent, replays)
+            comparer = Comparer(threshold, args.silent, replays, stddevs=stddevs)
             comparer.compare(mode="single")
             return
 

@@ -21,7 +21,7 @@ class Comparer:
         Investigator
     """
 
-    def __init__(self, threshold, auto, silent, replays1, replays2=None):
+    def __init__(self, threshold, silent, replays1, replays2=None, stddevs=None):
         """
         Initializes a Comparer instance.
 
@@ -30,16 +30,16 @@ class Comparer:
 
         Args:
             Integer threshold: If a comparison scores below this value, the result is printed.
-            Boolean auto: If true, will set the threshold to the average - threshold * standard deviation afterwards.
             Boolean silent: If true, visualization prompts will be ignored and only results will be printed.
             List replays1: A list of Replay instances to compare against replays2.
             List replays2: A list of Replay instances to be compared against. Optional, defaulting to None. No attempt to error check
                            this is made - if a compare() call is made, the program will throw an AttributeError. Be sure to only call
                            methods that involve the first set of replays.
+            Float stddevs: If set, the threshold will be automatically set to this many standard deviations below the average similarity for the comparisons.
         """
 
         self.threshold = threshold
-        self.auto = auto
+        self.stddevs = stddevs
         self.silent = silent
 
         self.replays1 = replays1
@@ -65,31 +65,36 @@ class Comparer:
         else:
             raise Exception("`mode` must be one of 'double' or 'single'")
 
-        results = {}
 
-        for replay1, replay2 in iterator:
-            if(self.check_names(replay1.player_name, replay2.player_name)):
-                continue
-            result = Comparer._compare_two_replays(replay1, replay2)
 
-            if self.auto:
+        # automatically determine threshold based on standard deviations of similarities if stddevs is set
+        if(self.stddevs):
+            results = {}
+            for replay1, replay2 in iterator:
+                if(self.check_names(replay1.player_name, replay2.player_name)):
+                    continue
+                result = Comparer._compare_two_replays(replay1, replay2)
                 results[(replay1, replay2)] = result
-            else:
-                self._print_result(result, replay1, replay2)
 
-        if self.auto:
             similarities = [result[0] for result in results.values()]
 
             mu, sigma = np.mean(similarities), np.std(similarities)
 
-            self.threshold = mu - self.threshold * sigma
+            self.threshold = mu - self.stddevs * sigma
 
             print(f'Standard deviation of similarities: {sigma:.2f}, {"in" if sigma / mu < 0.2 else ""}significant')
 
             for key in results:
-                self._print_result(results[key], *key)
-                
-                
+                self._print_result(results[key], key[0], key[1])
+        # else print normally
+        else:
+            for replay1, replay2 in iterator:
+                if(self.check_names(replay1.player_name, replay2.player_name)):
+                    continue
+                result = Comparer._compare_two_replays(replay1, replay2)
+                self._print_result(result, replay1, replay2)
+
+
 
         print("done comparing")
 
@@ -117,6 +122,7 @@ class Comparer:
 
         mean = result[0]
         sigma = result[1]
+
         if(mean > self.threshold):
             return
 

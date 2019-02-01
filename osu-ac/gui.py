@@ -15,7 +15,7 @@ def run():
     _local = local.get()
     _threshold = threshold.get()
 
-    _auto_thresh = auto_thresh.get() if auto.get() else -1.0
+    _stddevs = stddevs.get() if auto.get() else None
 
     _number = num.get()
     _cache = cache.get()
@@ -24,7 +24,7 @@ def run():
 
 
     def run_anticheat():
-        anticheat = Anticheat(SimpleNamespace(map_id=_map_id, user_id=_user_id, local=_local, threshold=_threshold, auto_thresh=_auto_thresh,
+        anticheat = Anticheat(SimpleNamespace(map_id=_map_id, user_id=_user_id, local=_local, threshold=_threshold, stddevs=_stddevs,
                                               number=_number, cache=_cache, single=_single, silent=_silent))
         anticheat.run()
 
@@ -50,7 +50,7 @@ user_id = tkinter.StringVar()
 local = tkinter.BooleanVar(value=False)
 threshold = tkinter.IntVar(value=20)
 auto = tkinter.BooleanVar(value=False)
-auto_thresh = tkinter.DoubleVar(value=2.0)
+stddevs = tkinter.DoubleVar(value=2.0)
 compare_to_map = tkinter.BooleanVar(value=False)
 num = tkinter.IntVar(value=50)
 cache = tkinter.BooleanVar(value=False)
@@ -96,19 +96,21 @@ top_plays_check = ttk.Checkbutton(top_x_plays, variable=compare_to_map)
 top_plays_check.grid(row=0, column=0)
 top_plays_label1 = ttk.Label(top_x_plays, text="Compare to top")
 top_plays_label1.grid(row=0, column=1)
-top_plays_entry = ttk.Entry(top_x_plays, width=5, textvariable=num)
+top_plays_entry = ttk.Entry(top_x_plays, width=4, textvariable=num)
 top_plays_entry.grid(row=0, column=2)
 top_plays_label2 = ttk.Label(top_x_plays, text="leaderboard plays?\n(Between 1 and 100 inclusive)")
 top_plays_label2.grid(row=0, column=3)
 
-should_auto = ttk.Frame(options)
-should_auto.grid(row=3, column=0)
-auto_check = ttk.Checkbutton(should_auto, variable=auto)
+auto_threshold = ttk.Frame(options)
+auto_threshold.grid(row=3, column=0)
+auto_check = ttk.Checkbutton(auto_threshold, variable=auto)
 auto_check.grid(row=0, column=0)
-auto_entry = ttk.Entry(should_auto, width=5, textvariable=auto_thresh)
-auto_entry.grid(row=0, column=1)
-auto_label = ttk.Label(should_auto, text="Typically between 1.5 and 2.5")
-auto_label.grid(row=0, column=2)
+auto_label1 = ttk.Label(auto_threshold, text="Automatically determine threshold?")
+auto_label1.grid(row=0, column=1)
+auto_entry = ttk.Entry(auto_threshold, width=3, textvariable=stddevs)
+auto_entry.grid(row=0, column=2)
+auto_label2 = ttk.Label(auto_threshold, text="Stddevs below average threshold to print for\n(typically between 1.5 and 2.5. The higher, the less results you will get)")
+auto_label2.grid(row=0, column=3)
 
 for child in main.winfo_children(): child.grid_configure(padx=5, pady=5)
 
