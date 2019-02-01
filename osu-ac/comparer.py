@@ -56,6 +56,10 @@ class Comparer:
             String mode: One of either "double" or "single", determining how to choose which replays to compare.
         """
 
+        if(not self.replays1): # if this is empty, bad things
+            print("No comparisons could be made. Make sure replay data is available for your args")
+            return
+
         if(mode == "double"):
             print("comparing first set of replays to second set of replays")
             iterator = itertools.product(self.replays1, self.replays2)
@@ -66,11 +70,11 @@ class Comparer:
             raise Exception("`mode` must be one of 'double' or 'single'")
 
 
-
         # automatically determine threshold based on standard deviations of similarities if stddevs is set
         if(self.stddevs):
             results = {}
             for replay1, replay2 in iterator:
+                print("loop")
                 if(self.check_names(replay1.player_name, replay2.player_name)):
                     continue
                 result = Comparer._compare_two_replays(replay1, replay2)
