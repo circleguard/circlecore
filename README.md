@@ -14,7 +14,7 @@ You will need to install [Python 3+](https://www.python.org/downloads/) if you d
 $ pip install -r requirements.txt
 ```
 
-For those not well versed in git or command line, [here is a walkthrough of setting the program up](https://www.youtube.com/watch?v=wWQWAYRIUqA&t=82), with timestamps in the description. Note that due to the highly beta state this program is in, some parts of the video may already be outdated by the time you watch it.
+For those not well versed in git or command line, [here is a video walkthrough of setting the program up](https://www.youtube.com/watch?v=Ozs2grxUyHw), with timestamps in the description. Note that due to the highly beta state this program is in, some parts of the video may already be outdated by the time you watch it.
 
 
 ## Usage
@@ -72,7 +72,7 @@ The GUI often lags behind CLI implementations - a feature recently added to the 
 
 The gui looks slightly different on every operating system. Here's how it should look on mac:
 
-<img src="https://github.com/osu-anticheat/osu-ac/blob/readme/showcase/gui1.png">
+<img src="https://i.imgur.com/5MQ9aP1.png">
 
 When you click 'run' in the gui, keep an eye on the command line you started the gui from, because that acts as both stdout and stdin of the program (meaning it will display results there, instead of the gui).
 
