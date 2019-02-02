@@ -76,7 +76,6 @@ class Comparer:
         if(self.stddevs):
             results = {}
             for replay1, replay2 in iterator:
-                print("loop")
                 if(self.check_names(replay1.player_name, replay2.player_name)):
                     continue
                 result = Comparer._compare_two_replays(replay1, replay2)
