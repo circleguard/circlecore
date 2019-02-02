@@ -91,7 +91,7 @@ class Anticheat:
 
         if(args.single):
             # checks every replay listed in PATH_REPLAYS_USER against every other replay there
-            comparer = Comparer(threshold, stddevs, args.silent, replays1)
+            comparer = Comparer(threshold, args.silent, replays1)
             comparer.compare(mode="single")
             return
         else:
