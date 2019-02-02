@@ -18,7 +18,7 @@ from online_replay import OnlineReplay
 from comparer import Comparer
 from investigator import Investigator
 from cacher import Cacher
-from config import PATH_REPLAYS, WHITELIST
+from config import PATH_REPLAYS, WHITELIST, VERSION
 
 class Anticheat:
 
@@ -115,5 +115,9 @@ class Anticheat:
             return
 
 if __name__ == '__main__':
-    anticheat = Anticheat(argparser.parse_args())
+    args = argparser.parse_args()
+    if(args.version):
+        print("osu!anticheat {}".format(VERSION))
+        sys.exit(0)
+    anticheat = Anticheat(args)
     anticheat.run()

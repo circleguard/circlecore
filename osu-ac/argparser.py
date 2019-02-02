@@ -25,3 +25,5 @@ argparser.add_argument("-s", "--silent", help="If set, you will not be prompted 
                                          action="store_true")
 
 argparser.add_argument("-v", "--verify", help="Takes 3 positional arguments - map id, user1 id and user2 id. Verifies that the scores are steals of each other", nargs=3)
+
+argparser.add_argument("--version", help="Prints the program version", action="store_true")
