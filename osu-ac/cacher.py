@@ -63,7 +63,7 @@ class Cacher:
 
         result = self.cursor.execute("SELECT user_id, replay_id FROM replays WHERE map_id=?", [map_id]).fetchall()
         for user_id, local_replay_id in result:
-            online_replay_id = user_to_replay[user_id]
+            online_replay_id = user_to_replay[user_id][0]
             if(local_replay_id != online_replay_id): # local (outdated) id does not match online (updated) id
                 print("replay outdated, redownloading...", end="")
                 # this **could** conceivable be the source of a logic error by Loader.replay_data returning None and the cache storing None,
