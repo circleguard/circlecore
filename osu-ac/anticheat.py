@@ -18,7 +18,7 @@ from online_replay import OnlineReplay
 from comparer import Comparer
 from investigator import Investigator
 from cacher import Cacher
-from config import PATH_REPLAYS_USER, PATH_REPLAYS_CHECK, WHITELIST
+from config import PATH_REPLAYS, WHITELIST
 
 class Anticheat:
 
@@ -50,8 +50,7 @@ class Anticheat:
         elif(self.args.map_id):
             self._run_map()
         else:
-            print("Please set either --local (-l) or --map (-m)! ")
-            sys.exit(1)
+            print("Please set either --local (-l), --map (-m), or --verify (-v)! ")
 
     def _run_verify(self):
         args = self.args
@@ -65,14 +64,14 @@ class Anticheat:
         replay1 = OnlineReplay.from_user_info(self.cacher, map_id, user1_info)
         replay2 = OnlineReplay.from_user_info(self.cacher, map_id, user2_info)
 
-        comparer = Comparer(args.threshold, args.silent, replay1, replays2=replay2)
+        comparer = Comparer(args.threshold, args.silent, replay1, replays2=replay2, stddevs=args.stddevs)
         comparer.compare(mode="double")
 
     def _run_local(self):
 
         args = self.args
-        # get all local user replays (used in every --local case)
-        replays1 = [LocalReplay.from_path(osr_path) for osr_path in PATH_REPLAYS_USER]
+        # get all local replays (used in every --local case)
+        replays1 = [LocalReplay.from_path(osr_path) for osr_path in PATH_REPLAYS]
 
         threshold = args.threshold
         stddevs = args.stddevs
@@ -88,18 +87,9 @@ class Anticheat:
             comparer = Comparer(threshold, args.silent, replays1, replays2=replays2, stddevs=stddevs)
             comparer.compare(mode="double")
             return
-
-        if(args.single):
-            # checks every replay listed in PATH_REPLAYS_USER against every other replay there
-            comparer = Comparer(threshold, args.silent, replays1)
-            comparer.compare(mode="single")
-            return
         else:
-            # checks every replay listed in PATH_REPLAYS_USER against every replay listed in PATH_REPLAYS_CHECK
-            replays2 = [LocalReplay.from_path(osr_path) for osr_path in PATH_REPLAYS_CHECK]
-            comparer = Comparer(threshold, args.silent, replays1, replays2=replays2, stddevs=stddevs)
-            comparer.compare(mode="double")
-            return
+            comparer = Comparer(threshold, args.silent, replays1, stddevs=stddevs)
+            comparer.compare(mode="single")
 
     def _run_map(self):
 

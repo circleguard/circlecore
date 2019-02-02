@@ -19,13 +19,12 @@ def run():
 
     _number = num.get()
     _cache = cache.get()
-    _single = single.get()
-    _silent = silent.get()
-
+    _silent = True # Visualizations do very very bad things when not called from the main thread, so when using gui, we just...force ignore them
+    _verify = verify.get()
 
     def run_anticheat():
         anticheat = Anticheat(SimpleNamespace(map_id=_map_id, user_id=_user_id, local=_local, threshold=_threshold, stddevs=_stddevs,
-                                              number=_number, cache=_cache, single=_single, silent=_silent))
+                                              number=_number, cache=_cache, silent=_silent, verify=_verify))
         anticheat.run()
 
     thread = threading.Thread(target=run_anticheat)
@@ -56,8 +55,7 @@ num = tkinter.IntVar(value=50)
 cache = tkinter.BooleanVar(value=False)
 
 # unimplemented
-single = tkinter.BooleanVar(value=False)
-silent = tkinter.BooleanVar(value=False)
+verify = tkinter.BooleanVar(value=False)
 
 # Make visual elements for main frame
 map_label = ttk.Label(main, text="Map id:")

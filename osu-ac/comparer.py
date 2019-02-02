@@ -63,15 +63,13 @@ class Comparer:
             return
 
         if(mode == "double"):
-            print("comparing first set of replays to second set of replays")
             iterator = itertools.product(self.replays1, self.replays2)
         elif (mode == "single"):
-            print("comparing first set of replays to itself")
             iterator = itertools.combinations(self.replays1, 2)
         else:
             raise Exception("`mode` must be one of 'double' or 'single'")
 
-
+        print("Starting to compare replays")
         # automatically determine threshold based on standard deviations of similarities if stddevs is set
         if(self.stddevs):
             results = {}
@@ -141,8 +139,9 @@ class Comparer:
 
         if(self.silent):
             return
-
-        answer = input("Would you like to see a visualization of both replays? ")
+        import sys
+        print("Would you like to see a visualization of both replays?")
+        answer = sys.stdin.readline()
         if (answer and answer[0].lower().strip() == "y"):
             draw = Draw(replay1, replay2)
             animation = draw.run()
