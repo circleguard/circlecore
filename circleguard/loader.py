@@ -2,10 +2,37 @@ import requests
 from datetime import datetime
 import time
 import base64
+import sys
+
+from requests import RequestException
 
 from enums import Error
 from config import API_SCORES_ALL, API_SCORES_USER, API_REPLAY
-from exceptions import CircleguardException, InvalidArgumentsException, APIException
+from exceptions import InvalidArgumentsException, APIException, CircleguardException, RatelimitException, InvalidKeyException
+
+def request(function):
+    """
+    Decorator intended to appropriately handle all request and api related exceptions.
+    """
+
+    def wrapper(*args, **kwargs):
+        # catch them exceptions boy
+        ret = None
+        try:
+            ret = function(*args, **kwargs)
+        except RatelimitException:
+            Loader.enforce_ratelimit()
+            # wrap function with the decorator then call decorator
+            ret = request(function)(*args, **kwargs)
+        except InvalidKeyException as e:
+            print(str(e))
+            sys.exit(0)
+        except RequestException as e:
+            print("Request exception: {}. Sleeping for 10 seconds".format(e))
+            time.sleep(10)
+            ret = request(function)(*args, **kwargs)
+        return ret
+    return wrapper
 
 def api(function):
     """
@@ -46,6 +73,7 @@ class Loader():
         raise CircleguardException("This class is not meant to be instantiated. Use the static methods instead.")
 
     @staticmethod
+    @request
     @api
     def users_info(map_id, num=50):
         """
@@ -62,14 +90,17 @@ class Loader():
         if(num > 100 or num < 2):
             raise InvalidArgumentsException("The number of top plays to fetch must be between 2 and 100 inclusive!")
         response = requests.get(API_SCORES_ALL.format(map_id, num)).json()
-        if(Loader.check_response(response)):
-            Loader.enforce_ratelimit()
-            return Loader.users_info(map_id, num=num)
+        error = Loader.check_response(response)
+        if(error):
+            for error2 in Error:
+                if(error == error2):
+                    raise error.value[1](error.value[2])
 
         info = {x["user_id"]: [x["username"], x["score_id"], int(x["enabled_mods"])] for x in response} # map user id to username, score id and mod bit
         return info
 
     @staticmethod
+    @request
     @api
     def user_info(map_id, user_id):
         """
@@ -81,14 +112,18 @@ class Loader():
         """
 
         response = requests.get(API_SCORES_USER.format(map_id, user_id)).json()
-        if(Loader.check_response(response)):
-            Loader.enforce_ratelimit()
-            return Loader.user_info(map_id, user_id)
+        error = Loader.check_response(response)
+        if(error):
+            for error2 in Error:
+                if(error == error2):
+                    raise error.value[1](error.value[2])
+
         info = {x["user_id"]: [x["username"], x["score_id"], int(x["enabled_mods"])] for x in response} # map user id to username, score id and mod bit,
                                                                                                         # should only be one response
         return info
 
     @staticmethod
+    @request
     @api
     def replay_data(map_id, user_id):
         """
@@ -109,18 +144,10 @@ class Loader():
         response = requests.get(API_REPLAY.format(map_id, user_id)).json()
 
         error = Loader.check_response(response)
-        if(error == Error.NO_REPLAY):
-            print("Could not find any replay data for user {} on map {}, skipping".format(user_id, map_id))
-            return None
-        elif(error == Error.RETRIEVAL_FAILED):
-            print("Replay retrieval failed for user {} on map {}, skipping".format(user_id, map_id))
-            return None
-        elif(error == Error.RATELIMITED):
-            Loader.enforce_ratelimit()
-            return Loader.replay_data(map_id, user_id)
-        elif(error == Error.UNKOWN):
-            raise APIException("unkown error when requesting replay by {} on map {}. Please lodge an issue with the devs immediately".format(user_id, map_id))
-
+        if(error):
+            for error2 in Error:
+                if(error == error2):
+                    raise error.value[1](error.value[2])
 
         return base64.b64decode(response["content"])
 
@@ -139,7 +166,7 @@ class Loader():
 
         if("error" in response):
             for error in Error:
-                if(response["error"] == error.value):
+                if(response["error"] == error.value[0]):
                     return error
             else:
                 return Error.UNKOWN
