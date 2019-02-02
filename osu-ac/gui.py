@@ -96,7 +96,7 @@ top_plays_label1 = ttk.Label(top_x_plays, text="Compare to top")
 top_plays_label1.grid(row=0, column=1)
 top_plays_entry = ttk.Entry(top_x_plays, width=4, textvariable=num)
 top_plays_entry.grid(row=0, column=2)
-top_plays_label2 = ttk.Label(top_x_plays, text="leaderboard plays?\n(Between 1 and 100 inclusive)")
+top_plays_label2 = ttk.Label(top_x_plays, text="leaderboard plays?\n(Between 2 and 100 inclusive)")
 top_plays_label2.grid(row=0, column=3)
 
 auto_threshold = ttk.Frame(options)
