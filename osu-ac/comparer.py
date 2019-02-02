@@ -5,7 +5,7 @@ import numpy as np
 from draw import Draw
 from replay import Replay
 from config import WHITELIST
-
+from exceptions import InvalidArgumentsException
 class Comparer:
     """
     A class for managing a set of replay comparisons.
@@ -67,7 +67,7 @@ class Comparer:
         elif (mode == "single"):
             iterator = itertools.combinations(self.replays1, 2)
         else:
-            raise Exception("`mode` must be one of 'double' or 'single'")
+            raise InvalidArgumentsException("`mode` must be one of 'double' or 'single'")
 
         print("Starting to compare replays")
         # automatically determine threshold based on standard deviations of similarities if stddevs is set

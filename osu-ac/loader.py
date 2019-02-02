@@ -5,7 +5,7 @@ import base64
 
 from enums import Error
 from config import API_SCORES_ALL, API_SCORES_USER, API_REPLAY
-
+from exceptions import InvalidArgumentsException, APIException, AnticheatException
 
 def api(function):
     """
@@ -43,7 +43,7 @@ class Loader():
         This class should never be instantiated. All methods are static.
         """
 
-        raise Exception("This class is not meant to be instantiated. Use the static methods instead.")
+        raise AnticheatException("This class is not meant to be instantiated. Use the static methods instead.")
 
     @staticmethod
     @api
@@ -60,7 +60,7 @@ class Loader():
         """
 
         if(num > 100 or num < 2):
-            raise Exception("The number of top plays to fetch must be between 2 and 100 inclusive!")
+            raise InvalidArgumentsException("The number of top plays to fetch must be between 2 and 100 inclusive!")
         response = requests.get(API_SCORES_ALL.format(map_id, num)).json()
         if(Loader.check_response(response)):
             Loader.enforce_ratelimit()
@@ -102,7 +102,7 @@ class Loader():
             The lzma bytes (b64 decoded response) returned by the api, or None if the replay was not available.
 
         Raises:
-            Exception if the api response with an error we don't know.
+            APIException if the api responds with an error we don't know.
         """
 
         print("Requesting replay by {} on map {}".format(user_id, map_id))
@@ -119,7 +119,7 @@ class Loader():
             Loader.enforce_ratelimit()
             return Loader.replay_data(map_id, user_id)
         elif(error == Error.UNKOWN):
-            raise Exception("unkown error when requesting replay by {} on map {}. Please lodge an issue with the devs immediately".format(user_id, map_id))
+            raise APIException("unkown error when requesting replay by {} on map {}. Please lodge an issue with the devs immediately".format(user_id, map_id))
 
 
         return base64.b64decode(response["content"])

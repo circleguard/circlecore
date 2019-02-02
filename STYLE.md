@@ -29,7 +29,7 @@ def method(arg1, arg2):
         [arg type] [arg name]: [description of arg]
 
     Returns:
-        [Description of return value] 
+        [Description of return value]
 
     Raises:
         [error name]: [description of when this error is raised]
@@ -56,8 +56,8 @@ Classes documentation is a little different. Classes follow all the same guideli
 ```python
 class Comparer:
     """
-    A class for managing a set of replay comparisons. 
-    
+    A class for managing a set of replay comparisons.
+
     Attributes:
         List replays1: A list of Replay instances to compare against replays2.
         List replays2: A list of Replay instances to be compared against.
