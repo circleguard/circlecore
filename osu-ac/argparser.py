@@ -11,7 +11,7 @@ argparser.add_argument("-l", "--local", help=("compare scores under the replays/
                                              "a score set by a user on a beatmap (if set with -m and -u) or the other scores in the folder "
                                             "(default behavior)"), action="store_true")
 
-argparser.add_argument("-t", "--threshold", help="sets the similarity threshold to print results that score under it. Defaults to 20", type=int, default=20)
+argparser.add_argument("-t", "--threshold", help="sets the similarity threshold to print results that score under it. Defaults to 20", type=int, default=18)
 
 argparser.add_argument("-a", "--auto", help="Sets the threshold to a number of standard deviations below the average similarity", type=float, dest="stddevs")
 
