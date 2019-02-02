@@ -86,7 +86,11 @@ class Cacher:
         """
 
         result = self.cursor.execute("SELECT replay_data FROM replays WHERE map_id=? AND user_id=?", [map_id, user_id]).fetchone()
-        return wtc.decompress(result[0]) if result else None
+        if(result):
+            print("Loading replay by {} from cache".format(user_id))
+            return wtc.decompress(result[0])
+
+        return None
 
     def write(self, statement, args):
         """

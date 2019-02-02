@@ -74,6 +74,7 @@ class Replay:
                 b = n & (~n+1)
                 yield b
                 n ^= b
+
         bit_values_gen = bits(enabled_mods)
         self.enabled_mods = frozenset(Mod(mod_val) for mod_val in bit_values_gen)
 
