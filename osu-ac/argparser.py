@@ -15,7 +15,7 @@ argparser.add_argument("-t", "--threshold", help="sets the similarity threshold 
 
 argparser.add_argument("-a", "--auto", help="Sets the threshold to a number of standard deviations below the average similarity", type=float, dest="stddevs")
 
-argparser.add_argument("-n", "--number", help="how many replays to get from a beatmap. No effect if not set with -m. Must be between 1 and 100 inclusive,"
+argparser.add_argument("-n", "--number", help="how many replays to get from a beatmap. No effect if not set with -m. Must be between 2 and 100 inclusive,"
                                               "defaults to 50. NOTE: THE TIME COMPLEXITY OF THE COMPARISONS WILL SCALE WITH O(n^2).", type=int, default=50)
 
 argparser.add_argument("-c", "--cache", help="If set, locally caches replays so they don't have to be redownloaded when checking the same map multiple times.",

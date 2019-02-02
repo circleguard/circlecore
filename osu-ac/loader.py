@@ -59,7 +59,7 @@ class Loader():
             Integer num: The number of ids to fetch. Defaults to 50.
         """
 
-        if(num > 100 or num < 1):
+        if(num > 100 or num < 2):
             raise Exception("The number of top plays to fetch must be between 1 and 100 inclusive!")
         response = requests.get(API_SCORES_ALL.format(map_id, num)).json()
         if(Loader.check_response(response)):
