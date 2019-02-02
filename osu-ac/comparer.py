@@ -139,9 +139,8 @@ class Comparer:
 
         if(self.silent):
             return
-        import sys
-        print("Would you like to see a visualization of both replays?")
-        answer = sys.stdin.readline()
+
+        answer = input("Would you like to see a visualization of both replays? ")
         if (answer and answer[0].lower().strip() == "y"):
             draw = Draw(replay1, replay2)
             animation = draw.run()
