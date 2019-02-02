@@ -60,7 +60,7 @@ class Loader():
         """
 
         if(num > 100 or num < 2):
-            raise Exception("The number of top plays to fetch must be between 1 and 100 inclusive!")
+            raise Exception("The number of top plays to fetch must be between 2 and 100 inclusive!")
         response = requests.get(API_SCORES_ALL.format(map_id, num)).json()
         if(Loader.check_response(response)):
             Loader.enforce_ratelimit()
