@@ -3,13 +3,13 @@
 https://discord.gg/wanBtNY
 
 
-# osu!anticheat
+# Circleguard
 
 This project ultimately aims to create a comprehensive, player-run anticheat. A by no means complete list of cheats includes replay stealing, relax, replay editing, and timewarp.
 
 As of the v1.0 release, we only attempt to detect the first item in that list - replay stealing.
 
-**Disclaimer: Neither the osu!ac organization nor any of the osu!anticheat devs are associated with osu! or the official osu! staff in any way.**
+**Disclaimer: Neither the osu!ac organization nor any of the circleguard devs are associated with osu! or the official osu! staff in any way.**
 
 ## Getting Started
 
@@ -87,7 +87,7 @@ When you click 'run' in the gui, keep an eye on the command line you started the
 ## Methodology
 This program compares the cursor positions of two replays to determine average distance between them. Since the times rarely match up perfectly between replays, the coordinates from one replay are interpolated from its previous and next position to estimate its position at a time identical to the other replay. By doing this we force all timestamps to be identical for easy comparison, at the cost of some precision.
 
-If run with -c (or with the appropriate option checked in the GUI), downloaded replays will be lossily compressed to roughly half their original size with [wtc compression](https://github.com/osu-anticheat/wtc-lzma-compressor). This reduces the need to wait for API ratelimits if run again.
+If run with -c (or with the appropriate option checked in the GUI), downloaded replays will be lossily compressed to roughly half their original size with [wtc compression](https://github.com/circleguard/wtc-lzma-compressor). This reduces the need to wait for API ratelimits if run again.
 
 ## Developement
 
@@ -97,4 +97,4 @@ If you have feedback on the program, are interested in contributing, or just wan
 
 ## Credits
 
-Thanks to [kszlim](https://github.com/kszlim), whose [replay parser](https://github.com/kszlim/osu-replay-parser) formed the basis of [our modified replay parser](https://github.com/osu-anticheat/osu-replay-parser).
+Thanks to [kszlim](https://github.com/kszlim), whose [replay parser](https://github.com/kszlim/osu-replay-parser) formed the basis of [our modified replay parser](https://github.com/circleguard/osu-replay-parser).
