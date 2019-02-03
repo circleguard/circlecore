@@ -87,14 +87,14 @@ class Draw():
             plot1.set_data(data1[0][i - 100:i], data1[1][i - 100:i])
             plot2.set_data(data2[0][i - 100:i], data2[1][i - 100:i])
             if i != 0 and i % int((total/10)) == 0:
-                print(f"Saved {round(100 * float(i)/float(total))}% already!")
+                print(f"Saved {round(100 * float(i)/float(total))}% of the video")
             return plot1, plot2
 
         setup()
         
         plt.show(block=True)
         plt.close('all')  # Maybe unnecessary
-        if input("Do you want to save the visualization? WARNING! This may take long ") == "y":
+if input("Do you want to save the video? WARNING, this may take a while ")[0] == "y":
             print("started saving video")
             setup()
 
