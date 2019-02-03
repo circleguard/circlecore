@@ -72,7 +72,7 @@ class Comparer:
         else:
             raise InvalidArgumentsException("`mode` must be one of 'double' or 'single'")
 
-        tenth = math.floor(total / 10)
+        tenth = round(total / 10) if total >= 4 else 1
         print("Starting a total of {:d} combinations".format(total))
         # automatically determine threshold based on standard deviations of similarities if stddevs is set
         if(self.stddevs):
