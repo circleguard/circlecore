@@ -85,8 +85,6 @@ class Draw():
         def update(i):
             plot1.set_data(data1[0][i - 100:i], data1[1][i - 100:i])
             plot2.set_data(data2[0][i - 100:i], data2[1][i - 100:i])
-            if i != 0 and i % int((total/10)) == 0:
-                print(f"Saved {round(100 * float(i)/float(total))}% of the video")
             return plot1, plot2
 
         setup()
@@ -98,7 +96,7 @@ class Draw():
             setup()
 
             writer = mk_animation.writers['ffmpeg']
-            writer = writer(fps=60, metadata=dict(artist='Me'), bitrate=1800, )
+            writer = writer(fps=60, metadata=dict(artist='Me'), bitrate=128, )
 
             file_name = f'{self.replay1.player_name} vs {self.replay2.player_name}.mp4'
             animation.save(file_name, writer=writer)
