@@ -91,7 +91,8 @@ class Draw():
 
         plt.show(block=True)
         plt.close('all')  # Maybe unnecessary
-        if input("Do you want to save the video? WARNING, this may take a while ")[0] == "y":
+        answer = input("Do you want to save the video? WARNING, this may take a while ")
+        if (answer and answer[0].lower().strip() == "y"):
             print("started saving video")
             setup()
 
