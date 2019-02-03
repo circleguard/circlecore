@@ -1,11 +1,12 @@
 import itertools
 
 import numpy as np
+import math
 
 from draw import Draw
 from replay import Replay
 from config import WHITELIST
-
+from exceptions import InvalidArgumentsException
 class Comparer:
     """
     A class for managing a set of replay comparisons.
@@ -64,12 +65,16 @@ class Comparer:
 
         if(mode == "double"):
             iterator = itertools.product(self.replays1, self.replays2)
+            total = sum(1 for i in itertools.product(self.replays1, self.replays2))
         elif (mode == "single"):
             iterator = itertools.combinations(self.replays1, 2)
+            total = sum(1 for i in itertools.combinations(self.replays1, 2))
         else:
-            raise Exception("`mode` must be one of 'double' or 'single'")
+            raise InvalidArgumentsException("`mode` must be one of 'double' or 'single'")
 
-        print("Starting to compare replays")
+        tenth = math.floor(total / 10)
+        done = 0
+        print("Starting a total of {:d} combinations.".format(total))
         # automatically determine threshold based on standard deviations of similarities if stddevs is set
         if(self.stddevs):
             results = {}
@@ -89,6 +94,10 @@ class Comparer:
 
             for key in results:
                 self._print_result(results[key], key[0], key[1])
+            done += 1
+            rem = done % tenth
+            if(rem == 0):
+                print("Done {0:.0f}% of combinations.".format((done / total * 100)))
         # else print normally
         else:
             for replay1, replay2 in iterator:
@@ -96,6 +105,10 @@ class Comparer:
                     continue
                 result = Comparer._compare_two_replays(replay1, replay2)
                 self._print_result(result, replay1, replay2)
+                done += 1
+                rem = done % tenth
+                if(rem == 0):
+                    print("Done {0:.0f}% of combinations.".format(math.ceil(done / total * 10) * 10))
 
 
 
