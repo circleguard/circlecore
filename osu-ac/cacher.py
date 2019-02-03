@@ -63,10 +63,9 @@ class Cacher:
         """
 
         result = self.cursor.execute("SELECT user_id, replay_id FROM replays WHERE map_id=?", [map_id]).fetchall()
-        print(result)
+
         # filter result to only contain entries also in user_info
         result = [info for info in result if info[0] in user_info.keys()]
-        print(result)
         for user_id, local_replay_id in result:
             online_replay_id = user_info[user_id][1]
             if(local_replay_id != online_replay_id): # local (outdated) id does not match online (updated) id
