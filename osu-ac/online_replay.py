@@ -12,7 +12,7 @@ def check_cache(function):
     Decorator that checks if the replay by the given user_id on the given map_id is already cached.
     If so, returns a Replay instance from the cached string instead of requesting it from the api.
 
-    Note that cacher, map_id, user_id, and enabled_mods must be the first, second, third, and sixth arguments to the function respectively.
+    Note that cacher, map_id, user_id, replay_id, and enabled_mods must be the first, second, third, fifth, and sixth arguments to the function respectively.
 
     Returns:
         A Replay instance from the cached replay if it was cached, or the return value of the function if not.
@@ -22,11 +22,12 @@ def check_cache(function):
         cacher = args[0]
         map_id = args[1]
         user_id = args[2]
+        replay_id = args[4]
         enabled_mods = args[5]
         lzma = cacher.check_cache(map_id, user_id)
         if(lzma):
             replay_data = osrparse.parse_replay(lzma, pure_lzma=True).play_data
-            return Replay(replay_data, user_id, enabled_mods)
+            return Replay(replay_data, user_id, enabled_mods, replay_id=replay_id)
         else:
             return function(*args, **kwargs)
     return wrapper
