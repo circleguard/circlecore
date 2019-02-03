@@ -20,4 +20,4 @@ WHITELIST = ["124493", "6304246", "2558286", "2562987", "2757689"]
 
 PATH_DB = PATH_ROOT / "db" / "cache.db" # /absolute/path/db/cache.db
 
-VERSION = "1.0d"
+VERSION = "1.1"
