@@ -82,7 +82,7 @@ class Comparer:
                     continue
                 result = Comparer._compare_two_replays(replay1, replay2)
                 results[(replay1, replay2)] = result
-                if(done % tenth == 0):
+                if(done != 1 and done % tenth == 0):
                     print("Done {0:.0f}% of combinations".format(math.ceil(done / total * 10) * 10))
 
             similarities = [result[0] for result in results.values()]
@@ -102,7 +102,7 @@ class Comparer:
                     continue
                 result = Comparer._compare_two_replays(replay1, replay2)
                 self._print_result(result, replay1, replay2)
-                if(done % tenth == 0):
+                if(done != 1 and done % tenth == 0):
                     print("Done {0:.0f}% of combinations".format(math.ceil(done / total * 10) * 10))
 
 
