@@ -97,7 +97,7 @@ class Comparer:
             done += 1
             rem = done % tenth
             if(rem == 0):
-                print("Done {0:.0f}% of combinations.".format((done / total * 100)))
+                print("Done {0:.0f}% of combinations.".format(math.ceil(done / total * 10) * 10))
         # else print normally
         else:
             for replay1, replay2 in iterator:
