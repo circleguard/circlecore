@@ -77,13 +77,13 @@ class Comparer:
         # automatically determine threshold based on standard deviations of similarities if stddevs is set
         if(self.stddevs):
             results = {}
-            for done, replay1, replay2 in enumerate(iterator):
+            for done, replay1, replay2 in enumerate(iterator, 1):
                 if(self.check_names(replay1.player_name, replay2.player_name)):
                     continue
                 result = Comparer._compare_two_replays(replay1, replay2)
                 results[(replay1, replay2)] = result
                 if(done % tenth == 0):
-                    print("Done {0:.0f}% of combinations.".format(math.ceil(done / total * 10) * 10))
+                    print("Done {0:.0f}% of combinations".format(math.ceil(done / total * 10) * 10))
 
             similarities = [result[0] for result in results.values()]
 
@@ -97,13 +97,13 @@ class Comparer:
                 self._print_result(results[key], key[0], key[1])
         # else print normally
         else:
-            for done, replay1, replay2 in enumerate(iterator):
+            for done, replay1, replay2 in enumerate(iterator, 1):
                 if(self.check_names(replay1.player_name, replay2.player_name)):
                     continue
                 result = Comparer._compare_two_replays(replay1, replay2)
                 self._print_result(result, replay1, replay2)
                 if(done % tenth == 0):
-                    print("Done {0:.0f}% of combinations.".format(math.ceil(done / total * 10) * 10))
+                    print("Done {0:.0f}% of combinations".format(math.ceil(done / total * 10) * 10))
 
 
 
