@@ -9,7 +9,7 @@ This project ultimately aims to create a comprehensive, player-run anticheat. A 
 
 As of the v1.0 release, we only attempt to detect the first item in that list - replay stealing.
 
-**Disclaimer: Neither the osu!ac organization nor any of the circleguard devs are associated with osu! or the official osu! staff in any way.**
+**Disclaimer: Neither the Circleguard organization nor any of the circleguard devs are associated with osu! or the official osu! staff in any way.**
 
 ## Getting Started
 
