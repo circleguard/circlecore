@@ -97,7 +97,7 @@ class Draw():
             setup()
 
             writer = mk_animation.writers['ffmpeg']
-            writer = writer(fps=60, metadata=dict(artist='Me'), bitrate=128, )
+            writer = writer(fps=60, metadata=dict(artist='Me'), bitrate=256, )
 
             file_name = f'{self.replay1.player_name} vs {self.replay2.player_name}.mp4'
             animation.save(file_name, writer=writer)
