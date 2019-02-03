@@ -9,6 +9,8 @@ if(not (ROOT_PATH / "secret.py").is_file()):
 
 import sys
 import itertools
+import os
+from os.path import isfile, join
 
 from argparser import argparser
 from draw import Draw
@@ -18,18 +20,21 @@ from online_replay import OnlineReplay
 from comparer import Comparer
 from investigator import Investigator
 from cacher import Cacher
-from config import PATH_REPLAYS, WHITELIST, VERSION
+from config import PATH_REPLAYS_STUB, WHITELIST, VERSION
 
-class Anticheat:
+class Circleguard:
 
     def __init__(self, args):
         """
-        Initializes an Anticheat instance.
+        Initializes a Circleguard instance.
 
         [SimpleNamespace or argparse.Namespace] args:
             A namespace-like object representing how and what to compare. An example may look like
             `Namespace(cache=False, local=False, map_id=None, number=50, threshold=20, user_id=None)`
         """
+
+        # get all replays in path to check against. Load this per circleguard instance or users moving files around while the gui is open doesn't work.
+        self.PATH_REPLAYS = [join(PATH_REPLAYS_STUB, f) for f in os.listdir(PATH_REPLAYS_STUB) if isfile(join(PATH_REPLAYS_STUB, f)) and f != ".DS_Store"]
 
         self.cacher = Cacher(args.cache)
         self.args = args
@@ -71,7 +76,7 @@ class Anticheat:
 
         args = self.args
         # get all local replays (used in every --local case)
-        replays1 = [LocalReplay.from_path(osr_path) for osr_path in PATH_REPLAYS]
+        replays1 = [LocalReplay.from_path(osr_path) for osr_path in self.PATH_REPLAYS]
 
         threshold = args.threshold
         stddevs = args.stddevs
@@ -117,7 +122,7 @@ class Anticheat:
 if __name__ == '__main__':
     args = argparser.parse_args()
     if(args.version):
-        print("osu!anticheat {}".format(VERSION))
+        print("Circleguard {}".format(VERSION))
         sys.exit(0)
-    anticheat = Anticheat(args)
-    anticheat.run()
+    circleguard = Circleguard(args)
+    circleguard.run()

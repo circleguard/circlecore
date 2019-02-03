@@ -1,8 +1,3 @@
-**PLEASE JOIN OUR DISCORD AND REPORT CHEATERS THERE. Public reporting to /r/osureport will allow for cheaters to overwrite their stolen score before staff can get to them. The link to our discord can be found below**
-
-https://discord.gg/wanBtNY
-
-
 # Circleguard
 
 This project ultimately aims to create a comprehensive, player-run anticheat. A by no means complete list of cheats includes replay stealing, relax, replay editing, and timewarp.
@@ -28,7 +23,7 @@ There are two ways to use the program - purely through the CLI, or through a GUI
 
 ### CLI
 
-For the former, run the anticheat.py file with some or all of the following flags:
+For the former, run the circleguard.py file with some or all of the following flags:
 
 | Flag | Usage |
 | --- | --- |
@@ -47,19 +42,19 @@ For the former, run the anticheat.py file with some or all of the following flag
 
 ```bash
 # compares https://osu.ppy.sh/u/1019489's replay on https://osu.ppy.sh/b/1776628 with the 49 other leaderboard replays
-$ python anticheat.py -m 1776628 -u 1019489
+$ python circleguard.py -m 1776628 -u 1019489
 
 # compares the top 57 leaderboard replays against the other top 57 replays (57 choose 2 comparisons)
-$ python anticheat.py -m 1618546 -n 57
+$ python circleguard.py -m 1618546 -n 57
 
 # compares the top 50 leaderboard replays against the other top 50 replays (50 choose 2 comparisons) and sets the threshold to be one standard deviation below the average similarity.
-$ python anticheat.py -m 1618546 -n 50 -a 1.0
+$ python circleguard.py -m 1618546 -n 50 -a 1.0
 
 # compares all replays under user/ with the top 50 scores on https://osu.ppy.sh/b/1611251
-$ python anticheat.py -l -m 1611251
+$ python circleguard.py -l -m 1611251
 
 # compares all replays under user/ with all replays under compare/
-$ python anticheat.py -l
+$ python circleguard.py -l
 ```
 
 This means that if you have a replay from a player and want to see if it's stolen, you should place it in the user/ directory and run with the -l and -m flags.
@@ -87,7 +82,7 @@ When you click 'run' in the gui, keep an eye on the command line you started the
 ## Methodology
 This program compares the cursor positions of two replays to determine average distance between them. Since the times rarely match up perfectly between replays, the coordinates from one replay are interpolated from its previous and next position to estimate its position at a time identical to the other replay. By doing this we force all timestamps to be identical for easy comparison, at the cost of some precision.
 
-If run with -c (or with the appropriate option checked in the GUI), downloaded replays will be lossily compressed to roughly half their original size with [wtc compression](https://github.com/circleguard/wtc-lzma-compressor). This reduces the need to wait for API ratelimits if run again.
+If run with -c (or with the appropriate option checked in the GUI), downloaded replays will be lossily compressed to roughly half their original size with [wtc compression](https://github.com/circleguard/wtc-lzma-compressor) and then stored in a local databsae. This reduces the need to wait for API ratelimits if run again.
 
 ## Developement
 

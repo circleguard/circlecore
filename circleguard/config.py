@@ -1,14 +1,9 @@
-import os
-from os.path import isfile, join
 import pathlib
 
 from secret import API_KEY
 
 PATH_ROOT = pathlib.Path(__file__).parent
 PATH_REPLAYS_STUB = PATH_ROOT / "replays"
-
-# get all replays in path to check against
-PATH_REPLAYS = [join(PATH_REPLAYS_STUB, f) for f in os.listdir(PATH_REPLAYS_STUB) if isfile(join(PATH_REPLAYS_STUB, f)) and f != ".DS_Store"]
 
 API_BASE = "https://osu.ppy.sh/api/"
 API_REPLAY = API_BASE + "get_replay?k=" + API_KEY + "&m=0&b={}&u={}"
