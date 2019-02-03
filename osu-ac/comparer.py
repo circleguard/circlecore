@@ -73,16 +73,17 @@ class Comparer:
             raise InvalidArgumentsException("`mode` must be one of 'double' or 'single'")
 
         tenth = math.floor(total / 10)
-        done = 0
-        print("Starting a total of {:d} combinations.".format(total))
+        print("Starting a total of {:d} combinations".format(total))
         # automatically determine threshold based on standard deviations of similarities if stddevs is set
         if(self.stddevs):
             results = {}
-            for replay1, replay2 in iterator:
+            for done, replay1, replay2 in enumerate(iterator):
                 if(self.check_names(replay1.player_name, replay2.player_name)):
                     continue
                 result = Comparer._compare_two_replays(replay1, replay2)
                 results[(replay1, replay2)] = result
+                if(done % tenth == 0):
+                    print("Done {0:.0f}% of combinations.".format(math.ceil(done / total * 10) * 10))
 
             similarities = [result[0] for result in results.values()]
 
@@ -94,20 +95,14 @@ class Comparer:
 
             for key in results:
                 self._print_result(results[key], key[0], key[1])
-            done += 1
-            rem = done % tenth
-            if(rem == 0):
-                print("Done {0:.0f}% of combinations.".format(math.ceil(done / total * 10) * 10))
         # else print normally
         else:
-            for replay1, replay2 in iterator:
+            for done, replay1, replay2 in enumerate(iterator):
                 if(self.check_names(replay1.player_name, replay2.player_name)):
                     continue
                 result = Comparer._compare_two_replays(replay1, replay2)
                 self._print_result(result, replay1, replay2)
-                done += 1
-                rem = done % tenth
-                if(rem == 0):
+                if(done % tenth == 0):
                     print("Done {0:.0f}% of combinations.".format(math.ceil(done / total * 10) * 10))
 
 
