@@ -147,7 +147,7 @@ class Loader():
             return False
 
     @staticmethod
-    def enforce_ratelimit(received, total):
+    def enforce_ratelimit(received=-1, total=-1):
         """
         Enforces the ratelimit by sleeping the thread until it's safe to make requests again.
         """
