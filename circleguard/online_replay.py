@@ -74,7 +74,7 @@ class OnlineReplay(Replay):
 
     @staticmethod
     @check_cache
-    def from_map(cacher, map_id, user_id, username, replay_id, enabled_mods, total):
+    def from_map(cacher, map_id, user_id, username, replay_id, enabled_mods, received, total):
         """
         Creates a Replay instance from a replay by the given user on the given map.
 
@@ -90,7 +90,7 @@ class OnlineReplay(Replay):
             The Replay instance created with the given information, or None if the replay was not available.
         """
 
-        lzma_bytes = Loader.replay_data(map_id, user_id, total)
+        lzma_bytes = Loader.replay_data(map_id, user_id, received, total)
         if(lzma_bytes is None):
             return None
         parsed_replay = osrparse.parse_replay(lzma_bytes, pure_lzma=True)
