@@ -22,3 +22,6 @@ class InvalidKeyException(InternalAPIException):
 
 class RatelimitException(InternalAPIException):
     """Indicates that our key has been ratelimited and we should retry the request at a later date."""
+
+class ReplayUnavailableException(InternalAPIException):
+    """Indicates that we expected a replay from the api but it was not able to deliver it."""
