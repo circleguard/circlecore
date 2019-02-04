@@ -67,8 +67,8 @@ class OnlineReplay(Replay):
         """
         replays = []
         for user_id, replay_info in user_info.items():
-            loader.received += 1
             replays.append(OnlineReplay.from_map(cacher, map_id, user_id, replay_info[0], replay_info[1], replay_info[2], loader))
+            loader.received += 1
         return replays
 
     @check_cache
