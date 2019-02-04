@@ -5,7 +5,7 @@ import base64
 
 from enums import Error
 from config import API_SCORES_ALL, API_SCORES_USER, API_REPLAY
-from exceptions import InvalidArgumentsException, APIException, AnticheatException
+from exceptions import CircleguardException, InvalidArgumentsException, APIException
 
 def api(function):
     """
@@ -43,7 +43,7 @@ class Loader():
         This class should never be instantiated. All methods are static.
         """
 
-        raise AnticheatException("This class is not meant to be instantiated. Use the static methods instead.")
+        raise CircleguardException("This class is not meant to be instantiated. Use the static methods instead.")
 
     @staticmethod
     @api
