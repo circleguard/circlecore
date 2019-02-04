@@ -64,14 +64,13 @@ class Loader():
         response = requests.get(API_SCORES_ALL.format(map_id, num)).json()
         if(self.check_response(response)):
             self.enforce_ratelimit()
-            return Loader.users_info(map_id, num=num)
+            return self.users_info(map_id, num=num)
 
         info = {x["user_id"]: [x["username"], x["score_id"], int(x["enabled_mods"])] for x in response} # map user id to username, score id and mod bit
         return info
 
-    @staticmethod
     @api
-    def user_info(map_id, user_id):
+    def user_info(self, map_id, user_id):
         """
         Returns a dict mapping a user_id to a list containing their [username, replay_id, enabled mods] on a given map.
 
@@ -81,9 +80,9 @@ class Loader():
         """
 
         response = requests.get(API_SCORES_USER.format(map_id, user_id)).json()
-        if(Loader.check_response(response)):
-            Loader.enforce_ratelimit()
-            return Loader.user_info(map_id, user_id)
+        if(self.check_response(response)):
+            self.enforce_ratelimit()
+            return self.user_info(map_id, user_id)
         info = {x["user_id"]: [x["username"], x["score_id"], int(x["enabled_mods"])] for x in response} # map user id to username, score id and mod bit,
                                                                                                         # should only be one response
         return info
