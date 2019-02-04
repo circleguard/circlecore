@@ -28,7 +28,7 @@ def request(function):
             print(str(e))
             sys.exit(0)
         except RequestException as e:
-            print("Request exception: {}. Sleeping for 10 seconds".format(e))
+            print("Request exception: {}. Sleeping for 5 seconds then retrying".format(e))
             time.sleep(10)
             ret = request(function)(*args, **kwargs)
         except ReplayUnavailableException as e:
