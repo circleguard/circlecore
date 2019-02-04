@@ -7,6 +7,7 @@ from enums import Error
 from config import API_SCORES_ALL, API_SCORES_USER, API_REPLAY
 from exceptions import CircleguardException, InvalidArgumentsException, APIException
 
+
 def api(function):
     """
     Decorator that checks if we can refresh the time at which we started our requests because
@@ -37,17 +38,16 @@ class Loader():
     RATELIMIT_RESET = 60 # time in seconds until the api refreshes our ratelimits
     start_time = datetime.min # when we started our requests cycle
 
-
-    def __init__(self):
+    def __init__(self, total):
         """
-        This class should never be instantiated. All methods are static.
+        Initializes a Loader instance.
         """
 
-        raise CircleguardException("This class is not meant to be instantiated. Use the static methods instead.")
+        self.total = total
+        self.received = 0
 
-    @staticmethod
     @api
-    def users_info(map_id, num=50):
+    def users_info(self, map_id, num=50):
         """
         Returns a dict mapping each user_id to a list containing [username, replay_id, enabled mods]
         for the top given number of replays on the given map.
@@ -62,8 +62,8 @@ class Loader():
         if(num > 100 or num < 2):
             raise InvalidArgumentsException("The number of top plays to fetch must be between 2 and 100 inclusive!")
         response = requests.get(API_SCORES_ALL.format(map_id, num)).json()
-        if(Loader.check_response(response)):
-            Loader.enforce_ratelimit()
+        if(self.check_response(response)):
+            self.enforce_ratelimit()
             return Loader.users_info(map_id, num=num)
 
         info = {x["user_id"]: [x["username"], x["score_id"], int(x["enabled_mods"])] for x in response} # map user id to username, score id and mod bit
@@ -88,9 +88,8 @@ class Loader():
                                                                                                         # should only be one response
         return info
 
-    @staticmethod
     @api
-    def replay_data(map_id, user_id, received, total):
+    def replay_data(self, map_id, user_id):
         """
         Queries the api for replay data from the given user on the given map.
 
@@ -108,7 +107,7 @@ class Loader():
         print("Requesting replay by {} on map {}".format(user_id, map_id))
         response = requests.get(API_REPLAY.format(map_id, user_id)).json()
 
-        error = Loader.check_response(response)
+        error = self.check_response(response)
         if(error == Error.NO_REPLAY):
             print("Could not find any replay data for user {} on map {}, skipping".format(user_id, map_id))
             return None
@@ -116,8 +115,8 @@ class Loader():
             print("Replay retrieval failed for user {} on map {}, skipping".format(user_id, map_id))
             return None
         elif(error == Error.RATELIMITED):
-            Loader.enforce_ratelimit(received, total)
-            return Loader.replay_data(map_id, user_id, received, total)
+            self.enforce_ratelimit()
+            return self.replay_data(map_id, user_id)
         elif(error == Error.UNKOWN):
             raise APIException("unkown error when requesting replay by {} on map {}. Please lodge an issue with the devs immediately".format(user_id, map_id))
 
@@ -146,8 +145,7 @@ class Loader():
         else:
             return False
 
-    @staticmethod
-    def enforce_ratelimit(received=-1, total=-1):
+    def enforce_ratelimit(self):
         """
         Enforces the ratelimit by sleeping the thread until it's safe to make requests again.
         """
@@ -159,5 +157,5 @@ class Loader():
 
         # sleep the remainder of the reset cycle so we guarantee it's been that long since the first request
         sleep_seconds = Loader.RATELIMIT_RESET - seconds_passed
-        print(f"Ratelimited. Sleeping for {sleep_seconds} seconds. {received} out of {total} maps already received. ETA : {int((total-received)/10)} min")
+        print(f"Ratelimited. Sleeping for {sleep_seconds} seconds. {self.received} out of {self.total} maps already received. ETA : {int((self.total-self.received)/10)} min")
         time.sleep(sleep_seconds)

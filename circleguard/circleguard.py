@@ -38,11 +38,12 @@ class Circleguard:
 
         self.cacher = Cacher(args.cache)
         self.args = args
+        self.loader = Loader(args.number)
         if(args.map_id):
-            self.users_info = Loader.users_info(args.map_id, args.number)
+            self.users_info = self.loader.users_info(args.map_id, args.number)
         if(args.user_id and args.map_id):
-            user_info = Loader.user_info(args.map_id, args.user_id)[args.user_id] # should be guaranteed to only be a single mapping of user_id to a list
-            self.replays_check = [OnlineReplay.from_map(self.cacher, args.map_id, args.user_id, user_info[0], user_info[1], user_info[2], args.number)]
+            user_info = self.loader.user_info(args.map_id, args.user_id)[args.user_id] # should be guaranteed to only be a single mapping of user_id to a list
+            self.replays_check = [OnlineReplay.from_map(self.cacher, args.map_id, args.user_id, user_info[0], user_info[1], user_info[2], self.loader)]
 
     def run(self):
         """
@@ -64,10 +65,10 @@ class Circleguard:
         user1_id = self.args.verify[1]
         user2_id = self.args.verify[2]
 
-        user1_info = Loader.user_info(map_id, user1_id)
-        user2_info = Loader.user_info(map_id, user2_id)
-        replay1 = OnlineReplay.from_user_info(self.cacher, map_id, user1_info)
-        replay2 = OnlineReplay.from_user_info(self.cacher, map_id, user2_info)
+        user1_info = self.loader.user_info(map_id, user1_id)
+        user2_info = self.loader.user_info(map_id, user2_id)
+        replay1 = OnlineReplay.from_user_info(self.cacher, map_id, user1_info, self.loader)
+        replay2 = OnlineReplay.from_user_info(self.cacher, map_id, user2_info, self.loader)
 
         comparer = Comparer(args.threshold, args.silent, replay1, replays2=replay2, stddevs=args.stddevs)
         comparer.compare(mode="double")
@@ -107,14 +108,14 @@ class Circleguard:
         self.cacher.revalidate(args.map_id, self.users_info)
 
         if(args.map_id and args.user_id): # passed both -m and -u but not -l
-            replays2 = OnlineReplay.from_user_info(self.cacher, args.map_id, self.users_info)
+            replays2 = OnlineReplay.from_user_info(self.cacher, args.map_id, self.users_info, self.loader)
             comparer = Comparer(threshold, args.silent, self.replays_check, replays2=replays2, stddevs=stddevs)
             comparer.compare(mode="double")
             return
 
         if(args.map_id): # only passed -m
             # get all 50 top replays
-            replays = OnlineReplay.from_user_info(self.cacher, args.map_id, self.users_info, args.number)
+            replays = OnlineReplay.from_user_info(self.cacher, args.map_id, self.users_info, self.loader)
             comparer = Comparer(threshold, args.silent, replays, stddevs=stddevs)
             comparer.compare(mode="single")
             return
