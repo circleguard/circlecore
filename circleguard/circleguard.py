@@ -42,7 +42,7 @@ class Circleguard:
             self.users_info = Loader.users_info(args.map_id, args.number)
         if(args.user_id and args.map_id):
             user_info = Loader.user_info(args.map_id, args.user_id)[args.user_id] # should be guaranteed to only be a single mapping of user_id to a list
-            self.replays_check = [OnlineReplay.from_map(self.cacher, args.map_id, args.user_id, user_info[0], user_info[1], user_info[2])]
+            self.replays_check = [OnlineReplay.from_map(self.cacher, args.map_id, args.user_id, user_info[0], user_info[1], user_info[2], args.number)]
 
     def run(self):
         """
@@ -114,7 +114,7 @@ class Circleguard:
 
         if(args.map_id): # only passed -m
             # get all 50 top replays
-            replays = OnlineReplay.from_user_info(self.cacher, args.map_id, self.users_info)
+            replays = OnlineReplay.from_user_info(self.cacher, args.map_id, self.users_info, args.number)
             comparer = Comparer(threshold, args.silent, replays, stddevs=stddevs)
             comparer.compare(mode="single")
             return
