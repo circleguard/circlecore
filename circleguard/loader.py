@@ -156,5 +156,5 @@ class Loader():
 
         # sleep the remainder of the reset cycle so we guarantee it's been that long since the first request
         sleep_seconds = Loader.RATELIMIT_RESET - seconds_passed
-        print(f"Ratelimited. Sleeping for {sleep_seconds} seconds. {self.received} out of {self.total} maps already received. ETA : {int((self.total-self.received)/10)} min")
+        print(f"Ratelimited. Sleeping for {sleep_seconds} seconds. {self.received} out of {self.total} maps already received. ETA ~ {int((self.total-self.received)/10)+1} min")
         time.sleep(sleep_seconds)
