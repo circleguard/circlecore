@@ -68,6 +68,8 @@ class Draw():
         plot1 = plt.plot('x', 'y', "red", animated=True, label=self.replay1.player_name)[0]
         plot2 = plt.plot('', '', "blue", animated=True, label=self.replay2.player_name)[0]
 
+        fig.legend()
+
         def init():
             ax.set_xlim(0, 512)
             ax.set_ylim(0, 384)

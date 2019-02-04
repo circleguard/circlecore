@@ -5,7 +5,7 @@ import base64
 
 from enums import Error
 from config import API_SCORES_ALL, API_SCORES_USER, API_REPLAY
-
+from exceptions import CircleguardException, InvalidArgumentsException, APIException
 
 def api(function):
     """
@@ -43,36 +43,37 @@ class Loader():
         This class should never be instantiated. All methods are static.
         """
 
-        raise Exception("This class is not meant to be instantiated. Use the static methods instead.")
+        raise CircleguardException("This class is not meant to be instantiated. Use the static methods instead.")
 
     @staticmethod
     @api
     def users_info(map_id, num=50):
         """
-        Returns a dict mapping the user_id to a list containing their replay_id and the enabled mods for the top given number of replays.
+        Returns a dict mapping each user_id to a list containing [username, replay_id, enabled mods]
+        for the top given number of replays on the given map.
 
-        EX: {"1234567": ["295871732", "15"]} # numbers may not be accurate to true mod bits or user ids
+        EX: {"1234567": ["tybug", "295871732", 15]} # numbers may not be accurate to true mod bits or user ids
 
         Args:
             String map_id: The map id to get a list of users from.
             Integer num: The number of ids to fetch. Defaults to 50.
         """
 
-        if(num > 100 or num < 1):
-            raise Exception("The number of top plays to fetch must be between 1 and 100 inclusive!")
+        if(num > 100 or num < 2):
+            raise InvalidArgumentsException("The number of top plays to fetch must be between 2 and 100 inclusive!")
         response = requests.get(API_SCORES_ALL.format(map_id, num)).json()
         if(Loader.check_response(response)):
             Loader.enforce_ratelimit()
             return Loader.users_info(map_id, num=num)
 
-        info = {x["user_id"]: [x["score_id"], int(x["enabled_mods"])] for x in response} # map user id to score id and mod bit
+        info = {x["user_id"]: [x["username"], x["score_id"], int(x["enabled_mods"])] for x in response} # map user id to username, score id and mod bit
         return info
 
     @staticmethod
     @api
     def user_info(map_id, user_id):
         """
-        Returns a dict mapping a user_id to a list containing their replay_id and the enabled mods on a given map.
+        Returns a dict mapping a user_id to a list containing their [username, replay_id, enabled mods] on a given map.
 
         Args:
             String map_id: The map id to get the replay_id from.
@@ -83,7 +84,8 @@ class Loader():
         if(Loader.check_response(response)):
             Loader.enforce_ratelimit()
             return Loader.user_info(map_id, user_id)
-        info = {x["user_id"]: [x["score_id"], int(x["enabled_mods"])] for x in response} # map user id to score id and mod bit, should only be one response
+        info = {x["user_id"]: [x["username"], x["score_id"], int(x["enabled_mods"])] for x in response} # map user id to username, score id and mod bit,
+                                                                                                        # should only be one response
         return info
 
     @staticmethod
@@ -100,7 +102,7 @@ class Loader():
             The lzma bytes (b64 decoded response) returned by the api, or None if the replay was not available.
 
         Raises:
-            Exception if the api response with an error we don't know.
+            APIException if the api responds with an error we don't know.
         """
 
         print("Requesting replay by {} on map {}".format(user_id, map_id))
@@ -108,13 +110,16 @@ class Loader():
 
         error = Loader.check_response(response)
         if(error == Error.NO_REPLAY):
-            print("Could not find any replay data for user {} on map {}".format(user_id, map_id))
+            print("Could not find any replay data for user {} on map {}, skipping".format(user_id, map_id))
+            return None
+        elif(error == Error.RETRIEVAL_FAILED):
+            print("Replay retrieval failed for user {} on map {}, skipping".format(user_id, map_id))
             return None
         elif(error == Error.RATELIMITED):
             Loader.enforce_ratelimit()
             return Loader.replay_data(map_id, user_id)
         elif(error == Error.UNKOWN):
-            raise Exception("unkown error when requesting replay by {} on map {}. Please lodge an issue with the devs immediately".format(user_id, map_id))
+            raise APIException("unkown error when requesting replay by {} on map {}. Please lodge an issue with the devs immediately".format(user_id, map_id))
 
 
         return base64.b64decode(response["content"])
@@ -133,10 +138,9 @@ class Loader():
         """
 
         if("error" in response):
-            if(response["error"] == Error.RATELIMITED.value):
-                return Error.RATELIMITED
-            elif(response["error"] == Error.NO_REPLAY.value):
-                return Error.NO_REPLAY
+            for error in Error:
+                if(response["error"] == error.value):
+                    return error
             else:
                 return Error.UNKOWN
         else:

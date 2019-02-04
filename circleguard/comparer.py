@@ -5,7 +5,7 @@ import numpy as np
 from draw import Draw
 from replay import Replay
 from config import WHITELIST
-
+from exceptions import InvalidArgumentsException
 class Comparer:
     """
     A class for managing a set of replay comparisons.
@@ -42,9 +42,11 @@ class Comparer:
         self.stddevs = stddevs
         self.silent = silent
 
-        self.replays1 = replays1
-        self.replays2 = replays2
+        # filter beatmaps we had no data for - see Loader.replay_data and OnlineReplay.from_map
+        self.replays1 = [replay for replay in replays1 if replay is not None]
 
+        if(replays2):
+            self.replays2 = [replay for replay in replays2 if replay is not None]
 
     def compare(self, mode):
         """
@@ -56,17 +58,18 @@ class Comparer:
             String mode: One of either "double" or "single", determining how to choose which replays to compare.
         """
 
+        if(not self.replays1): # if this is empty, bad things
+            print("No comparisons could be made. Make sure replay data is available for your args")
+            return
+
         if(mode == "double"):
-            print("comparing first set of replays to second set of replays")
             iterator = itertools.product(self.replays1, self.replays2)
         elif (mode == "single"):
-            print("comparing first set of replays to itself")
             iterator = itertools.combinations(self.replays1, 2)
         else:
-            raise Exception("`mode` must be one of 'double' or 'single'")
+            raise InvalidArgumentsException("`mode` must be one of 'double' or 'single'")
 
-
-
+        print("Starting to compare replays")
         # automatically determine threshold based on standard deviations of similarities if stddevs is set
         if(self.stddevs):
             results = {}
@@ -126,13 +129,13 @@ class Comparer:
         if(mean > self.threshold):
             return
 
-        # if they were both set online, we don't get dates from
-        first_score = None
+        # if they were both set locally, we don't get replay ids to compare
+        last_score = None
         if(replay1.replay_id and replay2.replay_id):
-            first_score = replay1.player_name if(replay1.replay_id < replay2.replay_id) else replay2.player_name
+            last_score = replay1.player_name if(replay1.replay_id > replay2.replay_id) else replay2.player_name
 
         print("{:.1f} similarity, {:.1f} std deviation ({} vs {}{})"
-              .format(mean, sigma, replay1.player_name, replay2.player_name, " - {} set first".format(first_score) if first_score else ""))
+              .format(mean, sigma, replay1.player_name, replay2.player_name, " - {} set later".format(last_score) if last_score else ""))
 
         if(self.silent):
             return

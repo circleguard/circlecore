@@ -9,6 +9,8 @@ if(not (ROOT_PATH / "secret.py").is_file()):
 
 import sys
 import itertools
+import os
+from os.path import isfile, join
 
 from argparser import argparser
 from draw import Draw
@@ -18,45 +20,63 @@ from online_replay import OnlineReplay
 from comparer import Comparer
 from investigator import Investigator
 from cacher import Cacher
-from config import PATH_REPLAYS_USER, PATH_REPLAYS_CHECK, WHITELIST
+from config import PATH_REPLAYS_STUB, WHITELIST, VERSION
 
-class Anticheat:
+class Circleguard:
 
     def __init__(self, args):
         """
-        Initializes an Anticheat instance.
+        Initializes a Circleguard instance.
 
         [SimpleNamespace or argparse.Namespace] args:
             A namespace-like object representing how and what to compare. An example may look like
             `Namespace(cache=False, local=False, map_id=None, number=50, threshold=20, user_id=None)`
         """
 
+        # get all replays in path to check against. Load this per circleguard instance or users moving files around while the gui is open doesn't work.
+        self.PATH_REPLAYS = [join(PATH_REPLAYS_STUB, f) for f in os.listdir(PATH_REPLAYS_STUB) if isfile(join(PATH_REPLAYS_STUB, f)) and f != ".DS_Store"]
+
         self.cacher = Cacher(args.cache)
         self.args = args
         if(args.map_id):
             self.users_info = Loader.users_info(args.map_id, args.number)
         if(args.user_id and args.map_id):
-            user_info = Loader.user_info(args.map_id, args.user_id)
-            self.replays_check = [OnlineReplay.from_map(self.cacher, args.map_id, args.user_id, user_info[args.user_id][0], user_info[args.user_id][1])]
+            user_info = Loader.user_info(args.map_id, args.user_id)[args.user_id] # should be guaranteed to only be a single mapping of user_id to a list
+            self.replays_check = [OnlineReplay.from_map(self.cacher, args.map_id, args.user_id, user_info[0], user_info[1], user_info[2])]
 
     def run(self):
         """
         Starts loading and detecting replays based on the args passed through the command line.
         """
-
-        if(self.args.local):
+        if(self.args.verify):
+            self._run_verify()
+        elif(self.args.local):
             self._run_local()
         elif(self.args.map_id):
             self._run_map()
         else:
-            print("Please set either --local (-l) or --map (-m)! ")
-            sys.exit(1)
+            print("Please set either --local (-l), --map (-m), or --verify (-v)! ")
+
+    def _run_verify(self):
+        args = self.args
+
+        map_id = self.args.verify[0]
+        user1_id = self.args.verify[1]
+        user2_id = self.args.verify[2]
+
+        user1_info = Loader.user_info(map_id, user1_id)
+        user2_info = Loader.user_info(map_id, user2_id)
+        replay1 = OnlineReplay.from_user_info(self.cacher, map_id, user1_info)
+        replay2 = OnlineReplay.from_user_info(self.cacher, map_id, user2_info)
+
+        comparer = Comparer(args.threshold, args.silent, replay1, replays2=replay2, stddevs=args.stddevs)
+        comparer.compare(mode="double")
 
     def _run_local(self):
 
         args = self.args
-        # get all local user replays (used in every --local case)
-        replays1 = [LocalReplay.from_path(osr_path) for osr_path in PATH_REPLAYS_USER]
+        # get all local replays (used in every --local case)
+        replays1 = [LocalReplay.from_path(osr_path) for osr_path in self.PATH_REPLAYS]
 
         threshold = args.threshold
         stddevs = args.stddevs
@@ -72,18 +92,9 @@ class Anticheat:
             comparer = Comparer(threshold, args.silent, replays1, replays2=replays2, stddevs=stddevs)
             comparer.compare(mode="double")
             return
-
-        if(args.single):
-            # checks every replay listed in PATH_REPLAYS_USER against every other replay there
-            comparer = Comparer(threshold, stddevs, args.silent, replays1)
-            comparer.compare(mode="single")
-            return
         else:
-            # checks every replay listed in PATH_REPLAYS_USER against every replay listed in PATH_REPLAYS_CHECK
-            replays2 = [LocalReplay.from_path(osr_path) for osr_path in PATH_REPLAYS_CHECK]
-            comparer = Comparer(threshold, args.silent, replays1, replays2=replays2, stddevs=stddevs)
-            comparer.compare(mode="double")
-            return
+            comparer = Comparer(threshold, args.silent, replays1, stddevs=stddevs)
+            comparer.compare(mode="single")
 
     def _run_map(self):
 
@@ -109,5 +120,9 @@ class Anticheat:
             return
 
 if __name__ == '__main__':
-    anticheat = Anticheat(argparser.parse_args())
-    anticheat.run()
+    args = argparser.parse_args()
+    if(args.version):
+        print("Circleguard {}".format(VERSION))
+        sys.exit(0)
+    circleguard = Circleguard(args)
+    circleguard.run()

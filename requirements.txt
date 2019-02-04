@@ -1,5 +1,5 @@
 numpy>=1.16.0
 matplotlib>=3.0.2
 requests>=2.21.0
-https://github.com/osu-anticheat/osu-replay-parser/archive/master.zip
-https://github.com/osu-anticheat/wtc-lzma-compressor/archive/master.zip
+https://github.com/circleguard/osu-replay-parser/archive/v3.1.0.zip
+https://github.com/circleguard/wtc-lzma-compressor/archive/v1.1.1.zip

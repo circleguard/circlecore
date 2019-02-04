@@ -3,11 +3,11 @@ from tkinter import ttk, Tk, N, W, E, S, StringVar, TclError
 from types import SimpleNamespace
 import threading
 
-from anticheat import Anticheat
+from circleguard import Circleguard
 
 def run():
     """
-    Runs the anticheat with the options given in the gui.
+    Runs the circleguard with the options given in the gui.
     """
 
     _map_id = map_id.get()
@@ -19,22 +19,21 @@ def run():
 
     _number = num.get()
     _cache = cache.get()
-    _single = single.get()
-    _silent = silent.get()
+    _silent = True # Visualizations do very very bad things when not called from the main thread, so when using gui, we just...force ignore them
+    _verify = verify.get()
 
+    def run_circleguard():
+        circleguard = Circleguard(SimpleNamespace(map_id=_map_id, user_id=_user_id, local=_local, threshold=_threshold, stddevs=_stddevs,
+                                              number=_number, cache=_cache, silent=_silent, verify=_verify))
+        circleguard.run()
 
-    def run_anticheat():
-        anticheat = Anticheat(SimpleNamespace(map_id=_map_id, user_id=_user_id, local=_local, threshold=_threshold, stddevs=_stddevs,
-                                              number=_number, cache=_cache, single=_single, silent=_silent))
-        anticheat.run()
-
-    thread = threading.Thread(target=run_anticheat)
+    thread = threading.Thread(target=run_circleguard)
     thread.start()
 
 
 # Root and Frames configuration
 root = Tk()
-root.title("Osu Anticheat")
+root.title("Circleguard")
 root.columnconfigure(0, weight=1)
 root.rowconfigure(0, weight=1)
 # houses user input boxes and run button
@@ -56,8 +55,7 @@ num = tkinter.IntVar(value=50)
 cache = tkinter.BooleanVar(value=False)
 
 # unimplemented
-single = tkinter.BooleanVar(value=False)
-silent = tkinter.BooleanVar(value=False)
+verify = tkinter.BooleanVar(value=False)
 
 # Make visual elements for main frame
 map_label = ttk.Label(main, text="Map id:")
@@ -98,7 +96,7 @@ top_plays_label1 = ttk.Label(top_x_plays, text="Compare to top")
 top_plays_label1.grid(row=0, column=1)
 top_plays_entry = ttk.Entry(top_x_plays, width=4, textvariable=num)
 top_plays_entry.grid(row=0, column=2)
-top_plays_label2 = ttk.Label(top_x_plays, text="leaderboard plays?\n(Between 1 and 100 inclusive)")
+top_plays_label2 = ttk.Label(top_x_plays, text="leaderboard plays?\n(Between 2 and 100 inclusive)")
 top_plays_label2.grid(row=0, column=3)
 
 auto_threshold = ttk.Frame(options)
