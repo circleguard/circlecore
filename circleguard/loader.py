@@ -8,7 +8,7 @@ from requests import RequestException
 
 from enums import Error
 from config import API_SCORES_ALL, API_SCORES_USER, API_REPLAY
-from exceptions import InvalidArgumentsException, APIException, CircleguardException, RatelimitException, InvalidKeyException
+from exceptions import InvalidArgumentsException, APIException, CircleguardException, RatelimitException, InvalidKeyException, ReplayUnavailableException
 
 def request(function):
     """
@@ -31,6 +31,9 @@ def request(function):
             print("Request exception: {}. Sleeping for 10 seconds".format(e))
             time.sleep(10)
             ret = request(function)(*args, **kwargs)
+        except ReplayUnavailableException as e:
+            print(str(e))
+            ret = None
         return ret
     return wrapper
 
