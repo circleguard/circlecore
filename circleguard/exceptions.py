@@ -1,5 +1,5 @@
 class CircleguardException(Exception):
-    """Base class for exceptions in the anticheat program."""
+    """Base class for exceptions in the circleguard program."""
 
 class InvalidArgumentsException(CircleguardException):
     """Indicates an invalid argument was passed to one of the flags."""
