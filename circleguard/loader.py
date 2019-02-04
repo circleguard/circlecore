@@ -5,7 +5,7 @@ import base64
 
 from enums import Error
 from config import API_SCORES_ALL, API_SCORES_USER, API_REPLAY
-from exceptions import CircleguardException, InvalidArgumentsException, APIException
+from exceptions import InvalidArgumentsException, APIException, AnticheatException
 
 def api(function):
     """
@@ -43,7 +43,7 @@ class Loader():
         This class should never be instantiated. All methods are static.
         """
 
-        raise CircleguardException("This class is not meant to be instantiated. Use the static methods instead.")
+        raise AnticheatException("This class is not meant to be instantiated. Use the static methods instead.")
 
     @staticmethod
     @api
@@ -90,7 +90,7 @@ class Loader():
 
     @staticmethod
     @api
-    def replay_data(map_id, user_id):
+    def replay_data(map_id, user_id, received, total):
         """
         Queries the api for replay data from the given user on the given map.
 
@@ -116,8 +116,8 @@ class Loader():
             print("Replay retrieval failed for user {} on map {}, skipping".format(user_id, map_id))
             return None
         elif(error == Error.RATELIMITED):
-            Loader.enforce_ratelimit()
-            return Loader.replay_data(map_id, user_id)
+            Loader.enforce_ratelimit(received, total)
+            return Loader.replay_data(map_id, user_id, received, total)
         elif(error == Error.UNKOWN):
             raise APIException("unkown error when requesting replay by {} on map {}. Please lodge an issue with the devs immediately".format(user_id, map_id))
 
@@ -147,7 +147,7 @@ class Loader():
             return False
 
     @staticmethod
-    def enforce_ratelimit():
+    def enforce_ratelimit(received, total):
         """
         Enforces the ratelimit by sleeping the thread until it's safe to make requests again.
         """
@@ -159,5 +159,5 @@ class Loader():
 
         # sleep the remainder of the reset cycle so we guarantee it's been that long since the first request
         sleep_seconds = Loader.RATELIMIT_RESET - seconds_passed
-        print("Ratelimited. Sleeping for {} seconds".format(sleep_seconds))
+        print(f"Ratelimited. Sleeping for {sleep_seconds} seconds. {received} out of {total} maps already received. ETA : {int((total-received)/10)} min")
         time.sleep(sleep_seconds)
