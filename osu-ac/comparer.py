@@ -1,4 +1,5 @@
 import itertools
+import sys
 
 import numpy as np
 import math
@@ -73,7 +74,7 @@ class Comparer:
             raise InvalidArgumentsException("`mode` must be one of 'double' or 'single'")
 
         tenth = round(total / 10) if total >= 4 else 1
-        print("Starting a total of {:d} combinations".format(total))
+        print("Starting {:d} combinations".format(total))
         # automatically determine threshold based on standard deviations of similarities if stddevs is set
         if(self.stddevs):
             results = {}
@@ -82,9 +83,11 @@ class Comparer:
                     continue
                 result = Comparer._compare_two_replays(replay1, replay2)
                 results[(replay1, replay2)] = result
-                if(done != 1 and done % tenth == 0):
-                    print("Done {0:.0f}% of combinations".format(math.ceil(done / total * 10) * 10))
-
+                if(done == 1):
+                    print("Done ", end="")
+                elif(done % tenth == 0):
+                    print("{0:.0f}%..".format(math.ceil(done / total * 10) * 10), end="")
+                    sys.stdout.flush()
             similarities = [result[0] for result in results.values()]
 
             mu, sigma = np.mean(similarities), np.std(similarities)
@@ -102,8 +105,11 @@ class Comparer:
                     continue
                 result = Comparer._compare_two_replays(replay1, replay2)
                 self._print_result(result, replay1, replay2)
-                if(done != 1 and done % tenth == 0):
-                    print("Done {0:.0f}% of combinations".format(math.ceil(done / total * 10) * 10))
+                if(done == 1):
+                    print("Done ", end="")
+                elif(done % tenth == 0):
+                    print("{0:.0f}%..".format(math.ceil(done / total * 10) * 10), end="")
+                    sys.stdout.flush()
 
 
 
