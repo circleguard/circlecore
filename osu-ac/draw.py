@@ -74,8 +74,8 @@ class Draw():
             plot2 = plt.plot('', '', "blue", animated=True, label=self.replay2.player_name)[0]
 
             fig.legend()
-			animation = animation.FuncAnimation(fig, update, frames=len(data1[0]), init_func=init, blit=True, interval=1)
-        	init()
+            animation = animation.FuncAnimation(fig, update, frames=len(data1[0]), init_func=init, blit=True, interval=1)
+            init()
             return
 
         def init():
@@ -94,7 +94,7 @@ class Draw():
         
         plt.show(block=True)
         plt.close('all')  # Maybe unnecessary
-if input("Do you want to save the video? WARNING, this may take a while ")[0] == "y":
+        if input("Do you want to save the video? WARNING, this may take a while ")[0] == "y":
             print("started saving video")
             setup()
 
