@@ -113,7 +113,7 @@ class Comparer:
 
 
 
-        print("done comparing")
+        print("\ndone comparing")
 
     def check_names(self, player1, player2):
         """
