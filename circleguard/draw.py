@@ -4,7 +4,7 @@ if(matplotlib.get_backend() == "MacOSX"):
     matplotlib.use("TkAgg")
 import matplotlib.pyplot as plt
 import itertools as itr
-import matplotlib.animation as mk_animation
+import matplotlib.animation
 from replay import Replay
 
 class Draw():
@@ -17,16 +17,16 @@ class Draw():
     """
 
     def __init__(self, replay1, replay2):
-            """
-            Initializes a Draw instance.
+        """
+        Initializes a Draw instance.
 
-            Args:
-                Replay replay1: The first replay to draw.
-                Replay replay2: The second replay to draw.
-            """
+        Args:
+            Replay replay1: The first replay to draw.
+            Replay replay2: The second replay to draw.
+        """
 
-            self.replay1 = replay1
-            self.replay2 = replay2
+        self.replay1 = replay1
+        self.replay2 = replay2
 
     def run(self):
         """
@@ -66,6 +66,7 @@ class Draw():
 
         def setup():
             global plot1, plot2, fig, ax, animation
+
             # create plot for each replay and add legend with player names
             fig, ax = plt.subplots()
 
@@ -73,7 +74,7 @@ class Draw():
             plot2 = plt.plot('', '', "blue", animated=True, label=self.replay2.player_name)[0]
 
             fig.legend()
-            animation = mk_animation.FuncAnimation(fig, update, frames=len(data1[0]), init_func=init, blit=True, interval=1)
+            animation = animation.FuncAnimation(fig, update, frames=len(data1[0]), init_func=init, blit=True, interval=1)
             init()
             return
 
@@ -85,21 +86,22 @@ class Draw():
         def update(i):
             plot1.set_data(data1[0][i - 100:i], data1[1][i - 100:i])
             plot2.set_data(data2[0][i - 100:i], data2[1][i - 100:i])
+            if i != 0 and i % int((total/10)) == 0:
+                print(f"Saved {round(100 * float(i)/float(total))}% of the video")
             return plot1, plot2
 
         setup()
-
+        
         plt.show(block=True)
         plt.close('all')  # Maybe unnecessary
-        answer = input("Do you want to save the video? WARNING, this may take a while ")
-        if (answer and answer[0].lower().strip() == "y"):
+        if input("Do you want to save the video? WARNING, this may take a while ")[0] == "y":
             print("started saving video")
             setup()
 
             writer = mk_animation.writers['ffmpeg']
-            writer = writer(fps=60, metadata=dict(artist='Me'), bitrate=256, )
+            writer = Writer(fps=60, metadata=dict(artist='Me'), bitrate=1800, )
 
-            file_name = f'{self.replay1.player_name} vs {self.replay2.player_name}.mp4'
+            file_name = f'{self.replay1.player_name[0]} vs {self.replay1.player_name[0]}.mp4'
             animation.save(file_name, writer=writer)
 
             print(f"Saved Video as {file_name}")
