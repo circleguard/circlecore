@@ -86,8 +86,7 @@ class Comparer:
                 if(done == 1):
                     print("Done ", end="")
                 elif(done % tenth == 0):
-                    print("{0:.0f}%..".format(math.ceil(done / total * 10) * 10), end="")
-                    sys.stdout.flush()
+                    print("{0:.0f}%..".format(math.ceil(done / total * 10) * 10), end="", flush=True)
             similarities = [result[0] for result in results.values()]
 
             mu, sigma = np.mean(similarities), np.std(similarities)
@@ -108,8 +107,7 @@ class Comparer:
                 if(done == 1):
                     print("Done ", end="")
                 elif(done % tenth == 0):
-                    print("{0:.0f}%..".format(math.ceil(done / total * 10) * 10), end="")
-                    sys.stdout.flush()
+                    print("{0:.0f}%..".format(math.ceil(done / total * 10) * 10), end="", flush=True)
 
 
 
@@ -148,7 +146,7 @@ class Comparer:
         if(replay1.replay_id and replay2.replay_id):
             last_score = replay1.player_name if(replay1.replay_id > replay2.replay_id) else replay2.player_name
 
-        print("{:.1f} similarity, {:.1f} std deviation ({} vs {}{})"
+        print("\n{:.1f} similarity, {:.1f} std deviation ({} vs {}{})"
               .format(mean, sigma, replay1.player_name, replay2.player_name, " - {} set later".format(last_score) if last_score else ""))
 
         if(self.silent):
