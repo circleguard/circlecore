@@ -43,6 +43,7 @@ def check_cache(function):
     """
 
     def wrapper(*args, **kwargs):
+        self = args[0]
         cacher = args[1]
         map_id = args[2]
         user_id = args[3]
@@ -51,6 +52,7 @@ def check_cache(function):
         lzma = cacher.check_cache(map_id, user_id)
         if(lzma):
             replay_data = osrparse.parse_replay(lzma, pure_lzma=True).play_data
+            self.loaded += 1
             return OnlineReplay(replay_data, user_id, enabled_mods, replay_id=replay_id)
         else:
             return function(*args, **kwargs)
@@ -234,5 +236,5 @@ class Loader():
         # sleep the remainder of the reset cycle so we guarantee it's been that long since the first request
         sleep_seconds = Loader.RATELIMIT_RESET - seconds_passed
         print(f"Ratelimited, sleeping for {sleep_seconds} seconds. "
-              f"{self.loaded} out of {self.total} maps already downloaded. ETA ~ {int((self.total-self.loaded)/10)+1} min")
+              f"{self.loaded} out of {self.total} maps loaded. ETA ~ {int((self.total-self.loaded)/10)+1} min")
         time.sleep(sleep_seconds)
