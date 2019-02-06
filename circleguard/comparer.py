@@ -35,7 +35,7 @@ class Comparer:
             Boolean silent: If true, visualization prompts will be ignored and only results will be printed.
             List replays1: A list of Replay instances to compare against replays2.
             List replays2: A list of Replay instances to be compared against. Optional, defaulting to None. No attempt to error check
-                           this is made - if a compare() call is made, the program will throw an AttributeError. Be sure to only call
+                           this is made - if a compare(mode="double") call is made, the program will throw an AttributeError. Be sure to only call
                            methods that involve the first set of replays.
             Float stddevs: If set, the threshold will be automatically set to this many standard deviations below the average similarity for the comparisons.
         """
