@@ -79,8 +79,6 @@ class Comparer:
         if(self.stddevs):
             results = {}
             for done, (replay1, replay2) in enumerate(iterator, 1):
-                if(self.check_names(replay1.player_name, replay2.player_name)):
-                    continue
                 result = Comparer._compare_two_replays(replay1, replay2)
                 results[(replay1, replay2)] = result
                 if(done == 1):
@@ -100,8 +98,6 @@ class Comparer:
         # else print normally
         else:
             for done, (replay1, replay2) in enumerate(iterator, 1):
-                if(self.check_names(replay1.player_name, replay2.player_name)):
-                    continue
                 result = Comparer._compare_two_replays(replay1, replay2)
                 self._print_result(result, replay1, replay2)
                 if(done == 1):
@@ -109,20 +105,7 @@ class Comparer:
                 elif(done % tenth == 0):
                     print("{0:.0f}%..".format(math.ceil(done / total * 10) * 10), end="", flush=True)
 
-
-
         print("\ndone comparing")
-
-    def check_names(self, player1, player2):
-        """
-        Returns True if both players are in the whitelist or are the same name, False otherwise.
-
-        Args:
-            String player1: The name of the first player.
-            String player2: The name of the second player.
-        """
-
-        return ((player1 in WHITELIST and player2 in WHITELIST) or (player1 == player2))
 
     def _print_result(self, result, replay1, replay2):
         """
