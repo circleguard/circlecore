@@ -6,8 +6,8 @@ import math
 
 from draw import Draw
 from replay import Replay
-from config import WHITELIST
 from exceptions import InvalidArgumentsException
+
 class Comparer:
     """
     A class for managing a set of replay comparisons.
