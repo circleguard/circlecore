@@ -1,12 +1,11 @@
-import requests
 from datetime import datetime
 import time
 import base64
 import sys
 
 from requests import RequestException
-
 import osrparse
+import osuAPI
 
 from online_replay import OnlineReplay
 from enums import Error
@@ -98,13 +97,14 @@ class Loader():
     start_time = datetime.min # when we started our requests cycle
 
 
-    def __init__(self, total):
+    def __init__(self, total, key):
         """
         Initializes a Loader instance.
         """
 
         self.total = total
         self.loaded = 0
+        self.api = osuAPI.OsuAPI(key)
 
     @request
     @api
@@ -122,7 +122,7 @@ class Loader():
 
         if(num > 100 or num < 2):
             raise InvalidArgumentsException("The number of top plays to fetch must be between 2 and 100 inclusive!")
-        response = requests.get(API_SCORES_ALL.format(map_id, num)).json()
+        response = self.api.get_scores({"m": "0", "b": map_id, "limit": num})
         error = Loader.check_response(response)
         if(error):
             for error2 in Error:
@@ -143,7 +143,7 @@ class Loader():
             String user_id: The user id to get the replay_id from.
         """
 
-        response = requests.get(API_SCORES_USER.format(map_id, user_id)).json()
+        response = self.api.get_scores({"m": "0", "b": map_id, "u": user_id})
         error = Loader.check_response(response)
         if(error):
             for error2 in Error:
@@ -172,7 +172,7 @@ class Loader():
         """
 
         print("Requesting replay by {} on map {}".format(user_id, map_id))
-        response = requests.get(API_REPLAY.format(map_id, user_id)).json()
+        response = self.api.get_replay({"m": "0", "b": map_id, "u": user_id})
 
         error = Loader.check_response(response)
         if(error):
@@ -263,5 +263,5 @@ class Loader():
         # sleep the remainder of the reset cycle so we guarantee it's been that long since the first request
         sleep_seconds = Loader.RATELIMIT_RESET - seconds_passed
         print(f"Ratelimited, sleeping for {sleep_seconds} seconds. "
-              f"{self.loaded} of {self.total} maps downloaded. ETA ~ {int((self.total-self.loaded)/10)+1} min")
+              f"{self.loaded} of {self.total} maps loaded. ETA ~ {int((self.total-self.loaded)/10)+1} min")
         time.sleep(sleep_seconds)

@@ -6,8 +6,8 @@ import math
 
 from draw import Draw
 from replay import Replay
-from config import WHITELIST
 from exceptions import InvalidArgumentsException
+
 class Comparer:
     """
     A class for managing a set of replay comparisons.
@@ -35,7 +35,7 @@ class Comparer:
             Boolean silent: If true, visualization prompts will be ignored and only results will be printed.
             List replays1: A list of Replay instances to compare against replays2.
             List replays2: A list of Replay instances to be compared against. Optional, defaulting to None. No attempt to error check
-                           this is made - if a compare() call is made, the program will throw an AttributeError. Be sure to only call
+                           this is made - if a compare(mode="double") call is made, the program will throw an AttributeError. Be sure to only call
                            methods that involve the first set of replays.
             Float stddevs: If set, the threshold will be automatically set to this many standard deviations below the average similarity for the comparisons.
         """
@@ -79,15 +79,12 @@ class Comparer:
         if(self.stddevs):
             results = {}
             for done, (replay1, replay2) in enumerate(iterator, 1):
-                if(self.check_names(replay1.player_name, replay2.player_name)):
-                    continue
                 result = Comparer._compare_two_replays(replay1, replay2)
                 results[(replay1, replay2)] = result
                 if(done == 1):
                     print("Done ", end="")
                 elif(done % tenth == 0):
-                    print("{0:.0f}%..".format(math.ceil(done / total * 10) * 10), end="")
-                    sys.stdout.flush()
+                    print("{0:.0f}%..".format(math.ceil(done / total * 10) * 10), end="", flush=True)
             similarities = [result[0] for result in results.values()]
 
             mu, sigma = np.mean(similarities), np.std(similarities)
@@ -101,30 +98,14 @@ class Comparer:
         # else print normally
         else:
             for done, (replay1, replay2) in enumerate(iterator, 1):
-                if(self.check_names(replay1.player_name, replay2.player_name)):
-                    continue
                 result = Comparer._compare_two_replays(replay1, replay2)
                 self._print_result(result, replay1, replay2)
                 if(done == 1):
                     print("Done ", end="")
                 elif(done % tenth == 0):
-                    print("{0:.0f}%..".format(math.ceil(done / total * 10) * 10), end="")
-                    sys.stdout.flush()
-
-
+                    print("{0:.0f}%..".format(math.ceil(done / total * 10) * 10), end="", flush=True)
 
         print("\ndone comparing")
-
-    def check_names(self, player1, player2):
-        """
-        Returns True if both players are in the whitelist or are the same name, False otherwise.
-
-        Args:
-            String player1: The name of the first player.
-            String player2: The name of the second player.
-        """
-
-        return ((player1 in WHITELIST and player2 in WHITELIST) or (player1 == player2))
 
     def _print_result(self, result, replay1, replay2):
         """
@@ -148,7 +129,7 @@ class Comparer:
         if(replay1.replay_id and replay2.replay_id):
             last_score = replay1.player_name if(replay1.replay_id > replay2.replay_id) else replay2.player_name
 
-        print("{:.1f} similarity, {:.1f} std deviation ({} vs {}{})"
+        print("\n{:.1f} similarity, {:.1f} std deviation ({} vs {}{})"
               .format(mean, sigma, replay1.player_name, replay2.player_name, " - {} set later".format(last_score) if last_score else ""))
 
         if(self.silent):
