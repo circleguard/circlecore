@@ -9,7 +9,35 @@ import osuAPI
 
 from online_replay import OnlineReplay
 from enums import Error
-from exceptions import InvalidArgumentsException, APIException
+from config import API_SCORES_ALL, API_SCORES_USER, API_REPLAY
+from exceptions import InvalidArgumentsException, APIException, CircleguardException, RatelimitException, InvalidKeyException, ReplayUnavailableException
+
+def request(function):
+    """
+    Decorator intended to appropriately handle all request and api related exceptions.
+    """
+
+    def wrapper(*args, **kwargs):
+        # catch them exceptions boy
+        ret = None
+        try:
+            ret = function(*args, **kwargs)
+        except RatelimitException:
+            args[0].enforce_ratelimit()
+            # wrap function with the decorator then call decorator
+            ret = request(function)(*args, **kwargs)
+        except InvalidKeyException as e:
+            print(str(e))
+            sys.exit(0)
+        except RequestException as e:
+            print("Request exception: {}. Sleeping for 5 seconds then retrying".format(e))
+            time.sleep(5)
+            ret = request(function)(*args, **kwargs)
+        except ReplayUnavailableException as e:
+            print(str(e))
+            ret = None
+        return ret
+    return wrapper
 
 def api(function):
     """
@@ -23,7 +51,6 @@ def api(function):
         difference = datetime.now() - Loader.start_time
         if(difference.seconds > Loader.RATELIMIT_RESET):
             Loader.start_time = datetime.now()
-
         return function(*args, **kwargs)
     return wrapper
 
@@ -79,6 +106,7 @@ class Loader():
         self.loaded = 0
         self.api = osuAPI.OsuAPI(key)
 
+    @request
     @api
     def users_info(self, map_id, num):
         """
@@ -95,13 +123,16 @@ class Loader():
         if(num > 100 or num < 2):
             raise InvalidArgumentsException("The number of top plays to fetch must be between 2 and 100 inclusive!")
         response = self.api.get_scores({"m": "0", "b": map_id, "limit": num})
-        if(Loader.check_response(response)):
-            self.enforce_ratelimit()
-            return self.users_info(map_id, num)
+        error = Loader.check_response(response)
+        if(error):
+            for error2 in Error:
+                if(error == error2):
+                    raise error.value[1](error.value[2])
 
         info = {x["user_id"]: [x["username"], x["score_id"], int(x["enabled_mods"])] for x in response} # map user id to username, score id and mod bit
         return info
 
+    @request
     @api
     def user_info(self, map_id, user_id):
         """
@@ -113,13 +144,17 @@ class Loader():
         """
 
         response = self.api.get_scores({"m": "0", "b": map_id, "u": user_id})
-        if(Loader.check_response(response)):
-            self.enforce_ratelimit()
-            return self.user_info(map_id, user_id)
+        error = Loader.check_response(response)
+        if(error):
+            for error2 in Error:
+                if(error == error2):
+                    raise error.value[1](error.value[2])
+
         info = {x["user_id"]: [x["username"], x["score_id"], int(x["enabled_mods"])] for x in response} # map user id to username, score id and mod bit,
                                                                                                         # should only be one response
         return info
 
+    @request
     @api
     def replay_data(self, map_id, user_id):
         """
@@ -140,17 +175,10 @@ class Loader():
         response = self.api.get_replay({"m": "0", "b": map_id, "u": user_id})
 
         error = Loader.check_response(response)
-        if(error == Error.NO_REPLAY):
-            print("Could not find any replay data for user {} on map {}, skipping".format(user_id, map_id))
-            return None
-        elif(error == Error.RETRIEVAL_FAILED):
-            print("Replay retrieval failed for user {} on map {}, skipping".format(user_id, map_id))
-            return None
-        elif(error == Error.RATELIMITED):
-            self.enforce_ratelimit()
-            return self.replay_data(map_id, user_id)
-        elif(error == Error.UNKOWN):
-            raise APIException("unkown error when requesting replay by {} on map {}. Please lodge an issue with the devs immediately".format(user_id, map_id))
+        if(error):
+            for error2 in Error:
+                if(error == error2):
+                    raise error.value[1](error.value[2])
 
         self.loaded += 1
 
@@ -235,5 +263,5 @@ class Loader():
         # sleep the remainder of the reset cycle so we guarantee it's been that long since the first request
         sleep_seconds = Loader.RATELIMIT_RESET - seconds_passed
         print(f"Ratelimited, sleeping for {sleep_seconds} seconds. "
-              f"{self.loaded} out of {self.total} maps loaded. ETA ~ {int((self.total-self.loaded)/10)+1} min")
+              f"{self.loaded} of {self.total} maps loaded. ETA ~ {int((self.total-self.loaded)/10)+1} min")
         time.sleep(sleep_seconds)
