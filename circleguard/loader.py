@@ -24,7 +24,7 @@ def request(function):
         try:
             ret = function(*args, **kwargs)
         except RatelimitException:
-            Loader.enforce_ratelimit()
+            args[0].enforce_ratelimit()
             # wrap function with the decorator then call decorator
             ret = request(function)(*args, **kwargs)
         except InvalidKeyException as e:
@@ -52,7 +52,6 @@ def api(function):
         difference = datetime.now() - Loader.start_time
         if(difference.seconds > Loader.RATELIMIT_RESET):
             Loader.start_time = datetime.now()
-
         return function(*args, **kwargs)
     return wrapper
 
@@ -107,7 +106,6 @@ class Loader():
         self.total = total
         self.loaded = 0
 
-    @staticmethod
     @request
     @api
     def users_info(self, map_id, num):
@@ -134,7 +132,6 @@ class Loader():
         info = {x["user_id"]: [x["username"], x["score_id"], int(x["enabled_mods"])] for x in response} # map user id to username, score id and mod bit
         return info
 
-    @staticmethod
     @request
     @api
     def user_info(self, map_id, user_id):
@@ -157,7 +154,6 @@ class Loader():
                                                                                                         # should only be one response
         return info
 
-    @staticmethod
     @request
     @api
     def replay_data(self, map_id, user_id):
@@ -267,5 +263,5 @@ class Loader():
         # sleep the remainder of the reset cycle so we guarantee it's been that long since the first request
         sleep_seconds = Loader.RATELIMIT_RESET - seconds_passed
         print(f"Ratelimited, sleeping for {sleep_seconds} seconds. "
-              f"{self.loaded} out of {self.total} maps already downloaded. ETA ~ {int((self.total-self.loaded)/10)+1} min")
+              f"{self.loaded} of {self.total} maps downloaded. ETA ~ {int((self.total-self.loaded)/10)+1} min")
         time.sleep(sleep_seconds)
