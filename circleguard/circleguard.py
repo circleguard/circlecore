@@ -20,7 +20,7 @@ from online_replay import OnlineReplay
 from comparer import Comparer
 from investigator import Investigator
 from cacher import Cacher
-from config import PATH_REPLAYS_STUB, VERSION
+from config import PATH_REPLAYS_STUB, VERSION, API_KEY
 
 class Circleguard:
 
@@ -37,7 +37,7 @@ class Circleguard:
         self.PATH_REPLAYS = [join(PATH_REPLAYS_STUB, f) for f in os.listdir(PATH_REPLAYS_STUB) if isfile(join(PATH_REPLAYS_STUB, f)) and f != ".DS_Store"]
 
         self.cacher = Cacher(args.cache)
-        self.loader = Loader(args.number)
+        self.loader = Loader(args.number, API_KEY)
         self.args = args
         if(args.map_id):
             self.users_info = self.loader.users_info(args.map_id, args.number)

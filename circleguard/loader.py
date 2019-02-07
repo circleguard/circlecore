@@ -1,16 +1,14 @@
-import requests
 from datetime import datetime
 import time
 import base64
 import sys
 
 from requests import RequestException
-
 import osrparse
+import osuAPI
 
 from online_replay import OnlineReplay
 from enums import Error
-from config import API_SCORES_ALL, API_SCORES_USER, API_REPLAY
 from exceptions import InvalidArgumentsException, APIException
 
 def api(function):
@@ -72,13 +70,14 @@ class Loader():
     start_time = datetime.min # when we started our requests cycle
 
 
-    def __init__(self, total):
+    def __init__(self, total, key):
         """
         Initializes a Loader instance.
         """
 
         self.total = total
         self.loaded = 0
+        self.api = osuAPI.OsuAPI(key)
 
     @api
     def users_info(self, map_id, num):
@@ -95,10 +94,10 @@ class Loader():
 
         if(num > 100 or num < 2):
             raise InvalidArgumentsException("The number of top plays to fetch must be between 2 and 100 inclusive!")
-        response = requests.get(API_SCORES_ALL.format(map_id, num)).json()
+        response = self.api.get_scores({"m": "0", "b": map_id, "limit": num})
         if(Loader.check_response(response)):
             self.enforce_ratelimit()
-            return self.users_info(map_id, num=num)
+            return self.users_info(map_id, num)
 
         info = {x["user_id"]: [x["username"], x["score_id"], int(x["enabled_mods"])] for x in response} # map user id to username, score id and mod bit
         return info
@@ -113,7 +112,7 @@ class Loader():
             String user_id: The user id to get the replay_id from.
         """
 
-        response = requests.get(API_SCORES_USER.format(map_id, user_id)).json()
+        response = self.api.get_scores({"m": "0", "b": map_id, "u": user_id})
         if(Loader.check_response(response)):
             self.enforce_ratelimit()
             return self.user_info(map_id, user_id)
@@ -138,7 +137,7 @@ class Loader():
         """
 
         print("Requesting replay by {} on map {}".format(user_id, map_id))
-        response = requests.get(API_REPLAY.format(map_id, user_id)).json()
+        response = self.api.get_replay({"m": "0", "b": map_id, "u": user_id})
 
         error = Loader.check_response(response)
         if(error == Error.NO_REPLAY):
