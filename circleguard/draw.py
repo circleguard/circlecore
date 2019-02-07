@@ -79,8 +79,14 @@ class Draw():
             plot1.set_data(data1[0][i - 100:i], data1[1][i - 100:i])
             plot2.set_data(data2[0][i - 100:i], data2[1][i - 100:i])
             return plot1, plot2
+        try:
+            animation = FuncAnimation(fig, update, frames=itr.count(100), init_func=init, blit=True, interval=dt)
+        except:
+            # if you close the window sometimes it's in the middle of updating and prints an annoying string to the console as an error -
+            # invalid command name "4584907080_on_timer"... and matplotlib errors are either awful and hidden or I'm blind so here's a blankey
+            # try/except
+            pass
 
-        animation = FuncAnimation(fig, update, frames=itr.count(100), init_func=init, blit=True, interval=dt)
         plt.show(block=True)
 
         # keep a reference to this otherwise it will get garbage collected instantly and not play.
