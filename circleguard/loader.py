@@ -6,6 +6,9 @@ import sys
 
 from requests import RequestException
 
+import osrparse
+
+from online_replay import OnlineReplay
 from enums import Error
 from config import API_SCORES_ALL, API_SCORES_USER, API_REPLAY
 from exceptions import InvalidArgumentsException, APIException, CircleguardException, RatelimitException, InvalidKeyException, ReplayUnavailableException
@@ -29,7 +32,7 @@ def request(function):
             sys.exit(0)
         except RequestException as e:
             print("Request exception: {}. Sleeping for 5 seconds then retrying".format(e))
-            time.sleep(10)
+            time.sleep(5)
             ret = request(function)(*args, **kwargs)
         except ReplayUnavailableException as e:
             print(str(e))
@@ -54,6 +57,34 @@ def api(function):
     return wrapper
 
 
+def check_cache(function):
+    """
+    Decorator that checks if the replay by the given user_id on the given map_id is already cached.
+    If so, returns a Replay instance from the cached string instead of requesting it from the api.
+
+    Note that cacher, map_id, user_id, replay_id, and enabled_mods must be the first, second, third, fifth, and sixth arguments to the function respectively.
+    (ignoring the self argument)
+
+    Returns:
+        A Replay instance from the cached replay if it was cached, or the return value of the function if not.
+    """
+
+    def wrapper(*args, **kwargs):
+        self = args[0]
+        cacher = args[1]
+        map_id = args[2]
+        user_id = args[3]
+        replay_id = args[5]
+        enabled_mods = args[6]
+        lzma = cacher.check_cache(map_id, user_id)
+        if(lzma):
+            replay_data = osrparse.parse_replay(lzma, pure_lzma=True).play_data
+            self.loaded += 1
+            return OnlineReplay(replay_data, user_id, enabled_mods, replay_id=replay_id)
+        else:
+            return function(*args, **kwargs)
+    return wrapper
+
 class Loader():
     """
     Manages interactions with the osu api - if the api ratelimits the key we wait until we refresh our ratelimits
@@ -68,17 +99,18 @@ class Loader():
     start_time = datetime.min # when we started our requests cycle
 
 
-    def __init__(self):
+    def __init__(self, total):
         """
-        This class should never be instantiated. All methods are static.
+        Initializes a Loader instance.
         """
 
-        raise CircleguardException("This class is not meant to be instantiated. Use the static methods instead.")
+        self.total = total
+        self.loaded = 0
 
     @staticmethod
     @request
     @api
-    def users_info(map_id, num=50):
+    def users_info(self, map_id, num):
         """
         Returns a dict mapping each user_id to a list containing [username, replay_id, enabled mods]
         for the top given number of replays on the given map.
@@ -87,7 +119,7 @@ class Loader():
 
         Args:
             String map_id: The map id to get a list of users from.
-            Integer num: The number of ids to fetch. Defaults to 50.
+            Integer num: The number of ids to fetch.
         """
 
         if(num > 100 or num < 2):
@@ -105,7 +137,7 @@ class Loader():
     @staticmethod
     @request
     @api
-    def user_info(map_id, user_id):
+    def user_info(self, map_id, user_id):
         """
         Returns a dict mapping a user_id to a list containing their [username, replay_id, enabled mods] on a given map.
 
@@ -128,7 +160,7 @@ class Loader():
     @staticmethod
     @request
     @api
-    def replay_data(map_id, user_id):
+    def replay_data(self, map_id, user_id):
         """
         Queries the api for replay data from the given user on the given map.
 
@@ -152,8 +184,54 @@ class Loader():
                 if(error == error2):
                     raise error.value[1](error.value[2])
 
+        self.loaded += 1
+
         return base64.b64decode(response["content"])
 
+
+    @api
+    def replay_from_user_info(self, cacher, map_id, user_info):
+        """
+        Creates a list of Replay instances for the users listed in user_info on the given map.
+
+        Args:
+            Cacher cacher: A cacher object containing a database connection.
+            String map_id: The map_id to download the replays from.
+            Dictionary user_info: A dict mapping user_ids to a list containing [username, replay_id, enabled mods] on the given map.
+                                  See Loader.users_info
+
+        Returns:
+            A list of Replay instances from the given information, with entries with no replay data available excluded.
+        """
+
+        replays = [self.replay_from_map(cacher, map_id, user_id, replay_info[0], replay_info[1], replay_info[2]) for user_id, replay_info in user_info.items()]
+        return replays
+
+    @api
+    @check_cache
+    def replay_from_map(self, cacher, map_id, user_id, username, replay_id, enabled_mods):
+        """
+        Creates an OnlineReplay instance from a replay by the given user on the given map.
+
+        Args:
+            Cacher cacher: A cacher object containing a database connection.
+            String map_id: The map_id to download the replay from.
+            String user_id: The user id to download the replay of.
+                            Also used as the username of the Replay.
+            String replay_id: The id of the replay we are retrieving (used to cache).
+            Integer enabled_mods: The base10 number representing the enabled mods
+
+        Returns:
+            The Replay instance created with the given information, or None if the replay was not available.
+        """
+
+        lzma_bytes = self.replay_data(map_id, user_id)
+        if(lzma_bytes is None):
+            return None
+        parsed_replay = osrparse.parse_replay(lzma_bytes, pure_lzma=True)
+        replay_data = parsed_replay.play_data
+        cacher.cache(map_id, user_id, lzma_bytes, replay_id)
+        return OnlineReplay(replay_data, username, enabled_mods, replay_id)
 
     @staticmethod
     def check_response(response):
@@ -176,8 +254,7 @@ class Loader():
         else:
             return False
 
-    @staticmethod
-    def enforce_ratelimit():
+    def enforce_ratelimit(self):
         """
         Enforces the ratelimit by sleeping the thread until it's safe to make requests again.
         """
@@ -189,5 +266,6 @@ class Loader():
 
         # sleep the remainder of the reset cycle so we guarantee it's been that long since the first request
         sleep_seconds = Loader.RATELIMIT_RESET - seconds_passed
-        print("Ratelimited. Sleeping for {} seconds".format(sleep_seconds))
+        print(f"Ratelimited, sleeping for {sleep_seconds} seconds. "
+              f"{self.loaded} out of {self.total} maps already downloaded. ETA ~ {int((self.total-self.loaded)/10)+1} min")
         time.sleep(sleep_seconds)

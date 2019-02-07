@@ -1,6 +1,8 @@
 import itertools
+import sys
 
 import numpy as np
+import math
 
 from draw import Draw
 from replay import Replay
@@ -64,21 +66,28 @@ class Comparer:
 
         if(mode == "double"):
             iterator = itertools.product(self.replays1, self.replays2)
+            total = sum(1 for i in itertools.product(self.replays1, self.replays2))
         elif (mode == "single"):
             iterator = itertools.combinations(self.replays1, 2)
+            total = sum(1 for i in itertools.combinations(self.replays1, 2))
         else:
             raise InvalidArgumentsException("`mode` must be one of 'double' or 'single'")
 
-        print("Starting to compare replays")
+        tenth = round(total / 10) if total >= 4 else 1
+        print("Starting {:d} combinations".format(total))
         # automatically determine threshold based on standard deviations of similarities if stddevs is set
         if(self.stddevs):
             results = {}
-            for replay1, replay2 in iterator:
+            for done, (replay1, replay2) in enumerate(iterator, 1):
                 if(self.check_names(replay1.player_name, replay2.player_name)):
                     continue
                 result = Comparer._compare_two_replays(replay1, replay2)
                 results[(replay1, replay2)] = result
-
+                if(done == 1):
+                    print("Done ", end="")
+                elif(done % tenth == 0):
+                    print("{0:.0f}%..".format(math.ceil(done / total * 10) * 10), end="")
+                    sys.stdout.flush()
             similarities = [result[0] for result in results.values()]
 
             mu, sigma = np.mean(similarities), np.std(similarities)
@@ -91,15 +100,20 @@ class Comparer:
                 self._print_result(results[key], key[0], key[1])
         # else print normally
         else:
-            for replay1, replay2 in iterator:
+            for done, (replay1, replay2) in enumerate(iterator, 1):
                 if(self.check_names(replay1.player_name, replay2.player_name)):
                     continue
                 result = Comparer._compare_two_replays(replay1, replay2)
                 self._print_result(result, replay1, replay2)
+                if(done == 1):
+                    print("Done ", end="")
+                elif(done % tenth == 0):
+                    print("{0:.0f}%..".format(math.ceil(done / total * 10) * 10), end="")
+                    sys.stdout.flush()
 
 
 
-        print("done comparing")
+        print("\ndone comparing")
 
     def check_names(self, player1, player2):
         """
