@@ -9,7 +9,6 @@ import osuAPI
 
 from online_replay import OnlineReplay
 from enums import Error
-from config import API_SCORES_ALL, API_SCORES_USER, API_REPLAY
 from exceptions import InvalidArgumentsException, APIException, CircleguardException, RatelimitException, InvalidKeyException, ReplayUnavailableException
 
 def request(function):

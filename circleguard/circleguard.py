@@ -20,7 +20,8 @@ from online_replay import OnlineReplay
 from comparer import Comparer
 from investigator import Investigator
 from cacher import Cacher
-from config import PATH_REPLAYS_STUB, VERSION, API_KEY
+from config import PATH_REPLAYS_STUB, VERSION
+from secret import API_KEY
 
 class Circleguard:
 
