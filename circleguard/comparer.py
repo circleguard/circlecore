@@ -66,10 +66,10 @@ class Comparer:
 
         if(mode == "double"):
             iterator = itertools.product(self.replays1, self.replays2)
-            total = sum(1 for i in itertools.product(self.replays1, self.replays2))
+            total = len(self.replays1) * len(self.replays2)
         elif (mode == "single"):
             iterator = itertools.combinations(self.replays1, 2)
-            total = sum(1 for i in itertools.combinations(self.replays1, 2))
+            total = len(self.replays1) * (len(self.replays1) - 1) // 2
         else:
             raise InvalidArgumentsException("`mode` must be one of 'double' or 'single'")
 
