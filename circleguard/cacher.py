@@ -52,7 +52,7 @@ class Cacher:
         else: # else just insert
             self.write("INSERT INTO replays VALUES(?, ?, ?, ?)", [map_id, user_id, compressed_bytes, replay_id])
 
-    def revalidate(self, map_id, user_info):
+    def revalidate(self, map_id, user_info, loader):
         """
         Re-caches a stored replay if one of the given users has overwritten their score on the given map since it was cached.
 
@@ -60,6 +60,7 @@ class Cacher:
             String map_id: The map to revalidate.
             Dictionary user_info: The up to date mapping of user_id to [username, replay_id, enabled_mods] to revalidate.
                                        Only contains information for a single map.
+            Loader loader: The Loader from the circleguard instance to redownload beatmaps with if they are outdated.
         """
 
         result = self.cursor.execute("SELECT user_id, replay_id FROM replays WHERE map_id=?", [map_id]).fetchall()
@@ -69,11 +70,11 @@ class Cacher:
         for user_id, local_replay_id in result:
             online_replay_id = user_info[user_id][1]
             if(local_replay_id != online_replay_id): # local (outdated) id does not match online (updated) id
-                print("replay outdated, redownloading...", end="")
+                print("replay by {} on {} outdated, redownloading...".format(user_id, map_id), end="")
                 # this **could** conceivable be the source of a logic error by Loader.replay_data returning None and the cache storing None,
                 # but since we only re-cache when we already stored a replay by them their future replay shouldn't ever be unavailable.
                 # We don't even know why some replays are unavailable though, so it's possible.
-                self.cache(map_id, user_id, Loader.replay_data(map_id, user_id), online_replay_id)
+                self.cache(map_id, user_id, loader.replay_data(map_id, user_id), online_replay_id)
                 print("cached")
 
     def check_cache(self, map_id, user_id):
