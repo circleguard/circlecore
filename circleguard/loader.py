@@ -183,6 +183,32 @@ class Loader():
 
         return base64.b64decode(response["content"])
 
+    @request
+    @api
+    def get_user_best(self, user_id):
+        """
+        Gets the top 100 best performance plays for the given user.
+
+        Args:
+            String user_id: The user id to get best performances of
+
+        Returns:
+            The JSON containing the information of the best performances
+
+        Raises:
+            APIException if the api responds with an error we don't know.
+        """
+
+        print("Requesting top scores of {}".format(user_id))
+        response = self.api.get_user_best({"m": "0", "u": user_id, "limit": 100})
+
+        error = Loader.check_response(response)
+        if(error):
+            for error2 in Error:
+                if(error == error2):
+                    raise error.value[1](error.value[2])
+
+        return response
 
     @api
     def replay_from_user_info(self, cacher, map_id, user_info):
