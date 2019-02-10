@@ -1,3 +1,5 @@
+from comparer import Comparer
+
 class Screener:
     """
     A class for screening a single player's history.
@@ -13,34 +15,44 @@ class Screener:
         Comparer
     """
     
-    def __init__(self, loader, user_id, threshold, silent, stddevs=None):
+    def __init__(self, cacher, loader, args):
         """
         Initializes a Screener instance.
 
         Args:
+            Cacher cacher: The cacher cached replays are loaded from.
             Loader loader: The loader all api requests are handled with.
-            Integer user_id: The user to screen.
-            Integer threshold: See Comparer
-            Boolean silent: See Comparer
-            Float stddev: See Comparer
+            Args args: The arguments to run the screening with.
         """
-        
+
+        self.cacher = cacher
         self.loader = loader
-        self.user_id = user_id
-        self.threshold = threshold
-        self.silent = silent
-        self.stddevs = stddevs
+        self.args = args
 
     def screen(self):
         """
         Starts the screening.
         """
 
-        best = self.loader.get_user_best(self.user_id)
+        args = self.args
 
-        for performance in best:
+        print(f"Screening user {args.user_id}")
+
+        best = self.loader.get_user_best(args.user_id)
+
+        for i, performance in enumerate(best, 1):
             map_id = performance['beatmap_id']
+            print(f"Screening on map {map_id}, {i}/{len(best)}")
 
-            #load user and check replays here, then make Comparer and run.
+            # load screened player
+            user_info = self.loader.user_info(map_id, args.user_id)[args.user_id]
+            replays_check = [self.loader.replay_from_map(self.cacher, map_id, args.user_id, user_info[0], user_info[1], user_info[2])]        
 
-        
+            # load other players on map
+            users_info = self.loader.users_info(map_id, args.number)
+            replays2 = self.loader.replay_from_user_info(self.cacher, map_id, users_info)
+            
+            comparer = Comparer(args.threshold, args.silent, replays_check, replays2=replays2, stddevs=args.stddevs)
+            comparer.compare(mode="double")
+
+        print("Finished screening")
