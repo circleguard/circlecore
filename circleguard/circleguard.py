@@ -56,8 +56,10 @@ class Circleguard:
             self._run_local()
         elif(self.args.map_id):
             self._run_map()
+        elif(self.args.user_id):
+            self._run_user()
         else:
-            print("Please set either --local (-l), --map (-m), or --verify (-v)! ")
+            print("Please set either --local (-l), --map (-m), --user (-u), or --verify (-v)! ")
 
     def _run_verify(self):
         loader = self.loader
@@ -120,6 +122,9 @@ class Circleguard:
             comparer = Comparer(threshold, args.silent, replays, stddevs=stddevs)
             comparer.compare(mode="single")
             return
+
+    def _run_user(self):
+        pass
 
 if __name__ == '__main__':
     args = argparser.parse_args()
