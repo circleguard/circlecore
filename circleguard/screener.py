@@ -13,7 +13,7 @@ class Screener:
         Comparer
     """
     
-    def __init__(self, loader, user_id, threshold, silent, stddev=None):
+    def __init__(self, loader, user_id, threshold, silent, stddevs=None):
         """
         Initializes a Screener instance.
 
@@ -29,4 +29,5 @@ class Screener:
         self.user_id = user_id
         self.threshold = threshold
         self.silent = silent
-        self.stddev = stddev
+        self.stddevs = stddevs
+        
