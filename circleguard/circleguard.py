@@ -20,6 +20,7 @@ from online_replay import OnlineReplay
 from comparer import Comparer
 from investigator import Investigator
 from cacher import Cacher
+from screener import Screener
 from config import PATH_REPLAYS_STUB, VERSION
 from secret import API_KEY
 
@@ -124,7 +125,14 @@ class Circleguard:
             return
 
     def _run_user(self):
-        pass
+        args = self.args
+
+        user_id = args.user_id
+        threshold = args.threshold
+        stddevs = args.stddevs
+
+        screener = Screener(self.loader, user_id, threshold, args.silent, stddevs=stddevs)
+        screener.screen()   
 
 if __name__ == '__main__':
     args = argparser.parse_args()
