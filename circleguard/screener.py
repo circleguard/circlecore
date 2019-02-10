@@ -30,4 +30,17 @@ class Screener:
         self.threshold = threshold
         self.silent = silent
         self.stddevs = stddevs
+
+    def screen(self):
+        """
+        Starts the screening.
+        """
+
+        best = self.loader.get_user_best(self.user_id)
+
+        for performance in best:
+            map_id = performance['beatmap_id']
+
+            #load user and check replays here, then make Comparer and run.
+
         
