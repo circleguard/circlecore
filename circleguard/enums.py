@@ -1,10 +1,14 @@
 from enum import Enum
 
+from exceptions import UnkownAPIException, RatelimitException, InvalidKeyException, ReplayUnavailableException
 # strings taken from osu api error responses
+# [api response, exception class type, details to pass to an exception]
 class Error(Enum):
-    NO_REPLAY   = "Replay not available."
-    RATELIMITED = "Requesting too fast! Slow your operation, cap'n!"
-    UNKOWN = "Unkown error."
+    NO_REPLAY         = ["Replay not available.", ReplayUnavailableException, "Could not find any replay data. Skipping"]
+    RATELIMITED       = ["Requesting too fast! Slow your operation, cap'n!", RatelimitException, "We were ratelimited. Waiting it out"]
+    RETRIEVAL_FAILED  = ["Replay retrieval failed.", ReplayUnavailableException, "Replay retrieval failed. Skipping"]
+    INVALID_KEY       = ["Please provide a valid API key.", InvalidKeyException, "Please provide a valid key in secret.py"]
+    UNKOWN            = ["Unkown error.", UnkownAPIException, "Unkown error when requesting replay. Please lodge an issue with the devs immediately"]
 
 class Mod(Enum):
     NoMod          = 0
