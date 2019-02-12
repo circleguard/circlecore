@@ -125,8 +125,9 @@ class Circleguard:
             return
 
     def _run_user(self):
-        screener = Screener(self.cacher, self.loader, self.args)
-        screener.screen()   
+        args = self.args
+        screener = Screener(self.cacher, self.loader, args.threshold, args.silent, args.user_id, args.number, args.stddevs)
+        screener.screen()
 
 if __name__ == '__main__':
     args = argparser.parse_args()
