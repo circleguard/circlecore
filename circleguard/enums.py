@@ -17,7 +17,7 @@ class Mod(Enum):
     NoVideo        = NV = 4
     Hidden         = HD = 8
     HardRock       = HR = 16
-    SuddenDeat     = SD = 32
+    SuddenDeath    = SD = 32
     DoubleTime     = DT = 64
     Relax          = RL = 128
     HalfTime       = HT = 256
