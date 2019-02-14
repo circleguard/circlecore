@@ -11,34 +11,34 @@ class Error(Enum):
     UNKOWN            = ["Unkown error.", UnkownAPIException, "Unkown error when requesting replay. Please lodge an issue with the devs immediately"]
 
 class Mod(Enum):
-    NoMod          = 0
-    NoFail         = 1
-    Easy           = 2
-    NoVideo        = 4
-    Hidden         = 8
-    HardRock       = 16
-    SuddenDeath    = 32
-    DoubleTime     = 64
-    Relax          = 128
-    HalfTime       = 256
-    Nightcore      = 512
-    Flashlight     = 1024
-    Autoplay       = 2048
-    SpunOut        = 4096
-    Autopilot      = 8192
-    Perfect        = 16384
-    Key4           = 32768
-    Key5           = 65536
-    Key6           = 131072
-    Key7           = 262144
-    Key8           = 524288
-    keyMod         = 1015808
-    FadeIn         = 1048576
-    Random         = 2097152
-    LastMod        = 4194304
-    TargetPractice = 8388608
-    Key9           = 16777216
-    Coop           = 33554432
-    Key1           = 67108864
-    Key3           = 134217728
-    Key2           = 268435456
+    NoMod          = NM = 0
+    NoFail         = NF = 1
+    Easy           = EZ = 2
+    NoVideo        = NV = 4
+    Hidden         = HD = 8
+    HardRock       = HR = 16
+    SuddenDeath    = SD = 32
+    DoubleTime     = DT = 64
+    Relax          = RL = 128
+    HalfTime       = HT = 256
+    Nightcore      = NC = 512
+    Flashlight     = FL = 1024
+    Autoplay       = CN = 2048
+    SpunOut        = SO = 4096
+    Autopilot      = AP = 8192
+    Perfect        = PF = 16384
+    Key4           = K4 = 32768
+    Key5           = K5 = 65536
+    Key6           = K6 = 131072
+    Key7           = K7 = 262144
+    Key8           = K8 = 524288
+    keyMod         = KM = 1015808
+    FadeIn         = FI = 1048576
+    Random         = RD = 2097152
+    LastMod        = LM = 4194304
+    TargetPractice = TP = 8388608
+    Key9           = K9 = 16777216
+    Coop           = CO = 33554432
+    Key1           = K1 = 67108864
+    Key3           = K3 = 134217728
+    Key2           = K2 = 268435456
