@@ -91,3 +91,34 @@ class Draw():
 
         # keep a reference to this otherwise it will get garbage collected instantly and not play.
         return animation
+
+    @staticmethod
+    def fplot(replays, unary=(), binary=()):
+        data = [r.as_list_with_timestamps() for r in replays]
+
+        data[1:] = [Replay.interpolate(d, data[0], unflip=True)[0] for d in data[1:]]
+        data = [Replay.skip_breaks(d) for d in data]
+        data = [(512 - d[1], 384 - d[2]) for d in data]
+
+        # unary and binary should be passed as tuples of (type, func) where type
+        # 0 : scalar, dot on curve
+        # 1 : vector, vector on curve
+        # 2 : replay, new replay
+        unary_out = [[], [], []]
+        for u in unary:
+            unary_out[u[0]].append([u[1](d) for d in data])
+
+        for b in binary:
+            binary_out[b[0]].append([[b[1](d1, d2) for d2 in data[i:]] for i, d2 in enumerate(data)])
+
+        data = [np.transpose(d) for d in data]
+
+        fig, ax = plt.subplots()
+
+        ax.set_xlabel('x')
+        ax.set_ylabel('y')
+        ax.set_xlim(0, 512)
+        ax.set_ylim(0, 384)
+            
+
+        
