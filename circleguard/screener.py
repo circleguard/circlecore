@@ -60,7 +60,7 @@ class Screener:
 
         for i, map_id in enumerate(self.map_ids, 1):
 
-            print(f"Screening on map {map_id} (map {i}/{len(self.map_ids)})")
+            print(f"steal check on map {map_id} (map {i}/{len(self.map_ids)})")
             self.loader.new_session(self.number)
             # load screened player
             user_info = self.loader.user_info(map_id, self.user_id)
@@ -90,9 +90,16 @@ class Screener:
 
         print("checking for remodding. The same replay may appear to be downloaded multiple times for some maps - don't worry, they have different mods.")
         for i, map_id in enumerate(self.map_ids, 1):
-            print(f"Screening on map {map_id} (map {i}/{len(self.map_ids)})")
+            print(f"remod check on map {map_id} (map {i}/{len(self.map_ids)})")
             user_info = self.loader.user_info(map_id, self.user_id, limit=False)
+            if(len(user_info) == 1): # they only have one replay so no way can it be remodded
+                continue
             self.loader.new_session(len(user_info))
             replays1 = self.loader.replay_from_user_info(self.cacher, map_id, user_info)
+            if(len([replay for replay in replays1 if replay is not None]) < 2):
+                # check for the same thing again, because they could have had multiple scores but only 1 (or none) available.
+                # TODO this is only necessary because of the scary warning Comparer gives ("Make sure replay data is available for your args"),
+                # changing that would render this check unecessary
+                continue
             comparer = Comparer(self.threshold, self.silent, replays1, stddevs=self.stddevs)
             comparer.compare(mode="single")
