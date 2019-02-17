@@ -37,9 +37,13 @@ class Draw():
         data1 = Replay.resample(data1, fps)
         data2 = Replay.resample(data2, fps)
 
-
+        flip1 = Mod.HardRock.value in [mod.value for mod in user_replay.enabled_mods]
+        flip2 = Mod.HardRock.value in [mod.value for mod in check_replay.enabled_mods]
         # replace with constants for screen sizes
-        data1 = [(512 - d[1], 384 - d[2]) for d in data1]
+        if(flip1 ^ flip2): # xor, if one has hr but not the other
+            data1 = [(512 - d[1], d[2]) for d in data1]
+        else:
+            data1 = [(512 - d[1], 384 - d[2]) for d in data1]
         data2 = [(512 - d[1], 384 - d[2]) for d in data2]
 
         data1 = np.transpose(data1)
