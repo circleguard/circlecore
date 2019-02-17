@@ -97,24 +97,28 @@ class Loader():
     start_time = datetime.min # when we started our requests cycle
 
 
-    def __init__(self, total, key):
+    def __init__(self, key):
         """
         Initializes a Loader instance.
         """
 
-        self.total = total
+        self.total = None
         self.loaded = 0
         self.api = osuAPI.OsuAPI(key)
 
 
-    def reset(self):
+    def new_session(self, total):
         """
-        Resets the loaded replays to 0.
+        Resets the loaded replays to 0, and sets the total to the passed total.
 
-        Intended to be called when the loader is used for multiple maps, and finishes loading from one map.
+        Intended to be called every time the loader is used for a different set of replay loadings -
+        since a Loader instance is passed around to Comparer and Investigator, each with different amounts
+        of replays to load, making new sessions is necessary to keep progress logs correct.
         """
 
         self.loaded = 0
+        self.total = total
+
 
     @request
     @api
@@ -179,8 +183,12 @@ class Loader():
             The lzma bytes (b64 decoded response) returned by the api, or None if the replay was not available.
 
         Raises:
+            CircleguardException if the loader instance has had a new session made yet.
             APIException if the api responds with an error we don't know.
         """
+
+        if(self.total is None):
+            raise CircleguardException("loader#new_session(total) must be called after instantiation, before any replay data is loaded.")
 
         print("Requesting replay by {} on map {}".format(user_id, map_id))
         response = self.api.get_replay({"m": "0", "b": map_id, "u": user_id, "mods": enabled_mods})
@@ -209,7 +217,6 @@ class Loader():
             A list of map_ids for the given number of the user's top plays.
 
         Raises:
-            APIException if the api responds with an error we don't know.
             InvalidArgumentsException if number is not between 1 and 100 inclusive.
         """
 

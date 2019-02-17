@@ -40,7 +40,8 @@ class Circleguard:
         self.PATH_REPLAYS = [join(PATH_REPLAYS_STUB, f) for f in os.listdir(PATH_REPLAYS_STUB) if isfile(join(PATH_REPLAYS_STUB, f)) and f != ".DS_Store"]
 
         self.cacher = Cacher(args.cache)
-        self.loader = Loader(args.number, API_KEY)
+        self.loader = Loader(API_KEY)
+        self.loader.new_session(args.number)
         self.args = args
         if(args.map_id):
             self.users_info = self.loader.users_info(args.map_id, args.number)
