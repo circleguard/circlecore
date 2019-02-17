@@ -130,11 +130,13 @@ class Draw():
 
         rplots = []
         uplots = np.zeros((3, 0)).tolist()
+        uquivers = []
         bplots = np.zeros((3, 0)).tolist()
+        bquivers = []
         plots = []
 
         def init():
-            nonlocal rplots, fplots, plots
+            nonlocal rplots, uplots, uquivers bplots, bquivers, plots
 
             rplots = [plt.plot('', '', Draw.color(i, len(replays)),
                                animated=True, label=r.player_name)[0]
@@ -153,6 +155,7 @@ class Draw():
                                   for v in u]
                 uplots[1].append(vectors)
                 plots.extend(vectors)
+                uquivers.append([plt.quiverkey(v, 0, 0, 0, '') for v in vectors])
 
             for u in unary_out[2]:
                 new_replays = [plt.plot('', '', Draw.color(i, len(u))
@@ -175,6 +178,8 @@ class Draw():
                                            , animated=True)[0] for v in b1]
                                   for b1 in b]
                 bplots[1].append(vectors)
+                bquivers.append([[plt.quiverkey(v, 0, 0, 0, '') for v in v1]
+                                  for v1 in vectors]])
 
                 for v in vectors:
                     plots.extend(v)
@@ -188,7 +193,25 @@ class Draw():
                 for r in new_replays:
                     plots.extend(r)
 
+            fig.legend()
+
             return plots
 
-                        
+        def update(i):
+            for plot, replay in zip(rplots, data):
+                plot.set_data(replay[0][i - 100:i], replay[1][i - 100:i])
+                
+            
+            for scalars, plots in zip(unary_out[0], uplots[0]):
+                for plot, scalar, replay in zip(plots, scalars, data):
+                    plot.set_data(replay[0][i], replay[1][i])
+                    plot.set_markersize(scalar)
+
+            for vectors, quivers, keys in zip(unary_out[1], uplots[1], uquivers):
+                for j, (quiver, vector, replay) in enumerate(zip(quivers, vectors, data)):
+                    keys[j].remove()
+
+                    l, t = np.linalg.norm(vector[i]), np.angle(vector[i])
+
+                    keys[j] = plt.quiverkey(quiver, replay[0][i], replay[1][i], l, '', color=Draw.color(k, len(quivers))) 
             
