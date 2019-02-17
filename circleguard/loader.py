@@ -105,6 +105,16 @@ class Loader():
         self.loaded = 0
         self.api = osuAPI.OsuAPI(key)
 
+
+    def reset(self):
+        """
+        Resets the loaded replays to 0.
+
+        Intended to be called when the loader is used for multiple maps, and finishes loading from one map.
+        """
+
+        self.loaded = 0
+
     @request
     @api
     def users_info(self, map_id, num):
@@ -135,7 +145,7 @@ class Loader():
     @api
     def user_info(self, map_id, user_id):
         """
-        Returns a dict mapping a user_id to a list containing their [username, replay_id, enabled mods] on a given map.
+        Returns a dict mapping a user_id to a list containing their [username, replay_id, enabled mods, replay available (0 or 1)] on a given map.
 
         Args:
             String map_id: The map id to get the replay_id from.
@@ -149,7 +159,7 @@ class Loader():
                 if(error == error2):
                     raise error.value[1](error.value[2])
 
-        info = {x["user_id"]: [x["username"], x["score_id"], int(x["enabled_mods"])] for x in response} # map user id to username, score id and mod bit,
+        info = {x["user_id"]: [x["username"], x["score_id"], int(x["enabled_mods"]), int(x["replay_available"])] for x in response}
                                                                                                         # should only be one response
         return info
 
@@ -183,6 +193,36 @@ class Loader():
 
         return base64.b64decode(response["content"])
 
+    @request
+    @api
+    def get_user_best(self, user_id, number):
+        """
+        Gets the top 100 best plays for the given user.
+
+        Args:
+            String user_id: The user id to get best plays of.
+            Integer number: The number of top plays to retrieve. Must be between 1 and 100.
+
+        Returns:
+            A list of map_ids for the given number of the user's top plays.
+
+        Raises:
+            APIException if the api responds with an error we don't know.
+            InvalidArgumentsException if number is not between 1 and 100 inclusive.
+        """
+
+        print("Requesting top scores of {}".format(user_id))
+        if(number < 1 or number > 100):
+            raise InvalidArgumentsException("The number of best user plays to fetch must be between 1 and 100 inclusive!")
+        response = self.api.get_user_best({"m": "0", "u": user_id, "limit": number})
+
+        error = Loader.check_response(response)
+        if(error):
+            for error2 in Error:
+                if(error == error2):
+                    raise error.value[1](error.value[2])
+
+        return response
 
     @api
     def replay_from_user_info(self, cacher, map_id, user_info):
@@ -262,5 +302,5 @@ class Loader():
         # sleep the remainder of the reset cycle so we guarantee it's been that long since the first request
         sleep_seconds = Loader.RATELIMIT_RESET - seconds_passed
         print(f"Ratelimited, sleeping for {sleep_seconds} seconds. "
-              f"{self.loaded} of {self.total} maps loaded. ETA ~ {int((self.total-self.loaded)/10)+1} min")
+              f"{self.loaded} of {self.total} replays loaded. ETA ~ {int((self.total-self.loaded)/10)+1} min")
         time.sleep(sleep_seconds)
