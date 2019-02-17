@@ -9,7 +9,8 @@ import osuAPI
 
 from online_replay import OnlineReplay
 from enums import Error
-from exceptions import InvalidArgumentsException, APIException, CircleguardException, RatelimitException, InvalidKeyException, ReplayUnavailableException
+from exceptions import (InvalidArgumentsException, APIException, CircleguardException,
+                        RatelimitException, InvalidKeyException, ReplayUnavailableException, UnkownAPIException)
 
 def request(function):
     """
@@ -119,10 +120,10 @@ class Loader():
     @api
     def users_info(self, map_id, num):
         """
-        Returns a list of lists, with each list containing [user_id, username, replay_id, enabled mods]
+        Returns a list of lists, with each list containing [user_id, username, replay_id, enabled mods, replay available]
         for the top given number of replays on the given map.
 
-        EX: [["1234567", "tybug", "295871732", 15], [...], ...] # numbers may not be accurate to true mod bits or user ids
+        EX: [["1234567", "tybug", "295871732", 15, 0], [...], ...] # numbers may not be accurate to true mod bits or user ids
 
         Args:
             String map_id: The map id to get a list of users from.
@@ -138,7 +139,7 @@ class Loader():
                 if(error == error2):
                     raise error.value[1](error.value[2])
 
-        info = [[x["user_id"], x["username"], x["score_id"], int(x["enabled_mods"])] for x in response]
+        info = [[x["user_id"], x["username"], x["score_id"], int(x["enabled_mods"]), int(x["replay_available"])] for x in response]
         return info
 
     @request
@@ -233,7 +234,7 @@ class Loader():
         Args:
             Cacher cacher: A cacher object containing a database connection.
             String map_id: The map_id to download the replays from.
-            List user_info: A list of lists, containing [user_id, username, replay_id, enabled mods] on the given map.
+            List user_info: A list of lists, containing [user_id, username, replay_id, enabled mods, replay available] on the given map.
                                   See loader#users_info
 
         Returns:
@@ -241,12 +242,12 @@ class Loader():
             available - see loader#replay_from_map.
         """
 
-        replays = [self.replay_from_map(cacher, map_id, info[0], info[1], info[2], info[3]) for info in user_info]
+        replays = [self.replay_from_map(cacher, map_id, info[0], info[1], info[2], info[3], info[4]) for info in user_info]
         return replays
 
     @api
     @check_cache
-    def replay_from_map(self, cacher, map_id, user_id, username, replay_id, enabled_mods):
+    def replay_from_map(self, cacher, map_id, user_id, username, replay_id, enabled_mods, replay_available):
         """
         Creates an OnlineReplay instance from a replay by the given user on the given map.
 
@@ -260,11 +261,18 @@ class Loader():
 
         Returns:
             The Replay instance created with the given information, or None if the replay was not available.
+
+        Raises:
+            UnkownAPIException if replay_available was 1, but we did not receive replay data from the api.
         """
+
+        if(replay_available == 0):
+            return None
 
         lzma_bytes = self.replay_data(map_id, user_id, enabled_mods)
         if(lzma_bytes is None):
-            return None
+            raise UnkownAPIException("The api guaranteed there would be a replay available, but we did not receive any data. "
+                                     "Please report this to the devs, who will open an issue on osu!api if necessary.")
         parsed_replay = osrparse.parse_replay(lzma_bytes, pure_lzma=True)
         replay_data = parsed_replay.play_data
         cacher.cache(map_id, user_id, lzma_bytes, replay_id)

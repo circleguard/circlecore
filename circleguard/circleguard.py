@@ -35,7 +35,8 @@ class Circleguard:
             `Namespace(cache=False, local=False, map_id=None, number=50, threshold=20, user_id=None)`
         """
 
-        # get all replays in path to check against. Load this per circleguard instance or users moving files around while the gui is open doesn't work.
+        # get all replays in path to check against. Load this per circleguard instance or users moving files around while the gui is open
+        # results in unintended behavior (their changes not being applied to a new run)
         self.PATH_REPLAYS = [join(PATH_REPLAYS_STUB, f) for f in os.listdir(PATH_REPLAYS_STUB) if isfile(join(PATH_REPLAYS_STUB, f)) and f != ".DS_Store"]
 
         self.cacher = Cacher(args.cache)
@@ -44,8 +45,8 @@ class Circleguard:
         if(args.map_id):
             self.users_info = self.loader.users_info(args.map_id, args.number)
         if(args.user_id and args.map_id):
-            user_info = self.loader.user_info(args.map_id, args.user_id)[args.user_id]
-            self.replays_check = [self.loader.replay_from_map(self.cacher, args.map_id, user_info[0], user_info[1], user_info[2], user_info[3])]
+            info = self.loader.user_info(args.map_id, args.user_id)[args.user_id]
+            self.replays_check = [self.loader.replay_from_map(self.cacher, args.map_id, info[0], info[1], info[2], info[3], info[4])]
 
     def run(self):
         """
