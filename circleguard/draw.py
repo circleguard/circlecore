@@ -93,6 +93,13 @@ class Draw():
         return animation
 
     @staticmethod
+    def color(i, n):
+        if n < 2:
+            return 'r'
+        else:
+            return matplotlib.colors.hsv_to_rgb((i / (n - 1), 1, 1))
+
+    @staticmethod
     def fplot(replays, unary=(), binary=()):
         data = [r.as_list_with_timestamps() for r in replays]
 
@@ -104,7 +111,8 @@ class Draw():
         # 0 : scalar, dot on curve
         # 1 : vector, vector on curve
         # 2 : replay, new replay
-        unary_out = [[], [], []]
+        unary_out = np.zeros((3, 0)).tolist()
+        binary_out = np.zeros((3, 0)).tolist()
         for u in unary:
             unary_out[u[0]].append([u[1](d) for d in data])
 
@@ -119,6 +127,68 @@ class Draw():
         ax.set_ylabel('y')
         ax.set_xlim(0, 512)
         ax.set_ylim(0, 384)
-            
 
-        
+        rplots = []
+        uplots = np.zeros((3, 0)).tolist()
+        bplots = np.zeros((3, 0)).tolist()
+        plots = []
+
+        def init():
+            nonlocal rplots, fplots, plots
+
+            rplots = [plt.plot('', '', Draw.color(i, len(replays)),
+                               animated=True, label=r.player_name)[0]
+                      for r in replays]
+
+            for u in unary_out[0]:
+                scalars = [plt.plot('', '', Draw.color(i, len(u))
+                                           , animated=True)[0]
+                                  for s in u]
+                uplots[0].append(scalars)
+                plots.extend(scalars)
+
+            for u in unary_out[1]:
+                vectors = [plt.quiver([0], [0], Draw.color(i, len(u))
+                                           , animated=True)[0]
+                                  for v in u]
+                uplots[1].append(vectors)
+                plots.extend(vectors)
+
+            for u in unary_out[2]:
+                new_replays = [plt.plot('', '', Draw.color(i, len(u))
+                                           , animated=True)[0]
+                                  for r in u]
+                uplots[2].append(new_replays)
+                plots.extend(new_replays)
+
+            for b in binary_out[0]:
+                scalars = [[plt.plot('', '', Draw.color(i, len(u))
+                                           , animated=True)[0] for s in b1]
+                                  for b1 in b]
+                bplots[0].append(scalars)
+
+                for s in scalars:
+                    plots.extend(s)
+                
+            for b in binary_out[1]:
+                vectors = [[plt.quiver([0], [0], Draw.color(i, len(u))
+                                           , animated=True)[0] for v in b1]
+                                  for b1 in b]
+                bplots[1].append(vectors)
+
+                for v in vectors:
+                    plots.extend(v)
+                
+            for b in binary_out[2]:
+                new_replays = [[plt.plot('', '', Draw.color(i, len(u))
+                                           , animated=True)[0] for r in b1]
+                                  for b1 in b]
+                bplots[2].append(new_replays)
+
+                for r in new_replays:
+                    plots.extend(r)
+
+            return plots
+
+                        
+            
