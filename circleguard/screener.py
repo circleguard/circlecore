@@ -61,7 +61,7 @@ class Screener:
         for i, map_id in enumerate(self.map_ids, 1):
 
             print(f"Screening on map {map_id} (map {i}/{len(self.map_ids)})")
-            self.loader.new_session(len(self.number))
+            self.loader.new_session(self.number)
             # load screened player
             user_info = self.loader.user_info(map_id, self.user_id)
 
