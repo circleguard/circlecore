@@ -43,29 +43,41 @@ class Screener:
         """
 
 
-        print(f"Screening user {self.user_id}")
+        print(f"Screening user {self.user_id}. Replays may appear to be downloaded multiple times for some maps - this is to check for play remodding.")
 
         best = self.loader.get_user_best(self.user_id, self.number)
         map_ids = [play['beatmap_id'] for play in best]
         for i, map_id in enumerate(map_ids, 1):
 
-            print(f"Screening on map {map_id}, {i}/{len(best)}")
+            print(f"Screening on map {map_id} (map {i}/{len(best)})")
 
             # load screened player
-            user_info = self.loader.user_info(map_id, self.user_id)[self.user_id]
+            user_info = self.loader.user_info(map_id, self.user_id, limit=False)
 
-            if(user_info[3] == 0): #replay unavailable, check before we waste a heavy api call
+            if(user_info[0][3] == 0): # first replay unavailable (so all subsequent ones are as well), check before we waste a heavy api call
                 print("replay unavailable for screened user, skipping map {}".format(map_id))
                 continue
 
-            replays_check = [self.loader.replay_from_map(self.cacher, map_id, self.user_id, user_info[0], user_info[1], user_info[2])]
+            all_replays = self.loader.replay_from_user_info(self.cacher, map_id, user_info)
+             # TODO move "replay unavailable so don't load" logic to replay_from_user_info, will mean standardizing
+             # loader#users_info to return replay available as well
 
             # load other players on map
-            users_info = self.loader.users_info(map_id, self.number)
-            replays2 = self.loader.replay_from_user_info(self.cacher, map_id, users_info)
+            other_users_info = self.loader.users_info(map_id, self.number)
+            # filter out their own replay (happens if they're in the top self.number of that beatmap)
+            other_users_info = [info for info in other_users_info if info[0] != self.user_id]
 
-            comparer = Comparer(self.threshold, self.silent, replays_check, replays2=replays2, stddevs=self.stddevs)
+            replays2 = self.loader.replay_from_user_info(self.cacher, map_id, other_users_info)
+
+            # only compare the first replay for replay stealing, highly unlikely they would steal a lower placed replay
+            # TODO make a deep investigate compare all?
+            comparer = Comparer(self.threshold, self.silent, [all_replays[0]], replays2=replays2, stddevs=self.stddevs)
             comparer.compare(mode="double")
+
+            print("checking for remodding")
+            # now compare all their replays against each other for replay remodding
+            comparer = Comparer(self.threshold, self.silent, all_replays, stddevs=self.stddevs)
+            comparer.compare(mode="single")
 
             self.loader.reset()
 

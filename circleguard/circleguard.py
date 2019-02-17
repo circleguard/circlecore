@@ -44,8 +44,8 @@ class Circleguard:
         if(args.map_id):
             self.users_info = self.loader.users_info(args.map_id, args.number)
         if(args.user_id and args.map_id):
-            user_info = self.loader.user_info(args.map_id, args.user_id)[args.user_id] # should be guaranteed to only be a single mapping of user_id to a list
-            self.replays_check = [self.loader.replay_from_map(self.cacher, args.map_id, args.user_id, user_info[0], user_info[1], user_info[2])]
+            user_info = self.loader.user_info(args.map_id, args.user_id)[args.user_id]
+            self.replays_check = [self.loader.replay_from_map(self.cacher, args.map_id, user_info[0], user_info[1], user_info[2], user_info[3])]
 
     def run(self):
         """

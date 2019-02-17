@@ -119,10 +119,10 @@ class Loader():
     @api
     def users_info(self, map_id, num):
         """
-        Returns a dict mapping each user_id to a list containing [username, replay_id, enabled mods]
+        Returns a list of lists, with each list containing [user_id, username, replay_id, enabled mods]
         for the top given number of replays on the given map.
 
-        EX: {"1234567": ["tybug", "295871732", 15]} # numbers may not be accurate to true mod bits or user ids
+        EX: [["1234567", "tybug", "295871732", 15], [...], ...] # numbers may not be accurate to true mod bits or user ids
 
         Args:
             String map_id: The map id to get a list of users from.
@@ -138,18 +138,19 @@ class Loader():
                 if(error == error2):
                     raise error.value[1](error.value[2])
 
-        info = {x["user_id"]: [x["username"], x["score_id"], int(x["enabled_mods"])] for x in response} # map user id to username, score id and mod bit
+        info = [[x["user_id"], x["username"], x["score_id"], int(x["enabled_mods"])] for x in response]
         return info
 
     @request
     @api
-    def user_info(self, map_id, user_id):
+    def user_info(self, map_id, user_id, limit=True):
         """
-        Returns a dict mapping a user_id to a list containing their [username, replay_id, enabled mods, replay available (0 or 1)] on a given map.
+        Returns a list of lists containing their [username, replay_id, enabled mods, replay available (0 or 1)] on a given map.
 
         Args:
             String map_id: The map id to get the replay_id from.
             String user_id: The user id to get the replay_id from.
+            Boolean limit: If set, will only return one response. Otherwise, will return every response (every score they set on that map under different mods)
         """
 
         response = self.api.get_scores({"m": "0", "b": map_id, "u": user_id})
@@ -159,15 +160,15 @@ class Loader():
                 if(error == error2):
                     raise error.value[1](error.value[2])
 
-        info = {x["user_id"]: [x["username"], x["score_id"], int(x["enabled_mods"]), int(x["replay_available"])] for x in response}
-                                                                                                        # should only be one response
-        return info
+        info = [[x["user_id"], x["username"], x["score_id"], int(x["enabled_mods"]), int(x["replay_available"])] for x in response]
+
+        return info[0:1] if limit else info # top score is first in the list
 
     @request
     @api
-    def replay_data(self, map_id, user_id):
+    def replay_data(self, map_id, user_id, enabled_mods):
         """
-        Queries the api for replay data from the given user on the given map.
+        Queries the api for replay data from the given user on the given map, with the given mods.
 
         Args:
             String map_id: The map id to get the replay off of.
@@ -181,7 +182,7 @@ class Loader():
         """
 
         print("Requesting replay by {} on map {}".format(user_id, map_id))
-        response = self.api.get_replay({"m": "0", "b": map_id, "u": user_id})
+        response = self.api.get_replay({"m": "0", "b": map_id, "u": user_id, "mods": enabled_mods})
 
         error = Loader.check_response(response)
         if(error):
@@ -232,14 +233,15 @@ class Loader():
         Args:
             Cacher cacher: A cacher object containing a database connection.
             String map_id: The map_id to download the replays from.
-            Dictionary user_info: A dict mapping user_ids to a list containing [username, replay_id, enabled mods] on the given map.
-                                  See Loader.users_info
+            List user_info: A list of lists, containing [user_id, username, replay_id, enabled mods] on the given map.
+                                  See loader#users_info
 
         Returns:
-            A list of Replay instances from the given information, with entries with no replay data available excluded.
+            A list of Replay instances from the given information. Some entries may be none if there was no replay data
+            available - see loader#replay_from_map.
         """
 
-        replays = [self.replay_from_map(cacher, map_id, user_id, replay_info[0], replay_info[1], replay_info[2]) for user_id, replay_info in user_info.items()]
+        replays = [self.replay_from_map(cacher, map_id, info[0], info[1], info[2], info[3]) for info in user_info]
         return replays
 
     @api
@@ -260,7 +262,7 @@ class Loader():
             The Replay instance created with the given information, or None if the replay was not available.
         """
 
-        lzma_bytes = self.replay_data(map_id, user_id)
+        lzma_bytes = self.replay_data(map_id, user_id, enabled_mods)
         if(lzma_bytes is None):
             return None
         parsed_replay = osrparse.parse_replay(lzma_bytes, pure_lzma=True)
