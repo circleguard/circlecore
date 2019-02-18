@@ -270,4 +270,3 @@ __pycache__/
 
 # pip nonsense
 src/*
-circleguard/draw_v2.py
