@@ -136,7 +136,7 @@ class Draw():
         plots = []
 
         def init():
-            nonlocal rplots, uplots, uquivers bplots, bquivers, plots
+            nonlocal rplots, uplots, uquivers, bplots, bquivers, plots
 
             rplots = [plt.plot('', '', Draw.color(i, len(replays)),
                                animated=True, label=r.player_name)[0]
@@ -172,18 +172,17 @@ class Draw():
 
                 for s in scalars:
                     plots.extend(s)
-                
+
             for b in binary_out[1]:
                 vectors = [[plt.quiver([0], [0], Draw.color(i, len(u))
                                            , animated=True)[0] for v in b1]
                                   for b1 in b]
                 bplots[1].append(vectors)
-                bquivers.append([[plt.quiverkey(v, 0, 0, 0, '') for v in v1]
-                                  for v1 in vectors]])
+                bquivers.append([[plt.quiverkey(v, 0, 0, 0, '') for v in v1] for v1 in vectors])
 
                 for v in vectors:
                     plots.extend(v)
-                
+
             for b in binary_out[2]:
                 new_replays = [[plt.plot('', '', Draw.color(i, len(u))
                                            , animated=True)[0] for r in b1]
@@ -200,8 +199,8 @@ class Draw():
         def update(i):
             for plot, replay in zip(rplots, data):
                 plot.set_data(replay[0][i - 100:i], replay[1][i - 100:i])
-                
-            
+
+
             for scalars, plots in zip(unary_out[0], uplots[0]):
                 for plot, scalar, replay in zip(plots, scalars, data):
                     plot.set_data(replay[0][i], replay[1][i])
@@ -213,5 +212,4 @@ class Draw():
 
                     l, t = np.linalg.norm(vector[i]), np.angle(vector[i])
 
-                    keys[j] = plt.quiverkey(quiver, replay[0][i], replay[1][i], l, '', color=Draw.color(k, len(quivers))) 
-            
+                    keys[j] = plt.quiverkey(quiver, replay[0][i], replay[1][i], l, '', color=Draw.color(k, len(quivers)))
