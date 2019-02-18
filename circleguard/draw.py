@@ -135,6 +135,26 @@ class Draw():
         bquivers = []
         plots = []
 
+        def array_loop(array, varplots, cursor, binary=False):
+            nonlocal u, i, plots, bplots, vectors, uquivers, bquivers
+            pointer = '' if cursor != 1 else [0]
+            if not binary:
+                for u in array[cursor]:
+                    var = [plt.plot(pointer, pointer, Draw.color(i, len(u)), animated=True)[0] for _ in u]
+                    varplots[cursor].append(var)
+                    plots.extend(var)
+                    if cursor == 1:
+                        uquivers.append([plt.quiverkey(v, 0, 0, 0, '') for v in vectors])
+            else:
+                for b in array[cursor]:
+                    var = [[plt.plot(pointer, pointer, Draw.color(i, len(u)), animated=True)[0] for _ in b1] for b1 in b]
+                    varplots[cursor].append(var)
+                    if cursor == 1:
+                        bquivers.append([[plt.quiverkey(v, 0, 0, 0, '') for v in v1] for v1 in vectors])
+                    for s in var:
+                        bplots.extend(s)
+            return
+
         def init():
             nonlocal rplots, uplots, uquivers, bplots, bquivers, plots
 
@@ -142,55 +162,10 @@ class Draw():
                                animated=True, label=r.player_name)[0]
                       for r in replays]
 
-            for u in unary_out[0]:
-                scalars = [plt.plot('', '', Draw.color(i, len(u))
-                                           , animated=True)[0]
-                                  for s in u]
-                uplots[0].append(scalars)
-                plots.extend(scalars)
-
-            for u in unary_out[1]:
-                vectors = [plt.quiver([0], [0], Draw.color(i, len(u))
-                                           , animated=True)[0]
-                                  for v in u]
-                uplots[1].append(vectors)
-                plots.extend(vectors)
-                uquivers.append([plt.quiverkey(v, 0, 0, 0, '') for v in vectors])
-
-            for u in unary_out[2]:
-                new_replays = [plt.plot('', '', Draw.color(i, len(u))
-                                           , animated=True)[0]
-                                  for r in u]
-                uplots[2].append(new_replays)
-                plots.extend(new_replays)
-
-            for b in binary_out[0]:
-                scalars = [[plt.plot('', '', Draw.color(i, len(u))
-                                           , animated=True)[0] for s in b1]
-                                  for b1 in b]
-                bplots[0].append(scalars)
-
-                for s in scalars:
-                    plots.extend(s)
-
-            for b in binary_out[1]:
-                vectors = [[plt.quiver([0], [0], Draw.color(i, len(u))
-                                           , animated=True)[0] for v in b1]
-                                  for b1 in b]
-                bplots[1].append(vectors)
-                bquivers.append([[plt.quiverkey(v, 0, 0, 0, '') for v in v1] for v1 in vectors])
-
-                for v in vectors:
-                    plots.extend(v)
-
-            for b in binary_out[2]:
-                new_replays = [[plt.plot('', '', Draw.color(i, len(u))
-                                           , animated=True)[0] for r in b1]
-                                  for b1 in b]
-                bplots[2].append(new_replays)
-
-                for r in new_replays:
-                    plots.extend(r)
+            # this next part is not well done
+            for binary in range(0, 2):
+                for i in range(0, 3):
+                    array_loop(array=unary_out, cursor=1, varplots=uplots, binary=bool(binary))
 
             fig.legend()
 
