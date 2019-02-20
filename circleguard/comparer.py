@@ -6,6 +6,7 @@ import math
 
 from draw import Draw
 from replay import Replay
+from enums import Mod
 from exceptions import InvalidArgumentsException
 
 class Comparer:
@@ -161,8 +162,13 @@ class Comparer:
         data1 = [d[1:] for d in data1]
         data2 = [d[1:] for d in data2]
 
-        (mu, sigma) = Comparer._compute_data_similarity(data1, data2)
+        flip1 = Mod.HardRock.value in [mod.value for mod in replay1.enabled_mods]
+        flip2 = Mod.HardRock.value in [mod.value for mod in replay2.enabled_mods]
+        if(flip1 ^ flip2): # xor, if one has hr but not the other
+            for d in data1:
+                d[1] = 384 - d[1]
 
+        (mu, sigma) = Comparer._compute_data_similarity(data1, data2)
         return (mu, sigma)
 
     @staticmethod
