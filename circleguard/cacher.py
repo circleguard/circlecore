@@ -37,20 +37,21 @@ class Cacher:
 
         Args:
             String map_id: The map id to insert into the db.
-            String user_id: The user id to insert into the db.
+            Integer user_id: The user id to insert into the db.
             Bytes lzma_bytes: The lzma bytes to compress and insert into the db.
-            String replay_id: The id of the replay, which changes when a user overwrites their score.
+            Integer replay_id: The id of the replay, which changes when a user overwrites their score.
         """
 
         if(not self.should_cache):
             return
-
+        print("caching...", end="", flush=True)
         compressed_bytes = Cacher.compress(lzma_bytes)
         result = self.cursor.execute("SELECT COUNT(1) FROM replays WHERE map_id=? AND user_id=?", [map_id, user_id]).fetchone()[0]
         if(result): # already exists so we overwrite (this happens when we call Cacher.revalidate)
             self.write("UPDATE replays SET replay_data=?, replay_id=? WHERE map_id=? AND user_id=?", [compressed_bytes, replay_id, map_id, user_id])
         else: # else just insert
             self.write("INSERT INTO replays VALUES(?, ?, ?, ?)", [map_id, user_id, compressed_bytes, replay_id])
+        print("done")
 
     def revalidate(self, map_id, user_info, loader):
         """
