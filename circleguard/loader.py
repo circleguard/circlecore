@@ -143,14 +143,15 @@ class Loader():
                 if(error == error2):
                     raise error.value[1](error.value[2])
 
-        info = [[x["user_id"], x["username"], x["score_id"], int(x["enabled_mods"]), int(x["replay_available"])] for x in response]
+        info = [[int(x["user_id"]), str(x["username"]), int(x["score_id"]), int(x["enabled_mods"]), bool(int(x["replay_available"]))] for x in response]
         return info
 
     @request
     @api
     def user_info(self, map_id, user_id, limit=True):
         """
-        Returns a list of lists containing their [username, replay_id, enabled mods, replay available (0 or 1)] on a given map.
+                                                  # int      str        int        int            bool
+        Returns a list of lists containing their [user_id, username, replay_id, enabled mods, replay available] on a given map.
 
         Args:
             String map_id: The map id to get the replay_id from.
@@ -164,8 +165,8 @@ class Loader():
             for error2 in Error:
                 if(error == error2):
                     raise error.value[1](error.value[2])
-
-        info = [[x["user_id"], x["username"], x["score_id"], int(x["enabled_mods"]), int(x["replay_available"])] for x in response]
+                                                                    # yes, it's necessary to cast the str response to int before bool - all strings are truthy.
+        info = [[int(x["user_id"]), str(x["username"]), int(x["score_id"]), int(x["enabled_mods"]), bool(int(x["replay_available"]))] for x in response]
 
         return info[0:1] if limit else info # top score is first in the list
 
@@ -240,7 +241,7 @@ class Loader():
 
         Args:
             Cacher cacher: A cacher object containing a database connection.
-            String map_id: The map_id to download the replays from.
+            Integer map_id: The map_id to download the replays from.
             List user_info: A list of lists, containing [user_id, username, replay_id, enabled mods, replay available] on the given map.
                                   See loader#users_info
 
@@ -260,11 +261,12 @@ class Loader():
 
         Args:
             Cacher cacher: A cacher object containing a database connection.
-            String map_id: The map_id to download the replay from.
-            String user_id: The user id to download the replay of.
-                            Also used as the username of the Replay.
-            String replay_id: The id of the replay we are retrieving (used to cache).
+            Integer map_id: The map_id to download the replay from.
+            Integer user_id: The user id to download the replay of.
+            String username: The username of the user. Used as the representation of the replay.
+            Integer replay_id: The id of the replay we are retrieving (used to cache).
             Integer enabled_mods: The base10 number representing the enabled mods
+            Boolean replay_available: Whether the replay data can be retrieved from the api or not.
 
         Returns:
             The Replay instance created with the given information, or None if the replay was not available.
@@ -273,7 +275,7 @@ class Loader():
             UnkownAPIException if replay_available was 1, but we did not receive replay data from the api.
         """
 
-        if(replay_available == 0):
+        if(not replay_available):
             return None
 
         lzma_bytes = self.replay_data(map_id, user_id, enabled_mods)
