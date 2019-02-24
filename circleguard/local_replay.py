@@ -25,6 +25,8 @@ class LocalReplay(Replay):
             Integer enabled_mods: A base10 representation of the enabled mods on the replay.
         """
 
+        self.replay_id = None
+
         Replay.__init__(self, replay_data, player_name, enabled_mods)
 
     @staticmethod

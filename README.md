@@ -50,10 +50,10 @@ $ python circleguard.py -m 1618546 -n 57
 # compares the top 50 leaderboard replays against the other top 50 replays (50 choose 2 comparisons) and sets the threshold to be one standard deviation below the average similarity.
 $ python circleguard.py -m 1618546 -n 50 -a 1.0
 
-# compares all replays under user/ with the top 50 scores on https://osu.ppy.sh/b/1611251
+# compares all replays under replays/ with the top 50 scores on https://osu.ppy.sh/b/1611251
 $ python circleguard.py -l -m 1611251
 
-# compares all replays under user/ with all replays under compare/
+# compares all replays under replays/ with all other replays under replays/
 $ python circleguard.py -l
 ```
 

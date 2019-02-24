@@ -1,11 +1,14 @@
 import itertools
+import sys
 
 import numpy as np
+import math
 
 from draw import Draw
 from replay import Replay
-from config import WHITELIST
+from enums import Mod
 from exceptions import InvalidArgumentsException
+
 class Comparer:
     """
     A class for managing a set of replay comparisons.
@@ -33,7 +36,7 @@ class Comparer:
             Boolean silent: If true, visualization prompts will be ignored and only results will be printed.
             List replays1: A list of Replay instances to compare against replays2.
             List replays2: A list of Replay instances to be compared against. Optional, defaulting to None. No attempt to error check
-                           this is made - if a compare() call is made, the program will throw an AttributeError. Be sure to only call
+                           this is made - if a compare(mode="double") call is made, the program will throw an AttributeError. Be sure to only call
                            methods that involve the first set of replays.
             Float stddevs: If set, the threshold will be automatically set to this many standard deviations below the average similarity for the comparisons.
         """
@@ -64,21 +67,25 @@ class Comparer:
 
         if(mode == "double"):
             iterator = itertools.product(self.replays1, self.replays2)
+            total = len(self.replays1) * len(self.replays2)
         elif (mode == "single"):
             iterator = itertools.combinations(self.replays1, 2)
+            total = len(self.replays1) * (len(self.replays1) - 1) // 2
         else:
             raise InvalidArgumentsException("`mode` must be one of 'double' or 'single'")
 
-        print("Starting to compare replays")
+        tenth = round(total / 10) if total >= 4 else 1
+        print("Starting {:d} combinations".format(total))
         # automatically determine threshold based on standard deviations of similarities if stddevs is set
         if(self.stddevs):
             results = {}
-            for replay1, replay2 in iterator:
-                if(self.check_names(replay1.player_name, replay2.player_name)):
-                    continue
+            for done, (replay1, replay2) in enumerate(iterator, 1):
                 result = Comparer._compare_two_replays(replay1, replay2)
                 results[(replay1, replay2)] = result
-
+                if(done == 1):
+                    print("Done ", end="")
+                elif(done % tenth == 0):
+                    print("{0:.0f}%..".format(math.ceil(done / total * 10) * 10), end="", flush=True)
             similarities = [result[0] for result in results.values()]
 
             mu, sigma = np.mean(similarities), np.std(similarities)
@@ -91,26 +98,15 @@ class Comparer:
                 self._print_result(results[key], key[0], key[1])
         # else print normally
         else:
-            for replay1, replay2 in iterator:
-                if(self.check_names(replay1.player_name, replay2.player_name)):
-                    continue
+            for done, (replay1, replay2) in enumerate(iterator, 1):
                 result = Comparer._compare_two_replays(replay1, replay2)
                 self._print_result(result, replay1, replay2)
+                if(done == 1):
+                    print("Done ", end="")
+                elif(done % tenth == 0):
+                    print("{0:.0f}%..".format(math.ceil(done / total * 10) * 10), end="", flush=True)
 
-
-
-        print("done comparing")
-
-    def check_names(self, player1, player2):
-        """
-        Returns True if both players are in the whitelist or are the same name, False otherwise.
-
-        Args:
-            String player1: The name of the first player.
-            String player2: The name of the second player.
-        """
-
-        return ((player1 in WHITELIST and player2 in WHITELIST) or (player1 == player2))
+        print("\ndone comparing")
 
     def _print_result(self, result, replay1, replay2):
         """
@@ -134,7 +130,7 @@ class Comparer:
         if(replay1.replay_id and replay2.replay_id):
             last_score = replay1.player_name if(replay1.replay_id > replay2.replay_id) else replay2.player_name
 
-        print("{:.1f} similarity, {:.1f} std deviation ({} vs {}{})"
+        print("\n{:.1f} similarity, {:.1f} std deviation ({} vs {}{})"
               .format(mean, sigma, replay1.player_name, replay2.player_name, " - {} set later".format(last_score) if last_score else ""))
 
         if(self.silent):
@@ -166,8 +162,13 @@ class Comparer:
         data1 = [d[1:] for d in data1]
         data2 = [d[1:] for d in data2]
 
-        (mu, sigma) = Comparer._compute_data_similarity(data1, data2)
+        flip1 = Mod.HardRock.value in [mod.value for mod in replay1.enabled_mods]
+        flip2 = Mod.HardRock.value in [mod.value for mod in replay2.enabled_mods]
+        if(flip1 ^ flip2): # xor, if one has hr but not the other
+            for d in data1:
+                d[1] = 384 - d[1]
 
+        (mu, sigma) = Comparer._compute_data_similarity(data1, data2)
         return (mu, sigma)
 
     @staticmethod

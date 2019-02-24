@@ -6,6 +6,7 @@ import matplotlib.pyplot as plt
 import itertools as itr
 from matplotlib.animation import FuncAnimation
 from replay import Replay
+from enums import Mod
 
 class Draw():
     """
@@ -55,8 +56,13 @@ class Draw():
         data1 = Replay.resample(data1, fps)
         data2 = Replay.resample(data2, fps)
 
+        flip1 = Mod.HardRock.value in [mod.value for mod in self.replay1.enabled_mods]
+        flip2 = Mod.HardRock.value in [mod.value for mod in self.replay2.enabled_mods]
         # replace with constants for screen sizes
-        data1 = [(512 - d[1], 384 - d[2]) for d in data1]
+        if(flip1 ^ flip2): # xor, if one has hr but not the other
+            data1 = [(512 - d[1], d[2]) for d in data1]
+        else:
+            data1 = [(512 - d[1], 384 - d[2]) for d in data1]
         data2 = [(512 - d[1], 384 - d[2]) for d in data2]
 
         data1 = np.transpose(data1)
@@ -79,8 +85,14 @@ class Draw():
             plot1.set_data(data1[0][i - 100:i], data1[1][i - 100:i])
             plot2.set_data(data2[0][i - 100:i], data2[1][i - 100:i])
             return plot1, plot2
+        try:
+            animation = FuncAnimation(fig, update, frames=itr.count(100), init_func=init, blit=True, interval=dt)
+        except:
+            # if you close the window sometimes it's in the middle of updating and prints an annoying string to the console as an error -
+            # invalid command name "4584907080_on_timer"... and matplotlib errors are either awful and hidden or I'm blind so here's a blankey
+            # try/except
+            pass
 
-        animation = FuncAnimation(fig, update, frames=itr.count(100), init_func=init, blit=True, interval=dt)
         plt.show(block=True)
 
         # keep a reference to this otherwise it will get garbage collected instantly and not play.

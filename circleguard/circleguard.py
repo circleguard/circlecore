@@ -20,7 +20,8 @@ from online_replay import OnlineReplay
 from comparer import Comparer
 from investigator import Investigator
 from cacher import Cacher
-from config import PATH_REPLAYS_STUB, WHITELIST, VERSION
+from config import PATH_REPLAYS_STUB, VERSION
+from secret import API_KEY
 
 class Circleguard:
 
@@ -37,12 +38,13 @@ class Circleguard:
         self.PATH_REPLAYS = [join(PATH_REPLAYS_STUB, f) for f in os.listdir(PATH_REPLAYS_STUB) if isfile(join(PATH_REPLAYS_STUB, f)) and f != ".DS_Store"]
 
         self.cacher = Cacher(args.cache)
+        self.loader = Loader(args.number, API_KEY)
         self.args = args
         if(args.map_id):
-            self.users_info = Loader.users_info(args.map_id, args.number)
+            self.users_info = self.loader.users_info(args.map_id, args.number)
         if(args.user_id and args.map_id):
-            user_info = Loader.user_info(args.map_id, args.user_id)[args.user_id] # should be guaranteed to only be a single mapping of user_id to a list
-            self.replays_check = [OnlineReplay.from_map(self.cacher, args.map_id, args.user_id, user_info[0], user_info[1], user_info[2])]
+            user_info = self.loader.user_info(args.map_id, args.user_id)[args.user_id] # should be guaranteed to only be a single mapping of user_id to a list
+            self.replays_check = [self.loader.replay_from_map(self.cacher, args.map_id, args.user_id, user_info[0], user_info[1], user_info[2])]
 
     def run(self):
         """
@@ -58,16 +60,16 @@ class Circleguard:
             print("Please set either --local (-l), --map (-m), or --verify (-v)! ")
 
     def _run_verify(self):
+        loader = self.loader
         args = self.args
-
         map_id = self.args.verify[0]
         user1_id = self.args.verify[1]
         user2_id = self.args.verify[2]
 
-        user1_info = Loader.user_info(map_id, user1_id)
-        user2_info = Loader.user_info(map_id, user2_id)
-        replay1 = OnlineReplay.from_user_info(self.cacher, map_id, user1_info)
-        replay2 = OnlineReplay.from_user_info(self.cacher, map_id, user2_info)
+        user1_info = loader.user_info(map_id, user1_id)
+        user2_info = loader.user_info(map_id, user2_id)
+        replay1 = loader.replay_from_user_info(self.cacher, map_id, user1_info)
+        replay2 = loader.replay_from_user_info(self.cacher, map_id, user2_info)
 
         comparer = Comparer(args.threshold, args.silent, replay1, replays2=replay2, stddevs=args.stddevs)
         comparer.compare(mode="double")
@@ -88,7 +90,7 @@ class Circleguard:
             return
         if(args.map_id):
             # compare every local replay with every leaderboard entry
-            replays2 = OnlineReplay.from_user_info(self.cacher, args.map_id, self.users_info)
+            replays2 = self.loader.replay_from_user_info(self.cacher, args.map_id, self.users_info)
             comparer = Comparer(threshold, args.silent, replays1, replays2=replays2, stddevs=stddevs)
             comparer.compare(mode="double")
             return
@@ -104,17 +106,17 @@ class Circleguard:
         stddevs = args.stddevs
 
         # if doing anything online, revalidate cache
-        self.cacher.revalidate(args.map_id, self.users_info)
+        self.cacher.revalidate(args.map_id, self.users_info, self.loader)
 
         if(args.map_id and args.user_id): # passed both -m and -u but not -l
-            replays2 = OnlineReplay.from_user_info(self.cacher, args.map_id, self.users_info)
+            replays2 = self.loader.replay_from_user_info(self.cacher, args.map_id, self.users_info)
             comparer = Comparer(threshold, args.silent, self.replays_check, replays2=replays2, stddevs=stddevs)
             comparer.compare(mode="double")
             return
 
         if(args.map_id): # only passed -m
             # get all 50 top replays
-            replays = OnlineReplay.from_user_info(self.cacher, args.map_id, self.users_info)
+            replays = self.loader.replay_from_user_info(self.cacher, args.map_id, self.users_info)
             comparer = Comparer(threshold, args.silent, replays, stddevs=stddevs)
             comparer.compare(mode="single")
             return
