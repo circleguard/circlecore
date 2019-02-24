@@ -6,4 +6,4 @@ PATH_REPLAYS_STUB = PATH_ROOT / "replays"
 
 PATH_DB = PATH_ROOT / "db" / "cache.db" # /absolute/path/db/cache.db
 
-VERSION = "1.1d"
+VERSION = "1.2"
