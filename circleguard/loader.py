@@ -8,6 +8,7 @@ import osrparse
 import osuAPI
 
 from online_replay import OnlineReplay
+from user_info import UserInfo
 from enums import Error
 from exceptions import (InvalidArgumentsException, APIException, CircleguardException,
                         RatelimitException, InvalidKeyException, ReplayUnavailableException, UnkownAPIException)
@@ -60,8 +61,7 @@ def check_cache(function):
     Decorator that checks if the replay by the given user_id on the given map_id is already cached.
     If so, returns a Replay instance from the cached string instead of requesting it from the api.
 
-    Note that cacher, map_id, user_id, replay_id, and enabled_mods must be the first, second, third, fifth, and sixth arguments to the function respectively.
-    (ignoring the self argument)
+    Note that self, cacher and user_info must be the first, second and third arguments to the function respectively.
 
     Returns:
         A Replay instance from the cached replay if it was cached, or the return value of the function if not.
@@ -70,15 +70,13 @@ def check_cache(function):
     def wrapper(*args, **kwargs):
         self = args[0]
         cacher = args[1]
-        map_id = args[2]
-        user_id = args[3]
-        replay_id = args[5]
-        enabled_mods = args[6]
-        lzma = cacher.check_cache(map_id, user_id, enabled_mods)
+        user_info = args[2]
+
+        lzma = cacher.check_cache(user_info.map_id, user_info.user_id, user_info.enabled_mods)
         if(lzma):
             replay_data = osrparse.parse_replay(lzma, pure_lzma=True).play_data
             self.loaded += 1
-            return OnlineReplay(replay_data, user_id, enabled_mods, replay_id=replay_id)
+            return OnlineReplay(replay_data, user_info)
         else:
             return function(*args, **kwargs)
     return wrapper
@@ -124,13 +122,11 @@ class Loader():
     @api
     def users_info(self, map_id, num):
         """
-        Returns a list of lists, with each list containing [user_id, username, replay_id, enabled mods, replay available]
+        Returns a list of UserInfo objects, each containing (user_id, username, replay_id, enabled mods, replay available)
         for the top given number of replays on the given map.
 
-        EX: [["1234567", "tybug", "295871732", 15, 0], [...], ...] # numbers may not be accurate to true mod bits or user ids
-
         Args:
-            String map_id: The map id to get a list of users from.
+            Integer map_id: The map id to get a list of users from.
             Integer num: The number of ids to fetch.
         """
 
@@ -143,20 +139,19 @@ class Loader():
                 if(error == error2):
                     raise error.value[1](error.value[2])
 
-        info = [[int(x["user_id"]), str(x["username"]), int(x["score_id"]), int(x["enabled_mods"]), bool(int(x["replay_available"]))] for x in response]
-        return info
+        infos = [UserInfo(map_id, int(x["user_id"]), str(x["username"]), int(x["score_id"]), int(x["enabled_mods"]), bool(int(x["replay_available"]))) for x in response]
+        return infos
 
     @request
     @api
     def user_info(self, map_id, user_id, limit=True):
         """
-                                                  # int      str        int        int            bool
-        Returns a list of lists containing their [user_id, username, replay_id, enabled mods, replay available] on a given map.
+        Returns a list of UserInfo objects containing a user's (user_id, username, replay_id, enabled mods, replay available) on a given map.
 
         Args:
-            String map_id: The map id to get the replay_id from.
-            String user_id: The user id to get the replay_id from.
-            Boolean limit: If set, will only return one response. Otherwise, will return every response (every score they set on that map under different mods)
+            Integer map_id: The map id to get the replay_id from.
+            Integer user_id: The user id to get the replay_id from.
+            Boolean limit: If set, will only return a user's top score (top response). Otherwise, will return every response (every score they set on that map under different mods)
         """
 
         response = self.api.get_scores({"m": "0", "b": map_id, "u": user_id})
@@ -166,20 +161,18 @@ class Loader():
                 if(error == error2):
                     raise error.value[1](error.value[2])
                                                                     # yes, it's necessary to cast the str response to int before bool - all strings are truthy.
-        info = [[int(x["user_id"]), str(x["username"]), int(x["score_id"]), int(x["enabled_mods"]), bool(int(x["replay_available"]))] for x in response]
+        infos = [UserInfo(map_id, int(x["user_id"]), str(x["username"]), int(x["score_id"]), int(x["enabled_mods"]), bool(int(x["replay_available"]))) for x in response]
 
-        return info[0:1] if limit else info # top score is first in the list
+        return infos[0:1] if limit else infos # top score is first in the list
 
     @request
     @api
-    def replay_data(self, map_id, user_id, enabled_mods):
+    def replay_data(self, user_info):
         """
         Queries the api for replay data from the given user on the given map, with the given mods.
 
         Args:
-            String map_id: The map id to get the replay off of.
-            String user_id: The user id to get the replay of.
-
+            UserInfo user_info: The UserInfo representing this replay.
         Returns:
             The lzma bytes (b64 decoded response) returned by the api, or None if the replay was not available.
 
@@ -191,8 +184,8 @@ class Loader():
         if(self.total is None):
             raise CircleguardException("loader#new_session(total) must be called after instantiation, before any replay data is loaded.")
 
-        print("Requesting replay by {} on map {}".format(user_id, map_id))
-        response = self.api.get_replay({"m": "0", "b": map_id, "u": user_id, "mods": enabled_mods})
+        print("Requesting replay by {} on map {}".format(user_info.user_id, user_info.map_id))
+        response = self.api.get_replay({"m": "0", "b": user_info.map_id, "u": user_info.user_id, "mods": user_info.enabled_mods})
 
         error = Loader.check_response(response)
         if(error):
@@ -235,38 +228,31 @@ class Loader():
         return response
 
     @api
-    def replay_from_user_info(self, cacher, map_id, user_info):
+    def replay_from_user_info(self, cacher, user_info):
         """
         Creates a list of Replay instances for the users listed in user_info on the given map.
 
         Args:
             Cacher cacher: A cacher object containing a database connection.
-            Integer map_id: The map_id to download the replays from.
-            List user_info: A list of lists, containing [user_id, username, replay_id, enabled mods, replay available] on the given map.
-                                  See loader#users_info
+            List [UserInfo]: A list of UserInfo objects, representing where and how to retrieve the replays.
 
         Returns:
             A list of Replay instances from the given information. Some entries may be none if there was no replay data
             available - see loader#replay_from_map.
         """
 
-        replays = [self.replay_from_map(cacher, map_id, info[0], info[1], info[2], info[3], info[4]) for info in user_info]
+        replays = [self.replay_from_map(cacher, info) for info in user_info]
         return replays
 
     @api
     @check_cache
-    def replay_from_map(self, cacher, map_id, user_id, username, replay_id, enabled_mods, replay_available):
+    def replay_from_map(self, cacher, user_info):
         """
         Creates an OnlineReplay instance from a replay by the given user on the given map.
 
         Args:
             Cacher cacher: A cacher object containing a database connection.
-            Integer map_id: The map_id to download the replay from.
-            Integer user_id: The user id to download the replay of.
-            String username: The username of the user. Used as the representation of the replay.
-            Integer replay_id: The id of the replay we are retrieving (used to cache).
-            Integer enabled_mods: The bitwise mod combination representing the enabled mods
-            Boolean replay_available: Whether the replay data can be retrieved from the api or not.
+            UserInfo user_info: The UserInfo object representing this replay.
 
         Returns:
             The Replay instance created with the given information, or None if the replay was not available.
@@ -275,17 +261,17 @@ class Loader():
             UnkownAPIException if replay_available was 1, but we did not receive replay data from the api.
         """
 
-        if(not replay_available):
+        if(not user_info.replay_available):
             return None
 
-        lzma_bytes = self.replay_data(map_id, user_id, enabled_mods)
+        lzma_bytes = self.replay_data(user_info)
         if(lzma_bytes is None):
             raise UnkownAPIException("The api guaranteed there would be a replay available, but we did not receive any data. "
                                      "Please report this to the devs, who will open an issue on osu!api if necessary.")
         parsed_replay = osrparse.parse_replay(lzma_bytes, pure_lzma=True)
         replay_data = parsed_replay.play_data
-        cacher.cache(map_id, user_id, lzma_bytes, replay_id, enabled_mods)
-        return OnlineReplay(replay_data, username, enabled_mods, replay_id)
+        cacher.cache(lzma_bytes, user_info)
+        return OnlineReplay(replay_data, user_info)
 
     @staticmethod
     def check_response(response):

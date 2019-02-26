@@ -25,7 +25,7 @@ class Cacher:
         self.conn = sqlite3.connect(str(PATH_DB))
         self.cursor = self.conn.cursor()
 
-    def cache(self, map_id, user_id, lzma_bytes, replay_id, mods):
+    def cache(self, lzma_bytes, user_info):
         """
         Writes the given lzma bytes to the database, linking it to the given map and user.
         If an entry with the given map_id and user_id already exists, it is overwritten with
@@ -37,15 +37,20 @@ class Cacher:
 
         Args:
             String map_id: The map id to insert into the db.
-            Integer user_id: The user id to insert into the db.
             Bytes lzma_bytes: The lzma bytes to compress and insert into the db.
-            Integer replay_id: The id of the replay, which changes when a user overwrites their score.
+            UserInfo user_info: The UserInfo object representing this replay.
         """
 
         if(not self.should_cache):
             return
         print("caching...", end="", flush=True)
         compressed_bytes = Cacher.compress(lzma_bytes)
+
+        map_id = user_info.map_id
+        user_id = user_info.user_id
+        mods = user_info.enabled_mods
+        replay_id = user_info.replay_id
+
         result = self.cursor.execute("SELECT COUNT(1) FROM replays WHERE map_id=? AND user_id=? AND mods=?", [map_id, user_id, mods]).fetchone()[0]
         if(result): # already exists so we overwrite (this happens when we call Cacher.revalidate)
             self.write("UPDATE replays SET replay_data=?, replay_id=? WHERE map_id=? AND user_id=? AND mods=?", [compressed_bytes, replay_id, map_id, user_id, mods])
@@ -53,17 +58,19 @@ class Cacher:
             self.write("INSERT INTO replays VALUES(?, ?, ?, ?, ?)", [map_id, user_id, compressed_bytes, replay_id, mods])
         print("done")
 
-    def revalidate(self, map_id, user_info, loader):
+    def revalidate(self, loader, user_info):
         """
-        Re-caches a stored replay if one of the given users has overwritten their score on the given map since it was cached.
+        Revalidates every entry in user_info, which may contain different maps or users. If an entry exists in the cache with a UserInfo's
+        map_id, user_id, and enabled_mods, the score is redownloaded and the outdated score is replaced with the new one in the cache.
 
         Args:
-            String map_id: The map to revalidate.
-            Dictionary user_info: The up to date mapping of user_id to [username, replay_id, enabled_mods] to revalidate.
-                                       Only contains information for a single map.
             Loader loader: The Loader from the circleguard instance to redownload beatmaps with if they are outdated.
+            List [UserInfo]: A list of UserInfo objects containing the up-to-date information of user's replays.
         """
 
+        # TODO giant mess doesn't work, check each entry individually (one db call per entry in user_info
+        # because different map ids which is a bit yucky but whatever,
+        # much easier than this silly filtering we do now
         result = self.cursor.execute("SELECT user_id, replay_id FROM replays WHERE map_id=?", [map_id]).fetchall()
 
         # filter result to only contain entries also in user_info
