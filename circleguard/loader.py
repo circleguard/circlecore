@@ -74,7 +74,7 @@ def check_cache(function):
         user_id = args[3]
         replay_id = args[5]
         enabled_mods = args[6]
-        lzma = cacher.check_cache(map_id, user_id)
+        lzma = cacher.check_cache(map_id, user_id, enabled_mods)
         if(lzma):
             replay_data = osrparse.parse_replay(lzma, pure_lzma=True).play_data
             self.loaded += 1
@@ -265,7 +265,7 @@ class Loader():
             Integer user_id: The user id to download the replay of.
             String username: The username of the user. Used as the representation of the replay.
             Integer replay_id: The id of the replay we are retrieving (used to cache).
-            Integer enabled_mods: The base10 number representing the enabled mods
+            Integer enabled_mods: The bitwise mod combination representing the enabled mods
             Boolean replay_available: Whether the replay data can be retrieved from the api or not.
 
         Returns:
@@ -284,7 +284,7 @@ class Loader():
                                      "Please report this to the devs, who will open an issue on osu!api if necessary.")
         parsed_replay = osrparse.parse_replay(lzma_bytes, pure_lzma=True)
         replay_data = parsed_replay.play_data
-        cacher.cache(map_id, user_id, lzma_bytes, replay_id)
+        cacher.cache(map_id, user_id, lzma_bytes, replay_id, enabled_mods)
         return OnlineReplay(replay_data, username, enabled_mods, replay_id)
 
     @staticmethod

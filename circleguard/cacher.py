@@ -25,7 +25,7 @@ class Cacher:
         self.conn = sqlite3.connect(str(PATH_DB))
         self.cursor = self.conn.cursor()
 
-    def cache(self, map_id, user_id, lzma_bytes, replay_id):
+    def cache(self, map_id, user_id, lzma_bytes, replay_id, mods):
         """
         Writes the given lzma bytes to the database, linking it to the given map and user.
         If an entry with the given map_id and user_id already exists, it is overwritten with
@@ -46,11 +46,11 @@ class Cacher:
             return
         print("caching...", end="", flush=True)
         compressed_bytes = Cacher.compress(lzma_bytes)
-        result = self.cursor.execute("SELECT COUNT(1) FROM replays WHERE map_id=? AND user_id=?", [map_id, user_id]).fetchone()[0]
+        result = self.cursor.execute("SELECT COUNT(1) FROM replays WHERE map_id=? AND user_id=? AND mods=?", [map_id, user_id, mods]).fetchone()[0]
         if(result): # already exists so we overwrite (this happens when we call Cacher.revalidate)
-            self.write("UPDATE replays SET replay_data=?, replay_id=? WHERE map_id=? AND user_id=?", [compressed_bytes, replay_id, map_id, user_id])
+            self.write("UPDATE replays SET replay_data=?, replay_id=? WHERE map_id=? AND user_id=? AND mods=?", [compressed_bytes, replay_id, map_id, user_id, mods])
         else: # else just insert
-            self.write("INSERT INTO replays VALUES(?, ?, ?, ?)", [map_id, user_id, compressed_bytes, replay_id])
+            self.write("INSERT INTO replays VALUES(?, ?, ?, ?, ?)", [map_id, user_id, compressed_bytes, replay_id, mods])
         print("done")
 
     def revalidate(self, map_id, user_info, loader):
@@ -67,7 +67,7 @@ class Cacher:
         result = self.cursor.execute("SELECT user_id, replay_id FROM replays WHERE map_id=?", [map_id]).fetchall()
 
         # filter result to only contain entries also in user_info
-        result = [info for info in result if info[0] in user_info.keys()]
+        result = [info for info in result if info[0] in user_info.keys()] #TODO user_info no longer a dict
         for user_id, local_replay_id in result:
             online_replay_id = user_info[user_id][1]
             if(local_replay_id != online_replay_id): # local (outdated) id does not match online (updated) id
@@ -78,19 +78,20 @@ class Cacher:
                 self.cache(map_id, user_id, loader.replay_data(map_id, user_id), online_replay_id)
                 print("cached")
 
-    def check_cache(self, map_id, user_id):
+    def check_cache(self, map_id, user_id, mods):
         """
-        Checks if a replay exists on the given map_id by the given user_id, and returns the decompressed wtc (equivelant to an lzma) string if so.
+        Checks if a replay exists on the given map_id by the given user_id with the given mods, and returns the decompressed wtc (equivelant to an lzma) string if so.
 
         Args:
-            String map_id: The map_id to check in combination with the user_id.
-            String user_id: The user_id to check in combination with the user_id.
+            String map_id: The map_id to check for.
+            String user_id: The user_id to check for.
+            Integer mods: The bitwise enabled mods for the play.
 
         Returns:
             The lzma bytes that would have been returned by decoding the base64 api response, or None if it wasn't cached.
         """
 
-        result = self.cursor.execute("SELECT replay_data FROM replays WHERE map_id=? AND user_id=?", [map_id, user_id]).fetchone()
+        result = self.cursor.execute("SELECT replay_data FROM replays WHERE map_id=? AND user_id=? AND mods=?", [map_id, user_id, mods]).fetchone()
         if(result):
             print("Loading replay by {} from cache".format(user_id))
             return wtc.decompress(result[0])
