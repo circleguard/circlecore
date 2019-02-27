@@ -290,7 +290,7 @@ class Loader():
                 if(response["error"] == error.value[0]):
                     return error
             else:
-                return Error.Unknown
+                return Error.UNKNOWN
         else:
             return False
 

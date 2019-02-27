@@ -8,7 +8,7 @@ class Error(Enum):
     RATELIMITED       = ["Requesting too fast! Slow your operation, cap'n!", RatelimitException, "We were ratelimited. Waiting it out"]
     RETRIEVAL_FAILED  = ["Replay retrieval failed.", ReplayUnavailableException, "Replay retrieval failed. Skipping"]
     INVALID_KEY       = ["Please provide a valid API key.", InvalidKeyException, "Please provide a valid key in secret.py"]
-    Unknown            = ["Unknown error.", UnknownAPIException, "Unknown error when requesting replay. Please lodge an issue with the devs immediately"]
+    UNKNOWN           = ["Unknown error.", UnknownAPIException, "Unknown error when requesting replay. Please lodge an issue with the devs immediately"]
 
 class Mod(Enum):
     NoMod          = 0
