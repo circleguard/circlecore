@@ -2,10 +2,10 @@ import argparse
 
 argparser = argparse.ArgumentParser()
 argparser.add_argument("-m", "--map", dest="map_id",
-                    help="checks the leaderboard on the given beatmap id against each other")
+                    help="checks the leaderboard on the given beatmap id against each other", type=int)
 
 argparser.add_argument("-u", "--user", dest="user_id",
-                    help="checks only the given user against the other leaderboard replays. Must be set with -m")
+                    help="checks only the given user against the other leaderboard replays. Must be set with -m", type=int)
 
 argparser.add_argument("-l", "--local", help=("compare scores under the replays/ directory to a beatmap leaderboard (if set with -m), "
                                              "a score set by a user on a beatmap (if set with -m and -u) or the other scores in the folder "

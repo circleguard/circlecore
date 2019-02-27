@@ -9,14 +9,14 @@ class OnlineReplay(Replay):
         LocalReplay
     """
 
-    def __init__(self, replay_data, player_name, enabled_mods, replay_id):
+    def __init__(self, replay_data, user_info):
         """
         Initializes an OnlineReplay instance.
 
         Unless you know what you're doing, don't call this method manually -
-        this is intented to be called internally by OnlineReplay.from_map.
+        this is intented to be called internally by Loader#replay_from_map.
         """
 
-        self.replay_id = replay_id
+        self.replay_id = user_info.replay_id
 
-        Replay.__init__(self, replay_data, player_name, enabled_mods)
+        Replay.__init__(self, replay_data, user_info.username, user_info.enabled_mods)
