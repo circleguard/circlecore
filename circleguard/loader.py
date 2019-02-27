@@ -133,11 +133,7 @@ class Loader():
         if(num > 100 or num < 2):
             raise InvalidArgumentsException("The number of top plays to fetch must be between 2 and 100 inclusive!")
         response = self.api.get_scores({"m": "0", "b": map_id, "limit": num})
-        error = Loader.check_response(response)
-        if(error):
-            for error2 in Error:
-                if(error == error2):
-                    raise error.value[1](error.value[2])
+        Loader.check_response(response)
 
         infos = [UserInfo(map_id, int(x["user_id"]), str(x["username"]), int(x["score_id"]), int(x["enabled_mods"]), bool(int(x["replay_available"]))) for x in response]
         return infos
@@ -155,11 +151,7 @@ class Loader():
         """
 
         response = self.api.get_scores({"m": "0", "b": map_id, "u": user_id})
-        error = Loader.check_response(response)
-        if(error):
-            for error2 in Error:
-                if(error == error2):
-                    raise error.value[1](error.value[2])
+        Loader.check_response(response)
                                                                     # yes, it's necessary to cast the str response to int before bool - all strings are truthy.
         infos = [UserInfo(map_id, int(x["user_id"]), str(x["username"]), int(x["score_id"]), int(x["enabled_mods"]), bool(int(x["replay_available"]))) for x in response]
 
@@ -187,12 +179,7 @@ class Loader():
         print("requesting replay by {} on map {} with mods {}".format(user_info.user_id, user_info.map_id, user_info.enabled_mods))
         response = self.api.get_replay({"m": "0", "b": user_info.map_id, "u": user_info.user_id, "mods": user_info.enabled_mods})
 
-        error = Loader.check_response(response)
-        if(error):
-            for error2 in Error:
-                if(error == error2):
-                    raise error.value[1](error.value[2])
-
+        Loader.check_response(response)
         self.loaded += 1
 
         return base64.b64decode(response["content"])
@@ -219,11 +206,7 @@ class Loader():
             raise InvalidArgumentsException("The number of best user plays to fetch must be between 1 and 100 inclusive!")
         response = self.api.get_user_best({"m": "0", "u": user_id, "limit": number})
 
-        error = Loader.check_response(response)
-        if(error):
-            for error2 in Error:
-                if(error == error2):
-                    raise error.value[1](error.value[2])
+        Loader.check_response(response)
 
         return response
 
@@ -281,18 +264,16 @@ class Loader():
         Args:
             String response: The api-returned response to check.
 
-        Returns:
-            An Error enum corresponding to the type of error if there was an error, or False otherwise.
+        Raises:
+            An Error corresponding to the type of error if there was an error.
         """
 
         if("error" in response):
             for error in Error:
                 if(response["error"] == error.value[0]):
-                    return error
+                    raise error.value[1](error.value[2])
             else:
-                return Error.UNKNOWN
-        else:
-            return False
+                raise Error.UNKNOWN.value[1](Error.UNKNOWN.value[2])
 
     def enforce_ratelimit(self):
         """
