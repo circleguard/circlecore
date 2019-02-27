@@ -65,7 +65,7 @@ class Screener:
             # load screened player
             user_info = self.loader.user_info(map_id, self.user_id)
 
-            replays1 = self.loader.replay_from_user_info(self.cacher, map_id, user_info)
+            replays1 = self.loader.replay_from_user_info(self.cacher, user_info)
             if(replays1[0] is None): #should only be one replay in replays1 because loader#user_info guarantees it when limit is True
                 print("replay unavailable for screened user, skipping map {}".format(map_id))
                 continue
@@ -73,9 +73,9 @@ class Screener:
             # load other players on map
             other_users_info = self.loader.users_info(map_id, self.number)
             # filter out screened user's own info so we don't duplicate their replay (happens if they're in the top self.number of that beatmap)
-            other_users_info = [info for info in other_users_info if info[0] != self.user_id]
+            other_users_info = [info for info in other_users_info if info.user_id != self.user_id]
 
-            replays2 = self.loader.replay_from_user_info(self.cacher, map_id, other_users_info)
+            replays2 = self.loader.replay_from_user_info(self.cacher, other_users_info)
 
             # only compare the first replay for replay stealing, highly unlikely they would steal a lower placed replay
             # TODO make a deep investigate compare all?
@@ -88,15 +88,17 @@ class Screener:
         (taking a replay and resubmitting it with different mods, typically for more pp or score)
         """
 
-        print("checking for remodding. The same replay may appear to be downloaded multiple times for some maps - don't worry, they have different mods.")
+        print("checking for remodding")
         for i, map_id in enumerate(self.map_ids, 1):
             print(f"remod check on map {map_id} (map {i}/{len(self.map_ids)})")
             user_info = self.loader.user_info(map_id, self.user_id, limit=False)
             if(len(user_info) == 1): # they only have one replay so no way can it be remodded
+                print("user only has one replay on the map, skipping")
                 continue
             self.loader.new_session(len(user_info))
-            replays1 = self.loader.replay_from_user_info(self.cacher, map_id, user_info)
+            replays1 = self.loader.replay_from_user_info(self.cacher, user_info)
             if(len([replay for replay in replays1 if replay is not None]) < 2):
+                print("user only has one available replay on the map, skipping")
                 # check for the same thing again, because they could have had multiple scores but only 1 (or none) available.
                 # TODO this is only necessary because of the scary warning Comparer gives ("Make sure replay data is available for your args"),
                 # changing that would render this check unecessary
