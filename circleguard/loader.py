@@ -184,7 +184,7 @@ class Loader():
         if(self.total is None):
             raise CircleguardException("loader#new_session(total) must be called after instantiation, before any replay data is loaded.")
 
-        print("Requesting replay by {} on map {}".format(user_info.user_id, user_info.map_id))
+        print("requesting replay by {} on map {} with mods {}".format(user_info.user_id, user_info.map_id, user_info.enabled_mods))
         response = self.api.get_replay({"m": "0", "b": user_info.map_id, "u": user_info.user_id, "mods": user_info.enabled_mods})
 
         error = Loader.check_response(response)
@@ -214,7 +214,7 @@ class Loader():
             InvalidArgumentsException if number is not between 1 and 100 inclusive.
         """
 
-        print("Requesting top scores of {}".format(user_id))
+        print("requesting top scores of {}".format(user_id))
         if(number < 1 or number > 100):
             raise InvalidArgumentsException("The number of best user plays to fetch must be between 1 and 100 inclusive!")
         response = self.api.get_user_best({"m": "0", "u": user_id, "limit": number})
