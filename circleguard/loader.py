@@ -11,7 +11,7 @@ from online_replay import OnlineReplay
 from user_info import UserInfo
 from enums import Error
 from exceptions import (InvalidArgumentsException, APIException, CircleguardException,
-                        RatelimitException, InvalidKeyException, ReplayUnavailableException, UnkownAPIException)
+                        RatelimitException, InvalidKeyException, ReplayUnavailableException, UnknownAPIException)
 
 def request(function):
     """
@@ -258,7 +258,7 @@ class Loader():
             The Replay instance created with the given information, or None if the replay was not available.
 
         Raises:
-            UnkownAPIException if replay_available was 1, but we did not receive replay data from the api.
+            UnknownAPIException if replay_available was 1, but we did not receive replay data from the api.
         """
 
         if(not user_info.replay_available):
@@ -266,7 +266,7 @@ class Loader():
 
         lzma_bytes = self.replay_data(user_info)
         if(lzma_bytes is None):
-            raise UnkownAPIException("The api guaranteed there would be a replay available, but we did not receive any data. "
+            raise UnknownAPIException("The api guaranteed there would be a replay available, but we did not receive any data. "
                                      "Please report this to the devs, who will open an issue on osu!api if necessary.")
         parsed_replay = osrparse.parse_replay(lzma_bytes, pure_lzma=True)
         replay_data = parsed_replay.play_data
@@ -290,7 +290,7 @@ class Loader():
                 if(response["error"] == error.value[0]):
                     return error
             else:
-                return Error.UNKOWN
+                return Error.Unknown
         else:
             return False
 
