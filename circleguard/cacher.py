@@ -4,6 +4,7 @@ import wtc
 
 from loader import Loader
 from config import PATH_DB
+from exceptions import CircleguardException
 
 class Cacher:
     """
@@ -68,23 +69,33 @@ class Cacher:
             List [UserInfo]: A list of UserInfo objects containing the up-to-date information of user's replays.
         """
 
-        # TODO giant mess doesn't work, check each entry individually (one db call per entry in user_info
-        # because different map ids which is a bit yucky but whatever,
-        # much easier than this silly filtering we do now
-        result = self.cursor.execute("SELECT user_id, replay_id FROM replays WHERE map_id=?", [map_id]).fetchall()
+        print("revalidating relevant scores in cache")
 
-        # filter result to only contain entries also in user_info
-        result = [info for info in result if info[0] in user_info.keys()] #TODO user_info no longer a dict
-        for user_id, local_replay_id in result:
-            online_replay_id = user_info[user_id][1]
-            if(local_replay_id != online_replay_id): # local (outdated) id does not match online (updated) id
-                print("replay by {} on {} outdated, redownloading...".format(user_id, map_id), end="")
-                # this **could** conceivable be the source of a logic error by Loader.replay_data returning None and the cache storing None,
-                # but since we only re-cache when we already stored a replay by them their future replay shouldn't ever be unavailable.
-                # We don't even know why some replays are unavailable though, so it's possible.
-                self.cache(map_id, user_id, loader.replay_data(map_id, user_id), online_replay_id)
-                print("cached")
+        for info in user_info:
+            map_id = info.map_id
+            user_id = info.user_id
+            mods = info.enabled_mods
 
+            result = self.cursor.execute("SELECT replay_id FROM replays WHERE map_id=? AND user_id=? AND mods=?", [map_id, user_id, mods]).fetchall()
+            if(not result):
+                continue # nothing cached
+
+            db_replay_id = result[0][0] # blame sqlite for nesting tuples in lists
+            new_replay_id = info.replay_id
+
+            if(db_replay_id != new_replay_id):
+                if(db_replay_id > new_replay_id):
+                    raise CircleguardException("The cached replay id of {} is higher than the new replay id of {}. Map id: {}, User id: {}, mods: {}"
+                                                .format(db_replay_id, new_replay_id, user_id, map_id, mods))
+
+                print("replay by {} on {} with mods {} outdated, redownloading..".format(user_id, map_id, mods), end="")
+                lzma_data = loader.replay_data(info)
+                if(lzma_data is None):
+                    raise CircleguardException("We could not load lzma data for map {}, user {}, mods {}, replay available {} while revalidating."
+                                                .format(map_id, user_id, mods, info.replay_available))
+                self.cache(lzma_data, info)
+
+        print("done revalidating")
     def check_cache(self, map_id, user_id, mods):
         """
         Checks if a replay exists on the given map_id by the given user_id with the given mods, and returns the decompressed wtc (equivelant to an lzma) string if so.
