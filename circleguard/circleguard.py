@@ -111,7 +111,7 @@ class Circleguard:
         stddevs = args.stddevs
 
         # if doing anything online, revalidate cache
-        # self.cacher.revalidate(self.loader, self.users_info)
+        self.cacher.revalidate(self.loader, self.users_info)
 
         if(args.map_id and args.user_id): # passed both -m and -u but not -l
             replays2 = self.loader.replay_from_user_info(self.cacher, self.users_info)
