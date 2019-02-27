@@ -106,7 +106,7 @@ class Comparer:
                 elif(done % tenth == 0):
                     print("{0:.0f}%..".format(math.ceil(done / total * 10) * 10), end="", flush=True)
 
-        print("\ndone comparing")
+        print("done comparing")
 
     def _print_result(self, result, replay1, replay2):
         """
