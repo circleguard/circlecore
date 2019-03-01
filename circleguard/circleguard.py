@@ -44,10 +44,10 @@ class Circleguard:
         self.loader.new_session(args.number)
         self.args = args
         if(args.map_id):
-            self.users_info = self.loader.users_info(args.map_id, args.number)
+            self.user_info = self.loader.user_info(args.map_id, num=args.number)
         if(args.user_id and args.map_id):
-            info = self.loader.user_info(args.map_id, args.user_id)[args.user_id]
-            self.replays_check = [self.loader.replay_from_map(self.cacher, info)]
+            info = self.loader.user_info(args.map_id, user_id=args.user_id)
+            self.replays_check = self.loader.replay_from_user_info(self.cacher, info)
 
     def run(self):
         """
@@ -71,8 +71,8 @@ class Circleguard:
         user1_id = self.args.verify[1]
         user2_id = self.args.verify[2]
 
-        user1_info = loader.user_info(map_id, user1_id)
-        user2_info = loader.user_info(map_id, user2_id)
+        user1_info = loader.user_info(map_id, user_id=user1_id)
+        user2_info = loader.user_info(map_id, user_id=user2_id)
         replay1 = loader.replay_from_user_info(self.cacher, user1_info)
         replay2 = loader.replay_from_user_info(self.cacher, user2_info)
 
@@ -95,7 +95,7 @@ class Circleguard:
             return
         if(args.map_id):
             # compare every local replay with every leaderboard entry
-            replays2 = self.loader.replay_from_user_info(self.cacher, self.users_info)
+            replays2 = self.loader.replay_from_user_info(self.cacher, self.user_info)
             comparer = Comparer(threshold, args.silent, replays1, replays2=replays2, stddevs=stddevs)
             comparer.compare(mode="double")
             return
@@ -111,17 +111,17 @@ class Circleguard:
         stddevs = args.stddevs
 
         # if doing anything online, revalidate cache
-        self.cacher.revalidate(self.loader, self.users_info)
+        self.cacher.revalidate(self.loader, self.user_info)
 
         if(args.map_id and args.user_id): # passed both -m and -u but not -l
-            replays2 = self.loader.replay_from_user_info(self.cacher, self.users_info)
+            replays2 = self.loader.replay_from_user_info(self.cacher, self.user_info)
             comparer = Comparer(threshold, args.silent, self.replays_check, replays2=replays2, stddevs=stddevs)
             comparer.compare(mode="double")
             return
 
         if(args.map_id): # only passed -m
             # get all 50 top replays
-            replays = self.loader.replay_from_user_info(self.cacher, self.users_info)
+            replays = self.loader.replay_from_user_info(self.cacher, self.user_info)
             comparer = Comparer(threshold, args.silent, replays, stddevs=stddevs)
             comparer.compare(mode="single")
             return
