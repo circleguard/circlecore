@@ -7,6 +7,10 @@ argparser.add_argument("-m", "--map", dest="map_id",
 argparser.add_argument("-u", "--user", dest="user_id",
                     help="checks only the given user against the other leaderboard replays. Must be set with -m", type=int)
 
+argparser.add_argument("--mods", help="Download and compare only replays set with the exact mods given. "
+                       "Any number of arguments can be passed, and the top -n (or the number of replays available for that combination, "
+                       "whichever is fewer) replays will be downloaded and compared for each argument.", nargs="*")
+
 argparser.add_argument("-l", "--local", help=("compare scores under the replays/ directory to a beatmap leaderboard (if set with -m), "
                                              "a score set by a user on a beatmap (if set with -m and -u) or the other scores in the folder "
                                             "(default behavior)"), action="store_true")
