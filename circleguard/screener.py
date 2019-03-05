@@ -63,7 +63,7 @@ class Screener:
             print(f"steal check on map {map_id} (map {i}/{len(self.map_ids)})")
             self.loader.new_session(self.number)
             # load screened player
-            user_info = self.loader.user_info(map_id, self.user_id)
+            user_info = self.loader.user_info(map_id, user_id=self.user_id)
 
             replays1 = self.loader.replay_from_user_info(self.cacher, user_info)
             if(replays1[0] is None): #should only be one replay in replays1 because loader#user_info guarantees it when limit is True
@@ -71,7 +71,7 @@ class Screener:
                 continue
 
             # load other players on map
-            other_users_info = self.loader.users_info(map_id, self.number)
+            other_users_info = self.loader.user_info(map_id, num=self.number)
             # filter out screened user's own info so we don't duplicate their replay (happens if they're in the top self.number of that beatmap)
             other_users_info = [info for info in other_users_info if info.user_id != self.user_id]
 
@@ -91,7 +91,7 @@ class Screener:
         print("checking for remodding")
         for i, map_id in enumerate(self.map_ids, 1):
             print(f"remod check on map {map_id} (map {i}/{len(self.map_ids)})")
-            user_info = self.loader.user_info(map_id, self.user_id, limit=False)
+            user_info = self.loader.user_info(map_id, user_id=self.user_id, limit=False)
             if(len(user_info) == 1): # they only have one replay so no way can it be remodded
                 print("user only has one replay on the map, skipping")
                 continue

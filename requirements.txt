@@ -3,4 +3,4 @@ matplotlib>=3.0.2
 requests>=2.21.0
 https://github.com/circleguard/osu-replay-parser/archive/v4.0.0.zip
 https://github.com/circleguard/wtc-lzma-compressor/archive/v1.1.2.zip
-https://github.com/circleguard/osu-api/archive/v1.0.zip
+https://github.com/circleguard/osu-api/archive/v1.1.1.zip
