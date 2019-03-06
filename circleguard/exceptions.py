@@ -8,10 +8,10 @@ class APIException(CircleguardException):
     """
     Indicates an error involving the API, which may or may not be fatal.
 
-    UnkownAPIExceptions are considered fatal, InternalAPIExceptions are not.
+    UnknownAPIExceptions are considered fatal, InternalAPIExceptions are not.
     """
 
-class UnkownAPIException(APIException):
+class UnknownAPIException(APIException):
     """Indicates some error on the API's end that we were not prepared to handle."""
 
 class InternalAPIException(APIException):

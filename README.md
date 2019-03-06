@@ -1,8 +1,8 @@
 # Circleguard
 
-This project ultimately aims to create a comprehensive, player-run anticheat. A by no means complete list of cheats includes replay stealing, relax, replay editing, and timewarp.
+This project ultimately aims to create a comprehensive, player-run cheat detection tool. A by no means complete list of cheats includes replay stealing, relax, replay editing, and timewarp.
 
-As of the v1.0 release, we only attempt to detect the first item in that list - replay stealing.
+As of the v1.3 release, this tool detects both replay stealing and remodding.
 
 **Disclaimer: Neither the Circleguard organization nor any of the circleguard devs are associated with osu! or the official osu! staff in any way.**
 
@@ -14,7 +14,7 @@ You will need to install [Python 3+](https://www.python.org/downloads/) if you d
 $ pip install -r requirements.txt
 ```
 
-For those not well versed in git or command line, [here is a video walkthrough of setting the program up](https://www.youtube.com/watch?v=Ozs2grxUyHw), with timestamps in the description. Note that due to the highly beta state this program is in, some parts of the video may already be outdated by the time you watch it.
+For those not well versed in git or command line, [here is a video walkthrough of setting the program up](https://www.youtube.com/watch?v=Ozs2grxUyHw), with timestamps in the description. Note that due to the beta state this program is in, some parts of the video may already be outdated by the time you watch it.
 
 
 ## Usage
@@ -30,6 +30,7 @@ For the former, run the circleguard.py file with some or all of the following fl
 | -h, --help | displays the messages below |
 | -m, --map | checks the leaderboard on the given beatmap id against each other |
 | -u, --user | checks only the given user against the other leaderboard replays. Must be set with -m |
+| --mods Download and compare only replays set with the exact mods given. Any number of arguments can be passed, and the top -n (or the number of replays available for that combination, whichever is fewer) replays will be downloaded and compared for each argument. |
 | -l, --local | compare scores under the replays/ directory to a beatmap leaderboard (if set with -m), a score set by a user on a beatmap (if set with -m and -u) or the other scores in the folder (default behavior) |
 | -t, --threshold | sets the similarity threshold to print comparisons that score under it. Defaults to 20 |
 | -a, --auto-threshold | sets the number of standard deviations from the average similarity the threshold will automatically be set to. Overrides -t  **Note: If more than ![formula](https://latex.codecogs.com/gif.latex?\frac{1}{2}&space;-&space;\frac{1}{2}&space;\mathbf{erf}\frac{a}{\sqrt{2}}) of the input is stolen this may cause false negatives** |

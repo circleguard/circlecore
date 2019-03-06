@@ -4,6 +4,7 @@ from types import SimpleNamespace
 import threading
 
 from circleguard import Circleguard
+from config import VERSION
 
 def run():
     """
@@ -23,7 +24,7 @@ def run():
     _verify = verify.get()
 
     def run_circleguard():
-        circleguard = Circleguard(SimpleNamespace(map_id=_map_id, user_id=_user_id, local=_local, threshold=_threshold, stddevs=_stddevs,
+        circleguard = Circleguard(SimpleNamespace(map_id=_map_id, user_id=_user_id, mods="", local=_local, threshold=_threshold, stddevs=_stddevs,
                                               number=_number, cache=_cache, silent=_silent, verify=_verify))
         circleguard.run()
 
@@ -33,15 +34,20 @@ def run():
 
 # Root and Frames configuration
 root = Tk()
-root.title("Circleguard")
+root.title("Circleguard v{}".format(VERSION))
 root.columnconfigure(0, weight=1)
 root.rowconfigure(0, weight=1)
-# houses user input boxes and run button
+# houses boolean inputs passed to circleguard
+s = ttk.Style()
+s.configure("TFrame", foreground="#ccc")
+
 main = ttk.Frame(root)
 main.grid(row=0, column=0)
 # houses options - what type of search, whether to use local, etc.
 options = ttk.Frame(root)
-options.grid(row=0, column=1)
+options.grid(row=0, column=2)
+sep = ttk.Separator(root, orient="vertical")
+sep.grid(row=0, column=1)
 
 # Global vars
 map_id = tkinter.StringVar()

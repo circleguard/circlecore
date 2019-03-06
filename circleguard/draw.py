@@ -71,8 +71,8 @@ class Draw():
         # create plot for each replay and add legend with player names
         fig, ax = plt.subplots()
 
-        plot1 = plt.plot('x', 'y', "red", animated=True, label=self.replay1.player_name)[0]
-        plot2 = plt.plot('', '', "blue", animated=True, label=self.replay2.player_name)[0]
+        plot1 = plt.plot('x', 'y', "red", animated=True, label='\u200B' + self.replay1.player_name)[0]
+        plot2 = plt.plot('', '', "blue", animated=True, label='\u200B' + self.replay2.player_name)[0]
 
         fig.legend()
 
