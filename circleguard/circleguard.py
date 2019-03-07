@@ -106,7 +106,7 @@ class Circleguard:
             return
         if(args.map_id):
             # compare every local replay with every leaderboard entry (multiple times for different mod sets)
-            for user_info in self.users_info:
+            for user_info in self.user_infos:
                 replays2 = self.loader.replay_from_user_info(self.cacher, user_info)
                 comparer = Comparer(threshold, args.silent, replays1, replays2=replays2, stddevs=stddevs)
                 comparer.compare(mode="double")
