@@ -74,9 +74,9 @@ The GUI often lags behind CLI implementations - a feature recently added to the 
 
 #### Examples
 
-The gui looks slightly different on every operating system. Here's how it should look on mac:
+The gui looks slightly different on every operating system. Here's how it should look on windows:
 
-<img src="https://i.imgur.com/5MQ9aP1.png">
+<img src="https://i.imgur.com/OJ4J9Wk.png">
 
 When you click 'run' in the gui, keep an eye on the command line you started the gui from, because that acts as both stdout and stdin of the program (meaning it will display results there, instead of the gui).
 
