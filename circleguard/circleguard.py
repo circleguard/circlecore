@@ -132,6 +132,8 @@ class Circleguard:
                 replays2 = self.loader.replay_from_user_info(self.cacher, user_info)
                 comparer = Comparer(threshold, args.silent, self.replays_check, replays2=replays2, stddevs=stddevs)
                 comparer.compare(mode="double")
+                replays2 = [replay for replay in replays2 if
+                            replay.replay_id not in [replay.replay_id for replay in self.replays_checks]]
             return
 
         if(args.map_id): # only passed -m
