@@ -122,7 +122,7 @@ class Comparer:
         mean = result[0]
         sigma = result[1]
 
-        if(mean > self.threshold):
+        if(mean > self.threshold) or replay1.replay_id == replay2.replay_id:
             return
 
         # if they were both set locally, we don't get replay ids to compare
