@@ -1,48 +1,42 @@
 import pathlib
 
-ROOT_PATH = pathlib.Path(__file__).parent
-if(not (ROOT_PATH / "secret.py").is_file()):
-    key = input("Please enter your api key below - you can get it from https://osu.ppy.sh/p/api. "
-                "This will only ever be stored locally, and is necessary to retrieve replay data.\n")
-    with open(ROOT_PATH / "secret.py", mode="x") as secret:
-        secret.write("API_KEY = '{}'".format(key))
-
 import sys
 import itertools
 import os
 from os.path import isfile, join
 
-from argparser import argparser
-from draw import Draw
-from loader import Loader
-from local_replay import LocalReplay
-from online_replay import OnlineReplay
-from comparer import Comparer
-from investigator import Investigator
-from cacher import Cacher
-from screener import Screener
-from config import PATH_REPLAYS_STUB, VERSION
-from secret import API_KEY
-from utils import mod_to_int
-from exceptions import InvalidArgumentsException
+from .draw import Draw
+from .loader import Loader
+from .local_replay import LocalReplay
+from .online_replay import OnlineReplay
+from .comparer import Comparer
+from .investigator import Investigator
+from .cacher import Cacher
+from .screener import Screener
+from .config import VERSION
+from .utils import mod_to_int
+from .exceptions import InvalidArgumentsException
 
 class Circleguard:
 
-    def __init__(self, args):
+    def __init__(self, args, key, path):
         """
         Initializes a Circleguard instance.
 
         [SimpleNamespace or argparse.Namespace] args:
             A namespace-like object representing how and what to compare. An example may look like
             `Namespace(cache=False, local=False, map_id=None, number=50, threshold=20, user_id=None)`
+        String key: An osu API key
+        Path path: A pathlike object representing the absolute path to the directory which contains the database and and replay files.
         """
 
         # get all replays in path to check against. Load this per circleguard instance or users moving files around while the gui is open
         # results in unintended behavior (their changes not being applied to a new run)
-        self.PATH_REPLAYS = [join(PATH_REPLAYS_STUB, f) for f in os.listdir(PATH_REPLAYS_STUB) if isfile(join(PATH_REPLAYS_STUB, f)) and f != ".DS_Store"]
+        local_replay_paths = [path / "replays" / f for f in os.listdir(path / "replays") if isfile(path / "replays" / f) and f != ".DS_Store"]
+        self.local_replays = [LocalReplay.from_path(osr_path) for osr_path in local_replay_paths]
 
-        self.cacher = Cacher(args.cache)
-        self.loader = Loader(API_KEY)
+        self.cacher = Cacher(args.cache, path / "db" / "cache.db")
+        self.loader = Loader(key)
         self.loader.new_session(args.number)
         self.args = args
 
@@ -64,7 +58,10 @@ class Circleguard:
         """
         Starts loading and detecting replays based on the args passed through the command line.
         """
-        if(self.args.verify):
+        if(self.args.version):
+            print("Circleguard {}".format(VERSION))
+            sys.exit(0)
+        elif(self.args.verify):
             self._run_verify()
         elif(self.args.local):
             self._run_local()
@@ -93,27 +90,24 @@ class Circleguard:
     def _run_local(self):
 
         args = self.args
-        # get all local replays (used in every --local case)
-        replays1 = [LocalReplay.from_path(osr_path) for osr_path in self.PATH_REPLAYS]
-
         threshold = args.threshold
         stddevs = args.stddevs
 
         if(args.map_id and args.user_id):
             # compare every local replay with just the given user + map replay
-            comparer = Comparer(threshold, args.silent, replays1, replays2=self.replays_check, stddevs=stddevs)
+            comparer = Comparer(threshold, args.silent, self.local_replays, replays2=self.replays_check, stddevs=stddevs)
             comparer.compare(mode="double")
             return
         if(args.map_id):
             # compare every local replay with every leaderboard entry (multiple times for different mod sets)
             for user_info in self.user_infos:
                 replays2 = self.loader.replay_from_user_info(self.cacher, user_info)
-                comparer = Comparer(threshold, args.silent, replays1, replays2=replays2, stddevs=stddevs)
+                comparer = Comparer(threshold, args.silent, self.local_replays, replays2=replays2, stddevs=stddevs)
                 comparer.compare(mode="double")
 
             return
         else:
-            comparer = Comparer(threshold, args.silent, replays1, stddevs=stddevs)
+            comparer = Comparer(threshold, args.silent, self.local_replays, stddevs=stddevs)
             comparer.compare(mode="single")
 
     def _run_map(self):
@@ -130,6 +124,7 @@ class Circleguard:
         if(args.map_id and args.user_id): # passed both -m and -u but not -l
             for user_info in self.user_infos:
                 replays2 = self.loader.replay_from_user_info(self.cacher, user_info)
+                replays2 = [replay for replay in replays2 if replay.replay_id not in [replay.replay_id for replay in self.replays_check]]
                 comparer = Comparer(threshold, args.silent, self.replays_check, replays2=replays2, stddevs=stddevs)
                 comparer.compare(mode="double")
             return
@@ -145,11 +140,3 @@ class Circleguard:
         args = self.args
         screener = Screener(self.cacher, self.loader, args.threshold, args.silent, args.user_id, args.number, args.stddevs)
         screener.screen()
-
-if __name__ == '__main__':
-    args = argparser.parse_args()
-    if(args.version):
-        print("Circleguard {}".format(VERSION))
-        sys.exit(0)
-    circleguard = Circleguard(args)
-    circleguard.run()

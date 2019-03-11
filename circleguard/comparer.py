@@ -4,10 +4,10 @@ import sys
 import numpy as np
 import math
 
-from draw import Draw
-from replay import Replay
-from enums import Mod
-from exceptions import InvalidArgumentsException
+from .draw import Draw
+from .replay import Replay
+from .enums import Mod
+from .exceptions import InvalidArgumentsException
 
 class Comparer:
     """

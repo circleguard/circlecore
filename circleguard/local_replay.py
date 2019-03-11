@@ -1,6 +1,6 @@
 import osrparse
 
-from replay import Replay
+from .replay import Replay
 
 class LocalReplay(Replay):
     """

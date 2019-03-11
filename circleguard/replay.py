@@ -1,6 +1,7 @@
 import numpy as np
 import osrparse
-from enums import Mod
+
+from .enums import Mod
 
 class Interpolation:
     """A utility class containing coordinate interpolations."""

@@ -1,4 +1,4 @@
-from replay import Replay
+from .replay import Replay
 
 class OnlineReplay(Replay):
     """

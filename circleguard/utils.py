@@ -1,5 +1,5 @@
-from exceptions import InvalidArgumentsException
-from enums import Mod
+from .exceptions import InvalidArgumentsException
+from .enums import Mod
 
 def mod_to_int(mod):
     """

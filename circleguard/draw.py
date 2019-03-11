@@ -1,12 +1,14 @@
+import itertools as itr
+
 import numpy as np
 import matplotlib
 if(matplotlib.get_backend() == "MacOSX"):
     matplotlib.use("TkAgg")
 import matplotlib.pyplot as plt
-import itertools as itr
 from matplotlib.animation import FuncAnimation
-from replay import Replay
-from enums import Mod
+
+from .replay import Replay
+from .enums import Mod
 
 class Draw():
     """

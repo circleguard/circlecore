@@ -2,9 +2,8 @@ import sqlite3
 
 import wtc
 
-from loader import Loader
-from config import PATH_DB
-from exceptions import CircleguardException
+from .loader import Loader
+from .exceptions import CircleguardException
 
 class Cacher:
     """
@@ -14,16 +13,17 @@ class Cacher:
     Be wary of instantiating too many.
     """
 
-    def __init__(self, cache):
+    def __init__(self, cache, path):
         """
         Initializes a Cacher instance.
 
         Args:
             Boolean cache: Whether replays should be cached or not.
+            Path path: A pathlike object representing the absolute path to the database
         """
 
         self.should_cache = cache
-        self.conn = sqlite3.connect(str(PATH_DB))
+        self.conn = sqlite3.connect(str(path))
         self.cursor = self.conn.cursor()
 
     def cache(self, lzma_bytes, user_info):

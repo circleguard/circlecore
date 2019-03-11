@@ -7,10 +7,10 @@ from requests import RequestException
 import osrparse
 import osuAPI
 
-from online_replay import OnlineReplay
-from user_info import UserInfo
-from enums import Error
-from exceptions import (InvalidArgumentsException, APIException, CircleguardException,
+from .online_replay import OnlineReplay
+from .user_info import UserInfo
+from .enums import Error
+from .exceptions import (InvalidArgumentsException, APIException, CircleguardException,
                         RatelimitException, InvalidKeyException, ReplayUnavailableException, UnknownAPIException)
 
 def request(function):
