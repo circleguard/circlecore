@@ -1,4 +1,4 @@
-import pathlib
+from pathlib import Path
 
 import sys
 import itertools
@@ -25,9 +25,9 @@ class Circleguard:
         Initializes a Circleguard instance.
 
         String key: An osu API key
-        Path path: A pathlike object representing the absolute path to the directory which contains the database and and replay files.
+        [Path or String] path: A pathlike object representing the absolute path to the directory which contains the database and and replay files.
         """
-
+        path = Path(path) # no effect if passed path, but converts string to path
         # get all replays in path to check against. Load this per circleguard instance or users moving files around while the gui is open
         # results in unintended behavior (their changes not being applied to a new run)
         local_replay_paths = [path / "replays" / f for f in os.listdir(path / "replays") if isfile(path / "replays" / f) and f != ".DS_Store"]
