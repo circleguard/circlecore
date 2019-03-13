@@ -26,6 +26,12 @@ class Cacher:
         self.conn = sqlite3.connect(str(path))
         self.cursor = self.conn.cursor()
 
+    def set_cache(self, should_cache):
+        """
+        Sets the cacher's cache setting - whether or not it will cache replays.
+        """
+        self.should_cache = should_cache
+
     def cache(self, lzma_bytes, user_info):
         """
         Writes the given lzma bytes to the database, linking it to the given map and user.
