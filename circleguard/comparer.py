@@ -4,10 +4,10 @@ import sys
 import numpy as np
 import math
 
-from .draw import Draw
+from circleguard.draw import Draw
 from circleguard.replay import Replay
-from .enums import Mod
-from .exceptions import InvalidArgumentsException, CircleguardException
+from circleguard.enums import Mod
+from circleguard.exceptions import InvalidArgumentsException, CircleguardException
 import circleguard.utils as utils
 from circleguard.result import Result
 import circleguard.config as config

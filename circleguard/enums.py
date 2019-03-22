@@ -1,6 +1,6 @@
 from enum import Enum
 
-from .exceptions import UnknownAPIException, RatelimitException, InvalidKeyException, ReplayUnavailableException
+from circleguard.exceptions import UnknownAPIException, RatelimitException, InvalidKeyException, ReplayUnavailableException
 # strings taken from osu api error responses
 # [api response, exception class type, details to pass to an exception]
 class Error(Enum):

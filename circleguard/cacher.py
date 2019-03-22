@@ -2,8 +2,8 @@ import sqlite3
 
 import wtc
 
-from .loader import Loader
-from .exceptions import CircleguardException
+from circleguard.loader import Loader
+from circleguard.exceptions import CircleguardException
 
 class Cacher:
     """

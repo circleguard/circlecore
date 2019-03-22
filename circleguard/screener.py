@@ -1,4 +1,4 @@
-from .comparer import Comparer
+from circleguard.comparer import Comparer
 
 class Screener:
     """
