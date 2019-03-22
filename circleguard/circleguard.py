@@ -22,18 +22,28 @@ class Circleguard:
         """
         Initializes a Circleguard instance.
 
-        String key: An osu API key
-        [Path or String] path: A pathlike object representing the absolute path to the directory which contains the database and and replay files.
+        Args:
+            String key: An osu API key
+            [Path or String] replays_path: A pathlike object to the directory containing osr files
+            [Path or String] db_path: A pathlike object to the databse file to write and/or read cached replays
         """
+
         self.replays_path = Path(replays_path) # no effect if passed path, but converts string to path
         self.db_path = Path(db_path)
-        self.cacher = Cacher(config.cache, self.db_path)
-        self.loader = Loader(self.cacher, key)
+        cacher = Cacher(config.cache, self.db_path)
+        self.loader = Loader(cacher, key)
 
     def run(self, check):
         """
-        Starts loading and detecting replays based on the args passed through the command line.
+        Compares replays contained in the check object for replay steals.
+
+        Args:
+            Check check: A Check object containing either one or two sets of replays. If it was initialized with
+                         a single replay set, all replays in that set are compared with each other. If it was
+                         initialized with two replay sets, all replays in the first set are compared with all
+                         replays in the second set.
         """
+
         replay_maps = [replay for replay in check.replays if isinstance(replay, ReplayMap)]
         self.loader.new_session(len(replay_maps))
         if(not check.loaded):
@@ -43,6 +53,19 @@ class Circleguard:
 
 
     def map_check(self, map_id, u=None, num=config.num, cache=config.cache):
+        """
+        Checks a map's leaderboard for replay steals.
+
+        Args:
+            Integer map_id: The id of the map (not the id of the mapset!) to compare replays from
+            Integer u: A user id. If passed, only the replay made by this user id on the given map will be
+                       compared with the rest of the lederboard of the map. No other comparisons will be made.
+            Integer num: The number of replays to compare from the map. Defaults to 50, or the config value if changed.
+                         Loads from the top ranks of the leaderboard, so num=20 will compare the top 20 scores. This
+                          number must be between 1 and 100, as restricted by the osu api.
+            Boolean cache: Whether to cache the replays loaded in this check. Defaults to False, or the config value if changed.
+        """
+
         replays2 = None
         if(u):
             info = self.loader.user_info(map_id, user_id=u)
@@ -53,6 +76,10 @@ class Circleguard:
         yield from self.run(check)
 
     def verify(self, map_id, user1, user2, cache):
+        """
+        Verifies that two user's replay on a map are steals of each other.
+        """
+
         info1 = self.loader.user_info(map_id, user_id=user1)
         info2 = self.loader.user_info(map_id, user_id=user2)
         replay1 = ReplayMap(info1.map_id, info1.user_id, info1.mods)
