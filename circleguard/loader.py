@@ -8,17 +8,25 @@ import osrparse
 import osuAPI
 
 from circleguard.replay import ReplayMap
-from .user_info import UserInfo
-from .enums import Error
-from .exceptions import (InvalidArgumentsException, APIException, CircleguardException,
+from circleguard.user_info import UserInfo
+from circleguard.enums import Error
+from circleguard.exceptions import (InvalidArgumentsException, APIException, CircleguardException,
                         RatelimitException, InvalidKeyException, ReplayUnavailableException, UnknownAPIException)
 
 def request(function):
     """
     Decorator intended to appropriately handle all request and api related exceptions.
+
+    Also checks if we can refresh the time at which we started our requests because
+    it's been more than RATELIMIT_RESET since the first request of the cycle.
+
+    If we've refreshed our ratelimits, sets start_time to be the current datetime.
     """
 
     def wrapper(*args, **kwargs):
+        difference = datetime.now() - Loader.start_time
+        if(difference.seconds > Loader.RATELIMIT_RESET):
+            Loader.start_time = datetime.now()
         # catch them exceptions boy
         ret = None
         try:
@@ -39,22 +47,6 @@ def request(function):
             ret = None
         return ret
     return wrapper
-
-def api(function):
-    """
-    Decorator that checks if we can refresh the time at which we started our requests because
-    it's been more than RATELIMIT_RESET since the first request of the cycle.
-
-    If we've refreshed our ratelimits, sets start_time to be the current datetime.
-    """
-    def wrapper(*args, **kwargs):
-        # check if we've refreshed our ratelimits yet
-        difference = datetime.now() - Loader.start_time
-        if(difference.seconds > Loader.RATELIMIT_RESET):
-            Loader.start_time = datetime.now()
-        return function(*args, **kwargs)
-    return wrapper
-
 
 def check_cache(function):
     """
@@ -119,7 +111,6 @@ class Loader():
 
 
     @request
-    @api
     def user_info(self, map_id, num=None, user_id=None, mods=None, limit=True):
         """
         Returns a list of UserInfo objects containing a user's (user_id, username, replay_id, enabled mods, replay available) on a given map.
@@ -148,7 +139,6 @@ class Loader():
 
 
     @request
-    @api
     def get_user_best(self, user_id, number):
         """
         Gets the top 100 best plays for the given user.
@@ -175,7 +165,6 @@ class Loader():
 
 
     @request
-    @api
     def load_replay_data(self, map_id, user_id, mods=None):
         """
         Queries the api for replay data from the given user on the given map, with the given mods.
@@ -200,7 +189,6 @@ class Loader():
 
         return base64.b64decode(response["content"])
 
-    @api
     @check_cache
     def replay_data(self, user_info):
         """
