@@ -55,7 +55,7 @@ class Cacher:
 
         map_id = user_info.map_id
         user_id = user_info.user_id
-        mods = user_info.enabled_mods
+        mods = user_info.mods
         replay_id = user_info.replay_id
 
         result = self.cursor.execute("SELECT COUNT(1) FROM replays WHERE map_id=? AND user_id=? AND mods=?", [map_id, user_id, mods]).fetchone()[0]

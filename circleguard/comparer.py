@@ -5,9 +5,12 @@ import numpy as np
 import math
 
 from .draw import Draw
-from .replay import Replay
+from circleguard.replay import Replay
 from .enums import Mod
-from .exceptions import InvalidArgumentsException
+from .exceptions import InvalidArgumentsException, CircleguardException
+import circleguard.utils as utils
+from circleguard.result import Result
+import circleguard.config as config
 
 class Comparer:
     """
@@ -24,7 +27,7 @@ class Comparer:
         Investigator
     """
 
-    def __init__(self, threshold, silent, replays1, replays2=None, stddevs=None):
+    def __init__(self, threshold, silent, replays1, replays2=None):
         """
         Initializes a Comparer instance.
 
@@ -42,14 +45,10 @@ class Comparer:
         """
 
         self.threshold = threshold
-        self.stddevs = stddevs
-        self.silent = silent
 
         # filter beatmaps we had no data for - see Loader.replay_data and OnlineReplay.from_map
-        self.replays1 = [replay for replay in replays1 if replay is not None]
-
-        if(replays2):
-            self.replays2 = [replay for replay in replays2 if replay is not None]
+        self.replays1 = [replay for replay in replays1 if replay.replay_data is not None]
+        self.replays2 = [replay for replay in replays2 if replay.replay_data is not None] if replays2 else None
 
     def compare(self, mode):
         """
@@ -61,54 +60,24 @@ class Comparer:
             String mode: One of either "double" or "single", determining how to choose which replays to compare.
         """
 
-        if(not self.replays1): # if this is empty, bad things
-            print("No comparisons could be made. Make sure replay data is available for your args")
-            return
+        if(not self.replays1 or not self.replays2): # if either are empty, bad things
+            if(config.failfast):
+                raise CircleguardException("No comparisons could be made from the given replays")
+            else:
+                return
 
         if(mode == "double"):
             iterator = itertools.product(self.replays1, self.replays2)
-            total = len(self.replays1) * len(self.replays2)
         elif (mode == "single"):
             iterator = itertools.combinations(self.replays1, 2)
-            total = len(self.replays1) * (len(self.replays1) - 1) // 2
         else:
-            raise InvalidArgumentsException("`mode` must be one of 'double' or 'single'")
+            raise InvalidArgumentsException("'mode' must be one of 'double' or 'single'")
 
-        tenth = round(total / 10) if total >= 4 else 1
-        print("Starting {:d} combinations".format(total))
-        # automatically determine threshold based on standard deviations of similarities if stddevs is set
-        if(self.stddevs):
-            results = {}
-            for done, (replay1, replay2) in enumerate(iterator, 1):
-                result = Comparer._compare_two_replays(replay1, replay2)
-                results[(replay1, replay2)] = result
-                if(done == 1):
-                    print("Done ", end="")
-                elif(done % tenth == 0):
-                    print("{0:.0f}%..".format(math.ceil(done / total * 10) * 10), end="", flush=True)
-            similarities = [result[0] for result in results.values()]
+        for replay1, replay2 in iterator:
+            yield from self.determine_result(replay1, replay2)
 
-            mu, sigma = np.mean(similarities), np.std(similarities)
 
-            self.threshold = mu - self.stddevs * sigma
-            print("\n\nAutomatically determined threshold limit: {:.1f}\nAverage similarity: {:.1f}".format(self.threshold, mu))
-            print(f"Standard deviation of similarities: {sigma:.2f}, {'in' if sigma / mu < 0.2 else ''}significant\n\n")
-
-            for key in results:
-                self._print_result(results[key], key[0], key[1])
-        # else print normally
-        else:
-            for done, (replay1, replay2) in enumerate(iterator, 1):
-                result = Comparer._compare_two_replays(replay1, replay2)
-                self._print_result(result, replay1, replay2)
-                if(done == 1):
-                    print("Done ", end="")
-                elif(done % tenth == 0):
-                    print("{0:.0f}%..".format(math.ceil(done / total * 10) * 10), end="", flush=True)
-
-        print("done comparing")
-
-    def _print_result(self, result, replay1, replay2):
+    def determine_result(self, replay1, replay2):
         """
         Prints a human readable version of the result if the average distance
         is below the threshold set from the command line.
@@ -118,28 +87,18 @@ class Comparer:
             Replay replay1: The replay to print the name of and to draw against replay2
             Replay replay2: The replay to print the name of and to draw against replay1
         """
-
+        result = Comparer._compare_two_replays(replay1, replay2)
         mean = result[0]
         sigma = result[1]
+        ischeat = False
+        if(mean < self.threshold):
+            ischeat = True
 
-        if(mean > self.threshold):
-            return
-
-        # if they were both set locally, we don't get replay ids to compare
-        last_score = None
+        # if they were both set locally, we may not get replay ids to compare
+        later_name = None
         if(replay1.replay_id and replay2.replay_id):
-            last_score = replay1.player_name if(replay1.replay_id > replay2.replay_id) else replay2.player_name
-
-        print("\n{:.1f} similarity, {:.1f} std deviation ({} vs {}{})"
-              .format(mean, sigma, replay1.player_name, replay2.player_name, " - {} set later".format(last_score) if last_score else ""))
-
-        if(self.silent):
-            return
-
-        answer = input("Would you like to see a visualization of both replays? ")
-        if (answer and answer[0].lower().strip() == "y"):
-            draw = Draw(replay1, replay2)
-            animation = draw.run()
+            later_name = replay1.username if(replay1.replay_id > replay2.replay_id) else replay2.username
+        yield Result(replay1, replay2, mean, ischeat, later_name)
 
     @staticmethod
     def _compare_two_replays(replay1, replay2):
@@ -156,14 +115,20 @@ class Comparer:
         data2 = replay2.as_list_with_timestamps()
 
         # interpolate
-        (data1, data2) = Replay.interpolate(data1, data2)
+        (data1, data2) = utils.interpolate(data1, data2)
 
         # remove time from each tuple
         data1 = [d[1:] for d in data1]
         data2 = [d[1:] for d in data2]
 
-        flip1 = Mod.HardRock.value in [mod.value for mod in replay1.enabled_mods]
-        flip2 = Mod.HardRock.value in [mod.value for mod in replay2.enabled_mods]
+        mods1 = replay1.mods
+        mods2 = replay2.mods
+        if(type(replay1.mods) is not frozenset):
+            mods1 = frozenset(Mod(mod_val) for mod_val in utils.bits(replay1.mods)) # TODO deal with frozenset being ugly and replicated here
+        if(type(replay2.mods) is not frozenset):
+            mods2 = frozenset(Mod(mod_val) for mod_val in utils.bits(replay2.mods))
+        flip1 = Mod.HardRock.value in [mod.value for mod in mods1]
+        flip2 = Mod.HardRock.value in [mod.value for mod in mods2]
         if(flip1 ^ flip2): # xor, if one has hr but not the other
             for d in data1:
                 d[1] = 384 - d[1]

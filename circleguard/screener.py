@@ -15,7 +15,7 @@ class Screener:
         Comparer
     """
 
-    def __init__(self, cacher, loader, threshold, silent, user_id, number, stddevs):
+    def __init__(self, loader, threshold, silent, user_id, number, stddevs):
         """
         Initializes a Screener instance.
 
@@ -29,7 +29,6 @@ class Screener:
             Float stddevs: If not None, the threshold will be automatically set to this many standard deviations below the average similarity each set of comparisons.
         """
 
-        self.cacher = cacher
         self.loader = loader
         self.threshold = threshold
         self.silent = silent
@@ -65,7 +64,7 @@ class Screener:
             # load screened player
             user_info = self.loader.user_info(map_id, user_id=self.user_id)
 
-            replays1 = self.loader.replay_from_user_info(self.cacher, user_info)
+            replays1 = self.loader.replay_from_user_info(user_info)
             if(replays1[0] is None): #should only be one replay in replays1 because loader#user_info guarantees it when limit is True
                 print("replay unavailable for screened user, skipping map {}".format(map_id))
                 continue
@@ -75,7 +74,7 @@ class Screener:
             # filter out screened user's own info so we don't duplicate their replay (happens if they're in the top self.number of that beatmap)
             other_users_info = [info for info in other_users_info if info.user_id != self.user_id]
 
-            replays2 = self.loader.replay_from_user_info(self.cacher, other_users_info)
+            replays2 = self.loader.replay_from_user_info(other_users_info)
 
             # only compare the first replay for replay stealing, highly unlikely they would steal a lower placed replay
             # TODO make a deep investigate compare all?
@@ -96,7 +95,7 @@ class Screener:
                 print("user only has one replay on the map, skipping")
                 continue
             self.loader.new_session(len(user_info))
-            replays1 = self.loader.replay_from_user_info(self.cacher, user_info)
+            replays1 = self.loader.replay_from_user_info(user_info)
             if(len([replay for replay in replays1 if replay is not None]) < 2):
                 print("user only has one available replay on the map, skipping")
                 # check for the same thing again, because they could have had multiple scores but only 1 (or none) available.

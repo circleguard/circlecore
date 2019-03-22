@@ -7,122 +7,79 @@ from os.path import isfile, join
 
 from circleguard.draw import Draw
 from circleguard.loader import Loader
-from circleguard.local_replay import LocalReplay
-from circleguard.online_replay import OnlineReplay
 from circleguard.comparer import Comparer
 from circleguard.investigator import Investigator
 from circleguard.cacher import Cacher
 from circleguard.screener import Screener
 from circleguard import config
 from circleguard.utils import mod_to_int
-from circleguard.exceptions import InvalidArgumentsException
-from circleguard.check_types import MapCheck, VerifyCheck, UsersAgainstMap
+from circleguard.exceptions import InvalidArgumentsException, CircleguardException
+from circleguard.replay import Check, ReplayMap, ReplayPath
 
 class Circleguard:
 
-    def __init__(self, key, path):
+    def __init__(self, key, replays_path, db_path):
         """
         Initializes a Circleguard instance.
 
         String key: An osu API key
         [Path or String] path: A pathlike object representing the absolute path to the directory which contains the database and and replay files.
         """
-        path = Path(path) # no effect if passed path, but converts string to path
-        # get all replays in path to check against. Load this per circleguard instance or users moving files around while the gui is open
-        # results in unintended behavior (their changes not being applied to a new run)
-        local_replay_paths = [path / "replays" / f for f in os.listdir(path / "replays") if isfile(path / "replays" / f) and f != ".DS_Store"]
-        self.local_replays = [LocalReplay.from_path(osr_path) for osr_path in local_replay_paths]
-
-        self.loader = Loader(key)
-        self.cacher = Cacher(config.cache, path / "db" / "cache.db")
+        self.replays_path = Path(replays_path) # no effect if passed path, but converts string to path
+        self.db_path = Path(db_path)
+        self.cacher = Cacher(config.cache, self.db_path)
+        self.loader = Loader(self.cacher, key)
 
     def run(self, check):
         """
         Starts loading and detecting replays based on the args passed through the command line.
         """
-        if(isinstance(check, MapCheck)):
-            self.loader.new_session(check.num)
-            self._run_map(check)
-        elif(isinstance(check, VerifyCheck)):
-            self._run_verify(check)
-        elif(self.args.local):
-            self._run_local()
-        elif(self.args.map_id):
-            self._run_map()
-        elif(self.args.user_id):
-            self._run_user()
-        else:
-            print("Please set either --local (-l), --map (-m), --user (-u), or --verify (-v)! ")
-
-    def _run_verify(self, check):
-        loader = self.loader
-        map_id = check.map_id
-
-        user_info = loader.user_info(map_id, user_id=check.user_id)
-        user2_info = loader.user_info(map_id, user_id=check.user2_id)
-        replay = loader.replay_from_user_info(self.cacher, user_info)
-        replay2 = loader.replay_from_user_info(self.cacher, user2_info)
-
-        comparer = Comparer(check.threshold, check.silent, replay, replays2=replay2, stddevs=check.stddevs)
-        comparer.compare(mode="double")
-
-    def _run_local(self):
-
-        args = self.args
-        threshold = args.threshold
-        stddevs = args.stddevs
-
-        if(args.map_id and args.user_id):
-            # compare every local replay with just the given user + map replay
-            comparer = Comparer(threshold, args.silent, self.local_replays, replays2=self.replays_check, stddevs=stddevs)
-            comparer.compare(mode="double")
-            return
-        if(args.map_id):
-            # compare every local replay with every leaderboard entry (multiple times for different mod sets)
-            for user_info in self.user_infos:
-                replays2 = self.loader.replay_from_user_info(self.cacher, user_info)
-                comparer = Comparer(threshold, args.silent, self.local_replays, replays2=replays2, stddevs=stddevs)
-                comparer.compare(mode="double")
-
-            return
-        else:
-            comparer = Comparer(threshold, args.silent, self.local_replays, stddevs=stddevs)
-            comparer.compare(mode="single")
-
-    def _run_map(self, check):
-        self.user_infos = [self.loader.user_info(check.map_id, num=check.num, mods=mods) for mods in check.mods]
-        threshold = check.threshold
-        stddevs = check.stddevs
-
-        # if doing anything online, revalidate cache for all set mods
-        for user_info in self.user_infos:
-            self.cacher.revalidate(self.loader, user_info)
-
-        if(type(check) is UsersAgainstMap):
-            for user_info in self.user_infos:
-                replays2 = self.loader.replay_from_user_info(self.cacher, user_info)
-                replays2 = [replay for replay in replays2 if replay.replay_id not in [replay.replay_id for replay in self.replays_check]]
-                comparer = Comparer(threshold, check.silent, self.replays_check, replays2=replays2, stddevs=stddevs)
-                comparer.compare(mode="double")
-            return
-
-        if(type(check) is MapCheck): # if it gets here this is always true
-            for user_info in self.user_infos:
-                replays = self.loader.replay_from_user_info(self.cacher, user_info)
-                comparer = Comparer(threshold, check.silent, replays, stddevs=stddevs)
-                comparer.compare(mode="single")
-            return
-
-    def _run_user(self):
-        args = self.args
-        screener = Screener(self.cacher, self.loader, args.threshold, args.silent, args.user_id, args.number, args.stddevs)
-        screener.screen()
+        replay_maps = [replay for replay in check.replays if isinstance(replay, ReplayMap)]
+        self.loader.new_session(len(replay_maps))
+        if(not check.loaded):
+            check.load(self.loader) # all replays now have replay data, this is where ratelimit waiting would occur
+        comparer = Comparer(check.thresh, check.silent, check.replays, replays2=check.replays2)
+        yield from comparer.compare(mode=check.mode)
 
 
-def set_options(thresh=None, num=None, silent=None, cache=None):
+    def map_check(self, map_id, u=None, num=config.num, cache=config.cache):
+        replays2 = None
+        if(u):
+            info = self.loader.user_info(map_id, user_id=u)
+            replays2 = [ReplayMap(info.map_id, info.user_id, info.mods)]
+        infos = self.loader.user_info(map_id, num=num)
+        replays = [ReplayMap(info.map_id, info.user_id, info.mods) for info in infos]
+        check = Check(replays, replays2=replays2)
+        yield from self.run(check)
+
+    def verify(self, map_id, user1, user2, cache):
+        info1 = self.loader.user_info(map_id, user_id=user1)
+        info2 = self.loader.user_info(map_id, user_id=user2)
+        replay1 = ReplayMap(info1.map_id, info1.user_id, info1.mods)
+        replay2 = ReplayMap(info2.map_id, info2.user_id, info2.mods)
+
+        check = Check([replay1, replay2])
+        yield from self.run(check)
+
+    def user_check(self, user_id, num):
+        ...
+
+    def local_check(self):
+        folder = self.replays_path
+        paths = [folder / f for f in os.listdir(folder) if isfile(folder / f) and f != ".DS_Store"]
+        replays = [ReplayPath(path) for path in paths]
+        check = Check(replays)
+        yield from self.run(check)
+
+
+def set_options(thresh=None, num=None, silent=None, cache=None, failfast=None):
     """
     Sets default options for newly created instances of circleguard, and for new runs of existing instances
     """
     for k,v in locals().items():
-        if(v and hasattr(config, k)): # if they passed a value and it exists in the config
+        if(not v):
+            continue
+        if(hasattr(config, k)):
             setattr(config, k, v)
+        else: # this only happens if we fucked up, not the user's fault
+            raise CircleguardException(f"The key {k} (with value {v}) is not available as a config option")

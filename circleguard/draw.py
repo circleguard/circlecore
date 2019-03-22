@@ -7,7 +7,6 @@ if(matplotlib.get_backend() == "MacOSX"):
 import matplotlib.pyplot as plt
 from matplotlib.animation import FuncAnimation
 
-from .replay import Replay
 from .enums import Mod
 
 class Draw():
