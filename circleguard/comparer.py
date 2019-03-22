@@ -17,11 +17,9 @@ class Comparer:
     A class for managing a set of replay comparisons.
 
     Attributes:
-        List replays1: A list of Replay instances to compare against replays2.
-        List replays2: A list of Replay instances to be compared against. Optional, defaulting to None. No attempt to error check
-                       this is made - if a compare() call is made, the program will throw an AttributeError. Be sure to only call
-                       methods that involve the first set of replays if this argument is not passed.
-        Integer threshold: If a comparison scores below this value, the result is printed.
+        List replays1: A list of Replay instances to compare against replays2 if passed, or against itself if not.
+        List replays2: A list of Replay instances to be compared against.
+        Integer threshold: If a comparison scores below this value, the Result object is assigned a ischeat value of True.
 
     See Also:
         Investigator
@@ -74,7 +72,7 @@ class Comparer:
             raise InvalidArgumentsException("'mode' must be one of 'double' or 'single'")
 
         for replay1, replay2 in iterator:
-            yield from self.determine_result(replay1, replay2)
+            yield self.determine_result(replay1, replay2)
 
 
     def determine_result(self, replay1, replay2):
@@ -98,7 +96,7 @@ class Comparer:
         later_name = None
         if(replay1.replay_id and replay2.replay_id):
             later_name = replay1.username if(replay1.replay_id > replay2.replay_id) else replay2.username
-        yield Result(replay1, replay2, mean, ischeat, later_name)
+        return Result(replay1, replay2, mean, ischeat, later_name)
 
     @staticmethod
     def _compare_two_replays(replay1, replay2):
