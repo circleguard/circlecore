@@ -48,6 +48,7 @@ def request(function):
         return ret
     return wrapper
 
+
 def check_cache(function):
     """
     Decorator that checks if the replay by the given user_id on the given map_id is already cached.
