@@ -75,7 +75,7 @@ class Circleguard:
         check = Check(replays, replays2=replays2)
         yield from self.run(check)
 
-    def verify(self, map_id, user1, user2, cache):
+    def verify(self, map_id, user1, user2, cache=config.cache):
         """
         Verifies that two user's replay on a map are steals of each other.
         """
