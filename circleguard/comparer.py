@@ -60,7 +60,7 @@ class Comparer:
             String mode: One of either "double" or "single", determining how to choose which replays to compare.
         """
 
-        if(not self.replays1 or not self.replays2): # if either are empty, bad things
+        if(not self.replays1 or self.replays2 == []): # if either are empty, bad things
             if(config.failfast):
                 raise CircleguardException("No comparisons could be made from the given replays")
             else:
