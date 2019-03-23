@@ -155,14 +155,13 @@ class Loader():
             InvalidArgumentsException if number is not between 1 and 100 inclusive.
         """
 
-        print("requesting top scores of {}".format(user_id))
         if(number < 1 or number > 100):
             raise InvalidArgumentsException("The number of best user plays to fetch must be between 1 and 100 inclusive!")
         response = self.api.get_user_best({"m": "0", "u": user_id, "limit": number})
 
         Loader.check_response(response)
 
-        return response
+        return [x["beatmap_id"] for x in response]
 
 
     @request
