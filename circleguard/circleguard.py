@@ -94,8 +94,17 @@ class Circleguard:
         check = Check([replay1, replay2])
         yield from self.run(check)
 
-    def user_check(self, user_id, num):
-        ...
+    def user_check(self, u, num):
+        for map_id in self.loader.get_user_best(u, num):
+            info = self.loader.user_info(map_id, user_id=u)
+            if(not info.replay_available):
+                continue # if we can't download the user's replay on the map, we have nothing to compare against
+            user_replay = [ReplayMap(info.map_id, info.user_id, mods=info.mods)]
+
+            infos = self.loader.user_info(map_id, num=num)
+            replays = [ReplayMap(info.map_id, info.user_id, mods=info.mods) for info in infos]
+
+            yield from self.run(Check(replays, replays2=user_replay))
 
     def local_check(self):
         """
