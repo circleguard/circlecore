@@ -146,3 +146,35 @@ def interpolate(data1, data2, interpolation=Interpolation.linear, unflip=False):
         (clean, inter) = (inter, clean)
 
     return (clean, inter)
+
+def resample(timestamped, frequency):
+    """
+    Resample timestamped data at the given frequency.
+
+    Args:
+        List timestamped: A list of tuples of (t, x, y).
+        Float frequency: The frequency to resample data to in Hz.
+
+    Returns
+        A list of tuples of (t, x, y) with constant time interval 1 / frequency.
+    """
+
+    i = 0
+    t = timestamped[0][0]
+    t_max = timestamped[-1][0]
+
+    resampled = []
+
+    while t < t_max:
+        while timestamped[i][0] < t:
+            i += 1
+
+        dt1 = t - timestamped[i - 1][0]
+        dt2 = timestamped[i][0] - timestamped[i - 1][0]
+
+        inter = Interpolation.linear(timestamped[i - 1][1:], timestamped[i][1:], dt1 / dt2)
+
+        resampled.append((t, *inter))
+        t += 1000 / frequency
+
+    return resampled
