@@ -43,8 +43,6 @@ class Replay():
         Returns:
             A list of tuples of (t, x, y).
         """
-        # pylint: disable=not-an-iterable
-        # it may be None now but we call this after loading!
         # get all offsets sum all offsets before it to get all absolute times
         timestamps = np.array([e.time_since_previous_action for e in self.replay_data])
         timestamps = timestamps.cumsum()
