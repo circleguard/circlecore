@@ -17,9 +17,9 @@ class Comparer:
     A class for managing a set of replay comparisons.
 
     Attributes:
+        Integer threshold: If a comparison scores below this value, the Result object is assigned a ischeat value of True.
         List replays1: A list of Replay instances to compare against replays2 if passed, or against itself if not.
         List replays2: A list of Replay instances to be compared against.
-        Integer threshold: If a comparison scores below this value, the Result object is assigned a ischeat value of True.
 
     See Also:
         Investigator
@@ -33,13 +33,9 @@ class Comparer:
         Comparing 1 to 2 is the same as comparing 2 to 1.
 
         Args:
-            Integer threshold: If a comparison scores below this value, the result is printed.
-            Boolean silent: If true, visualization prompts will be ignored and only results will be printed.
-            List replays1: A list of Replay instances to compare against replays2.
-            List replays2: A list of Replay instances to be compared against. Optional, defaulting to None. No attempt to error check
-                           this is made - if a compare(mode="double") call is made, the program will throw an AttributeError. Be sure to only call
-                           methods that involve the first set of replays.
-            Float stddevs: If set, the threshold will be automatically set to this many standard deviations below the average similarity for the comparisons.
+            Integer threshold: If a comparison scores below this value, the Result object is assigned a ischeat value of True.
+            List replays1: A list of Replay instances to compare against replays2 if passed, or against itself if not.
+            List replays2: A list of Replay instances to be compared against.
         """
 
         self.threshold = threshold
@@ -52,7 +48,8 @@ class Comparer:
         """
         If mode is "double", compares all replays in replays1 against all replays in replays2.
         If mode is "single", compares all replays in replays1 against all other replays in replays1 (len(replays1) choose 2 comparisons).
-        In both cases, prints the result of each comparison according to _print_result.
+
+        In both cases, yields Result objects containing the result of each comparison.
 
         Args:
             String mode: One of either "double" or "single", determining how to choose which replays to compare.
@@ -72,19 +69,21 @@ class Comparer:
             raise InvalidArgumentsException("'mode' must be one of 'double' or 'single'")
 
         for replay1, replay2 in iterator:
-            yield self.determine_result(replay1, replay2)
+            yield self.result(replay1, replay2)
 
 
-    def determine_result(self, replay1, replay2):
+    def result(self, replay1, replay2):
         """
-        Prints a human readable version of the result if the average distance
-        is below the threshold set from the command line.
+        Compares two replays and returns the result of that comparison.
 
         Args:
-            Tuple result: A tuple containing (average distance, standard deviation) of a comparison.
-            Replay replay1: The replay to print the name of and to draw against replay2
-            Replay replay2: The replay to print the name of and to draw against replay1
+            Replay replay1: The first replay to compare against the second
+            Replay replay2: The second replay to compare against the first
+
+        Returns:
+            A Result object, containing the results of the comparison.
         """
+
         result = Comparer._compare_two_replays(replay1, replay2)
         mean = result[0]
         sigma = result[1]
