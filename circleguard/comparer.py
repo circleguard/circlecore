@@ -25,7 +25,7 @@ class Comparer:
         Investigator
     """
 
-    def __init__(self, threshold, silent, replays1, replays2=None):
+    def __init__(self, threshold, replays1, replays2=None):
         """
         Initializes a Comparer instance.
 

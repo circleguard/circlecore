@@ -48,7 +48,7 @@ class Circleguard:
         self.loader.new_session(len(replay_maps))
         if(not check.loaded):
             check.load(self.loader) # all replays now have replay data, this is where ratelimit waiting would occur
-        comparer = Comparer(check.thresh, check.silent, check.replays, replays2=check.replays2)
+        comparer = Comparer(check.thresh, check.replays, replays2=check.replays2)
         yield from comparer.compare(mode=check.mode)
 
 
@@ -109,7 +109,7 @@ class Circleguard:
         yield from self.run(check)
 
 
-def set_options(thresh=None, num=None, silent=None, cache=None, failfast=None):
+def set_options(thresh=None, num=None, cache=None, failfast=None):
     """
     Changes the default value for different options in circleguard.
 

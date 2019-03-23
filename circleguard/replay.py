@@ -7,13 +7,12 @@ from circleguard import config
 
 class Check():
 
-    def __init__(self, replays, replays2=None, thresh=config.thresh, silent=config.silent, cache=config.cache):
+    def __init__(self, replays, replays2=None, thresh=config.thresh, cache=config.cache):
         self.replays = replays # list of ReplayMap and ReplayPath objects, not yet processed
         self.replays2 = replays2
         self.mode = "double" if replays2 else "single"
         self.loaded = False
         self.thresh = thresh
-        self.silent = silent
         self.cache = cache
 
     def load(self, loader):
