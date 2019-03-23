@@ -17,7 +17,6 @@ class Check():
 
     def load(self, loader):
         if(self.loaded):
-            print("The replays in this Check object have already been loaded")
             return
         for replay in self.replays:
             replay.load(loader)
