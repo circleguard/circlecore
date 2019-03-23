@@ -29,9 +29,9 @@ class Check():
 
 class Replay():
 
-    def __init__(self):
-        self.replay_id = None
-        self.replay_data = None
+    def __init__(self, replay_id, replay_data):
+        self.replay_id = replay_id
+        self.replay_data = replay_data
 
     @abc.abstractclassmethod
     def load(self, loader):
@@ -68,9 +68,8 @@ class ReplayMap(Replay):
 
     def load(self, loader):
         info = loader.user_info(self.map_id, user_id=self.user_id, mods=self.mods)
-        self.replay_data = loader.replay_data(info)
         self.user_info = info
-        self.replay_id = info.replay_id
+        Replay.__init__(self, info.replay_id, loader.replay_data(info))
 
 class ReplayPath(Replay):
 
@@ -82,11 +81,10 @@ class ReplayPath(Replay):
         self.mods = None
         self.replay_data = None
 
-
     def load(self, loader):
         # no, we don't need loader for ReplayPath, but to reduce type checking when calling we make the method signatures homogeneous
         loaded = osrparse.parse_replay_file(self.path)
-        self.replay_data = loaded.play_data
         self.username = loaded.player_name
         self.mods = loaded.mod_combination
-        self.replay_id = loaded.replay_id if loaded.replay_id != 0 else None # if score is 0 it wasn't submitted (?)
+        replay_id = loaded.replay_id if loaded.replay_id != 0 else None # if score is 0 it wasn't submitted (?)
+        Replay.__init__(self, replay_id, loaded.play_data)
