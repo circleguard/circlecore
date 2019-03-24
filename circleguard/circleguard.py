@@ -18,17 +18,15 @@ from circleguard.replay import Check, ReplayMap, ReplayPath
 
 class Circleguard:
 
-    def __init__(self, key, replays_path, db_path):
+    def __init__(self, key, db_path):
         """
         Initializes a Circleguard instance.
 
         Args:
             String key: An osu API key
-            [Path or String] replays_path: A pathlike object to the directory containing osr files
             [Path or String] db_path: A pathlike object to the databse file to write and/or read cached replays
         """
 
-        self.replays_path = Path(replays_path) # no effect if passed path, but converts string to path
         self.db_path = Path(db_path)
         cacher = Cacher(config.cache, self.db_path)
         self.loader = Loader(cacher, key)
@@ -106,12 +104,14 @@ class Circleguard:
 
             yield from self.run(Check(replays, replays2=user_replay))
 
-    def local_check(self):
+    def local_check(self, folder):
         """
         Compares locally stored osr files for replay steals.
+
+        Args:
+            [Path or String] folder: A pathlike object to the directory containing osr files
         """
 
-        folder = self.replays_path
         paths = [folder / f for f in os.listdir(folder) if isfile(folder / f) and f != ".DS_Store"]
         replays = [ReplayPath(path) for path in paths]
         check = Check(replays)
