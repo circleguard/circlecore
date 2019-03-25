@@ -42,7 +42,8 @@ class Circleguard:
                          replays in the second set.
         """
 
-        replay_maps = [replay for replay in check.replays if isinstance(replay, ReplayMap)]
+        total_replays = check.replays if check.replays2 is None else check.replays + check.replays2
+        replay_maps = [replay for replay in total_replays if isinstance(replay, ReplayMap)]
         self.loader.new_session(len(replay_maps))
         if(not check.loaded):
             check.load(self.loader) # all replays now have replay data, this is where ratelimit waiting would occur
@@ -109,7 +110,7 @@ class Circleguard:
         Compares locally stored osr files for replay steals.
 
         Args:
-            [Path or String] folder: A pathlike object to the directory containing osr files
+            [Path or String] folder: A pathlike object to the directory containing osr files.
         """
 
         paths = [folder / f for f in os.listdir(folder) if isfile(folder / f) and f != ".DS_Store"]
