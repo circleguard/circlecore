@@ -6,8 +6,37 @@ import numpy as np
 from circleguard import config
 
 class Check():
+    """
+    Contains a list of Replay objects (or subclasses thereof) and how to proceed when
+    investigating them for cheats.
+
+    Attributes:
+            List [Replay] replays: A list of Replay objects.
+            List [Replay] replays2: A list of Replay objects to compare against 'replays' if passed.
+            Integer thresh: If a comparison scores below this value, its Result object has ischeat set to True.
+                            Defaults to 18, or the config value if changed.
+            Boolean cache: Whether to cache the loaded replays. Defaults to False, or the config value if changed.
+            String mode: "single" if only replays was passed, or "double" if both replays and replays2 were passed.
+            Boolean loaded: False at instantiation, set to True once check#load is called. See check#load for
+                            more details.
+    """
 
     def __init__(self, replays, replays2=None, thresh=config.thresh, cache=config.cache):
+        """
+        Initializes a Check instance.
+
+        If only replays is passed, the replays in that list are compared with themselves. If
+        both replays and replays2 are passed, the replays in replays are compared only with the
+        replays in replays2. See comparer#compare for a more detailed description.
+
+        Args:
+            List [Replay] replays: A list of Replay objects.
+            List [Replay] replays2: A list of Replay objects to compare against 'replays' if passed.
+            Integer thresh: If a comparison scores below this value, its Result object has ischeat set to True.
+                            Defaults to 18, or the config value if changed.
+            Boolean cache: Whether to cache the loaded replays. Defaults to False, or the config value if changed.
+        """
+
         self.replays = replays # list of ReplayMap and ReplayPath objects, not yet processed
         self.replays2 = replays2
         self.mode = "double" if replays2 else "single"
@@ -16,6 +45,17 @@ class Check():
         self.cache = cache
 
     def load(self, loader):
+        """
+        If check.loaded is already true, this method silently returns. Otherwise, loads replay data for every
+        replay in both replays and replays2, and sets check.loaded to True. How replays are loaded is up to
+        the implementation of the specific subclass of the Replay. Although the subclass may not use the loader
+        object, it is still passed regardless to reduce type checking. For implementation details, see the load
+        method of each Replay subclass.
+
+        Args:
+            Loader loader: The loader to handle api requests, if required by the Replay.
+        """
+
         if(self.loaded):
             return
         for replay in self.replays:
@@ -28,6 +68,10 @@ class Check():
 
 class Replay(abc.ABC):
     def __init__(self, username, mods, replay_id, replay_data):
+        """
+        Initializes a Replay instance.
+        """
+
         self.username = username
         self.mods = mods
         self.replay_id = replay_id
