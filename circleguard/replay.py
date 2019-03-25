@@ -26,8 +26,7 @@ class Check():
         self.loaded = True
 
 
-class Replay():
-
+class Replay(abc.ABC):
     def __init__(self, username, mods, replay_id, replay_data):
         self.username = username
         self.mods = mods
