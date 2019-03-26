@@ -15,6 +15,7 @@ from circleguard import config
 from circleguard.utils import mod_to_int
 from circleguard.exceptions import InvalidArgumentsException, CircleguardException
 from circleguard.replay import Check, ReplayMap, ReplayPath
+from circleguard.detect import Detect
 
 class Circleguard:
 
@@ -42,14 +43,18 @@ class Circleguard:
                          replays in the second set.
         """
 
-        total_replays = check.replays if check.replays2 is None else check.replays + check.replays2
-        replay_maps = [replay for replay in total_replays if isinstance(replay, ReplayMap)]
-        self.loader.new_session(len(replay_maps))
+        # steal check
+        compare1 = [replay for replay in check.replays if replay.detect & Detect.STEAL]
+        compare2 = [replay for replay in check.replays2 if replay.detect & Detect.STEAL] if check.replays2 else []
+        to_load = [replay for replay in compare1 + compare2 if isinstance(replay, ReplayMap)]
+
+        self.loader.new_session(len(to_load))
         if(not check.loaded):
             check.load(self.loader) # all replays now have replay data, this is where ratelimit waiting would occur
-        comparer = Comparer(check.thresh, check.replays, replays2=check.replays2)
+        comparer = Comparer(check.thresh, compare1, replays2=compare2)
         yield from comparer.compare(mode=check.mode)
 
+        # relax check (TODO)
 
     def map_check(self, map_id, u=None, num=config.num, cache=config.cache):
         """

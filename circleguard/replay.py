@@ -3,6 +3,7 @@ import abc
 import osrparse
 import numpy as np
 
+from circleguard.detect import Detect
 from circleguard import config
 
 class Check():
@@ -67,7 +68,7 @@ class Check():
 
 
 class Replay(abc.ABC):
-    def __init__(self, username, mods, replay_id, replay_data):
+    def __init__(self, username, mods, replay_id, replay_data, detect):
         """
         Initializes a Replay instance.
         """
@@ -76,6 +77,7 @@ class Replay(abc.ABC):
         self.mods = mods
         self.replay_id = replay_id
         self.replay_data = replay_data
+        self.detect = detect
 
     @abc.abstractclassmethod
     def load(self, loader):
@@ -101,22 +103,24 @@ class Replay(abc.ABC):
 
 class ReplayMap(Replay):
 
-    def __init__(self, map_id, user_id, mods=None):
+    def __init__(self, map_id, user_id, mods=None, detect=Detect.ALL):
         self.map_id = map_id
         self.user_id = user_id
         self.mods = mods
+        self.detect = detect
 
     def load(self, loader):
         info = loader.user_info(self.map_id, user_id=self.user_id, mods=self.mods)
-        Replay.__init__(self, self.user_id, info.mods, info.replay_id, loader.replay_data(info))
+        Replay.__init__(self, self.user_id, info.mods, info.replay_id, loader.replay_data(info), self.detect)
 
 class ReplayPath(Replay):
 
-    def __init__(self, path):
+    def __init__(self, path, detect=Detect.ALL):
         self.path = path
+        self.detect = detect
 
     def load(self, loader):
         # no, we don't need loader for ReplayPath, but to reduce type checking when calling we make the method signatures homogeneous
         loaded = osrparse.parse_replay_file(self.path)
         replay_id = loaded.replay_id if loaded.replay_id != 0 else None # if score is 0 it wasn't submitted (?)
-        Replay.__init__(self, loaded.player_name, loaded.mod_combination, replay_id, loaded.play_data)
+        Replay.__init__(self, loaded.player_name, loaded.mod_combination, replay_id, loaded.play_data, self.detect)
