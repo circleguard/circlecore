@@ -98,4 +98,62 @@ Options can be further specified at the second lowest level (Check level) by pas
 
 ### Subclassing Replay
 
-TODO
+If you have needs that are not met by the provided implementations of Replay - ReplayPath and ReplayMap - you can subclass Replay, or one of its subclasses, yourself.
+
+Here is a simple example of subclassing, where each Replay has a unique id. Say you were pulling these paths from a database rather than listing the files in a folder - if your database has an id for each entry, storing that in the Replay allows you to identify which entry to modify in the database after a comparison has been made.
+
+```python
+from circleguard import *
+
+class IdentifiableReplay(ReplayPath):
+    def __init__(self, id, path):
+        self.id = id
+        ReplayPath.__init__(self, path)
+
+circleguard = Circleguard("your-api-key", "/absolute/path/to/your/db/file.db")
+# database file here unrelated to the path database TODO rewrite example to make clearer or remove db path as necessary altogether
+check = Check(IdentifiableReplay(1, "/path/to/osr.osr"), IdentifiableReplay(2, "/path/to/osr2.osr"))
+for result in circleguard.run(check):
+    print("id {} vs {} - cheating? {}".format(result.replay1.id, result.replay2.id, result.ischeat))
+    # do some database logic with these two ids if applicable
+```
+
+Although Replay does not have the id attribute by default, because we subclassed ReplayPath and gave IdenitiableReplay the id attribute, the replays stored in the Result object will be that same IdentifiableReplay we passed to the Check constructor, and will have the id attribute.
+
+**The Replays stored in replay1 and replay2 of the Result object are the same replays used to instantiate Check.**
+
+Besides adding information to the Replay through the constructor, you can also control when and how it gets loaded by overloading its `load` method.
+
+```python
+from circleguard import *
+
+class ReplayDatabase(Replay):
+    def __init__(self, map_id, user_id, mods, detect=Detect.ALL):
+        self.map_id = map_id
+        self.user_id = user_id
+        self.mods = mods
+        self.detect = detect
+        self.loaded = False
+
+    def load(self):
+        # execute (unimplented) sql to retrieve replay data from a local database. Assume the call returns a tuple (replay_id, replay_data)
+        result = load_replay_from_database(self.map_id, self.user_id, self.mods)
+        replay_id = result[0]
+        replay_data = result[1]
+
+        Replay.__init__(self.user_id, self.mods, replay_id, replay_data, self.detect, loaded=True)
+
+replays = [ReplayDatabase(1699366, 12092800, 4), ReplayDatabase(1005542, 7477458, 16)]
+for replay in replays:
+    print("loading replay from local database")
+    replay.load()
+
+for result in circleguard.run(Check(replys)):
+    print(result.similarity)
+```
+
+Circleguard only cares that Replay is initialized in a subclass's load method (technically, it only cares that the class has certain attributes, but that's nitpicking). When you call circleguard.run(check), the first thing it checks if check.loaded is True. If it is, it doesn't load any replays inside it. If not, it calls the load method on each replay in the check object that has replay.loaded set to False, skipping those that have replay.loaded set to True.
+
+So long as your overriding load method loads valid replay_data and initializes the superclass Replay with appropriate values, you can either load it outside the circleguard.run(check) call, or leave the loading up to that call. Either way, the load method will be executed unless you set replay.loaded to True, which happens when you initialize Replay.
+
+If you just want to add attributes but are happy with how the replays are loaded, subclass one of ReplayPath or ReplayMap. If you want to entirely change how the replay is loaded, subclass Replay.
