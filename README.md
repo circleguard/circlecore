@@ -22,7 +22,7 @@ For simple usage, you may only ever need to use convenience methods. These metho
 
 
 ```python
-import circleguard
+from circleguard import *
 
 circleguard = Circleguard("your-api-key", "/absolute/path/to/your/db/file.db")
 
@@ -56,7 +56,7 @@ for r in circleguard.verify(1699366, 12092800, 7477458, False):
 The much more flexible way to use circleguard is to make your own Check object and run circleguard with that. This allows for mixing different types of Replay objects - comparing local .osr's to online replays - as well as the liberty to instantiate the Replay objects yourself and use your own Replay subclasses. See Advanced Usage for more on subclassing.
 
 ```python
-import circleguard
+from circleguard import *
 from pathlib import Path
 
 circleguard = Circleguard("your-api-key", "/absolute/path/to/your/db/file.db")
