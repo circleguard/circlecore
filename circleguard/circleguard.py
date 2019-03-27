@@ -108,7 +108,14 @@ class Circleguard:
             infos = self.loader.user_info(map_id, num=num)
             replays = [ReplayMap(info.map_id, info.user_id, mods=info.mods) for info in infos]
 
-            yield from self.run(Check(replays, replays2=user_replay))
+            remod_replays = []
+            for info in self.loader.user_info(map_id, user_id=u, limit=False)[1:]:
+                remod_replays.append(ReplayMap(info.map_id, info.user_id, mods=info.mods))
+
+            yield from self.run(Check(user_replay, replays2=replays))
+
+            yield from self.run(Check(user_replay + remod_replays))
+
 
     def local_check(self, folder):
         """

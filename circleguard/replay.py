@@ -68,7 +68,7 @@ class Check():
 
 
 class Replay(abc.ABC):
-    def __init__(self, username, mods, replay_id, replay_data, detect):
+    def __init__(self, username, mods, replay_id, replay_data, detect, loaded):
         """
         Initializes a Replay instance.
         """
@@ -78,6 +78,7 @@ class Replay(abc.ABC):
         self.replay_id = replay_id
         self.replay_data = replay_data
         self.detect = detect
+        self.loaded = loaded
 
     @abc.abstractclassmethod
     def load(self, loader):
@@ -101,6 +102,7 @@ class Replay(abc.ABC):
         txy.sort(key=lambda p: p[0])
         return txy
 
+
 class ReplayMap(Replay):
 
     def __init__(self, map_id, user_id, mods=None, detect=Detect.ALL):
@@ -108,19 +110,26 @@ class ReplayMap(Replay):
         self.user_id = user_id
         self.mods = mods
         self.detect = detect
+        self.loaded = False
 
     def load(self, loader):
+        if(self.loaded):
+            return
         info = loader.user_info(self.map_id, user_id=self.user_id, mods=self.mods)
-        Replay.__init__(self, self.user_id, info.mods, info.replay_id, loader.replay_data(info), self.detect)
+        Replay.__init__(self, self.user_id, info.mods, info.replay_id, loader.replay_data(info), self.detect, loaded=True)
+
 
 class ReplayPath(Replay):
 
     def __init__(self, path, detect=Detect.ALL):
         self.path = path
         self.detect = detect
+        self.loaded = False
 
     def load(self, loader):
+        if(self.loaded):
+            return
         # no, we don't need loader for ReplayPath, but to reduce type checking when calling we make the method signatures homogeneous
         loaded = osrparse.parse_replay_file(self.path)
         replay_id = loaded.replay_id if loaded.replay_id != 0 else None # if score is 0 it wasn't submitted (?)
-        Replay.__init__(self, loaded.player_name, loaded.mod_combination, replay_id, loaded.play_data, self.detect)
+        Replay.__init__(self, loaded.player_name, loaded.mod_combination, replay_id, loaded.play_data, self.detect, loaded=True)
