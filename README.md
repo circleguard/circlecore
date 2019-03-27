@@ -68,14 +68,14 @@ PATH = Path(__file__).parent / "replays"
 # Refer to the Pathlib documentation for reference on what constitutes a valid Path in string form.
 replays = [ReplayPath(PATH / "woey.osr"), ReplayPath(PATH / "ryuk.osr")]
 check = Check(replays)
-for result in circleguard.run(check):
+for r in circleguard.run(check):
     if(r.ischeat):
         print("Found a cheater locally! {} vs {}, {} set later.".format(r.replay1.path, r.replay2.path, r.later_name))
 
 # Check objects allow mixing of Replay subclasses. circleguard only defines ReplayPath and ReplayMap,
 # but as we will see further on, you can define your own subclasses to suit your needs.
 replays = [ReplayPath(PATH / "woey.osr"), ReplayMap(map_id=1699366, user_id=12092800, mods=0)]
-for result in circleguard.run(Check(replays)):
+for r in circleguard.run(Check(replays)):
     if(r.ischeat):
         # subclasses are mixed now
         repr1 = r.replay1.path if r.replay1 is ReplayPath else r.replay1.username
