@@ -56,7 +56,7 @@ class Circleguard:
 
         # relax check (TODO)
 
-    def map_check(self, map_id, u=None, num=config.num, cache=config.cache):
+    def map_check(self, map_id, u=None, num=config.num, cache=config.cache, thresh=config.thresh):
         """
         Checks a map's leaderboard for replay steals.
 
@@ -76,7 +76,7 @@ class Circleguard:
             replays2 = [ReplayMap(info.map_id, info.user_id, info.mods)]
         infos = self.loader.user_info(map_id, num=num)
         replays = [ReplayMap(info.map_id, info.user_id, info.mods) for info in infos]
-        check = Check(replays, replays2=replays2)
+        check = Check(replays, replays2=replays2, thresh=thresh)
         yield from self.run(check)
 
     def verify(self, map_id, u1, u2, cache=config.cache):
