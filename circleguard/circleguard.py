@@ -39,7 +39,7 @@ class Circleguard:
 
         # get all replays in path to check against. Load this per circleguard instance or users moving files around while the gui is open
         # results in unintended behavior (their changes not being applied to a new run)
-        self.PATH_REPLAYS = [join(PATH_REPLAYS_STUB, f) for f in os.listdir(PATH_REPLAYS_STUB) if isfile(join(PATH_REPLAYS_STUB, f)) and f != ".DS_Store"]
+        self.PATH_REPLAYS = [join(PATH_REPLAYS_STUB, f) for f in os.listdir(PATH_REPLAYS_STUB) if isfile(join(PATH_REPLAYS_STUB, f)) and f.endswith(".osr")]
 
         self.cacher = Cacher(args.cache)
         self.loader = Loader(API_KEY)
