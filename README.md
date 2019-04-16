@@ -95,4 +95,4 @@ If you have feedback on the program, are interested in contributing, or just wan
 
 Thanks to [kszlim](https://github.com/kszlim), whose [replay parser](https://github.com/kszlim/osu-replay-parser) formed the basis of [our modified replay parser](https://github.com/circleguard/osu-replay-parser).
 
-Thanks to [Accalix](https://twitter.com/Accalix_) for creating our logo!  You can check out more of his work and purchase commissions [here](https://accalixgfx.com/index.php)
+Thanks to [Accalix](https://twitter.com/Accalix_) for creating our logo! You can check out more of his work [here](https://accalixgfx.com/index.php)
