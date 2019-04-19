@@ -69,10 +69,10 @@ class Comparer:
             raise InvalidArgumentsException("'mode' must be one of 'double' or 'single'")
 
         for replay1, replay2 in iterator:
-            yield self.result(replay1, replay2)
+            yield self._result(replay1, replay2)
 
 
-    def result(self, replay1, replay2):
+    def _result(self, replay1, replay2):
         """
         Compares two replays and returns the result of that comparison.
 

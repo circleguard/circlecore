@@ -45,7 +45,7 @@ class Cacher:
         if(not self.should_cache):
             return
         print("caching...", end="", flush=True)
-        compressed_bytes = Cacher.compress(lzma_bytes)
+        compressed_bytes = Cacher._compress(lzma_bytes)
 
         map_id = user_info.map_id
         user_id = user_info.user_id
@@ -54,9 +54,9 @@ class Cacher:
 
         result = self.cursor.execute("SELECT COUNT(1) FROM replays WHERE map_id=? AND user_id=? AND mods=?", [map_id, user_id, mods]).fetchone()[0]
         if(result): # already exists so we overwrite (this happens when we call Cacher.revalidate)
-            self.write("UPDATE replays SET replay_data=?, replay_id=? WHERE map_id=? AND user_id=? AND mods=?", [compressed_bytes, replay_id, map_id, user_id, mods])
+            self._write("UPDATE replays SET replay_data=?, replay_id=? WHERE map_id=? AND user_id=? AND mods=?", [compressed_bytes, replay_id, map_id, user_id, mods])
         else: # else just insert
-            self.write("INSERT INTO replays VALUES(?, ?, ?, ?, ?)", [map_id, user_id, compressed_bytes, replay_id, mods])
+            self._write("INSERT INTO replays VALUES(?, ?, ?, ?, ?)", [map_id, user_id, compressed_bytes, replay_id, mods])
         print("done")
 
     def revalidate(self, loader, user_info):
@@ -96,6 +96,7 @@ class Cacher:
                 self.cache(lzma_data, info)
 
         print("done revalidating")
+
     def check_cache(self, map_id, user_id, mods):
         """
         Checks if a replay exists on the given map_id by the given user_id with the given mods, and returns the decompressed wtc (equivelant to an lzma) string if so.
@@ -116,7 +117,7 @@ class Cacher:
 
         return None
 
-    def write(self, statement, args):
+    def _write(self, statement, args):
         """
         Writes an sql statement with the given args to the databse.
 
@@ -131,7 +132,7 @@ class Cacher:
 
 
     @staticmethod
-    def compress(lzma_bytes):
+    def _compress(lzma_bytes):
         """
         Compresses the lzma string to a (smaller) wtc string to store in the database.
 

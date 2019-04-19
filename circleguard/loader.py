@@ -32,7 +32,7 @@ def request(function):
         try:
             ret = function(*args, **kwargs)
         except RatelimitException:
-            args[0].enforce_ratelimit()
+            args[0]._enforce_ratelimit()
             # wrap function with the decorator then call decorator
             ret = request(function)(*args, **kwargs)
         except InvalidKeyException as e:
@@ -237,7 +237,7 @@ class Loader():
                 raise Error.UNKNOWN.value[1](Error.UNKNOWN.value[2]) # pylint: disable=unsubscriptable-object
                 # pylint is dumb because Error is an enum and this is totally legal
 
-    def enforce_ratelimit(self):
+    def _enforce_ratelimit(self):
         """
         Enforces the ratelimit by sleeping the thread until it's safe to make requests again.
         """
