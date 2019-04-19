@@ -90,9 +90,10 @@ class Draw():
             animation = FuncAnimation(fig, update, frames=itr.count(100), init_func=init, blit=True, interval=dt)
         except:
             # if you close the window sometimes it's in the middle of updating and prints an annoying string to the console as an error -
-            # invalid command name "4584907080_on_timer"... and matplotlib errors are either awful and hidden or I'm blind so here's a blankey
+            # invalid command name "4584907080_on_timer"... and matplotlib errors are either awful and hidden or I'm blind so here's a blanket
             # try/except
             pass
+            # me 3 months later: aparently this didn't fix it, I'm kind of at a loss honestly, see #43 for the relevant issue
 
         plt.show(block=True)
 
