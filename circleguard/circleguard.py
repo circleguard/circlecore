@@ -49,8 +49,7 @@ class Circleguard:
         to_load = [replay for replay in compare1 + compare2 if isinstance(replay, ReplayMap)]
 
         self.loader.new_session(len(to_load))
-        if(not check.loaded):
-            check.load(self.loader) # all replays now have replay data, this is where ratelimit waiting would occur
+        check.load(self.loader) # all replays now have replay data, this is where ratelimit waiting would occur
         comparer = Comparer(check.thresh, compare1, replays2=compare2)
         yield from comparer.compare(mode=check.mode)
 
