@@ -1,6 +1,13 @@
 from .exceptions import InvalidArgumentsException
 from .enums import Mod
 
+
+########### LOGGING ##############
+
+TRACE = 5
+
+######### UTIL METHODS ###########
+
 def mod_to_int(mod):
     """
     Returns the integer representation of a mod string. The mods in the string can be in any order -

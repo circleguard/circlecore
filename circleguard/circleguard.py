@@ -4,6 +4,7 @@ import sys
 import itertools
 import os
 from os.path import isfile, join
+import logging
 
 from circleguard.draw import Draw
 from circleguard.loader import Loader
@@ -12,7 +13,6 @@ from circleguard.investigator import Investigator
 from circleguard.cacher import Cacher
 from circleguard.screener import Screener
 from circleguard import config
-from circleguard.utils import mod_to_int
 from circleguard.exceptions import InvalidArgumentsException, CircleguardException
 from circleguard.replay import Check, ReplayMap, ReplayPath
 from circleguard.detect import Detect
@@ -28,6 +28,7 @@ class Circleguard:
             [Path or String] db_path: A pathlike object to the databse file to write and/or read cached replays
         """
 
+        self.log = logging.getLogger(__name__)
         self.db_path = Path(db_path)
         cacher = Cacher(config.cache, self.db_path)
         self.loader = Loader(cacher, key)
@@ -43,12 +44,15 @@ class Circleguard:
                          replays in the second set.
         """
 
+        self.log.info("Starting a run with a Check")
         # steal check
         compare1 = [replay for replay in check.replays if replay.detect & Detect.STEAL]
         compare2 = [replay for replay in check.replays2 if replay.detect & Detect.STEAL] if check.replays2 else []
         to_load = [replay for replay in compare1 + compare2 if isinstance(replay, ReplayMap)]
 
+
         self.loader.new_session(len(to_load))
+        self.log.info("Loading %d ReplayMaps", len(to_load))
         check.load(self.loader) # all replays now have replay data, this is where ratelimit waiting would occur
         comparer = Comparer(check.thresh, compare1, replays2=compare2)
         yield from comparer.compare(mode=check.mode)
@@ -69,6 +73,7 @@ class Circleguard:
             Boolean cache: Whether to cache the loaded replays. Defaults to False, or the config value if changed.
         """
 
+        self.log.info("Map check with map id %d, u %s, num %s, cache %s, thresh %s", map_id, u, num, cache, thresh)
         replays2 = None
         if(u):
             info = self.loader.user_info(map_id, user_id=u)
@@ -89,6 +94,7 @@ class Circleguard:
             Boolean cache: Whether to cache the loaded replays. Defaults to False, or the config value if changed.
         """
 
+        self.log.info("Verify with map id %d, u1 %s, u2 %s, cache %s", map_id, u1, u2, cache)
         info1 = self.loader.user_info(map_id, user_id=u1)
         info2 = self.loader.user_info(map_id, user_id=u2)
         replay1 = ReplayMap(info1.map_id, info1.user_id, info1.mods)
@@ -98,6 +104,9 @@ class Circleguard:
         yield from self.run(check)
 
     def user_check(self, u, num):
+
+        self.log.info("User check with u %s, num %s", u, num)
+
         for map_id in self.loader.get_user_best(u, num):
             info = self.loader.user_info(map_id, user_id=u)
             if(not info.replay_available):

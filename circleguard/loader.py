@@ -2,6 +2,8 @@ from datetime import datetime
 import time
 import base64
 import sys
+import logging
+from math import ceil
 
 from requests import RequestException
 import osrparse
@@ -12,6 +14,7 @@ from circleguard.user_info import UserInfo
 from circleguard.enums import Error
 from circleguard.exceptions import (InvalidArgumentsException, APIException, CircleguardException,
                         RatelimitException, InvalidKeyException, ReplayUnavailableException, UnknownAPIException)
+from circleguard.utils import TRACE
 
 def request(function):
     """
@@ -92,6 +95,7 @@ class Loader():
         Initializes a Loader instance.
         """
 
+        self.log = logging.getLogger(__name__)
         self.total = None
         self.loaded = 0
         self.api = osuAPI.OsuAPI(key)
@@ -107,6 +111,7 @@ class Loader():
         of replays to load, making new sessions is necessary to keep progress logs correct.
         """
 
+        self.log.debug("Starting a new session with total %d", total)
         self.loaded = 0
         self.total = total
 
@@ -124,6 +129,9 @@ class Loader():
             Boolean limit: If set, will only return a user's top score (top response). Otherwise, will return every response (every score they set on that map under different mods)
             Integer mods: The mods the replay info to retieve were played with.
         """
+
+        self.log.log(TRACE, "Loading user info on map %d with options %s",
+                            map_id, {k: locals()[k] for k in locals().items() if locals()[k] is not None and k is not self})
 
         if(num and (num > 100 or num < 2)):
             raise InvalidArgumentsException("The number of top plays to fetch must be between 2 and 100 inclusive!")
@@ -155,6 +163,7 @@ class Loader():
             InvalidArgumentsException if number is not between 1 and 100 inclusive.
         """
 
+        self.log.log(TRACE, "Retrieving the best %d plays of user %d", number, user_id)
         if(number < 1 or number > 100):
             raise InvalidArgumentsException("The number of best user plays to fetch must be between 1 and 100 inclusive!")
         response = self.api.get_user_best({"m": "0", "u": user_id, "limit": number})
@@ -179,6 +188,7 @@ class Loader():
             APIException if the api responds with an error we don't know.
         """
 
+        self.log.log(TRACE, "Requesting replay data by user %d on map %d with mods %s", user_id, map_id, mods)
         if(self.total is None):
             raise CircleguardException("loader#new_session(total) must be called after instantiation, before any replay data is loaded.")
 
@@ -203,12 +213,15 @@ class Loader():
         Raises:
             UnknownAPIException if replay_available was 1, but we did not receive replay data from the api.
         """
-        print("requesting replay by {} on map {} with mods {}".format(user_info.user_id, user_info.map_id, user_info.mods))
+
+        user_id = user_info.user_id
+        map_id = user_info.map_id
+        mods = user_info.mods
         if(not user_info.replay_available):
-            print("replay not available")
+            self.log.debug("Replay data by user %d on map %d with mods %s not available", user_id, map_id, mods)
             return None
 
-        lzma_bytes = self.load_replay_data(user_info.map_id, user_info.user_id, user_info.mods)
+        lzma_bytes = self.load_replay_data(map_id, user_id, mods)
         if(lzma_bytes is None):
             raise UnknownAPIException("The api guaranteed there would be a replay available, but we did not receive any data. "
                                      "Please report this to the devs, who will open an issue on osu!api if necessary.")
@@ -245,10 +258,12 @@ class Loader():
         difference = datetime.now() - Loader.start_time
         seconds_passed = difference.seconds
         if(seconds_passed > Loader.RATELIMIT_RESET):
+            self.log.debug("More than a minute has passed since our last ratelimit, not sleeping")
             return
 
         # sleep the remainder of the reset cycle so we guarantee it's been that long since the first request
         sleep_seconds = Loader.RATELIMIT_RESET - seconds_passed
-        print(f"ratelimited, sleeping for {sleep_seconds} seconds. "
-              f"{self.loaded} of {self.total} replays loaded. ETA ~ {int((self.total-self.loaded)/10)+1} min")
+
+        self.log.info("Ratelimited, sleeping for %s seconds. %d of %d replays loaded. "
+            "ETA ~ %d min", sleep_seconds, self.loaded, self.total, ceil((self.total-self.loaded)/10))
         time.sleep(sleep_seconds)

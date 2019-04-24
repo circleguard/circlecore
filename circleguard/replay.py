@@ -1,4 +1,5 @@
 import abc
+import logging
 
 import osrparse
 import numpy as np
@@ -38,6 +39,7 @@ class Check():
             Boolean cache: Whether to cache the loaded replays. Defaults to False, or the config value if changed.
         """
 
+        self.log = logging.getLogger(__name__)
         self.replays = replays # list of ReplayMap and ReplayPath objects, not yet processed
         self.replays2 = replays2
         self.mode = "double" if replays2 else "single"
@@ -60,11 +62,14 @@ class Check():
         if(self.loaded):
             return
         for replay in self.replays:
+            self.log.debug("Loading replay of type %s", type(replay))
             replay.load(loader)
         if(self.replays2):
             for replay in self.replays2:
+                self.log.debug("Loading replay of type %s from replays2", type(replay))
                 replay.load(loader)
         self.loaded = True
+        self.log.debug("Finished loading Check object")
 
 
 class Replay(abc.ABC):
@@ -106,6 +111,8 @@ class Replay(abc.ABC):
 class ReplayMap(Replay):
 
     def __init__(self, map_id, user_id, mods=None, detect=Detect.ALL):
+
+        self.log = logging.getLogger(__name__)
         self.map_id = map_id
         self.user_id = user_id
         self.mods = mods
@@ -114,6 +121,7 @@ class ReplayMap(Replay):
 
     def load(self, loader):
         if(self.loaded):
+            self.log.debug("Replay already loaded, not loading")
             return
         info = loader.user_info(self.map_id, user_id=self.user_id, mods=self.mods)
         Replay.__init__(self, self.user_id, info.mods, info.replay_id, loader.replay_data(info), self.detect, loaded=True)
@@ -122,12 +130,14 @@ class ReplayMap(Replay):
 class ReplayPath(Replay):
 
     def __init__(self, path, detect=Detect.ALL):
+        self.log = logging.getLogger(__name__)
         self.path = path
         self.detect = detect
         self.loaded = False
 
     def load(self, loader):
         if(self.loaded):
+            self.log.debug("Replay already loaded, not loading")
             return
         # no, we don't need loader for ReplayPath, but to reduce type checking when calling we make the method signatures homogeneous
         loaded = osrparse.parse_replay_file(self.path)
