@@ -39,7 +39,7 @@ class Check():
             Boolean cache: Whether to cache the loaded replays. Defaults to False, or the config value if changed.
         """
 
-        self.log = logging.getLogger(__name__)
+        self.log = logging.getLogger(__name__ + ".Check")
         self.replays = replays # list of ReplayMap and ReplayPath objects, not yet processed
         self.replays2 = replays2
         self.mode = "double" if replays2 else "single"
@@ -110,9 +110,18 @@ class Replay(abc.ABC):
 
 class ReplayMap(Replay):
 
-    def __init__(self, map_id, user_id, mods=None, detect=Detect.ALL):
+    def __init__(self, map_id, user_id, mods=None, username=None, detect=Detect.ALL):
+        """
+        todo documentation
 
-        self.log = logging.getLogger(__name__)
+        String username: If passed, username will be set to this string. Otherwise, it will be set to the user id.
+                         This is to only require you to know the user id for create a ReplayMap, instead of using extra
+                         api requests to retrieve the username. However, if the username is known, it is better to represent
+                         the Replay with a player's name than an id. Both username and user_id will obviously still be available
+                         to you through the result object after comparison.
+        """
+
+        self.log = logging.getLogger(__name__ + ".ReplayMap")
         self.map_id = map_id
         self.user_id = user_id
         self.mods = mods
@@ -131,7 +140,7 @@ class ReplayMap(Replay):
 class ReplayPath(Replay):
 
     def __init__(self, path, detect=Detect.ALL):
-        self.log = logging.getLogger(__name__)
+        self.log = logging.getLogger(__name__ + ".ReplayPath")
         self.path = path
         self.detect = detect
         self.loaded = False
