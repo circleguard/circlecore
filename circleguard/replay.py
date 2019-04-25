@@ -62,11 +62,11 @@ class Check():
         if(self.loaded):
             return
         for replay in self.replays:
-            self.log.debug("Loading replay of type %s", type(replay))
+            self.log.debug("Loading replay of type %s", type(replay).__name__)
             replay.load(loader)
         if(self.replays2):
             for replay in self.replays2:
-                self.log.debug("Loading replay of type %s from replays2", type(replay))
+                self.log.debug("Loading replay of type %s from replays2", type(replay).__name__)
                 replay.load(loader)
         self.loaded = True
         self.log.debug("Finished loading Check object")
