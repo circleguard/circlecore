@@ -1,3 +1,6 @@
+from logging import Formatter
+from copy import copy
+
 from .exceptions import InvalidArgumentsException
 from .enums import Mod
 
@@ -5,6 +8,48 @@ from .enums import Mod
 ########### LOGGING ##############
 
 TRACE = 5
+
+# Colored logs adapted from
+# https://stackoverflow.com/questions/384076/how-can-i-color-python-logging-output
+COLOR_MAPPING = {
+    "TRACE"    : 90, # bright black (more like gray)
+    "DEBUG"    : 36, # cyan
+    "INFO"     : 96, # bright cyan
+    "WARNING"  : 33, # yellow (but fake yellow, it's muted and more like orange)
+    "ERROR"    : 31, # red
+    "CRITICAL" : 41, # white on red bg
+
+    "NAME"     : 32,   # green
+    "MESSAGE"  : 94   # bright blue
+}
+
+COLOR_PREFIX = '\033['
+COLOR_SUFFIX = '\033[0m'
+
+class ColoredFormatter(Formatter):
+
+    def __init__(self, patern):
+        Formatter.__init__(self, patern)
+
+    def format(self, record):
+        # c as in colored, not as in copy
+        c_record = copy(record)
+        levelname = c_record.levelname
+        color = COLOR_MAPPING.get(levelname, 37) # default white
+        c_levelname = ('{0}{1}m{2}{3}').format(COLOR_PREFIX, color, levelname, COLOR_SUFFIX)
+
+        name = c_record.name
+        color = COLOR_MAPPING["NAME"]
+        c_name = ('{0}{1}m{2}{3}').format(COLOR_PREFIX, color, name, COLOR_SUFFIX)
+
+        message = c_record.msg # why is this msg, but we format it as %(message)s in the formatter? mysteries of life.
+        color = COLOR_MAPPING["MESSAGE"]
+        c_msg = ('{0}{1}m{2}{3}').format(COLOR_PREFIX, color, message, COLOR_SUFFIX)
+
+        c_record.levelname = c_levelname
+        c_record.name = c_name
+        c_record.msg = c_msg
+        return Formatter.format(self, c_record)
 
 ######### UTIL METHODS ###########
 

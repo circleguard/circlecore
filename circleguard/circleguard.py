@@ -16,6 +16,17 @@ from circleguard import config
 from circleguard.exceptions import InvalidArgumentsException, CircleguardException
 from circleguard.replay import Check, ReplayMap, ReplayPath
 from circleguard.detect import Detect
+from circleguard.utils import TRACE, ColoredFormatter
+
+
+
+
+logging.addLevelName(TRACE, "TRACE")
+formatter = ColoredFormatter("[%(name)s][%(levelname)s]  %(message)s (%(filename)s:%(lineno)d)")
+handler_stream = logging.StreamHandler()
+handler_stream.setFormatter(formatter)
+logging.getLogger("circleguard").addHandler(handler_stream)
+
 
 class Circleguard:
 
