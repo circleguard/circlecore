@@ -13,10 +13,10 @@ TRACE = 5
 # https://stackoverflow.com/questions/384076/how-can-i-color-python-logging-output
 COLOR_MAPPING = {
     "TRACE"    : 90, # bright black
-    "DEBUG"    : 36, # cyan
-    "INFO"     : 96, # bright cyan
-    "WARNING"  : 33, # yellow
-    "ERROR"    : 31, # red
+    "DEBUG"    : 94, # bright blue
+    "INFO"     : 95, # bright magenta
+    "WARNING"  : 31, # red
+    "ERROR"    : 91, # bright red
     "CRITICAL" : 41, # white on red bg
 
     "NAME"     : 32,  # green
