@@ -19,7 +19,7 @@ COLOR_MAPPING = {
     "ERROR"    : 31, # red
     "CRITICAL" : 41, # white on red bg
 
-    "NAME"     : 32,   # green
+    "NAME"     : 32,  # green
     "MESSAGE"  : 94   # bright blue
 }
 
