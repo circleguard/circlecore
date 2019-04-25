@@ -130,8 +130,12 @@ class Loader():
             Integer mods: The mods the replay info to retieve were played with.
         """
 
+        # we have to define a new variable to hold locals - otherwise when we call it twice inside the dict comprehension,
+        # it rebinds to the comp scope and takes on different locals which is real bad. I spent many-a-hour figuring this out,
+        # and if anyone has a more elegant solution I'm all ears.
+        locals_ = locals()
         self.log.log(TRACE, "Loading user info on map %d with options %s",
-                            map_id, {k: locals()[k] for k in locals().items() if locals()[k] is not None and k is not self})
+                            map_id, {k: locals_[k] for k in locals_ if k is not self})
 
         if(num and (num > 100 or num < 2)):
             raise InvalidArgumentsException("The number of top plays to fetch must be between 2 and 100 inclusive!")
