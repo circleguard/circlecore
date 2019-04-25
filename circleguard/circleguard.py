@@ -22,7 +22,7 @@ from circleguard.utils import TRACE, ColoredFormatter
 
 
 logging.addLevelName(TRACE, "TRACE")
-formatter = ColoredFormatter("[%(name)s][%(levelname)s]  %(message)s (%(filename)s:%(lineno)s)")
+formatter = ColoredFormatter("[%(name)s][%(levelname)s]  %(message)s  (%(filename)s:%(lineno)s)")
 handler_stream = logging.StreamHandler()
 handler_stream.setFormatter(formatter)
 logging.getLogger("circleguard").addHandler(handler_stream)
