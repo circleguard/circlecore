@@ -55,7 +55,7 @@ class Circleguard:
                          replays in the second set.
         """
 
-        self.log.info("Starting a run with a Check")
+        self.log.info("Running circlegauard with a Check")
         # steal check
         compare1 = [replay for replay in check.replays if replay.detect & Detect.STEAL]
         compare2 = [replay for replay in check.replays2 if replay.detect & Detect.STEAL] if check.replays2 else []
