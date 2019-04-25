@@ -139,7 +139,7 @@ class Circleguard:
         yield from self.run(check)
 
 
-def set_options(thresh=None, num=None, cache=None, failfast=None):
+def set_options(thresh=None, num=None, cache=None, failfast=None, loglevel=None):
     """
     Changes the default value for different options in circleguard.
 
@@ -149,10 +149,20 @@ def set_options(thresh=None, num=None, cache=None, failfast=None):
         Boolean cache: Whether downloaded replays should be cached or not. False by default.
         Boolean failfast: Will throw an exception if no comparisons can be made for a given Check object,
                           or silently make no comparisons otherwise. False by default.
+        Integer loglevel: What level to log at. Circlecore follows standard python logging levels, with an added level of
+                          TRACE with a value of 5 (lower than debug, which is 10). The value passed to loglevel is
+                          passed directly to the setLevel function of the root logger. WARNING by default.
+                          For more information on log levels, see the standard python logging lib.
     """
 
     for k,v in locals().items():
         if(not v):
+            continue
+        if(k == "loglevel"):
+            # print(logging.root.handlers) # empty (as it should be)
+            logging.getLogger("circleguard").setLevel(loglevel)
+            logging.log(0, "If I don't log something here, the setLevel doesn't take effect. I don't know why so please ignore this")
+            # print(logging.root.handlers) # empty unless we call logging.log (very bad! Should have a handler even if we don't log)
             continue
         if(hasattr(config, k)):
             setattr(config, k, v)
