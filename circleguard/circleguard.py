@@ -88,9 +88,9 @@ class Circleguard:
         replays2 = None
         if(u):
             info = self.loader.user_info(map_id, user_id=u)
-            replays2 = [ReplayMap(info.map_id, info.user_id, info.mods)]
+            replays2 = [ReplayMap(info.map_id, info.user_id, info.mods, username=info.username)]
         infos = self.loader.user_info(map_id, num=num)
-        replays = [ReplayMap(info.map_id, info.user_id, info.mods) for info in infos]
+        replays = [ReplayMap(info.map_id, info.user_id, info.mods, username=info.username) for info in infos]
         check = Check(replays, replays2=replays2, thresh=thresh)
         yield from self.run(check)
 
@@ -108,8 +108,8 @@ class Circleguard:
         self.log.info("Verify with map id %d, u1 %s, u2 %s, cache %s", map_id, u1, u2, cache)
         info1 = self.loader.user_info(map_id, user_id=u1)
         info2 = self.loader.user_info(map_id, user_id=u2)
-        replay1 = ReplayMap(info1.map_id, info1.user_id, info1.mods)
-        replay2 = ReplayMap(info2.map_id, info2.user_id, info2.mods)
+        replay1 = ReplayMap(info1.map_id, info1.user_id, info1.mods, username=info1.username)
+        replay2 = ReplayMap(info2.map_id, info2.user_id, info2.mods, username=info2.username)
 
         check = Check([replay1, replay2])
         yield from self.run(check)
@@ -122,14 +122,14 @@ class Circleguard:
             info = self.loader.user_info(map_id, user_id=u)
             if(not info.replay_available):
                 continue # if we can't download the user's replay on the map, we have nothing to compare against
-            user_replay = [ReplayMap(info.map_id, info.user_id, mods=info.mods)]
+            user_replay = [ReplayMap(info.map_id, info.user_id, mods=info.mods, username=info.username)]
 
             infos = self.loader.user_info(map_id, num=num)
-            replays = [ReplayMap(info.map_id, info.user_id, mods=info.mods) for info in infos]
+            replays = [ReplayMap(info.map_id, info.user_id, mods=info.mods, username=info.username) for info in infos]
 
             remod_replays = []
             for info in self.loader.user_info(map_id, user_id=u, limit=False)[1:]:
-                remod_replays.append(ReplayMap(info.map_id, info.user_id, mods=info.mods))
+                remod_replays.append(ReplayMap(info.map_id, info.user_id, mods=info.mods, username=info.username))
 
             yield from self.run(Check(user_replay, replays2=replays))
 

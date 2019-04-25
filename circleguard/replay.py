@@ -118,13 +118,14 @@ class ReplayMap(Replay):
         self.mods = mods
         self.detect = detect
         self.loaded = False
+        self._username = username
 
     def load(self, loader):
         if(self.loaded):
             self.log.debug("Replay already loaded, not loading")
             return
         info = loader.user_info(self.map_id, user_id=self.user_id, mods=self.mods)
-        Replay.__init__(self, self.user_id, info.mods, info.replay_id, loader.replay_data(info), self.detect, loaded=True)
+        Replay.__init__(self, self.user_id if not self._username else self._username, info.mods, info.replay_id, loader.replay_data(info), self.detect, loaded=True)
 
 
 class ReplayPath(Replay):
