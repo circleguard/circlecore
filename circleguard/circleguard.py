@@ -151,7 +151,7 @@ def set_options(thresh=None, num=None, cache=None, failfast=None, loglevel=None)
                           or silently make no comparisons otherwise. False by default.
         Integer loglevel: What level to log at. Circlecore follows standard python logging levels, with an added level of
                           TRACE with a value of 5 (lower than debug, which is 10). The value passed to loglevel is
-                          passed directly to the setLevel function of the root logger. WARNING by default.
+                          passed directly to the setLevel function of the circleguard root logger. WARNING by default.
                           For more information on log levels, see the standard python logging lib.
     """
 
