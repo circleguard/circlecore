@@ -12,15 +12,17 @@ TRACE = 5
 # Colored logs adapted from
 # https://stackoverflow.com/questions/384076/how-can-i-color-python-logging-output
 COLOR_MAPPING = {
-    "TRACE"    : 90, # bright black (more like gray)
+    "TRACE"    : 90, # bright black
     "DEBUG"    : 36, # cyan
     "INFO"     : 96, # bright cyan
-    "WARNING"  : 33, # yellow (but fake yellow, it's muted and more like orange)
+    "WARNING"  : 33, # yellow
     "ERROR"    : 31, # red
     "CRITICAL" : 41, # white on red bg
 
     "NAME"     : 32,  # green
-    "MESSAGE"  : 94   # bright blue
+    "MESSAGE"  : 93,  # bright yellow
+    "FILENAME" : 92,  # bright green
+    "LINENO"   : 91   # bright red
 }
 
 COLOR_PREFIX = '\033['
@@ -46,9 +48,20 @@ class ColoredFormatter(Formatter):
         color = COLOR_MAPPING["MESSAGE"]
         c_msg = ('{0}{1}m{2}{3}').format(COLOR_PREFIX, color, message, COLOR_SUFFIX)
 
+        filename = c_record.filename
+        color = COLOR_MAPPING["FILENAME"]
+        c_filename = ('{0}{1}m{2}{3}').format(COLOR_PREFIX, color, filename, COLOR_SUFFIX)
+
+        lineno = c_record.lineno
+        color = COLOR_MAPPING["LINENO"]
+        c_lineno = ('{0}{1}m{2}{3}').format(COLOR_PREFIX, color, lineno, COLOR_SUFFIX)
+
         c_record.levelname = c_levelname
         c_record.name = c_name
         c_record.msg = c_msg
+        c_record.filename = c_filename
+        c_record.lineno = c_lineno
+
         return Formatter.format(self, c_record)
 
 ######### UTIL METHODS ###########

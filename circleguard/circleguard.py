@@ -22,7 +22,7 @@ from circleguard.utils import TRACE, ColoredFormatter
 
 
 logging.addLevelName(TRACE, "TRACE")
-formatter = ColoredFormatter("[%(name)s][%(levelname)s]  %(message)s (%(filename)s:%(lineno)d)")
+formatter = ColoredFormatter("[%(name)s][%(levelname)s]  %(message)s (%(filename)s:%(lineno)s)")
 handler_stream = logging.StreamHandler()
 handler_stream.setFormatter(formatter)
 logging.getLogger("circleguard").addHandler(handler_stream)
@@ -170,10 +170,7 @@ def set_options(thresh=None, num=None, cache=None, failfast=None, loglevel=None)
         if(not v):
             continue
         if(k == "loglevel"):
-            # print(logging.root.handlers) # empty (as it should be)
             logging.getLogger("circleguard").setLevel(loglevel)
-            logging.log(0, "If I don't log something here, the setLevel doesn't take effect. I don't know why so please ignore this")
-            # print(logging.root.handlers) # empty unless we call logging.log (very bad! Should have a handler even if we don't log)
             continue
         if(hasattr(config, k)):
             setattr(config, k, v)
