@@ -6,6 +6,7 @@ import numpy as np
 
 from circleguard.enums import Detect
 from circleguard import config
+from circleguard.utils import TRACE
 
 class Check():
     """
@@ -58,16 +59,15 @@ class Check():
         Args:
             Loader loader: The loader to handle api requests, if required by the Replay.
         """
+        self.log.info("Loading replays from Check")
 
         if(self.loaded):
+            self.log.debug("Check already loaded, not loading individual Replays")
             return
         for replay in self.replays:
-            self.log.debug("Loading replay of type %s", type(replay).__name__)
             replay.load(loader)
         if(self.replays2):
             for replay in self.replays2:
-                self.log.debug("Loading replay of type %s from replays2", type(replay).__name__)
-                # TODO: move log statements to inside of methods, not outside of methods
                 replay.load(loader)
         self.loaded = True
         self.log.debug("Finished loading Check object")
@@ -151,11 +151,13 @@ class ReplayMap(Replay):
         self._username = username
 
     def load(self, loader):
+        self.log.debug("Loading ReplayMap for user %d on map %d with mods %d", self.user_id, self.map_id, self.mods)
         if(self.loaded):
-            self.log.debug("Replay already loaded, not loading")
+            self.log.debug("ReplayMap already loaded, not loading")
             return
         info = loader.user_info(self.map_id, user_id=self.user_id, mods=self.mods)
         Replay.__init__(self, self.user_id if not self._username else self._username, info.mods, info.replay_id, loader.replay_data(info), self.detect)
+        self.log.log(TRACE, "Finished loading ReplayMap")
 
 
 class ReplayPath(Replay):
@@ -167,10 +169,12 @@ class ReplayPath(Replay):
         self.loaded = False
 
     def load(self, loader):
+        self.log.debug("Loading ReplayPath with path %s", self.path)
         if(self.loaded):
-            self.log.debug("Replay already loaded, not loading")
+            self.log.debug("ReplayPath already loaded, not loading")
             return
         # no, we don't need loader for ReplayPath, but to reduce type checking when calling we make the method signatures homogeneous
         loaded = osrparse.parse_replay_file(self.path)
         replay_id = loaded.replay_id if loaded.replay_id != 0 else None # if score is 0 it wasn't submitted (?)
         Replay.__init__(self, loaded.player_name, loaded.mod_combination, replay_id, loaded.play_data, self.detect)
+        self.log.log(TRACE, "Finished loading ReplayPath")

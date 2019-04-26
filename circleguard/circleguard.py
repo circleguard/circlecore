@@ -63,7 +63,6 @@ class Circleguard:
 
 
         self.loader.new_session(len(to_load))
-        self.log.info("Loading %d ReplayMaps", len(to_load))
         check.load(self.loader) # all replays now have replay data, this is where ratelimit waiting would occur
         comparer = Comparer(check.thresh, compare1, replays2=compare2)
         yield from comparer.compare(mode=check.mode)
