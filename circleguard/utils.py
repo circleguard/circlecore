@@ -36,6 +36,12 @@ class ColoredFormatter(Formatter):
     def format(self, record):
         # c as in colored, not as in copy
         c_record = copy(record)
+
+        # logging's choice of camelCase, not mine
+        threadName = c_record.threadName
+        color = COLOR_MAPPING["NAME"]
+        c_threadName = ('{0}{1}m{2}{3}').format(COLOR_PREFIX, color, threadName, COLOR_SUFFIX)
+
         levelname = c_record.levelname
         color = COLOR_MAPPING.get(levelname, 37) # default white
         c_levelname = ('{0}{1}m{2}{3}').format(COLOR_PREFIX, color, levelname, COLOR_SUFFIX)
@@ -56,6 +62,7 @@ class ColoredFormatter(Formatter):
         color = COLOR_MAPPING["LINENO"]
         c_lineno = ('{0}{1}m{2}{3}').format(COLOR_PREFIX, color, lineno, COLOR_SUFFIX)
 
+        c_record.threadName = c_threadName
         c_record.levelname = c_levelname
         c_record.name = c_name
         c_record.msg = c_msg
