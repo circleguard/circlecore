@@ -67,15 +67,25 @@ class Check():
         if(self.replays2):
             for replay in self.replays2:
                 self.log.debug("Loading replay of type %s from replays2", type(replay).__name__)
+                # TODO: move log statements to inside of methods, not outside of methods
                 replay.load(loader)
         self.loaded = True
         self.log.debug("Finished loading Check object")
 
 
 class Replay(abc.ABC):
-    def __init__(self, username, mods, replay_id, replay_data, detect, loaded):
+    def __init__(self, username, mods, replay_id, replay_data, detect):
         """
         Initializes a Replay instance.
+
+        Attributes:
+            String username: The username of this player. Whether or not this is their true username has
+                             no effect - this field is used to represent the player more readably than their id.
+            Integer mods: The mods the replay was played with.
+            Integer replay_id: The id of this replay, or 0 if it does not have an id (unsubmitted replays have no id)
+            osrparse.Replay replay_data: An osrparse Replay containing the replay data for this replay.
+            Detect detect: The Detect enum (or bitwise combination of enums), indicating what types of cheats this
+                           replay should be investigated or compared for.
         """
 
         self.username = username
@@ -83,11 +93,22 @@ class Replay(abc.ABC):
         self.replay_id = replay_id
         self.replay_data = replay_data
         self.detect = detect
-        self.loaded = loaded
+        self.loaded = True
 
     @abc.abstractclassmethod
     def load(self, loader):
+        """
+        Loads replay data of the replay, from the osu api or from some other source.
+        Implementation is up to the specific subclass.
+
+        To meet the specs of this method, subclasses must set replay.loaded to True after this method is called,
+        and replay.replay_data must be a valid Replay object, as defined by osrparse.Replay. Both of these specs
+        can be met if the superclass circleguard.Replay is initialized with a valid Replay, as
+        circleguard.Replay.__init__ sets replay.loaded to true by default.
+        """
+
         ...
+
 
     def as_list_with_timestamps(self):
         """
@@ -134,7 +155,7 @@ class ReplayMap(Replay):
             self.log.debug("Replay already loaded, not loading")
             return
         info = loader.user_info(self.map_id, user_id=self.user_id, mods=self.mods)
-        Replay.__init__(self, self.user_id if not self._username else self._username, info.mods, info.replay_id, loader.replay_data(info), self.detect, loaded=True)
+        Replay.__init__(self, self.user_id if not self._username else self._username, info.mods, info.replay_id, loader.replay_data(info), self.detect)
 
 
 class ReplayPath(Replay):
@@ -152,4 +173,4 @@ class ReplayPath(Replay):
         # no, we don't need loader for ReplayPath, but to reduce type checking when calling we make the method signatures homogeneous
         loaded = osrparse.parse_replay_file(self.path)
         replay_id = loaded.replay_id if loaded.replay_id != 0 else None # if score is 0 it wasn't submitted (?)
-        Replay.__init__(self, loaded.player_name, loaded.mod_combination, replay_id, loaded.play_data, self.detect, loaded=True)
+        Replay.__init__(self, loaded.player_name, loaded.mod_combination, replay_id, loaded.play_data, self.detect)
