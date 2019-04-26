@@ -121,7 +121,7 @@ class Cacher:
         if(result):
             self.log.debug("Loading replay on map %d by user %d with mods %s from cache", map_id, user_id, mods)
             return wtc.decompress(result[0])
-
+        self.log.log(TRACE, "No replay found in cache")
         return None
 
     def _write(self, statement, args):
