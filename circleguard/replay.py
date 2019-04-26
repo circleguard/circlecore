@@ -4,7 +4,7 @@ import logging
 import osrparse
 import numpy as np
 
-from circleguard.detect import Detect
+from circleguard.enums import Detect
 from circleguard import config
 
 class Check():

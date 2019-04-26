@@ -1,4 +1,4 @@
-from enum import Enum
+from enum import Enum, Flag
 
 from circleguard.exceptions import UnknownAPIException, RatelimitException, InvalidKeyException, ReplayUnavailableException
 # strings taken from osu api error responses
@@ -42,3 +42,12 @@ class Mod(Enum):
     Key1           = K1 = 67108864
     Key3           = K3 = 134217728
     Key2           = K2 = 268435456
+
+class Detect(Flag):
+                   # (in binary)
+    STEAL = 1 << 0 # 0001
+    RELAX = 1 << 1 # 0010
+    REMOD = 1 << 2 # 0100
+
+    ALL = STEAL | RELAX | REMOD
+    NONE = 0

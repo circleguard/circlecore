@@ -15,7 +15,7 @@ from circleguard.screener import Screener
 from circleguard import config
 from circleguard.exceptions import InvalidArgumentsException, CircleguardException
 from circleguard.replay import Check, ReplayMap, ReplayPath
-from circleguard.detect import Detect
+from circleguard.enums import Detect
 from circleguard.utils import TRACE, ColoredFormatter
 
 
