@@ -103,7 +103,7 @@ class Replay(abc.ABC):
 
         To meet the specs of this method, subclasses must set replay.loaded to True after this method is called,
         and replay.replay_data must be a valid Replay object, as defined by osrparse.Replay. Both of these specs
-        can be met if the superclass circleguard.Replay is initialized with a valid Replay, as
+        can be met if the superclass circleguard.Replay is initialized in the load method with a valid Replay, as
         circleguard.Replay.__init__ sets replay.loaded to true by default.
         """
 
