@@ -13,14 +13,14 @@ class Check():
     investigating them for cheats.
 
     Attributes:
-            List [Replay] replays: A list of Replay objects.
-            List [Replay] replays2: A list of Replay objects to compare against 'replays' if passed.
-            Integer thresh: If a comparison scores below this value, its Result object has ischeat set to True.
-                            Defaults to 18, or the config value if changed.
-            Boolean cache: Whether to cache the loaded replays. Defaults to False, or the config value if changed.
-            String mode: "single" if only replays was passed, or "double" if both replays and replays2 were passed.
-            Boolean loaded: False at instantiation, set to True once check#load is called. See check#load for
-                            more details.
+        List [Replay] replays: A list of Replay objects.
+        List [Replay] replays2: A list of Replay objects to compare against 'replays' if passed.
+        Integer thresh: If a comparison scores below this value, its Result object has ischeat set to True.
+                        Defaults to 18, or the config value if changed.
+        Boolean cache: Whether to cache the loaded replays. Defaults to False, or the config value if changed.
+        String mode: "single" if only replays was passed, or "double" if both replays and replays2 were passed.
+        Boolean loaded: False at instantiation, set to True once check#load is called. See check#load for
+                        more details.
     """
 
     def __init__(self, replays, replays2=None, thresh=config.thresh, cache=config.cache):
