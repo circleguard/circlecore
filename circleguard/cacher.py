@@ -49,8 +49,7 @@ class Cacher:
         if(not self.should_cache):
             self.log.debug("should_cache is false, not caching")
             return
-        self.log.log(TRACE, "Compressing lzma")
-        compressed_bytes = Cacher._compress(lzma_bytes)
+        compressed_bytes = self._compress(lzma_bytes)
 
         map_id = user_info.map_id
         user_id = user_info.user_id
@@ -138,8 +137,7 @@ class Cacher:
         self.conn.commit()
 
 
-    @staticmethod
-    def _compress(lzma_bytes):
+    def _compress(self, lzma_bytes):
         """
         Compresses the lzma string to a (smaller) wtc string to store in the database.
 
@@ -150,4 +148,5 @@ class Cacher:
             A compressed bytes from the given bytes, using lossy wtc compression.
         """
 
+        self.log.log(TRACE, "Compressing lzma bytes")
         return wtc.compress(lzma_bytes)
