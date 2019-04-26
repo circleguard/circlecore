@@ -78,9 +78,9 @@ class Replay(abc.ABC):
         """
         Initializes a Replay instance.
 
-        Attributes:
-            String username: The username of this player. Whether or not this is their true username has
-                             no effect - this field is used to represent the player more readably than their id.
+        Args:
+            String username: The username of the player who made the replay. Whether or not this is their true username
+                             has no effect - this field is used to represent the player more readably than their id.
             Integer mods: The mods the replay was played with.
             Integer replay_id: The id of this replay, or 0 if it does not have an id (unsubmitted replays have no id)
             osrparse.Replay replay_data: An osrparse Replay containing the replay data for this replay.
@@ -130,16 +130,46 @@ class Replay(abc.ABC):
 
 
 class ReplayMap(Replay):
+    """
+    Represents a Replay submitted to online servers, that can be retrieved from the osu api.
+
+    The only things you need to know to instantiate a ReplayMap
+    are the user who made the replay, and the map it was made on.
+
+    Attributes:
+        Integer map_id: The id of the map the replay was made on.
+        Integer user_id: The id of the user who made the replay.
+        Integer mods: The mods the replay was played with. None if not set when instantiated and has not been loaded yet -
+                      otherwise, set to the mods the replay was made with.
+        String username: A readable representation of the user who made the replay. If passed,
+                         username will be set to this string. Otherwise, it will be set to the user id.
+                         This is so you don't need to know a user's username when creating a ReplayMap, only their id.
+                         However, if the username is known (by retrieving it through the api, or other means), it is better
+                         to represent the Replay with a player's name than an id. Both username and user_id will
+                         obviously still be available to you through the result object after comparison.
+        Detect detect: The Detect enum (or bitwise combination of enums), indicating what types of cheats this
+                       replay should be investigated or compared for.
+        Boolean loaded: Whether this replay has been loaded. If True, calls to #load will have no effect.
+                        See #load for more information.
+    """
 
     def __init__(self, map_id, user_id, mods=None, username=None, detect=Detect.ALL):
         """
-        todo documentation
+        Initializes a ReplayMap instance.
 
-        String username: If passed, username will be set to this string. Otherwise, it will be set to the user id.
-                         This is to only require you to know the user id for create a ReplayMap, instead of using extra
-                         api requests to retrieve the username. However, if the username is known, it is better to represent
-                         the Replay with a player's name than an id. Both username and user_id will obviously still be available
-                         to you through the result object after comparison.
+        Args:
+            Integer map_id: The id of the map the replay was made on.
+            Integer user_id: The id of the user who made the replay.
+            Integer mods: The mods the replay was played with. If this is not set, the top scoring replay of the user on the
+                          given map will be loaded. Otherwise, the replay with the given mods will be loaded.
+            String username: A readable representation of the user who made the replay. If passed,
+                             username will be set to this string. Otherwise, it will be set to the user id.
+                             This is so you don't need to know a user's username when creating a ReplayMap, only their id.
+                             However, if the username is known (by retrieving it through the api, or other means), it is
+                             better to represent the Replay with a player's name than an id. Both username and user_id
+                             will obviously still be available to you through the result object after comparison.
+            Detect detect: The Detect enum (or bitwise combination of enums), indicating what types of cheats this
+                           replay should be investigated or compared for.
         """
 
         self.log = logging.getLogger(__name__ + ".ReplayMap")
@@ -148,33 +178,79 @@ class ReplayMap(Replay):
         self.mods = mods
         self.detect = detect
         self.loaded = False
-        self._username = username
+        self.username = username if username else user_id
 
     def load(self, loader):
+        # TODO what happens if the replay isn't avaiable from the api? pretty sure it fatal errors right now. That bad
+        """
+        Loads the data for this replay from the api. This method silently returns if replay.loaded is True.
+
+        The superclass Replay is initialized after this call, setting replay.loaded to True. Multiple
+        calls to this method will have no effect beyond the first.
+        """
+
         self.log.debug("Loading ReplayMap for user %d on map %d with mods %d", self.user_id, self.map_id, self.mods)
         if(self.loaded):
             self.log.debug("ReplayMap already loaded, not loading")
             return
         info = loader.user_info(self.map_id, user_id=self.user_id, mods=self.mods)
-        Replay.__init__(self, self.user_id if not self._username else self._username, info.mods, info.replay_id, loader.replay_data(info), self.detect)
+        Replay.__init__(self, self.username, info.mods, info.replay_id, loader.replay_data(info), self.detect)
         self.log.log(TRACE, "Finished loading ReplayMap")
 
 
 class ReplayPath(Replay):
+    """
+    Represents a Replay saved locally.
+
+    To instantiate a ReplayPath, you only need to know the path to the osr file. This class has significant
+    advantages compared to a ReplayMap - the username is immediately available from the replay, instead of requiring
+    an extra api call. The time it takes to load the replay is also significantly less – especially if you factor in
+    ratelimits – because there is no need to make a request to the api to retrieve the replay data, only read an osr
+    file.
+
+    Of course, to reap those benefits, it requires having the replay already downloaded, which isn't always ideal.
+
+    Attributes:
+        [String or Path] path: A pathlike object representing the absolute path to the osr file.
+        Detect detect: The Detect enum (or bitwise combination of enums), indicating what types of cheats this
+                       replay should be investigated or compared for.
+        Boolean loaded: Whether this replay has been loaded. If True, calls to #load will have no effect.
+                        See #load for more information.
+    """
 
     def __init__(self, path, detect=Detect.ALL):
+        """
+        Initializes a ReplayPath instance.
+
+        Args:
+            [String or Path] path: A pathlike object representing the absolute path to the osr file.
+            Detect detect: The Detect enum (or bitwise combination of enums), indicating what types of cheats this
+                           replay should be investigated or compared for.
+        """
+
         self.log = logging.getLogger(__name__ + ".ReplayPath")
         self.path = path
         self.detect = detect
         self.loaded = False
 
     def load(self, loader):
+        # TODO add documentation to osrparse lol
+        """
+        Loads the data for this replay from the osr file given by the path. See osrparse.parse_replay_file for
+        implementation details. This method has no effect if replay.loaded is True.
+
+        The superclass Replay is initialized after this call, setting replay.loaded to True. Multiple
+        calls to this method will have no effect beyond the first.
+        """
+
         self.log.debug("Loading ReplayPath with path %s", self.path)
         if(self.loaded):
             self.log.debug("ReplayPath already loaded, not loading")
             return
         # no, we don't need loader for ReplayPath, but to reduce type checking when calling we make the method signatures homogeneous
         loaded = osrparse.parse_replay_file(self.path)
-        replay_id = loaded.replay_id if loaded.replay_id != 0 else None # if score is 0 it wasn't submitted (?)
+        replay_id = loaded.replay_id if loaded.replay_id != 0 else None # if replay id is 0 it wasn't submitted (?)
+        # TODO normalize this, either always 0 or always None, I like always 0 better but I can't remember if changing that breaks
+        # anything further down the pipeline (in comparer/etc)
         Replay.__init__(self, loaded.player_name, loaded.mod_combination, replay_id, loaded.play_data, self.detect)
         self.log.log(TRACE, "Finished loading ReplayPath")
