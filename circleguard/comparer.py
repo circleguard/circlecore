@@ -1,5 +1,6 @@
 import itertools
 import sys
+import logging
 
 import numpy as np
 import math
@@ -38,6 +39,7 @@ class Comparer:
             List replays2: A list of Replay instances to be compared against.
         """
 
+        self.log = logging.getLogger(__name__)
         self.threshold = threshold
 
         # filter beatmaps we had no data for - see Loader.replay_data and OnlineReplay.from_map
@@ -54,6 +56,10 @@ class Comparer:
         Args:
             String mode: One of either "double" or "single", determining how to choose which replays to compare.
         """
+
+        self.log.info("Comparing replays with mode: %s", mode)
+        self.log.log(utils.TRACE, "replays1: %s", self.replays1)
+        self.log.log(utils.TRACE, "replays2: %s", self.replays2)
 
         if(not self.replays1 or self.replays2 == []): # if either are empty, bad things
             if(config.failfast):
