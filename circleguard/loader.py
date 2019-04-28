@@ -161,7 +161,7 @@ class Loader():
             Integer number: The number of top plays to retrieve. Must be between 1 and 100.
 
         Returns:
-            A list of map_ids for the given number of the user's top plays.
+            A list of Integer map_ids for the given number of the user's top plays.
 
         Raises:
             InvalidArgumentsException if number is not between 1 and 100 inclusive.
@@ -174,7 +174,7 @@ class Loader():
 
         Loader.check_response(response)
 
-        return [x["beatmap_id"] for x in response]
+        return [int(x["beatmap_id"]) for x in response]
 
 
     @request
