@@ -170,7 +170,7 @@ class Circleguard:
                             Defaults to 18, or the config value if changed.
         """
 
-        paths = [folder / f for f in os.listdir(folder) if isfile(folder / f) and f != ".DS_Store"]
+        paths = [folder / f for f in os.listdir(folder) if isfile(folder / f) and f.endswith(".osr")]
         replays = [ReplayPath(path) for path in paths]
         check = Check(replays, thresh=thresh)
         yield from self.run(check)
