@@ -32,21 +32,21 @@ def request(function):
             Loader.start_time = datetime.now()
         # catch them exceptions boy
         ret = None
+        self = args[0]
         try:
             ret = function(*args, **kwargs)
         except RatelimitException:
-            args[0]._enforce_ratelimit()
+            self._enforce_ratelimit()
             # wrap function with the decorator then call decorator
             ret = request(function)(*args, **kwargs)
         except InvalidKeyException as e:
-            print(str(e))
-            sys.exit(0)
+            raise CircleguardException("The given key is invalid")
         except RequestException as e:
-            print("Request exception: {}. Sleeping for 5 seconds then retrying".format(e))
+            self.log.waning("Request exception: {}. Likely a network issue; sleeping for 5 seconds then retrying".format(e))
             time.sleep(5)
             ret = request(function)(*args, **kwargs)
         except ReplayUnavailableException as e:
-            print(str(e))
+            self.log.warning("We expected a replay from the api, but it was unable to deliver it: {}".format(e))
             ret = None
         return ret
     return wrapper
