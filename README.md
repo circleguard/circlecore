@@ -152,7 +152,7 @@ for result in circleguard.run(Check(replys)):
     print(result.similarity)
 ```
 
-Circleguard only cares that Replay is initialized in a subclass's load method (technically, it only cares that the class has certain attributes, but that's nitpicking). When you call circleguard.run(check), the first thing it checks if check.loaded is True. If it is, it doesn't load any replays inside it. If not, it calls the load method on each replay in the check object that has replay.loaded set to False, skipping those that have replay.loaded set to True.
+To conform to Replay standards in a subclass you create, you must initialize the superclass (usually Replay, but you can have as long of a hierarchy as you want) in your load method. You must also set self.weight to one of RatelimitWeight.HEAVY, RatelimitWeight.LIGHT, or RatelimitWeight.NONE in your \__init__ method (see the Replay documentation for why this attribute is important, and how to determine which one to use). When you call circleguard.run(check), the first thing it checks if check.loaded is True. If it is, it doesn't load any replays inside it. If not, it calls the load method on each replay in the check object that has replay.loaded set to False, skipping those that have replay.loaded set to True.
 
 So long as your overriding load method loads valid replay_data and initializes the superclass Replay with appropriate values, you can either load it outside the circleguard.run(check) call, or leave the loading up to that call. Either way, the load method will be executed unless you set replay.loaded to True, which happens when you initialize Replay.
 

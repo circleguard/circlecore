@@ -4,7 +4,7 @@ import logging
 import osrparse
 import numpy as np
 
-from circleguard.enums import Detect
+from circleguard.enums import Detect, RatelimitWeight
 from circleguard import config
 from circleguard.utils import TRACE
 
@@ -74,7 +74,7 @@ class Check():
 
 
 class Replay(abc.ABC):
-    def __init__(self, username, mods, replay_id, replay_data, detect):
+    def __init__(self, username, mods, replay_id, replay_data, detect, weight):
         """
         Initializes a Replay instance.
 
@@ -86,6 +86,14 @@ class Replay(abc.ABC):
             osrparse.Replay replay_data: An osrparse Replay containing the replay data for this replay.
             Detect detect: The Detect enum (or bitwise combination of enums), indicating what types of cheats this
                            replay should be investigated or compared for.
+            RatelimitWeight weight: How much it 'costs' to load this replay from the api. If the load method of the replay makes no api calls,
+                             this value is RatelimitWeight.NONE. If it makes only light api calls (anything but get_replay), this value is
+                             RatelimitWeight.LIGHT. If it makes any heavy api calls (get_replay), this value is RatelimitWeight.HEAVY.
+                             This value is used internally to determine how long the loader class will have to spend loading replays -
+                             currently LIGHT and NONE are treated the same, and only HEAVY values are counted towards replays to load. Note
+                             that this has no effect on the comparisons or internal program implementation - it only affects log messages
+                             internally, and if you access circleguard#loader#total, it modifies that value as well. See Loader#new_session
+                             for more details.
         """
 
         self.username = username
@@ -93,7 +101,9 @@ class Replay(abc.ABC):
         self.replay_id = replay_id
         self.replay_data = replay_data
         self.detect = detect
+        self.weight = weight
         self.loaded = True
+
 
     @abc.abstractclassmethod
     def load(self, loader):
@@ -151,6 +161,14 @@ class ReplayMap(Replay):
                        replay should be investigated or compared for.
         Boolean loaded: Whether this replay has been loaded. If True, calls to #load will have no effect.
                         See #load for more information.
+        RatelimitWeight weight: How much it 'costs' to load this replay from the api. If the load method of the replay makes no api calls,
+                            this value is RatelimitWeight.NONE. If it makes only light api calls (anything but get_replay), this value is
+                            RatelimitWeight.LIGHT. If it makes any heavy api calls (get_replay), this value is RatelimitWeight.HEAVY.
+                            This value is used internally to determine how long the loader class will have to spend loading replays -
+                            currently LIGHT and NONE are treated the same, and only HEAVY values are counted towards replays to load. Note
+                            that this has no effect on the comparisons or internal program implementation - it only affects log messages
+                            internally, and if you access circleguard#loader#total, it modifies that value as well. See Loader#new_session
+                            for more details.
     """
 
     def __init__(self, map_id, user_id, mods=None, username=None, detect=Detect.ALL):
@@ -177,6 +195,7 @@ class ReplayMap(Replay):
         self.user_id = user_id
         self.mods = mods
         self.detect = detect
+        self.weight = RatelimitWeight.HEAVY
         self.loaded = False
         self.username = username if username else user_id
 
@@ -194,7 +213,7 @@ class ReplayMap(Replay):
             self.log.debug("ReplayMap already loaded, not loading")
             return
         info = loader.user_info(self.map_id, user_id=self.user_id, mods=self.mods)
-        Replay.__init__(self, self.username, info.mods, info.replay_id, loader.replay_data(info), self.detect)
+        Replay.__init__(self, self.username, info.mods, info.replay_id, loader.replay_data(info), self.detect, self.weight)
         self.log.log(TRACE, "Finished loading ReplayMap")
 
 
@@ -216,6 +235,14 @@ class ReplayPath(Replay):
                        replay should be investigated or compared for.
         Boolean loaded: Whether this replay has been loaded. If True, calls to #load will have no effect.
                         See #load for more information.
+        RatelimitWeight weight: How much it 'costs' to load this replay from the api. If the load method of the replay makes no api calls,
+                            this value is RatelimitWeight.NONE. If it makes only light api calls (anything but get_replay), this value is
+                            RatelimitWeight.LIGHT. If it makes any heavy api calls (get_replay), this value is RatelimitWeight.HEAVY.
+                            This value is used internally to determine how long the loader class will have to spend loading replays -
+                            currently LIGHT and NONE are treated the same, and only HEAVY values are counted towards replays to load. Note
+                            that this has no effect on the comparisons or internal program implementation - it only affects log messages
+                            internally, and if you access circleguard#loader#total, it modifies that value as well. See Loader#new_session
+                            for more details.
     """
 
     def __init__(self, path, detect=Detect.ALL):
@@ -231,6 +258,7 @@ class ReplayPath(Replay):
         self.log = logging.getLogger(__name__ + ".ReplayPath")
         self.path = path
         self.detect = detect
+        self.weight = RatelimitWeight.HEAVY
         self.loaded = False
 
     def load(self, loader):
@@ -252,5 +280,5 @@ class ReplayPath(Replay):
         replay_id = loaded.replay_id if loaded.replay_id != 0 else None # if replay id is 0 it wasn't submitted (?)
         # TODO normalize this, either always 0 or always None, I like always 0 better but I can't remember if changing that breaks
         # anything further down the pipeline (in comparer/etc)
-        Replay.__init__(self, loaded.player_name, loaded.mod_combination, replay_id, loaded.play_data, self.detect)
+        Replay.__init__(self, loaded.player_name, loaded.mod_combination, replay_id, loaded.play_data, self.detect, self.weight)
         self.log.log(TRACE, "Finished loading ReplayPath")

@@ -51,3 +51,8 @@ class Detect(Flag):
 
     ALL = STEAL | RELAX | REMOD
     NONE = 0
+
+class RatelimitWeight(Enum):
+    NONE  = "none"
+    LIGHT = "light"
+    HEAVY = "heavy"
