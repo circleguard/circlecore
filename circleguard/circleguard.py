@@ -42,8 +42,8 @@ class Circleguard:
         Initializes a Circleguard instance.
 
         Args:
-            String key: An osu API key
-            [Path or String] db_path: A pathlike object to the databse file to write and/or read cached replays
+            String key: An osu API key.
+            [Path or String] db_path: A pathlike object to the databse file to write and/or read cached replays.
         """
 
         self.log = logging.getLogger(__name__)
