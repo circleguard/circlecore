@@ -99,7 +99,7 @@ class Circleguard:
         check = Check(replays, replays2=replays2, thresh=thresh)
         yield from self.run(check)
 
-    def verify(self, map_id, u1, u2, cache=config.cache):
+    def verify(self, map_id, u1, u2, cache=config.cache, thresh=config.thresh):
         """
         Verifies that two user's replay on a map are steals of each other.
 
@@ -116,10 +116,10 @@ class Circleguard:
         replay1 = ReplayMap(info1.map_id, info1.user_id, info1.mods, username=info1.username)
         replay2 = ReplayMap(info2.map_id, info2.user_id, info2.mods, username=info2.username)
 
-        check = Check([replay1, replay2])
+        check = Check([replay1, replay2], thresh=thresh)
         yield from self.run(check)
 
-    def user_check(self, u, num):
+    def user_check(self, u, num, thresh=config.thresh):
         """
         Checks a user's top plays for replay steals.
 
@@ -150,12 +150,12 @@ class Circleguard:
             for info in self.loader.user_info(map_id, user_id=u, limit=False)[1:]:
                 remod_replays.append(ReplayMap(info.map_id, info.user_id, mods=info.mods, username=info.username))
 
-            yield from self.run(Check(user_replay, replays2=replays))
+            yield from self.run(Check(user_replay, replays2=replays, thresh=thresh))
 
-            yield from self.run(Check(user_replay + remod_replays))
+            yield from self.run(Check(user_replay + remod_replays, thresh=thresh))
 
 
-    def local_check(self, folder):
+    def local_check(self, folder, thresh=config.thresh):
         """
         Compares locally stored osr files for replay steals.
 
@@ -165,7 +165,7 @@ class Circleguard:
 
         paths = [folder / f for f in os.listdir(folder) if isfile(folder / f) and f != ".DS_Store"]
         replays = [ReplayPath(path) for path in paths]
-        check = Check(replays)
+        check = Check(replays, thresh=thresh)
         yield from self.run(check)
 
 
