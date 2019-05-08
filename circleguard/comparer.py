@@ -123,14 +123,10 @@ class Comparer:
         data1 = [d[1:] for d in data1]
         data2 = [d[1:] for d in data2]
 
-        mods1 = replay1.mods
-        mods2 = replay2.mods
-        if(type(replay1.mods) is not frozenset):
-            mods1 = frozenset(Mod(mod_val) for mod_val in utils.bits(replay1.mods)) # TODO deal with frozenset being ugly and replicated here
-        if(type(replay2.mods) is not frozenset):
-            mods2 = frozenset(Mod(mod_val) for mod_val in utils.bits(replay2.mods))
-        flip1 = Mod.HardRock.value in [mod.value for mod in mods1]
-        flip2 = Mod.HardRock.value in [mod.value for mod in mods2]
+        mods1 = [Mod(mod_val) for mod_val in utils.bits(replay1.mods)]
+        mods2 = [Mod(mod_val) for mod_val in utils.bits(replay2.mods)]
+        flip1 = Mod.HardRock in mods1
+        flip2 = Mod.HardRock in mods2
         if(flip1 ^ flip2): # xor, if one has hr but not the other
             for d in data1:
                 d[1] = 384 - d[1]
