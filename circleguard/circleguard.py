@@ -19,8 +19,6 @@ from circleguard.enums import Detect
 from circleguard.utils import TRACE, ColoredFormatter
 
 
-
-
 logging.addLevelName(TRACE, "TRACE")
 formatter = ColoredFormatter("[%(threadName)s][%(name)s][%(levelname)s]  %(message)s  (%(filename)s:%(lineno)s)")
 handler_stream = logging.StreamHandler()
