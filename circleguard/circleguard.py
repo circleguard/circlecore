@@ -29,6 +29,17 @@ logging.getLogger("circleguard").addHandler(handler_stream)
 
 
 class Circleguard:
+    """
+    Circleguard compares and investigates replays to detect cheats.
+
+    Circleguard provides convenience methods for common use cases: map_check, verify, user_check, and local_check -
+    see each method for further documentation. If these convenience methods are not flexible enough for you, you will
+    have to instantiate your own Check object and call circleguard#run(check).
+
+    Under the hood, convenience methods simply instantiate a Check object and call circleguard#run(check). The run method
+    returns a generator containing Result objects, which contains the result of each comparison of the replays. See the
+    Result class for further documentation.
+    """
 
     def __init__(self, key, db_path):
         """
