@@ -78,12 +78,12 @@ def check_cache(function):
 
 class Loader():
     """
-    Manages interactions with the osu api - if the api ratelimits the key we wait until we refresh our ratelimits
-    and retry the request.
+    Manages interactions with the osu api, using the osuAPI wrapper.
 
-    This class is not meant to be instantiated, instead only static methods and class variables used.
-    This is because we only use one api key for the entire project, and making all methods static provides
-    cleaner access than passing around a single Loader class.
+    if the api ratelimits the key, we wait until we refresh our ratelimits and retry
+    the request. Because the api does not provide the time until the next refresh (and we
+    do not periodically retry the key), if the key is ratelimited outside of this class,
+    the class may wait more time than necessary for the key to refresh.
     """
 
     RATELIMIT_RESET = 60 # time in seconds until the api refreshes our ratelimits
