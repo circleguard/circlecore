@@ -91,7 +91,7 @@ class Circleguard:
 
         self.log.info("Map check with map id %d, u %s, num %s, cache %s, thresh %s", map_id, u, num, cache, thresh)
         replays2 = None
-        if(u):
+        if u:
             info = self.loader.user_info(map_id, user_id=u)
             replays2 = [ReplayMap(info.map_id, info.user_id, info.mods, username=info.username)]
         infos = self.loader.user_info(map_id, num=num)
@@ -139,8 +139,8 @@ class Circleguard:
 
         for map_id in self.loader.get_user_best(u, num):
             info = self.loader.user_info(map_id, user_id=u)
-            if(not info.replay_available):
-                continue # if we can't download the user's replay on the map, we have nothing to compare against
+            if not info.replay_available:
+                continue  # if we can't download the user's replay on the map, we have nothing to compare against
             user_replay = [ReplayMap(info.map_id, info.user_id, mods=info.mods, username=info.username)]
 
             infos = self.loader.user_info(map_id, num=num)
@@ -153,7 +153,6 @@ class Circleguard:
             yield from self.run(Check(user_replay, replays2=replays, thresh=thresh))
 
             yield from self.run(Check(user_replay + remod_replays, thresh=thresh))
-
 
     def local_check(self, folder, thresh=config.thresh):
         """
@@ -185,13 +184,13 @@ def set_options(thresh=None, num=None, cache=None, failfast=None, loglevel=None)
                           For more information on log levels, see the standard python logging lib.
     """
 
-    for k,v in locals().items():
-        if(not v):
+    for k, v in locals().items():
+        if not v:
             continue
-        if(k == "loglevel"):
+        if k == "loglevel":
             logging.getLogger("circleguard").setLevel(loglevel)
             continue
-        if(hasattr(config, k)):
+        if hasattr(config, k):
             setattr(config, k, v)
-        else: # this only happens if we fucked up, not the user's fault
+        else:  # this only happens if we fucked up, not the user's fault
             raise CircleguardException(f"The key {k} (with value {v}) is not available as a config option")
