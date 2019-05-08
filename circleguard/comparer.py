@@ -5,7 +5,6 @@ import logging
 import numpy as np
 import math
 
-from circleguard.draw import Draw
 from circleguard.replay import Replay
 from circleguard.enums import Mod
 from circleguard.exceptions import InvalidArgumentsException, CircleguardException
