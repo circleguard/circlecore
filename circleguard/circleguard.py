@@ -87,6 +87,8 @@ class Circleguard:
                          Loads from the top ranks of the leaderboard, so num=20 will compare the top 20 scores. This
                          number must be between 1 and 100, as restricted by the osu api.
             Boolean cache: Whether to cache the loaded replays. Defaults to False, or the config value if changed.
+            Integer thresh: If a comparison scores below this value, its Result object has ischeat set to True.
+                            Defaults to 18, or the config value if changed.
         """
 
         self.log.info("Map check with map id %d, u %s, num %s, cache %s, thresh %s", map_id, u, num, cache, thresh)
@@ -108,6 +110,8 @@ class Circleguard:
             Integer u1: The user id of one of the users who set a replay on this map.
             Integer u2: The user id of the second user who set a replay on this map.
             Boolean cache: Whether to cache the loaded replays. Defaults to False, or the config value if changed.
+            Integer thresh: If a comparison scores below this value, its Result object has ischeat set to True.
+                            Defaults to 18, or the config value if changed.
         """
 
         self.log.info("Verify with map id %d, u1 %s, u2 %s, cache %s", map_id, u1, u2, cache)
@@ -133,6 +137,8 @@ class Circleguard:
             Integer u: The user id of the user to check
             Integer num: The number of replays of each map to compare against the user's replay. For now, this also serves as the
                          number of top plays of the user to check for replay stealing and remodding.
+            Integer thresh: If a comparison scores below this value, its Result object has ischeat set to True.
+                            Defaults to 18, or the config value if changed.
         """
 
         self.log.info("User check with u %s, num %s", u, num)
@@ -160,6 +166,8 @@ class Circleguard:
 
         Args:
             [Path or String] folder: A pathlike object to the directory containing osr files.
+            Integer thresh: If a comparison scores below this value, its Result object has ischeat set to True.
+                            Defaults to 18, or the config value if changed.
         """
 
         paths = [folder / f for f in os.listdir(folder) if isfile(folder / f) and f != ".DS_Store"]
