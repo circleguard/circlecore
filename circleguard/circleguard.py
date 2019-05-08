@@ -11,9 +11,8 @@ from circleguard.loader import Loader
 from circleguard.comparer import Comparer
 from circleguard.investigator import Investigator
 from circleguard.cacher import Cacher
-from circleguard.screener import Screener
 from circleguard import config
-from circleguard.exceptions import InvalidArgumentsException, CircleguardException
+from circleguard.exceptions import CircleguardException
 from circleguard.replay import Check, ReplayMap, ReplayPath
 from circleguard.enums import Detect
 from circleguard.utils import TRACE, ColoredFormatter
@@ -87,7 +86,7 @@ class Circleguard:
                        compared with the rest of the lederboard of the map. No other comparisons will be made.
             Integer num: The number of replays to compare from the map. Defaults to 50, or the config value if changed.
                          Loads from the top ranks of the leaderboard, so num=20 will compare the top 20 scores. This
-                          number must be between 1 and 100, as restricted by the osu api.
+                         number must be between 1 and 100, as restricted by the osu api.
             Boolean cache: Whether to cache the loaded replays. Defaults to False, or the config value if changed.
         """
 
@@ -122,6 +121,20 @@ class Circleguard:
         yield from self.run(check)
 
     def user_check(self, u, num):
+        """
+        Checks a user's top plays for replay steals.
+
+        For each of the user's top plays, the replay will be compared to the top plays of the map,
+        then compared to all the user's other plays on the map, to check for both stealing and remodding.
+
+        If a user has no or only one downloadable replay on the map, no comparisons to the user's other plays are made.
+        Obviously, if the play is not downloadable, no comparison is made against the map leaderboard for that replay either.
+
+        Args:
+            Integer u: The user id of the user to check
+            Integer num: The number of replays of each map to compare against the user's replay. For now, this also serves as the
+                         number of top plays of the user to check for replay stealing and remodding.
+        """
 
         self.log.info("User check with u %s, num %s", u, num)
 
