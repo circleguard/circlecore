@@ -53,6 +53,16 @@ class Detect(Flag):
     NONE = 0
 
 class RatelimitWeight(Enum):
+    """
+    How much it 'costs' to load a replay from the api. If the load method of a replay makes no api calls,
+    the corresponding value is RatelimitWeight.NONE. If it makes only light api calls (anything but get_replay),
+    the corresponding value is RatelimitWeight.LIGHT. If it makes any heavy api calls (get_replay), the
+    corresponding value is RatelimitWeight.HEAVY.
+
+    This value is used internally to determine how long the loader class will have to spend loading replays -
+    currently LIGHT and NONE are treated the same, and only HEAVY values are counted towards replays to load.
+    See loader#new_session and the Replay documentation for more details.
+    """
     NONE  = "none"
     LIGHT = "light"
     HEAVY = "heavy"
