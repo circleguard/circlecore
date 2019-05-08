@@ -96,9 +96,9 @@ class Comparer:
         if(mean < self.threshold):
             ischeat = True
 
-        # if they were both set locally, we may not get replay ids to compare
+        # if they were both set locally, we may not get replay ids to compare (replay_id is 0 if local)
         later_name = None
-        if(replay1.replay_id and replay2.replay_id):
+        if(replay1.replay_id != 0 and replay2.replay_id != 0):
             later_name = replay1.username if(replay1.replay_id > replay2.replay_id) else replay2.username
         return Result(replay1, replay2, mean, ischeat, later_name)
 

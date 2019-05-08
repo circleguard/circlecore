@@ -277,8 +277,5 @@ class ReplayPath(Replay):
             return
         # no, we don't need loader for ReplayPath, but to reduce type checking when calling we make the method signatures homogeneous
         loaded = osrparse.parse_replay_file(self.path)
-        replay_id = loaded.replay_id if loaded.replay_id != 0 else None # if replay id is 0 it wasn't submitted (?)
-        # TODO normalize this, either always 0 or always None, I like always 0 better but I can't remember if changing that breaks
-        # anything further down the pipeline (in comparer/etc)
-        Replay.__init__(self, loaded.player_name, loaded.mod_combination, replay_id, loaded.play_data, self.detect, self.weight)
+        Replay.__init__(self, loaded.player_name, loaded.mod_combination, loaded.replay_id, loaded.play_data, self.detect, self.weight)
         self.log.log(TRACE, "Finished loading ReplayPath")
