@@ -6,7 +6,6 @@ import os
 from os.path import isfile, join
 import logging
 
-from circleguard.draw import Draw
 from circleguard.loader import Loader
 from circleguard.comparer import Comparer
 from circleguard.investigator import Investigator
