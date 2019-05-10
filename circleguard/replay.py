@@ -251,7 +251,6 @@ class ReplayPath(Replay):
         self.loaded = False
 
     def load(self, loader):
-        # TODO add documentation to osrparse lol
         """
         Loads the data for this replay from the osr file given by the path. See osrparse.parse_replay_file for
         implementation details. This method has no effect if replay.loaded is True.
