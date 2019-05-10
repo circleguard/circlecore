@@ -59,6 +59,7 @@ class Check():
         Args:
             Loader loader: The loader to handle api requests, if required by the Replay.
         """
+
         self.log.info("Loading replays from Check")
 
         if(self.loaded):
@@ -229,8 +230,8 @@ class ReplayPath(Replay):
                        replay should be investigated or compared for.
         Boolean loaded: Whether this replay has been loaded. If True, calls to #load will have no effect.
                         See #load for more information.
-        RatelimitWeight weight: RatelimitWeight.NONE, as this class' load method makes no api calls. See RatelimitWeight documentation
-                                for more information.
+        RatelimitWeight weight: RatelimitWeight.NONE, as this class' load method makes no api calls. See RatelimitWeight
+                                documentation for more information.
     """
 
     def __init__(self, path, detect=Detect.ALL):
