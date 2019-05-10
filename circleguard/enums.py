@@ -63,6 +63,7 @@ class RatelimitWeight(Enum):
     currently LIGHT and NONE are treated the same, and only HEAVY values are counted towards replays to load.
     See loader#new_session and the Replay documentation for more details.
     """
+
     NONE  = "none"
     LIGHT = "light"
     HEAVY = "heavy"
