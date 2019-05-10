@@ -51,8 +51,6 @@ class Comparer:
         If mode is "single", compares all replays in replays1 against all other replays in replays1 (len(replays1) choose 2 comparisons).
         In both cases, yields Result objects containing the result of each comparison.
 
-
-
         Args:
             String mode: One of either "double" or "single", determining how to choose which replays to compare.
 
