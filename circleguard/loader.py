@@ -55,9 +55,10 @@ def request(function):
 def check_cache(function):
     """
     Decorator that checks if the replay by the given user_id on the given map_id is already cached.
-    If so, returns a Replay instance from the cached string instead of requesting it from the api.
+    If so, returns a Replay instance from the cached data instead of requesting it from the api.
+    Otherwise, it calls the function as normal.
 
-    Note that self, cacher and user_info must be the first, second and third arguments to the function respectively.
+    Note that self and user_info must be the first and second arguments to the function respectively.
 
     Returns:
         A Replay instance from the cached replay if it was cached, or the return value of the function if not.
