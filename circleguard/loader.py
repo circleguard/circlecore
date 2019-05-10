@@ -54,14 +54,16 @@ def request(function):
 
 def check_cache(function):
     """
-    Decorator that checks if the replay by the given user_id on the given map_id is already cached.
-    If so, returns a Replay instance from the cached data instead of requesting it from the api.
-    Otherwise, it calls the function as normal.
+    Decorator that checks if the replay by the given user_id on the given map_id is already
+    cached. If so, returns a Replay instance from the cached data instead of requesting it
+    from the api. Otherwise, it calls the function as normal.
 
-    Note that self and user_info must be the first and second arguments to the function respectively.
+    Note that self and user_info must be the first and second arguments to
+    the function respectively.
 
     Returns:
-        A Replay instance from the cached replay if it was cached, or the return value of the function if not.
+        A Replay instance from the cached replay if it was cached,
+        or the return value of the function if not.
     """
 
     def wrapper(*args, **kwargs):
@@ -108,8 +110,8 @@ class Loader():
         Resets the loaded replays to 0, and sets the total to the passed total.
 
         Intended to be called every time the loader is used for a different set of replay loadings -
-        since a Loader instance is passed around to Comparer and Investigator, each with different amounts
-        of replays to load, making new sessions is necessary to keep progress logs correct.
+        since a Loader instance is passed around to Comparer and Investigator, each with different
+        amounts of replays to load, making new sessions is necessary to keep progress logs correct.
         """
 
         self.log.debug("Starting a new session with total %d", total)
@@ -120,14 +122,17 @@ class Loader():
     @request
     def user_info(self, map_id, num=None, user_id=None, mods=None, limit=True):
         """
-        Returns a list of UserInfo objects containing a user's (user_id, username, replay_id, enabled mods, replay available) on a given map.
+        Returns a list of UserInfo objects containing a user's
+        (user_id, username, replay_id, enabled mods, replay available)
+        on a given map.
 
         If limit and user_id is set, it will return a single UserInfo object, not a list.
 
         Args:
             Integer map_id: The map id to get the replay_id from.
             Integer user_id: The user id to get the replay_id from.
-            Boolean limit: If set, will only return a user's top score (top response). Otherwise, will return every response (every score they set on that map under different mods)
+            Boolean limit: If set, will only return a user's top score (top response). Otherwise, will
+                          return every response (every score they set on that map under different mods)
             Integer mods: The mods the replay info to retieve were played with.
         """
 
