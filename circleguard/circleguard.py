@@ -14,14 +14,6 @@ from circleguard import config
 from circleguard.exceptions import CircleguardException
 from circleguard.replay import Check, ReplayMap, ReplayPath
 from circleguard.enums import Detect, RatelimitWeight
-from circleguard.utils import TRACE, ColoredFormatter
-
-
-logging.addLevelName(TRACE, "TRACE")
-formatter = ColoredFormatter("[%(threadName)s][%(name)s][%(levelname)s]  %(message)s  (%(filename)s:%(lineno)s)")
-handler_stream = logging.StreamHandler()
-handler_stream.setFormatter(formatter)
-logging.getLogger("circleguard").addHandler(handler_stream)
 
 
 class Circleguard:
@@ -45,6 +37,8 @@ class Circleguard:
             String key: An osu API key.
             [Path or String] db_path: A pathlike object to the databse file to write and/or read cached replays.
         """
+        print("cg init")
+        print("cg init", file=sys.stderr)
 
         self.log = logging.getLogger(__name__)
         self.db_path = Path(db_path)
