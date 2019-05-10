@@ -49,18 +49,28 @@ class Comparer:
         """
         If mode is "double", compares all replays in replays1 against all replays in replays2.
         If mode is "single", compares all replays in replays1 against all other replays in replays1 (len(replays1) choose 2 comparisons).
-
         In both cases, yields Result objects containing the result of each comparison.
+
+
 
         Args:
             String mode: One of either "double" or "single", determining how to choose which replays to compare.
+
+        Returns:
+            A generator containing Result objects of the comparisons.
+
+        Raises:
+            CircleguardException if no comparisons could be made from the given replays (if replays1
+            or replays2 is empty) and config.failfast is True. Otherwise, even if the replay lists are empty,
+            silently returns.
         """
 
         self.log.info("Comparing replays with mode: %s", mode)
         self.log.log(utils.TRACE, "replays1: %s", self.replays1)
         self.log.log(utils.TRACE, "replays2: %s", self.replays2)
 
-        if(not self.replays1 or self.replays2 == []): # if either are empty, bad things
+        #TODO: a little bit hacky and I don't think works 100% correctly, if mode is double but replays2 is None
+        if(not self.replays1 or self.replays2 == []):
             if(config.failfast):
                 raise CircleguardException("No comparisons could be made from the given replays")
             else:
