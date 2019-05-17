@@ -37,8 +37,6 @@ class Circleguard:
             String key: An osu API key.
             [Path or String] db_path: A pathlike object to the databse file to write and/or read cached replays.
         """
-        print("cg init")
-        print("cg init", file=sys.stderr)
 
         self.log = logging.getLogger(__name__)
         self.db_path = Path(db_path)
