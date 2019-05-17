@@ -24,7 +24,7 @@ class Check():
                         more details.
     """
 
-    def __init__(self, replays, replays2=None, thresh=config.thresh, cache=config.cache):
+    def __init__(self, replays, replays2=None, thresh=config.thresh, cache=config.cache, include=config.include):
         """
         Initializes a Check instance.
 
@@ -42,11 +42,29 @@ class Check():
 
         self.log = logging.getLogger(__name__ + ".Check")
         self.replays = replays # list of ReplayMap and ReplayPath objects, not yet processed
-        self.replays2 = replays2
+        self.replays2 = replays2 if replays2 else [] # make replays2 fake iterable, for #filter mostly
         self.mode = "double" if replays2 else "single"
         self.loaded = False
         self.thresh = thresh
         self.cache = cache
+        self.include = include
+
+    def filter(self):
+        """
+        Filters self.replays and self.replays2 to contain only Replays where self.include returns True
+        when the Replay is passed. This gives total control to what replays end up getting loaded
+        and compared.
+        """
+
+        self.log.info("Filtering replays from Check")
+
+        for replay in self.replays:
+            if not self.include(replay):
+                self.replays.remove(replay)
+
+        for replay in self.replays2:
+            if not self.include(replay):
+                self.replays2.remove(replay)
 
     def load(self, loader):
         """
