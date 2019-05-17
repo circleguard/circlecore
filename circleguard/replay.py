@@ -58,13 +58,19 @@ class Check():
 
         self.log.info("Filtering replays from Check")
 
+        # TODO: could be optimized, #remove is O(n) and we're already traversing anyway, use
+        # enumerate() and del
         for replay in self.replays:
             if not self.include(replay):
+                self.log.debug("Replay failed include(), filtering from Check replays")
                 self.replays.remove(replay)
+            self.log.log(TRACE, "Replay passed include(), keeping in Check replays")
 
         for replay in self.replays2:
             if not self.include(replay):
+                self.log.debug("Replay failed include(), filtering from Check replays2")
                 self.replays2.remove(replay)
+            self.log.log(TRACE, "Replay passed include(), keeping in Check replays2")
 
     def load(self, loader):
         """
