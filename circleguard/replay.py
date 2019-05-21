@@ -108,7 +108,9 @@ class Replay(abc.ABC):
                              has no effect - this field is used to represent the player more readably than their id.
             Integer mods: The mods the replay was played with.
             Integer replay_id: The id of this replay, or 0 if it does not have an id (unsubmitted replays have no id)
-            osrparse.Replay replay_data: An osrparse Replay containing the replay data for this replay.
+            osrparse.Replay replay_data: An osrparse Replay containing the replay data for this replay. If the replay data is not available
+                                         (from the api or otherwise), this field should be None. This means that this replay will not be
+                                         compared against other replays or investigated for cheats.
             Detect detect: The Detect enum (or bitwise combination of enums), indicating what types of cheats this
                            replay should be investigated or compared for.
             RatelimitWeight weight: How much it 'costs' to load this replay from the api. If the load method of the replay makes no api calls,
@@ -219,7 +221,6 @@ class ReplayMap(Replay):
         self.username = username if username else user_id
 
     def load(self, loader):
-        # TODO what happens if the replay isn't avaiable from the api? pretty sure it fatal errors right now. That bad
         """
         Loads the data for this replay from the api. This method silently returns if replay.loaded is True.
 
