@@ -232,7 +232,8 @@ class ReplayMap(Replay):
             self.log.debug("ReplayMap already loaded, not loading")
             return
         info = loader.user_info(self.map_id, user_id=self.user_id, mods=self.mods)
-        Replay.__init__(self, self.username, info.mods, info.replay_id, loader.replay_data(info), self.detect, self.weight)
+        replay_data = loader.replay_data(info)
+        Replay.__init__(self, self.username, info.mods, info.replay_id, replay_data, self.detect, self.weight)
         self.log.log(TRACE, "Finished loading ReplayMap")
 
 
