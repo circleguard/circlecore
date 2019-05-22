@@ -57,7 +57,7 @@ class Circleguard:
             A generator containing Result objects of the comparisons.
         """
 
-        self.log.info("Running circlegauard with a Check")
+        self.log.info("Running circleguard with a Check")
 
         check.filter()
         # steal check

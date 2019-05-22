@@ -1,11 +1,12 @@
 import sqlite3
 import logging
-
+import os
 import wtc
 
 from circleguard.loader import Loader
 from circleguard.exceptions import CircleguardException
 from circleguard.utils import TRACE
+
 
 class Cacher:
     """
@@ -26,6 +27,8 @@ class Cacher:
 
         self.log = logging.getLogger(__name__)
         self.should_cache = cache
+        if not os.path.isfile(str(path)):
+            self._create_cache(str(path))
         self.conn = sqlite3.connect(str(path))
         self.cursor = self.conn.cursor()
 
@@ -102,7 +105,6 @@ class Cacher:
                                                 .format(map_id, user_id, mods, info.replay_available))
                 self.cache(lzma_data, info)
 
-
     def check_cache(self, map_id, user_id, mods):
         """
         Checks if a replay exists on the given map_id by the given user_id with the given mods, and returns the decompressed wtc (equivelant to an lzma) string if so.
@@ -136,7 +138,6 @@ class Cacher:
         self.cursor.execute(statement, args)
         self.conn.commit()
 
-
     def _compress(self, lzma_bytes):
         """
         Compresses the lzma string to a (smaller) wtc string to store in the database.
@@ -150,3 +151,20 @@ class Cacher:
 
         self.log.log(TRACE, "Compressing lzma bytes")
         return wtc.compress(lzma_bytes)
+
+    def _create_cache(self, path):
+        print(path)
+        print(os.path.split(path))
+        if not os.path.exists(os.path.split(path)[0]):  # create dir if nonexistent
+            os.makedirs(os.path.split(path)[0])
+        conn = sqlite3.connect(str(path))
+        c = conn.cursor()
+        c.execute("""CREATE TABLE "REPLAYS"(
+            "MAP_ID" INTEGER NOT NULL,
+            "USER_ID" INTEGER NOT NULL,
+            "REPLAY_DATA" MEDIUMTEXT NOT NULL,
+            "REPLAY_ID" INTEGER NOT NULL,
+            "MODS" INTEGER NOT NULL,
+            PRIMARY KEY("REPLAY_ID")
+        )""")
+        conn.close()

@@ -42,7 +42,7 @@ def request(function):
         except InvalidKeyException as e:
             raise CircleguardException("The given key is invalid")
         except RequestException as e:
-            self.log.waning("Request exception: {}. Likely a network issue; sleeping for 5 seconds then retrying".format(e))
+            self.log.warning("Request exception: {}. Likely a network issue; sleeping for 5 seconds then retrying".format(e))
             time.sleep(5)
             ret = request(function)(*args, **kwargs)
         except ReplayUnavailableException as e:
