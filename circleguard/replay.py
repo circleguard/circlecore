@@ -57,20 +57,21 @@ class Check():
         """
 
         self.log.info("Filtering replays from Check")
+        self.replays = [replay for replay in self.replays if self._include(replay)]
+        self.replays2 = [replay for replay in self.replays2 if self._include(replay)]
 
-        # TODO: could be optimized, #remove is O(n) and we're already traversing anyway, use
-        # enumerate() and del
-        for replay in self.replays:
-            if not self.include(replay):
-                self.log.debug("Replay failed include(), filtering from Check replays")
-                self.replays.remove(replay)
+
+    def _include(self, replay):
+        """
+        An internal helper method to create log statements from inside a list comprehension.
+        """
+
+        if(self.include(replay)):
             self.log.log(TRACE, "Replay passed include(), keeping in Check replays")
-
-        for replay in self.replays2:
-            if not self.include(replay):
-                self.log.debug("Replay failed include(), filtering from Check replays2")
-                self.replays2.remove(replay)
-            self.log.log(TRACE, "Replay passed include(), keeping in Check replays2")
+            return True
+        else:
+            self.log.debug("Replay failed include(), filtering from Check replays")
+            return False
 
     def load(self, loader):
         """
