@@ -42,6 +42,7 @@ class Circleguard:
         self.db_path = Path(db_path)
         cacher = Cacher(config.cache, self.db_path)
         self.loader = Loader(cacher, key)
+        self.options = Options()
 
     def run(self, check):
         """
@@ -72,7 +73,7 @@ class Circleguard:
 
         # relax check (TODO)
 
-    def map_check(self, map_id, u=None, num=config.num, cache=config.cache, thresh=config.thresh, include=config.include):
+    def map_check(self, map_id, u=None, num=None, cache=None, thresh=None, include=None):
         """
         Checks a map's leaderboard for replay steals.
 
@@ -91,6 +92,12 @@ class Circleguard:
             A generator containing Result objects of the comparisons.
         """
 
+        options = self.options
+        num = num if num else options.num
+        cache = cache if cache else options.cache
+        thresh = thresh if thresh else options.thresh
+        include = include if include else options.include
+
         self.log.info("Map check with map id %d, u %s, num %s, cache %s, thresh %s", map_id, u, num, cache, thresh)
         replays2 = None
         if u:
@@ -98,10 +105,10 @@ class Circleguard:
             replays2 = [ReplayMap(info.map_id, info.user_id, info.mods, username=info.username)]
         infos = self.loader.user_info(map_id, num=num)
         replays = [ReplayMap(info.map_id, info.user_id, info.mods, username=info.username) for info in infos]
-        check = Check(replays, replays2=replays2, thresh=thresh, include=include)
+        check = Check(replays, replays2=replays2, thresh=thresh, cache=cache, include=include)
         yield from self.run(check)
 
-    def verify(self, map_id, u1, u2, cache=config.cache, thresh=config.thresh, include=config.include):
+    def verify(self, map_id, u1, u2, cache=None, thresh=None, include=None):
         """
         Verifies that two user's replay on a map are steals of each other.
 
@@ -117,6 +124,11 @@ class Circleguard:
             A generator containing Result objects of the comparisons.
         """
 
+        options = self.options
+        cache = cache if cache else options.cache
+        thresh = thresh if thresh else options.thresh
+        include = include if include else options.include
+
         self.log.info("Verify with map id %d, u1 %s, u2 %s, cache %s", map_id, u1, u2, cache)
         info1 = self.loader.user_info(map_id, user_id=u1)
         info2 = self.loader.user_info(map_id, user_id=u2)
@@ -126,7 +138,7 @@ class Circleguard:
         check = Check([replay1, replay2], thresh=thresh, include=include)
         yield from self.run(check)
 
-    def user_check(self, u, num, thresh=config.thresh, include=config.include):
+    def user_check(self, u, num, thresh=None, include=None):
         """
         Checks a user's top plays for replay steals.
 
@@ -147,6 +159,10 @@ class Circleguard:
             A generator containing Result objects of the comparisons.
         """
 
+        options = self.options
+        thresh = thresh if thresh else options.thresh
+        include = include if include else options.include
+
         self.log.info("User check with u %s, num %s", u, num)
 
         for map_id in self.loader.get_user_best(u, num):
@@ -166,7 +182,7 @@ class Circleguard:
 
             yield from self.run(Check(user_replay + remod_replays, thresh=thresh, include=include))
 
-    def local_check(self, folder, thresh=config.thresh, include=config.include):
+    def local_check(self, folder, thresh=None, include=None):
         """
         Compares locally stored osr files for replay steals.
 
@@ -178,6 +194,10 @@ class Circleguard:
         Returns:
             A generator containing Result objects of the comparisons.
         """
+
+        options = self.options
+        thresh = thresh if thresh else options.thresh
+        include = include if include else options.include
 
         paths = [folder / f for f in os.listdir(folder) if isfile(folder / f) and f.endswith(".osr")]
         replays = [ReplayPath(path) for path in paths]
@@ -245,3 +265,17 @@ def set_options(thresh=None, num=None, cache=None, failfast=None, loglevel=None,
             setattr(config, k, v)
         else:  # this only happens if we fucked up, not the user's fault
             raise CircleguardException(f"The key {k} (with value {v}) is not available as a config option for global config")
+
+
+
+class Options():
+    """
+    Container class for options, tied to a specific Circleguard instance.
+    """
+
+    def __init__(self):
+        self.thresh = config.thresh
+        self.num = config.num
+        self.cache = config.cache
+        self.failfast = config.failfast
+        self.include = config.include

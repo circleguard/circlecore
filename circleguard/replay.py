@@ -24,7 +24,7 @@ class Check():
                         more details.
     """
 
-    def __init__(self, replays, replays2=None, thresh=config.thresh, cache=config.cache, include=config.include):
+    def __init__(self, replays, replays2=None, thresh=None, cache=None, include=None):
         """
         Initializes a Check instance.
 
@@ -45,9 +45,9 @@ class Check():
         self.replays2 = replays2 if replays2 else [] # make replays2 fake iterable, for #filter mostly
         self.mode = "double" if replays2 else "single"
         self.loaded = False
-        self.thresh = thresh
-        self.cache = cache
-        self.include = include
+        self.thresh = thresh if thresh else config.thresh
+        self.cache = cache if cache else config.cache
+        self.include = include if include else config.include
 
     def filter(self):
         """
