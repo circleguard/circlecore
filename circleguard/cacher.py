@@ -153,8 +153,7 @@ class Cacher:
         return wtc.compress(lzma_bytes)
 
     def _create_cache(self, path):
-        print(path)
-        print(os.path.split(path))
+        self.log.info("Cache not found at path %s, creating cache", path)
         if not os.path.exists(os.path.split(path)[0]):  # create dir if nonexistent
             os.makedirs(os.path.split(path)[0])
         conn = sqlite3.connect(str(path))
