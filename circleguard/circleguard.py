@@ -184,6 +184,36 @@ class Circleguard:
         check = Check(replays, thresh=thresh, include=include)
         yield from self.run(check)
 
+    def set_options(self, thresh=None, num=None, cache=None, failfast=None, logleve=None, include=None):
+        """
+        Changes the default value for different options in circleguard.
+        Affects only the ircleguard instance this method is called on.
+
+        Args:
+            Integer thresh: If a comparison scores below this value, its Result object has ischeat set to True. 18 by default.
+            Integer num: How many replays to load from a map when doing a map check. 50 by default.
+            Boolean cache: Whether downloaded replays should be cached or not. False by default.
+            Boolean failfast: Will throw an exception if no comparisons can be made for a given Check object,
+                          or silently make no comparisons otherwise. False by default.
+            Integer loglevel: What level to log at. Circlecore follows standard python logging levels, with an added level of
+                          TRACE with a value of 5 (lower than debug, which is 10). The value passed to loglevel is
+                          passed directly to the setLevel function of the circleguard root logger. WARNING by default.
+                          For more information on log levels, see the standard python logging lib.
+            Function include: A Predicate functrion that returns True if the replay should be loaded, and False otherwise.
+                          The include function will be passed a single argument - the circleguard.Replay object, or one
+                          of its subclasses.
+        """
+
+        for k, v in locals().items():
+            if not v:
+                continue
+            if hasattr(self.options, k):
+                setattr(self.options, k, v)
+            else:  # this only happens if we fucked up, not the user's fault # TODO not quite true for loglevel,
+                   # which is available only as a global option atm, nothing more specific. Either change that (give each circleguard class
+                   # its own logger, like Circleguard.circleguard1 so that log levels can be changed independently per instance) or
+                   # leave a note that it's global in documentation. Leaning towards the former
+                raise CircleguardException(f"The key {k} (value {v}) is not available as a config option for a circleguard instance")
 
 def set_options(thresh=None, num=None, cache=None, failfast=None, loglevel=None, include=None):
     """
