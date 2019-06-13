@@ -185,9 +185,10 @@ class Circleguard:
         yield from self.run(check)
 
 
-def set_options(thresh=None, num=None, cache=None, failfast=None, loglevel=None):
+def set_options(thresh=None, num=None, cache=None, failfast=None, loglevel=None, include=None):
     """
     Changes the default value for different options in circleguard.
+    Affects all circleguard instances, even ones that have already been instantiated.
 
     Args:
         Integer thresh: If a comparison scores below this value, its Result object has ischeat set to True. 18 by default.
@@ -199,6 +200,9 @@ def set_options(thresh=None, num=None, cache=None, failfast=None, loglevel=None)
                           TRACE with a value of 5 (lower than debug, which is 10). The value passed to loglevel is
                           passed directly to the setLevel function of the circleguard root logger. WARNING by default.
                           For more information on log levels, see the standard python logging lib.
+        Function include: A Predicate functrion that returns True if the replay should be loaded, and False otherwise.
+                          The include function will be passed a single argument - the circleguard.Replay object, or one
+                          of its subclasses.
     """
 
     for k, v in locals().items():
