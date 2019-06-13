@@ -9,7 +9,7 @@ To clarify, this module is referred to internally as circlecore to differentiate
 First, install circleguard:
 
 ```bash
-$ pip install circleguard
+pip install circleguard
 ```
 
 Circleguard can be ran in two ways - through convenience methods such as `circleguard.user_check()` or by instantiating and passing a Check object to `circleguard.run(check)`, which provides much more control over how and what replays to compare. Both methods return a generator containing Result objects.
@@ -19,7 +19,6 @@ The following examples provide very simple uses of Result objects. For more deta
 ### Convenience Methods
 
 For simple usage, you may only ever need to use convenience methods. These methods are used directly by the frontend of circleguard and are generally maintained on that basis, so methods useful to the most people are added. Convenience methods are no different from running circleguard through Check objects - internally, all convenience methods do is create Check objects and run circleguard with them anyway. They simply provide easy usage for common use cases of circleguard, such as checking a specific map's leaderboard.
-
 
 ```python
 from circleguard import *
@@ -32,7 +31,7 @@ for r in circleguard.user_check(12092800, cache=True):
     if(r.ischeat):
         print("Found a cheater! {} vs {}, {} set later.".format(r.replay1.username, r.replay2.username, r.later_name))
 
-# cmopare the top 10 plays on a map for replay steals
+# compare the top 10 plays on a map for replay steals
 for r in circleguard.map_check(1005542, num=10):
     if(r.ischeat):
         print("Found a cheater on a map! {} vs {}, {} set later.".format(r.replay1.username, r.replay2.username, r.later_name))
@@ -49,7 +48,6 @@ for r in circleguard.verify(1699366, 12092800, 7477458, False):
     else:
         print("Neither of those two users appear to have stolen from each other")
 ```
-
 
 ### More Generally
 
@@ -82,7 +80,6 @@ for r in circleguard.run(Check(replays)):
         repr2 = r.replay2.path if r.replay2 is ReplayPath else r.replay2.username
         print("Found a cheater! {} vs {}, {} set later.".format(repr1, repr2, r.later_name))
 ```
-
 
 ## Advanced Usage
 
