@@ -39,7 +39,7 @@ class Circleguard:
         """
 
         self.log = logging.getLogger(__name__)
-        self.db_path = Path(db_path)
+        self.db_path = Path(db_path).absolute() # allows for . to be passed to db_path
         cacher = Cacher(config.cache, self.db_path)
         self.loader = Loader(cacher, key)
         self.options = Options()
