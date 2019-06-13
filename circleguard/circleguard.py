@@ -244,4 +244,4 @@ def set_options(thresh=None, num=None, cache=None, failfast=None, loglevel=None,
         if hasattr(config, k):
             setattr(config, k, v)
         else:  # this only happens if we fucked up, not the user's fault
-            raise CircleguardException(f"The key {k} (with value {v}) is not available as a config option")
+            raise CircleguardException(f"The key {k} (with value {v}) is not available as a config option for global config")
