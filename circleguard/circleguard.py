@@ -42,7 +42,7 @@ class Circleguard:
         self.db_path = Path(db_path).absolute() # allows for . to be passed to db_path
         cacher = Cacher(config.cache, self.db_path)
         # allow for people to pass their own loader implementation/subclass
-        self.loader = Loader(cacher, key) if loader is None else loader
+        self.loader = Loader(cacher, key) if loader is None else loader(cacher, key)
         self.options = Options()
 
     def run(self, check):
