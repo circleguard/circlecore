@@ -212,13 +212,14 @@ class Loader():
     @check_cache
     def replay_data(self, user_info):
         """
-        Creates a ReplayMap instance from a replay by the given user on the given map.
+        Loads the replay data specified by the user info.
 
         Args:
             UserInfo user_info: The UserInfo object representing this replay.
 
         Returns:
-            The Replay instance created with the given information, or None if the replay was not available.
+            The play_data field of an osrparse.Replay instance created from the replay data received from the api,
+            or None if the replay was not available.
 
         Raises:
             UnknownAPIException if replay_available was 1, but we did not receive replay data from the api.
@@ -249,7 +250,8 @@ class Loader():
             String response: The api-returned response to check.
 
         Raises:
-            An Error corresponding to the type of error if there was an error.
+            An Error corresponding to the type of error if there was an error. The mappings
+            for the api error message and its corresponding error are in circleguard.enums.
         """
 
         if("error" in response):
@@ -262,7 +264,7 @@ class Loader():
 
     def _enforce_ratelimit(self):
         """
-        Enforces the ratelimit by sleeping the thread until it's safe to make requests again.
+        Enforces the api ratelimit by sleeping the thread until it's safe to make requests again.
         """
 
         difference = datetime.now() - Loader.start_time
