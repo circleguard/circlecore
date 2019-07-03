@@ -29,7 +29,7 @@ class Circleguard:
     Result class for further documentation.
     """
 
-    def __init__(self, key, db_path):
+    def __init__(self, key, db_path, loader=None):
         """
         Initializes a Circleguard instance.
 
@@ -41,7 +41,8 @@ class Circleguard:
         self.log = logging.getLogger(__name__)
         self.db_path = Path(db_path).absolute() # allows for . to be passed to db_path
         cacher = Cacher(config.cache, self.db_path)
-        self.loader = Loader(cacher, key)
+        # allow for people to pass their own loader implementation/subclass
+        self.loader = Loader(cacher, key) if loader is None else loader
         self.options = Options()
 
     def run(self, check):
