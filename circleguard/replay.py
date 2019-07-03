@@ -98,6 +98,15 @@ class Check():
         self.loaded = True
         self.log.debug("Finished loading Check object")
 
+    def all_replays(self):
+        """
+        Convenience method for accessing all replays stored in this object.
+
+        Returns:
+            A list of all replays in this Check object (replays1 + replays2)
+        """
+        return self.replays + self.replays2
+
 
 class Replay(abc.ABC):
     def __init__(self, username, mods, replay_id, replay_data, detect, weight):
