@@ -238,6 +238,14 @@ class Circleguard:
         replays = [ReplayPath(path) for path in paths]
         return Check(replays, thresh=thresh, include=include)
 
+    def load(self, replay):
+        """
+        Loads the given replay. This is identical to calling replay.load(cg.loader) if cg is your
+        circleguard instance. This method exists to emphasize that this behavior is encouraged,
+        and tied to a specific cg instance.
+        """
+        replay.load(self.loader)
+
     def set_options(self, thresh=None, num=None, cache=None, failfast=None, logleve=None, include=None):
         """
         Changes the default value for different options in circleguard.
