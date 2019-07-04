@@ -47,6 +47,6 @@ class Result():
 
         self.replay1: Replay = replay1
         self.replay2: Replay = replay2
-        self.similiarity: int = similarity
+        self.similarity: int = similarity
         self.ischeat: bool = ischeat
         self.later_name: str = later_name
