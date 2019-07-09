@@ -44,7 +44,6 @@ class Circleguard:
         # allow for people to pass their own loader implementation/subclass
         self.loader = Loader(cacher, key) if loader is None else loader(cacher, key)
         self.options = Options()
-        self.log.info("include initialized at memory {}".format(self.options.include))
 
     def run(self, check):
         """
@@ -296,7 +295,6 @@ def set_options(thresh=None, num=None, cache=None, failfast=None, loglevel=None,
                           The include function will be passed a single argument - the circleguard.Replay object, or one
                           of its subclasses.
     """
-    logging.getLogger("circleguard").info("setting include to memory %s", include)
 
     for k, v in locals().items():
         if not v:
@@ -317,8 +315,29 @@ class Options():
     """
 
     def __init__(self):
-        self.thresh = config.thresh
-        self.num = config.num
-        self.cache = config.cache
-        self.failfast = config.failfast
-        self.include = config.include
+        ...
+
+    # These methods are unfortunately necessary because when
+    # config module variables are updated, references to them are not - ie
+    # references to config.thresh (or any other) are by value. So, when we
+    # access options attributes, just get the latest config variable with these
+    # methods.
+    @property
+    def thresh(self):
+        return config.thresh
+
+    @property
+    def num(self):
+        return config.num
+
+    @property
+    def cache(self):
+        return config.cache
+
+    @property
+    def failfast(self):
+        return config.failfast
+
+    @property
+    def include(self):
+        return config.include
