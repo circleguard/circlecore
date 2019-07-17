@@ -210,7 +210,7 @@ class Loader():
         return base64.b64decode(response["content"])
 
     @check_cache
-    def replay_data(self, user_info):
+    def replay_data(self, user_info, cache=None):
         """
         Loads the replay data specified by the user info.
 
@@ -238,7 +238,7 @@ class Loader():
                                      "Please report this to the devs, who will open an issue on osu!api if necessary.")
         parsed_replay = osrparse.parse_replay(lzma_bytes, pure_lzma=True)
         replay_data = parsed_replay.play_data
-        self.cacher.cache(lzma_bytes, user_info)
+        self.cacher.cache(lzma_bytes, user_info, should_cache=cache)
         return replay_data
 
     @staticmethod

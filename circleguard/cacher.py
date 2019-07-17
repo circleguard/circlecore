@@ -32,7 +32,7 @@ class Cacher:
         self.conn = sqlite3.connect(str(path))
         self.cursor = self.conn.cursor()
 
-    def cache(self, lzma_bytes, user_info):
+    def cache(self, lzma_bytes, user_info, should_cache=None):
         """
         Writes the given lzma bytes to the database, linking it to the given map and user.
         If an entry with the given map_id and user_id already exists, it is overwritten with
@@ -46,10 +46,13 @@ class Cacher:
             String map_id: The map id to insert into the db.
             Bytes lzma_bytes: The lzma bytes to compress and insert into the db.
             UserInfo user_info: The UserInfo object representing this replay.
+            Boolean should_cache: If this is passed, overwrites the option set at initialization time.
         """
 
         self.log.debug("Caching lzma bytes")
-        if(not self.should_cache):
+        should_cache = should_cache if should_cache else self.should_cache
+
+        if(not should_cache):
             self.log.debug("should_cache is false, not caching")
             return
         compressed_bytes = self._compress(lzma_bytes)

@@ -68,7 +68,8 @@ class Circleguard:
         num_to_load = len([replay for replay in compare1 + compare2 if replay.weight == RatelimitWeight.HEAVY])
 
         self.loader.new_session(num_to_load)
-        check.load(self.loader) # all replays now have replay data, this is where ratelimit waiting would occur
+        check.load(self.loader)
+        # all replays now have replay data, above is where ratelimit waiting would occur
         comparer = Comparer(check.thresh, compare1, replays2=compare2)
         yield from comparer.compare(mode=check.mode)
 
@@ -237,13 +238,15 @@ class Circleguard:
         replays = [ReplayPath(path) for path in paths]
         return Check(replays, thresh=thresh, include=include)
 
-    def load(self, replay):
+    def load(self, check, replay):
         """
-        Loads the given replay. This is identical to calling replay.load(cg.loader) if cg is your
-        circleguard instance. This method exists to emphasize that this behavior is encouraged,
-        and tied to a specific cg instance.
+        Loads the given replay. This is identical to calling replay.load(cg.loader, check.cache) if cg is your
+        Circleguard instance and check is your Check instance.. This method exists to emphasize that this behavior is encouraged,
+        and tied to a specific cg (and Check) instance. The Check is necessary to inherit the cache setting from the Check
+        in case it differs from the Circleguard option (since it is more specific, it would override circleguard). See the
+        options documentation for more details on setting inheritence.
         """
-        replay.load(self.loader)
+        replay.load(self.loader, check.cache)
 
     def set_options(self, thresh=None, num=None, cache=None, failfast=None, logleve=None, include=None):
         """

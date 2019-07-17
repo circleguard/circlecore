@@ -91,10 +91,10 @@ class Check():
             self.log.debug("Check already loaded, not loading individual Replays")
             return
         for replay in self.replays:
-            replay.load(loader)
+            replay.load(loader, self.cache)
         if(self.replays2):
             for replay in self.replays2:
-                replay.load(loader)
+                replay.load(loader, self.cache)
         self.loaded = True
         self.log.debug("Finished loading Check object")
 
@@ -143,7 +143,7 @@ class Replay(abc.ABC):
 
 
     @abc.abstractclassmethod
-    def load(self, loader):
+    def load(self, loader, cache):
         """
         Loads replay data of the replay, from the osu api or from some other source.
         Implementation is up to the specific subclass.
@@ -230,20 +230,19 @@ class ReplayMap(Replay):
         self.loaded = False
         self.username = username if username else user_id
 
-    def load(self, loader):
+    def load(self, loader, cache=None):
         """
         Loads the data for this replay from the api. This method silently returns if replay.loaded is True.
 
         The superclass Replay is initialized after this call, setting replay.loaded to True. Multiple
         calls to this method will have no effect beyond the first.
         """
-
         self.log.debug("Loading ReplayMap for user %d on map %d with mods %d", self.user_id, self.map_id, self.mods)
         if(self.loaded):
             self.log.debug("ReplayMap already loaded, not loading")
             return
         info = loader.user_info(self.map_id, user_id=self.user_id, mods=self.mods)
-        replay_data = loader.replay_data(info)
+        replay_data = loader.replay_data(info, cache=cache)
         Replay.__init__(self, self.username, info.mods, info.replay_id, replay_data, self.detect, self.weight)
         self.log.log(TRACE, "Finished loading ReplayMap")
 
@@ -286,13 +285,15 @@ class ReplayPath(Replay):
         self.weight = RatelimitWeight.HEAVY
         self.loaded = False
 
-    def load(self, loader):
+    def load(self, loader, cache=None):
         """
         Loads the data for this replay from the osr file given by the path. See osrparse.parse_replay_file for
         implementation details. This method has no effect if replay.loaded is True.
 
         The superclass Replay is initialized after this call, setting replay.loaded to True. Multiple
         calls to this method will have no effect beyond the first.
+
+        The cache argument here currently has no effect, and is only added for homogeneity with ReplayMap#load.
         """
 
         self.log.debug("Loading ReplayPath with path %s", self.path)
