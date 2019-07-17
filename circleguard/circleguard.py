@@ -297,7 +297,7 @@ def set_options(thresh=None, num=None, cache=None, failfast=None, loglevel=None,
     """
 
     for k, v in locals().items():
-        if not v:
+        if v is None:
             continue
         if k == "loglevel":
             logging.getLogger("circleguard").setLevel(loglevel)
