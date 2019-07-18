@@ -153,4 +153,11 @@ To conform to Replay standards in a subclass you create, you must initialize the
 
 So long as your overriding load method loads valid replay_data and initializes the superclass Replay with appropriate values, you can either load it outside the circleguard.run(check) call, or leave the loading up to that call. Either way, the load method will be executed unless you set replay.loaded to True, which happens when you initialize Replay.
 
+
 If you just want to add attributes but are happy with how the replays are loaded, subclass one of ReplayPath or ReplayMap. If you want to entirely change how the replay is loaded, subclass Replay.
+
+
+Thanks to [kszlim](https://github.com/kszlim), whose [replay parser](https://github.com/kszlim/osu-replay-parser) formed the basis of [our modified replay parser](https://github.com/circleguard/osu-replay-parser).
+
+Thanks to [Accalix](https://twitter.com/Accalix_) for creating our logo! You can check out more of his work [here](https://accalixgfx.com/index.php)
+
