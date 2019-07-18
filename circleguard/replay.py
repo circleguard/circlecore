@@ -1,231 +1,161 @@
-import numpy as np
+import abc
+import logging
+
 import osrparse
-from enums import Mod
+import numpy as np
 
-class Interpolation:
-    """A utility class containing coordinate interpolations."""
+from circleguard.enums import Detect, RatelimitWeight
+from circleguard import config
+from circleguard.utils import TRACE
 
-    @staticmethod
-    def linear(x1, x2, r):
-        """
-        Linearly interpolates coordinate tuples x1 and x2 with ratio r.
-
-        Args:
-            Float x1: The startpoint of the interpolation.
-            Float x2: The endpoint of the interpolation.
-            Float r: The ratio of the points to interpolate to.
-        """
-
-        return ((1 - r) * x1[0] + r * x2[0], (1 - r) * x1[1] + r * x2[1])
-
-    @staticmethod
-    def before(x1, x2, r):
-        """
-        Returns the startpoint of the range.
-
-        Args:
-            Float x1: The startpoint of the interpolation.
-            Float x2: The endpoint of the interpolation.
-            Float r: Ignored.
-        """
-
-        return x2
-
-class Replay:
+class Check():
     """
-    This class represents a replay as its cursor positions and playername.
+    Contains a list of Replay objects (or subclasses thereof) and how to proceed when
+    investigating them for cheats.
 
     Attributes:
-        List replay_data: A list of osrpasrse.ReplayEvent objects, containing
-                          x, y, time_since_previous_action, and keys_pressed.
-        String player_name: The player who set the replay. Often given as a player id.
-        Frozenset enabled_mods: A frozen set containing Mod enums, representing which mods were enabled on the replay.
-        Integer replay_id: The id of the replay, if the replay was retrieved from online. None if retrieved locally.
+        List [Replay] replays: A list of Replay objects.
+        List [Replay] replays2: A list of Replay objects to compare against 'replays' if passed.
+        Integer thresh: If a comparison scores below this value, its Result object has ischeat set to True.
+                        Defaults to 18, or the config value if changed.
+        Boolean cache: Whether to cache the loaded replays. Defaults to False, or the config value if changed.
+        String mode: "single" if only replays was passed, or "double" if both replays and replays2 were passed.
+        Boolean loaded: False at instantiation, set to True once check#load is called. See check#load for
+                        more details.
     """
 
-    def __init__(self, replay_data, player_name, enabled_mods):
+    def __init__(self, replays, replays2=None, thresh=None, cache=None, include=None):
+        """
+        Initializes a Check instance.
+
+        If only replays is passed, the replays in that list are compared with themselves. If
+        both replays and replays2 are passed, the replays in replays are compared only with the
+        replays in replays2. See comparer#compare for a more detailed description.
+
+        Args:
+            List [Replay] replays: A list of Replay objects.
+            List [Replay] replays2: A list of Replay objects to compare against 'replays' if passed.
+            Integer thresh: If a comparison scores below this value, its Result object has ischeat set to True.
+                            Defaults to 18, or the config value if changed.
+            Boolean cache: Whether to cache the loaded replays. Defaults to False, or the config value if changed.
+        """
+
+        self.log = logging.getLogger(__name__ + ".Check")
+        self.replays = replays # list of ReplayMap and ReplayPath objects, not yet processed
+        self.replays2 = replays2 if replays2 else [] # make replays2 fake iterable, for #filter mostly
+        self.mode = "double" if replays2 else "single"
+        self.loaded = False
+        self.thresh = thresh if thresh else config.thresh
+        self.cache = cache if cache else config.cache
+        self.include = include if include else config.include
+
+    def filter(self):
+        """
+        Filters self.replays and self.replays2 to contain only Replays where self.include returns True
+        when the Replay is passed. This gives total control to what replays end up getting loaded
+        and compared.
+        """
+
+        self.log.info("Filtering replays from Check")
+        self.replays = [replay for replay in self.replays if self._include(replay)]
+        self.replays2 = [replay for replay in self.replays2 if self._include(replay)]
+
+
+    def _include(self, replay):
+        """
+        An internal helper method to create log statements from inside a list comprehension.
+        """
+
+        if(self.include(replay)):
+            self.log.log(TRACE, "Replay passed include(), keeping in Check replays")
+            return True
+        else:
+            self.log.debug("Replay failed include(), filtering from Check replays")
+            return False
+
+    def load(self, loader):
+        """
+        If check.loaded is already true, this method silently returns. Otherwise, loads replay data for every
+        replay in both replays and replays2, and sets check.loaded to True. How replays are loaded is up to
+        the implementation of the specific subclass of the Replay. Although the subclass may not use the loader
+        object, it is still passed regardless to reduce type checking. For implementation details, see the load
+        method of each Replay subclass.
+
+        Args:
+            Loader loader: The loader to handle api requests, if required by the Replay.
+        """
+
+        self.log.info("Loading replays from Check")
+
+        if(self.loaded):
+            self.log.debug("Check already loaded, not loading individual Replays")
+            return
+        for replay in self.replays:
+            replay.load(loader, self.cache)
+        if(self.replays2):
+            for replay in self.replays2:
+                replay.load(loader, self.cache)
+        self.loaded = True
+        self.log.debug("Finished loading Check object")
+
+    def all_replays(self):
+        """
+        Convenience method for accessing all replays stored in this object.
+
+        Returns:
+            A list of all replays in this Check object (replays1 + replays2)
+        """
+        return self.replays + self.replays2
+
+
+class Replay(abc.ABC):
+    def __init__(self, username, mods, replay_id, replay_data, detect, weight):
         """
         Initializes a Replay instance.
 
         Args:
-            List replay_data: A list of osrpasrse.ReplayEvent objects, containing
-                              x, y, time_since_previous_action, and keys_pressed.
-            String player_name: An identifier marking the player that did the replay. Name or user id are common.
-            [Frozenset or Integer] enabled_mods: A frozenset containing Mod enums, or base10 representation of
-                                                 the enabled mods on the replay.
+            String username: The username of the player who made the replay. Whether or not this is their true username
+                             has no effect - this field is used to represent the player more readably than their id.
+            Integer mods: The mods the replay was played with.
+            Integer replay_id: The id of this replay, or 0 if it does not have an id (unsubmitted replays have no id)
+            osrparse.Replay replay_data: An osrparse Replay containing the replay data for this replay. If the replay data is not available
+                                         (from the api or otherwise), this field should be None. This means that this replay will not be
+                                         compared against other replays or investigated for cheats.
+            Detect detect: The Detect enum (or bitwise combination of enums), indicating what types of cheats this
+                           replay should be investigated or compared for.
+            RatelimitWeight weight: How much it 'costs' to load this replay from the api. If the load method of the replay makes no api calls,
+                             this value is RatelimitWeight.NONE. If it makes only light api calls (anything but get_replay), this value is
+                             RatelimitWeight.LIGHT. If it makes any heavy api calls (get_replay), this value is RatelimitWeight.HEAVY.
+                             This value is used internally to determine how long the loader class will have to spend loading replays -
+                             currently LIGHT and NONE are treated the same, and only HEAVY values are counted towards replays to load. Note
+                             that this has no effect on the comparisons or internal program implementation - it only affects log messages
+                             internally, and if you access circleguard#loader#total, it modifies that value as well. See Loader#new_session
+                             for more details.
         """
 
-        self.play_data = replay_data
-        self.player_name = player_name
-
-        # we good if it's already a frozenset
-        if(type(enabled_mods) is frozenset):
-            self.enabled_mods = enabled_mods
-            return
-
-        # Else make it one; taken directly from
-        # https://github.com/kszlim/osu-replay-parser/blob/master/osrparse/replay.py#L64
-        def bits(n):
-            if n == 0:
-                yield 0
-            while n:
-                b = n & (~n+1)
-                yield b
-                n ^= b
-
-        bit_values_gen = bits(enabled_mods)
-        self.enabled_mods = frozenset(Mod(mod_val) for mod_val in bit_values_gen)
+        self.username = username
+        self.mods = mods
+        self.replay_id = replay_id
+        self.replay_data = replay_data
+        self.detect = detect
+        self.weight = weight
+        self.loaded = True
 
 
-    @staticmethod
-    def interpolate(data1, data2, interpolation=Interpolation.linear, unflip=False):
+    @abc.abstractclassmethod
+    def load(self, loader, cache):
         """
-        Interpolates the longer of the datas to match the timestamps of the shorter.
+        Loads replay data of the replay, from the osu api or from some other source.
+        Implementation is up to the specific subclass.
 
-        Args:
-            List data1: A list of tuples of (t, x, y).
-            List data2: A list of tuples of (t, x, y).
-            Boolean unflip: Preserves input order of data1 and data2 if True.
-
-        Returns:
-            If unflip:
-                The tuple (data1, data2), where one is interpolated to the other
-                and said other without uninterpolatable points.
-            Else:
-                The tuple (clean, inter), respectively the shortest of
-                the datasets without uninterpolatable points and the longest
-                interpolated to the timestamps of shortest.
-
+        To meet the specs of this method, subclasses must set replay.loaded to True after this method is called,
+        and replay.replay_data must be a valid Replay object, as defined by osrparse.Replay. Both of these specs
+        can be met if the superclass circleguard.Replay is initialized in the load method with a valid Replay, as
+        circleguard.Replay.__init__ sets replay.loaded to true by default.
         """
 
-        flipped = False
+        ...
 
-        # if the first timestamp in data2 is before the first in data1 switch
-        # so data1 always has some timestamps before data2.
-        if data1[0][0] > data2[0][0]:
-            flipped = not flipped
-            (data1, data2) = (data2, data1)
-
-        # get the smallest index of the timestamps after the first timestamp in data2.
-        i = next((i for (i, p) in enumerate(data1) if p[0] > data2[0][0]))
-
-        # remove all earlier timestamps, if data1 is longer than data2 keep one more
-        # so that the longest always starts before the shorter dataset.
-        data1 = data1[i:] if len(data1) < len(data2) else data1[i - 1:]
-
-        if len(data1) > len(data2):
-            flipped = not flipped
-            (data1, data2) = (data2, data1)
-
-        # for each point in data1 interpolate the points around the timestamp in data2.
-        j = 0
-        inter = []
-        clean = []
-        for between in data1:
-            # keep a clean version with only values that can be interpolated properly.
-            clean.append(between)
-
-            # move up to the last timestamp in data2 before the current timestamp.
-            while j < len(data2) - 1 and data2[j][0] < between[0]:
-                j += 1
-
-            if j == len(data2) - 1:
-                break
-
-            before = data2[j]
-            after = data2[j + 1]
-
-            # calculate time differences
-            # dt1 =  ---2       , data1
-            # dt2 = 1-------3   , data2
-            dt1 = between[0] - before[0]
-            dt2 = after[0] - before[0]
-
-            # skip trying to interpolate to this event
-            # if its surrounding events are not set apart in time
-            # and replace it with the event before it
-            if dt2 == 0:
-                inter.append((between[0], *before[1:]))
-                continue
-
-            # interpolate the coordinates in data2
-            # according to the ratios of the time differences
-            x_inter = interpolation(before[1:], after[1:], dt1 / dt2)
-
-            # filter out interpolation artifacts which send outliers even further away
-            if abs(x_inter[0]) > 600 or abs(x_inter[1]) > 600:
-                inter.append(between)
-                continue
-
-            t_inter = between[0]
-
-            inter.append((t_inter, *x_inter))
-
-        if unflip and flipped:
-            (clean, inter) = (inter, clean)
-
-        return (clean, inter)
-
-    @staticmethod
-    def resample(timestamped, frequency):
-        """
-        Resample timestamped data at the given frequency.
-
-        Args:
-            List timestamped: A list of tuples of (t, x, y).
-            Float frequency: The frequency to resample data to in Hz.
-
-        Returns
-            A list of tuples of (t, x, y) with constant time interval 1 / frequency.
-        """
-
-        i = 0
-        t = timestamped[0][0]
-        t_max = timestamped[-1][0]
-
-        resampled = []
-
-        while t < t_max:
-            while timestamped[i][0] < t:
-                i += 1
-
-            dt1 = t - timestamped[i - 1][0]
-            dt2 = timestamped[i][0] - timestamped[i - 1][0]
-
-            inter = Interpolation.linear(timestamped[i - 1][1:], timestamped[i][1:], dt1 / dt2)
-
-            resampled.append((t, *inter))
-            t += 1000 / frequency
-
-        return resampled
-
-    @staticmethod
-    def skip_breaks(timestamped, break_threshold=1000):
-        """
-        Eliminates pauses and breaks between events
-        longer than the specified threshold in ms.
-
-        Args:
-            List timestamped: A list of tuples of (t, x, y).
-            Integer break_threshold: The smallest pause in events to be recognized as a break.
-
-        Returns:
-            A list of tuples of (t, x, y) without breaks.
-        """
-        total_break_time = 0
-
-        skipped = []
-        t_prev = timestamped[0][0]
-        for event in timestamped:
-            dt = event[0] - t_prev
-
-            if dt > break_threshold:
-                total_break_time += dt
-
-            skipped.append((event[0] - total_break_time, *event[1:]))
-            t_prev = event[0]
-
-        return skipped
 
     def as_list_with_timestamps(self):
         """
@@ -234,17 +164,143 @@ class Replay:
         Returns:
             A list of tuples of (t, x, y).
         """
-
         # get all offsets sum all offsets before it to get all absolute times
-        timestamps = np.array([e.time_since_previous_action for e in self.play_data])
+        timestamps = np.array([e.time_since_previous_action for e in self.replay_data])
         timestamps = timestamps.cumsum()
 
         # zip timestamps back to data and convert t, x, y to tuples
-        txy = [[z[0], z[1].x, z[1].y] for z in zip(timestamps, self.play_data)]
+        txy = [[z[0], z[1].x, z[1].y] for z in zip(timestamps, self.replay_data)]
         # sort to ensure time goes forward as you move through the data
         # in case someone decides to make time go backwards anyway
         txy.sort(key=lambda p: p[0])
         return txy
 
-# fail fast
-np.seterr(all='raise')
+
+class ReplayMap(Replay):
+    """
+    Represents a Replay submitted to online servers, that can be retrieved from the osu api.
+
+    The only things you need to know to instantiate a ReplayMap
+    are the user who made the replay, and the map it was made on.
+
+    Attributes:
+        Integer map_id: The id of the map the replay was made on.
+        Integer user_id: The id of the user who made the replay.
+        Integer mods: The mods the replay was played with. None if not set when instantiated and has not been loaded yet -
+                      otherwise, set to the mods the replay was made with.
+        String username: A readable representation of the user who made the replay. If passed,
+                         username will be set to this string. Otherwise, it will be set to the user id.
+                         This is so you don't need to know a user's username when creating a ReplayMap, only their id.
+                         However, if the username is known (by retrieving it through the api, or other means), it is better
+                         to represent the Replay with a player's name than an id. Both username and user_id will
+                         obviously still be available to you through the result object after comparison.
+        Detect detect: The Detect enum (or bitwise combination of enums), indicating what types of cheats this
+                       replay should be investigated or compared for.
+        Boolean loaded: Whether this replay has been loaded. If True, calls to #load will have no effect.
+                        See #load for more information.
+        RatelimitWeight weight: RatelimitWeight.HEAVY, as this class' load method makes a heavy api call. See RatelimitWeight
+                                documentation for more information.
+    """
+
+    def __init__(self, map_id, user_id, mods=None, username=None, detect=Detect.ALL):
+        """
+        Initializes a ReplayMap instance.
+
+        Args:
+            Integer map_id: The id of the map the replay was made on.
+            Integer user_id: The id of the user who made the replay.
+            Integer mods: The mods the replay was played with. If this is not set, the top scoring replay of the user on the
+                          given map will be loaded. Otherwise, the replay with the given mods will be loaded.
+            String username: A readable representation of the user who made the replay. If passed,
+                             username will be set to this string. Otherwise, it will be set to the user id.
+                             This is so you don't need to know a user's username when creating a ReplayMap, only their id.
+                             However, if the username is known (by retrieving it through the api, or other means), it is
+                             better to represent the Replay with a player's name than an id. Both username and user_id
+                             will obviously still be available to you through the result object after comparison.
+            Detect detect: The Detect enum (or bitwise combination of enums), indicating what types of cheats this
+                           replay should be investigated or compared for.
+        """
+
+        self.log = logging.getLogger(__name__ + ".ReplayMap")
+        self.map_id = map_id
+        self.user_id = user_id
+        self.mods = mods
+        self.detect = detect
+        self.weight = RatelimitWeight.HEAVY
+        self.loaded = False
+        self.username = username if username else user_id
+
+    def load(self, loader, cache=None):
+        """
+        Loads the data for this replay from the api. This method silently returns if replay.loaded is True.
+
+        The superclass Replay is initialized after this call, setting replay.loaded to True. Multiple
+        calls to this method will have no effect beyond the first.
+        """
+        self.log.debug("Loading ReplayMap for user %d on map %d with mods %d", self.user_id, self.map_id, self.mods)
+        if(self.loaded):
+            self.log.debug("ReplayMap already loaded, not loading")
+            return
+        info = loader.user_info(self.map_id, user_id=self.user_id, mods=self.mods)
+        replay_data = loader.replay_data(info, cache=cache)
+        Replay.__init__(self, self.username, info.mods, info.replay_id, replay_data, self.detect, self.weight)
+        self.log.log(TRACE, "Finished loading ReplayMap")
+
+
+class ReplayPath(Replay):
+    """
+    Represents a Replay saved locally.
+
+    To instantiate a ReplayPath, you only need to know the path to the osr file. This class has significant
+    advantages compared to a ReplayMap - the username is immediately available from the replay, instead of requiring
+    an extra api call. The time it takes to load the replay is also significantly less – especially if you factor in
+    ratelimits – because there is no need to make a request to the api to retrieve the replay data, only read an osr
+    file.
+
+    Of course, to reap those benefits, it requires having the replay already downloaded, which isn't always ideal.
+
+    Attributes:
+        [String or Path] path: A pathlike object representing the absolute path to the osr file.
+        Detect detect: The Detect enum (or bitwise combination of enums), indicating what types of cheats this
+                       replay should be investigated or compared for.
+        Boolean loaded: Whether this replay has been loaded. If True, calls to #load will have no effect.
+                        See #load for more information.
+        RatelimitWeight weight: RatelimitWeight.NONE, as this class' load method makes no api calls. See RatelimitWeight
+                                documentation for more information.
+    """
+
+    def __init__(self, path, detect=Detect.ALL):
+        """
+        Initializes a ReplayPath instance.
+
+        Args:
+            [String or Path] path: A pathlike object representing the absolute path to the osr file.
+            Detect detect: The Detect enum (or bitwise combination of enums), indicating what types of cheats this
+                           replay should be investigated or compared for.
+        """
+
+        self.log = logging.getLogger(__name__ + ".ReplayPath")
+        self.path = path
+        self.detect = detect
+        self.weight = RatelimitWeight.HEAVY
+        self.loaded = False
+
+    def load(self, loader, cache=None):
+        """
+        Loads the data for this replay from the osr file given by the path. See osrparse.parse_replay_file for
+        implementation details. This method has no effect if replay.loaded is True.
+
+        The superclass Replay is initialized after this call, setting replay.loaded to True. Multiple
+        calls to this method will have no effect beyond the first.
+
+        The cache argument here currently has no effect, and is only added for homogeneity with ReplayMap#load.
+        """
+
+        self.log.debug("Loading ReplayPath with path %s", self.path)
+        if(self.loaded):
+            self.log.debug("ReplayPath already loaded, not loading")
+            return
+        # no, we don't need loader for ReplayPath, but to reduce type checking when calling we make the method signatures homogeneous
+        loaded = osrparse.parse_replay_file(self.path)
+        Replay.__init__(self, loaded.player_name, loaded.mod_combination, loaded.replay_id, loaded.play_data, self.detect, self.weight)
+        self.log.log(TRACE, "Finished loading ReplayPath")

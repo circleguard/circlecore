@@ -1,6 +1,6 @@
-from enum import Enum
+from enum import Enum, Flag
 
-from exceptions import UnknownAPIException, RatelimitException, InvalidKeyException, ReplayUnavailableException
+from circleguard.exceptions import UnknownAPIException, RatelimitException, InvalidKeyException, ReplayUnavailableException
 # strings taken from osu api error responses
 # [api response, exception class type, details to pass to an exception]
 class Error(Enum):
@@ -42,3 +42,28 @@ class Mod(Enum):
     Key1           = K1 = 67108864
     Key3           = K3 = 134217728
     Key2           = K2 = 268435456
+
+class Detect(Flag):
+                   # (in binary)
+    STEAL = 1 << 0 # 0001
+    RELAX = 1 << 1 # 0010
+    REMOD = 1 << 2 # 0100
+
+    ALL = STEAL | RELAX | REMOD
+    NONE = 0
+
+class RatelimitWeight(Enum):
+    """
+    How much it 'costs' to load a replay from the api. If the load method of a replay makes no api calls,
+    the corresponding value is RatelimitWeight.NONE. If it makes only light api calls (anything but get_replay),
+    the corresponding value is RatelimitWeight.LIGHT. If it makes any heavy api calls (get_replay), the
+    corresponding value is RatelimitWeight.HEAVY.
+
+    This value is used internally to determine how long the loader class will have to spend loading replays -
+    currently LIGHT and NONE are treated the same, and only HEAVY values are counted towards replays to load.
+    See loader#new_session and the Replay documentation for more details.
+    """
+
+    NONE  = "none"
+    LIGHT = "light"
+    HEAVY = "heavy"

@@ -1,9 +1,10 @@
-import pathlib
+thresh = 18
+num = 50
+stddevs = None
+cache = False
+failfast = False
 
-PATH_ROOT = pathlib.Path(__file__).parent
-PATH_REPLAYS_STUB = PATH_ROOT / "replays"
+def include_predicate(replay):
+    return True
 
-
-PATH_DB = PATH_ROOT / "db" / "cache.db" # /absolute/path/db/cache.db
-
-VERSION = "1.3.3"
+include = include_predicate

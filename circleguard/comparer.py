@@ -1,30 +1,31 @@
 import itertools
 import sys
+import logging
 
 import numpy as np
 import math
 
-from draw import Draw
-from replay import Replay
-from enums import Mod
-from exceptions import InvalidArgumentsException
+from circleguard.replay import Replay
+from circleguard.enums import Mod
+from circleguard.exceptions import InvalidArgumentsException, CircleguardException
+import circleguard.utils as utils
+from circleguard.result import Result
+import circleguard.config as config
 
 class Comparer:
     """
     A class for managing a set of replay comparisons.
 
     Attributes:
-        List replays1: A list of Replay instances to compare against replays2.
-        List replays2: A list of Replay instances to be compared against. Optional, defaulting to None. No attempt to error check
-                       this is made - if a compare() call is made, the program will throw an AttributeError. Be sure to only call
-                       methods that involve the first set of replays if this argument is not passed.
-        Integer threshold: If a comparison scores below this value, the result is printed.
+        Integer threshold: If a comparison scores below this value, the Result object is assigned a ischeat value of True.
+        List replays1: A list of Replay instances to compare against replays2 if passed, or against itself if not.
+        List replays2: A list of Replay instances to be compared against.
 
     See Also:
         Investigator
     """
 
-    def __init__(self, threshold, silent, replays1, replays2=None, stddevs=None):
+    def __init__(self, threshold, replays1, replays2=None):
         """
         Initializes a Comparer instance.
 
@@ -32,114 +33,82 @@ class Comparer:
         Comparing 1 to 2 is the same as comparing 2 to 1.
 
         Args:
-            Integer threshold: If a comparison scores below this value, the result is printed.
-            Boolean silent: If true, visualization prompts will be ignored and only results will be printed.
-            List replays1: A list of Replay instances to compare against replays2.
-            List replays2: A list of Replay instances to be compared against. Optional, defaulting to None. No attempt to error check
-                           this is made - if a compare(mode="double") call is made, the program will throw an AttributeError. Be sure to only call
-                           methods that involve the first set of replays.
-            Float stddevs: If set, the threshold will be automatically set to this many standard deviations below the average similarity for the comparisons.
+            Integer threshold: If a comparison scores below this value, the Result object is assigned a ischeat value of True.
+            List replays1: A list of Replay instances to compare against replays2 if passed, or against itself if not.
+            List replays2: A list of Replay instances to be compared against.
         """
 
+        self.log = logging.getLogger(__name__)
         self.threshold = threshold
-        self.stddevs = stddevs
-        self.silent = silent
 
         # filter beatmaps we had no data for - see Loader.replay_data and OnlineReplay.from_map
-        self.replays1 = [replay for replay in replays1 if replay is not None]
-
-        if(replays2):
-            self.replays2 = [replay for replay in replays2 if replay is not None]
+        self.replays1 = [replay for replay in replays1 if replay.replay_data is not None]
+        self.replays2 = [replay for replay in replays2 if replay.replay_data is not None] if replays2 else None
 
     def compare(self, mode):
         """
         If mode is "double", compares all replays in replays1 against all replays in replays2.
         If mode is "single", compares all replays in replays1 against all other replays in replays1 (len(replays1) choose 2 comparisons).
-        In both cases, prints the result of each comparison according to _print_result.
+        In both cases, yields Result objects containing the result of each comparison.
 
         Args:
             String mode: One of either "double" or "single", determining how to choose which replays to compare.
+
+        Returns:
+            A generator containing Result objects of the comparisons.
+
+        Raises:
+            CircleguardException if no comparisons could be made from the given replays (if replays1
+            or replays2 is empty) and config.failfast is True. Otherwise, even if the replay lists are empty,
+            silently returns.
         """
 
-        if(not self.replays1): # if this is empty, bad things
-            print("No comparisons could be made. Make sure replay data is available for your args")
-            return
+        self.log.info("Comparing replays with mode: %s", mode)
+        self.log.log(utils.TRACE, "replays1: %s", self.replays1)
+        self.log.log(utils.TRACE, "replays2: %s", self.replays2)
+
+        #TODO: a little bit hacky and I don't think works 100% correctly, if mode is double but replays2 is None
+        if(not self.replays1 or self.replays2 == []):
+            if(config.failfast):
+                raise CircleguardException("No comparisons could be made from the given replays")
+            else:
+                return
 
         if(mode == "double"):
             iterator = itertools.product(self.replays1, self.replays2)
-            total = len(self.replays1) * len(self.replays2)
         elif (mode == "single"):
             iterator = itertools.combinations(self.replays1, 2)
-            total = len(self.replays1) * (len(self.replays1) - 1) // 2
         else:
-            raise InvalidArgumentsException("`mode` must be one of 'double' or 'single'")
+            raise InvalidArgumentsException("'mode' must be one of 'double' or 'single'")
 
-        tenth = round(total / 10) if total >= 4 else 1
-        print("Starting {:d} combinations".format(total))
-        # automatically determine threshold based on standard deviations of similarities if stddevs is set
-        if(self.stddevs):
-            results = {}
-            for done, (replay1, replay2) in enumerate(iterator, 1):
-                result = Comparer._compare_two_replays(replay1, replay2)
-                results[(replay1, replay2)] = result
-                if(done == 1):
-                    print("Done ", end="")
-                elif(done % tenth == 0):
-                    print("{0:.0f}%..".format(math.ceil(done / total * 10) * 10), end="", flush=True)
-            similarities = [result[0] for result in results.values()]
+        for replay1, replay2 in iterator:
+            yield self._result(replay1, replay2)
 
-            mu, sigma = np.mean(similarities), np.std(similarities)
 
-            self.threshold = mu - self.stddevs * sigma
-            print("\n\nAutomatically determined threshold limit: {:.1f}\nAverage similarity: {:.1f}".format(self.threshold, mu))
-            print(f"Standard deviation of similarities: {sigma:.2f}, {'in' if sigma / mu < 0.2 else ''}significant\n\n")
-
-            for key in results:
-                self._print_result(results[key], key[0], key[1])
-        # else print normally
-        else:
-            for done, (replay1, replay2) in enumerate(iterator, 1):
-                result = Comparer._compare_two_replays(replay1, replay2)
-                self._print_result(result, replay1, replay2)
-                if(done == 1):
-                    print("Done ", end="")
-                elif(done % tenth == 0):
-                    print("{0:.0f}%..".format(math.ceil(done / total * 10) * 10), end="", flush=True)
-
-        print("done comparing")
-
-    def _print_result(self, result, replay1, replay2):
+    def _result(self, replay1, replay2):
         """
-        Prints a human readable version of the result if the average distance
-        is below the threshold set from the command line.
+        Compares two replays and returns the result of that comparison.
 
         Args:
-            Tuple result: A tuple containing (average distance, standard deviation) of a comparison.
-            Replay replay1: The replay to print the name of and to draw against replay2
-            Replay replay2: The replay to print the name of and to draw against replay1
+            Replay replay1: The first replay to compare against the second
+            Replay replay2: The second replay to compare against the first
+
+        Returns:
+            A Result object, containing the results of the comparison.
         """
 
+        result = Comparer._compare_two_replays(replay1, replay2)
         mean = result[0]
         sigma = result[1]
+        ischeat = False
+        if(mean < self.threshold):
+            ischeat = True
 
-        if(mean > self.threshold):
-            return
-
-        # if they were both set locally, we don't get replay ids to compare
-        last_score = None
-        if(replay1.replay_id and replay2.replay_id):
-            last_score = replay1.player_name if(replay1.replay_id > replay2.replay_id) else replay2.player_name
-
-        print("\n{:.1f} similarity, {:.1f} std deviation ({} vs {}{})"
-              .format(mean, sigma, replay1.player_name, replay2.player_name, " - {} set later".format(last_score) if last_score else ""))
-
-        if(self.silent):
-            return
-
-        answer = input("Would you like to see a visualization of both replays? ")
-        if (answer and answer[0].lower().strip() == "y"):
-            draw = Draw(replay1, replay2)
-            animation = draw.run()
+        # if they were both set locally, we may not get replay ids to compare (replay_id is 0 if local)
+        later_name = None
+        if(replay1.replay_id != 0 and replay2.replay_id != 0):
+            later_name = replay1.username if(replay1.replay_id > replay2.replay_id) else replay2.username
+        return Result(replay1, replay2, mean, ischeat, later_name)
 
     @staticmethod
     def _compare_two_replays(replay1, replay2):
@@ -156,14 +125,16 @@ class Comparer:
         data2 = replay2.as_list_with_timestamps()
 
         # interpolate
-        (data1, data2) = Replay.interpolate(data1, data2)
+        (data1, data2) = utils.interpolate(data1, data2)
 
         # remove time from each tuple
         data1 = [d[1:] for d in data1]
         data2 = [d[1:] for d in data2]
 
-        flip1 = Mod.HardRock.value in [mod.value for mod in replay1.enabled_mods]
-        flip2 = Mod.HardRock.value in [mod.value for mod in replay2.enabled_mods]
+        mods1 = [Mod(mod_val) for mod_val in utils.bits(replay1.mods)]
+        mods2 = [Mod(mod_val) for mod_val in utils.bits(replay2.mods)]
+        flip1 = Mod.HardRock in mods1
+        flip2 = Mod.HardRock in mods2
         if(flip1 ^ flip2): # xor, if one has hr but not the other
             for d in data1:
                 d[1] = 384 - d[1]

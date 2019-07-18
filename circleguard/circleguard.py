@@ -1,157 +1,346 @@
-import pathlib
-
-ROOT_PATH = pathlib.Path(__file__).parent
-if(not (ROOT_PATH / "secret.py").is_file()):
-    key = input("Please enter your api key below - you can get it from https://osu.ppy.sh/p/api. "
-                "This will only ever be stored locally, and is necessary to retrieve replay data.\n")
-    with open(ROOT_PATH / "secret.py", mode="x") as secret:
-        secret.write("API_KEY = '{}'".format(key))
+from pathlib import Path
 
 import sys
 import itertools
 import os
 from os.path import isfile, join
+import logging
 
-from argparser import argparser
-from draw import Draw
-from loader import Loader
-from local_replay import LocalReplay
-from online_replay import OnlineReplay
-from comparer import Comparer
-from investigator import Investigator
-from cacher import Cacher
-from screener import Screener
-from config import PATH_REPLAYS_STUB, VERSION
-from secret import API_KEY
-from utils import mod_to_int
-from exceptions import InvalidArgumentsException
+from circleguard.loader import Loader
+from circleguard.comparer import Comparer
+from circleguard.investigator import Investigator
+from circleguard.cacher import Cacher
+from circleguard import config
+from circleguard.exceptions import CircleguardException
+from circleguard.replay import Check, ReplayMap, ReplayPath
+from circleguard.enums import Detect, RatelimitWeight
+
 
 class Circleguard:
+    """
+    Circleguard compares and investigates replays to detect cheats.
 
-    def __init__(self, args):
+    Circleguard provides convenience methods for common use cases: map_check, verify, user_check, and local_check -
+    see each method for further documentation. If these convenience methods are not flexible enough for you, you will
+    have to instantiate your own Check object and call circleguard#run(check).
+
+    Under the hood, convenience methods simply instantiate a Check object and call circleguard#run(check). The run method
+    returns a generator containing Result objects, which contains the result of each comparison of the replays. See the
+    Result class for further documentation.
+    """
+
+    def __init__(self, key, db_path, loader=None):
         """
         Initializes a Circleguard instance.
 
-        [SimpleNamespace or argparse.Namespace] args:
-            A namespace-like object representing how and what to compare. An example may look like
-            `Namespace(cache=False, local=False, map_id=None, number=50, threshold=20, user_id=None)`
+        Args:
+            String key: An osu API key.
+            [Path or String] db_path: A pathlike object to the databse file to write and/or read cached replays.
         """
 
-        # get all replays in path to check against. Load this per circleguard instance or users moving files around while the gui is open
-        # results in unintended behavior (their changes not being applied to a new run)
-        self.PATH_REPLAYS = [join(PATH_REPLAYS_STUB, f) for f in os.listdir(PATH_REPLAYS_STUB) if isfile(join(PATH_REPLAYS_STUB, f)) and f.endswith(".osr")]
+        self.log = logging.getLogger(__name__)
+        self.db_path = Path(db_path).absolute() # allows for . to be passed to db_path
+        cacher = Cacher(config.cache, self.db_path)
+        # allow for people to pass their own loader implementation/subclass
+        self.loader = Loader(cacher, key) if loader is None else loader(cacher, key)
+        self.options = Options()
 
-        self.cacher = Cacher(args.cache)
-        self.loader = Loader(API_KEY)
-        self.loader.new_session(args.number)
-        self.args = args
-
-        self.modset = None
-        if(args.mods):
-            for mod_string in args.mods:
-                if(len(mod_string) % 2 != 0):
-                    raise InvalidArgumentsException("{} is an invalid mod string. Each mod is made of a two letter acronym".format(mod_string))
-
-            self.modset = [mod_to_int(mod_string) for mod_string in args.mods]
-
-        if(args.map_id):
-            self.user_infos = [self.loader.user_info(args.map_id, num=args.number, mods=mod_int) for mod_int in self.modset] if self.modset else [self.loader.user_info(args.map_id, num=args.number)]
-        if(args.user_id and args.map_id):
-            info = self.loader.user_info(args.map_id, user_id=args.user_id)
-            self.replays_check = self.loader.replay_from_user_info(self.cacher, info)
-
-    def run(self):
+    def run(self, check):
         """
-        Starts loading and detecting replays based on the args passed through the command line.
+        Compares replays contained in the check object for replay steals.
+
+        Args:
+            Check check: A Check object containing either one or two sets of replays. If it was initialized with
+                         a single replay set, all replays in that set are compared with each other. If it was
+                         initialized with two replay sets, all replays in the first set are compared with all
+                         replays in the second set.
+
+        Returns:
+            A generator containing Result objects of the comparisons.
         """
-        if(self.args.verify):
-            self._run_verify()
-        elif(self.args.local):
-            self._run_local()
-        elif(self.args.map_id):
-            self._run_map()
-        elif(self.args.user_id):
-            self._run_user()
-        else:
-            print("Please set either --local (-l), --map (-m), --user (-u), or --verify (-v)! ")
 
-    def _run_verify(self):
-        loader = self.loader
-        args = self.args
-        map_id = self.args.verify[0]
-        user1_id = self.args.verify[1]
-        user2_id = self.args.verify[2]
+        self.log.info("Running circleguard with a Check")
 
-        user1_info = loader.user_info(map_id, user_id=user1_id)
-        user2_info = loader.user_info(map_id, user_id=user2_id)
-        replay1 = loader.replay_from_user_info(self.cacher, user1_info)
-        replay2 = loader.replay_from_user_info(self.cacher, user2_info)
+        check.filter()
+        # steal check
+        compare1 = [replay for replay in check.replays if replay.detect & Detect.STEAL]
+        compare2 = [replay for replay in check.replays2 if replay.detect & Detect.STEAL]
+        num_to_load = len([replay for replay in compare1 + compare2 if replay.weight == RatelimitWeight.HEAVY])
 
-        comparer = Comparer(args.threshold, args.silent, replay1, replays2=replay2, stddevs=args.stddevs)
-        comparer.compare(mode="double")
+        self.loader.new_session(num_to_load)
+        check.load(self.loader)
+        # all replays now have replay data, above is where ratelimit waiting would occur
+        comparer = Comparer(check.thresh, compare1, replays2=compare2)
+        yield from comparer.compare(mode=check.mode)
 
-    def _run_local(self):
+        # relax check (TODO)
 
-        args = self.args
-        # get all local replays (used in every --local case)
-        replays1 = [LocalReplay.from_path(osr_path) for osr_path in self.PATH_REPLAYS]
+    def map_check(self, map_id, u=None, num=None, cache=None, thresh=None, include=None):
+        """
+        Checks a map's leaderboard for replay steals.
 
-        threshold = args.threshold
-        stddevs = args.stddevs
+        Args:
+            Integer map_id: The id of the map (not the id of the mapset!) to compare replays from.
+            Integer u: A user id. If passed, only the replay made by this user id on the given map will be
+                       compared with the rest of the lederboard of the map. No other comparisons will be made.
+            Integer num: The number of replays to compare from the map. Defaults to 50, or the config value if changed.
+                         Loads from the top ranks of the leaderboard, so num=20 will compare the top 20 scores. This
+                         number must be between 1 and 100, as restricted by the osu api.
+            Boolean cache: Whether to cache the loaded replays. Defaults to False, or the config value if changed.
+            Integer thresh: If a comparison scores below this value, its Result object has ischeat set to True.
+                            Defaults to 18, or the config value if changed.
 
-        if(args.map_id and args.user_id):
-            # compare every local replay with just the given user + map replay
-            comparer = Comparer(threshold, args.silent, replays1, replays2=self.replays_check, stddevs=stddevs)
-            comparer.compare(mode="double")
-            return
-        if(args.map_id):
-            # compare every local replay with every leaderboard entry (multiple times for different mod sets)
-            for user_info in self.user_infos:
-                replays2 = self.loader.replay_from_user_info(self.cacher, user_info)
-                comparer = Comparer(threshold, args.silent, replays1, replays2=replays2, stddevs=stddevs)
-                comparer.compare(mode="double")
+        Returns:
+            A generator containing Result objects of the comparisons.
+        """
+        self.log.info("include at memory {}".format(self.options.include))
+        check = self.create_map_check(map_id, u, num, cache, thresh, include)
+        yield from self.run(check)
 
-            return
-        else:
-            comparer = Comparer(threshold, args.silent, replays1, stddevs=stddevs)
-            comparer.compare(mode="single")
 
-    def _run_map(self):
+    def create_map_check(self, map_id, u=None, num=None, cache=None, thresh=None, include=None):
+        """
+        Creates the Check object used in the map_check convenience method. See that method for more information.
+        """
+        options = self.options
+        num = num if num else options.num
+        cache = cache if cache else options.cache
+        thresh = thresh if thresh else options.thresh
+        include = include if include else options.include
 
-        args = self.args
+        self.log.info("Map check with map id %d, u %s, num %s, cache %s, thresh %s", map_id, u, num, cache, thresh)
+        replays2 = None
+        if u:
+            info = self.loader.user_info(map_id, user_id=u)
+            replays2 = [ReplayMap(info.map_id, info.user_id, info.mods, username=info.username)]
+        infos = self.loader.user_info(map_id, num=num)
+        replays = [ReplayMap(info.map_id, info.user_id, info.mods, username=info.username) for info in infos]
+        return Check(replays, replays2=replays2, thresh=thresh, cache=cache, include=include)
 
-        threshold = args.threshold
-        stddevs = args.stddevs
+    def verify(self, map_id, u1, u2, cache=None, thresh=None, include=None):
+        """
+        Verifies that two user's replay on a map are steals of each other.
 
-        # if doing anything online, revalidate cache for all set mods
-        for user_info in self.user_infos:
-            self.cacher.revalidate(self.loader, user_info)
+        Args:
+            Integer map_id: The id of the map to compare replays from.
+            Integer u1: The user id of one of the users who set a replay on this map.
+            Integer u2: The user id of the second user who set a replay on this map.
+            Boolean cache: Whether to cache the loaded replays. Defaults to False, or the config value if changed.
+            Integer thresh: If a comparison scores below this value, its Result object has ischeat set to True.
+                            Defaults to 18, or the config value if changed.
 
-        if(args.map_id and args.user_id): # passed both -m and -u but not -l
-            for user_info in self.user_infos:
-                replays2 = self.loader.replay_from_user_info(self.cacher, user_info)
-                replays2 = [replay for replay in replays2 if
-                            replay.replay_id not in [replay.replay_id for replay in self.replays_check]]
-                comparer = Comparer(threshold, args.silent, self.replays_check, replays2=replays2, stddevs=stddevs)
-                comparer.compare(mode="double")
-            return
+        Returns:
+            A generator containing Result objects of the comparisons.
+        """
 
-        if(args.map_id): # only passed -m
-            for user_info in self.user_infos:
-                replays = self.loader.replay_from_user_info(self.cacher, user_info)
-                comparer = Comparer(threshold, args.silent, replays, stddevs=stddevs)
-                comparer.compare(mode="single")
-            return
+        check = self.create_verify_check(map_id, u1, u2, cache, thresh, include)
+        yield from self.run(check)
 
-    def _run_user(self):
-        args = self.args
-        screener = Screener(self.cacher, self.loader, args.threshold, args.silent, args.user_id, args.number, args.stddevs)
-        screener.screen()
+    def create_verify_check(self, map_id, u1, u2, cache=None, thresh=None, include=None):
+        """
+        Creates the Check object used in the verify_check convenience method. See that method for more information.
+        """
+        options = self.options
+        cache = cache if cache else options.cache
+        thresh = thresh if thresh else options.thresh
+        include = include if include else options.include
 
-if __name__ == '__main__':
-    args = argparser.parse_args()
-    if(args.version):
-        print("Circleguard {}".format(VERSION))
-        sys.exit(0)
-    circleguard = Circleguard(args)
-    circleguard.run()
+        self.log.info("Verify with map id %d, u1 %s, u2 %s, cache %s", map_id, u1, u2, cache)
+        info1 = self.loader.user_info(map_id, user_id=u1)
+        info2 = self.loader.user_info(map_id, user_id=u2)
+        replay1 = ReplayMap(info1.map_id, info1.user_id, info1.mods, username=info1.username)
+        replay2 = ReplayMap(info2.map_id, info2.user_id, info2.mods, username=info2.username)
+
+        return Check([replay1, replay2], thresh=thresh, include=include)
+
+    def user_check(self, u, num, thresh=None, include=None):
+        """
+        Checks a user's top plays for replay steals.
+
+        For each of the user's top plays, the replay will be compared to the top plays of the map,
+        then compared to all the user's other plays on the map, to check for both stealing and remodding.
+
+        If a user has no or only one downloadable replay on the map, no comparisons to the user's other plays are made.
+        Obviously, if the play is not downloadable, no comparison is made against the map leaderboard for that replay either.
+
+        Args:
+            Integer u: The user id of the user to check
+            Integer num: The number of replays of each map to compare against the user's replay. For now, this also serves as the
+                         number of top plays of the user to check for replay stealing and remodding.
+            Integer thresh: If a comparison scores below this value, its Result object has ischeat set to True.
+                            Defaults to 18, or the config value if changed.
+
+        Returns:
+            A generator containing Result objects of the comparisons.
+        """
+
+        for check_list in self.create_user_check(u, num, thresh, include):
+            # yuck; each top play has two different checks (remodding and stealing)
+            # which is why we need a double loop
+            for check in check_list:
+                yield from self.run(check)
+
+    def create_user_check(self, u, num, thresh=None, include=None):
+        """
+        Creates the Check object used in the user_check convenience method. See that method for more information.
+        """
+        options = self.options
+        thresh = thresh if thresh else options.thresh
+        include = include if include else options.include
+
+        self.log.info("User check with u %s, num %s", u, num)
+        ret = []
+        for map_id in self.loader.get_user_best(u, num):
+            info = self.loader.user_info(map_id, user_id=u)
+            if not info.replay_available:
+                continue  # if we can't download the user's replay on the map, we have nothing to compare against
+            user_replay = [ReplayMap(info.map_id, info.user_id, mods=info.mods, username=info.username)]
+
+            infos = self.loader.user_info(map_id, num=num)
+            replays = [ReplayMap(info.map_id, info.user_id, mods=info.mods, username=info.username) for info in infos]
+
+            remod_replays = []
+            for info in self.loader.user_info(map_id, user_id=u, limit=False)[1:]:
+                remod_replays.append(ReplayMap(info.map_id, info.user_id, mods=info.mods, username=info.username))
+
+            check1 = Check(user_replay, replays2=replays, thresh=thresh, include=include)
+            check2 = Check(user_replay + remod_replays, thresh=thresh, include=include)
+            ret.append([check1, check2])
+
+        return ret
+
+
+    def local_check(self, folder, thresh=None, include=None):
+        """
+        Compares locally stored osr files for replay steals.
+
+        Args:
+            [Path or String] folder: A pathlike object to the directory containing osr files.
+            Integer thresh: If a comparison scores below this value, its Result object has ischeat set to True.
+                            Defaults to 18, or the config value if changed.
+
+        Returns:
+            A generator containing Result objects of the comparisons.
+        """
+
+        check = self.create_local_check(folder, thresh, include)
+        yield from self.run(check)
+
+    def create_local_check(self, folder, thresh=None, include=None):
+        """
+        Creates the Check object used in the local_check convenience method. See that method for more information.
+        """
+        options = self.options
+        thresh = thresh if thresh else options.thresh
+        include = include if include else options.include
+
+        paths = [folder / f for f in os.listdir(folder) if isfile(folder / f) and f.endswith(".osr")]
+        replays = [ReplayPath(path) for path in paths]
+        return Check(replays, thresh=thresh, include=include)
+
+    def load(self, check, replay):
+        """
+        Loads the given replay. This is identical to calling replay.load(cg.loader, check.cache) if cg is your
+        Circleguard instance and check is your Check instance.. This method exists to emphasize that this behavior is encouraged,
+        and tied to a specific cg (and Check) instance. The Check is necessary to inherit the cache setting from the Check
+        in case it differs from the Circleguard option (since it is more specific, it would override circleguard). See the
+        options documentation for more details on setting inheritence.
+        """
+        replay.load(self.loader, check.cache)
+
+    def set_options(self, thresh=None, num=None, cache=None, failfast=None, logleve=None, include=None):
+        """
+        Changes the default value for different options in circleguard.
+        Affects only the ircleguard instance this method is called on.
+
+        Args:
+            Integer thresh: If a comparison scores below this value, its Result object has ischeat set to True. 18 by default.
+            Integer num: How many replays to load from a map when doing a map check. 50 by default.
+            Boolean cache: Whether downloaded replays should be cached or not. False by default.
+            Boolean failfast: Will throw an exception if no comparisons can be made for a given Check object,
+                          or silently make no comparisons otherwise. False by default.
+            Integer loglevel: What level to log at. Circlecore follows standard python logging levels, with an added level of
+                          TRACE with a value of 5 (lower than debug, which is 10). The value passed to loglevel is
+                          passed directly to the setLevel function of the circleguard root logger. WARNING by default.
+                          For more information on log levels, see the standard python logging lib.
+            Function include: A Predicate functrion that returns True if the replay should be loaded, and False otherwise.
+                          The include function will be passed a single argument - the circleguard.Replay object, or one
+                          of its subclasses.
+        """
+
+        for k, v in locals().items():
+            if not v or k == "self":
+                continue
+            if hasattr(self.options, k):
+                setattr(self.options, k, v)
+            else:  # this only happens if we fucked up, not the user's fault # TODO not quite true for loglevel,
+                   # which is available only as a global option atm, nothing more specific. Either change that (give each circleguard class
+                   # its own logger, like Circleguard.circleguard1 so that log levels can be changed independently per instance) or
+                   # leave a note that it's global in documentation. Leaning towards the former
+                raise CircleguardException(f"The key {k} (value {v}) is not available as a config option for a circleguard instance")
+
+def set_options(thresh=None, num=None, cache=None, failfast=None, loglevel=None, include=None):
+    """
+    Changes the default value for different options in circleguard.
+    Affects all circleguard instances, even ones that have already been instantiated.
+
+    Args:
+        Integer thresh: If a comparison scores below this value, its Result object has ischeat set to True. 18 by default.
+        Integer num: How many replays to load from a map when doing a map check. 50 by default.
+        Boolean cache: Whether downloaded replays should be cached or not. False by default.
+        Boolean failfast: Will throw an exception if no comparisons can be made for a given Check object,
+                          or silently make no comparisons otherwise. False by default.
+        Integer loglevel: What level to log at. Circlecore follows standard python logging levels, with an added level of
+                          TRACE with a value of 5 (lower than debug, which is 10). The value passed to loglevel is
+                          passed directly to the setLevel function of the circleguard root logger. WARNING by default.
+                          For more information on log levels, see the standard python logging lib.
+        Function include: A Predicate functrion that returns True if the replay should be loaded, and False otherwise.
+                          The include function will be passed a single argument - the circleguard.Replay object, or one
+                          of its subclasses.
+    """
+
+    for k, v in locals().items():
+        if v is None:
+            continue
+        if k == "loglevel":
+            logging.getLogger("circleguard").setLevel(loglevel)
+            continue
+        if hasattr(config, k):
+            setattr(config, k, v)
+        else:  # this only happens if we fucked up, not the user's fault
+            raise CircleguardException(f"The key {k} (with value {v}) is not available as a config option for global config")
+
+
+
+class Options():
+    """
+    Container class for options, tied to a specific Circleguard instance.
+    """
+
+    def __init__(self):
+        ...
+
+    # These methods are unfortunately necessary because when
+    # config module variables are updated, references to them are not - ie
+    # references to config.thresh (or any other) are by value. So, when we
+    # access options attributes, just get the latest config variable with these
+    # methods.
+    @property
+    def thresh(self):
+        return config.thresh
+
+    @property
+    def num(self):
+        return config.num
+
+    @property
+    def cache(self):
+        return config.cache
+
+    @property
+    def failfast(self):
+        return config.failfast
+
+    @property
+    def include(self):
+        return config.include

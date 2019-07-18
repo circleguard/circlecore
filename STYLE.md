@@ -37,6 +37,7 @@ def method(arg1, arg2):
 ```
 
 Here is an example docstring that adheres to all guidelines:
+
 ```python
 def from_path(path, useless_var):
     """
@@ -90,7 +91,6 @@ class ClassA:
     """
 ```
 
-
 ### Actual Code
 
 Where possible, list comprehensions are generally prefered over lambdas.
@@ -101,6 +101,7 @@ my_list = filter(lambda x: x.attribute == value, my_list) # NOT PREFERRED
 ```
 
 However, note that there are multiple places a lambda is more reabable, such as sorting an array:
+
 ```python
 stats.sort(key=lambda stat: stat[0])
 ```
