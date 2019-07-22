@@ -145,9 +145,9 @@ for result in circleguard.run(Check(replys)):
     print(result.similarity)
 ```
 
-To get around the rather hairy problem of allowing users to instantiate Replay subclasses at any point in their program and only load them when necessary (when calling `circleguard#run`), circleguard opts to wait to initialize the Replay superclass until the load method is called and we have all the necessary information that the Replay class requires, either from the api, a local osr file, or some other means.
+To get around the rather hairy problem of simultaneously allowing users to instantiate Replay subclasses at any point in their program and only loading them when necessary (when calling `circleguard#run(check)`), circleguard opts to wait to initialize the Replay superclass until the load method is called and we have all the necessary information that the Replay class requires, either from the api, a local osr file, or some other means.
 
-This means that if you subclass Replay, you must make sure you do a couple things that circleguard expects from any Replay subclass. Replay must be initialized in your `load` method, and you must set self.weight to one of `RatelimitWeight.HEAVY`, `RatelimitWeight.LIGHT`, or `RatelimitWeight.NONE` in your `__init__` method (**NOT** in your load method! Circleguard needs to know how much of a toll loading this replay will cause on the program before it is loaded). The documentation from the Ratelimit Enum follows, for your convenience:
+This means that if you subclass Replay, you must make sure you do a couple things that circleguard expects from any Replay subclass. Replay must be initialized in your `load` method (**NOT** in your `__init__` method, as you would expect), and you must set self.weight to one of `RatelimitWeight.HEAVY`, `RatelimitWeight.LIGHT`, or `RatelimitWeight.NONE` in your `__init__` method (**NOT** in your load method! Circleguard needs to know how much of a toll loading this replay will cause on the program before it is loaded). The documentation from the Ratelimit Enum follows, for your convenience:
 
 ```python
 """
