@@ -7,7 +7,7 @@ from math import ceil
 
 from requests import RequestException
 import osrparse
-import osuAPI
+import ossapi
 
 from circleguard.replay import ReplayMap
 from circleguard.user_info import UserInfo
@@ -81,7 +81,7 @@ def check_cache(function):
 
 class Loader():
     """
-    Manages interactions with the osu api, using the osuAPI wrapper.
+    Manages interactions with the osu api, using the ossapi wrapper.
 
     if the api ratelimits the key, we wait until we refresh our ratelimits and retry
     the request. Because the api does not provide the time until the next refresh (and we
@@ -101,7 +101,7 @@ class Loader():
         self.log = logging.getLogger(__name__)
         self.total = None
         self.loaded = 0
-        self.api = osuAPI.OsuAPI(key)
+        self.api = ossapi.ossapi(key)
         self.cacher = cacher
 
 
