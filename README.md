@@ -1,6 +1,6 @@
 # Circlecore
 
-Circlecore is the backend of the circleguard project, available as a pip module. If you are looking to download and start using the program circleguard yourself, see [our frontend repo](https://github.com/circleguard/circleguard). If you would like to incorporate circleguard into your own projects, read on.
+Circlecore is the backend of the circleguard project, available as a pip module. If you are looking to download and start using the program circleguard yourself, see [our frontend repository](https://github.com/circleguard/circleguard). If you would like to incorporate circleguard into your projects, read on.
 
 To clarify, this module is referred to internally as circlecore to differentiate it from the circleguard project as a whole, but is imported as circleguard, and referred to as circleguard in this overview.
 
@@ -12,7 +12,7 @@ First, install circleguard:
 pip install circleguard
 ```
 
-Circleguard can be ran in two ways - through convenience methods such as `circleguard.user_check()` or by instantiating and passing a Check object to `circleguard.run(check)`, the latter of which provides much more control over how and what replays to compare. Both methods return a generator containing Result objects.
+Circleguard can be run in two ways - through convenience methods such as `circleguard.user_check()` or by instantiating and passing a Check object to `circleguard.run(check)`, the latter of which provides much more control over how and what replays to compare. Both methods return a generator containing Result objects.
 
 The following examples provide very simple uses of Result objects. For more detailed documentation of what variables are available to you through Result objects, refer to its documentation in the code.
 
@@ -51,7 +51,7 @@ for r in circleguard.verify(1699366, 12092800, 7477458, False):
 
 ### More Generally
 
-The much more flexible way to use circleguard is to make your own Check object and run circleguard with that. This allows for mixing different types of Replay objects - comparing local .osr's to online replays - as well as the liberty to instantiate the Replay objects yourself and use your own Replay subclasses. See [Advanced Usage](#subclassing-replay) for more on subclassing.
+The much more flexible way to use circleguard is to make your Check object and run circleguard with that. This allows for mixing different types of Replay objects - comparing local .osr's to online replays - as well as the liberty to instantiate the Replay objects yourself and use your Replay subclasses. See [Advanced Usage](#subclassing-replay) for more on subclassing.
 
 ```python
 from circleguard import *
@@ -87,9 +87,9 @@ for r in circleguard.run(Check(replays)):
 
 There are four tiers of options. The lowest option which is set takes priority for any given replay or comparison.
 
-Options can be set at the highest level (global level) by using `Circleguard.set_options`. Options can be changed at the second highest level (instance level) using `circleguard#set_options`, which only affects the instance you call the method on. Be careful to use the static module method to change global settings and the instance method to change instance settings, as they share the same name and can be easy to confuse.
+Options can be set at the highest level (global level) by using `Circleguard.set_options`. Options can be changed at the second-highest level (instance level) using `circleguard#set_options`, which only affects the instance you call the method on. Be careful to use the static module method to change global settings and the instance method to change instance settings, as they share the same name and can be easy to confuse.
 
-Options can be further specified at the second lowest level (Check level) by passing the appropriate argument when the Check is instantiated. Finally, options can be changed at the lowest level (Replay level) by passing the appropriate argument when the Replay is instantiated.
+Options can be further specified at the second-lowest level (Check level) by passing the appropriate argument when the Check is instantiated. Finally, options can be changed at the lowest level (Replay level) by passing the appropriate argument when the Replay is instantiated.
 
 Settings affect all previously instantiated objects when they are changed. That is, if you change an option globally, it will change that setting for all past and future Circleguard instances.
 
@@ -147,7 +147,7 @@ for result in circleguard.run(Check(replys)):
 
 To get around the rather hairy problem of simultaneously allowing users to instantiate Replay subclasses at any point in their program and only loading them when necessary (when calling `circleguard#run(check)`), circleguard opts to wait to initialize the Replay superclass until the load method is called and we have all the necessary information that the Replay class requires, either from the api, a local osr file, or some other means.
 
-This means that if you subclass Replay, you must make sure you do a couple things that circleguard expects from any Replay subclass. Replay must be initialized in your `load` method (**NOT** in your `__init__` method, as you would expect), and you must set self.weight to one of `RatelimitWeight.HEAVY`, `RatelimitWeight.LIGHT`, or `RatelimitWeight.NONE` in your `__init__` method (**NOT** in your load method! Circleguard needs to know how much of a toll loading this replay will cause on the program before it is loaded). The documentation from the Ratelimit Enum follows, for your convenience:
+This means that if you subclass Replay, you must make sure you do a couple of things that circleguard expects from any Replay subclass. Replay must be initialized in your `load` method (**NOT** in your `__init__` method, as you would expect), and you must set self.weight to one of `RatelimitWeight.HEAVY`, `RatelimitWeight.LIGHT`, or `RatelimitWeight.NONE` in your `__init__` method (**NOT** in your load method! Circleguard needs to know how much of a toll loading this replay will cause on the program before it is loaded). The documentation from the Ratelimit Enum follows, for your convenience:
 
 ```python
 """
@@ -157,24 +157,24 @@ the corresponding value is RatelimitWeight.LIGHT. If it makes any heavy api call
 corresponding value is RatelimitWeight.HEAVY.
 
 This value is used internally to determine how long the loader class will have to spend loading replays -
-currently LIGHT and NONE are treated the same, and only HEAVY values are counted towards replays to load.
+currently, LIGHT and NONE are treated the same, and only HEAVY values are counted towards replays to load.
 See loader#new_session and the Replay documentation for more details.
 """
 ```
 
 `replay_data` must be a list of `circleparse.ReplayEvent` like objects when passed to `Replay.__init__`. You can look at the [circleparse](https://github.com/circleguard/circleparse) repository for more information, but all that means is that each object must have the `time_since_previous_action`, `x`, `y`, and `keys_pressed` attributes.
 
-Finally, the load method of the replay must accept one required argument and one positional argument, regardless of whether you use them - `loader` and `cache=None`, respectively. If you need to load some information from the api, use the passed Loader class to do so (see the Loader class for further documentation). Should you want to implement a caching system of your own, the cache argument takes care of all the nasty options hierarchy issues and delivers you the final result - should this singular replay be cached? If you choose to cache the replay, you will also have to implement the loading of the replay from the cache, by writing the corresponding logic in the laod method. None of that is touched by circleguard - the caching of ReplayMaps happens in an entirely different location than `replay#load`. So long as you set `self.loaded` to `True` by initializing Replay in `load`, circleguard will respect your replay and assume you have loaded the data properly.
+Finally, the load method of the replay must accept one required argument and one positional argument, regardless of whether you use them - `loader` and `cache=None`, respectively. If you need to load some information from the api, use the passed Loader class to do so (see the Loader class for further documentation). Should you want to implement a caching system of your own, the cache argument takes care of all the nasty options hierarchy issues and delivers you the final result - should this singular replay be cached? If you choose to cache the replay, you will also have to implement the loading of the replay from the cache, by writing the corresponding logic in the load method. None of that is touched by circleguard - the caching of ReplayMaps happens in an entirely different location than `replay#load`. So long as you set `self.loaded` to `True` by initializing Replay in `load`, circleguard will respect your replay and assume you have loaded the data properly.
 
 ### Loading Replays
 
 Normally, all replays in a `Check` object are loaded when you call `circleguard#run(check)`. However, if you require more control over when you load your replays (or which ones get loaded when you do), you can call circleguard.load(replay) to load an individual replay. This is a shorthand method for calling `replay#load(circleguard.loader)`, and going through circleguard is always recommended, as not doing so can cause unexpected caching issues with the settings hierarchy not cascading down to the replay correctly. See the last section of Subclassing Replay for more on the optional cache option for `replay#load`
 
-There is no limitation on the order in which replays get loaded; when `circleguard#run(check)` is called, it first checks if `check.loaded` is `True`. If it is, it assumes all the replays in the check object are loaded as well, and moves on to comparing them. Else, it checks if each replay in the check object have `replay.loaded` set to `True` - if so, it moves on to loading the next replay. Otherwise, it calls `replay#load`.
+There is no limitation on the order in which replays get loaded; when `circleguard#run(check)` is called, it first checks if `check.loaded` is `True`. If it is, it assumes all the replays in the check object are loaded as well and moves onto comparing them. Else, it checks if each replay in the check object have `replay.loaded` set to `True` - if so, it moves on to loading the next replay. Otherwise, it calls `replay#load`.
 
 ## Contributing
 
-If you would like to contribute to Circleguard, join our discord and ask what you can help with, or take a look at the [open issues for circleguard](https://github.com/circleguard/circleguard/issues) and [circlecore](https://github.com/circleguard/circlecore/issues). We're happy to work with you if you have any questions!
+If you would like to contribute to Circleguard, join our discord and ask what you can help with, or take a look at the open issues for [circleguard](https://github.com/circleguard/circleguard/issues) and [circlecore](https://github.com/circleguard/circlecore/issues). We're happy to work with you if you have any questions!
 
 You can also help out by opening issues for bugs or feature requests, which helps us and others keep track of what needs to be done next.
 
