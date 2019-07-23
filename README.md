@@ -1,6 +1,6 @@
 # Circlecore
 
-Circlecore is the backend of the circleguard project, available as a pip module. If you are looking to download and start using the program circleguard yourself, see [our frontend repository](https://github.com/circleguard/circleguard). If you would like to incorporate circleguard into your projects, read on.
+Circlecore is the backend of the circleguard project, available as a pip module. If you are looking to download and start using the program circleguard yourself, see [our frontend repository](https://github.com/circleguard/circleguard). If you would like to incorporate circleguard into your own projects, read on.
 
 To clarify, this module is referred to internally as circlecore to differentiate it from the circleguard project as a whole, but is imported as circleguard, and referred to as circleguard in this overview.
 
@@ -51,7 +51,7 @@ for r in circleguard.verify(1699366, 12092800, 7477458, False):
 
 ### More Generally
 
-The much more flexible way to use circleguard is to make your Check object and run circleguard with that. This allows for mixing different types of Replay objects - comparing local .osr's to online replays - as well as the liberty to instantiate the Replay objects yourself and use your Replay subclasses. See [Advanced Usage](#subclassing-replay) for more on subclassing.
+The much more flexible way to use circleguard is to make your own Check object and run circleguard with that. This allows for mixing different types of Replay objects - comparing local .osr's to online replays - as well as the liberty to instantiate the Replay objects yourself and use your ownReplay subclasses. See [Advanced Usage](#subclassing-replay) for more on subclassing.
 
 ```python
 from circleguard import *
@@ -157,7 +157,7 @@ the corresponding value is RatelimitWeight.LIGHT. If it makes any heavy api call
 corresponding value is RatelimitWeight.HEAVY.
 
 This value is used internally to determine how long the loader class will have to spend loading replays -
-currently, LIGHT and NONE are treated the same, and only HEAVY values are counted towards replays to load.
+currently LIGHT and NONE are treated the same, and only HEAVY values are counted towards replays to load.
 See loader#new_session and the Replay documentation for more details.
 """
 ```
@@ -170,11 +170,11 @@ Finally, the load method of the replay must accept one required argument and one
 
 Normally, all replays in a `Check` object are loaded when you call `circleguard#run(check)`. However, if you require more control over when you load your replays (or which ones get loaded when you do), you can call circleguard.load(replay) to load an individual replay. This is a shorthand method for calling `replay#load(circleguard.loader)`, and going through circleguard is always recommended, as not doing so can cause unexpected caching issues with the settings hierarchy not cascading down to the replay correctly. See the last section of Subclassing Replay for more on the optional cache option for `replay#load`
 
-There is no limitation on the order in which replays get loaded; when `circleguard#run(check)` is called, it first checks if `check.loaded` is `True`. If it is, it assumes all the replays in the check object are loaded as well and moves onto comparing them. Else, it checks if each replay in the check object have `replay.loaded` set to `True` - if so, it moves on to loading the next replay. Otherwise, it calls `replay#load`.
+There is no limitation on the order in which replays get loaded; when `circleguard#run(check)` is called, it first checks if `check.loaded` is `True`. If it is, it assumes all the replays in the check object are loaded as well and moves on to comparing them. Else, it checks if each replay in the check object have `replay.loaded` set to `True` - if so, it moves on to loading the next replay. Otherwise, it calls `replay#load`.
 
 ## Contributing
 
-If you would like to contribute to Circleguard, join our discord and ask what you can help with, or take a look at the open issues for [circleguard](https://github.com/circleguard/circleguard/issues) and [circlecore](https://github.com/circleguard/circlecore/issues). We're happy to work with you if you have any questions!
+If you would like to contribute to Circleguard, join our discord and ask what you can help with, or take a look at the [open issues for circleguard](https://github.com/circleguard/circleguard/issues) and [circlecore](https://github.com/circleguard/circlecore/issues). We're happy to work with you if you have any questions!
 
 You can also help out by opening issues for bugs or feature requests, which helps us and others keep track of what needs to be done next.
 
