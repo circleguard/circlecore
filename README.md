@@ -51,7 +51,7 @@ for r in circleguard.verify(1699366, 12092800, 7477458, False):
 
 ### More Generally
 
-The much more flexible way to use circleguard is to make your own Check object and run circleguard with that. This allows for mixing different types of Replay objects - comparing local .osr's to online replays - as well as the liberty to instantiate the Replay objects yourself and use your own Replay subclasses. See Advanced Usage for more on subclassing.
+The much more flexible way to use circleguard is to make your own Check object and run circleguard with that. This allows for mixing different types of Replay objects - comparing local .osr's to online replays - as well as the liberty to instantiate the Replay objects yourself and use your own Replay subclasses. See [Advanced Usage](#subclassing-replay) for more on subclassing.
 
 ```python
 from circleguard import *
@@ -164,7 +164,7 @@ See loader#new_session and the Replay documentation for more details.
 
 `replay_data` must be a list of `circleparse.ReplayEvent` like objects when passed to `Replay.__init__`. You can look at the [circleparse](https://github.com/circleguard/circleparse) repository for more information, but all that means is that each object must have the `time_since_previous_action`, `x`, `y`, and `keys_pressed` attributes.
 
-Finally, the load method of the replay must accept one required argument and one positional argument, regardless of whether you use them - `loader` and `cache=None`, respectively. If you need to load some information from the api, use the passed Loader class to do so (see the Loader class for further documentation. You're really starting to dig into the internals of the code if you do this - why not offer to write some code for us while you're at it? We don't bite, I promise c:). Should you want to implement a caching system of your own, the cache argument takes care of all the nasty options hierarchy issues and delivers you the final result - should this singular replay be cached? If you choose to cache the replay, you will also have to implement the loading of the replay from the cache, by writing the corresponding logic in the laod method. None of that is touched by circleguard - the caching of ReplayMaps happens in an entirely different location than `replay#load`. So long as you set `self.loaded` to `True` by initializing Replay in `load`, circleguard will respect your replay and assume you have loaded the data properly.
+Finally, the load method of the replay must accept one required argument and one positional argument, regardless of whether you use them - `loader` and `cache=None`, respectively. If you need to load some information from the api, use the passed Loader class to do so (see the Loader class for further documentation). Should you want to implement a caching system of your own, the cache argument takes care of all the nasty options hierarchy issues and delivers you the final result - should this singular replay be cached? If you choose to cache the replay, you will also have to implement the loading of the replay from the cache, by writing the corresponding logic in the laod method. None of that is touched by circleguard - the caching of ReplayMaps happens in an entirely different location than `replay#load`. So long as you set `self.loaded` to `True` by initializing Replay in `load`, circleguard will respect your replay and assume you have loaded the data properly.
 
 ### Loading Replays
 
@@ -172,8 +172,14 @@ Normally, all replays in a `Check` object are loaded when you call `circleguard#
 
 There is no limitation on the order in which replays get loaded; when `circleguard#run(check)` is called, it first checks if `check.loaded` is `True`. If it is, it assumes all the replays in the check object are loaded as well, and moves on to comparing them. Else, it checks if each replay in the check object have `replay.loaded` set to `True` - if so, it moves on to loading the next replay. Otherwise, it calls `replay#load`.
 
+## Contributing
+
+If you would like to contribute to Circleguard, join our discord and ask what you can help with, or take a look at the [open issues for circleguard](https://github.com/circleguard/circleguard/issues) and [circlecore](https://github.com/circleguard/circlecore/issues). We're happy to work with you if you have any questions!
+
+You can also help out by opening issues for bugs or feature requests, which helps us and others keep track of what needs to be done next.
+
 ## Conclusion
 
-Whether you read through everything or scrolled down to the bottom, I hope this helped. If you have any questions (or want to offer your skills in contribution to the project), the link to our discord follows. We welcome any comments and are happy to answer questions.
+Whether you read through everything or scrolled down to the bottom, I hope this helped. If you have any questions, the link to our discord follows. We welcome any comments and are happy to answer questions.
 
 Discord: <https://discord.gg/VNnkTjm>
