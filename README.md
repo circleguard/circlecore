@@ -51,7 +51,7 @@ for r in circleguard.verify(1699366, 12092800, 7477458, False):
 
 ### More Generally
 
-The much more flexible way to use circleguard is to make your own Check object and run circleguard with that. This allows for mixing different types of Replay objects - comparing local .osr's to online replays - as well as the liberty to instantiate the Replay objects yourself and use your ownReplay subclasses. See [Advanced Usage](#subclassing-replay) for more on subclassing.
+The much more flexible way to use circleguard is to make your own Check object and run circleguard with that. This allows for mixing different types of Replay objects - comparing local .osr's to online replays - as well as the liberty to instantiate the Replay objects yourself and use your own Replay subclasses. See [Advanced Usage](#subclassing-replay) for more on subclassing.
 
 ```python
 from circleguard import *
