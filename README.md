@@ -87,9 +87,9 @@ for r in circleguard.run(Check(replays)):
 
 There are four tiers of options. The lowest option which is set takes priority for any given replay or comparison.
 
-Options can be set at the highest level (global level) by using `Circleguard.set_options`. Options can be changed at the second-highest level (instance level) using `circleguard#set_options`, which only affects the instance you call the method on. Be careful to use the static module method to change global settings and the instance method to change instance settings, as they share the same name and can be easy to confuse.
+Options can be set at the highest level (global level) by using `Circleguard.set_options`. Options can be changed at the second highest level (instance level) using `circleguard#set_options`, which only affects the instance you call the method on. Be careful to use the static module method to change global settings and the instance method to change instance settings, as they share the same name and can be easy to confuse.
 
-Options can be further specified at the second-lowest level (Check level) by passing the appropriate argument when the Check is instantiated. Finally, options can be changed at the lowest level (Replay level) by passing the appropriate argument when the Replay is instantiated.
+Options can be further specified at the second lowest level (Check level) by passing the appropriate argument when the Check is instantiated. Finally, options can be changed at the lowest level (Replay level) by passing the appropriate argument when the Replay is instantiated.
 
 Settings affect all previously instantiated objects when they are changed. That is, if you change an option globally, it will change that setting for all past and future Circleguard instances.
 
