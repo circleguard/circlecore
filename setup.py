@@ -23,7 +23,7 @@ setup(
     author="Liam DeVoe",
     author_email="orionldevoe@gmail.com",
     url="https://github.com/circleguard/circlecore",
-    download_url = "https://github.com/circleguard/circlecore/tarball/" + __version__,
+    download_url = "https://github.com/circleguard/circlecore/tarball/v" + __version__,
     license = "MIT",
     packages=find_packages(),
     install_requires=[
