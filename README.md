@@ -129,7 +129,7 @@ class ReplayDatabase(Replay):
         self.loaded = False
 
     def load(self, loader, cache=None):
-        # execute some sql (implementation now shown) to retrieve replay data from a local database. Assume the call returns a tuple of (replay_id, replay_data)
+        # execute some sql (implementation not shown) to retrieve replay data from a local database. Assume the call returns a tuple of (replay_id, replay_data)
         result = load_replay_from_database(self.map_id, self.user_id, self.mods)
         replay_id = result[0]
         replay_data = result[1]
