@@ -1,7 +1,7 @@
 import abc
 import logging
 
-import osrparse
+import circleparse
 import numpy as np
 
 from circleguard.enums import Detect, RatelimitWeight
@@ -118,7 +118,7 @@ class Replay(abc.ABC):
                              has no effect - this field is used to represent the player more readably than their id.
             Integer mods: The mods the replay was played with.
             Integer replay_id: The id of this replay, or 0 if it does not have an id (unsubmitted replays have no id)
-            osrparse.Replay replay_data: An osrparse Replay containing the replay data for this replay. If the replay data is not available
+            circleparse.Replay replay_data: A circleparse Replay containing the replay data for this replay. If the replay data is not available
                                          (from the api or otherwise), this field should be None. This means that this replay will not be
                                          compared against other replays or investigated for cheats.
             Detect detect: The Detect enum (or bitwise combination of enums), indicating what types of cheats this
@@ -149,7 +149,7 @@ class Replay(abc.ABC):
         Implementation is up to the specific subclass.
 
         To meet the specs of this method, subclasses must set replay.loaded to True after this method is called,
-        and replay.replay_data must be a valid Replay object, as defined by osrparse.Replay. Both of these specs
+        and replay.replay_data must be a valid Replay object, as defined by circleparse.Replay. Both of these specs
         can be met if the superclass circleguard.Replay is initialized in the load method with a valid Replay, as
         circleguard.Replay.__init__ sets replay.loaded to true by default.
         """
@@ -287,7 +287,7 @@ class ReplayPath(Replay):
 
     def load(self, loader, cache=None):
         """
-        Loads the data for this replay from the osr file given by the path. See osrparse.parse_replay_file for
+        Loads the data for this replay from the osr file given by the path. See circleparse.parse_replay_file for
         implementation details. This method has no effect if replay.loaded is True.
 
         The superclass Replay is initialized after this call, setting replay.loaded to True. Multiple
@@ -301,6 +301,6 @@ class ReplayPath(Replay):
             self.log.debug("ReplayPath already loaded, not loading")
             return
         # no, we don't need loader for ReplayPath, but to reduce type checking when calling we make the method signatures homogeneous
-        loaded = osrparse.parse_replay_file(self.path)
+        loaded = circleparse.parse_replay_file(self.path)
         Replay.__init__(self, loaded.player_name, loaded.mod_combination, loaded.replay_id, loaded.play_data, self.detect, self.weight)
         self.log.log(TRACE, "Finished loading ReplayPath")

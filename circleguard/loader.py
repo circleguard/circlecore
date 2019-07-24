@@ -6,7 +6,7 @@ import logging
 from math import ceil
 
 from requests import RequestException
-import osrparse
+import circleparse
 import ossapi
 
 from circleguard.replay import ReplayMap
@@ -72,7 +72,7 @@ def check_cache(function):
 
         lzma = self.cacher.check_cache(user_info.map_id, user_info.user_id, user_info.mods)
         if(lzma):
-            replay_data = osrparse.parse_replay(lzma, pure_lzma=True).play_data
+            replay_data = circleparse.parse_replay(lzma, pure_lzma=True).play_data
             self.loaded += 1
             return replay_data
         else:
@@ -218,7 +218,7 @@ class Loader():
             UserInfo user_info: The UserInfo object representing this replay.
 
         Returns:
-            The play_data field of an osrparse.Replay instance created from the replay data received from the api,
+            The play_data field of an circleparse.Replay instance created from the replay data received from the api,
             or None if the replay was not available.
 
         Raises:
@@ -236,7 +236,7 @@ class Loader():
         if(lzma_bytes is None):
             raise UnknownAPIException("The api guaranteed there would be a replay available, but we did not receive any data. "
                                      "Please report this to the devs, who will open an issue on osu!api if necessary.")
-        parsed_replay = osrparse.parse_replay(lzma_bytes, pure_lzma=True)
+        parsed_replay = circleparse.parse_replay(lzma_bytes, pure_lzma=True)
         replay_data = parsed_replay.play_data
         self.cacher.cache(lzma_bytes, user_info, should_cache=cache)
         return replay_data
