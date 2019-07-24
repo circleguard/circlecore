@@ -1,9 +1,9 @@
 import itertools
 import sys
 import logging
+import math
 
 import numpy as np
-import math
 
 from circleguard.replay import Replay
 from circleguard.enums import Mod

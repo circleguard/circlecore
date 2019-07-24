@@ -1,6 +1,7 @@
 import sqlite3
 import logging
 import os
+
 import wtc
 
 from circleguard.loader import Loader
