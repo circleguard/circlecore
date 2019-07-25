@@ -169,11 +169,11 @@ class Replay(abc.ABC):
         timestamps = timestamps.cumsum()
 
         # zip timestamps back to data and convert t, x, y, keys to tuples
-        txy = [[z[0], z[1].x, z[1].y, z[1].keys_pressed] for z in zip(timestamps, self.replay_data)]
+        txyk = [[z[0], z[1].x, z[1].y, z[1].keys_pressed] for z in zip(timestamps, self.replay_data)]
         # sort to ensure time goes forward as you move through the data
         # in case someone decides to make time go backwards anyway
-        txy.sort(key=lambda p: p[0])
-        return txy
+        txyk.sort(key=lambda p: p[0])
+        return txyk
 
 
 class ReplayMap(Replay):
