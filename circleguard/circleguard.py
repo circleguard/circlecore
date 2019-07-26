@@ -179,7 +179,7 @@ class Circleguard:
             for check in check_list:
                 yield from self.run(check)
 
-    def create_user_check(self, u, num, thresh=None, include=None):
+    def create_user_check(self, u, num_top, num_users, thresh=None, include=None):
         """
         Creates the Check object used in the user_check convenience method. See that method for more information.
         """
@@ -187,15 +187,15 @@ class Circleguard:
         thresh = thresh if thresh else options.thresh
         include = include if include else options.include
 
-        self.log.info("User check with u %s, num %s", u, num)
+        self.log.info("User check with u %s, num_top %s, num_users %s", u, num_top, num_users)
         ret = []
-        for map_id in self.loader.get_user_best(u, num):
+        for map_id in self.loader.get_user_best(u, num_top):
             info = self.loader.user_info(map_id, user_id=u)
             if not info.replay_available:
                 continue  # if we can't download the user's replay on the map, we have nothing to compare against
             user_replay = [ReplayMap(info.map_id, info.user_id, mods=info.mods, username=info.username)]
 
-            infos = self.loader.user_info(map_id, num=num)
+            infos = self.loader.user_info(map_id, num=num_users)
             replays = [ReplayMap(info.map_id, info.user_id, mods=info.mods, username=info.username) for info in infos]
 
             remod_replays = []
