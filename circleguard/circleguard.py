@@ -182,6 +182,11 @@ class Circleguard:
     def create_user_check(self, u, num_top, num_users, thresh=None, include=None):
         """
         Creates the Check object used in the user_check convenience method. See that method for more information.
+
+        Bewarned that this method does not return a single Check object like all other circleguard#create methods.
+        Instead it returns a list of lists of Check objects [[Check, Check], [Check, Check], ...], because each top
+        play of the user needs two Check objects, one for replay stealing and one for remodding. Be sure to handle
+        this special case accordingly.
         """
         options = self.options
         thresh = thresh if thresh else options.thresh
