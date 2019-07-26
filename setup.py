@@ -30,7 +30,7 @@ setup(
         "circleparse >= 5.0.1",
         "ossapi >= 1.2.0",
         "wtc >= 1.1.3",
-        "numpy"
+        "numpy",
         "requests"
     ]
 )
