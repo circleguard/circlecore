@@ -296,7 +296,7 @@ class Circleguard:
         """
 
         for k, v in locals().items():
-            if not v or k == "self":
+            if v is None or k == "self":
                 continue
             if hasattr(self.options, k):
                 setattr(self.options, k, v)
