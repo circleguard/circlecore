@@ -28,6 +28,9 @@ class Circleguard:
     Result class for further documentation.
     """
 
+    # used to distinguish log output for cg instances
+    NUM = 1
+
     def __init__(self, key, db_path, loader=None):
         """
         Initializes a Circleguard instance.
@@ -37,12 +40,13 @@ class Circleguard:
             [Path or String] db_path: A pathlike object to the databse file to write and/or read cached replays.
         """
 
-        self.log = logging.getLogger(__name__)
+        self.log = logging.getLogger(__name__ + str(Circleguard.NUM))
         self.db_path = Path(db_path).absolute() # allows for . to be passed to db_path
         cacher = Cacher(config.cache, self.db_path)
         # allow for people to pass their own loader implementation/subclass
         self.loader = Loader(cacher, key) if loader is None else loader(cacher, key)
         self.options = Options()
+        Circleguard.NUM += 1
 
     def run(self, check):
         """
@@ -286,7 +290,7 @@ class Circleguard:
         """
         replay.load(self.loader, check.cache)
 
-    def set_options(self, thresh=None, num=None, cache=None, failfast=None, logleve=None, include=None):
+    def set_options(self, thresh=None, num=None, cache=None, failfast=None, loglevel=None, include=None):
         """
         Changes the default value for different options in circleguard.
         Affects only the ircleguard instance this method is called on.
@@ -299,7 +303,7 @@ class Circleguard:
                           or silently make no comparisons otherwise. False by default.
             Integer loglevel: What level to log at. Circlecore follows standard python logging levels, with an added level of
                           TRACE with a value of 5 (lower than debug, which is 10). The value passed to loglevel is
-                          passed directly to the setLevel function of the circleguard root logger. WARNING by default.
+                          passed directly to the setLevel function of this instance's logger. WARNING by default.
                           For more information on log levels, see the standard python logging lib.
             Function include: A Predicate function that returns True if the replay should be loaded, and False otherwise.
                           The include function will be passed a single argument - the circleguard.Replay object, or one
@@ -309,12 +313,12 @@ class Circleguard:
         for k, v in locals().items():
             if v is None or k == "self":
                 continue
+            if k == "loglevel":
+                self.log.setLevel(loglevel)
+                continue
             if hasattr(self.options, k):
                 setattr(self.options, k, v)
-            else:  # this only happens if we fucked up, not the user's fault # TODO not quite true for loglevel,
-                   # which is available only as a global option atm, nothing more specific. Either change that (give each circleguard class
-                   # its own logger, like Circleguard.circleguard1 so that log levels can be changed independently per instance) or
-                   # leave a note that it's global in documentation. Leaning towards the former
+            else:  # this only happens if we fucked up, not the user's fault
                 raise CircleguardException(f"The key {k} (value {v}) is not available as a config option for a circleguard instance")
 
 def set_options(thresh=None, num=None, cache=None, failfast=None, loglevel=None, include=None):
