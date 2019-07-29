@@ -88,6 +88,9 @@ class Circleguard:
             Boolean cache: Whether to cache the loaded replays. Defaults to False, or the config value if changed.
             Integer thresh: If a comparison scores below this value, its Result object has ischeat set to True.
                             Defaults to 18, or the config value if changed.
+            Function include: A Predicate function that returns True if the replay should be loaded, and False otherwise.
+                              The include function will be passed a single argument - the circleguard.Replay object, or one
+                              of its subclasses.
 
         Returns:
             A generator containing Result objects of the comparisons.
@@ -127,6 +130,9 @@ class Circleguard:
             Boolean cache: Whether to cache the loaded replays. Defaults to False, or the config value if changed.
             Integer thresh: If a comparison scores below this value, its Result object has ischeat set to True.
                             Defaults to 18, or the config value if changed.
+            Function include: A Predicate function that returns True if the replay should be loaded, and False otherwise.
+                              The include function will be passed a single argument - the circleguard.Replay object, or one
+                              of its subclasses.
 
         Returns:
             A generator containing Result objects of the comparisons.
@@ -169,6 +175,9 @@ class Circleguard:
             Boolean cache: Whether to cache the loaded replays. Defaults to False, or the config value if changed.
             Integer thresh: If a comparison scores below this value, its Result object has ischeat set to True.
                             Defaults to 18, or the config value if changed.
+            Function include: A Predicate function that returns True if the replay should be loaded, and False otherwise.
+                              The include function will be passed a single argument - the circleguard.Replay object, or one
+                              of its subclasses.
 
         Returns:
             A generator containing Result objects of the comparisons.
@@ -233,6 +242,9 @@ class Circleguard:
             Boolean cache: Whether to cache the loaded replays. Defaults to False, or the config value if changed.
             Integer thresh: If a comparison scores below this value, its Result object has ischeat set to True.
                             Defaults to 18, or the config value if changed.
+            Function include: A Predicate function that returns True if the replay should be loaded, and False otherwise.
+                              The include function will be passed a single argument - the circleguard.Replay object, or one
+                              of its subclasses.
 
         Returns:
             A generator containing Result objects of the comparisons.
