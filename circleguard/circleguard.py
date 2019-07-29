@@ -95,7 +95,6 @@ class Circleguard:
         Returns:
             A generator containing Result objects of the comparisons.
         """
-        self.log.info("include at memory {}".format(self.options.include))
         check = self.create_map_check(map_id, u, num, cache, thresh, include)
         yield from self.run(check)
 
