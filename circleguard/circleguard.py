@@ -114,7 +114,7 @@ class Circleguard:
             replays2 = [ReplayMap(info.map_id, info.user_id, info.mods, username=info.username)]
         infos = self.loader.user_info(map_id, num=num)
         replays = [ReplayMap(info.map_id, info.user_id, info.mods, username=info.username) for info in infos]
-        return Check(replays, replays2=replays2, thresh=thresh, cache=cache, include=include)
+        return Check(replays, replays2=replays2, cache=cache, thresh=thresh, include=include)
 
     def verify(self, map_id, u1, u2, cache=None, thresh=None, include=None):
         """
@@ -150,9 +150,9 @@ class Circleguard:
         replay1 = ReplayMap(info1.map_id, info1.user_id, info1.mods, username=info1.username)
         replay2 = ReplayMap(info2.map_id, info2.user_id, info2.mods, username=info2.username)
 
-        return Check([replay1, replay2], thresh=thresh, include=include)
+        return Check([replay1, replay2], cache=cache, thresh=thresh, include=include)
 
-    def user_check(self, u, num, thresh=None, include=None):
+    def user_check(self, u, num, cache=None, thresh=None, include=None):
         """
         Checks a user's top plays for replay steals.
 
@@ -166,6 +166,7 @@ class Circleguard:
             Integer u: The user id of the user to check
             Integer num: The number of replays of each map to compare against the user's replay. For now, this also serves as the
                          number of top plays of the user to check for replay stealing and remodding.
+            Boolean cache: Whether to cache the loaded replays. Defaults to False, or the config value if changed.
             Integer thresh: If a comparison scores below this value, its Result object has ischeat set to True.
                             Defaults to 18, or the config value if changed.
 
@@ -173,13 +174,13 @@ class Circleguard:
             A generator containing Result objects of the comparisons.
         """
 
-        for check_list in self.create_user_check(u, num, thresh, include):
+        for check_list in self.create_user_check(u, num, cache, thresh, include):
             # yuck; each top play has two different checks (remodding and stealing)
             # which is why we need a double loop
             for check in check_list:
                 yield from self.run(check)
 
-    def create_user_check(self, u, num_top, num_users, thresh=None, include=None):
+    def create_user_check(self, u, num_top, num_users, cache=None, thresh=None, include=None):
         """
         Creates the Check object used in the user_check convenience method. See that method for more information.
 
@@ -189,6 +190,7 @@ class Circleguard:
         this special case accordingly.
         """
         options = self.options
+        cache = cache if cache else options.cache
         thresh = thresh if thresh else options.thresh
         include = include if include else options.include
 
@@ -207,8 +209,8 @@ class Circleguard:
             for info in self.loader.user_info(map_id, user_id=u, limit=False)[1:]:
                 remod_replays.append(ReplayMap(info.map_id, info.user_id, mods=info.mods, username=info.username))
 
-            check1 = Check(user_replay, replays2=replays, thresh=thresh, include=include)
-            check2 = Check(user_replay + remod_replays, thresh=thresh, include=include)
+            check1 = Check(user_replay, replays2=replays, cache=cache, thresh=thresh, include=include)
+            check2 = Check(user_replay + remod_replays, cache=cache, thresh=thresh, include=include)
             ret.append([check1, check2])
 
         return ret
