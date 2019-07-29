@@ -7,8 +7,9 @@ class Error(Enum):
     NO_REPLAY         = ["Replay not available.", ReplayUnavailableException, "Could not find any replay data. Skipping"]
     RATELIMITED       = ["Requesting too fast! Slow your operation, cap'n!", RatelimitException, "We were ratelimited. Waiting it out"]
     RETRIEVAL_FAILED  = ["Replay retrieval failed.", ReplayUnavailableException, "Replay retrieval failed. Skipping"]
-    INVALID_KEY       = ["Please provide a valid API key.", InvalidKeyException, "Please provide a valid key in secret.py"]
-    UNKNOWN           = ["Unknown error.", UnknownAPIException, "Unknown error when requesting replay. Please lodge an issue with the devs immediately"]
+    INVALID_KEY       = ["Please provide a valid API key.", InvalidKeyException, "Please provide a valid api key"]
+    UNKNOWN           = ["Unknown error.", UnknownAPIException, "Unknown error when requesting a replay. Please report this "
+                                                                "to the developers at https://github.com/circleguard/circlecore"]
 
 class Mod(Enum):
     NoMod          = NM = 0
