@@ -216,12 +216,21 @@ class Circleguard:
         return ret
 
 
-    def local_check(self, folder, thresh=None, include=None):
+    def local_check(self, folder, map_id=None, u=None, num=None, cache=None, thresh=None, include=None):
         """
         Compares locally stored osr files for replay steals.
 
         Args:
             [Path or String] folder: A pathlike object to the directory containing osr files.
+            Integer map_id: A map id. If passed, the osr files will be compared against the top
+                            plays on this map (50 by default).
+            Integer u: A user id. If both this and map_id are passed, the osr files will be compared
+                       against the user's play on the map. This value has no effect if passed without map_id.
+            Integer num: The number of replays to compare from the map. Defaults to 50, or the config value if changed.
+                         Loads from the top ranks of the leaderboard, so num=20 will compare the top 20 scores. This
+                         number must be between 1 and 100, as restricted by the osu api. This value has no effect
+                         if passed with both u and map_id.
+            Boolean cache: Whether to cache the loaded replays. Defaults to False, or the config value if changed.
             Integer thresh: If a comparison scores below this value, its Result object has ischeat set to True.
                             Defaults to 18, or the config value if changed.
 
@@ -229,20 +238,32 @@ class Circleguard:
             A generator containing Result objects of the comparisons.
         """
 
-        check = self.create_local_check(folder, thresh, include)
+        check = self.create_local_check(folder, map_id, u, num, cache, thresh, include)
         yield from self.run(check)
 
-    def create_local_check(self, folder, thresh=None, include=None):
+    def create_local_check(self, folder, map_id=None, u=None, num=None, cache=None, thresh=None, include=None):
         """
         Creates the Check object used in the local_check convenience method. See that method for more information.
         """
         options = self.options
+        num = num if num else options.num
+        cache = cache if cache else options.cache
         thresh = thresh if thresh else options.thresh
         include = include if include else options.include
 
         paths = [folder / f for f in os.listdir(folder) if isfile(folder / f) and f.endswith(".osr")]
-        replays = [ReplayPath(path) for path in paths]
-        return Check(replays, thresh=thresh, include=include)
+        local_replays = [ReplayPath(path) for path in paths]
+        online_replays = None
+        if map_id:
+            if u:
+                infos = self.loader.user_info(map_id, user_id=u)
+            else:
+                # num guaranteed to be defined, either passed or from settings.
+                infos = self.loader.user_info(map_id, num=num)
+
+            online_replays = [ReplayMap(info.map_id, info.user_id, info.mods, username=info.username) for info in infos]
+
+        return Check(local_replays, replays2=online_replays, thresh=thresh, include=include)
 
     def load(self, check, replay):
         """
