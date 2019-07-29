@@ -290,7 +290,7 @@ class Circleguard:
                           TRACE with a value of 5 (lower than debug, which is 10). The value passed to loglevel is
                           passed directly to the setLevel function of the circleguard root logger. WARNING by default.
                           For more information on log levels, see the standard python logging lib.
-            Function include: A Predicate functrion that returns True if the replay should be loaded, and False otherwise.
+            Function include: A Predicate function that returns True if the replay should be loaded, and False otherwise.
                           The include function will be passed a single argument - the circleguard.Replay object, or one
                           of its subclasses.
         """
