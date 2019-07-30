@@ -1,3 +1,5 @@
+[![PyPi version](https://badge.fury.io/py/circleguard.svg)](https://pypi.org/project/circleparse/)
+
 # Circlecore
 
 Circlecore is the backend of the circleguard project, available as a pip module. If you are looking to download and start using the program circleguard yourself, see [our frontend repository](https://github.com/circleguard/circleguard). If you would like to incorporate circleguard into your own projects, read on.
