@@ -24,7 +24,7 @@ class Check():
                         more details.
     """
 
-    def __init__(self, replays, replays2=None, thresh=None, cache=None, include=None):
+    def __init__(self, replays, replays2=None, cache=None, thresh=None, include=None):
         """
         Initializes a Check instance.
 
@@ -35,9 +35,9 @@ class Check():
         Args:
             List [Replay] replays: A list of Replay objects.
             List [Replay] replays2: A list of Replay objects to compare against 'replays' if passed.
+            Boolean cache: Whether to cache the loaded replays. Defaults to False, or the config value if changed.
             Integer thresh: If a comparison scores below this value, its Result object has ischeat set to True.
                             Defaults to 18, or the config value if changed.
-            Boolean cache: Whether to cache the loaded replays. Defaults to False, or the config value if changed.
         """
 
         self.log = logging.getLogger(__name__ + ".Check")

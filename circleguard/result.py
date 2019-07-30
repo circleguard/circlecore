@@ -3,7 +3,7 @@ class Result():
     """
     Result objects are returned from circleguard#run, and contain the two Replay objects that
     were compared, among other statistics about the comparison. Replay data can be accessed
-    through the replay objects.
+    through the replay1 and replay2 objects.
 
     Attributes:
         Replay replay1: The first replay that was compared against the second.

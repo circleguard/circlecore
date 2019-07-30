@@ -1,7 +1,6 @@
 from logging import Formatter
 from copy import copy
 
-from circleguard.exceptions import InvalidArgumentsException
 from circleguard.enums import Mod
 
 
