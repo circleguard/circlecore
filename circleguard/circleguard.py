@@ -115,11 +115,18 @@ class Circleguard:
 
         self.log.info("Map check with map id %d, u %s, num %s, cache %s, thresh %s", map_id, u, num, cache, thresh)
         replays2 = None
+        replay2_id = None
         if u:
             info = self.loader.user_info(map_id, user_id=u)
+            replay2_id = info.replay_id
             replays2 = [ReplayMap(info.map_id, info.user_id, info.mods, username=info.username)]
         infos = self.loader.user_info(map_id, num=num)
-        replays = [ReplayMap(info.map_id, info.user_id, info.mods, username=info.username) for info in infos]
+        replays = []
+        for info in infos:
+            if info.replay_id == replay2_id:
+                self.log.debug("Removing map %s, user %s, mods %s from check with the same replay id as the user's replay")
+                continue
+            replays.append(ReplayMap(info.map_id, info.user_id, info.mods, username=info.username))
         return Check(replays, replays2=replays2, cache=cache, thresh=thresh, include=include)
 
     def verify(self, map_id, u1, u2, cache=None, thresh=None, include=None):
