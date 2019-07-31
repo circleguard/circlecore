@@ -124,7 +124,8 @@ class Circleguard:
         replays = []
         for info in infos:
             if info.replay_id == replay2_id:
-                self.log.debug("Removing map %s, user %s, mods %s from check with the same replay id as the user's replay")
+                self.log.debug("Removing map %s, user %s, mods %s from map check with "
+                                "the same replay id as the user's replay", info.map_id, info.user_id, info.mods)
                 continue
             replays.append(ReplayMap(info.map_id, info.user_id, info.mods, username=info.username))
         return Check(replays, replays2=replays2, cache=cache, thresh=thresh, include=include)
