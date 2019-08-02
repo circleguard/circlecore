@@ -115,11 +115,19 @@ class Circleguard:
 
         self.log.info("Map check with map id %d, u %s, num %s, cache %s, thresh %s", map_id, u, num, cache, thresh)
         replays2 = None
+        replay2_id = None
         if u:
             info = self.loader.user_info(map_id, user_id=u)
+            replay2_id = info.replay_id
             replays2 = [ReplayMap(info.map_id, info.user_id, info.mods, username=info.username)]
         infos = self.loader.user_info(map_id, num=num)
-        replays = [ReplayMap(info.map_id, info.user_id, info.mods, username=info.username) for info in infos]
+        replays = []
+        for info in infos:
+            if info.replay_id == replay2_id:
+                self.log.debug("Removing map %s, user %s, mods %s from map check with "
+                                "the same replay id as the user's replay", info.map_id, info.user_id, info.mods)
+                continue
+            replays.append(ReplayMap(info.map_id, info.user_id, info.mods, username=info.username))
         return Check(replays, replays2=replays2, cache=cache, thresh=thresh, include=include)
 
     def verify(self, map_id, u1, u2, cache=None, thresh=None, include=None):
@@ -210,12 +218,19 @@ class Circleguard:
         ret = []
         for map_id in self.loader.get_user_best(u, num_top):
             info = self.loader.user_info(map_id, user_id=u)
+            ureplay_id = info.replay_id # user replay id
             if not info.replay_available:
                 continue  # if we can't download the user's replay on the map, we have nothing to compare against
             user_replay = [ReplayMap(info.map_id, info.user_id, mods=info.mods, username=info.username)]
 
             infos = self.loader.user_info(map_id, num=num_users)
-            replays = [ReplayMap(info.map_id, info.user_id, mods=info.mods, username=info.username) for info in infos]
+            replays = []
+            for info in infos:
+                if info.replay_id == ureplay_id:
+                    self.log.debug("Removing map %s, user %s, mods %s from user check with "
+                                   "the same replay id as the user's replay", info.map_id, info.user_id, info.mods)
+                    continue
+                replays.append(ReplayMap(info.map_id, info.user_id, info.mods, username=info.username))
 
             remod_replays = []
             for info in self.loader.user_info(map_id, user_id=u, limit=False)[1:]:

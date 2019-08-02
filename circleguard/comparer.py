@@ -64,8 +64,8 @@ class Comparer:
         """
 
         self.log.info("Comparing replays with mode: %s", mode)
-        self.log.log(utils.TRACE, "replays1: %s", self.replays1)
-        self.log.log(utils.TRACE, "replays2: %s", self.replays2)
+        self.log.debug("replays1: %s", self.replays1)
+        self.log.debug("replays2: %s", self.replays2)
 
         #TODO: a little bit hacky and I don't think works 100% correctly, if mode is double but replays2 is None
         if(not self.replays1 or self.replays2 == []):

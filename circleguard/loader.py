@@ -143,8 +143,8 @@ class Loader():
         self.log.log(TRACE, "Loading user info on map %d with options %s",
                             map_id, {k: locals_[k] for k in locals_ if k != 'self'})
 
-        if(num and (num > 100 or num < 2)):
-            raise InvalidArgumentsException("The number of top plays to fetch must be between 2 and 100 inclusive!")
+        if(num and (num > 100 or num < 1)):
+            raise InvalidArgumentsException("The number of top plays to fetch must be between 1 and 100 inclusive!")
 
         if(not bool(user_id) ^ bool(num)):
             raise InvalidArgumentsException("One of either num or user_id must be passed, but not both")
