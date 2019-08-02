@@ -251,14 +251,14 @@ class ReplayMap(Replay):
         The superclass Replay is initialized after this call, setting replay.loaded to True. Multiple
         calls to this method will have no effect beyond the first.
         """
-        self.log.debug("Loading ReplayMap for user %d on map %d with mods %d", self.user_id, self.map_id, self.mods)
+        self.log.debug("Loading %r", self)
         if(self.loaded):
-            self.log.debug("ReplayMap already loaded, not loading")
+            self.log.debug("%s already loaded, not loading", self)
             return
         info = loader.user_info(self.map_id, user_id=self.user_id, mods=self.mods)
         replay_data = loader.replay_data(info, cache=cache)
         Replay.__init__(self, self.username, info.mods, info.replay_id, replay_data, self.detect, self.weight)
-        self.log.log(TRACE, "Finished loading ReplayMap")
+        self.log.log(TRACE, "Finished loading %s", self)
 
 
 class ReplayPath(Replay):
@@ -323,11 +323,11 @@ class ReplayPath(Replay):
         The cache argument here currently has no effect, and is only added for homogeneity with ReplayMap#load.
         """
 
-        self.log.debug("Loading ReplayPath with path %s", self.path)
+        self.log.debug("Loading ReplayPath %r", self)
         if(self.loaded):
-            self.log.debug("ReplayPath already loaded, not loading")
+            self.log.debug("%s already loaded, not loading", self)
             return
         # no, we don't need loader for ReplayPath, but to reduce type checking when calling we make the method signatures homogeneous
         loaded = circleparse.parse_replay_file(self.path)
         Replay.__init__(self, loaded.player_name, loaded.mod_combination, loaded.replay_id, loaded.play_data, self.detect, self.weight)
-        self.log.log(TRACE, "Finished loading ReplayPath")
+        self.log.log(TRACE, "Finished loading %s", self)
