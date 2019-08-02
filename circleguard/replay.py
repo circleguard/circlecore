@@ -238,7 +238,7 @@ class ReplayMap(Replay):
 
     def __repr__(self):
         return (f"ReplayMap(map_id={self.map_id},user_id={self.user_id},mods={self.mods},detect={self.detect},"
-                f"{f'replay_id={self.replay_id}' if self.loaded else ''},weight={self.weight},loaded={self.loaded},"
+                f"{f'replay_id={self.replay_id},' if self.loaded else ''}weight={self.weight},loaded={self.loaded},"
                 f"username={self.username})")
 
     def __str__(self):
