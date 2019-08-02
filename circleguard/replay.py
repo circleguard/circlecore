@@ -141,6 +141,10 @@ class Replay(abc.ABC):
         self.weight = weight
         self.loaded = True
 
+    def __repr__(self):
+        return (f"Replay(mods={self.mods},detect={self.detect},replay_id={self.replay_id},"
+               f"weight={self.weight},loaded={self.loaded},username={self.username})")
+
     def __str__(self):
         return f"Replay by {self.username}"
 
@@ -232,6 +236,11 @@ class ReplayMap(Replay):
         self.loaded = False
         self.username = username if username else user_id
 
+    def __repr__(self):
+        return (f"ReplayMap(map_id={self.map_id},user_id={self.user_id},mods={self.mods},detect={self.detect},"
+                f"{f'replay_id={self.replay_id}' if self.loaded else ''},weight={self.weight},loaded={self.loaded},"
+                f"username={self.username})")
+
     def __str__(self):
         return f"{'Loaded' if self.loaded else 'Unloaded'} ReplayMap by {self.username} on {self.map_id}"
 
@@ -289,6 +298,13 @@ class ReplayPath(Replay):
         self.detect = detect
         self.weight = RatelimitWeight.HEAVY
         self.loaded = False
+
+    def __repr__(self):
+        if self.loaded:
+            return (f"ReplayPath(path={self.path},mods={self.mods},detect={self.detect},replay_id={self.replay_id},"
+                    f"weight={self.weight},loaded={self.loaded},username={self.username})")
+        else:
+            return f"ReplayPath(path={self.path},detect={self.detect},weight={self.weight},loaded={self.loaded})"
 
     def __str__(self):
         if self.loaded:
