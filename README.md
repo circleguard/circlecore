@@ -1,4 +1,4 @@
-[![PyPi version](https://badge.fury.io/py/circleguard.svg)](https://pypi.org/project/circleparse/)
+[![PyPi version](https://badge.fury.io/py/circleguard.svg)](https://pypi.org/project/circleguard/)
 
 # Circlecore
 
