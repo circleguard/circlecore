@@ -141,6 +141,8 @@ class Replay(abc.ABC):
         self.weight = weight
         self.loaded = True
 
+    def __str__(self):
+        return f"Replay by {self.username}"
 
     @abc.abstractclassmethod
     def load(self, loader, cache):
@@ -230,6 +232,9 @@ class ReplayMap(Replay):
         self.loaded = False
         self.username = username if username else user_id
 
+    def __str__(self):
+        return f"{'Loaded' if self.loaded else 'Unloaded'} ReplayMap by {self.username} on {self.map_id}"
+
     def load(self, loader, cache=None):
         """
         Loads the data for this replay from the api. This method silently returns if replay.loaded is True.
@@ -284,6 +289,12 @@ class ReplayPath(Replay):
         self.detect = detect
         self.weight = RatelimitWeight.HEAVY
         self.loaded = False
+
+    def __str__(self):
+        if self.loaded:
+            return f"Loaded ReplayPath by {self.username} at {self.path}"
+        else:
+            return f"Unloaded ReplayPath at {self.path}"
 
     def load(self, loader, cache=None):
         """
