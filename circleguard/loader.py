@@ -4,6 +4,7 @@ import base64
 import sys
 import logging
 from math import ceil
+from lzma import LZMAError
 
 from requests import RequestException
 import circleparse
@@ -236,7 +237,13 @@ class Loader():
         if(lzma_bytes is None):
             raise UnknownAPIException("The api guaranteed there would be a replay available, but we did not receive any data. "
                                      "Please report this to the devs, who will open an issue on osu!api if necessary.")
-        parsed_replay = circleparse.parse_replay(lzma_bytes, pure_lzma=True)
+        try:
+            parsed_replay = circleparse.parse_replay(lzma_bytes, pure_lzma=True)
+        # see https://github.com/circleguard/circlecore/issues/61
+        # api sometimes returns corrupt replays
+        except LZMAError:
+            self.log.warning("lzma from %r could not be decompressed, api returned corrupt replay", user_info)
+            return None
         replay_data = parsed_replay.play_data
         self.cacher.cache(lzma_bytes, user_info, should_cache=cache)
         return replay_data
