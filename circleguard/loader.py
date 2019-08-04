@@ -241,6 +241,20 @@ class Loader():
         self.cacher.cache(lzma_bytes, user_info, should_cache=cache)
         return replay_data
 
+    def map_id(self, map_hash):
+        """
+        Retrieves the corresponding map id for the given map_hash from the api.
+
+        Returns:
+            The corresponding map id, or 0 if the api returned no matches.
+        """
+
+        response = self.api.get_beatmaps({"h": map_hash})
+        if response == []:
+            return 0
+        else:
+            return int(response[0]["beatmap_id"])
+
     @staticmethod
     def check_response(response):
         """
