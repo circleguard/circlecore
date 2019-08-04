@@ -67,10 +67,10 @@ class Check():
         """
 
         if(self.include(replay)):
-            self.log.log(TRACE, "Replay passed include(), keeping in Check replays")
+            self.log.log(TRACE, "%r passed include(), keeping in Check replays", replay)
             return True
         else:
-            self.log.debug("Replay failed include(), filtering from Check replays")
+            self.log.debug("%r failed include(), filtering from Check replays", replay)
             return False
 
     def load(self, loader):
