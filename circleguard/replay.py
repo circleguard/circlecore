@@ -283,7 +283,7 @@ class ReplayPath(Replay):
                                 documentation for more information.
     """
 
-    def __init__(self, path, detect=Detect.ALL):
+    def __init__(self, path, detect=Detect.ALL, load_map_id=False):
         """
         Initializes a ReplayPath instance.
 
@@ -291,6 +291,10 @@ class ReplayPath(Replay):
             [String or Path] path: A pathlike object representing the absolute path to the osr file.
             Detect detect: The Detect enum (or bitwise combination of enums), indicating what types of cheats this
                            replay should be investigated or compared for.
+            Boolean load_map_id: Whether to get the map id of this osr from the api. If True, the Circleguard instance
+                                 will need to have been initialized with a valid api key and the application must have
+                                 internet connection. Neither of these things are strictly true, though implied by
+                                 documentation, if you only load and compare local replays.
         """
 
         self.log = logging.getLogger(__name__ + ".ReplayPath")
@@ -298,17 +302,19 @@ class ReplayPath(Replay):
         self.detect = detect
         self.weight = RatelimitWeight.HEAVY
         self.loaded = False
+        self.load_map_id = load_map_id
+        self.map_id = None
 
     def __repr__(self):
         if self.loaded:
-            return (f"ReplayPath(path={self.path},mods={self.mods},detect={self.detect},replay_id={self.replay_id},"
-                    f"weight={self.weight},loaded={self.loaded},username={self.username})")
+            return (f"ReplayPath(path={self.path},map_id={self.map_id},mods={self.mods},detect={self.detect},"
+                    f"replay_id={self.replay_id},weight={self.weight},loaded={self.loaded},username={self.username})")
         else:
             return f"ReplayPath(path={self.path},detect={self.detect},weight={self.weight},loaded={self.loaded})"
 
     def __str__(self):
         if self.loaded:
-            return f"Loaded ReplayPath by {self.username} at {self.path}"
+            return f"Loaded ReplayPath by {self.username} on {self.map_id} at {self.path}"
         else:
             return f"Unloaded ReplayPath at {self.path}"
 
@@ -327,7 +333,11 @@ class ReplayPath(Replay):
         if(self.loaded):
             self.log.debug("%s already loaded, not loading", self)
             return
-        # no, we don't need loader for ReplayPath, but to reduce type checking when calling we make the method signatures homogeneous
+
         loaded = circleparse.parse_replay_file(self.path)
+        self.map_hash = loaded.beatmap_hash
+        if self.load_map_id:
+            self.map_id = loader.map_id(self.map_hash)
+
         Replay.__init__(self, loaded.player_name, loaded.mod_combination, loaded.replay_id, loaded.play_data, self.detect, self.weight)
         self.log.log(TRACE, "Finished loading %s", self)
