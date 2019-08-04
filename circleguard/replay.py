@@ -283,7 +283,7 @@ class ReplayPath(Replay):
                                 documentation for more information.
     """
 
-    def __init__(self, path, detect=Detect.ALL, load_map_id=False):
+    def __init__(self, path, detect=Detect.ALL, load_map_id=None):
         """
         Initializes a ReplayPath instance.
 
@@ -302,7 +302,7 @@ class ReplayPath(Replay):
         self.detect = detect
         self.weight = RatelimitWeight.HEAVY
         self.loaded = False
-        self.load_map_id = load_map_id
+        self.load_map_id = load_map_id if load_map_id is not None else config.load_osr_map_id
         self.map_id = None
 
     def __repr__(self):
