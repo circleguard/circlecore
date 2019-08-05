@@ -316,6 +316,11 @@ class Loader():
         # sleep the remainder of the reset cycle so we guarantee it's been that long since the first request
         sleep_seconds = Loader.RATELIMIT_RESET - seconds_passed
 
-        self.log.info("Ratelimited, sleeping for %s seconds. %d of %d replays loaded. "
-            "ETA ~ %d min", sleep_seconds, self.loaded, self.total, ceil((self.total-self.loaded)/10))
+        if self.total is None:
+            self.log.info("Ratelimited, sleeping for %s seconds. %d of ? replays loaded. "
+                "ETA ~ ? min", sleep_seconds, self.loaded)
+        else:
+            self.log.info("Ratelimited, sleeping for %s seconds. %d of %d replays loaded. "
+                "ETA ~ %d min", sleep_seconds, self.loaded, self.total, ceil((self.total-self.loaded)/10))
+
         time.sleep(sleep_seconds)
