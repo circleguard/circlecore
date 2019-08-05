@@ -317,8 +317,9 @@ class Loader():
         sleep_seconds = Loader.RATELIMIT_RESET - seconds_passed
 
         if self.total is None:
-            self.log.info("Ratelimited, sleeping for %s seconds. %d of ? replays loaded. "
-                "ETA ~ ? min", sleep_seconds, self.loaded)
+            # occurs when calling light functions (user_info, get_user_best, etc)
+            # without #new_session being called when the key is ratelimited.
+            self.log.info("Ratelimited, sleeping for %s seconds.", sleep_seconds)
         else:
             self.log.info("Ratelimited, sleeping for %s seconds. %d of %d replays loaded. "
                 "ETA ~ %d min", sleep_seconds, self.loaded, self.total, ceil((self.total-self.loaded)/10))
