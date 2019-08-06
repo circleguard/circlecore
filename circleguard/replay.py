@@ -109,31 +109,36 @@ class Check():
 
 
 class Replay(abc.ABC):
-    def __init__(self, username, mods, replay_id, replay_data, detect, weight):
+    def __init__(self, timestamp, map_id, username, user_id, mods, replay_id, replay_data, detect, weight):
         """
         Initializes a Replay instance.
 
         Args:
-            String username: The username of the player who made the replay. Whether or not this is their true username
-                             has no effect - this field is used to represent the player more readably than their id.
+            Datetime timestamp: When this replay was played.
+            Integer map_id: The map id the replay was played on, or 0 if unknown or on an unsubmitted map.
+            String username: The username of the player who made the replay.
+            Integer user_id: The id of the player who made the replay, or 0 if unknown..]
             Integer mods: The mods the replay was played with.
-            Integer replay_id: The id of this replay, or 0 if it does not have an id (unsubmitted replays have no id)
-            circleparse.Replay replay_data: A circleparse Replay containing the replay data for this replay. If the replay data is not available
-                                         (from the api or otherwise), this field should be None. This means that this replay will not be
-                                         compared against other replays or investigated for cheats.
+            Integer replay_id: The id of this replay, or 0 if it does not have an id (unsubmitted replays have no id).
+            List [circleparse.Replay.ReplayEvent] replay_data: An array containing objects with the attributes x, y, time_since_previous_action,
+                            and keys_pressed. If the replay could not be loaded (from the api or otherwise), this field should be None.
+                            This means that this replay will not be compared against other replays or investigated for cheats.
             Detect detect: The Detect enum (or bitwise combination of enums), indicating what types of cheats this
-                           replay should be investigated or compared for.
+                            replay should be investigated or compared for.
             RatelimitWeight weight: How much it 'costs' to load this replay from the api. If the load method of the replay makes no api calls,
-                             this value is RatelimitWeight.NONE. If it makes only light api calls (anything but get_replay), this value is
-                             RatelimitWeight.LIGHT. If it makes any heavy api calls (get_replay), this value is RatelimitWeight.HEAVY.
-                             This value is used internally to determine how long the loader class will have to spend loading replays -
-                             currently LIGHT and NONE are treated the same, and only HEAVY values are counted towards replays to load. Note
-                             that this has no effect on the comparisons or internal program implementation - it only affects log messages
-                             internally, and if you access circleguard#loader#total, it modifies that value as well. See Loader#new_session
-                             for more details.
+                            this value is RatelimitWeight.NONE. If it makes only light api calls (anything but get_replay), this value is
+                            RatelimitWeight.LIGHT. If it makes any heavy api calls (get_replay), this value is RatelimitWeight.HEAVY.
+                            This value is used internally to determine how long the loader class will have to spend loading replays -
+                            currently LIGHT and NONE are treated the same, and only HEAVY values are counted towards replays to load. Note
+                            that this has no effect on the comparisons or internal program implementation - it only affects log messages
+                            internally, and if you access circleguard#loader#total, it modifies that value as well. See Loader#new_session
+                            for more details.
         """
 
+        self.timestamp = timestamp
+        self.map_id = map_id
         self.username = username
+        self.user_id = user_id
         self.mods = mods
         self.replay_id = replay_id
         self.replay_data = replay_data
@@ -142,11 +147,11 @@ class Replay(abc.ABC):
         self.loaded = True
 
     def __repr__(self):
-        return (f"Replay(mods={self.mods},detect={self.detect},replay_id={self.replay_id},"
-               f"weight={self.weight},loaded={self.loaded},username={self.username})")
+        return (f"Replay(timestamp={self.timestamp},map_id={self.map_id},user_id={self.user_id},mods={self.mods},detect={self.detect},"
+               f"replay_id={self.replay_id},weight={self.weight},loaded={self.loaded},username={self.username})")
 
     def __str__(self):
-        return f"Replay by {self.username}"
+        return f"Replay by {self.username} on {self.map_id}"
 
     @abc.abstractclassmethod
     def load(self, loader, cache):
@@ -237,9 +242,14 @@ class ReplayMap(Replay):
         self.username = username if username else user_id
 
     def __repr__(self):
-        return (f"ReplayMap(map_id={self.map_id},user_id={self.user_id},mods={self.mods},detect={self.detect},"
-                f"{f'replay_id={self.replay_id},' if self.loaded else ''}weight={self.weight},loaded={self.loaded},"
+        if self.loaded:
+            return(f"ReplayMap(timestamp={self.timestamp},map_id={self.map_id},user_id={self.user_id},mods={self.mods},"
+                f"detect={self.detect},replay_id={self.replay_id},weight={self.weight},loaded={self.loaded},"
                 f"username={self.username})")
+
+        else:
+            return (f"ReplayMap(map_id={self.map_id},user_id={self.user_id},mods={self.mods},detect={self.detect},"
+                f"weight={self.weight},loaded={self.loaded},username={self.username})")
 
     def __str__(self):
         return f"{'Loaded' if self.loaded else 'Unloaded'} ReplayMap by {self.username} on {self.map_id}"
@@ -257,7 +267,7 @@ class ReplayMap(Replay):
             return
         info = loader.user_info(self.map_id, user_id=self.user_id, mods=self.mods)
         replay_data = loader.replay_data(info, cache=cache)
-        Replay.__init__(self, self.username, info.mods, info.replay_id, replay_data, self.detect, self.weight)
+        Replay.__init__(self, info.timestamp, self.map_id, self.username, self.user_id, info.mods, info.replay_id, replay_data, self.detect, self.weight)
         self.log.log(TRACE, "Finished loading %s", self)
 
 
@@ -265,13 +275,10 @@ class ReplayPath(Replay):
     """
     Represents a Replay saved locally.
 
-    To instantiate a ReplayPath, you only need to know the path to the osr file. This class has significant
-    advantages compared to a ReplayMap - the username is immediately available from the replay, instead of requiring
-    an extra api call. The time it takes to load the replay is also significantly less – especially if you factor in
-    ratelimits – because there is no need to make a request to the api to retrieve the replay data, only read an osr
-    file.
-
-    Of course, to reap those benefits, it requires having the replay already downloaded, which isn't always ideal.
+    To instantiate a ReplayPath, you only need to know the path to the osr file. Although this class still
+    loads some information from the api - like the map id and the user id - no RatelimitWeight.HEAVY calls
+    are made, making this a relatively light replay to load. Of course, the replay has to already be downloaded
+    to instantiate this class, sometimes making it less than ideal.
 
     Attributes:
         [String or Path] path: A pathlike object representing the absolute path to the osr file.
@@ -279,11 +286,11 @@ class ReplayPath(Replay):
                        replay should be investigated or compared for.
         Boolean loaded: Whether this replay has been loaded. If True, calls to #load will have no effect.
                         See #load for more information.
-        RatelimitWeight weight: RatelimitWeight.NONE, as this class' load method makes no api calls. See RatelimitWeight
-                                documentation for more information.
+        RatelimitWeight weight: RatelimitWeight.LIGHT, as this class' load method makes only light api calls.
+                                See RatelimitWeight documentation for more information.
     """
 
-    def __init__(self, path, detect=Detect.ALL, load_map_id=None):
+    def __init__(self, path, detect=Detect.ALL):
         """
         Initializes a ReplayPath instance.
 
@@ -291,19 +298,13 @@ class ReplayPath(Replay):
             [String or Path] path: A pathlike object representing the absolute path to the osr file.
             Detect detect: The Detect enum (or bitwise combination of enums), indicating what types of cheats this
                            replay should be investigated or compared for.
-            Boolean load_map_id: Whether to get the map id of this osr from the api. If True, the Circleguard instance
-                                 will need to have been initialized with a valid api key and the application must have
-                                 internet connection. Neither of these things are strictly true, though implied by
-                                 documentation, if you only load and compare local replays.
         """
 
         self.log = logging.getLogger(__name__ + ".ReplayPath")
         self.path = path
         self.detect = detect
-        self.weight = RatelimitWeight.HEAVY
+        self.weight = RatelimitWeight.LIGHT
         self.loaded = False
-        self.load_map_id = load_map_id if load_map_id is not None else config.load_osr_map_id
-        self.map_id = None
 
     def __repr__(self):
         if self.loaded:
@@ -335,9 +336,9 @@ class ReplayPath(Replay):
             return
 
         loaded = circleparse.parse_replay_file(self.path)
-        self.map_hash = loaded.beatmap_hash
-        if self.load_map_id:
-            self.map_id = loader.map_id(self.map_hash)
+        map_id = loader.map_id(loaded.beatmap_hash)
+        user_id = loader.user_id(loaded.player_name)
 
-        Replay.__init__(self, loaded.player_name, loaded.mod_combination, loaded.replay_id, loaded.play_data, self.detect, self.weight)
+        Replay.__init__(self, loaded.timestamp, map_id, loaded.player_name, user_id, loaded.mod_combination,
+                        loaded.replay_id, loaded.play_data, self.detect, self.weight)
         self.log.log(TRACE, "Finished loading %s", self)
