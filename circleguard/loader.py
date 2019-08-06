@@ -124,8 +124,8 @@ class Loader():
     def user_info(self, map_id, num=None, user_id=None, mods=None, limit=True):
         """
         Returns a list of UserInfo objects containing a user's
-        (user_id, username, replay_id, enabled mods, replay available)
-        on a given map.
+        (timestamp, map_id, user_id, username, replay_id, mods, replay_available)
+        on the given map.
 
         If limit and user_id is set, it will return a single UserInfo object, not a list.
 
@@ -152,8 +152,10 @@ class Loader():
 
         response = self.api.get_scores({"m": "0", "b": map_id, "limit": num, "u": user_id, "mods": mods})
         Loader.check_response(response)
-                                                                    # yes, it's necessary to cast the str response to int before bool - all strings are truthy.
-        infos = [UserInfo(map_id, int(x["user_id"]), str(x["username"]), int(x["score_id"]), int(x["enabled_mods"]), bool(int(x["replay_available"]))) for x in response]
+        # yes, it's necessary to cast the str response to int before bool - all strings are truthy.
+        # strptime format from https://github.com/ppy/osu-api/wiki#apiget_scores
+        infos = [UserInfo(datetime.strptime(x["date"], "%Y-%m-%d %H:%M:%S"), map_id, int(x["user_id"]), str(x["username"]), int(x["score_id"]),
+                          int(x["enabled_mods"]), bool(int(x["replay_available"]))) for x in response]
 
         return infos[0] if (limit and user_id) else infos # limit only applies if user_id was set
 
@@ -261,6 +263,23 @@ class Loader():
             return 0
         else:
             return int(response[0]["beatmap_id"])
+
+    def user_id(self, username):
+        """
+        Retrieves the corresponding user id for the given username from the api.
+        Note that the api currently has no method to keep track of name changes,
+        meaning this method will return 0 for previous usernames of a user, rather
+        than their true id.
+
+        Returns:
+            The corresponding user id, or 0 if the api returned no matches.
+        """
+
+        response = self.api.get_user({"u": username, "type": "string"})
+        if response == []:
+            return 0
+        else:
+            return int(response[0]["user_id"])
 
     @staticmethod
     def check_response(response):
