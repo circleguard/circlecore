@@ -27,7 +27,6 @@ class Investigator:
             for j in hitobjs:
                 if i > j-(hitwindow/2) and i < j+(hitwindow/2):
                     diff = j-i
-                    diff = diff if diff > 0 else diff
                     diff.append(diff)
 
         return np.std(diff)*10
