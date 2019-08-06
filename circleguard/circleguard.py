@@ -271,7 +271,7 @@ class Circleguard:
         check = self.create_local_check(folder, map_id, u, num, cache, thresh, include)
         yield from self.run(check)
 
-    def create_local_check(self, folder, map_id=None, u=None, num=None, cache=None, thresh=None, include=None, load_map_id=None):
+    def create_local_check(self, folder, map_id=None, u=None, num=None, cache=None, thresh=None, include=None):
         """
         Creates the Check object used in the local_check convenience method. See that method for more information.
         """
@@ -280,10 +280,9 @@ class Circleguard:
         cache = cache if cache is not None else options.cache
         thresh = thresh if thresh is not None else options.thresh
         include = include if include is not None else options.include
-        load_map_id = load_map_id if load_map_id is not None else options.load_osr_map_id
 
         paths = [folder / f for f in os.listdir(folder) if isfile(folder / f) and f.endswith(".osr")]
-        local_replays = [ReplayPath(path, load_map_id=load_map_id) for path in paths]
+        local_replays = [ReplayPath(path) for path in paths]
         online_replays = None
         if map_id:
             if u:
@@ -306,7 +305,7 @@ class Circleguard:
         """
         replay.load(self.loader, check.cache)
 
-    def set_options(self, thresh=None, num=None, cache=None, failfast=None, loglevel=None, include=None, load_osr_map_id=None):
+    def set_options(self, thresh=None, num=None, cache=None, failfast=None, loglevel=None, include=None):
         """
         Changes the default value for different options in circleguard.
         Affects only the ircleguard instance this method is called on.
@@ -324,9 +323,6 @@ class Circleguard:
             Function include: A Predicate function that returns True if the replay should be loaded, and False otherwise.
                           The include function will be passed a single argument - the circleguard.Replay object, or one
                           of its subclasses.
-            Boolean load_osr_map_id: Whether to load the map id of the osr from the api. If True, local loading and comparisons
-                                     will need a valid api key passed to circleguard and an internet connection, neither of which
-                                     were formally required (although heavily implied as necessary) when only loading locally.
         """
 
         for k, v in locals().items():
@@ -340,7 +336,7 @@ class Circleguard:
             else:  # this only happens if we fucked up, not the user's fault
                 raise CircleguardException(f"The key {k} (value {v}) is not available as a config option for a circleguard instance")
 
-def set_options(thresh=None, num=None, cache=None, failfast=None, loglevel=None, include=None, load_osr_map_id=None):
+def set_options(thresh=None, num=None, cache=None, failfast=None, loglevel=None, include=None):
     """
     Changes the default value for different options in circleguard.
     Affects all circleguard instances, even ones that have already been instantiated.
@@ -358,9 +354,6 @@ def set_options(thresh=None, num=None, cache=None, failfast=None, loglevel=None,
         Function include: A Predicate functrion that returns True if the replay should be loaded, and False otherwise.
                           The include function will be passed a single argument - the circleguard.Replay object, or one
                           of its subclasses.
-        Boolean load_osr_map_id: Whether to load the map id of the osr from the api. If True, local loading and comparisons
-                                 will need a valid api key passed to circleguard and an internet connection, neither of which
-                                 were formally required (although heavily implied as necessary) when only loading locally.
     """
 
     for k, v in locals().items():
@@ -408,7 +401,3 @@ class Options():
     @property
     def include(self):
         return config.include
-
-    @property
-    def load_osr_map_id(self):
-        return config.load_osr_map_id
