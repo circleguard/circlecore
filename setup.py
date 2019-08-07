@@ -28,7 +28,7 @@ setup(
     packages=find_packages(),
     install_requires=[
         "circleparse >= 5.0.1",
-        "ossapi >= 1.2.0",
+        "ossapi >= 1.2.1",
         "wtc >= 1.1.3",
         "numpy",
         "requests"
