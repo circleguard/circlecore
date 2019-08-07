@@ -1,6 +1,8 @@
 from enum import Enum, Flag
 
-from circleguard.exceptions import UnknownAPIException, RatelimitException, InvalidKeyException, ReplayUnavailableException
+from circleguard.exceptions import (UnknownAPIException, RatelimitException,
+                InvalidKeyException, ReplayUnavailableException, InvalidJSONException)
+
 # strings taken from osu api error responses
 # [api response, exception class type, details to pass to an exception]
 class Error(Enum):
@@ -8,6 +10,7 @@ class Error(Enum):
     RATELIMITED       = ["Requesting too fast! Slow your operation, cap'n!", RatelimitException, "We were ratelimited. Waiting it out"]
     RETRIEVAL_FAILED  = ["Replay retrieval failed.", ReplayUnavailableException, "Replay retrieval failed. Skipping"]
     INVALID_KEY       = ["Please provide a valid API key.", InvalidKeyException, "Please provide a valid api key"]
+    INVALID_JSON      = ["The api broke.", InvalidJSONException, "The api returned an invalid json response, retrying"]
     UNKNOWN           = ["Unknown error.", UnknownAPIException, "Unknown error when requesting a replay. Please report this "
                                                                 "to the developers at https://github.com/circleguard/circlecore"]
 

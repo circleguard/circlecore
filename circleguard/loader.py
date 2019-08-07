@@ -14,7 +14,8 @@ from circleguard.replay import ReplayMap
 from circleguard.user_info import UserInfo
 from circleguard.enums import Error
 from circleguard.exceptions import (InvalidArgumentsException, APIException, CircleguardException,
-                        RatelimitException, InvalidKeyException, ReplayUnavailableException, UnknownAPIException)
+                        RatelimitException, InvalidKeyException, ReplayUnavailableException, UnknownAPIException,
+                        InvalidJSONException)
 from circleguard.utils import TRACE
 
 def request(function):
@@ -39,6 +40,10 @@ def request(function):
         except RatelimitException:
             self._enforce_ratelimit()
             # wrap function with the decorator then call decorator
+            ret = request(function)(*args, **kwargs)
+        except InvalidJSONException as e:
+            self.log.warning("Invalid json exception: {}. API likely having issues; sleeping for 3 seconds then retrying".format(e))
+            time.sleep(3)
             ret = request(function)(*args, **kwargs)
         except InvalidKeyException as e:
             raise CircleguardException("The given key is invalid")
