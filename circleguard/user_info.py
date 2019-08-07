@@ -6,11 +6,12 @@ class UserInfo():
     A container class, holding a user's map id, user id, username, replay id, enabled mods, and replay availability for a given replay.
     """
 
-    def __init__(self, map_id, user_id, username, replay_id, mods, replay_available):
+    def __init__(self, timestamp, map_id, user_id, username, replay_id, mods, replay_available):
         """
         Initializes a UserInfo class.
 
         Args:
+            Datetime timestamp: When this replay was set.
             Integer map_id: The id of the map the replay was made on.
             Integer user_id: The id of the player who set the replay.
             String username: The username of the player who set the replay.
@@ -19,6 +20,7 @@ class UserInfo():
             Boolean replay_available: Whether this replay is available from the api or not.
         """
 
+        self.timestamp = timestamp
         self.map_id = map_id
         self.user_id = user_id
         self.username = username

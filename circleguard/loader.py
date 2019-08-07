@@ -4,6 +4,7 @@ import base64
 import sys
 import logging
 from math import ceil
+from lzma import LZMAError
 
 from requests import RequestException
 import circleparse
@@ -123,8 +124,8 @@ class Loader():
     def user_info(self, map_id, num=None, user_id=None, mods=None, limit=True):
         """
         Returns a list of UserInfo objects containing a user's
-        (user_id, username, replay_id, enabled mods, replay available)
-        on a given map.
+        (timestamp, map_id, user_id, username, replay_id, mods, replay_available)
+        on the given map.
 
         If limit and user_id is set, it will return a single UserInfo object, not a list.
 
@@ -151,8 +152,10 @@ class Loader():
 
         response = self.api.get_scores({"m": "0", "b": map_id, "limit": num, "u": user_id, "mods": mods})
         Loader.check_response(response)
-                                                                    # yes, it's necessary to cast the str response to int before bool - all strings are truthy.
-        infos = [UserInfo(map_id, int(x["user_id"]), str(x["username"]), int(x["score_id"]), int(x["enabled_mods"]), bool(int(x["replay_available"]))) for x in response]
+        # yes, it's necessary to cast the str response to int before bool - all strings are truthy.
+        # strptime format from https://github.com/ppy/osu-api/wiki#apiget_scores
+        infos = [UserInfo(datetime.strptime(x["date"], "%Y-%m-%d %H:%M:%S"), map_id, int(x["user_id"]), str(x["username"]), int(x["score_id"]),
+                          int(x["enabled_mods"]), bool(int(x["replay_available"]))) for x in response]
 
         return infos[0] if (limit and user_id) else infos # limit only applies if user_id was set
 
@@ -236,10 +239,47 @@ class Loader():
         if(lzma_bytes is None):
             raise UnknownAPIException("The api guaranteed there would be a replay available, but we did not receive any data. "
                                      "Please report this to the devs, who will open an issue on osu!api if necessary.")
-        parsed_replay = circleparse.parse_replay(lzma_bytes, pure_lzma=True)
+        try:
+            parsed_replay = circleparse.parse_replay(lzma_bytes, pure_lzma=True)
+        # see https://github.com/circleguard/circlecore/issues/61
+        # api sometimes returns corrupt replays
+        except LZMAError:
+            self.log.warning("lzma from %r could not be decompressed, api returned corrupt replay", user_info)
+            return None
         replay_data = parsed_replay.play_data
         self.cacher.cache(lzma_bytes, user_info, should_cache=cache)
         return replay_data
+
+    def map_id(self, map_hash):
+        """
+        Retrieves the corresponding map id for the given map_hash from the api.
+
+        Returns:
+            The corresponding map id, or 0 if the api returned no matches.
+        """
+
+        response = self.api.get_beatmaps({"h": map_hash})
+        if response == []:
+            return 0
+        else:
+            return int(response[0]["beatmap_id"])
+
+    def user_id(self, username):
+        """
+        Retrieves the corresponding user id for the given username from the api.
+        Note that the api currently has no method to keep track of name changes,
+        meaning this method will return 0 for previous usernames of a user, rather
+        than their true id.
+
+        Returns:
+            The corresponding user id, or 0 if the api returned no matches.
+        """
+
+        response = self.api.get_user({"u": username, "type": "string"})
+        if response == []:
+            return 0
+        else:
+            return int(response[0]["user_id"])
 
     @staticmethod
     def check_response(response):
@@ -276,6 +316,12 @@ class Loader():
         # sleep the remainder of the reset cycle so we guarantee it's been that long since the first request
         sleep_seconds = Loader.RATELIMIT_RESET - seconds_passed
 
-        self.log.info("Ratelimited, sleeping for %s seconds. %d of %d replays loaded. "
-            "ETA ~ %d min", sleep_seconds, self.loaded, self.total, ceil((self.total-self.loaded)/10))
+        if self.total is None:
+            # occurs when calling light functions (user_info, get_user_best, etc)
+            # without #new_session being called when the key is ratelimited.
+            self.log.info("Ratelimited, sleeping for %s seconds.", sleep_seconds)
+        else:
+            self.log.info("Ratelimited, sleeping for %s seconds. %d of %d replays loaded. "
+                "ETA ~ %d min", sleep_seconds, self.loaded, self.total, ceil((self.total-self.loaded)/10))
+
         time.sleep(sleep_seconds)

@@ -108,10 +108,10 @@ class Circleguard:
         Creates the Check object used in the map_check convenience method. See that method for more information.
         """
         options = self.options
-        num = num if num else options.num
-        cache = cache if cache else options.cache
-        thresh = thresh if thresh else options.thresh
-        include = include if include else options.include
+        num = num if num is not None else options.num
+        cache = cache if cache is not None else options.cache
+        thresh = thresh if thresh is not None else options.thresh
+        include = include if include is not None else options.include
 
         self.log.info("Map check with map id %d, u %s, num %s, cache %s, thresh %s", map_id, u, num, cache, thresh)
         replays2 = None
@@ -157,9 +157,9 @@ class Circleguard:
         Creates the Check object used in the verify_check convenience method. See that method for more information.
         """
         options = self.options
-        cache = cache if cache else options.cache
-        thresh = thresh if thresh else options.thresh
-        include = include if include else options.include
+        cache = cache if cache is not None else options.cache
+        thresh = thresh if thresh is not None else options.thresh
+        include = include if include is not None else options.include
 
         self.log.info("Verify with map id %d, u1 %s, u2 %s, cache %s", map_id, u1, u2, cache)
         info1 = self.loader.user_info(map_id, user_id=u1)
@@ -210,9 +210,9 @@ class Circleguard:
         this special case accordingly.
         """
         options = self.options
-        cache = cache if cache else options.cache
-        thresh = thresh if thresh else options.thresh
-        include = include if include else options.include
+        cache = cache if cache is not None else options.cache
+        thresh = thresh if thresh is not None else options.thresh
+        include = include if include is not None else options.include
 
         self.log.info("User check with u %s, num_top %s, num_users %s", u, num_top, num_users)
         ret = []
@@ -276,10 +276,10 @@ class Circleguard:
         Creates the Check object used in the local_check convenience method. See that method for more information.
         """
         options = self.options
-        num = num if num else options.num
-        cache = cache if cache else options.cache
-        thresh = thresh if thresh else options.thresh
-        include = include if include else options.include
+        num = num if num is not None else options.num
+        cache = cache if cache is not None else options.cache
+        thresh = thresh if thresh is not None else options.thresh
+        include = include if include is not None else options.include
 
         paths = [folder / f for f in os.listdir(folder) if isfile(folder / f) and f.endswith(".osr")]
         local_replays = [ReplayPath(path) for path in paths]
