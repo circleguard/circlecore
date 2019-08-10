@@ -170,9 +170,17 @@ Finally, the load method of the replay must accept one required argument and one
 
 ### Loading Replays
 
-Normally, all replays in a `Check` object are loaded when you call `circleguard#run(check)`. However, if you require more control over when you load your replays (or which ones get loaded when you do), you can call `circleguard.load(replay, check)` to load an individual replay contained in the passed `Check` object. This is a shorthand method for calling `replay#load(circleguard.loader, check.cache)`, and going through circleguard is always recommended, as not doing so can cause unexpected caching issues with the settings hierarchy not cascading down to the replay correctly. See the last section of Subclassing Replay for more on the optional cache option for `replay#load`.
+Normally, all replays in a `Check` object are loaded when you call `circleguard#run(check)`. However, if you require more control over when you load your replays (or which ones get loaded when you do), you can call `circleguard.load(check, replay)` to load an individual replay contained in the passed `Check` object. This is a shorthand method for calling `replay#load(circleguard.loader, check.cache)`, and going through circleguard is always recommended, as not doing so can cause unexpected caching issues with the settings hierarchy not cascading down to the replay correctly. See the last section of Subclassing Replay for more on the optional cache option for `replay#load`.
 
 There is no limitation on the order in which replays get loaded; when `circleguard#run(check)` is called, it first checks if `check.loaded` is `True`. If it is, it assumes all the replays in the check object are loaded as well and moves on to comparing them. Else, it checks if each replay in the check object have `replay.loaded` set to `True` - if so, it moves on to loading the next replay. Otherwise, it calls `replay#load`.
+
+### Modifying Convenience Method Check Before Loading
+
+You may find yourself wishing to perform an action on the `Check` returned by a convenience method before running it. Although the standard convenience methods create the `Check` and immediately run it, Circleguard provides methods that only create the `Check` (`circleguard#create_map_check`, `circleguard#create_user_check`, etc).
+
+For instance, the gui [Circleguard](https://github.com/circleguard/circleguard/) takes advantage of these methods to load the replays one by one and increment a progress bar before running the check, something that would not be possible with the standard convenience methods.
+
+You can also modify the `Check` by adding or removing replays before running it. You should see if the recommended approaches for dealing with this, such as the `include` argument for convenience methods and `Check` objects, satisfy your needs before resorting to modifying a returned `Check`.
 
 ## Contributing
 
