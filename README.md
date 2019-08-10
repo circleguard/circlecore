@@ -31,22 +31,23 @@ circleguard = Circleguard("your-api-key", "/absolute/path/to/your/db/file.db")
 # You can change options such as whether to cache the results from the default for a single method. See Advanced Usage for more on default options.
 for r in circleguard.user_check(12092800, cache=True):
     if(r.ischeat):
-        print("Found a cheater! {} vs {}, {} set later.".format(r.replay1.username, r.replay2.username, r.later_name))
+        # later_replay and earlier_replay provide a reference to either replay1 or replay2, depending on which one was set before the other.
+        print("Found a cheater! {} vs {}, {} set later.".format(r.replay1.username, r.replay2.username, r.later_replay.username))
 
 # compare the top 10 plays on a map for replay steals
 for r in circleguard.map_check(1005542, num=10):
     if(r.ischeat):
-        print("Found a cheater on a map! {} vs {}, {} set later.".format(r.replay1.username, r.replay2.username, r.later_name))
+        print("Found a cheater on a map! {} vs {}, {} set later.".format(r.replay1.username, r.replay2.username, r.later_replay.username))
 
 # compare local files for replay steals
 for r in circleguard.local_check("/absolute/path/to/folder/containing/osr/files/"):
      if(r.ischeat):
-        print("Found a cheater locally! {} vs {}, {} set later.".format(r.replay1.path, r.replay2.path, r.later_name))
+        print("Found a cheater locally! {} vs {}, {} set later.".format(r.replay1.path, r.replay2.path, r.later_replay.path))
 
 # compare two specific users' plays on a map to check for a replay steal
 for r in circleguard.verify(1699366, 12092800, 7477458, False):
     if(r.ischeat):
-        print("Confirmed that {} is cheating".format(r.later_name))
+        print("Confirmed that {} is cheating".format(r.later_replay.username))
     else:
         print("Neither of those two users appear to have stolen from each other")
 ```
@@ -70,7 +71,7 @@ replays = [ReplayPath(PATH / "woey.osr"), ReplayPath(PATH / "ryuk.osr")]
 check = Check(replays)
 for r in circleguard.run(check):
     if(r.ischeat):
-        print("Found a cheater locally! {} vs {}, {} set later.".format(r.replay1.path, r.replay2.path, r.later_name))
+        print("Found a cheater locally! {} vs {}, {} set later.".format(r.replay1.path, r.replay2.path, r.later_replay.path))
 
 # Check objects allow mixing of Replay subclasses. circleguard only defines ReplayPath and ReplayMap,
 # but as we will see further on, you can define your own subclasses to suit your needs.
@@ -80,7 +81,7 @@ for r in circleguard.run(Check(replays)):
         # subclasses are mixed now
         repr1 = r.replay1.path if r.replay1 is ReplayPath else r.replay1.username
         repr2 = r.replay2.path if r.replay2 is ReplayPath else r.replay2.username
-        print("Found a cheater! {} vs {}, {} set later.".format(repr1, repr2, r.later_name))
+        print("Found a cheater! {} vs {}, {} set later.".format(repr1, repr2, r.later_replay.path))
 ```
 
 ## Advanced Usage
