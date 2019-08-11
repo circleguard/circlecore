@@ -1,6 +1,6 @@
 from distutils.core import setup
 from setuptools import find_packages
-from circleguard.__init__ import __version__
+from circleguard.version import __version__
 
 with open("README.md", "r") as readme:
     long_description = readme.read()

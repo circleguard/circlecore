@@ -4,8 +4,7 @@ from circleguard.circleguard import Circleguard, set_options
 from circleguard.replay import Check, Replay, ReplayMap, ReplayPath
 from circleguard.enums import Detect
 from circleguard.utils import TRACE, ColoredFormatter
-
-__version__ = "2.1.1.dev"
+from circleguard.version import __version__
 
 logging.addLevelName(TRACE, "TRACE")
 formatter = ColoredFormatter("[%(threadName)s][%(name)s][%(levelname)s]  %(message)s  (%(filename)s:%(lineno)s)")
