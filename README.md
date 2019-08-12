@@ -77,12 +77,25 @@ for r in circleguard.run(check):
 # but as we will see further on, you can define your own subclasses to suit your needs.
 replays = [ReplayPath(PATH / "woey.osr"), ReplayMap(map_id=1699366, user_id=12092800, mods=0)]
 for r in circleguard.run(Check(replays)):
-    if(r.ischeat):
-        # subclasses are mixed now
-        repr1 = r.replay1.path if r.replay1 is ReplayPath else r.replay1.username
-        repr2 = r.replay2.path if r.replay2 is ReplayPath else r.replay2.username
-        print("Found a cheater! {} vs {}, {} set later.".format(repr1, repr2, r.later_replay.path))
+
+### Caching
+
+Circleguard will cache downloaded replays if you give it the path to a database and set the cache option to True. This reduces download times, because replays are stored locally instead of waiting for the quite heavy api ratelimits. You can see more about setting options under [Setting Options](#setting-options).
+
+```python
+# if the database given doesn't exist, it will be created at the specified location.
+cg = Circleguard("your-api-key", "/path/to/your/db/file/db.db")
+cg.set_options(cache=True) # can also pass cache=True to a convenience method like map_check, but it will only apply for that single check. This will cache replays for all methods for this circleguard object.
+
+# all 6 replays will be loaded from the api
+for r in cg.map_check(221777, num=6):
+    pass
+
+# the first 6 replays will be loaded from the cache, and only 5 will be loaded from the api, avoiding the 10 replays/min ratelimit.
+for r in cg.map_check(221777, num=11)
 ```
+
+Caching persists across runs since it is stored on a file instead of in memory; just pass the path to the file when instantiating circleguard.
 
 ## Advanced Usage
 
