@@ -76,6 +76,9 @@ def check_cache(function):
         self = args[0]
         user_info = args[1]
 
+        if self.cacher is None:
+            return function(*args, **kwargs)
+
         lzma = self.cacher.check_cache(user_info.map_id, user_info.user_id, user_info.mods)
         if(lzma):
             replay_data = circleparse.parse_replay(lzma, pure_lzma=True).play_data
@@ -99,9 +102,10 @@ class Loader():
     start_time = datetime.min # when we started our requests cycle
 
 
-    def __init__(self, cacher, key):
+    def __init__(self, key, cacher=None):
         """
-        Initializes a Loader instance.
+        Initializes a Loader instance. If a Cacher is not provided,
+        scores will not be loaded from cache or cached to the databse.
         """
 
         self.log = logging.getLogger(__name__)
@@ -252,7 +256,8 @@ class Loader():
             self.log.warning("lzma from %r could not be decompressed, api returned corrupt replay", user_info)
             return None
         replay_data = parsed_replay.play_data
-        self.cacher.cache(lzma_bytes, user_info, should_cache=cache)
+        if self.cacher is not None:
+            self.cacher.cache(lzma_bytes, user_info, should_cache=cache)
         return replay_data
 
     def map_id(self, map_hash):
