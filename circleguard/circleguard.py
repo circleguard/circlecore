@@ -31,20 +31,25 @@ class Circleguard:
     # used to distinguish log output for cg instances
     NUM = 1
 
-    def __init__(self, key, db_path, loader=None):
+    def __init__(self, key, db_path=None, loader=None):
         """
         Initializes a Circleguard instance.
 
         Args:
             String key: An osu API key.
-            [Path or String] db_path: A pathlike object to the databse file to write and/or read cached replays.
+            [Path or String] db_path: A pathlike object to the databsae file to write and/or read cached replays. If the given file
+                                doesn't exist, it is created. If this is not passed, no replays will be cached or loaded from cache.
         """
 
+        cacher = None
+        if db_path is not None:
+            # allows for . to be passed to db_path
+            db_path = Path(db_path).absolute()
+            cacher = Cacher(config.cache, db_path)
+
         self.log = logging.getLogger(__name__ + str(Circleguard.NUM))
-        self.db_path = Path(db_path).absolute() # allows for . to be passed to db_path
-        cacher = Cacher(config.cache, self.db_path)
         # allow for people to pass their own loader implementation/subclass
-        self.loader = Loader(cacher, key) if loader is None else loader(cacher, key)
+        self.loader = Loader(key, cacher=cacher) if loader is None else loader(key, cacher)
         self.options = Options()
         Circleguard.NUM += 1
 
@@ -90,6 +95,7 @@ class Circleguard:
                          Loads from the top ranks of the leaderboard, so num=20 will compare the top 20 scores. This
                          number must be between 1 and 100, as restricted by the osu api.
             Boolean cache: Whether to cache the loaded replays. Defaults to False, or the config value if changed.
+                           If no database file was passed, this value has no effect, as replays will not be cached.
             Integer thresh: If a comparison scores below this value, its Result object has ischeat set to True.
                             Defaults to 18, or the config value if changed.
             Function include: A Predicate function that returns True if the replay should be loaded, and False otherwise.
@@ -139,6 +145,7 @@ class Circleguard:
             Integer u1: The user id of one of the users who set a replay on this map.
             Integer u2: The user id of the second user who set a replay on this map.
             Boolean cache: Whether to cache the loaded replays. Defaults to False, or the config value if changed.
+                           If no database file was passed, this value has no effect, as replays will not be cached.
             Integer thresh: If a comparison scores below this value, its Result object has ischeat set to True.
                             Defaults to 18, or the config value if changed.
             Function include: A Predicate function that returns True if the replay should be loaded, and False otherwise.
@@ -183,7 +190,8 @@ class Circleguard:
             Integer u: The user id of the user to check
             Integer num: The number of replays of each map to compare against the user's replay. For now, this also serves as the
                          number of top plays of the user to check for replay stealing and remodding.
-            Boolean cache: Whether to cache the loaded replays. Defaults to False, or the config value if changed.
+                         Boolean cache: Whether to cache the loaded replays. Defaults to False, or the config value if changed.
+                         If no database file was passed, this value has no effect, as replays will not be cached.
             Integer thresh: If a comparison scores below this value, its Result object has ischeat set to True.
                             Defaults to 18, or the config value if changed.
             Function include: A Predicate function that returns True if the replay should be loaded, and False otherwise.
@@ -258,6 +266,7 @@ class Circleguard:
                          number must be between 1 and 100, as restricted by the osu api. This value has no effect
                          if passed with both u and map_id.
             Boolean cache: Whether to cache the loaded replays. Defaults to False, or the config value if changed.
+                           If no database file was passed, this value has no effect, as replays will not be cached.
             Integer thresh: If a comparison scores below this value, its Result object has ischeat set to True.
                             Defaults to 18, or the config value if changed.
             Function include: A Predicate function that returns True if the replay should be loaded, and False otherwise.
@@ -298,7 +307,7 @@ class Circleguard:
     def load(self, check, replay):
         """
         Loads the given replay. This is identical to calling replay.load(cg.loader, check.cache) if cg is your
-        Circleguard instance and check is your Check instance.. This method exists to emphasize that this behavior is encouraged,
+        Circleguard instance and check is your Check instance. This method exists to emphasize that this behavior is encouraged,
         and tied to a specific cg (and Check) instance. The Check is necessary to inherit the cache setting from the Check
         in case it differs from the Circleguard option (since it is more specific, it would override circleguard). See the
         options documentation for more details on setting inheritence.
@@ -313,7 +322,8 @@ class Circleguard:
         Args:
             Integer thresh: If a comparison scores below this value, its Result object has ischeat set to True. 18 by default.
             Integer num: How many replays to load from a map when doing a map check. 50 by default.
-            Boolean cache: Whether downloaded replays should be cached or not. False by default.
+            Boolean cache: Whether to cache the loaded replays. Defaults to False, or the config value if changed.
+                           If no database file was passed, this value has no effect, as replays will not be cached.
             Boolean failfast: Will throw an exception if no comparisons can be made for a given Check object,
                           or silently make no comparisons otherwise. False by default.
             Integer loglevel: What level to log at. Circlecore follows standard python logging levels, with an added level of
@@ -344,7 +354,8 @@ def set_options(thresh=None, num=None, cache=None, failfast=None, loglevel=None,
     Args:
         Integer thresh: If a comparison scores below this value, its Result object has ischeat set to True. 18 by default.
         Integer num: How many replays to load from a map when doing a map check. 50 by default.
-        Boolean cache: Whether downloaded replays should be cached or not. False by default.
+        Boolean cache: Whether to cache the loaded replays. Defaults to False, or the config value if changed.
+                       If no database file was passed to a circleguard instance, this value has no effect, as replays will not be cached.
         Boolean failfast: Will throw an exception if no comparisons can be made for a given Check object,
                           or silently make no comparisons otherwise. False by default.
         Integer loglevel: What level to log at. Circlecore follows standard python logging levels, with an added level of
