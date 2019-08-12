@@ -8,17 +8,14 @@ class Investigator:
     See Also:
         Comparer
     """
-    def __init__(self, replay, beatmap_dir=""):
+    def __init__(self, replay, beatmap_path):
         self.replay = replay.as_list_with_timestamps()
-        if beatmap_dir:
-            self.beatmap = Beatmap(beatmap_dir)
-        else:
-            self.beatmap = None
+        self.beatmap = Beatmap(beatmap_path)
 
-    def calculate_ur(self):
+    def ur(self):
         hitobjs = self._parse_beatmap(self.beatmap)
-        keypresses = self._parse_keys(self.beatmap)
-        diff = []
+        keypresses = self._parse_keys(self.replay)
+        diff_arr = []
 
         # remove hits not near hitobj
         hitwindow = 150 + 50 * (5 - self.beatmap.difficulty["OverallDifficulty"]) / 5
@@ -27,9 +24,9 @@ class Investigator:
             for j in hitobjs:
                 if i > j-(hitwindow/2) and i < j+(hitwindow/2):
                     diff = j-i
-                    diff.append(diff)
+                    diff_arr.append(diff)
 
-        return np.std(diff)*10
+        return np.std(diff_arr) * 10
 
     def _parse_beatmap(self, beatmap):
         hitobjs = []
