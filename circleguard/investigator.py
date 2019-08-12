@@ -15,18 +15,26 @@ class Investigator:
     def ur(self):
         hitobjs = self._parse_beatmap(self.beatmap)
         keypresses = self._parse_keys(self.replay)
-        diff_arr = []
-
-        # remove hits not near hitobj
         hitwindow = 150 + 50 * (5 - self.beatmap.difficulty["OverallDifficulty"]) / 5
-        # inefficient as fugg, but not important rn
-        for i in keypresses:
-            for j in hitobjs:
-                if i > j-(hitwindow/2) and i < j+(hitwindow/2):
-                    diff = j-i
-                    diff_arr.append(diff)
+        diff_array = []
 
-        return np.std(diff_arr) * 10
+        # inefficient as fugg, but not important rn
+        # filters out all clicks that didn't hit anything and stores diffs to array
+        for hitobj in hitobjs:
+            temp_diffs = []
+            temp_times = []
+            for press in keypresses:
+                if hitobj > press-(hitwindow/2) and hitobj < press+(hitwindow/2):
+                    temp_times.append(hitobj)
+                    diff = press-hitobj
+                    diff = diff if diff > 0 else diff
+                    temp_diffs.append(diff)
+            # only add one click per hitobj
+            if len(temp_diffs) != 0:
+                index = temp_diffs.index(min(temp_diffs, key=abs))
+                diff_array.append(temp_diffs[index])
+
+        return np.std(diff_array) * 10
 
     def _parse_beatmap(self, beatmap):
         hitobjs = []
