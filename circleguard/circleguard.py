@@ -83,7 +83,7 @@ class Circleguard:
 
         # relax check (TODO)
 
-    def map_check(self, map_id, u=None, num=None, cache=None, thresh=None, include=None):
+    def map_check(self, map_id, u=None, num=None, cache=None, thresh=None, mods=None, include=None):
         """
         Checks a map's leaderboard for replay steals.
 
@@ -98,6 +98,13 @@ class Circleguard:
                            If no database file was passed, this value has no effect, as replays will not be cached.
             Integer thresh: If a comparison scores below this value, its Result object has ischeat set to True.
                             Defaults to 18, or the config value if changed.
+            Integer mods: If passed, download and compare the top num replays set with these exact mods. You can find a
+                          reference on what mod maps to what integer value here: https://github.com/ppy/osu-api/wiki#mods.
+                          There is currently no support for optional mods (eg HR is required, but other mods optional,
+                          so both HR and HDHR scores would be downloaded). This is due to api limitations.
+                          If both mods and u are passed, the user's replay will be downloaded regardless of the passed mods,
+                          (ie their highest scoring play on the map), but the other replays it is compared against will
+                          be downloaded according to the passed mods.
             Function include: A Predicate function that returns True if the replay should be loaded, and False otherwise.
                               The include function will be passed a single argument - the circleguard.Replay object, or one
                               of its subclasses.
@@ -105,11 +112,11 @@ class Circleguard:
         Returns:
             A generator containing Result objects of the comparisons.
         """
-        check = self.create_map_check(map_id, u, num, cache, thresh, include)
+        check = self.create_map_check(map_id, u, num, cache, thresh, mods, include)
         yield from self.run(check)
 
 
-    def create_map_check(self, map_id, u=None, num=None, cache=None, thresh=None, include=None):
+    def create_map_check(self, map_id, u=None, num=None, cache=None, thresh=None, mods=None, include=None):
         """
         Creates the Check object used in the map_check convenience method. See that method for more information.
         """
@@ -126,7 +133,7 @@ class Circleguard:
             info = self.loader.user_info(map_id, user_id=u)
             replay2_id = info.replay_id
             replays2 = [ReplayMap(info.map_id, info.user_id, info.mods, username=info.username)]
-        infos = self.loader.user_info(map_id, num=num)
+        infos = self.loader.user_info(map_id, num=num, mods=mods)
         replays = []
         for info in infos:
             if info.replay_id == replay2_id:
