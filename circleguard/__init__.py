@@ -12,3 +12,7 @@ formatter = ColoredFormatter("[%(threadName)s][%(name)s][%(levelname)s]  %(messa
 handler_stream = logging.StreamHandler()
 handler_stream.setFormatter(formatter)
 logging.getLogger("circleguard").addHandler(handler_stream)
+
+__all__ = ["Circleguard", "set_options", "Check", "Replay", "ReplayMap",
+           "ReplayPath", "Detect", "TRACE", "ColoredFormatter", "Loader",
+           "__version__"]
