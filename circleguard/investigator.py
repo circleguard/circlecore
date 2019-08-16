@@ -27,21 +27,20 @@ class Investigator:
 
         # parse hitobj
         for hit in beatmap.hitobjects:
-            if not 8 & hit.type:
-                hitobjs.append([hit.time, hit.x, hit.y])
+            hitobjs.append([hit.time, hit.x, hit.y])
         return hitobjs
 
     def _parse_keys(self, replay):
         keypresses = []
-        flip = False
+        last = 0
         for keypress in replay:
-            if keypress[3] == 5 or keypress[3] == 10:
-                if not flip:
-                    flip = True
-                    keypresses.append(keypress[:3])  # t,x,y
+            if keypress[3] % 5 == 0:  # 5=> key1, 10 => key2, 15 => both keys
+                if keypress[3] != last:
+                    if last != 15:  # ignore if the user held both buttons and let go of one
+                        keypresses.append(keypress[:3])  # t,x,y
+                    last = keypress[3]
             else:
-                if flip:
-                    flip = False
+                last = 0
         return keypresses
 
 
@@ -62,5 +61,5 @@ class Investigator:
             if len(temp_diffs) != 0:
                 index = temp_diffs.index(min(temp_diffs, key=abs))
                 array.append([hitobj, temp_hits[index]])
-        print(len(array))
+                keypresses.pop(keypresses.index(temp_hits[index]))  # remove used hits
         return array
