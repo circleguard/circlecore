@@ -4,6 +4,7 @@ from circleguard.circleguard import Circleguard, set_options
 from circleguard.replay import Check, Replay, ReplayMap, ReplayPath
 from circleguard.enums import Detect
 from circleguard.utils import TRACE, ColoredFormatter
+from circleguard.loader import Loader
 from circleguard.version import __version__
 
 logging.addLevelName(TRACE, "TRACE")
