@@ -109,24 +109,8 @@ class Loader():
         """
 
         self.log = logging.getLogger(__name__)
-        self.total = None
-        self.loaded = 0
         self.api = ossapi.ossapi(key)
         self.cacher = cacher
-
-
-    def new_session(self, total):
-        """
-        Resets the loaded replays to 0, and sets the total to the passed total.
-
-        Intended to be called every time the loader is used for a different set of replay loadings -
-        since a Loader instance is passed around to Comparer and Investigator, each with different
-        amounts of replays to load, making new sessions is necessary to keep progress logs correct.
-        """
-
-        self.log.debug("Starting a new session with total %d", total)
-        self.loaded = 0
-        self.total = total
 
 
     @request
@@ -189,7 +173,6 @@ class Loader():
         if(number < 1 or number > 100):
             raise InvalidArgumentsException("The number of best user plays to fetch must be between 1 and 100 inclusive!")
         response = self.api.get_user_best({"m": "0", "u": user_id, "limit": number})
-
         Loader.check_response(response)
 
         return [int(x["beatmap_id"]) for x in response]
@@ -211,13 +194,8 @@ class Loader():
         """
 
         self.log.log(TRACE, "Requesting replay data by user %d on map %d with mods %s", user_id, map_id, mods)
-        if(self.total is None):
-            raise CircleguardException("loader#new_session(total) must be called after instantiation, before any replay data is loaded.")
-
         response = self.api.get_replay({"m": "0", "b": map_id, "u": user_id, "mods": mods})
-
         Loader.check_response(response)
-        self.loaded += 1
 
         return base64.b64decode(response["content"])
 
@@ -319,19 +297,17 @@ class Loader():
 
         difference = datetime.now() - Loader.start_time
         seconds_passed = difference.seconds
-        if(seconds_passed > Loader.RATELIMIT_RESET):
-            self.log.debug("More than a minute has passed since our last ratelimit, not sleeping")
-            return
 
         # sleep the remainder of the reset cycle so we guarantee it's been that long since the first request
         sleep_seconds = Loader.RATELIMIT_RESET - seconds_passed
+        self._ratelimit(sleep_seconds)
 
-        if self.total is None:
-            # occurs when calling light functions (user_info, get_user_best, etc)
-            # without #new_session being called when the key is ratelimited.
-            self.log.info("Ratelimited, sleeping for %s seconds.", sleep_seconds)
-        else:
-            self.log.info("Ratelimited, sleeping for %s seconds. %d of %d replays loaded. "
-                "ETA ~ %d min", sleep_seconds, self.loaded, self.total, ceil((self.total-self.loaded)/10))
+    def _ratelimit(self, length):
+        """
+        Sleeps the thread for the specified amount of time. Called by #_enforce_ratelimit.
 
-        time.sleep(sleep_seconds)
+        Split into two functions mostly to allow Loader subclasses to overload a single function and easily
+        get the time the Loader will be ratelimited for.
+        """
+        self.log.info("Ratelimited, sleeping for %s seconds.", length)
+        time.sleep(length)

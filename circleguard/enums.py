@@ -63,9 +63,7 @@ class RatelimitWeight(Enum):
     the corresponding value is RatelimitWeight.LIGHT. If it makes any heavy api calls (get_replay), the
     corresponding value is RatelimitWeight.HEAVY.
 
-    This value is used internally to determine how long the loader class will have to spend loading replays -
-    currently LIGHT and NONE are treated the same, and only HEAVY values are counted towards replays to load.
-    See loader#new_session and the Replay documentation for more details.
+    This value currently has no effect on the program and is reserved for possible future functionality.
     """
 
     NONE  = "none"
