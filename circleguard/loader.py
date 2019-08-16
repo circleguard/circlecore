@@ -1,16 +1,13 @@
 from datetime import datetime
 import time
 import base64
-import sys
 import logging
-from math import ceil
 from lzma import LZMAError
 
 from requests import RequestException
 import circleparse
 import ossapi
 
-from circleguard.replay import ReplayMap
 from circleguard.user_info import UserInfo
 from circleguard.enums import Error
 from circleguard.exceptions import (InvalidArgumentsException, APIException, CircleguardException,
