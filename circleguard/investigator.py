@@ -34,7 +34,7 @@ class Investigator:
         keypresses = []
         last = 0
         for keypress in replay:
-            if keypress[3] % 5 == 0:  # 5=> key1, 10 => key2, 15 => both keys
+            if keypress[3] % 5 == 0 and keypress[3] != 0:  # 5=> key1, 10 => key2, 15 => both keys
                 if keypress[3] != last:
                     if last != 15:  # ignore if the user held both buttons and let go of one
                         keypresses.append(keypress[:3])  # t,x,y
