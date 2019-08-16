@@ -128,11 +128,7 @@ class Replay(abc.ABC):
             RatelimitWeight weight: How much it 'costs' to load this replay from the api. If the load method of the replay makes no api calls,
                             this value is RatelimitWeight.NONE. If it makes only light api calls (anything but get_replay), this value is
                             RatelimitWeight.LIGHT. If it makes any heavy api calls (get_replay), this value is RatelimitWeight.HEAVY.
-                            This value is used internally to determine how long the loader class will have to spend loading replays -
-                            currently LIGHT and NONE are treated the same, and only HEAVY values are counted towards replays to load. Note
-                            that this has no effect on the comparisons or internal program implementation - it only affects log messages
-                            internally, and if you access circleguard#loader#total, it modifies that value as well. See Loader#new_session
-                            for more details.
+                            See the RatelimitWeight documentation for more details.
         """
 
         self.timestamp = timestamp
