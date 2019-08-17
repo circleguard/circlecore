@@ -1,4 +1,4 @@
-from osu_parser.osu_parser.beatmap import Beatmap
+from circleparse.beatmap import Beatmap
 import numpy as np
 
 class Investigator:
