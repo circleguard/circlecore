@@ -1,5 +1,5 @@
 from circleguard.replay import Replay
-from enums import ResultType
+from circleguard.enums import ResultType
 
 # Hierarchy
 #                                 Result
