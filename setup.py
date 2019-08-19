@@ -38,7 +38,7 @@ setup(
     license = "MIT",
     packages=find_packages(),
     install_requires=[
-        "circleparse >= 6.0.0",
+        "circleparse >= 6.1.0",
         "ossapi >= 1.2.2",
         "wtc >= 1.1.3",
         "numpy",
