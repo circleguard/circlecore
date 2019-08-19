@@ -122,7 +122,7 @@ class Replay(abc.ABC):
             Datetime timestamp: When this replay was played.
             Integer map_id: The map id the replay was played on, or 0 if unknown or on an unsubmitted map.
             String username: The username of the player who made the replay.
-            Integer user_id: The id of the player who made the replay, or 0 if unknown..]
+            Integer user_id: The id of the player who made the replay, or 0 if unknown.
             Integer mods: The mods the replay was played with.
             Integer replay_id: The id of this replay, or 0 if it does not have an id (unsubmitted replays have no id).
             List [circleparse.Replay.ReplayEvent] replay_data: An array containing objects with the attributes x, y, time_since_previous_action,
