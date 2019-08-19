@@ -4,6 +4,7 @@ import itertools
 import os
 from os.path import isfile, join
 import logging
+from tempfile import NamedTemporaryFile
 
 from circleguard.loader import Loader
 from circleguard.comparer import Comparer
@@ -13,6 +14,7 @@ from circleguard import config
 from circleguard.exceptions import CircleguardException
 from circleguard.replay import Check, ReplayMap, ReplayPath
 from circleguard.enums import Detect, RatelimitWeight
+from circleparse.beatmap import Beatmap
 
 
 class Circleguard:
@@ -76,12 +78,25 @@ class Circleguard:
 
         check.load(self.loader)
         # all replays now have replay data, above is where ratelimit waiting would occur
-        comparer = Comparer(check.thresh, compare1, replays2=compare2)
+        comparer = Comparer(check.steal_thresh, compare1, replays2=compare2)
         yield from comparer.compare(mode=check.mode)
 
-        # relax check (TODO)
+        for replay in check.all_replays():
+            if not replay.detect & Detect.RELAX:
+                continue
+            bm_content = self.loader.get_beatmap(replay.map_id)
+            # need a file-like object because circleparse uses open
+            #  and readline, among other things
+            bm_file = NamedTemporaryFile(delete=False)
+            bm_file.write(bm_content)
+            bm_file.close()
+            bm = Beatmap(bm_file.name)
+            investigator = Investigator(replay, bm, check.rx_thresh)
+            yield from investigator.investigate()
+            os.remove(bm_file.name)
 
-    def map_check(self, map_id, u=None, num=None, cache=None, thresh=None, mods=None, include=None):
+
+    def map_check(self, map_id, u=None, num=None, cache=None, steal_thresh=None, rx_thresh=None, mods=None, include=None):
         """
         Checks a map's leaderboard for replay steals.
 
@@ -94,8 +109,10 @@ class Circleguard:
                          number must be between 1 and 100, as restricted by the osu api.
             Boolean cache: Whether to cache the loaded replays. Defaults to False, or the config value if changed.
                            If no database file was passed, this value has no effect, as replays will not be cached.
-            Integer thresh: If a comparison scores below this value, its Result object has ischeat set to True.
+            Integer steal_thresh: If a comparison scores below this value, its Result object has ischeat set to True.
                             Defaults to 18, or the config value if changed.
+            Integer rx_thresh: if a replay has a ur below this value, it is considered cheated.
+                    Deaults to 50, or the config value if changed.
             Integer mods: If passed, download and compare the top num replays set with these exact mods. You can find a
                           reference on what mod maps to what integer value here: https://github.com/ppy/osu-api/wiki#mods.
                           There is currently no support for optional mods (eg HR is required, but other mods optional,
@@ -110,21 +127,21 @@ class Circleguard:
         Returns:
             A generator containing Result objects of the comparisons.
         """
-        check = self.create_map_check(map_id, u, num, cache, thresh, mods, include)
+        check = self.create_map_check(map_id, u, num, cache, steal_thresh, mods, include)
         yield from self.run(check)
 
 
-    def create_map_check(self, map_id, u=None, num=None, cache=None, thresh=None, mods=None, include=None):
+    def create_map_check(self, map_id, u=None, num=None, cache=None, steal_thresh=None, mods=None, include=None):
         """
         Creates the Check object used in the map_check convenience method. See that method for more information.
         """
         options = self.options
         num = num if num is not None else options.num
         cache = cache if cache is not None else options.cache
-        thresh = thresh if thresh is not None else options.thresh
+        steal_thresh = steal_thresh if steal_thresh is not None else options.steal_thresh
         include = include if include is not None else options.include
 
-        self.log.info("Map check with map id %d, u %s, num %s, cache %s, thresh %s", map_id, u, num, cache, thresh)
+        self.log.info("Map check with map id %d, u %s, num %s, cache %s, steal_thresh %s", map_id, u, num, cache, steal_thresh)
         replays2 = None
         replay2_id = None
         if u:
@@ -139,9 +156,9 @@ class Circleguard:
                                 "the same replay id as the user's replay", info.map_id, info.user_id, info.mods)
                 continue
             replays.append(ReplayMap(info.map_id, info.user_id, info.mods, username=info.username))
-        return Check(replays, replays2=replays2, cache=cache, thresh=thresh, include=include)
+        return Check(replays, replays2=replays2, cache=cache, steal_thresh=steal_thresh, include=include)
 
-    def verify(self, map_id, u1, u2, cache=None, thresh=None, include=None):
+    def verify(self, map_id, u1, u2, cache=None, steal_thresh=None, include=None):
         """
         Verifies that two user's replay on a map are steals of each other.
 
@@ -151,7 +168,7 @@ class Circleguard:
             Integer u2: The user id of the second user who set a replay on this map.
             Boolean cache: Whether to cache the loaded replays. Defaults to False, or the config value if changed.
                            If no database file was passed, this value has no effect, as replays will not be cached.
-            Integer thresh: If a comparison scores below this value, its Result object has ischeat set to True.
+            Integer steal_thresh: If a comparison scores below this value, its Result object has ischeat set to True.
                             Defaults to 18, or the config value if changed.
             Function include: A Predicate function that returns True if the replay should be loaded, and False otherwise.
                               The include function will be passed a single argument - the circleguard.Replay object, or one
@@ -161,16 +178,16 @@ class Circleguard:
             A generator containing Result objects of the comparisons.
         """
 
-        check = self.create_verify_check(map_id, u1, u2, cache, thresh, include)
+        check = self.create_verify_check(map_id, u1, u2, cache, steal_thresh, include)
         yield from self.run(check)
 
-    def create_verify_check(self, map_id, u1, u2, cache=None, thresh=None, include=None):
+    def create_verify_check(self, map_id, u1, u2, cache=None, steal_thresh=None, include=None):
         """
         Creates the Check object used in the verify_check convenience method. See that method for more information.
         """
         options = self.options
         cache = cache if cache is not None else options.cache
-        thresh = thresh if thresh is not None else options.thresh
+        steal_thresh = steal_thresh if steal_thresh is not None else options.steal_thresh
         include = include if include is not None else options.include
 
         self.log.info("Verify with map id %d, u1 %s, u2 %s, cache %s", map_id, u1, u2, cache)
@@ -179,9 +196,9 @@ class Circleguard:
         replay1 = ReplayMap(info1.map_id, info1.user_id, info1.mods, username=info1.username)
         replay2 = ReplayMap(info2.map_id, info2.user_id, info2.mods, username=info2.username)
 
-        return Check([replay1, replay2], cache=cache, thresh=thresh, include=include)
+        return Check([replay1, replay2], cache=cache, steal_thresh=steal_thresh, include=include)
 
-    def user_check(self, u, num, cache=None, thresh=None, include=None):
+    def user_check(self, u, num, cache=None, steal_thresh=None, include=None):
         """
         Checks a user's top plays for replay steals.
 
@@ -197,7 +214,7 @@ class Circleguard:
                          number of top plays of the user to check for replay stealing and remodding.
                          Boolean cache: Whether to cache the loaded replays. Defaults to False, or the config value if changed.
                          If no database file was passed, this value has no effect, as replays will not be cached.
-            Integer thresh: If a comparison scores below this value, its Result object has ischeat set to True.
+            Integer steal_thresh: If a comparison scores below this value, its Result object has ischeat set to True.
                             Defaults to 18, or the config value if changed.
             Function include: A Predicate function that returns True if the replay should be loaded, and False otherwise.
                               The include function will be passed a single argument - the circleguard.Replay object, or one
@@ -207,13 +224,13 @@ class Circleguard:
             A generator containing Result objects of the comparisons.
         """
 
-        for check_list in self.create_user_check(u, num, cache, thresh, include):
+        for check_list in self.create_user_check(u, num, cache, steal_thresh, include):
             # yuck; each top play has two different checks (remodding and stealing)
             # which is why we need a double loop
             for check in check_list:
                 yield from self.run(check)
 
-    def create_user_check(self, u, num_top, num_users, cache=None, thresh=None, include=None):
+    def create_user_check(self, u, num_top, num_users, cache=None, steal_thresh=None, include=None):
         """
         Creates the Check object used in the user_check convenience method. See that method for more information.
 
@@ -224,7 +241,7 @@ class Circleguard:
         """
         options = self.options
         cache = cache if cache is not None else options.cache
-        thresh = thresh if thresh is not None else options.thresh
+        steal_thresh = steal_thresh if steal_thresh is not None else options.steal_thresh
         include = include if include is not None else options.include
 
         self.log.info("User check with u %s, num_top %s, num_users %s", u, num_top, num_users)
@@ -249,14 +266,14 @@ class Circleguard:
             for info in self.loader.user_info(map_id, user_id=u, limit=False)[1:]:
                 remod_replays.append(ReplayMap(info.map_id, info.user_id, mods=info.mods, username=info.username))
 
-            check1 = Check(user_replay, replays2=replays, cache=cache, thresh=thresh, include=include)
-            check2 = Check(user_replay + remod_replays, cache=cache, thresh=thresh, include=include)
+            check1 = Check(user_replay, replays2=replays, cache=cache, steal_thresh=steal_thresh, include=include)
+            check2 = Check(user_replay + remod_replays, cache=cache, steal_thresh=steal_thresh, include=include)
             ret.append([check1, check2])
 
         return ret
 
 
-    def local_check(self, folder, map_id=None, u=None, num=None, cache=None, thresh=None, include=None):
+    def local_check(self, folder, map_id=None, u=None, num=None, cache=None, steal_thresh=None, include=None):
         """
         Compares locally stored osr files for replay steals.
 
@@ -272,7 +289,7 @@ class Circleguard:
                          if passed with both u and map_id.
             Boolean cache: Whether to cache the loaded replays. Defaults to False, or the config value if changed.
                            If no database file was passed, this value has no effect, as replays will not be cached.
-            Integer thresh: If a comparison scores below this value, its Result object has ischeat set to True.
+            Integer steal_thresh: If a comparison scores below this value, its Result object has ischeat set to True.
                             Defaults to 18, or the config value if changed.
             Function include: A Predicate function that returns True if the replay should be loaded, and False otherwise.
                               The include function will be passed a single argument - the circleguard.Replay object, or one
@@ -282,17 +299,17 @@ class Circleguard:
             A generator containing Result objects of the comparisons.
         """
 
-        check = self.create_local_check(folder, map_id, u, num, cache, thresh, include)
+        check = self.create_local_check(folder, map_id, u, num, cache, steal_thresh, include)
         yield from self.run(check)
 
-    def create_local_check(self, folder, map_id=None, u=None, num=None, cache=None, thresh=None, include=None):
+    def create_local_check(self, folder, map_id=None, u=None, num=None, cache=None, steal_thresh=None, include=None):
         """
         Creates the Check object used in the local_check convenience method. See that method for more information.
         """
         options = self.options
         num = num if num is not None else options.num
         cache = cache if cache is not None else options.cache
-        thresh = thresh if thresh is not None else options.thresh
+        steal_thresh = steal_thresh if steal_thresh is not None else options.steal_thresh
         include = include if include is not None else options.include
 
         paths = [folder / f for f in os.listdir(folder) if isfile(folder / f) and f.endswith(".osr")]
@@ -307,7 +324,7 @@ class Circleguard:
 
             online_replays = [ReplayMap(info.map_id, info.user_id, info.mods, username=info.username) for info in infos]
 
-        return Check(local_replays, replays2=online_replays, thresh=thresh, include=include)
+        return Check(local_replays, replays2=online_replays, steal_thresh=steal_thresh, include=include)
 
     def load(self, check, replay):
         """
@@ -319,13 +336,14 @@ class Circleguard:
         """
         replay.load(self.loader, check.cache)
 
-    def set_options(self, thresh=None, num=None, cache=None, failfast=None, loglevel=None, include=None):
+    def set_options(self, steal_thresh=None, rx_thresh=None, num=None, cache=None, failfast=None, loglevel=None, include=None):
         """
         Changes the default value for different options in circleguard.
         Affects only the ircleguard instance this method is called on.
 
         Args:
-            Integer thresh: If a comparison scores below this value, its Result object has ischeat set to True. 18 by default.
+            Integer steal_thresh: If a comparison scores below this value, its Result object has ischeat set to True. 18 by default.
+            Integer rx_thresh: if a replay has a ur below this value, it is considered cheated. 50 by default.
             Integer num: How many replays to load from a map when doing a map check. 50 by default.
             Boolean cache: Whether to cache the loaded replays. Defaults to False, or the config value if changed.
                            If no database file was passed, this value has no effect, as replays will not be cached.
@@ -351,13 +369,14 @@ class Circleguard:
             else:  # this only happens if we fucked up, not the user's fault
                 raise CircleguardException(f"The key {k} (value {v}) is not available as a config option for a circleguard instance")
 
-def set_options(thresh=None, num=None, cache=None, failfast=None, loglevel=None, include=None):
+def set_options(steal_thresh=None, rx_thresh=None, num=None, cache=None, failfast=None, loglevel=None, include=None):
     """
     Changes the default value for different options in circleguard.
     Affects all circleguard instances, even ones that have already been instantiated.
 
     Args:
-        Integer thresh: If a comparison scores below this value, its Result object has ischeat set to True. 18 by default.
+        Integer steal_thresh: If a comparison scores below this value, its Result object has ischeat set to True. 18 by default.
+        Integer rx_thresh: if a replay has a ur below this value, it is considered cheated. 50 by default.
         Integer num: How many replays to load from a map when doing a map check. 50 by default.
         Boolean cache: Whether to cache the loaded replays. Defaults to False, or the config value if changed.
                        If no database file was passed to a circleguard instance, this value has no effect, as replays will not be cached.
@@ -395,13 +414,16 @@ class Options():
 
     # These methods are unfortunately necessary because when
     # config module variables are updated, references to them are not - ie
-    # references to config.thresh (or any other) are by value. So, when we
+    # references to config.steal_thresh (or any other) are by value. So, when we
     # access options attributes, just get the latest config variable with these
     # methods.
     @property
-    def thresh(self):
-        return config.thresh
+    def steal_thresh(self):
+        return config.steal_thresh
 
+    @property
+    def rx_thresh(self):
+        return config.rx_thresh
     @property
     def num(self):
         return config.num

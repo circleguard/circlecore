@@ -1,5 +1,6 @@
-from circleparse.beatmap import Beatmap
 import numpy as np
+
+from circleguard.result import RelaxResult
 
 class Investigator:
     """
@@ -8,16 +9,33 @@ class Investigator:
     See Also:
         Comparer
     """
-    def __init__(self, replay, beatmap_path):
+
+    def __init__(self, replay, beatmap, threshold):
+        """
+        Initializes an Investigator instance.
+
+        Attributes:
+            Replay replay: The Replay object to investigate.
+            circleparse.Beatmap beatmap: The beatmap to calculate ur with.
+            Integer threshold: If a replay has a lower ur than this value,
+                    it is considered a cheted repaly.
+        """
+
         self.replay = replay.as_list_with_timestamps()
-        self.beatmap = Beatmap(beatmap_path)
+        self.beatmap = beatmap
+        self.threshold = threshold
+
+    def investigate(self):
+        ur = self.ur()
+        ischeat = True if ur < self.threshold else False
+        yield RelaxResult(self.replay, ur, ischeat)
 
     def ur(self):
         hitobjs = self._parse_beatmap(self.beatmap)
         keypresses = self._parse_keys(self.replay)
         filtered_array = self._filter_hits(hitobjs, keypresses)
         diff_array = []
-        
+
         for hit, press in filtered_array:
             diff_array.append(press[0]-hit[0])
         return np.std(diff_array) * 10

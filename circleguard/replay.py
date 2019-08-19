@@ -16,15 +16,17 @@ class Check():
     Attributes:
         List [Replay] replays: A list of Replay objects.
         List [Replay] replays2: A list of Replay objects to compare against 'replays' if passed.
-        Integer thresh: If a comparison scores below this value, its Result object has ischeat set to True.
-                        Defaults to 18, or the config value if changed.
+        Integer steal_thresh: If a comparison scores below this value, its Result object has ischeat set to True.
+                Defaults to 18, or the config value if changed.
+        Integer rx_thresh: if a replay has a ur below this value, it is considered cheated.
+                Deaults to 50, or the config value if changed.
         Boolean cache: Whether to cache the loaded replays. Defaults to False, or the config value if changed.
         String mode: "single" if only replays was passed, or "double" if both replays and replays2 were passed.
         Boolean loaded: False at instantiation, set to True once check#load is called. See check#load for
-                        more details.
+                more details.
     """
 
-    def __init__(self, replays, replays2=None, cache=None, thresh=None, include=None):
+    def __init__(self, replays, replays2=None, cache=None, steal_thresh=None, rx_thresh=None, include=None):
         """
         Initializes a Check instance.
 
@@ -36,8 +38,10 @@ class Check():
             List [Replay] replays: A list of Replay objects.
             List [Replay] replays2: A list of Replay objects to compare against 'replays' if passed.
             Boolean cache: Whether to cache the loaded replays. Defaults to False, or the config value if changed.
-            Integer thresh: If a comparison scores below this value, its Result object has ischeat set to True.
-                            Defaults to 18, or the config value if changed.
+            Integer steal_thresh: If a Comparison scores below this value, it is considered cheated.
+                    Defaults to 18, or the config value if changed.
+            Integer rx_thresh: if a replay has a ur below this value, it is considered cheated.
+                    Deaults to 50, or the config value if changed.
         """
 
         self.log = logging.getLogger(__name__ + ".Check")
@@ -45,7 +49,8 @@ class Check():
         self.replays2 = replays2 if replays2 else [] # make replays2 fake iterable, for #filter mostly
         self.mode = "double" if replays2 else "single"
         self.loaded = False
-        self.thresh = thresh if thresh else config.thresh
+        self.steal_thresh = steal_thresh if steal_thresh else config.steal_thresh
+        self.rx_thresh = rx_thresh if rx_thresh else config.rx_thresh
         self.cache = cache if cache else config.cache
         self.include = include if include else config.include
 
