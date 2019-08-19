@@ -25,7 +25,8 @@ For simple usage, you may only ever need to use convenience methods. These metho
 ```python
 from circleguard import *
 
-circleguard = Circleguard("your-api-key")
+# replace the api key used in these examples with your own key
+circleguard = Circleguard("5c626a85b077fac5d201565d5413de06b92382c4")
 
 # screen a user's top plays for replay steals and remods. (defaults to 50 top plays)
 for r in circleguard.user_check(12092800):
@@ -60,7 +61,7 @@ The more flexible way to use circleguard is to make your own Check object and ru
 from circleguard import *
 from pathlib import Path
 
-circleguard = Circleguard("your-api-key")
+circleguard = Circleguard("5c626a85b077fac5d201565d5413de06b92382c4")
 
 # assuming you have your replays folder in ../replays, relative to your script. Adjust as necessary
 PATH = Path(__file__).parent / "replays"
@@ -88,7 +89,7 @@ Circleguard will cache downloaded replays if you give it the path to a database 
 
 ```python
 # if the database given doesn't exist, it will be created at the specified location.
-cg = Circleguard("your-api-key", "/path/to/your/db/file/db.db")
+cg = Circleguard("5c626a85b077fac5d201565d5413de06b92382c4", "/path/to/your/db/file/db.db")
 cg.set_options(cache=True) # can also pass cache=True to a convenience method like map_check, but it will only apply for that single check. This will cache replays for all methods for this circleguard object.
 
 # all 6 replays will be loaded from the api
@@ -127,7 +128,7 @@ class IdentifiableReplay(ReplayPath):
         self.id = id
         super().__init__(path)
 
-circleguard = Circleguard("your-api-key")
+circleguard = Circleguard("5c626a85b077fac5d201565d5413de06b92382c4")
 check = Check(IdentifiableReplay(1, "/path/to/same/osr.osr"), IdentifiableReplay(2, "/path/to/same/osr.osr"))
 for result in circleguard.run(check):
     print("id {} vs {} - cheating? {}".format(result.replay1.id, result.replay2.id, result.ischeat))
