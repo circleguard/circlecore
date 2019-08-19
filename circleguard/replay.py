@@ -1,5 +1,6 @@
 import abc
 import logging
+from typing import Iterable, Callable
 
 import circleparse
 import numpy as np
@@ -7,110 +8,6 @@ import numpy as np
 from circleguard.enums import Detect, RatelimitWeight
 from circleguard import config
 from circleguard.utils import TRACE
-
-class Check():
-    """
-    Contains a list of Replay objects (or subclasses thereof) and how to proceed when
-    investigating them for cheats.
-
-    Attributes:
-        List [Replay] replays: A list of Replay objects.
-        List [Replay] replays2: A list of Replay objects to compare against 'replays' if passed.
-        Integer steal_thresh: If a comparison scores below this value, its Result object has ischeat set to True.
-                Defaults to 18, or the config value if changed.
-        Integer rx_thresh: if a replay has a ur below this value, it is considered cheated.
-                Deaults to 50, or the config value if changed.
-        Boolean cache: Whether to cache the loaded replays. Defaults to False, or the config value if changed.
-        String mode: "single" if only replays was passed, or "double" if both replays and replays2 were passed.
-        Boolean loaded: False at instantiation, set to True once check#load is called. See check#load for
-                more details.
-    """
-
-    def __init__(self, replays, replays2=None, cache=None, steal_thresh=None, rx_thresh=None, include=None):
-        """
-        Initializes a Check instance.
-
-        If only replays is passed, the replays in that list are compared with themselves. If
-        both replays and replays2 are passed, the replays in replays are compared only with the
-        replays in replays2. See comparer#compare for a more detailed description.
-
-        Args:
-            List [Replay] replays: A list of Replay objects.
-            List [Replay] replays2: A list of Replay objects to compare against 'replays' if passed.
-            Boolean cache: Whether to cache the loaded replays. Defaults to False, or the config value if changed.
-            Integer steal_thresh: If a Comparison scores below this value, it is considered cheated.
-                    Defaults to 18, or the config value if changed.
-            Integer rx_thresh: if a replay has a ur below this value, it is considered cheated.
-                    Deaults to 50, or the config value if changed.
-        """
-
-        self.log = logging.getLogger(__name__ + ".Check")
-        self.replays = replays # list of ReplayMap and ReplayPath objects, not yet processed
-        self.replays2 = replays2 if replays2 else [] # make replays2 fake iterable, for #filter mostly
-        self.mode = "double" if replays2 else "single"
-        self.loaded = False
-        self.steal_thresh = steal_thresh if steal_thresh else config.steal_thresh
-        self.rx_thresh = rx_thresh if rx_thresh else config.rx_thresh
-        self.cache = cache if cache else config.cache
-        self.include = include if include else config.include
-
-    def filter(self):
-        """
-        Filters self.replays and self.replays2 to contain only Replays where self.include returns True
-        when the Replay is passed. This gives total control to what replays end up getting loaded
-        and compared.
-        """
-
-        self.log.info("Filtering replays from Check")
-        self.replays = [replay for replay in self.replays if self._include(replay)]
-        self.replays2 = [replay for replay in self.replays2 if self._include(replay)]
-
-
-    def _include(self, replay):
-        """
-        An internal helper method to create log statements from inside a list comprehension.
-        """
-
-        if(self.include(replay)):
-            self.log.log(TRACE, "%r passed include(), keeping in Check replays", replay)
-            return True
-        else:
-            self.log.debug("%r failed include(), filtering from Check replays", replay)
-            return False
-
-    def load(self, loader):
-        """
-        If check.loaded is already true, this method silently returns. Otherwise, loads replay data for every
-        replay in both replays and replays2, and sets check.loaded to True. How replays are loaded is up to
-        the implementation of the specific subclass of the Replay. Although the subclass may not use the loader
-        object, it is still passed regardless to reduce type checking. For implementation details, see the load
-        method of each Replay subclass.
-
-        Args:
-            Loader loader: The loader to handle api requests, if required by the Replay.
-        """
-
-        self.log.info("Loading replays from Check")
-
-        if(self.loaded):
-            self.log.debug("Check already loaded, not loading individual Replays")
-            return
-        for replay in self.replays:
-            replay.load(loader, self.cache)
-        if(self.replays2):
-            for replay in self.replays2:
-                replay.load(loader, self.cache)
-        self.loaded = True
-        self.log.debug("Finished loading Check object")
-
-    def all_replays(self):
-        """
-        Convenience method for accessing all replays stored in this object.
-
-        Returns:
-            A list of all replays in this Check object (replays1 + replays2)
-        """
-        return self.replays + self.replays2
 
 
 class Replay(abc.ABC):
@@ -342,3 +239,109 @@ class ReplayPath(Replay):
         Replay.__init__(self, loaded.timestamp, map_id, loaded.player_name, user_id, loaded.mod_combination,
                         loaded.replay_id, loaded.play_data, self.detect, self.weight)
         self.log.log(TRACE, "Finished loading %s", self)
+
+
+class Check():
+    """
+    Contains a list of Replay objects (or subclasses thereof) and how to proceed when
+    investigating them for cheats.
+
+    Attributes:
+        List [Replay] replays: A list of Replay objects.
+        List [Replay] replays2: A list of Replay objects to compare against 'replays' if passed.
+        Integer steal_thresh: If a comparison scores below this value, its Result object has ischeat set to True.
+                Defaults to 18, or the config value if changed.
+        Integer rx_thresh: if a replay has a ur below this value, it is considered cheated.
+                Deaults to 50, or the config value if changed.
+        Boolean cache: Whether to cache the loaded replays. Defaults to False, or the config value if changed.
+        String mode: "single" if only replays was passed, or "double" if both replays and replays2 were passed.
+        Boolean loaded: False at instantiation, set to True once check#load is called. See check#load for
+                more details.
+    """
+
+    def __init__(self, replays: Iterable[Replay], replays2: Iterable[Replay]=None, cache: bool=None,
+                        steal_thresh: int=None, rx_thresh: int=None, include: Callable[[Replay], bool]=None):
+        """
+        Initializes a Check instance.
+
+        If only replays is passed, the replays in that list are compared with themselves. If
+        both replays and replays2 are passed, the replays in replays are compared only with the
+        replays in replays2. See comparer#compare for a more detailed description.
+
+        Args:
+            List [Replay] replays: A list of Replay objects.
+            List [Replay] replays2: A list of Replay objects to compare against 'replays' if passed.
+            Boolean cache: Whether to cache the loaded replays. Defaults to False, or the config value if changed.
+            Integer steal_thresh: If a Comparison scores below this value, it is considered cheated.
+                    Defaults to 18, or the config value if changed.
+            Integer rx_thresh: if a replay has a ur below this value, it is considered cheated.
+                    Deaults to 50, or the config value if changed.
+        """
+
+        self.log = logging.getLogger(__name__ + ".Check")
+        self.replays = replays # list of ReplayMap and ReplayPath objects, not yet processed
+        self.replays2 = replays2 if replays2 else [] # make replays2 fake iterable, for #filter mostly
+        self.mode = "double" if replays2 else "single"
+        self.loaded = False
+        self.steal_thresh = steal_thresh if steal_thresh else config.steal_thresh
+        self.rx_thresh = rx_thresh if rx_thresh else config.rx_thresh
+        self.cache = cache if cache else config.cache
+        self.include = include if include else config.include
+
+    def filter(self):
+        """
+        Filters self.replays and self.replays2 to contain only Replays where self.include returns True
+        when the Replay is passed. This gives total control to what replays end up getting loaded
+        and compared.
+        """
+
+        self.log.info("Filtering replays from Check")
+        self.replays = [replay for replay in self.replays if self._include(replay)]
+        self.replays2 = [replay for replay in self.replays2 if self._include(replay)]
+
+
+    def _include(self, replay):
+        """
+        An internal helper method to create log statements from inside a list comprehension.
+        """
+
+        if(self.include(replay)):
+            self.log.log(TRACE, "%r passed include(), keeping in Check replays", replay)
+            return True
+        else:
+            self.log.debug("%r failed include(), filtering from Check replays", replay)
+            return False
+
+    def load(self, loader):
+        """
+        If check.loaded is already true, this method silently returns. Otherwise, loads replay data for every
+        replay in both replays and replays2, and sets check.loaded to True. How replays are loaded is up to
+        the implementation of the specific subclass of the Replay. Although the subclass may not use the loader
+        object, it is still passed regardless to reduce type checking. For implementation details, see the load
+        method of each Replay subclass.
+
+        Args:
+            Loader loader: The loader to handle api requests, if required by the Replay.
+        """
+
+        self.log.info("Loading replays from Check")
+
+        if(self.loaded):
+            self.log.debug("Check already loaded, not loading individual Replays")
+            return
+        for replay in self.replays:
+            replay.load(loader, self.cache)
+        if(self.replays2):
+            for replay in self.replays2:
+                replay.load(loader, self.cache)
+        self.loaded = True
+        self.log.debug("Finished loading Check object")
+
+    def all_replays(self) -> Iterable[Replay]:
+        """
+        Convenience method for accessing all replays stored in this object.
+
+        Returns:
+            A list of all replays in this Check object (replays1 + replays2)
+        """
+        return self.replays + self.replays2
