@@ -69,3 +69,14 @@ class RatelimitWeight(Enum):
     NONE  = "none"
     LIGHT = "light"
     HEAVY = "heavy"
+
+class ResultType(Enum):
+    """
+    What type of cheat test we are representing the results for.
+    """
+
+    REPLAY_STEALING = "replay stealing"
+    REMODDING = "remodding"
+    RELAX = "relax"
+    AIM_CORRECTION = "aim correction"
+    TIMEWARP = "timewarp"
