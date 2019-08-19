@@ -30,7 +30,7 @@ circleguard = Circleguard("5c626a85b077fac5d201565d5413de06b92382c4")
 
 # screen a user's top plays for replay steals and remods. (defaults to 50 top plays)
 for r in circleguard.user_check(12092800):
-    ifr.ischeat:
+    if r.ischeat:
         # later_replay and earlier_replay provide a reference to either replay1 or replay2, depending on which one was set before the other.
         print("Found a cheater! {} vs {}, {} set later.".format(r.replay1.username, r.replay2.username, r.later_replay.username))
 
