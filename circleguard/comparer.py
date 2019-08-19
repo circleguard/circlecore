@@ -17,7 +17,7 @@ class Comparer:
     A class for managing a set of replay comparisons.
 
     Attributes:
-        Integer threshold: If a comparison scores below this value, the Result object is assigned a ischeat value of True.
+        Integer threshold: If a comparison scores below this value, one of the replays is considered cheated.
         List replays1: A list of Replay instances to compare against replays2 if passed, or against itself if not.
         List replays2: A list of Replay instances to be compared against.
 
