@@ -25,7 +25,7 @@ For simple usage, you may only ever need to use convenience methods. These metho
 ```python
 from circleguard import *
 
-# replace the api key used in these examples with your own key
+# replace the example api key with your own key - this key is invalid and will not work.
 circleguard = Circleguard("5c626a85b077fac5d201565d5413de06b92382c4")
 
 # screen a user's top plays for replay steals and remods. (defaults to 50 top plays)
