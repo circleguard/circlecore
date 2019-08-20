@@ -1,6 +1,7 @@
 import numpy as np
 from circleguard.enums import Keys
 from circleguard.result import RelaxResult
+import circleguard.utils as utils
 
 class Investigator:
     """
@@ -54,7 +55,7 @@ class Investigator:
         self.last_keys = [0, 0]
         for keypress in replay:
             if self._check_keys(keypress[3]):
-                    keypresses.append(keypress[:3])  # t,x,y
+                    keypresses.append(keypress)
         return keypresses
 
     def _check_keys(self, pressed):
@@ -100,3 +101,4 @@ class Hit:
         self.x = hit[1]-hitobj[1]
         self.y = hit[2]-hitobj[2]
         self.error = hit[0]-hitobj[0]
+        self.keys = [Keys(key_val) for key_val in utils.bits(hit[3])]
