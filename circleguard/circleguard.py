@@ -5,7 +5,6 @@ import os
 from os.path import isfile, join
 import logging
 from tempfile import NamedTemporaryFile
-from typing import Iterable, Union
 
 from circleguard.loader import Loader
 from circleguard.comparer import Comparer
@@ -15,7 +14,6 @@ from circleguard import config
 from circleguard.exceptions import CircleguardException
 from circleguard.replay import Check, ReplayMap, ReplayPath
 from circleguard.enums import Detect, RatelimitWeight
-from circleguard.result import ReplayStealingResult, RelaxResult
 from circleparse.beatmap import Beatmap
 
 
@@ -57,7 +55,7 @@ class Circleguard:
         self.options = Options()
         Circleguard.NUM += 1
 
-    def run(self, check) -> Union[Iterable[ReplayStealingResult], Iterable[RelaxResult]]:
+    def run(self, check):
         """
         Compares replays contained in the check object for replay steals.
 
@@ -98,8 +96,7 @@ class Circleguard:
             os.remove(bm_file.name)
 
 
-    def map_check(self, map_id, u=None, num=None, cache=None, steal_thresh=None, rx_thresh=None, mods=None, include=None)\
-                -> Union[Iterable[ReplayStealingResult], Iterable[RelaxResult]]:
+    def map_check(self, map_id, u=None, num=None, cache=None, steal_thresh=None, rx_thresh=None, mods=None, include=None):
         """
         Checks a map's leaderboard for replay steals.
 
@@ -134,7 +131,7 @@ class Circleguard:
         yield from self.run(check)
 
 
-    def create_map_check(self, map_id, u=None, num=None, cache=None, steal_thresh=None, mods=None, include=None) -> Check:
+    def create_map_check(self, map_id, u=None, num=None, cache=None, steal_thresh=None, mods=None, include=None):
         """
         Creates the Check object used in the map_check convenience method. See that method for more information.
         """
@@ -161,8 +158,7 @@ class Circleguard:
             replays.append(ReplayMap(info.map_id, info.user_id, info.mods, username=info.username))
         return Check(replays, replays2=replays2, cache=cache, steal_thresh=steal_thresh, include=include)
 
-    def verify(self, map_id, u1, u2, cache=None, steal_thresh=None, include=None)\
-                -> Iterable[ReplayStealingResult]:
+    def verify(self, map_id, u1, u2, cache=None, steal_thresh=None, include=None):
         """
         Verifies that two user's replay on a map are steals of each other.
 
@@ -185,7 +181,7 @@ class Circleguard:
         check = self.create_verify_check(map_id, u1, u2, cache, steal_thresh, include)
         yield from self.run(check)
 
-    def create_verify_check(self, map_id, u1, u2, cache=None, steal_thresh=None, include=None) -> Check:
+    def create_verify_check(self, map_id, u1, u2, cache=None, steal_thresh=None, include=None):
         """
         Creates the Check object used in the verify_check convenience method. See that method for more information.
         """
@@ -202,8 +198,7 @@ class Circleguard:
 
         return Check([replay1, replay2], cache=cache, steal_thresh=steal_thresh, include=include)
 
-    def user_check(self, u, num, cache=None, steal_thresh=None, include=None)\
-                -> Union[Iterable[ReplayStealingResult], Iterable[RelaxResult]]:
+    def user_check(self, u, num, cache=None, steal_thresh=None, include=None):
         """
         Checks a user's top plays for replay steals.
 
@@ -235,7 +230,7 @@ class Circleguard:
             for check in check_list:
                 yield from self.run(check)
 
-    def create_user_check(self, u, num_top, num_users, cache=None, steal_thresh=None, include=None) -> Check:
+    def create_user_check(self, u, num_top, num_users, cache=None, steal_thresh=None, include=None):
         """
         Creates the Check object used in the user_check convenience method. See that method for more information.
 
@@ -278,8 +273,7 @@ class Circleguard:
         return ret
 
 
-    def local_check(self, folder, map_id=None, u=None, num=None, cache=None, steal_thresh=None, include=None)\
-                -> Union[Iterable[ReplayStealingResult], Iterable[RelaxResult]]:
+    def local_check(self, folder, map_id=None, u=None, num=None, cache=None, steal_thresh=None, include=None):
         """
         Compares locally stored osr files for replay steals.
 
@@ -308,7 +302,7 @@ class Circleguard:
         check = self.create_local_check(folder, map_id, u, num, cache, steal_thresh, include)
         yield from self.run(check)
 
-    def create_local_check(self, folder, map_id=None, u=None, num=None, cache=None, steal_thresh=None, include=None) -> Check:
+    def create_local_check(self, folder, map_id=None, u=None, num=None, cache=None, steal_thresh=None, include=None):
         """
         Creates the Check object used in the local_check convenience method. See that method for more information.
         """
