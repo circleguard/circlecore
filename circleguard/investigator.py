@@ -81,15 +81,6 @@ class Investigator:
                 keypresses.pop(keypresses.index(temp_hits[index]))  # remove used hits
         return array
 
-    def hit_map(self):
-        hitobjs = self._parse_beatmap(self.beatmap)
-        keypresses = self._parse_keys(self.replay)
-        filtered_array = self._filter_hits(hitobjs,keypresses)
-        array = []
-        for hit, press in filtered_array:
-            array.append(Hit(hit,press))
-        return array
-
 class Hit:
     def __init__(self, hitobj, hit):
         self.x = hit[1]-hitobj[1]
