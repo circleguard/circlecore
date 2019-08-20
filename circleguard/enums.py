@@ -80,3 +80,10 @@ class ResultType(Enum):
     RELAX = "relax"
     AIM_CORRECTION = "aim correction"
     TIMEWARP = "timewarp"
+
+class Keys(Enum):
+    M1 = 1
+    M2 = 2
+    K1 = 4
+    K2 = 8
+    SMOKE = 16
