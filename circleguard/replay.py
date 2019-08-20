@@ -1,6 +1,6 @@
 import abc
 import logging
-from typing import Iterable, Callable, Optional
+from typing import Iterable
 
 import circleparse
 import numpy as np
@@ -259,8 +259,7 @@ class Check():
                 more details.
     """
 
-    def __init__(self, replays: Iterable[Replay], replays2: Optional[Iterable[Replay]]=None, cache: Optional[bool]=None,
-                        steal_thresh: Optional[int]=None, rx_thresh: Optional[int]=None, include: Optional[Callable[[Replay], bool]]=None):
+    def __init__(self, replays, replays2=None, cache=None, steal_thresh=None, rx_thresh=None, include=None):
         """
         Initializes a Check instance.
 
