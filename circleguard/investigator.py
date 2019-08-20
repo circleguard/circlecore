@@ -1,6 +1,7 @@
 import numpy as np
-
+from circleguard.enums import Keys
 from circleguard.result import RelaxResult
+import circleguard.utils as utils
 
 class Investigator:
     """
@@ -24,6 +25,7 @@ class Investigator:
         self.replay = replay.as_list_with_timestamps()
         self.beatmap = beatmap
         self.threshold = threshold
+        self.last_keys = [0, 0]
 
     def investigate(self):
         ur = self.ur()
@@ -50,16 +52,20 @@ class Investigator:
 
     def _parse_keys(self, replay):
         keypresses = []
-        last = 0
+        self.last_keys = [0, 0]
         for keypress in replay:
-            if keypress[3] % 5 == 0 and keypress[3] != 0:  # 5=> key1, 10 => key2, 15 => both keys
-                if keypress[3] != last:
-                    if last != 15:  # ignore if the user held both buttons and let go of one
-                        keypresses.append(keypress[:3])  # t,x,y
-                    last = keypress[3]
-            else:
-                last = 0
+            if self._check_keys(keypress[3]):
+                    keypresses.append(keypress)
         return keypresses
+
+    def _check_keys(self, pressed):
+        checks = [pressed & key.value for key in (Keys.K1, Keys.K2)]
+        if checks != self.last_keys and any(checks): 
+            if not all(self.last_keys):  # skip if user was holding both buttons in previous event
+                self.last_keys = checks
+                return True
+        self.last_keys = checks
+        return False
 
     def _filter_hits(self, hitobjs, keypresses):
         array = []
@@ -86,3 +92,4 @@ class Hit:
         self.x = hit[1]-hitobj[1]
         self.y = hit[2]-hitobj[2]
         self.error = hit[0]-hitobj[0]
+        self.keys = [Keys(key_val) for key_val in utils.bits(hit[3])]
