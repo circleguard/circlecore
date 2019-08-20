@@ -25,8 +25,7 @@ class Replay(abc.ABC):
             List [circleparse.Replay.ReplayEvent] replay_data: An array containing objects with the attributes x, y, time_since_previous_action,
                             and keys_pressed. If the replay could not be loaded (from the api or otherwise), this field should be None.
                             This means that this replay will not be compared against other replays or investigated for cheats.
-            Detect detect: The Detect enum (or bitwise combination of enums), indicating what types of cheats this
-                            replay should be investigated or compared for.
+            Detect detect: What cheats to run tests to detect.
             RatelimitWeight weight: How much it 'costs' to load this replay from the api. If the load method of the replay makes no api calls,
                             this value is RatelimitWeight.NONE. If it makes only light api calls (anything but get_replay), this value is
                             RatelimitWeight.LIGHT. If it makes any heavy api calls (get_replay), this value is RatelimitWeight.HEAVY.
@@ -102,15 +101,14 @@ class ReplayMap(Replay):
                          However, if the username is known (by retrieving it through the api, or other means), it is better
                          to represent the Replay with a player's name than an id. Both username and user_id will
                          obviously still be available to you through the result object after comparison.
-        Detect detect: The Detect enum (or bitwise combination of enums), indicating what types of cheats this
-                       replay should be investigated or compared for.
+        Detect detect: What cheats to run tests to detect.
         Boolean loaded: Whether this replay has been loaded. If True, calls to #load will have no effect.
                         See #load for more information.
         RatelimitWeight weight: RatelimitWeight.HEAVY, as this class' load method makes a heavy api call. See RatelimitWeight
                                 documentation for more information.
     """
 
-    def __init__(self, map_id, user_id, mods=None, username=None, detect=Detect.ALL):
+    def __init__(self, map_id, user_id, mods=None, username=None, detect=None):
         """
         Initializes a ReplayMap instance.
 
@@ -125,15 +123,14 @@ class ReplayMap(Replay):
                              However, if the username is known (by retrieving it through the api, or other means), it is
                              better to represent the Replay with a player's name than an id. Both username and user_id
                              will obviously still be available to you through the result object after comparison.
-            Detect detect: The Detect enum (or bitwise combination of enums), indicating what types of cheats this
-                           replay should be investigated or compared for.
+            Detect detect: What cheats to run tests to detect.
         """
 
         self.log = logging.getLogger(__name__ + ".ReplayMap")
         self.map_id = map_id
         self.user_id = user_id
         self.mods = mods
-        self.detect = detect
+        self.detect = detect if detect is not None else config.detect
         self.weight = RatelimitWeight.HEAVY
         self.loaded = False
         self.username = username if username else user_id
@@ -179,27 +176,25 @@ class ReplayPath(Replay):
 
     Attributes:
         [String or Path] path: A pathlike object representing the absolute path to the osr file.
-        Detect detect: The Detect enum (or bitwise combination of enums), indicating what types of cheats this
-                       replay should be investigated or compared for.
+        Detect detect: What cheats to run tests to detect.
         Boolean loaded: Whether this replay has been loaded. If True, calls to #load will have no effect.
                         See #load for more information.
         RatelimitWeight weight: RatelimitWeight.LIGHT, as this class' load method makes only light api calls.
                                 See RatelimitWeight documentation for more information.
     """
 
-    def __init__(self, path, detect=Detect.ALL):
+    def __init__(self, path, detect=None):
         """
         Initializes a ReplayPath instance.
 
         Args:
             [String or Path] path: A pathlike object representing the absolute path to the osr file.
-            Detect detect: The Detect enum (or bitwise combination of enums), indicating what types of cheats this
-                           replay should be investigated or compared for.
+            Detect detect: What cheats to run tests to detect.
         """
 
         self.log = logging.getLogger(__name__ + ".ReplayPath")
         self.path = path
-        self.detect = detect
+        self.detect = detect if detect is not None else config.detect
         self.weight = RatelimitWeight.LIGHT
         self.loaded = False
 
@@ -228,7 +223,7 @@ class ReplayPath(Replay):
         """
 
         self.log.debug("Loading ReplayPath %r", self)
-        if(self.loaded):
+        if self.loaded:
             self.log.debug("%s already loaded, not loading", self)
             return
 
@@ -257,9 +252,10 @@ class Check():
         String mode: "single" if only replays was passed, or "double" if both replays and replays2 were passed.
         Boolean loaded: False at instantiation, set to True once check#load is called. See check#load for
                 more details.
+        Detect detect: What cheats to run tests to detect.
     """
 
-    def __init__(self, replays, replays2=None, cache=None, steal_thresh=None, rx_thresh=None, include=None):
+    def __init__(self, replays, replays2=None, cache=None, steal_thresh=None, rx_thresh=None, include=None, detect=None):
         """
         Initializes a Check instance.
 
@@ -275,11 +271,23 @@ class Check():
                     Defaults to 18, or the config value if changed.
             Integer rx_thresh: if a replay has a ur below this value, it is considered cheated.
                     Deaults to 50, or the config value if changed.
+            Function include: A Predicate function that returns True if the replay should be loaded, and False otherwise.
+                    The include function will be passed a single argument - the circleguard.Replay object, or one
+                    of its subclasses.
+            Detect detect: What cheats to run tests to detect. This will only overwrite replay's settings in this Check
+                    if the replays were not given a Detect different from the (default) config value.
         """
 
         self.log = logging.getLogger(__name__ + ".Check")
         self.replays = replays # list of ReplayMap and ReplayPath objects, not yet processed
         self.replays2 = replays2 if replays2 else [] # make replays2 fake iterable, for #filter mostly
+        self.detect = detect if detect else config.detect
+        for r in self.all_replays():
+            # if detect was not passed to Replays they default to config.detect,
+            # we should only overwrite when detect wasn't explicitly passed to
+            # the replay
+            if r.detect == config.detect:
+                r.detect = self.detect
         self.mode = "double" if replays2 else "single"
         self.loaded = False
         self.steal_thresh = steal_thresh if steal_thresh else config.steal_thresh
@@ -304,7 +312,7 @@ class Check():
         An internal helper method to create log statements from inside a list comprehension.
         """
 
-        if(self.include(replay)):
+        if self.include(replay):
             self.log.log(TRACE, "%r passed include(), keeping in Check replays", replay)
             return True
         else:
@@ -325,12 +333,12 @@ class Check():
 
         self.log.info("Loading replays from Check")
 
-        if(self.loaded):
+        if self.loaded :
             self.log.debug("Check already loaded, not loading individual Replays")
             return
         for replay in self.replays:
             replay.load(loader, self.cache)
-        if(self.replays2):
+        if self.replays2:
             for replay in self.replays2:
                 replay.load(loader, self.cache)
         self.loaded = True

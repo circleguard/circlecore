@@ -96,7 +96,7 @@ class Circleguard:
             os.remove(bm_file.name)
 
 
-    def map_check(self, map_id, u=None, num=None, cache=None, steal_thresh=None, rx_thresh=None, mods=None, include=None):
+    def map_check(self, map_id, u=None, num=None, cache=None, steal_thresh=None, rx_thresh=None, mods=None, include=None, detect=None):
         """
         Checks a map's leaderboard for replay steals.
 
@@ -123,15 +123,16 @@ class Circleguard:
             Function include: A Predicate function that returns True if the replay should be loaded, and False otherwise.
                               The include function will be passed a single argument - the circleguard.Replay object, or one
                               of its subclasses.
+            Detect detect: What cheats to run tests to detect for replays on this map.
 
         Returns:
             A generator containing Result objects of the comparisons.
         """
-        check = self.create_map_check(map_id, u, num, cache, steal_thresh, mods, include)
+        check = self.create_map_check(map_id, u, num, cache, steal_thresh, mods, include, detect)
         yield from self.run(check)
 
 
-    def create_map_check(self, map_id, u=None, num=None, cache=None, steal_thresh=None, mods=None, include=None):
+    def create_map_check(self, map_id, u=None, num=None, cache=None, steal_thresh=None, mods=None, include=None, detect=None):
         """
         Creates the Check object used in the map_check convenience method. See that method for more information.
         """
@@ -140,6 +141,7 @@ class Circleguard:
         cache = cache if cache is not None else options.cache
         steal_thresh = steal_thresh if steal_thresh is not None else options.steal_thresh
         include = include if include is not None else options.include
+        detect = detect if detect is not None else options.detect
 
         self.log.info("Map check with map id %d, u %s, num %s, cache %s, steal_thresh %s", map_id, u, num, cache, steal_thresh)
         replays2 = None
@@ -156,7 +158,7 @@ class Circleguard:
                                 "the same replay id as the user's replay", info.map_id, info.user_id, info.mods)
                 continue
             replays.append(ReplayMap(info.map_id, info.user_id, info.mods, username=info.username))
-        return Check(replays, replays2=replays2, cache=cache, steal_thresh=steal_thresh, include=include)
+        return Check(replays, replays2=replays2, cache=cache, steal_thresh=steal_thresh, include=include, detect=detect)
 
     def verify(self, map_id, u1, u2, cache=None, steal_thresh=None, include=None):
         """
@@ -196,9 +198,9 @@ class Circleguard:
         replay1 = ReplayMap(info1.map_id, info1.user_id, info1.mods, username=info1.username)
         replay2 = ReplayMap(info2.map_id, info2.user_id, info2.mods, username=info2.username)
 
-        return Check([replay1, replay2], cache=cache, steal_thresh=steal_thresh, include=include)
+        return Check([replay1, replay2], cache=cache, steal_thresh=steal_thresh, include=include, detect=Detect.STEAL)
 
-    def user_check(self, u, num, cache=None, steal_thresh=None, include=None):
+    def user_check(self, u, num, cache=None, steal_thresh=None, include=None, detect=None):
         """
         Checks a user's top plays for replay steals.
 
@@ -219,18 +221,19 @@ class Circleguard:
             Function include: A Predicate function that returns True if the replay should be loaded, and False otherwise.
                               The include function will be passed a single argument - the circleguard.Replay object, or one
                               of its subclasses.
+            Detect detect: What cheats to run tests to detect.
 
         Returns:
             A generator containing Result objects of the comparisons.
         """
 
-        for check_list in self.create_user_check(u, num, cache, steal_thresh, include):
+        for check_list in self.create_user_check(u, num, cache, steal_thresh, include, detect):
             # yuck; each top play has two different checks (remodding and stealing)
             # which is why we need a double loop
             for check in check_list:
                 yield from self.run(check)
 
-    def create_user_check(self, u, num_top, num_users, cache=None, steal_thresh=None, include=None):
+    def create_user_check(self, u, num_top, num_users, cache=None, steal_thresh=None, include=None, detect=None):
         """
         Creates the Check object used in the user_check convenience method. See that method for more information.
 
@@ -243,6 +246,7 @@ class Circleguard:
         cache = cache if cache is not None else options.cache
         steal_thresh = steal_thresh if steal_thresh is not None else options.steal_thresh
         include = include if include is not None else options.include
+        detect = detect if detect is not None else options.detect
 
         self.log.info("User check with u %s, num_top %s, num_users %s", u, num_top, num_users)
         ret = []
@@ -266,14 +270,14 @@ class Circleguard:
             for info in self.loader.user_info(map_id, user_id=u, limit=False)[1:]:
                 remod_replays.append(ReplayMap(info.map_id, info.user_id, mods=info.mods, username=info.username))
 
-            check1 = Check(user_replay, replays2=replays, cache=cache, steal_thresh=steal_thresh, include=include)
-            check2 = Check(user_replay + remod_replays, cache=cache, steal_thresh=steal_thresh, include=include)
+            check1 = Check(user_replay, replays2=replays, cache=cache, steal_thresh=steal_thresh, include=include, detect=detect)
+            check2 = Check(user_replay + remod_replays, cache=cache, steal_thresh=steal_thresh, include=include, detect=detect)
             ret.append([check1, check2])
 
         return ret
 
 
-    def local_check(self, folder, map_id=None, u=None, num=None, cache=None, steal_thresh=None, include=None):
+    def local_check(self, folder, map_id=None, u=None, num=None, cache=None, steal_thresh=None, include=None, detect=None):
         """
         Compares locally stored osr files for replay steals.
 
@@ -294,15 +298,16 @@ class Circleguard:
             Function include: A Predicate function that returns True if the replay should be loaded, and False otherwise.
                               The include function will be passed a single argument - the circleguard.Replay object, or one
                               of its subclasses.
+            Detect detect: What cheats to run tests to detect.
 
         Returns:
             A generator containing Result objects of the comparisons.
         """
 
-        check = self.create_local_check(folder, map_id, u, num, cache, steal_thresh, include)
+        check = self.create_local_check(folder, map_id, u, num, cache, steal_thresh, include, detect)
         yield from self.run(check)
 
-    def create_local_check(self, folder, map_id=None, u=None, num=None, cache=None, steal_thresh=None, include=None):
+    def create_local_check(self, folder, map_id=None, u=None, num=None, cache=None, steal_thresh=None, include=None, detect=None):
         """
         Creates the Check object used in the local_check convenience method. See that method for more information.
         """
@@ -311,6 +316,7 @@ class Circleguard:
         cache = cache if cache is not None else options.cache
         steal_thresh = steal_thresh if steal_thresh is not None else options.steal_thresh
         include = include if include is not None else options.include
+        detect = detect if detect is not None else options.detect
 
         paths = [folder / f for f in os.listdir(folder) if isfile(folder / f) and f.endswith(".osr")]
         local_replays = [ReplayPath(path) for path in paths]
@@ -324,7 +330,7 @@ class Circleguard:
 
             online_replays = [ReplayMap(info.map_id, info.user_id, info.mods, username=info.username) for info in infos]
 
-        return Check(local_replays, replays2=online_replays, steal_thresh=steal_thresh, include=include)
+        return Check(local_replays, replays2=online_replays, steal_thresh=steal_thresh, include=include, detect=detect)
 
     def load(self, check, replay):
         """
@@ -336,7 +342,7 @@ class Circleguard:
         """
         replay.load(self.loader, check.cache)
 
-    def set_options(self, steal_thresh=None, rx_thresh=None, num=None, cache=None, failfast=None, loglevel=None, include=None):
+    def set_options(self, steal_thresh=None, rx_thresh=None, num=None, cache=None, failfast=None, loglevel=None, include=None, detect=None):
         """
         Changes the default value for different options in circleguard.
         Affects only the ircleguard instance this method is called on.
@@ -356,6 +362,7 @@ class Circleguard:
             Function include: A Predicate function that returns True if the replay should be loaded, and False otherwise.
                           The include function will be passed a single argument - the circleguard.Replay object, or one
                           of its subclasses.
+            Detect detect: What cheats to run tests to detect.
         """
 
         for k, v in locals().items():
@@ -369,7 +376,7 @@ class Circleguard:
             else:  # this only happens if we fucked up, not the user's fault
                 raise CircleguardException(f"The key {k} (value {v}) is not available as a config option for a circleguard instance")
 
-def set_options(steal_thresh=None, rx_thresh=None, num=None, cache=None, failfast=None, loglevel=None, include=None):
+def set_options(steal_thresh=None, rx_thresh=None, num=None, cache=None, failfast=None, loglevel=None, include=None, detect=None):
     """
     Changes the default value for different options in circleguard.
     Affects all circleguard instances, even ones that have already been instantiated.
@@ -389,6 +396,7 @@ def set_options(steal_thresh=None, rx_thresh=None, num=None, cache=None, failfas
         Function include: A Predicate functrion that returns True if the replay should be loaded, and False otherwise.
                           The include function will be passed a single argument - the circleguard.Replay object, or one
                           of its subclasses.
+        Detect detect: What cheats to run tests to detect.
     """
 
     for k, v in locals().items():
@@ -412,11 +420,10 @@ class Options():
     def __init__(self):
         ...
 
-    # These methods are unfortunately necessary because when
-    # config module variables are updated, references to them are not - ie
-    # references to config.steal_thresh (or any other) are by value. So, when we
-    # access options attributes, just get the latest config variable with these
-    # methods.
+    # These methods are unfortunately necessary because when config module
+    # variables are updated, references to them are not - ie references to
+    # config.steal_thresh (or any other) are by value. So, when we access options
+    # attributes, just get the latest config variable with these methods.
     @property
     def steal_thresh(self):
         return config.steal_thresh
@@ -439,3 +446,7 @@ class Options():
     @property
     def include(self):
         return config.include
+
+    @property
+    def detect(self):
+        return config.detect
