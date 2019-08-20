@@ -1,6 +1,8 @@
 from enum import Enum, Flag
 
-from circleguard.exceptions import UnknownAPIException, RatelimitException, InvalidKeyException, ReplayUnavailableException
+from circleguard.exceptions import (UnknownAPIException, RatelimitException,
+                InvalidKeyException, ReplayUnavailableException, InvalidJSONException)
+
 # strings taken from osu api error responses
 # [api response, exception class type, details to pass to an exception]
 class Error(Enum):
@@ -8,6 +10,7 @@ class Error(Enum):
     RATELIMITED       = ["Requesting too fast! Slow your operation, cap'n!", RatelimitException, "We were ratelimited. Waiting it out"]
     RETRIEVAL_FAILED  = ["Replay retrieval failed.", ReplayUnavailableException, "Replay retrieval failed. Skipping"]
     INVALID_KEY       = ["Please provide a valid API key.", InvalidKeyException, "Please provide a valid api key"]
+    INVALID_JSON      = ["The api broke.", InvalidJSONException, "The api returned an invalid json response, retrying"]
     UNKNOWN           = ["Unknown error.", UnknownAPIException, "Unknown error when requesting a replay. Please report this "
                                                                 "to the developers at https://github.com/circleguard/circlecore"]
 
@@ -60,11 +63,27 @@ class RatelimitWeight(Enum):
     the corresponding value is RatelimitWeight.LIGHT. If it makes any heavy api calls (get_replay), the
     corresponding value is RatelimitWeight.HEAVY.
 
-    This value is used internally to determine how long the loader class will have to spend loading replays -
-    currently LIGHT and NONE are treated the same, and only HEAVY values are counted towards replays to load.
-    See loader#new_session and the Replay documentation for more details.
+    This value currently has no effect on the program and is reserved for possible future functionality.
     """
 
     NONE  = "none"
     LIGHT = "light"
     HEAVY = "heavy"
+
+class ResultType(Enum):
+    """
+    What type of cheat test we are representing the results for.
+    """
+
+    REPLAY_STEALING = "replay stealing"
+    REMODDING = "remodding"
+    RELAX = "relax"
+    AIM_CORRECTION = "aim correction"
+    TIMEWARP = "timewarp"
+
+class Keys(Enum):
+    M1 = 1
+    M2 = 2
+    K1 = 4
+    K2 = 8
+    SMOKE = 16

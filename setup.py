@@ -1,13 +1,24 @@
 from distutils.core import setup
 from setuptools import find_packages
-from circleguard.__init__ import __version__
+import re
 
 with open("README.md", "r") as readme:
     long_description = readme.read()
 
+# https://stackoverflow.com/a/7071358
+VERSION = "Unknown"
+VERSION_RE = r"^__version__ = ['\"]([^'\"]*)['\"]"
+
+with open("circleguard/version.py") as f:
+    match = re.search(VERSION_RE, f.read())
+    if match:
+        VERSION = match.group(1)
+    else:
+        raise RuntimeError("Unable to find version string in circleguard/version.py")
+
 setup(
     name="circleguard",
-    version=__version__,
+    version=VERSION,
     description="A player made and maintained cheat detection tool for osu!. "
                 "Provides support for detecting replay stealing and remodding "
                 "from a profile, map, or set of osr files.",
@@ -23,12 +34,12 @@ setup(
     author="Liam DeVoe",
     author_email="orionldevoe@gmail.com",
     url="https://github.com/circleguard/circlecore",
-    download_url = "https://github.com/circleguard/circlecore/tarball/v" + __version__,
+    download_url = "https://github.com/circleguard/circlecore/tarball/v" + VERSION,
     license = "MIT",
     packages=find_packages(),
     install_requires=[
-        "circleparse >= 5.0.1",
-        "ossapi >= 1.2.0",
+        "circleparse >= 6.1.0",
+        "ossapi >= 1.2.2",
         "wtc >= 1.1.3",
         "numpy",
         "requests"

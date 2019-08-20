@@ -14,7 +14,7 @@ First, install circleguard:
 pip install circleguard
 ```
 
-Circleguard can be run in two ways - through convenience methods such as `circleguard.user_check()` or by instantiating and passing a Check object to `circleguard.run(check)`, the latter of which provides much more control over how and what replays to compare. Both methods return a generator containing Result objects.
+Circleguard can be run in two ways - through convenience methods such as `circleguard.user_check()` or by instantiating and passing a Check object to `circleguard.run(check)`, the latter of which provides more control over how and what replays to compare. Both methods return a generator containing Result objects.
 
 The following examples provide very simple uses of Result objects. For more detailed documentation of what variables are available to you through Result objects, refer to its documentation in the code.
 
@@ -25,41 +25,43 @@ For simple usage, you may only ever need to use convenience methods. These metho
 ```python
 from circleguard import *
 
-circleguard = Circleguard("your-api-key", "/absolute/path/to/your/db/file.db")
+# replace the example api key with your own key - this key is invalid and will not work.
+circleguard = Circleguard("5c626a85b077fac5d201565d5413de06b92382c4")
 
-# screen a user's top plays for replay steals and remods.
-# You can change options such as whether to cache the results from the default for a single method. See Advanced Usage for more on default options.
-for r in circleguard.user_check(12092800, cache=True):
-    if(r.ischeat):
-        print("Found a cheater! {} vs {}, {} set later.".format(r.replay1.username, r.replay2.username, r.later_name))
+# screen a user's top plays for replay steals and remods. (defaults to 50 top plays)
+for r in circleguard.user_check(12092800):
+    if r.ischeat:
+        # later_replay and earlier_replay provide a reference to either replay1 or replay2, depending on which one was set before the other.
+        print("Found a cheater! {} vs {}, {} set later.".format(r.replay1.username, r.replay2.username, r.later_replay.username))
 
-# compare the top 10 plays on a map for replay steals
-for r in circleguard.map_check(1005542, num=10):
-    if(r.ischeat):
-        print("Found a cheater on a map! {} vs {}, {} set later.".format(r.replay1.username, r.replay2.username, r.later_name))
+# compare the top 10 HDHR plays on a map for replay steals
+# Mod to int documentation: https://github.com/ppy/osu-api/wiki#mods
+for r in circleguard.map_check(1005542, num=10, mods=24):
+    if r.ischeat:
+        print("Found a cheater on a map! {} vs {}, {} set later.".format(r.replay1.username, r.replay2.username, r.later_replay.username))
 
 # compare local files for replay steals
 for r in circleguard.local_check("/absolute/path/to/folder/containing/osr/files/"):
-     if(r.ischeat):
-        print("Found a cheater locally! {} vs {}, {} set later.".format(r.replay1.path, r.replay2.path, r.later_name))
+     if r.ischeat:
+        print("Found a cheater locally! {} vs {}, {} set later.".format(r.replay1.path, r.replay2.path, r.later_replay.path))
 
 # compare two specific users' plays on a map to check for a replay steal
-for r in circleguard.verify(1699366, 12092800, 7477458, False):
-    if(r.ischeat):
-        print("Confirmed that {} is cheating".format(r.later_name))
+for r in circleguard.verify(1699366, 12092800, 7477458):
+    if r.ischeat:
+        print("Confirmed that {} is cheating".format(r.later_replay.username))
     else:
         print("Neither of those two users appear to have stolen from each other")
 ```
 
 ### More Generally
 
-The much more flexible way to use circleguard is to make your own Check object and run circleguard with that. This allows for mixing different types of Replay objects - comparing local .osr's to online replays - as well as the liberty to instantiate the Replay objects yourself and use your own Replay subclasses. See [Advanced Usage](#subclassing-replay) for more on subclassing.
+The more flexible way to use circleguard is to make your own Check object and run circleguard with that. This allows for mixing different types of Replay objects - comparing local .osr's to online replays - as well as the liberty to instantiate the Replay objects yourself and use your own Replay subclasses. See [Advanced Usage](#subclassing-replay) for more on subclassing.
 
 ```python
 from circleguard import *
 from pathlib import Path
 
-circleguard = Circleguard("your-api-key", "/absolute/path/to/your/db/file.db")
+circleguard = Circleguard("5c626a85b077fac5d201565d5413de06b92382c4")
 
 # assuming you have your replays folder in ../replays, relative to your script. Adjust as necessary
 PATH = Path(__file__).parent / "replays"
@@ -69,19 +71,36 @@ PATH = Path(__file__).parent / "replays"
 replays = [ReplayPath(PATH / "woey.osr"), ReplayPath(PATH / "ryuk.osr")]
 check = Check(replays)
 for r in circleguard.run(check):
-    if(r.ischeat):
-        print("Found a cheater locally! {} vs {}, {} set later.".format(r.replay1.path, r.replay2.path, r.later_name))
+    if r.ischeat:
+        print("Found a cheater locally! {} vs {}, {} set later.".format(r.replay1.path, r.replay2.path, r.later_replay.path))
 
 # Check objects allow mixing of Replay subclasses. circleguard only defines ReplayPath and ReplayMap,
-# but as we will see further on, you can define your own subclasses to suit your needs.
+# but as we will see under Advanced Usage, you can define your own subclasses to suit your needs.
 replays = [ReplayPath(PATH / "woey.osr"), ReplayMap(map_id=1699366, user_id=12092800, mods=0)]
 for r in circleguard.run(Check(replays)):
-    if(r.ischeat):
-        # subclasses are mixed now
-        repr1 = r.replay1.path if r.replay1 is ReplayPath else r.replay1.username
-        repr2 = r.replay2.path if r.replay2 is ReplayPath else r.replay2.username
-        print("Found a cheater! {} vs {}, {} set later.".format(repr1, repr2, r.later_name))
+    if r.ischeat:
+        # Replay subclasses have well defined __str__ and __repr__ methods, so we can print them directly to represent them in a human readable way if need be.
+        print("Found a cheater! {} vs {}, {} set later.".format(r.replay1, r.replay2, r.later_replay))
 ```
+
+### Caching
+
+Circleguard will cache downloaded replays if you give it the path to a database and set the cache option to True. This reduces download times, because replays are stored locally instead of waiting for the quite heavy api ratelimits. You can see more about setting options under [Setting Options](#setting-options).
+
+```python
+# if the database given doesn't exist, it will be created at the specified location.
+cg = Circleguard("5c626a85b077fac5d201565d5413de06b92382c4", "/path/to/your/db/file/db.db")
+cg.set_options(cache=True) # can also pass cache=True to a convenience method like map_check, but it will only apply for that single check. This will cache replays for all methods for this circleguard object.
+
+# all 6 replays will be loaded from the api
+for r in cg.map_check(221777, num=6):
+    pass
+
+# the first 6 replays will be loaded from the cache, and only 5 will be loaded from the api, avoiding the 10 replays/min ratelimit.
+for r in cg.map_check(221777, num=11)
+```
+
+Caching persists across runs since it is stored on a file instead of in memory; just pass the path to the file when instantiating circleguard.
 
 ## Advanced Usage
 
@@ -109,7 +128,7 @@ class IdentifiableReplay(ReplayPath):
         self.id = id
         super().__init__(path)
 
-circleguard = Circleguard("your-api-key", "/absolute/path/to/your/db/file.db")
+circleguard = Circleguard("5c626a85b077fac5d201565d5413de06b92382c4")
 check = Check(IdentifiableReplay(1, "/path/to/same/osr.osr"), IdentifiableReplay(2, "/path/to/same/osr.osr"))
 for result in circleguard.run(check):
     print("id {} vs {} - cheating? {}".format(result.replay1.id, result.replay2.id, result.ischeat))
@@ -158,9 +177,8 @@ the corresponding value is RatelimitWeight.NONE. If it makes only light api call
 the corresponding value is RatelimitWeight.LIGHT. If it makes any heavy api calls (get_replay), the
 corresponding value is RatelimitWeight.HEAVY.
 
-This value is used internally to determine how long the loader class will have to spend loading replays -
-currently LIGHT and NONE are treated the same, and only HEAVY values are counted towards replays to load.
-See loader#new_session and the Replay documentation for more details.
+    This value currently has no effect on the program and is reserved for possible future functionality.
+
 """
 ```
 
@@ -170,9 +188,17 @@ Finally, the load method of the replay must accept one required argument and one
 
 ### Loading Replays
 
-Normally, all replays in a `Check` object are loaded when you call `circleguard#run(check)`. However, if you require more control over when you load your replays (or which ones get loaded when you do), you can call `circleguard.load(replay, check)` to load an individual replay contained in the passed `Check` object. This is a shorthand method for calling `replay#load(circleguard.loader, check.cache)`, and going through circleguard is always recommended, as not doing so can cause unexpected caching issues with the settings hierarchy not cascading down to the replay correctly. See the last section of Subclassing Replay for more on the optional cache option for `replay#load`.
+Normally, all replays in a `Check` object are loaded when you call `circleguard#run(check)`. However, if you require more control over when you load your replays (or which ones get loaded when you do), you can call `circleguard.load(check, replay)` to load an individual replay contained in the passed `Check` object. This is a shorthand method for calling `replay#load(circleguard.loader, check.cache)`, and going through circleguard is always recommended, as not doing so can cause unexpected caching issues with the settings hierarchy not cascading down to the replay correctly. See the last section of Subclassing Replay for more on the optional cache option for `replay#load`.
 
 There is no limitation on the order in which replays get loaded; when `circleguard#run(check)` is called, it first checks if `check.loaded` is `True`. If it is, it assumes all the replays in the check object are loaded as well and moves on to comparing them. Else, it checks if each replay in the check object have `replay.loaded` set to `True` - if so, it moves on to loading the next replay. Otherwise, it calls `replay#load`.
+
+### Modifying Convenience Method Check Before Loading
+
+You may find yourself wishing to perform an action on the `Check` returned by a convenience method before running it. Although the standard convenience methods create the `Check` and immediately run it, Circleguard provides methods that only create the `Check` (`circleguard#create_map_check`, `circleguard#create_user_check`, etc).
+
+For instance, the gui [Circleguard](https://github.com/circleguard/circleguard/) takes advantage of these methods to load the replays one by one and increment a progress bar before running the check, something that would not be possible with the standard convenience methods.
+
+You can also modify the `Check` by adding or removing replays before running it. You should see if the recommended approaches for dealing with this, such as the `include` argument for convenience methods and `Check` objects, satisfy your needs before resorting to modifying a returned `Check`.
 
 ## Contributing
 

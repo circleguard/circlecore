@@ -9,7 +9,7 @@ from circleguard.replay import Replay
 from circleguard.enums import Mod
 from circleguard.exceptions import InvalidArgumentsException, CircleguardException
 import circleguard.utils as utils
-from circleguard.result import Result
+from circleguard.result import ReplayStealingResult
 import circleguard.config as config
 
 class Comparer:
@@ -17,7 +17,7 @@ class Comparer:
     A class for managing a set of replay comparisons.
 
     Attributes:
-        Integer threshold: If a comparison scores below this value, the Result object is assigned a ischeat value of True.
+        Integer threshold: If a comparison scores below this value, one of the replays is considered cheated.
         List replays1: A list of Replay instances to compare against replays2 if passed, or against itself if not.
         List replays2: A list of Replay instances to be compared against.
 
@@ -104,7 +104,7 @@ class Comparer:
         if(mean < self.threshold):
             ischeat = True
 
-        return Result(replay1, replay2, mean, ischeat)
+        return ReplayStealingResult(replay1, replay2, mean, ischeat)
 
     @staticmethod
     def _compare_two_replays(replay1, replay2):
@@ -123,9 +123,9 @@ class Comparer:
         # interpolate
         (data1, data2) = utils.interpolate(data1, data2)
 
-        # remove time from each tuple
-        data1 = [d[1:] for d in data1]
-        data2 = [d[1:] for d in data2]
+        # remove time and keys from each tuple
+        data1 = [d[1:3] for d in data1]
+        data2 = [d[1:3] for d in data2]
 
         mods1 = [Mod(mod_val) for mod_val in utils.bits(replay1.mods)]
         mods2 = [Mod(mod_val) for mod_val in utils.bits(replay2.mods)]

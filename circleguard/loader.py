@@ -1,20 +1,19 @@
 from datetime import datetime
 import time
 import base64
-import sys
 import logging
-from math import ceil
 from lzma import LZMAError
 
+import requests
 from requests import RequestException
 import circleparse
 import ossapi
 
-from circleguard.replay import ReplayMap
 from circleguard.user_info import UserInfo
 from circleguard.enums import Error
 from circleguard.exceptions import (InvalidArgumentsException, APIException, CircleguardException,
-                        RatelimitException, InvalidKeyException, ReplayUnavailableException, UnknownAPIException)
+                        RatelimitException, InvalidKeyException, ReplayUnavailableException, UnknownAPIException,
+                        InvalidJSONException)
 from circleguard.utils import TRACE
 
 def request(function):
@@ -39,6 +38,10 @@ def request(function):
         except RatelimitException:
             self._enforce_ratelimit()
             # wrap function with the decorator then call decorator
+            ret = request(function)(*args, **kwargs)
+        except InvalidJSONException as e:
+            self.log.warning("Invalid json exception: {}. API likely having issues; sleeping for 3 seconds then retrying".format(e))
+            time.sleep(3)
             ret = request(function)(*args, **kwargs)
         except InvalidKeyException as e:
             raise CircleguardException("The given key is invalid")
@@ -71,10 +74,12 @@ def check_cache(function):
         self = args[0]
         user_info = args[1]
 
+        if self.cacher is None:
+            return function(*args, **kwargs)
+
         lzma = self.cacher.check_cache(user_info.map_id, user_info.user_id, user_info.mods)
-        if(lzma):
+        if lzma :
             replay_data = circleparse.parse_replay(lzma, pure_lzma=True).play_data
-            self.loaded += 1
             return replay_data
         else:
             return function(*args, **kwargs)
@@ -94,31 +99,26 @@ class Loader():
     start_time = datetime.min # when we started our requests cycle
 
 
-    def __init__(self, cacher, key):
+    def __init__(self, key, cacher=None):
         """
-        Initializes a Loader instance.
+        Initializes a Loader instance. If a Cacher is not provided,
+        scores will not be loaded from cache or cached to the databse.
         """
 
         self.log = logging.getLogger(__name__)
-        self.total = None
-        self.loaded = 0
         self.api = ossapi.ossapi(key)
         self.cacher = cacher
 
-
-    def new_session(self, total):
+    @request
+    def get_beatmap(self, map_id):
         """
-        Resets the loaded replays to 0, and sets the total to the passed total.
-
-        Intended to be called every time the loader is used for a different set of replay loadings -
-        since a Loader instance is passed around to Comparer and Investigator, each with different
-        amounts of replays to load, making new sessions is necessary to keep progress logs correct.
+        Returns the content of the beatmap of the given map. This request is
+        not ratelimited and does not require an api key. Because of this, treat
+        this endpoint with caution - the osu-tools repository uses this endpoint
+        and peppy has said it is "ok to use for now", but even so it is not in
+        the same category as other api endpoints.
         """
-
-        self.log.debug("Starting a new session with total %d", total)
-        self.loaded = 0
-        self.total = total
-
+        return requests.get(f"https://osu.ppy.sh/osu/{map_id}").content
 
     @request
     def user_info(self, map_id, num=None, user_id=None, mods=None, limit=True):
@@ -180,7 +180,6 @@ class Loader():
         if(number < 1 or number > 100):
             raise InvalidArgumentsException("The number of best user plays to fetch must be between 1 and 100 inclusive!")
         response = self.api.get_user_best({"m": "0", "u": user_id, "limit": number})
-
         Loader.check_response(response)
 
         return [int(x["beatmap_id"]) for x in response]
@@ -202,13 +201,8 @@ class Loader():
         """
 
         self.log.log(TRACE, "Requesting replay data by user %d on map %d with mods %s", user_id, map_id, mods)
-        if(self.total is None):
-            raise CircleguardException("loader#new_session(total) must be called after instantiation, before any replay data is loaded.")
-
         response = self.api.get_replay({"m": "0", "b": map_id, "u": user_id, "mods": mods})
-
         Loader.check_response(response)
-        self.loaded += 1
 
         return base64.b64decode(response["content"])
 
@@ -247,7 +241,8 @@ class Loader():
             self.log.warning("lzma from %r could not be decompressed, api returned corrupt replay", user_info)
             return None
         replay_data = parsed_replay.play_data
-        self.cacher.cache(lzma_bytes, user_info, should_cache=cache)
+        if self.cacher is not None:
+            self.cacher.cache(lzma_bytes, user_info, should_cache=cache)
         return replay_data
 
     def map_id(self, map_hash):
@@ -309,19 +304,17 @@ class Loader():
 
         difference = datetime.now() - Loader.start_time
         seconds_passed = difference.seconds
-        if(seconds_passed > Loader.RATELIMIT_RESET):
-            self.log.debug("More than a minute has passed since our last ratelimit, not sleeping")
-            return
 
         # sleep the remainder of the reset cycle so we guarantee it's been that long since the first request
         sleep_seconds = Loader.RATELIMIT_RESET - seconds_passed
+        self._ratelimit(sleep_seconds)
 
-        if self.total is None:
-            # occurs when calling light functions (user_info, get_user_best, etc)
-            # without #new_session being called when the key is ratelimited.
-            self.log.info("Ratelimited, sleeping for %s seconds.", sleep_seconds)
-        else:
-            self.log.info("Ratelimited, sleeping for %s seconds. %d of %d replays loaded. "
-                "ETA ~ %d min", sleep_seconds, self.loaded, self.total, ceil((self.total-self.loaded)/10))
+    def _ratelimit(self, length):
+        """
+        Sleeps the thread for the specified amount of time. Called by #_enforce_ratelimit.
 
-        time.sleep(sleep_seconds)
+        Split into two functions mostly to allow Loader subclasses to overload a single function and easily
+        get the time the Loader will be ratelimited for.
+        """
+        self.log.info("Ratelimited, sleeping for %s seconds.", length)
+        time.sleep(length)
