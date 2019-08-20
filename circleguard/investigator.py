@@ -24,6 +24,7 @@ class Investigator:
         self.replay = replay.as_list_with_timestamps()
         self.beatmap = beatmap
         self.threshold = threshold
+        self.last_keys = [0, 0]
 
     def investigate(self):
         ur = self.ur()
@@ -50,16 +51,22 @@ class Investigator:
 
     def _parse_keys(self, replay):
         keypresses = []
-        last = 0
+        self.last_keys = [0, 0]
         for keypress in replay:
-            if keypress[3] % 5 == 0 and keypress[3] != 0:  # 5=> key1, 10 => key2, 15 => both keys
-                if keypress[3] != last:
-                    if last != 15:  # ignore if the user held both buttons and let go of one
-                        keypresses.append(keypress[:3])  # t,x,y
-                    last = keypress[3]
-            else:
-                last = 0
+            if self._check_keys(keypress[3]):
+                    keypresses.append(keypress[:3])  # t,x,y
         return keypresses
+
+    def _check_keys(self, keys):
+        index = [0, 1]  # this work for both keyboard and mouse since mouse always triggers with keyboard
+        bits = bin(keys)[2:][::-1].ljust(8,"0")  # int to bits, remove 0b, inverse, pad for ease of use
+        checks = [(True if bits[i] == "1" else False) for i in index]  # yes I could just read the first two bits, but this is more extendable
+        if any(checks) and not all(self.last_keys):
+            self.last_keys = checks
+            return True
+        elif all(self.last_keys):
+            self.last_keys = checks
+        return False
 
     def _filter_hits(self, hitobjs, keypresses):
         array = []
