@@ -123,9 +123,9 @@ class Comparer:
         # interpolate
         (data1, data2) = utils.interpolate(data1, data2)
 
-        # remove time from each tuple
-        data1 = [d[1:] for d in data1]
-        data2 = [d[1:] for d in data2]
+        # remove time and keys from each tuple
+        data1 = [d[1:3] for d in data1]
+        data2 = [d[1:3] for d in data2]
 
         mods1 = [Mod(mod_val) for mod_val in utils.bits(replay1.mods)]
         mods2 = [Mod(mod_val) for mod_val in utils.bits(replay2.mods)]
