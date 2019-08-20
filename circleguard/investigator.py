@@ -1,5 +1,5 @@
 import numpy as np
-
+from circleguard.enums import Keys
 from circleguard.result import RelaxResult
 
 class Investigator:
@@ -57,15 +57,13 @@ class Investigator:
                     keypresses.append(keypress[:3])  # t,x,y
         return keypresses
 
-    def _check_keys(self, keys):
-        index = [0, 1]  # this work for both keyboard and mouse since mouse always triggers with keyboard
-        bits = bin(keys)[2:][::-1].ljust(8,"0")  # int to bits, remove 0b, inverse, pad for ease of use
-        checks = [(True if bits[i] == "1" else False) for i in index]  # yes I could just read the first two bits, but this is more extendable
-        if any(checks) and not all(self.last_keys):
-            self.last_keys = checks
-            return True
-        elif all(self.last_keys):
-            self.last_keys = checks
+    def _check_keys(self, pressed):
+        checks = [pressed & key.value for key in (Keys.K1, Keys.K2)]
+        if checks != self.last_keys and any(checks): 
+            if not all(self.last_keys):  # skip if user was holding both buttons in previous event
+                self.last_keys = checks
+                return True
+        self.last_keys = checks
         return False
 
     def _filter_hits(self, hitobjs, keypresses):
