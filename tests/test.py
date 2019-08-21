@@ -11,7 +11,10 @@ class TestSteal(TestCase):
     def __init__(self, *args, **kwargs):
         # extra args necessary since unittest init does some magic stuff
         super().__init__(*args, **kwargs)
-        self.cg = Circleguard(KEY)
+
+    @classmethod
+    def setUpClass(cls):
+        cls.cg = Circleguard(KEY)
 
     def test_cheated_replay(self):
         # taken from http://redd.it/bvfv8j, remodded replay by same user (CielXDLP) from HDHR to FLHDHR
