@@ -8,9 +8,6 @@ RES = Path(__file__).parent / "resources"
 
 
 class TestSteal(TestCase):
-    def __init__(self, *args, **kwargs):
-        # extra args necessary since unittest init does some magic stuff
-        super().__init__(*args, **kwargs)
 
     @classmethod
     def setUpClass(cls):
