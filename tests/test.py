@@ -27,6 +27,7 @@ class TestSteal(TestCase):
         earlier = r.earlier_replay
         later = r.later_replay
 
+        self.assertAlmostEqual(r.similarity, 4.2608, delta=0.0001, msg="Similarity is not correct")
         self.assertEqual(r1.map_id, r2.map_id, "Replay map ids did not match")
         self.assertEqual(r1.map_id, 1988753, "Replay map id was not correct")
         self.assertEqual(earlier.mods, 24, "Earlier replay mods was not correct") # HDHR
@@ -48,6 +49,7 @@ class TestSteal(TestCase):
         earlier = r.earlier_replay
         later = r.later_replay
 
+        self.assertAlmostEqual(r.similarity, 24.2129, delta=0.0001, msg="Similarity is not correct")
         self.assertEqual(r1.map_id, r2.map_id, "Replay map ids did not match")
         self.assertEqual(r1.map_id, 722238, "Replay map id was not correct")
         self.assertEqual(earlier.mods, 584, "Earlier replay mods was not correct") # HDNC
