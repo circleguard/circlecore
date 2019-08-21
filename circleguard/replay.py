@@ -19,7 +19,7 @@ class Replay(abc.ABC):
             Datetime timestamp: When this replay was played.
             Integer map_id: The map id the replay was played on, or 0 if unknown or on an unsubmitted map.
             String username: The username of the player who made the replay.
-            Integer user_id: The id of the player who made the replay, or 0 if unknown.
+            Integer user_id: The id of the player who made the replay, or 0 if unknown or a restricted player.
             Integer mods: The mods the replay was played with.
             Integer replay_id: The id of this replay, or 0 if it does not have an id (unsubmitted replays have no id).
             List [circleparse.Replay.ReplayEvent] replay_data: An array containing objects with the attributes x, y, time_since_previous_action,
@@ -133,7 +133,6 @@ class ReplayMap(Replay):
         self.detect = detect if detect is not None else config.detect
         self.weight = RatelimitWeight.HEAVY
         self.loaded = False
-        self.username = username if username else user_id
 
     def __repr__(self):
         if self.loaded:
@@ -143,10 +142,10 @@ class ReplayMap(Replay):
 
         else:
             return (f"ReplayMap(map_id={self.map_id},user_id={self.user_id},mods={self.mods},detect={self.detect},"
-                f"weight={self.weight},loaded={self.loaded},username={self.username})")
+                f"weight={self.weight},loaded={self.loaded})")
 
     def __str__(self):
-        return f"{'Loaded' if self.loaded else 'Unloaded'} ReplayMap by {self.username} on {self.map_id}"
+        return f"{'Loaded' if self.loaded else 'Unloaded'} ReplayMap by {self.user_id} on {self.map_id}"
 
     def load(self, loader, cache=None):
         """
@@ -161,7 +160,7 @@ class ReplayMap(Replay):
             return
         info = loader.user_info(self.map_id, user_id=self.user_id, mods=self.mods)
         replay_data = loader.replay_data(info, cache=cache)
-        Replay.__init__(self, info.timestamp, self.map_id, self.username, self.user_id, info.mods, info.replay_id, replay_data, self.detect, self.weight)
+        Replay.__init__(self, info.timestamp, self.map_id, info.username, self.user_id, info.mods, info.replay_id, replay_data, self.detect, self.weight)
         self.log.log(TRACE, "Finished loading %s", self)
 
 
