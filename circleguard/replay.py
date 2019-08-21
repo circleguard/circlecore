@@ -200,7 +200,7 @@ class ReplayPath(Replay):
 
     def __repr__(self):
         if self.loaded:
-            return (f"ReplayPath(path={self.path},map_id={self.map_id},mods={self.mods},detect={self.detect},"
+            return (f"ReplayPath(path={self.path},map_id={self.map_id},user_id={self.user_id},mods={self.mods},detect={self.detect},"
                     f"replay_id={self.replay_id},weight={self.weight},loaded={self.loaded},username={self.username})")
         else:
             return f"ReplayPath(path={self.path},detect={self.detect},weight={self.weight},loaded={self.loaded})"
