@@ -58,10 +58,11 @@ class TestSteal(TestCase):
         self.assertEqual(later.username, "TemaZpro", "Later username was not correct")
 
     def test_loading_replaypath(self):
-        replays = [ReplayPath(RES / "example_replay.osr")]
-        c = Check(replays)
-        self.cg.load(c, replays[0])
-        r = replays[0]
+        r = ReplayPath(RES / "example_replay.osr")
+        c = Check([r])
+        self.assertFalse(r.loaded, "Loaded status was not correct")
+        self.cg.load(c, r)
+
         self.assertEqual(r.mods, 72, "Mods was not correct")
         self.assertEqual(r.replay_id, 2029801532, "Replay id was not correct")
         self.assertEqual(r.username, "MarthXT", "Username was not correct")
@@ -71,10 +72,10 @@ class TestSteal(TestCase):
 
     def test_loading_replaymap(self):
         # Toy HDHR score on Pretender
-        replays = [ReplayMap(221777, 2757689)]
-        c = Check(replays)
-        self.cg.load(c, replays[0])
-        r = replays[0]
+        r = ReplayMap(221777, 2757689)
+        c = Check([r])
+        self.assertFalse(r.loaded, "Loaded status was not correct")
+        self.cg.load(c, r)
 
         self.assertEqual(r.map_id, 221777, "Map id was not correct")
         self.assertEqual(r.user_id, 2757689, "Map id was not correct")
