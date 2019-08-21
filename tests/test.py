@@ -3,7 +3,7 @@ from pathlib import Path
 
 from circleguard import Circleguard, Check, ReplayMap, ReplayPath, Detect, RatelimitWeight
 
-KEY = input("enter your api key: ")
+KEY = input("Enter your api key: ")
 RES = Path(__file__).parent / "resources"
 
 
