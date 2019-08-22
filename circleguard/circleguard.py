@@ -418,7 +418,15 @@ class Options():
     """
 
     def __init__(self):
-        ...
+        # underscores to not call the @property functions when
+        # accessing these attributes
+        self._steal_thresh = None
+        self._rx_thresh = None
+        self._num = None
+        self._cache = None
+        self._failfast = None
+        self._include = None
+        self._detect = None
 
     # These methods are unfortunately necessary because when config module
     # variables are updated, references to them are not - ie references to
@@ -426,27 +434,49 @@ class Options():
     # attributes, just get the latest config variable with these methods.
     @property
     def steal_thresh(self):
-        return config.steal_thresh
+        return config.steal_thresh if self._steal_thresh is None else self._steal_thresh
+    @steal_thresh.setter
+    def steal_thresh(self, v):
+        self._steal_thresh = v
 
     @property
     def rx_thresh(self):
-        return config.rx_thresh
+        return config.rx_thresh if self._rx_thresh is None else self._rx_thresh
+    @rx_thresh.setter
+    def rx_thresh(self, v):
+        self._rx_thresh = v
+
     @property
     def num(self):
-        return config.num
+        return config.num if self._num is None else self._num
+    @num.setter
+    def num(self, v):
+        self._num = v
 
     @property
     def cache(self):
-        return config.cache
+        return config.cache if self._cache is None else self._cache
+    @cache.setter
+    def cache(self, v):
+        self._cache = v
 
     @property
     def failfast(self):
-        return config.failfast
+        return config.failfast if self._failfast is None else self._failfast
+    @failfast.setter
+    def failfast(self, v):
+        self._failfast = v
 
     @property
     def include(self):
-        return config.include
+        return config.include if self._include is None else self._include
+    @include.setter
+    def include(self, v):
+        self._include = v
 
     @property
     def detect(self):
-        return config.detect
+        return config.detect if self._detect is None else self._detect
+    @detect.setter
+    def detect(self, v):
+        self._detect = v
