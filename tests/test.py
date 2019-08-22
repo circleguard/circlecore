@@ -19,7 +19,7 @@ class TestReplays(TestCase):
         cls.cg = Circleguard(KEY)
 
     @log
-    def test_cheated_replay(self):
+    def test_cheated_replaypath(self):
         # taken from http://redd.it/bvfv8j, remodded replay by same user (CielXDLP) from HDHR to FLHDHR
         replays = [ReplayPath(RES / "stolen_replay1.osr"), ReplayPath(RES / "stolen_replay2.osr")]
         c = Check(replays, detect=Detect.STEAL)
@@ -43,7 +43,7 @@ class TestReplays(TestCase):
         self.assertEqual(r1.username, r2.username, "Replay usernames did not match")
 
     @log
-    def test_legitimate_replay(self):
+    def test_legitimate_replaypath(self):
         replays = [ReplayPath(RES / "legit_replay1.osr"), ReplayPath(RES / "legit_replay2.osr")]
         c = Check(replays, detect=Detect.STEAL)
         r = list(self.cg.run(c))
