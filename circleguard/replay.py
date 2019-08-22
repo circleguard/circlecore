@@ -244,11 +244,14 @@ class Check():
                 Defaults to 18, or the config value if changed.
         Integer rx_thresh: if a replay has a ur below this value, it is considered cheated.
                 Deaults to 50, or the config value if changed.
+        Function include: A Predicate function that returns True if the replay should be loaded, and False otherwise.
+                The include function will be passed a single argument - the circleguard.Replay object, or one
+                of its subclasses.
+        Detect detect: What cheats to run tests to detect.
         Boolean cache: Whether to cache the loaded replays. Defaults to False, or the config value if changed.
         String mode: "single" if only replays was passed, or "double" if both replays and replays2 were passed.
         Boolean loaded: False at instantiation, set to True once check#load is called. See check#load for
                 more details.
-        Detect detect: What cheats to run tests to detect.
     """
 
     def __init__(self, replays, replays2=None, cache=None, steal_thresh=None, rx_thresh=None, include=None, detect=None):
