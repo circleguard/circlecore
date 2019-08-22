@@ -174,3 +174,9 @@ class Comparer:
         mu, sigma = distance.mean(), distance.std()
 
         return (mu, sigma)
+
+    def __repr__(self):
+        return f"Comparer(threshold={self.threshold},replays1={self.replays1},replays2={self.replays2})"
+
+    def __str__(self):
+        return f"Comparer with thresh {self.threshold}"
