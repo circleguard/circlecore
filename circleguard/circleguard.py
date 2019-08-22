@@ -72,6 +72,17 @@ class Circleguard:
         self.log.info("Running circleguard with a Check")
 
         check.filter()
+        # Checks are instantiated without relation to a cg instance by necessity of
+        # easy of use. This means if it is not given an option, it will default to
+        # the config value at that time, not the circleguard's option value, which has
+        # higher priority than the config value. So we change it here, and only so late
+        # because this is the first time the check gets tied to a cg instance and we are
+        # able to give it the cg's option. But don't overwrite the option if it was
+        # passed to the check (will be different from the config value if that is the case).
+        # TODO work on cases where config value is changed after check instantiation but before
+        # cg is run
+        if check.steal_thresh == config.steal_thresh:
+            check.steal_thresh = self.options.steal_thresh
         # steal check
         compare1 = [replay for replay in check.replays if replay.detect & Detect.STEAL]
         compare2 = [replay for replay in check.replays2 if replay.detect & Detect.STEAL]

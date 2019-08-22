@@ -1,7 +1,7 @@
 from unittest import TestCase
 from pathlib import Path
 
-from circleguard import Circleguard, Check, ReplayMap, ReplayPath, Detect, RatelimitWeight, set_options
+from circleguard import Circleguard, Check, ReplayMap, ReplayPath, Detect, RatelimitWeight, set_options, config
 
 KEY = input("Enter your api key: ")
 RES = Path(__file__).parent / "resources"
@@ -9,7 +9,7 @@ set_options(loglevel=20)
 
 def log(function):
     def wrapper(*args, **kwargs):
-        print(f"Running test {function.__name__}")
+        print(f"Running {function.__name__}")
         return function(*args, **kwargs)
     return wrapper
 
@@ -101,6 +101,7 @@ class TestOption(TestCase):
     @classmethod
     def setUpClass(cls):
         cls.cg = Circleguard(KEY)
+        # TODO use short replays to reduce comparison time (switch to ReplayPaths)
         cls.r1 = ReplayMap(221777, 2757689)
         cls.r2 = ReplayMap(221777, 3219026)
         cls.r3 = ReplayMap(221777, 3256299)
@@ -160,7 +161,6 @@ class TestOption(TestCase):
 
     @log
     def test_steal_thresh_class_true(self):
-        # TODO failing
         set_options(steal_thresh=19)
         self.cg.set_options(steal_thresh=21)
         c = Check([self.r1, self.r2])
@@ -169,7 +169,6 @@ class TestOption(TestCase):
 
     @log
     def test_steal_thresh_class_false(self):
-        # TODO failing
         set_options(steal_thresh=21)
         self.cg.set_options(steal_thresh=19)
         c = Check([self.r1, self.r2])
@@ -178,7 +177,6 @@ class TestOption(TestCase):
 
     @log
     def test_steal_thresh_class_without_global_true(self):
-        # TODO failing
         self.cg.set_options(steal_thresh=21)
         c = Check([self.r1, self.r2])
         r = list(self.cg.run(c))[0]
