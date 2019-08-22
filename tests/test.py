@@ -160,6 +160,7 @@ class TestOption(TestCase):
 
     @log
     def test_steal_thresh_class_true(self):
+        # TODO failing
         set_options(steal_thresh=19)
         self.cg.set_options(steal_thresh=21)
         c = Check([self.r1, self.r2])
@@ -168,6 +169,7 @@ class TestOption(TestCase):
 
     @log
     def test_steal_thresh_class_false(self):
+        # TODO failing
         set_options(steal_thresh=21)
         self.cg.set_options(steal_thresh=19)
         c = Check([self.r1, self.r2])
@@ -176,6 +178,7 @@ class TestOption(TestCase):
 
     @log
     def test_steal_thresh_class_without_global_true(self):
+        # TODO failing
         self.cg.set_options(steal_thresh=21)
         c = Check([self.r1, self.r2])
         r = list(self.cg.run(c))[0]
