@@ -1,4 +1,4 @@
-from unittest import TestCase
+from unittest import TestCase, skip
 from pathlib import Path
 
 from circleguard import Circleguard, Check, ReplayMap, ReplayPath, Detect, RatelimitWeight, set_options, config
@@ -184,3 +184,33 @@ class TestOption(TestCase):
         c = Check([self.r1, self.r2])
         r = list(self.cg.run(c))[0]
         self.assertFalse(r.ischeat, "Thresh should have been set to miss a cheat at the class level but was not")
+
+    # TODO test all options, not just steal thresh
+
+class TestInclude(TestCase):
+    @classmethod
+    def setUpClass(cls):
+        cls.cg = Circleguard(KEY)
+
+    def test_include_replaypath_filter_some(self):
+        def _include(replay):
+            return replay.replay_id in [2801164636]
+
+        c = Check([ReplayPath(RES / "stolen_replay1.osr"), ReplayPath(RES / "stolen_replay2.osr")], include=_include)
+        self.cg.load(c)
+        c.filter()
+        self.assertEqual(len(c.all_replays()), 1, "A replay should have been filtered out but it was not")
+
+    def test_include_replaypath_filter_none(self):
+        c = Check([ReplayPath(RES / "stolen_replay1.osr"), ReplayPath(RES / "stolen_replay2.osr")])
+        self.cg.load(c)
+        c.filter()
+        self.assertEqual(len(c.all_replays()), 2, "No replays should have been filtered but at least one was")
+
+    def test_include_replaypath_filter_all(self):
+        def _include(replay):
+            return False
+        c = Check([ReplayPath(RES / "stolen_replay1.osr"), ReplayPath(RES / "stolen_replay2.osr")], include=_include)
+        self.cg.load(c)
+        c.filter()
+        self.assertEqual(len(c.all_replays()), 0, "All replays should have been filtered but at least one was not")
