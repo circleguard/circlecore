@@ -12,7 +12,7 @@ from circleguard.investigator import Investigator
 from circleguard.cacher import Cacher
 from circleguard import config
 from circleguard.exceptions import CircleguardException
-from circleguard.replay import Check, ReplayMap, ReplayPath
+from circleguard.replay import Check, ReplayMap, ReplayPath, Replay
 from circleguard.enums import Detect, RatelimitWeight
 from circleparse.beatmap import Beatmap
 
@@ -343,15 +343,19 @@ class Circleguard:
 
         return Check(local_replays, replays2=online_replays, steal_thresh=steal_thresh, include=include, detect=detect)
 
-    def load(self, replay):
+    def load(self, loadable):
         """
-        Loads the given replay. This is identical to calling replay.load(cg.loader, check.cache) if cg is your
-        Circleguard instance and check is your Check instance. This method exists to emphasize that this behavior is encouraged,
-        and tied to a specific cg (and Check) instance. The Check is necessary to inherit the cache setting from the Check
-        in case it differs from the Circleguard option (since it is more specific, it would override circleguard). See the
-        options documentation for more details on setting inheritence.
+        Loads the given Replay or Check. This is identical to calling replay.load(cg.loader) if cg is your
+        Circleguard instance for a Replay, or identical to `for r in check.all_replays(): cg.load(r)` for a Check.
+        This method exists to emphasize that this behavior is encouraged, and tied to a specific cg instance.
         """
-        replay.load(self.loader)
+        # Replay and Check happen to have the same method signatures for loading,
+        # but leaving this as an (unnecessary) conditional to emphasize that this
+        # is purely coincidental.
+        if isinstance(loadable, Replay):
+            loadable.load(self.loader)
+        if isinstance(loadable, Check):
+            loadable.load(self.loader)
 
     def set_options(self, steal_thresh=None, rx_thresh=None, num=None, cache=None, failfast=None, loglevel=None, include=None, detect=None):
         """
