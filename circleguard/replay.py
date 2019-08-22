@@ -334,7 +334,7 @@ class Check():
 
         self.log.info("Loading replays from Check")
 
-        if self.loaded :
+        if self.loaded:
             self.log.debug("Check already loaded, not loading individual Replays")
             return
         for replay in self.all_replays():
