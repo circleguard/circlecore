@@ -108,7 +108,7 @@ class ReplayMap(Replay):
                                 documentation for more information.
     """
 
-    def __init__(self, map_id, user_id, mods=None, username=None, detect=None):
+    def __init__(self, map_id, user_id, mods=None, detect=None):
         """
         Initializes a ReplayMap instance.
 
@@ -117,12 +117,6 @@ class ReplayMap(Replay):
             Integer user_id: The id of the user who made the replay.
             Integer mods: The mods the replay was played with. If this is not set, the top scoring replay of the user on the
                           given map will be loaded. Otherwise, the replay with the given mods will be loaded.
-            String username: A readable representation of the user who made the replay. If passed,
-                             username will be set to this string. Otherwise, it will be set to the user id.
-                             This is so you don't need to know a user's username when creating a ReplayMap, only their id.
-                             However, if the username is known (by retrieving it through the api, or other means), it is
-                             better to represent the Replay with a player's name than an id. Both username and user_id
-                             will obviously still be available to you through the result object after comparison.
             Detect detect: What cheats to run tests to detect.
         """
 
