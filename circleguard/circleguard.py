@@ -332,7 +332,7 @@ class Circleguard:
 
         return Check(local_replays, replays2=online_replays, steal_thresh=steal_thresh, include=include, detect=detect)
 
-    def load(self, check, replay):
+    def load(self, replay):
         """
         Loads the given replay. This is identical to calling replay.load(cg.loader, check.cache) if cg is your
         Circleguard instance and check is your Check instance. This method exists to emphasize that this behavior is encouraged,
@@ -340,7 +340,7 @@ class Circleguard:
         in case it differs from the Circleguard option (since it is more specific, it would override circleguard). See the
         options documentation for more details on setting inheritence.
         """
-        replay.load(self.loader, check.cache)
+        replay.load(self.loader)
 
     def set_options(self, steal_thresh=None, rx_thresh=None, num=None, cache=None, failfast=None, loglevel=None, include=None, detect=None):
         """

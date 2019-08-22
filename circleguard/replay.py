@@ -108,7 +108,7 @@ class ReplayMap(Replay):
                                 documentation for more information.
     """
 
-    def __init__(self, map_id, user_id, mods=None, detect=None):
+    def __init__(self, map_id, user_id, mods=None, detect=None, cache=None):
         """
         Initializes a ReplayMap instance.
 
@@ -118,6 +118,7 @@ class ReplayMap(Replay):
             Integer mods: The mods the replay was played with. If this is not set, the top scoring replay of the user on the
                           given map will be loaded. Otherwise, the replay with the given mods will be loaded.
             Detect detect: What cheats to run tests to detect.
+            Boolean cache: Whether to cache this replay
         """
 
         self.log = logging.getLogger(__name__ + ".ReplayMap")
@@ -125,6 +126,7 @@ class ReplayMap(Replay):
         self.user_id = user_id
         self.mods = mods
         self.detect = detect if detect is not None else config.detect
+        self.cache = cache if cache is not None else config.cache
         self.weight = RatelimitWeight.HEAVY
         self.loaded = False
 
@@ -141,7 +143,7 @@ class ReplayMap(Replay):
     def __str__(self):
         return f"{'Loaded' if self.loaded else 'Unloaded'} ReplayMap by {self.user_id} on {self.map_id}"
 
-    def load(self, loader, cache=None):
+    def load(self, loader):
         """
         Loads the data for this replay from the api. This method silently returns if replay.loaded is True.
 
@@ -153,7 +155,7 @@ class ReplayMap(Replay):
             self.log.debug("%s already loaded, not loading", self)
             return
         info = loader.user_info(self.map_id, user_id=self.user_id, mods=self.mods)
-        replay_data = loader.replay_data(info, cache=cache)
+        replay_data = loader.replay_data(info, cache=self.cache)
         Replay.__init__(self, info.timestamp, self.map_id, info.username, self.user_id, info.mods, info.replay_id, replay_data, self.detect, self.weight)
         self.log.log(TRACE, "Finished loading %s", self)
 
@@ -176,7 +178,7 @@ class ReplayPath(Replay):
                                 See RatelimitWeight documentation for more information.
     """
 
-    def __init__(self, path, detect=None):
+    def __init__(self, path, detect=None, cache=None):
         """
         Initializes a ReplayPath instance.
 
@@ -188,6 +190,7 @@ class ReplayPath(Replay):
         self.log = logging.getLogger(__name__ + ".ReplayPath")
         self.path = path
         self.detect = detect if detect is not None else config.detect
+        self.cache = cache if cache is not None else config.cache
         self.weight = RatelimitWeight.LIGHT
         self.loaded = False
 
@@ -204,7 +207,7 @@ class ReplayPath(Replay):
         else:
             return f"Unloaded ReplayPath at {self.path}"
 
-    def load(self, loader, cache=None):
+    def load(self, loader):
         """
         Loads the data for this replay from the osr file given by the path. See circleparse.parse_replay_file for
         implementation details. This method has no effect if replay.loaded is True.
@@ -275,18 +278,20 @@ class Check():
         self.replays = replays # list of ReplayMap and ReplayPath objects, not yet processed
         self.replays2 = replays2 if replays2 else [] # make replays2 fake iterable, for #filter mostly
         self.detect = detect if detect else config.detect
-        for r in self.all_replays():
-            # if detect was not passed to Replays they default to config.detect,
-            # we should only overwrite when detect wasn't explicitly passed to
-            # the replay
-            if r.detect == config.detect:
-                r.detect = self.detect
         self.mode = "double" if replays2 else "single"
         self.loaded = False
         self.steal_thresh = steal_thresh if steal_thresh else config.steal_thresh
         self.rx_thresh = rx_thresh if rx_thresh else config.rx_thresh
         self.cache = cache if cache else config.cache
         self.include = include if include else config.include
+        for r in self.all_replays():
+            # if detect was not passed to Replays they default to config.detect,
+            # we should only overwrite when detect wasn't explicitly passed to
+            # the replay
+            if r.detect == config.detect:
+                r.detect = self.detect
+            if r.cache == config.cache:
+                r.cache = self.cache
 
     def filter(self):
         """
@@ -329,11 +334,8 @@ class Check():
         if self.loaded :
             self.log.debug("Check already loaded, not loading individual Replays")
             return
-        for replay in self.replays:
-            replay.load(loader, self.cache)
-        if self.replays2:
-            for replay in self.replays2:
-                replay.load(loader, self.cache)
+        for replay in self.all_replays():
+            replay.load(loader)
         self.loaded = True
         self.log.debug("Finished loading Check object")
 

@@ -7,7 +7,7 @@ KEY = input("Enter your api key: ")
 RES = Path(__file__).parent / "resources"
 
 
-class TestSteal(TestCase):
+class TestReplays(TestCase):
 
     @classmethod
     def setUpClass(cls):
@@ -61,10 +61,8 @@ class TestSteal(TestCase):
 
     def test_loading_replaypath(self):
         r = ReplayPath(RES / "example_replay.osr")
-        c = Check([r])
         self.assertFalse(r.loaded, "Loaded status was not correct")
-        self.cg.load(c, r)
-
+        self.cg.load(r)
         self.assertEqual(r.mods, 72, "Mods was not correct")
         self.assertEqual(r.replay_id, 2029801532, "Replay id was not correct")
         self.assertEqual(r.username, "MarthXT", "Username was not correct")
@@ -75,10 +73,8 @@ class TestSteal(TestCase):
     def test_loading_replaymap(self):
         # Toy HDHR score on Pretender
         r = ReplayMap(221777, 2757689)
-        c = Check([r])
         self.assertFalse(r.loaded, "Loaded status was not correct")
-        self.cg.load(c, r)
-
+        self.cg.load(r)
         self.assertEqual(r.map_id, 221777, "Map id was not correct")
         self.assertEqual(r.user_id, 2757689, "Map id was not correct")
         self.assertEqual(r.mods, 24, "Mods was not correct")
