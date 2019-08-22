@@ -149,7 +149,7 @@ class Circleguard:
         if u:
             info = self.loader.user_info(map_id, user_id=u)
             replay2_id = info.replay_id
-            replays2 = [ReplayMap(info.map_id, info.user_id, info.mods, username=info.username)]
+            replays2 = [ReplayMap(info.map_id, info.user_id, info.mods)]
         infos = self.loader.user_info(map_id, num=num, mods=mods)
         replays = []
         for info in infos:
@@ -157,7 +157,7 @@ class Circleguard:
                 self.log.debug("Removing map %s, user %s, mods %s from map check with "
                                 "the same replay id as the user's replay", info.map_id, info.user_id, info.mods)
                 continue
-            replays.append(ReplayMap(info.map_id, info.user_id, info.mods, username=info.username))
+            replays.append(ReplayMap(info.map_id, info.user_id, info.mods))
         return Check(replays, replays2=replays2, cache=cache, steal_thresh=steal_thresh, include=include, detect=detect)
 
     def verify(self, map_id, u1, u2, cache=None, steal_thresh=None, include=None):
@@ -195,8 +195,8 @@ class Circleguard:
         self.log.info("Verify with map id %d, u1 %s, u2 %s, cache %s", map_id, u1, u2, cache)
         info1 = self.loader.user_info(map_id, user_id=u1)
         info2 = self.loader.user_info(map_id, user_id=u2)
-        replay1 = ReplayMap(info1.map_id, info1.user_id, info1.mods, username=info1.username)
-        replay2 = ReplayMap(info2.map_id, info2.user_id, info2.mods, username=info2.username)
+        replay1 = ReplayMap(info1.map_id, info1.user_id, info1.mods)
+        replay2 = ReplayMap(info2.map_id, info2.user_id, info2.mods)
 
         return Check([replay1, replay2], cache=cache, steal_thresh=steal_thresh, include=include, detect=Detect.STEAL)
 
@@ -255,7 +255,7 @@ class Circleguard:
             ureplay_id = info.replay_id # user replay id
             if not info.replay_available:
                 continue  # if we can't download the user's replay on the map, we have nothing to compare against
-            user_replay = [ReplayMap(info.map_id, info.user_id, mods=info.mods, username=info.username)]
+            user_replay = [ReplayMap(info.map_id, info.user_id, mods=info.mods)]
 
             infos = self.loader.user_info(map_id, num=num_users)
             replays = []
@@ -264,11 +264,11 @@ class Circleguard:
                     self.log.debug("Removing map %s, user %s, mods %s from user check with "
                                    "the same replay id as the user's replay", info.map_id, info.user_id, info.mods)
                     continue
-                replays.append(ReplayMap(info.map_id, info.user_id, info.mods, username=info.username))
+                replays.append(ReplayMap(info.map_id, info.user_id, info.mods))
 
             remod_replays = []
             for info in self.loader.user_info(map_id, user_id=u, limit=False)[1:]:
-                remod_replays.append(ReplayMap(info.map_id, info.user_id, mods=info.mods, username=info.username))
+                remod_replays.append(ReplayMap(info.map_id, info.user_id, mods=info.mods))
 
             check1 = Check(user_replay, replays2=replays, cache=cache, steal_thresh=steal_thresh, include=include, detect=detect)
             check2 = Check(user_replay + remod_replays, cache=cache, steal_thresh=steal_thresh, include=include, detect=detect)
@@ -328,7 +328,7 @@ class Circleguard:
                 # num guaranteed to be defined, either passed or from settings.
                 infos = self.loader.user_info(map_id, num=num)
 
-            online_replays = [ReplayMap(info.map_id, info.user_id, info.mods, username=info.username) for info in infos]
+            online_replays = [ReplayMap(info.map_id, info.user_id, info.mods) for info in infos]
 
         return Check(local_replays, replays2=online_replays, steal_thresh=steal_thresh, include=include, detect=detect)
 
