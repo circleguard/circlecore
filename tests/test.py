@@ -13,9 +13,7 @@ def log(function):
         return function(*args, **kwargs)
     return wrapper
 
-
 class TestReplays(TestCase):
-
     @classmethod
     def setUpClass(cls):
         cls.cg = Circleguard(KEY)
@@ -95,9 +93,7 @@ class TestReplays(TestCase):
         self.assertTrue(r.loaded, "Loaded status was not correct")
 
 
-
 class TestOption(TestCase):
-
     @classmethod
     def setUpClass(cls):
         cls.cg = Circleguard(KEY)
