@@ -107,7 +107,7 @@ class Circleguard:
             os.remove(bm_file.name)
 
 
-    def map_check(self, map_id, u=None, num=None, cache=None, steal_thresh=None, rx_thresh=None, mods=None, include=None, detect=None):
+    def map_check(self, map_id, u=None, num=None, cache=None, steal_thresh=None, rx_thresh=None, mods=None, include=None, detect=None, span=None):
         """
         Checks a map's leaderboard for replay steals.
 
@@ -135,15 +135,18 @@ class Circleguard:
                     The include function will be passed a single argument - the circleguard.Replay object, or one
                     of its subclasses.
             Detect detect: What cheats to run tests to detect for replays on this map.
+            String span: A comma separated list of ranges of top replays to check on the map. "1-3" will check the first 3 replays,
+                    and "1-3,6,2-4" will check replays 1,2,3,4,6 for instance. Values that appear multiple times or in multiple ranges
+                    are only counted once.
 
         Returns:
             A generator containing Result objects of the comparisons.
         """
-        check = self.create_map_check(map_id, u, num, cache, steal_thresh, mods, include, detect)
+        check = self.create_map_check(map_id, u, num, cache, steal_thresh, mods, include, detect, span)
         yield from self.run(check)
 
 
-    def create_map_check(self, map_id, u=None, num=None, cache=None, steal_thresh=None, mods=None, include=None, detect=None):
+    def create_map_check(self, map_id, u=None, num=None, cache=None, steal_thresh=None, mods=None, include=None, detect=None, span=None):
         """
         Creates the Check object used in the map_check convenience method. See that method for more information.
         """
@@ -161,7 +164,7 @@ class Circleguard:
             info = self.loader.user_info(map_id, user_id=u)
             replay2_id = info.replay_id
             replays2 = [ReplayMap(info.map_id, info.user_id, info.mods)]
-        infos = self.loader.user_info(map_id, num=num, mods=mods)
+        infos = self.loader.user_info(map_id, num=num, mods=mods, span=span)
         replays = []
         for info in infos:
             if info.replay_id == replay2_id:
@@ -211,7 +214,7 @@ class Circleguard:
 
         return Check([replay1, replay2], cache=cache, steal_thresh=steal_thresh, include=include, detect=Detect.STEAL)
 
-    def user_check(self, u, num, cache=None, steal_thresh=None, include=None, detect=None):
+    def user_check(self, u, num, cache=None, steal_thresh=None, include=None, detect=None, span=None):
         """
         Checks a user's top plays for replay steals.
 
@@ -233,18 +236,22 @@ class Circleguard:
                     The include function will be passed a single argument - the circleguard.Replay object, or one
                     of its subclasses.
             Detect detect: What cheats to run tests to detect.
+            String span: A comma separated list of ranges of top plays to check. "1-3" will check the top 3 plays,
+                    and "1-3,6,2-4" will check top plays 1,2,3,4,6 for instance. Values that appear multiple times or in multiple ranges
+                    are only counted once. Just like normal, if the user does not have a replay available for one of the top plays in the span,
+                    it will be skipped. The span refers to all of the user's top plays, not just the ones they have a replay available for.
 
         Returns:
             A generator containing Result objects of the comparisons.
         """
 
-        for check_list in self.create_user_check(u, num, cache, steal_thresh, include, detect):
+        for check_list in self.create_user_check(u, num, cache, steal_thresh, include, detect, span):
             # yuck; each top play has two different checks (remodding and stealing)
             # which is why we need a double loop
             for check in check_list:
                 yield from self.run(check)
 
-    def create_user_check(self, u, num_top, num_users, cache=None, steal_thresh=None, include=None, detect=None):
+    def create_user_check(self, u, num_top, num_users, cache=None, steal_thresh=None, include=None, detect=None, span=None):
         """
         Creates the Check object used in the user_check convenience method. See that method for more information.
 
@@ -261,7 +268,7 @@ class Circleguard:
 
         self.log.info("User check with u %s, num_top %s, num_users %s", u, num_top, num_users)
         ret = []
-        for map_id in self.loader.get_user_best(u, num_top):
+        for map_id in self.loader.get_user_best(u, num_top, span=span):
             info = self.loader.user_info(map_id, user_id=u)
             ureplay_id = info.replay_id # user replay id
             if not info.replay_available:

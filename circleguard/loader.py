@@ -14,7 +14,7 @@ from circleguard.enums import Error
 from circleguard.exceptions import (InvalidArgumentsException, APIException, CircleguardException,
                         RatelimitException, InvalidKeyException, ReplayUnavailableException, UnknownAPIException,
                         InvalidJSONException)
-from circleguard.utils import TRACE
+from circleguard.utils import TRACE, span_to_list
 
 def request(function):
     """
@@ -121,7 +121,7 @@ class Loader():
         return requests.get(f"https://osu.ppy.sh/osu/{map_id}").content
 
     @request
-    def user_info(self, map_id, num=None, user_id=None, mods=None, limit=True):
+    def user_info(self, map_id, num=None, user_id=None, mods=None, limit=True, span=None):
         """
         Returns a list of UserInfo objects containing a user's
         (timestamp, map_id, user_id, username, replay_id, mods, replay_available)
@@ -135,6 +135,9 @@ class Loader():
             Boolean limit: If set, will only return a user's top score (top response). Otherwise, will
                           return every response (every score they set on that map under different mods)
             Integer mods: The mods the replay info to retieve were played with.
+            String span: A comma separated list of ranges of top replays on the map to check. "1-3" will check the first 3 replays,
+                    and "1-3,6,2-4" will check replays 1,2,3,4,6 for instance. Values that appear multiple times or in multiple ranges
+                    are only counted once. If both span and num are passed, span is used instead of num.
         """
 
         # we have to define a new variable to hold locals - otherwise when we call it twice inside the dict comprehension,
@@ -144,14 +147,21 @@ class Loader():
         self.log.log(TRACE, "Loading user info on map %d with options %s",
                             map_id, {k: locals_[k] for k in locals_ if k != 'self'})
 
-        if(num and (num > 100 or num < 1)):
+        if num and (num > 100 or num < 1):
             raise InvalidArgumentsException("The number of top plays to fetch must be between 1 and 100 inclusive!")
 
-        if(not bool(user_id) ^ bool(num)):
-            raise InvalidArgumentsException("One of either num or user_id must be passed, but not both")
-
+        if not bool(user_id) ^ (bool(num) or bool(span)):
+            raise InvalidArgumentsException("One of num, user_id, or span must be passed, but not both num and either user_id or span")
+        if span:
+            span_list = span_to_list(span)
+            num = max(span_list)
+            print(span_list)
+            print(num)
         response = self.api.get_scores({"m": "0", "b": map_id, "limit": num, "u": user_id, "mods": mods})
         Loader.check_response(response)
+        if span:
+            # filter out anything not in our span
+            response = [response[i-1] for i in span_list]
         # yes, it's necessary to cast the str response to int before bool - all strings are truthy.
         # strptime format from https://github.com/ppy/osu-api/wiki#apiget_scores
         infos = [UserInfo(datetime.strptime(x["date"], "%Y-%m-%d %H:%M:%S"), map_id, int(x["user_id"]), str(x["username"]), int(x["score_id"]),
@@ -161,13 +171,16 @@ class Loader():
 
 
     @request
-    def get_user_best(self, user_id, number):
+    def get_user_best(self, user_id, num, span=None):
         """
         Gets the top 100 best plays for the given user.
 
         Args:
             String user_id: The user id to get best plays of.
-            Integer number: The number of top plays to retrieve. Must be between 1 and 100.
+            Integer num: The number of top plays to retrieve. Must be between 1 and 100.
+            String span: A comma separated list of ranges of top plays to return "1-3" will return the map_ids for the top 3 plays of the user,
+                    and "1-3,6,2-4" will return the 1,2,3,4,6 top plays for instance. Values that appear multiple times or in multiple ranges
+                    are only returned once.
 
         Returns:
             A list of Integer map_ids for the given number of the user's top plays.
@@ -176,11 +189,16 @@ class Loader():
             InvalidArgumentsException if number is not between 1 and 100 inclusive.
         """
 
-        self.log.log(TRACE, "Retrieving the best %d plays of user %d", number, user_id)
-        if(number < 1 or number > 100):
+        self.log.log(TRACE, "Retrieving the best %d plays of user %d", num, user_id)
+        if num < 1 or num > 100:
             raise InvalidArgumentsException("The number of best user plays to fetch must be between 1 and 100 inclusive!")
-        response = self.api.get_user_best({"m": "0", "u": user_id, "limit": number})
+        if span:
+            span_list = span_to_list(span)
+            num = max(span_list)
+        response = self.api.get_user_best({"m": "0", "u": user_id, "limit": num})
         Loader.check_response(response)
+        if span:
+            response = [response[i-1] for i in span_list]
 
         return [int(x["beatmap_id"]) for x in response]
 

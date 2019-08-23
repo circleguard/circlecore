@@ -72,6 +72,22 @@ class ColoredFormatter(Formatter):
 
 ######### UTIL METHODS ###########
 
+def span_to_list(span):
+    """
+    Takes a string span such as "1-3,6,2-4" and converts it to a set such as
+    {1,2,3,4,6}.
+    """
+    ret = set()
+    for s in span.split(","):
+        if "-" in s:
+            p = s.split("-")
+            l = list(range(int(p[0]), int(p[1])+1))
+            ret.update(l)
+        else:
+            ret.add(int(s))
+    return ret
+
+
 def mod_to_int(mod):
     """
     Returns the integer representation of a mod string. The mods in the string can be in any order -
