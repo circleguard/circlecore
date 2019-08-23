@@ -21,8 +21,8 @@ class Investigator:
             Integer threshold: If a replay has a lower ur than this value,
                     it is considered a cheted repaly.
         """
-
-        self.replay = replay.as_list_with_timestamps()
+        self.replay = replay
+        self.data = replay.as_list_with_timestamps()
         self.beatmap = beatmap
         self.threshold = threshold
         self.last_keys = [0, 0]
@@ -34,7 +34,7 @@ class Investigator:
 
     def ur(self):
         hitobjs = self._parse_beatmap(self.beatmap)
-        keypresses = self._parse_keys(self.replay)
+        keypresses = self._parse_keys(self.data)
         filtered_array = self._filter_hits(hitobjs, keypresses)
         diff_array = []
 
@@ -60,7 +60,7 @@ class Investigator:
 
     def _check_keys(self, pressed):
         checks = [pressed & key.value for key in (Keys.K1, Keys.K2)]
-        if checks != self.last_keys and any(checks): 
+        if checks != self.last_keys and any(checks):
             if not all(self.last_keys):  # skip if user was holding both buttons in previous event
                 self.last_keys = checks
                 return True
