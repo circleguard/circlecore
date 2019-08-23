@@ -6,6 +6,7 @@ from circleguard.enums import Detect, RatelimitWeight
 from circleguard.utils import TRACE, ColoredFormatter
 from circleguard.loader import Loader
 from circleguard.version import __version__
+from circleguard.result import Result, InvestigationResult, ComparisonResult, RelaxResult, ReplayStealingResult, ResultType
 
 logging.addLevelName(TRACE, "TRACE")
 formatter = ColoredFormatter("[%(threadName)s][%(name)s][%(levelname)s]  %(message)s  (%(filename)s:%(lineno)s)")
@@ -15,4 +16,5 @@ logging.getLogger("circleguard").addHandler(handler_stream)
 
 __all__ = ["Circleguard", "set_options", "Check", "Replay", "ReplayMap",
            "ReplayPath", "Detect", "TRACE", "ColoredFormatter", "Loader",
-           "__version__", "RatelimitWeight"]
+           "__version__", "RatelimitWeight", "Result", "InvestigationResult",
+           "ComparisonResult", "RelaxResult", "ReplayStealingResult", "ResultType"]
