@@ -45,6 +45,8 @@ class Comparer:
         self.replays1 = [replay for replay in replays1 if replay.replay_data is not None]
         self.replays2 = [replay for replay in replays2 if replay.replay_data is not None] if replays2 else None
 
+        self.log.debug("Comparer initialized: %r", self)
+
     def compare(self, mode):
         """
         If mode is "double", compares all replays in replays1 against all replays in replays2.
@@ -64,8 +66,8 @@ class Comparer:
         """
 
         self.log.info("Comparing replays with mode: %s", mode)
-        self.log.debug("replays1: %s", self.replays1)
-        self.log.debug("replays2: %s", self.replays2)
+        self.log.debug("replays1: %r", self.replays1)
+        self.log.debug("replays2: %r", self.replays2)
 
         #TODO: a little bit hacky and I don't think works 100% correctly, if mode is double but replays2 is None
         if(not self.replays1 or self.replays2 == []):
@@ -172,3 +174,9 @@ class Comparer:
         mu, sigma = distance.mean(), distance.std()
 
         return (mu, sigma)
+
+    def __repr__(self):
+        return f"Comparer(threshold={self.threshold},replays1={self.replays1},replays2={self.replays2})"
+
+    def __str__(self):
+        return f"Comparer with thresh {self.threshold}"

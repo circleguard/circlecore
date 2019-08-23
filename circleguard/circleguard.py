@@ -12,7 +12,7 @@ from circleguard.investigator import Investigator
 from circleguard.cacher import Cacher
 from circleguard import config
 from circleguard.exceptions import CircleguardException
-from circleguard.replay import Check, ReplayMap, ReplayPath
+from circleguard.replay import Check, ReplayMap, ReplayPath, Replay
 from circleguard.enums import Detect, RatelimitWeight
 from circleparse.beatmap import Beatmap
 
@@ -72,6 +72,17 @@ class Circleguard:
         self.log.info("Running circleguard with a Check")
 
         check.filter()
+        # Checks are instantiated without relation to a cg instance by necessity of
+        # easy of use. This means if it is not given an option, it will default to
+        # the config value at that time, not the circleguard's option value, which has
+        # higher priority than the config value. So we change it here, and only so late
+        # because this is the first time the check gets tied to a cg instance and we are
+        # able to give it the cg's option. But don't overwrite the option if it was
+        # passed to the check (will be different from the config value if that is the case).
+        # TODO work on cases where config value is changed after check instantiation but before
+        # cg is run
+        if check.steal_thresh == config.steal_thresh:
+            check.steal_thresh = self.options.steal_thresh
         # steal check
         compare1 = [replay for replay in check.replays if replay.detect & Detect.STEAL]
         compare2 = [replay for replay in check.replays2 if replay.detect & Detect.STEAL]
@@ -149,7 +160,7 @@ class Circleguard:
         if u:
             info = self.loader.user_info(map_id, user_id=u)
             replay2_id = info.replay_id
-            replays2 = [ReplayMap(info.map_id, info.user_id, info.mods, username=info.username)]
+            replays2 = [ReplayMap(info.map_id, info.user_id, info.mods)]
         infos = self.loader.user_info(map_id, num=num, mods=mods)
         replays = []
         for info in infos:
@@ -157,7 +168,7 @@ class Circleguard:
                 self.log.debug("Removing map %s, user %s, mods %s from map check with "
                                 "the same replay id as the user's replay", info.map_id, info.user_id, info.mods)
                 continue
-            replays.append(ReplayMap(info.map_id, info.user_id, info.mods, username=info.username))
+            replays.append(ReplayMap(info.map_id, info.user_id, info.mods))
         return Check(replays, replays2=replays2, cache=cache, steal_thresh=steal_thresh, include=include, detect=detect)
 
     def verify(self, map_id, u1, u2, cache=None, steal_thresh=None, include=None):
@@ -195,8 +206,8 @@ class Circleguard:
         self.log.info("Verify with map id %d, u1 %s, u2 %s, cache %s", map_id, u1, u2, cache)
         info1 = self.loader.user_info(map_id, user_id=u1)
         info2 = self.loader.user_info(map_id, user_id=u2)
-        replay1 = ReplayMap(info1.map_id, info1.user_id, info1.mods, username=info1.username)
-        replay2 = ReplayMap(info2.map_id, info2.user_id, info2.mods, username=info2.username)
+        replay1 = ReplayMap(info1.map_id, info1.user_id, info1.mods)
+        replay2 = ReplayMap(info2.map_id, info2.user_id, info2.mods)
 
         return Check([replay1, replay2], cache=cache, steal_thresh=steal_thresh, include=include, detect=Detect.STEAL)
 
@@ -255,7 +266,7 @@ class Circleguard:
             ureplay_id = info.replay_id # user replay id
             if not info.replay_available:
                 continue  # if we can't download the user's replay on the map, we have nothing to compare against
-            user_replay = [ReplayMap(info.map_id, info.user_id, mods=info.mods, username=info.username)]
+            user_replay = [ReplayMap(info.map_id, info.user_id, mods=info.mods)]
 
             infos = self.loader.user_info(map_id, num=num_users)
             replays = []
@@ -264,11 +275,11 @@ class Circleguard:
                     self.log.debug("Removing map %s, user %s, mods %s from user check with "
                                    "the same replay id as the user's replay", info.map_id, info.user_id, info.mods)
                     continue
-                replays.append(ReplayMap(info.map_id, info.user_id, info.mods, username=info.username))
+                replays.append(ReplayMap(info.map_id, info.user_id, info.mods))
 
             remod_replays = []
             for info in self.loader.user_info(map_id, user_id=u, limit=False)[1:]:
-                remod_replays.append(ReplayMap(info.map_id, info.user_id, mods=info.mods, username=info.username))
+                remod_replays.append(ReplayMap(info.map_id, info.user_id, mods=info.mods))
 
             check1 = Check(user_replay, replays2=replays, cache=cache, steal_thresh=steal_thresh, include=include, detect=detect)
             check2 = Check(user_replay + remod_replays, cache=cache, steal_thresh=steal_thresh, include=include, detect=detect)
@@ -328,19 +339,23 @@ class Circleguard:
                 # num guaranteed to be defined, either passed or from settings.
                 infos = self.loader.user_info(map_id, num=num)
 
-            online_replays = [ReplayMap(info.map_id, info.user_id, info.mods, username=info.username) for info in infos]
+            online_replays = [ReplayMap(info.map_id, info.user_id, info.mods) for info in infos]
 
         return Check(local_replays, replays2=online_replays, steal_thresh=steal_thresh, include=include, detect=detect)
 
-    def load(self, check, replay):
+    def load(self, loadable):
         """
-        Loads the given replay. This is identical to calling replay.load(cg.loader, check.cache) if cg is your
-        Circleguard instance and check is your Check instance. This method exists to emphasize that this behavior is encouraged,
-        and tied to a specific cg (and Check) instance. The Check is necessary to inherit the cache setting from the Check
-        in case it differs from the Circleguard option (since it is more specific, it would override circleguard). See the
-        options documentation for more details on setting inheritence.
+        Loads the given Replay or Check. This is identical to calling replay.load(cg.loader) if cg is your
+        Circleguard instance for a Replay, or identical to `for r in check.all_replays(): cg.load(r)` for a Check.
+        This method exists to emphasize that this behavior is encouraged, and tied to a specific cg instance.
         """
-        replay.load(self.loader, check.cache)
+        # Replay and Check happen to have the same method signatures for loading,
+        # but leaving this as an (unnecessary) conditional to emphasize that this
+        # is purely coincidental.
+        if isinstance(loadable, Replay):
+            loadable.load(self.loader)
+        if isinstance(loadable, Check):
+            loadable.load(self.loader)
 
     def set_options(self, steal_thresh=None, rx_thresh=None, num=None, cache=None, failfast=None, loglevel=None, include=None, detect=None):
         """
@@ -418,7 +433,15 @@ class Options():
     """
 
     def __init__(self):
-        ...
+        # underscores to not call the @property functions when
+        # accessing these attributes
+        self._steal_thresh = None
+        self._rx_thresh = None
+        self._num = None
+        self._cache = None
+        self._failfast = None
+        self._include = None
+        self._detect = None
 
     # These methods are unfortunately necessary because when config module
     # variables are updated, references to them are not - ie references to
@@ -426,27 +449,49 @@ class Options():
     # attributes, just get the latest config variable with these methods.
     @property
     def steal_thresh(self):
-        return config.steal_thresh
+        return config.steal_thresh if self._steal_thresh is None else self._steal_thresh
+    @steal_thresh.setter
+    def steal_thresh(self, v):
+        self._steal_thresh = v
 
     @property
     def rx_thresh(self):
-        return config.rx_thresh
+        return config.rx_thresh if self._rx_thresh is None else self._rx_thresh
+    @rx_thresh.setter
+    def rx_thresh(self, v):
+        self._rx_thresh = v
+
     @property
     def num(self):
-        return config.num
+        return config.num if self._num is None else self._num
+    @num.setter
+    def num(self, v):
+        self._num = v
 
     @property
     def cache(self):
-        return config.cache
+        return config.cache if self._cache is None else self._cache
+    @cache.setter
+    def cache(self, v):
+        self._cache = v
 
     @property
     def failfast(self):
-        return config.failfast
+        return config.failfast if self._failfast is None else self._failfast
+    @failfast.setter
+    def failfast(self, v):
+        self._failfast = v
 
     @property
     def include(self):
-        return config.include
+        return config.include if self._include is None else self._include
+    @include.setter
+    def include(self, v):
+        self._include = v
 
     @property
     def detect(self):
-        return config.detect
+        return config.detect if self._detect is None else self._detect
+    @detect.setter
+    def detect(self, v):
+        self._detect = v
