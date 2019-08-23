@@ -155,8 +155,6 @@ class Loader():
         if span:
             span_list = span_to_list(span)
             num = max(span_list)
-            print(span_list)
-            print(num)
         response = self.api.get_scores({"m": "0", "b": map_id, "limit": num, "u": user_id, "mods": mods})
         Loader.check_response(response)
         if span:
