@@ -1,9 +1,13 @@
+import os
 from unittest import TestCase, skip
 from pathlib import Path
 
 from circleguard import Circleguard, Check, ReplayMap, ReplayPath, Detect, RatelimitWeight, set_options, config
 
-KEY = input("Enter your api key: ")
+KEY = os.environ.get('OSU_API_KEY')
+if KEY is None:  
+    KEY = input("Enter your api key: ")
+
 RES = Path(__file__).parent / "resources"
 set_options(loglevel=20)
 
