@@ -15,6 +15,6 @@ handler_stream.setFormatter(formatter)
 logging.getLogger("circleguard").addHandler(handler_stream)
 
 __all__ = ["Circleguard", "set_options", "Check", "Replay", "ReplayMap",
-           "ReplayPath", "Detect", "TRACE", "ColoredFormatter", "Loader",
+           "ReplayPath", "Detect", "TRACE", "Loader",
            "__version__", "RatelimitWeight", "Result", "InvestigationResult",
            "ComparisonResult", "RelaxResult", "ReplayStealingResult", "ResultType"]
