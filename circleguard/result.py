@@ -76,7 +76,7 @@ class ReplayStealingResult(ComparisonResult):
     """
 
     def __init__(self, replay1: Replay, replay2: Replay, similarity: int, ischeat: bool):
-        super().__init__(replay1, replay2, ischeat, ResultType.REPLAY_STEALING)
+        super().__init__(replay1, replay2, ischeat, ResultType.STEAL)
 
         self.similarity = similarity
         if self.replay1.timestamp < self.replay2.timestamp:
