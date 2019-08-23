@@ -114,26 +114,26 @@ class Circleguard:
         Args:
             Integer map_id: The id of the map (not the id of the mapset!) to compare replays from.
             Integer u: A user id. If passed, only the replay made by this user id on the given map will be
-                       compared with the rest of the lederboard of the map. No other comparisons will be made.
+                    compared with the rest of the lederboard of the map. No other comparisons will be made.
             Integer num: The number of replays to compare from the map. Defaults to 50, or the config value if changed.
-                         Loads from the top ranks of the leaderboard, so num=20 will compare the top 20 scores. This
-                         number must be between 1 and 100, as restricted by the osu api.
+                    Loads from the top ranks of the leaderboard, so num=20 will compare the top 20 scores. This
+                    number must be between 1 and 100, as restricted by the osu api.
             Boolean cache: Whether to cache the loaded replays. Defaults to False, or the config value if changed.
-                           If no database file was passed, this value has no effect, as replays will not be cached.
+                    If no database file was passed, this value has no effect, as replays will not be cached.
             Integer steal_thresh: If a comparison scores below this value, its Result object has ischeat set to True.
-                            Defaults to 18, or the config value if changed.
+                    Defaults to 18, or the config value if changed.
             Integer rx_thresh: if a replay has a ur below this value, it is considered cheated.
                     Deaults to 50, or the config value if changed.
             Integer mods: If passed, download and compare the top num replays set with these exact mods. You can find a
-                          reference on what mod maps to what integer value here: https://github.com/ppy/osu-api/wiki#mods.
-                          There is currently no support for optional mods (eg HR is required, but other mods optional,
-                          so both HR and HDHR scores would be downloaded). This is due to api limitations.
-                          If both mods and u are passed, the user's replay will be downloaded regardless of the passed mods,
-                          (ie their highest scoring play on the map), but the other replays it is compared against will
-                          be downloaded according to the passed mods.
+                    reference on what mod maps to what integer value here: https://github.com/ppy/osu-api/wiki#mods.
+                    There is currently no support for optional mods (eg HR is required, but other mods optional,
+                    so both HR and HDHR scores would be downloaded). This is due to api limitations.
+                    If both mods and u are passed, the user's replay will be downloaded regardless of the passed mods,
+                    (ie their highest scoring play on the map), but the other replays it is compared against will
+                    be downloaded according to the passed mods.
             Function include: A Predicate function that returns True if the replay should be loaded, and False otherwise.
-                              The include function will be passed a single argument - the circleguard.Replay object, or one
-                              of its subclasses.
+                    The include function will be passed a single argument - the circleguard.Replay object, or one
+                    of its subclasses.
             Detect detect: What cheats to run tests to detect for replays on this map.
 
         Returns:
@@ -180,12 +180,12 @@ class Circleguard:
             Integer u1: The user id of one of the users who set a replay on this map.
             Integer u2: The user id of the second user who set a replay on this map.
             Boolean cache: Whether to cache the loaded replays. Defaults to False, or the config value if changed.
-                           If no database file was passed, this value has no effect, as replays will not be cached.
+                    If no database file was passed, this value has no effect, as replays will not be cached.
             Integer steal_thresh: If a comparison scores below this value, its Result object has ischeat set to True.
-                            Defaults to 18, or the config value if changed.
+                    Defaults to 18, or the config value if changed.
             Function include: A Predicate function that returns True if the replay should be loaded, and False otherwise.
-                              The include function will be passed a single argument - the circleguard.Replay object, or one
-                              of its subclasses.
+                    The include function will be passed a single argument - the circleguard.Replay object, or one
+                    of its subclasses.
 
         Returns:
             A generator containing Result objects of the comparisons.
@@ -224,14 +224,14 @@ class Circleguard:
         Args:
             Integer u: The user id of the user to check
             Integer num: The number of replays of each map to compare against the user's replay. For now, this also serves as the
-                         number of top plays of the user to check for replay stealing and remodding.
-                         Boolean cache: Whether to cache the loaded replays. Defaults to False, or the config value if changed.
-                         If no database file was passed, this value has no effect, as replays will not be cached.
+                    number of top plays of the user to check for replay stealing and remodding.
+                    Boolean cache: Whether to cache the loaded replays. Defaults to False, or the config value if changed.
+                    If no database file was passed, this value has no effect, as replays will not be cached.
             Integer steal_thresh: If a comparison scores below this value, its Result object has ischeat set to True.
-                            Defaults to 18, or the config value if changed.
+                    Defaults to 18, or the config value if changed.
             Function include: A Predicate function that returns True if the replay should be loaded, and False otherwise.
-                              The include function will be passed a single argument - the circleguard.Replay object, or one
-                              of its subclasses.
+                    The include function will be passed a single argument - the circleguard.Replay object, or one
+                    of its subclasses.
             Detect detect: What cheats to run tests to detect.
 
         Returns:
