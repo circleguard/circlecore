@@ -70,21 +70,23 @@ class Investigator:
     def _filter_hits(self, hitobjs, keypresses):
         array = []
         hitwindow = 150 + 50 * (5 - self.beatmap.difficulty["OverallDifficulty"]) / 5
-        # inefficient as fugg, but not important rn
-        # filters out all clicks that didn't hit anything and stores hit and hitobj to array
-        for hitobj in hitobjs:
-            temp_diffs = []
-            temp_hits = []
-            for press in keypresses:
-                if hitobj[0] > press[0]-(hitwindow/2) and hitobj[0] < press[0]+(hitwindow/2):
-                    diff = press[0]-hitobj[0]
-                    temp_diffs.append(diff)
-                    temp_hits.append(press)
-            # only add one click per hitobj
-            if len(temp_diffs) != 0:
-                index = temp_diffs.index(min(temp_diffs, key=abs))
-                array.append([hitobj, temp_hits[index]])
-                keypresses.pop(keypresses.index(temp_hits[index]))  # remove used hits
+
+        object_i = 0
+        press_i = 0
+
+        while object_i < len(hitobjs) and press_i < len(keypresses):
+            hitobj = hitobjs[object_i]
+            press = keypresses[press_i]
+            
+            if press[0] < hitobj[0] - hitwindow / 2:
+                press_i += 1
+            elif press[0] > hitobj[0] + hitwindow / 2:
+                object_i += 1
+            else:
+                array.append([hitobj, press])
+                press_i += 1
+                object_i += 1
+
         return array
 
 class Hit:
