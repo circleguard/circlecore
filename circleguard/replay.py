@@ -1,6 +1,5 @@
 import abc
 import logging
-from typing import Iterable
 
 import circleparse
 import numpy as np
@@ -342,7 +341,7 @@ class Check():
         self.loaded = True
         self.log.debug("Finished loading Check object")
 
-    def all_replays(self) -> Iterable[Replay]:
+    def all_replays(self):
         """
         Convenience method for accessing all replays stored in this object.
 
