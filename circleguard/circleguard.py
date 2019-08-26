@@ -12,7 +12,7 @@ from circleguard.investigator import Investigator
 from circleguard.cacher import Cacher
 from circleguard import config
 from circleguard.exceptions import CircleguardException
-from circleguard.replay import Check, ReplayMap, ReplayPath, Replay
+from circleguard.replay import Check, ReplayMap, ReplayPath, Replay, Map
 from circleguard.enums import Detect, RatelimitWeight
 from circleparse.beatmap import Beatmap
 
@@ -159,20 +159,10 @@ class Circleguard:
         detect = detect if detect is not None else options.detect
 
         self.log.info("Map check with map id %d, u %s, num %s, cache %s, steal_thresh %s", map_id, u, num, cache, steal_thresh)
-        replays2 = None
-        replay2_id = None
-        if u:
-            info = self.loader.user_info(map_id, user_id=u)
-            replay2_id = info.replay_id
-            replays2 = [ReplayMap(info.map_id, info.user_id, info.mods)]
-        infos = self.loader.user_info(map_id, num=num, mods=mods, span=span)
-        replays = []
-        for info in infos:
-            if info.replay_id == replay2_id:
-                self.log.debug("Removing map %s, user %s, mods %s from map check with "
-                                "the same replay id as the user's replay", info.map_id, info.user_id, info.mods)
-                continue
-            replays.append(ReplayMap(info.map_id, info.user_id, info.mods))
+
+        replays = Map(map_id, num=num, cache=cache, mods=mods, detect=detect, span=span)
+        replays2 = [ReplayMap(map_id, u, mods=mods)] if u else None
+
         return Check(replays, replays2=replays2, cache=cache, steal_thresh=steal_thresh, include=include, detect=detect)
 
     def verify(self, map_id, u1, u2, cache=None, steal_thresh=None, include=None):
