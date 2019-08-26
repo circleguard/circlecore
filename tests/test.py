@@ -7,22 +7,22 @@ KEY = input("Enter your api key: ")
 RES = Path(__file__).parent / "resources"
 set_options(loglevel=20)
 
-
-class TestReplays(TestCase):
-    @classmethod
-    def setUpClass(cls):
-        cls.cg = Circleguard(KEY)
-
-    # some weird requests warnings about sockets not getting closed;
-    # see https://github.com/psf/requests/issues/3912 for more context
-    # and https://github.com/biomadeira/pyPDBeREST/commit/71dfe75859a9086b7e415379702cd61ab61fd6e5 for implementation
+class CGTestCase(TestCase):
     def setUp(self):
         # prints TestClassName.testMethodName.
         # See https://stackoverflow.com/a/28745033
         print(self.id())
+        # some weird requests warnings about sockets not getting closed;
+        # see https://github.com/psf/requests/issues/3912 for more context and
+        # https://github.com/biomadeira/pyPDBeREST/commit/71dfe75859a9086b7e415379702cd61ab61fd6e5 for implementation
         warnings.filterwarnings(action="ignore",
-                                message="unclosed",
-                                category=ResourceWarning)
+                message="unclosed",
+                category=ResourceWarning)
+
+class TestReplays(CGTestCase):
+    @classmethod
+    def setUpClass(cls):
+        cls.cg = Circleguard(KEY)
 
     def test_cheated_replaypath(self):
         # taken from http://redd.it/bvfv8j, remodded replay by same user (CielXDLP) from HDHR to FLHDHR
@@ -94,7 +94,7 @@ class TestReplays(TestCase):
         self.assertEqual(r.username, "Toy", "Username was not correct")
         self.assertTrue(r.loaded, "Loaded status was not correct")
 
-class TestOption(TestCase):
+class TestOption(CGTestCase):
 
     SIM_1_2_NO_DETECT = 24
     SIM_1_2_DETECT = 25
@@ -117,10 +117,7 @@ class TestOption(TestCase):
     def setUp(self):
         # reset settings so methods don't interfere with each other's settings
         self.cg = Circleguard(KEY)
-        warnings.filterwarnings(action="ignore",
-                                message="unclosed",
-                                category=ResourceWarning)
-        print(self.id())
+        super().setUp()
 
     def test_steal_thresh_check_true(self):
         set_options(steal_thresh=self.SIM_1_2_NO_DETECT)
@@ -187,16 +184,11 @@ class TestOption(TestCase):
 
     # TODO test all options, not just steal thresh
 
-class TestInclude(TestCase):
+class TestInclude(CGTestCase):
     @classmethod
     def setUpClass(cls):
         cls.cg = Circleguard(KEY)
 
-    def setUp(self):
-        warnings.filterwarnings(action="ignore",
-                                message="unclosed",
-                                category=ResourceWarning)
-        print(self.id())
 
     def test_include_replaypath_filter_some(self):
         def _include(replay):
