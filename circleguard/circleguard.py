@@ -69,7 +69,7 @@ class Circleguard:
             A generator containing Result objects of the comparisons.
         """
 
-        self.log.info("Running circleguard with a Check")
+        self.log.info("Running circleguard with %r", check)
 
         check.filter()
         # Checks are instantiated without relation to a cg instance by necessity of
