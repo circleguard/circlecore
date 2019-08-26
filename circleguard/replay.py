@@ -51,6 +51,8 @@ class Map(Container):
         replays = []
         for info in infos:
             replays.append(ReplayMap(info.map_id, info.user_id, info.mods, detect=self.detect))
+        for replay in replays: # load the replays we just made as well
+            replay.load(loader)
         super().__init__(replays)
 
     def __repr__(self):
@@ -103,21 +105,8 @@ class Check(Container):
         """
 
         self.log = logging.getLogger(__name__ + ".Check")
-        self.replays = []
-        for replay in replays:
-            # recursively load other Containers
-            if isinstance(replay, Container):
-                self.replays += replay.all_replays()
-            else:
-                self.replays.append(replay)
-        replays2 = replays2 if replays2 else []
-        self.replays2 = []
-        for replay in replays2:
-            # recursively load other Containers
-            if isinstance(replay, Container):
-                self.replays2 += replay.all_replays()
-            else:
-                self.replays2.append(replay)
+        self.replays = replays
+        self.replays2 = replays2 if replays2 else []
         self.detect = detect if detect else config.detect
         self.mode = "double" if replays2 else "single"
         self.loaded = False
@@ -125,14 +114,7 @@ class Check(Container):
         self.rx_thresh = rx_thresh if rx_thresh else config.rx_thresh
         self.cache = cache if cache else config.cache
         self.include = include if include else config.include
-        for r in self.all_replays():
-            # if detect was not passed to Replays they default to config.detect,
-            # we should only overwrite when detect wasn't explicitly passed to
-            # the replay
-            if r.detect == config.detect:
-                r.detect = self.detect
-            if r.cache == config.cache:
-                r.cache = self.cache
+
 
     def filter(self):
         """
@@ -177,7 +159,36 @@ class Check(Container):
             return
         for replay in self.all_replays():
             replay.load(loader)
+
+        replays = []
+        for replay in self.replays:
+            # recursively load other Containers
+            if isinstance(replay, Container):
+                replays += replay.all_replays()
+            else:
+                replays.append(replay)
+        self.replays = replays
+
+        replays2 = []
+        for replay in self.replays2:
+            # recursively load other Containers
+            if isinstance(replay, Container):
+                replays2 += replay.all_replays()
+            else:
+                replays2.append(replay)
+        self.replays2 = replays2
+
         super().__init__(self.replays)
+
+        for r in self.all_replays():
+            # if detect was not passed to Replays they default to config.detect,
+            # we should only overwrite when detect wasn't explicitly passed to
+            # the replay
+            if r.detect == config.detect:
+                r.detect = self.detect
+            if r.cache == config.cache:
+                r.cache = self.cache
+
         self.log.debug("Finished loading Check object")
 
     def all_replays(self):

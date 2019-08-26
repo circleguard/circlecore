@@ -83,11 +83,12 @@ class Circleguard:
         # cg is run
         if check.steal_thresh == config.steal_thresh:
             check.steal_thresh = self.options.steal_thresh
+
+        check.load(self.loader)
+
         # steal check
         compare1 = [replay for replay in check.replays if replay.detect & Detect.STEAL]
         compare2 = [replay for replay in check.replays2 if replay.detect & Detect.STEAL]
-
-        check.load(self.loader)
         # all replays now have replay data, above is where ratelimit waiting would occur
         comparer = Comparer(check.steal_thresh, compare1, replays2=compare2)
         yield from comparer.compare(mode=check.mode)
