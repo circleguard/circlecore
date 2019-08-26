@@ -84,6 +84,9 @@ class Comparer:
             raise InvalidArgumentsException("'mode' must be one of 'double' or 'single'")
 
         for replay1, replay2 in iterator:
+            if replay1.replay_id == replay2.replay_id:
+                self.log.debug("Not comparing %r and %r with the same id", replay1, replay2)
+                continue
             yield self._result(replay1, replay2)
 
 
