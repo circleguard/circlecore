@@ -1,7 +1,7 @@
 import logging
 
 from circleguard.circleguard import Circleguard, set_options
-from circleguard.replay import Check, Replay, ReplayMap, ReplayPath
+from circleguard.replay import Check, Replay, ReplayMap, ReplayPath, Map, Container
 from circleguard.enums import Detect, RatelimitWeight
 from circleguard.utils import TRACE, ColoredFormatter
 from circleguard.loader import Loader
@@ -17,4 +17,5 @@ logging.getLogger("circleguard").addHandler(handler_stream)
 __all__ = ["Circleguard", "set_options", "Check", "Replay", "ReplayMap",
            "ReplayPath", "Detect", "TRACE", "Loader",
            "__version__", "RatelimitWeight", "Result", "InvestigationResult",
-           "ComparisonResult", "RelaxResult", "ReplayStealingResult", "ResultType"]
+           "ComparisonResult", "RelaxResult", "ReplayStealingResult", "ResultType",
+           "Map", "Container"]
