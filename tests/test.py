@@ -7,11 +7,6 @@ KEY = input("Enter your api key: ")
 RES = Path(__file__).parent / "resources"
 set_options(loglevel=20)
 
-def log(function):
-    def wrapper(*args, **kwargs):
-        print(f"Running {function.__name__}")
-        return function(*args, **kwargs)
-    return wrapper
 
 class TestReplays(TestCase):
     @classmethod
@@ -22,11 +17,13 @@ class TestReplays(TestCase):
     # see https://github.com/psf/requests/issues/3912 for more context
     # and https://github.com/biomadeira/pyPDBeREST/commit/71dfe75859a9086b7e415379702cd61ab61fd6e5 for implementation
     def setUp(self):
+        # prints TestClassName.testMethodName.
+        # See https://stackoverflow.com/a/28745033
+        print(self.id())
         warnings.filterwarnings(action="ignore",
                                 message="unclosed",
                                 category=ResourceWarning)
 
-    @log
     def test_cheated_replaypath(self):
         # taken from http://redd.it/bvfv8j, remodded replay by same user (CielXDLP) from HDHR to FLHDHR
         replays = [ReplayPath(RES / "stolen_replay1.osr"), ReplayPath(RES / "stolen_replay2.osr")]
@@ -50,7 +47,6 @@ class TestReplays(TestCase):
         self.assertEqual(later.replay_id, 2805164683, "Later replay id was not correct")
         self.assertEqual(r1.username, r2.username, "Replay usernames did not match")
 
-    @log
     def test_legitimate_replaypath(self):
         replays = [ReplayPath(RES / "legit_replay1.osr"), ReplayPath(RES / "legit_replay2.osr")]
         c = Check(replays, detect=Detect.STEAL)
@@ -74,7 +70,6 @@ class TestReplays(TestCase):
         self.assertEqual(earlier.username, "Crissinop", "Earlier username was not correct")
         self.assertEqual(later.username, "TemaZpro", "Later username was not correct")
 
-    @log
     def test_loading_replaypath(self):
         r = ReplayPath(RES / "example_replay.osr")
         self.assertFalse(r.loaded, "Loaded status was not correct")
@@ -86,7 +81,6 @@ class TestReplays(TestCase):
         self.assertEqual(r.weight, RatelimitWeight.LIGHT, "RatelimitWeight was not correct")
         self.assertTrue(r.loaded, "Loaded status was not correct")
 
-    @log
     def test_loading_replaymap(self):
         # Toy HDHR score on Pretender
         r = ReplayMap(221777, 2757689)
@@ -99,7 +93,6 @@ class TestReplays(TestCase):
         self.assertEqual(r.weight, RatelimitWeight.HEAVY, "RatelimitWeight was not correct")
         self.assertEqual(r.username, "Toy", "Username was not correct")
         self.assertTrue(r.loaded, "Loaded status was not correct")
-
 
 class TestOption(TestCase):
 
@@ -127,8 +120,8 @@ class TestOption(TestCase):
         warnings.filterwarnings(action="ignore",
                                 message="unclosed",
                                 category=ResourceWarning)
+        print(self.id())
 
-    @log
     def test_steal_thresh_check_true(self):
         set_options(steal_thresh=self.SIM_1_2_NO_DETECT)
         self.cg.set_options(steal_thresh=self.SIM_1_2_NO_DETECT)
@@ -136,7 +129,6 @@ class TestOption(TestCase):
         r = list(self.cg.run(c))[0]
         self.assertTrue(r.ischeat, "Thresh should have been set to detect a cheat at the Check level but was not")
 
-    @log
     def test_steal_thresh_check_false(self):
         set_options(steal_thresh=self.SIM_1_2_DETECT)
         self.cg.set_options(steal_thresh=self.SIM_1_2_DETECT)
@@ -144,21 +136,18 @@ class TestOption(TestCase):
         r = list(self.cg.run(c))[0]
         self.assertFalse(r.ischeat, "Thresh should have been set to miss a cheat at the Check level but was not")
 
-    @log
     def test_steal_thresh_check_without_class_true(self):
         set_options(steal_thresh=self.SIM_1_2_NO_DETECT)
         c = Check([self.r1, self.r2], steal_thresh=self.SIM_1_2_DETECT)
         r = list(self.cg.run(c))[0]
         self.assertTrue(r.ischeat, "Thresh should have been set to detect a cheat at the Check level but was not")
 
-    @log
     def test_steal_thresh_check_without_class_false(self):
         set_options(steal_thresh=self.SIM_1_2_DETECT)
         c = Check([self.r1, self.r2], steal_thresh=self.SIM_1_2_NO_DETECT)
         r = list(self.cg.run(c))[0]
         self.assertFalse(r.ischeat, "Thresh should have been set to miss a cheat at the Check level but was not")
 
-    @log
     def test_steal_thresh_check_without_class_or_global_true(self):
         c = Check([self.r1, self.r2], steal_thresh=self.SIM_1_2_DETECT)
         r = list(self.cg.run(c))[0]
@@ -170,7 +159,6 @@ class TestOption(TestCase):
         self.assertFalse(r.ischeat, "Thresh should have been set to miss a cheat at the Check level but was not")
 
 
-    @log
     def test_steal_thresh_class_true(self):
         set_options(steal_thresh=self.SIM_1_2_NO_DETECT)
         self.cg.set_options(steal_thresh=self.SIM_1_2_DETECT)
@@ -178,7 +166,6 @@ class TestOption(TestCase):
         r = list(self.cg.run(c))[0]
         self.assertTrue(r.ischeat, "Thresh should have been set to detect a cheat at the class level but was not")
 
-    @log
     def test_steal_thresh_class_false(self):
         set_options(steal_thresh=self.SIM_1_2_DETECT)
         self.cg.set_options(steal_thresh=self.SIM_1_2_NO_DETECT)
@@ -186,14 +173,12 @@ class TestOption(TestCase):
         r = list(self.cg.run(c))[0]
         self.assertFalse(r.ischeat, "Thresh should have been set to miss a cheat at the class level but was not")
 
-    @log
     def test_steal_thresh_class_without_global_true(self):
         self.cg.set_options(steal_thresh=self.SIM_1_2_DETECT)
         c = Check([self.r1, self.r2])
         r = list(self.cg.run(c))[0]
         self.assertTrue(r.ischeat, "Thresh should have been set to detect a cheat at the class level but was not")
 
-    @log
     def test_steal_thresh_class_without_global_false(self):
         self.cg.set_options(steal_thresh=self.SIM_1_2_NO_DETECT)
         c = Check([self.r1, self.r2])
@@ -211,6 +196,7 @@ class TestInclude(TestCase):
         warnings.filterwarnings(action="ignore",
                                 message="unclosed",
                                 category=ResourceWarning)
+        print(self.id())
 
     def test_include_replaypath_filter_some(self):
         def _include(replay):
