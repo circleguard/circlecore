@@ -102,18 +102,22 @@ class TestReplays(TestCase):
 
 
 class TestOption(TestCase):
+
+    SIM_1_2_NO_DETECT = 24
+    SIM_1_2_DETECT = 25
+
     @classmethod
     def setUpClass(cls):
         cls.cg = Circleguard(KEY)
         # TODO use short replays to reduce comparison time (switch to ReplayPaths)
-        cls.r1 = ReplayMap(221777, 2757689)
-        cls.r2 = ReplayMap(221777, 3219026)
-        cls.r3 = ReplayMap(221777, 3256299)
+        cls.r1 = ReplayPath(RES / "legit_replay1.osr")
+        cls.r2 = ReplayPath(RES / "legit_replay2.osr")
+        cls.r3 = ReplayPath(RES / "stolen_replay1.osr")
         cls.cg.load(cls.r1)
         cls.cg.load(cls.r2)
         cls.cg.load(cls.r3)
 
-        # r1 <-> r2 similarity: 20.875089740385583
+        # r1 <-> r2 similarity: 24.21291168195734
         # r2 <-> r3 similarity:
         # r3 <-> r1 similarity:
 
@@ -126,72 +130,72 @@ class TestOption(TestCase):
 
     @log
     def test_steal_thresh_check_true(self):
-        set_options(steal_thresh=19)
-        self.cg.set_options(steal_thresh=19)
-        c = Check([self.r1, self.r2], steal_thresh=21)
+        set_options(steal_thresh=self.SIM_1_2_NO_DETECT)
+        self.cg.set_options(steal_thresh=self.SIM_1_2_NO_DETECT)
+        c = Check([self.r1, self.r2], steal_thresh=self.SIM_1_2_DETECT)
         r = list(self.cg.run(c))[0]
         self.assertTrue(r.ischeat, "Thresh should have been set to detect a cheat at the Check level but was not")
 
     @log
     def test_steal_thresh_check_false(self):
-        set_options(steal_thresh=21)
-        self.cg.set_options(steal_thresh=21)
-        c = Check([self.r1, self.r2], steal_thresh=19)
+        set_options(steal_thresh=self.SIM_1_2_DETECT)
+        self.cg.set_options(steal_thresh=self.SIM_1_2_DETECT)
+        c = Check([self.r1, self.r2], steal_thresh=self.SIM_1_2_NO_DETECT)
         r = list(self.cg.run(c))[0]
         self.assertFalse(r.ischeat, "Thresh should have been set to miss a cheat at the Check level but was not")
 
     @log
     def test_steal_thresh_check_without_class_true(self):
-        set_options(steal_thresh=19)
-        c = Check([self.r1, self.r2], steal_thresh=21)
+        set_options(steal_thresh=self.SIM_1_2_NO_DETECT)
+        c = Check([self.r1, self.r2], steal_thresh=self.SIM_1_2_DETECT)
         r = list(self.cg.run(c))[0]
         self.assertTrue(r.ischeat, "Thresh should have been set to detect a cheat at the Check level but was not")
 
     @log
     def test_steal_thresh_check_without_class_false(self):
-        set_options(steal_thresh=21)
-        c = Check([self.r1, self.r2], steal_thresh=19)
+        set_options(steal_thresh=self.SIM_1_2_DETECT)
+        c = Check([self.r1, self.r2], steal_thresh=self.SIM_1_2_NO_DETECT)
         r = list(self.cg.run(c))[0]
         self.assertFalse(r.ischeat, "Thresh should have been set to miss a cheat at the Check level but was not")
 
     @log
     def test_steal_thresh_check_without_class_or_global_true(self):
-        c = Check([self.r1, self.r2], steal_thresh=21)
+        c = Check([self.r1, self.r2], steal_thresh=self.SIM_1_2_DETECT)
         r = list(self.cg.run(c))[0]
         self.assertTrue(r.ischeat, "Thresh should have been set to detect a cheat at the Check level but was not")
 
     def test_steal_thresh_check_without_class_or_global_false(self):
-        c = Check([self.r1, self.r2], steal_thresh=19)
+        c = Check([self.r1, self.r2], steal_thresh=self.SIM_1_2_NO_DETECT)
         r = list(self.cg.run(c))[0]
         self.assertFalse(r.ischeat, "Thresh should have been set to miss a cheat at the Check level but was not")
 
 
     @log
     def test_steal_thresh_class_true(self):
-        set_options(steal_thresh=19)
-        self.cg.set_options(steal_thresh=21)
+        set_options(steal_thresh=self.SIM_1_2_NO_DETECT)
+        self.cg.set_options(steal_thresh=self.SIM_1_2_DETECT)
         c = Check([self.r1, self.r2])
         r = list(self.cg.run(c))[0]
         self.assertTrue(r.ischeat, "Thresh should have been set to detect a cheat at the class level but was not")
 
     @log
     def test_steal_thresh_class_false(self):
-        set_options(steal_thresh=21)
-        self.cg.set_options(steal_thresh=19)
+        set_options(steal_thresh=self.SIM_1_2_DETECT)
+        self.cg.set_options(steal_thresh=self.SIM_1_2_NO_DETECT)
         c = Check([self.r1, self.r2])
         r = list(self.cg.run(c))[0]
         self.assertFalse(r.ischeat, "Thresh should have been set to miss a cheat at the class level but was not")
 
     @log
     def test_steal_thresh_class_without_global_true(self):
-        self.cg.set_options(steal_thresh=21)
+        self.cg.set_options(steal_thresh=self.SIM_1_2_DETECT)
         c = Check([self.r1, self.r2])
         r = list(self.cg.run(c))[0]
         self.assertTrue(r.ischeat, "Thresh should have been set to detect a cheat at the class level but was not")
 
     @log
     def test_steal_thresh_class_without_global_false(self):
-        self.cg.set_options(steal_thresh=19)
+        self.cg.set_options(steal_thresh=self.SIM_1_2_NO_DETECT)
         c = Check([self.r1, self.r2])
         r = list(self.cg.run(c))[0]
         self.assertFalse(r.ischeat, "Thresh should have been set to miss a cheat at the class level but was not")
