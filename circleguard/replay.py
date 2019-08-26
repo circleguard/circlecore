@@ -53,6 +53,10 @@ class Map(Container):
             replays.append(ReplayMap(info.map_id, info.user_id, info.mods, detect=self.detect))
         super().__init__(replays)
 
+    def __repr__(self):
+        return (f"Map(map_id={self.map_id},num={self.num},cache={self.cache},mods={self.mods},"
+                f"detect={self.detect},span={self.span},replays={self.replays},loaded={self.loaded})")
+
 class Check(Container):
     """
     Contains a list of Replay objects (or subclasses thereof) and how to proceed when
@@ -184,6 +188,9 @@ class Check(Container):
             A list of all replays in this Check.
         """
         return self.replays + self.replays2
+
+    def __repr__(self):
+        return f"Check(replays={self.replays},replays2={self.replays2})"
 
 
 class Replay(abc.ABC):
