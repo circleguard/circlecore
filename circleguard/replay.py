@@ -213,8 +213,6 @@ class ReplayPath(Replay):
 
         The superclass Replay is initialized after this call, setting replay.loaded to True. Multiple
         calls to this method will have no effect beyond the first.
-
-        The cache argument here currently has no effect, and is only added for homogeneity with ReplayMap#load.
         """
 
         self.log.debug("Loading ReplayPath %r", self)
