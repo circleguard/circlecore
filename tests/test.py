@@ -1,6 +1,6 @@
 from unittest import TestCase, skip
 from pathlib import Path
-
+import warnings
 from circleguard import Circleguard, Check, ReplayMap, ReplayPath, Detect, RatelimitWeight, set_options, config
 
 KEY = input("Enter your api key: ")
@@ -17,6 +17,14 @@ class TestReplays(TestCase):
     @classmethod
     def setUpClass(cls):
         cls.cg = Circleguard(KEY)
+
+    # some weird requests warnings about sockets not getting closed;
+    # see https://github.com/psf/requests/issues/3912 for more context
+    # and https://github.com/biomadeira/pyPDBeREST/commit/71dfe75859a9086b7e415379702cd61ab61fd6e5 for implementation
+    def setUp(self):
+        warnings.filterwarnings(action="ignore",
+                                message="unclosed",
+                                category=ResourceWarning)
 
     @log
     def test_cheated_replaypath(self):
@@ -112,6 +120,9 @@ class TestOption(TestCase):
     def setUp(self):
         # reset settings so methods don't interfere with each other's settings
         self.cg = Circleguard(KEY)
+        warnings.filterwarnings(action="ignore",
+                                message="unclosed",
+                                category=ResourceWarning)
 
     @log
     def test_steal_thresh_check_true(self):
@@ -191,6 +202,11 @@ class TestInclude(TestCase):
     @classmethod
     def setUpClass(cls):
         cls.cg = Circleguard(KEY)
+
+    def setUp(self):
+        warnings.filterwarnings(action="ignore",
+                                message="unclosed",
+                                category=ResourceWarning)
 
     def test_include_replaypath_filter_some(self):
         def _include(replay):
