@@ -1,7 +1,8 @@
-from unittest import TestCase, skip
+from unittest import TestCase, skip, TestSuite, TextTestRunner
 from pathlib import Path
 import warnings
-from circleguard import Circleguard, Check, ReplayMap, ReplayPath, Detect, RatelimitWeight, set_options, config
+from circleguard import (Circleguard, Check, ReplayMap, ReplayPath, Detect, RatelimitWeight, set_options, config,
+                        Map)
 
 KEY = input("Enter your api key: ")
 RES = Path(__file__).parent / "resources"
@@ -212,3 +213,55 @@ class TestInclude(CGTestCase):
         self.cg.load(c)
         c.filter()
         self.assertEqual(len(c.all_replays()), 0, "All replays should have been filtered but at least one was not")
+
+class TestMap(CGTestCase):
+    @classmethod
+    def setUpClass(cls):
+        cls.cg = Circleguard(KEY)
+
+
+    def test_map_alone(self):
+        m = Map(129891, num=2) # Freedom Dive [Four Dimensions]
+        c = Check([m], detect=Detect.STEAL)
+        r = list(self.cg.run(c))
+        self.assertEqual(len(r), 1)
+        self.assertEqual(r[0].earlier_replay.mods, 24) # cookiezi HDHR
+
+    def test_map_with_replaypath(self):
+        m = Map(129891, num=1)
+        rpath = ReplayPath(RES / "legit_replay1.osr")
+        # of course, it makes no sense to compare replays on two different maps
+        # for steals, but it serves this tests' purpose.
+        c = Check([m, rpath], detect=Detect.STEAL)
+        r = list(self.cg.run(c))
+        self.assertEqual(len(r), 1)
+        # dont need a ton of checks here, mostly just checking that
+        # running with Map and Replay combined *runs*. Other tests ensure
+        # the accuracy of the Results
+        self.assertEqual(r[0].later_replay.username, "nathan on osu")
+        self.assertEqual(r[0].earlier_replay.username, "Crissinop")
+
+    def test_map_with_replaymap(self):
+        m = Map(129891, num=1)
+        rmap = ReplayMap(1524183, 4196808) # Karthy HDHR on Full Moon
+        c = Check([m, rmap], detect=Detect.STEAL)
+        r = list(self.cg.run(c))
+        self.assertEqual(len(r), 1)
+        self.assertEqual(r[0].later_replay.username, "Karthy")
+        self.assertEqual(r[0].earlier_replay.username, "nathan on osu")
+
+    def test_map_with_replaypath_replaymap(self):
+        m = Map(129891, num=1)
+        rpath = ReplayPath(RES / "legit_replay1.osr")
+        rmap = ReplayMap(1524183, 4196808) # Karthy HDHR on Full Moon
+        c = Check([m, rmap, rpath], detect=Detect.STEAL)
+        r = list(self.cg.run(c))
+        self.assertEqual(len(r), 3)
+
+if __name__ == '__main__':
+    suite = TestSuite()
+    suite.addTest(TestMap("test_map_with_replaypath"))
+    suite.addTest(TestMap("test_map_with_replaymap"))
+    suite.addTest(TestMap("test_map_with_replaypath_replaymap"))
+
+    TextTestRunner().run(suite)
