@@ -160,7 +160,7 @@ class Circleguard:
 
         self.log.info("Map check with map id %d, u %s, num %s, cache %s, steal_thresh %s", map_id, u, num, cache, steal_thresh)
 
-        replays = Map(map_id, num=num, cache=cache, mods=mods, detect=detect, span=span)
+        replays = [Map(map_id, num=num, cache=cache, mods=mods, detect=detect, span=span)]
         replays2 = [ReplayMap(map_id, u, mods=mods)] if u else None
 
         return Check(replays, replays2=replays2, cache=cache, steal_thresh=steal_thresh, include=include, detect=detect)
