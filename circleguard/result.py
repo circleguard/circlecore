@@ -99,3 +99,8 @@ class RelaxResult(InvestigationResult):
     def __init__(self, replay: Replay, ur: int, ischeat: bool):
         super().__init__(replay, ischeat, ResultType.RELAX)
         self.ur = ur
+
+class AimCorrectionResult(InvestigationResult):
+    def __init__(self, replay, jerks, ischeat):
+        super().__init__(replay, ischeat, ResultType.AIM_CORRECTION)
+        self.jerks = jerks

@@ -1,6 +1,7 @@
+
 import numpy as np
 from circleguard.enums import Keys
-from circleguard.result import RelaxResult
+from circleguard.result import RelaxResult, AimCorrectionResult
 import circleguard.utils as utils
 
 class Investigator:
@@ -11,7 +12,7 @@ class Investigator:
         Comparer
     """
 
-    def __init__(self, replay, beatmap, threshold):
+    def __init__(self, replay, beatmap, threshold, threshold2=None):
         """
         Initializes an Investigator instance.
 
@@ -25,6 +26,7 @@ class Investigator:
         self.data = replay.as_list_with_timestamps()
         self.beatmap = beatmap
         self.threshold = threshold
+        self.threshold2 = threshold2
         self.last_keys = [0, 0]
 
     def investigate(self):
@@ -41,6 +43,31 @@ class Investigator:
         for hit, press in filtered_array:
             diff_array.append(press[0]-hit[0])
         return np.std(diff_array) * 10
+
+    def aim_correction(self):
+        txyk = np.array(self.data)
+
+        txy = txyk[:, :3]
+
+        t = txy[:, 0]
+        xy = txy[:, 1:]
+
+        dt = np.diff(t)
+        dxy = np.diff(xy, axis=0, n=3)
+
+        jerk = np.divide(dxy, dt[2:, None] ** 3, out=np.zeros_like(dxy), where=dt[2:,None]!=0)
+
+        jerk = np.linalg.norm(jerk, axis=1)
+
+        anomalous = jerk > self.threshold
+        timestamps = t[3:][anomalous]
+        values = jerk[anomalous]
+
+        jerks = np.vstack((timestamps, values)).T
+        
+        ischeat = anomalous.sum() > self.threshold2
+
+        yield AimCorrectionResult(self.replay, jerks, ischeat)
 
     def _parse_beatmap(self, beatmap):
         hitobjs = []
