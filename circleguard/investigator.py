@@ -51,26 +51,45 @@ class Investigator:
         return np.std(diff_array) * 10
 
     def aim_correction(self):
+        """
+        Calculates the jerk at each moment in the Replay, counts the number of times
+        it exceeds min_jerk and reports a positive if that number is over num_jerks.
+        Also reports all suspicious jerks and their timestamps.
+        """
+
+        # get all replay data as an array of type [(t, x, y, k)]
         txyk = np.array(self.data)
 
+        # drop keypresses
         txy = txyk[:, :3]
 
+        # separate time and space
         t = txy[:, 0]
         xy = txy[:, 1:]
 
-        dt = np.diff(t)
-        dxy = np.diff(xy, axis=0, n=3)
+        # j_x = (d/dt)^3 x
+        # calculated as (d/dT dT/dt)^3 x = (dT/dt)^3 (d/dT)^3 x
+        # (d/dT)^3 x = d(d(dx/dT)/dT)/dT
+        # (dT/dt)^3 = 1/(dt/dT)^3
+        dtdT = np.diff(t)
+        d3xy = np.diff(xy, axis=0, n=3)
+        # safely calculate the division and replace with zero if the divisor is zero
+        # dtdT is sliced with 2: because differentiating drops one element for each order (slice (n - 1,) to (n - 3,))
+        # d3xy is of shape (n - 3, 2) so dtdT is also reshaped from (n - 3,) to (n - 3, 1) to align the axes.
+        jerk = np.divide(d3xy, dtdT[2:, None] ** 3, out=np.zeros_like(d3xy), where=dtdT[2:,None]!=0)
 
-        jerk = np.divide(dxy, dt[2:, None] ** 3, out=np.zeros_like(dxy), where=dt[2:,None]!=0)
-
+        # take the absolute value of the jerk
         jerk = np.linalg.norm(jerk, axis=1)
 
+        # create a mask of where the jerk reaches suspicious values
         anomalous = jerk > self.min_jerk
+        # and retrieve and store the timestamps and the values themself
         timestamps = t[3:][anomalous]
         values = jerk[anomalous]
-
+        # reshape to an array of type [(t, j)]
         jerks = np.vstack((timestamps, values)).T
-        
+
+        # count the anomalies
         ischeat = anomalous.sum() > self.num_jerks
 
         yield AimCorrectionResult(self.replay, jerks, ischeat)
