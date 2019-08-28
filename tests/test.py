@@ -197,13 +197,13 @@ class TestInclude(CGTestCase):
 
         c = Check([ReplayPath(RES / "stolen_replay1.osr"), ReplayPath(RES / "stolen_replay2.osr")], include=_include)
         self.cg.load(c)
-        c.filter()
+        c.filter(self.cg.loader)
         self.assertEqual(len(c.all_replays()), 1, "A replay should have been filtered out but it was not")
 
     def test_include_replaypath_filter_none(self):
         c = Check([ReplayPath(RES / "stolen_replay1.osr"), ReplayPath(RES / "stolen_replay2.osr")])
         self.cg.load(c)
-        c.filter()
+        c.filter(self.cg.loader)
         self.assertEqual(len(c.all_replays()), 2, "No replays should have been filtered but at least one was")
 
     def test_include_replaypath_filter_all(self):
@@ -211,7 +211,7 @@ class TestInclude(CGTestCase):
             return False
         c = Check([ReplayPath(RES / "stolen_replay1.osr"), ReplayPath(RES / "stolen_replay2.osr")], include=_include)
         self.cg.load(c)
-        c.filter()
+        c.filter(self.cg.loader)
         self.assertEqual(len(c.all_replays()), 0, "All replays should have been filtered but at least one was not")
 
 class TestMap(CGTestCase):
@@ -238,7 +238,7 @@ class TestMap(CGTestCase):
         # dont need a ton of checks here, mostly just checking that
         # running with Map and Replay combined *runs*. Other tests ensure
         # the accuracy of the Results
-        self.assertEqual(r[0].later_replay.username, "nathan on osu")
+        self.assertEqual(r[0].later_replay.username, "chocomint")
         self.assertEqual(r[0].earlier_replay.username, "Crissinop")
 
     def test_map_with_replaymap(self):
@@ -248,7 +248,7 @@ class TestMap(CGTestCase):
         r = list(self.cg.run(c))
         self.assertEqual(len(r), 1)
         self.assertEqual(r[0].later_replay.username, "Karthy")
-        self.assertEqual(r[0].earlier_replay.username, "nathan on osu")
+        self.assertEqual(r[0].earlier_replay.username, "chocomint")
 
     def test_map_with_replaypath_replaymap(self):
         m = Map(129891, num=1)
@@ -258,10 +258,10 @@ class TestMap(CGTestCase):
         r = list(self.cg.run(c))
         self.assertEqual(len(r), 3)
 
-if __name__ == '__main__':
-    suite = TestSuite()
-    suite.addTest(TestMap("test_map_with_replaypath"))
-    suite.addTest(TestMap("test_map_with_replaymap"))
-    suite.addTest(TestMap("test_map_with_replaypath_replaymap"))
+# if __name__ == '__main__':
+#     suite = TestSuite()
+#     suite.addTest(TestMap("test_map_with_replaypath"))
+#     suite.addTest(TestMap("test_map_with_replaymap"))
+#     suite.addTest(TestMap("test_map_with_replaypath_replaymap"))
 
-    TextTestRunner().run(suite)
+#     TextTestRunner().run(suite)
