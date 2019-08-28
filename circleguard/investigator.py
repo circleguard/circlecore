@@ -77,7 +77,7 @@ class Investigator:
         while object_i < len(hitobjs) and press_i < len(keypresses):
             hitobj = hitobjs[object_i]
             press = keypresses[press_i]
-            
+
             if press[0] < hitobj[0] - hitwindow / 2:
                 press_i += 1
             elif press[0] > hitobj[0] + hitwindow / 2:

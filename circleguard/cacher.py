@@ -53,7 +53,7 @@ class Cacher:
         self.log.debug("Caching lzma bytes")
         should_cache = should_cache if should_cache else self.should_cache
 
-        if(not should_cache):
+        if not should_cache:
             self.log.debug("should_cache is false, not caching")
             return
         compressed_bytes = self._compress(lzma_bytes)
