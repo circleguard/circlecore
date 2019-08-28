@@ -12,26 +12,32 @@ class Investigator:
         Comparer
     """
 
-    def __init__(self, replay, beatmap, threshold, threshold2=None):
+    def __init__(self, replay, beatmap, max_ur, min_jerk, num_jerks):
         """
         Initializes an Investigator instance.
 
         Attributes:
             Replay replay: The Replay object to investigate.
             circleparse.Beatmap beatmap: The beatmap to calculate ur with.
-            Integer threshold: If a replay has a lower ur than this value,
-                    it is considered a cheted repaly.
+            Float max_ur: If a replay has a lower ur than this value,
+                    it is considered a cheated replay.
+            Float min_jerk: If a replay has a jerk higher than this value at a point,
+                    that is considered suspicious.
+            Integer num_jerks: If a replay has more suspicious jerks than this number,
+                    it is considered a cheated replay.
+            
         """
         self.replay = replay
         self.data = replay.as_list_with_timestamps()
         self.beatmap = beatmap
-        self.threshold = threshold
-        self.threshold2 = threshold2
+        self.max_ur = max_ur
+        self.min_jerk = min_jerk
+        self.num_jerks = num_jerks
         self.last_keys = [0, 0]
 
     def investigate(self):
         ur = self.ur()
-        ischeat = True if ur < self.threshold else False
+        ischeat = True if ur < self.max_ur else False
         yield RelaxResult(self.replay, ur, ischeat)
 
     def ur(self):
@@ -59,13 +65,13 @@ class Investigator:
 
         jerk = np.linalg.norm(jerk, axis=1)
 
-        anomalous = jerk > self.threshold
+        anomalous = jerk > self.min_jerk
         timestamps = t[3:][anomalous]
         values = jerk[anomalous]
 
         jerks = np.vstack((timestamps, values)).T
         
-        ischeat = anomalous.sum() > self.threshold2
+        ischeat = anomalous.sum() > self.num_jerks
 
         yield AimCorrectionResult(self.replay, jerks, ischeat)
 
