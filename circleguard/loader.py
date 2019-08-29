@@ -13,7 +13,7 @@ from circleguard.user_info import UserInfo
 from circleguard.enums import Error
 from circleguard.exceptions import (InvalidArgumentsException, APIException, CircleguardException,
                         RatelimitException, InvalidKeyException, ReplayUnavailableException, UnknownAPIException,
-                        InvalidJSONException)
+                        InvalidJSONException, NoInfoAvailable)
 from circleguard.utils import TRACE
 
 def request(function):
@@ -285,7 +285,8 @@ class Loader():
             String response: The api-returned response to check.
 
         Raises:
-            An Error corresponding to the type of error if there was an error. The mappings
+            An Error corresponding to the type of error if there is an error, or
+            NoInfoAvailable if the response is empty. The mappings
             for the api error message and its corresponding error are in circleguard.enums.
         """
 
@@ -296,6 +297,10 @@ class Loader():
             else:
                 raise Error.UNKNOWN.value[1](Error.UNKNOWN.value[2]) # pylint: disable=unsubscriptable-object
                 # pylint is dumb because Error is an enum and this is totally legal
+        if not response: # response is empty
+            raise NoInfoAvailable("No info was available from the api for the given arguments.")
+
+
 
     def _enforce_ratelimit(self):
         """
