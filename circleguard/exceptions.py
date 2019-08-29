@@ -11,7 +11,7 @@ class APIException(CircleguardException):
     UnknownAPIExceptions are considered fatal, InternalAPIExceptions are not.
     """
 
-class NoInfoAvailable(APIException):
+class NoInfoAvailableException(APIException):
     """Indicates that the API returned no information for the given arguments"""
 
 class UnknownAPIException(APIException):
