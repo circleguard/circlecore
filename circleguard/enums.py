@@ -52,6 +52,8 @@ class Detect(Flag):
     STEAL = 1 << 0 # 0001
     RELAX = 1 << 1 # 0010
     REMOD = 1 << 2 # 0100
+    AIM_CORRECTION = 1 << 3
+    TIMEWARP = 1 << 4
 
     ALL = STEAL | RELAX | REMOD
     NONE = 0
