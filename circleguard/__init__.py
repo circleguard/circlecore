@@ -19,5 +19,5 @@ logging.getLogger("circleguard").addHandler(handler_stream)
 __all__ = ["Circleguard", "set_options", "Check", "Replay", "ReplayMap",
            "ReplayPath", "Detect", "TRACE", "ColoredFormatter", "Loader",
            "__version__", "RatelimitWeight", "CircleguardException", "InvalidArgumentsException",
-           "APIException", "NoInfoAvailableException", "NoInfoAvailable", "UnknownAPIException", "InternalAPIException",
+           "APIException", "NoInfoAvailableException", "UnknownAPIException", "InternalAPIException",
            "InvalidKeyException", "RatelimitException", "InvalidJSONException", "ReplayUnavailableException"]
