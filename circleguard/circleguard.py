@@ -334,7 +334,7 @@ class Circleguard:
         online_replays = None
         if map_id:
             if u:
-                infos = self.loader.user_info(map_id, user_id=u)
+                infos = [self.loader.user_info(map_id, user_id=u)]
             else:
                 # num guaranteed to be defined, either passed or from settings.
                 infos = self.loader.user_info(map_id, num=num)
