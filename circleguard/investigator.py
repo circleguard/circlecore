@@ -25,7 +25,7 @@ class Investigator:
                     that is considered suspicious.
             Integer num_jerks: If a replay has more suspicious jerks than this number,
                     it is considered a cheated replay.
-            
+
         """
         self.replay = replay
         self.data = replay.as_list_with_timestamps()
@@ -129,7 +129,7 @@ class Investigator:
         while object_i < len(hitobjs) and press_i < len(keypresses):
             hitobj = hitobjs[object_i]
             press = keypresses[press_i]
-            
+
             if press[0] < hitobj[0] - hitwindow / 2:
                 press_i += 1
             elif press[0] > hitobj[0] + hitwindow / 2:
