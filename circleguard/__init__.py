@@ -5,9 +5,9 @@ from circleguard.replay import Check, Replay, ReplayMap, ReplayPath
 from circleguard.enums import Detect, RatelimitWeight
 from circleguard.utils import TRACE, ColoredFormatter
 from circleguard.loader import Loader
-from circleguard.exceptions import (CircleguardException, InvalidArgumentsException, APIException, NoInfoAvailable,
-        NoInfoAvailableException, UnknownAPIException, InternalAPIException, InvalidKeyException, RatelimitException, InvalidJSONException,
-        ReplayUnavailableException)
+from circleguard.exceptions import (CircleguardException, InvalidArgumentsException, APIException,
+        NoInfoAvailableException, UnknownAPIException, InternalAPIException, InvalidKeyException, RatelimitException,
+        InvalidJSONException, ReplayUnavailableException)
 from circleguard.version import __version__
 
 logging.addLevelName(TRACE, "TRACE")

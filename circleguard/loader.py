@@ -13,7 +13,7 @@ from circleguard.user_info import UserInfo
 from circleguard.enums import Error
 from circleguard.exceptions import (InvalidArgumentsException, APIException, CircleguardException,
                         RatelimitException, InvalidKeyException, ReplayUnavailableException, UnknownAPIException,
-                        InvalidJSONException, NoInfoAvailable)
+                        InvalidJSONException, NoInfoAvailableException)
 from circleguard.utils import TRACE
 
 def request(function):
@@ -298,7 +298,7 @@ class Loader():
                 raise Error.UNKNOWN.value[1](Error.UNKNOWN.value[2]) # pylint: disable=unsubscriptable-object
                 # pylint is dumb because Error is an enum and this is totally legal
         if not response: # response is empty
-            raise NoInfoAvailable("No info was available from the api for the given arguments.")
+            raise NoInfoAvailableException("No info was available from the api for the given arguments.")
 
 
 
