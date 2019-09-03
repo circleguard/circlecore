@@ -59,7 +59,7 @@ class Investigator:
         return keypresses
 
     def _check_keys(self, pressed):
-        checks = [pressed & key.value for key in (Keys.K1, Keys.K2)]
+        checks = [pressed & key for key in (Keys.K1, Keys.K2)]
         if checks != self.last_keys and any(checks):
             if not all(self.last_keys):  # skip if user was holding both buttons in previous event
                 self.last_keys = checks

@@ -1,4 +1,4 @@
-from enum import Enum, Flag
+from enum import Enum, Flag, IntFlag
 
 from circleguard.exceptions import (UnknownAPIException, RatelimitException,
                 InvalidKeyException, ReplayUnavailableException, InvalidJSONException)
@@ -81,7 +81,7 @@ class ResultType(Enum):
     AIM_CORRECTION = "aim correction"
     TIMEWARP = "timewarp"
 
-class Keys(Enum):
+class Keys(IntFlag):
     M1 = 1
     M2 = 2
     K1 = 4
