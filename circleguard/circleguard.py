@@ -14,7 +14,7 @@ from circleguard import config
 from circleguard.exceptions import CircleguardException
 from circleguard.replay import Check, ReplayMap, ReplayPath, Replay, Map, Container
 from circleguard.enums import Detect, RatelimitWeight
-from circleparse.beatmap import Beatmap
+from slider.beatmap import Beatmap
 
 
 class Circleguard:
@@ -99,7 +99,7 @@ class Circleguard:
             bm_file = NamedTemporaryFile(delete=False)
             bm_file.write(bm_content)
             bm_file.close()
-            bm = Beatmap(bm_file.name)
+            bm = Beatmap.from_path(bm_file.name)
             investigator = Investigator(replay, bm, cont.rx_thresh)
             yield from investigator.investigate()
             os.remove(bm_file.name)
