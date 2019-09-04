@@ -54,11 +54,8 @@ class Investigator:
         return hitobjs
 
     def _parse_keys(self, replay):
-        keypresses = []
         self.last_keys = [0, 0]
-        for keypress in replay:
-            if self._check_keys(keypress[3]):
-                    keypresses.append(keypress)
+        keypresses = [keypress for keypress in replay if self._check_keys(keypress[3])]
         return keypresses
 
     def _check_keys(self, pressed):
