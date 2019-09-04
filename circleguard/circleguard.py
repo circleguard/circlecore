@@ -94,15 +94,9 @@ class Circleguard:
             if not replay.detect & Detect.RELAX:
                 continue
             bm_content = self.loader.get_beatmap(replay.map_id)
-            # need a file-like object because circleparse uses open
-            # and readline, among other things
-            bm_file = NamedTemporaryFile(delete=False)
-            bm_file.write(bm_content)
-            bm_file.close()
-            bm = Beatmap.from_path(bm_file.name)
+            bm = Beatmap.parse(bm_content)
             investigator = Investigator(replay, bm, cont.rx_thresh)
             yield from investigator.investigate()
-            os.remove(bm_file.name)
 
 
     def map_check(self, map_id, u=None, num=None, cache=None, steal_thresh=None, rx_thresh=None, mods=None, include=None, detect=None, span=None):

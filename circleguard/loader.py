@@ -118,7 +118,7 @@ class Loader():
         and peppy has said it is "ok to use for now", but even so it is not in
         the same category as other api endpoints.
         """
-        return requests.get(f"https://osu.ppy.sh/osu/{map_id}").content
+        return requests.get(f"https://osu.ppy.sh/osu/{map_id}").text
 
     @request
     def user_info(self, map_id, num=None, user_id=None, mods=None, limit=True, span=None):
