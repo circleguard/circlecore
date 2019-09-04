@@ -10,8 +10,7 @@ class Investigator:
     See Also:
         Comparer
     """
-    # casting necessary for performance reasons
-    KEYS = [int(Keys.K1), int(Keys.K2)]
+    MASK = int(Keys.K1) | int(Keys.K2)
 
     def __init__(self, replay, beatmap, threshold):
         """
@@ -27,7 +26,6 @@ class Investigator:
         self.data = replay.as_list_with_timestamps()
         self.beatmap = beatmap
         self.threshold = threshold
-        self.last_keys = [0, 0]
 
     def investigate(self):
         ur = self.ur()
@@ -54,18 +52,13 @@ class Investigator:
         return hitobjs
 
     def _parse_keys(self, data):
-        self.last_keys = [0, 0]
-        keypresses = [keypress for keypress in data if self._check_keys(keypress[3])]
-        return keypresses
+        data = np.array(data, dtype=object)
+        
+        keypresses = np.int32(data[:, 3]) & self.MASK
 
-    def _check_keys(self, pressed):
-        checks = [pressed & key for key in self.KEYS]
-        if checks != self.last_keys and any(checks):
-            if not all(self.last_keys):  # skip if user was holding both buttons in previous event
-                self.last_keys = checks
-                return True
-        self.last_keys = checks
-        return False
+        changes = keypresses & ~np.insert(keypresses[:-1], 0, 0)
+
+        return data[changes!=0]
 
     def _filter_hits(self, hitobjs, keypresses):
         array = []
