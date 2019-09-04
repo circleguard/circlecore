@@ -53,9 +53,9 @@ class Investigator:
             hitobjs.append([hit.time.total_seconds() * 1000, p.x, p.y])
         return hitobjs
 
-    def _parse_keys(self, replay):
+    def _parse_keys(self, data):
         self.last_keys = [0, 0]
-        keypresses = [keypress for keypress in replay if self._check_keys(keypress[3])]
+        keypresses = [keypress for keypress in data if self._check_keys(keypress[3])]
         return keypresses
 
     def _check_keys(self, pressed):
