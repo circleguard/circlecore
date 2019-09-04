@@ -17,7 +17,7 @@ class Investigator:
 
         Attributes:
             Replay replay: The Replay object to investigate.
-            circleparse.Beatmap beatmap: The beatmap to calculate ur with.
+            slider.Beatmap beatmap: The beatmap to calculate ur with.
             Integer threshold: If a replay has a lower ur than this value,
                     it is considered a cheted repaly.
         """
@@ -47,8 +47,9 @@ class Investigator:
         hitobjs = []
 
         # parse hitobj
-        for hit in beatmap.hitobjects:
-            hitobjs.append([hit.time, hit.x, hit.y])
+        for hit in beatmap.hit_objects_no_spinners:
+            p = hit.position
+            hitobjs.append([hit.time.total_seconds() * 1000, p.x, p.y])
         return hitobjs
 
     def _parse_keys(self, replay):
@@ -70,7 +71,7 @@ class Investigator:
 
     def _filter_hits(self, hitobjs, keypresses):
         array = []
-        hitwindow = 150 + 50 * (5 - self.beatmap.difficulty["OverallDifficulty"]) / 5
+        hitwindow = 150 + 50 * (5 - self.beatmap.overall_difficulty) / 5
 
         object_i = 0
         press_i = 0
