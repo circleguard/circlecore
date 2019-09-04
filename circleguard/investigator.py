@@ -10,6 +10,8 @@ class Investigator:
     See Also:
         Comparer
     """
+    # casting necessary for performance reasons
+    KEYS = [int(Keys.K1), int(Keys.K2)]
 
     def __init__(self, replay, beatmap, threshold):
         """
@@ -26,7 +28,6 @@ class Investigator:
         self.beatmap = beatmap
         self.threshold = threshold
         self.last_keys = [0, 0]
-        self.Keys = [int(Keys.K1), int(Keys.K2)]
 
     def investigate(self):
         ur = self.ur()
@@ -61,7 +62,7 @@ class Investigator:
         return keypresses
 
     def _check_keys(self, pressed):
-        checks = [pressed & key for key in self.Keys]
+        checks = [pressed & key for key in self.KEYS]
         if checks != self.last_keys and any(checks):
             if not all(self.last_keys):  # skip if user was holding both buttons in previous event
                 self.last_keys = checks
