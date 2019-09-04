@@ -53,11 +53,8 @@ class Investigator:
 
     def _parse_keys(self, data):
         data = np.array(data, dtype=object)
-        
         keypresses = np.int32(data[:, 3]) & self.MASK
-
         changes = keypresses & ~np.insert(keypresses[:-1], 0, 0)
-
         return data[changes!=0]
 
     def _filter_hits(self, hitobjs, keypresses):
