@@ -110,17 +110,6 @@ class Loader():
         self.cacher = cacher
 
     @request
-    def get_beatmap(self, map_id):
-        """
-        Returns the content of the beatmap of the given map. This request is
-        not ratelimited and does not require an api key. Because of this, treat
-        this endpoint with caution - the osu-tools repository uses this endpoint
-        and peppy has said it is "ok to use for now", but even so it is not in
-        the same category as other api endpoints.
-        """
-        return requests.get(f"https://osu.ppy.sh/osu/{map_id}").text
-
-    @request
     def user_info(self, map_id, num=None, user_id=None, mods=None, limit=True, span=None):
         """
         Returns a list of UserInfo objects containing a user's
