@@ -14,7 +14,7 @@ from circleguard import config
 from circleguard.exceptions import CircleguardException
 from circleguard.replay import Check, ReplayMap, ReplayPath, Replay, Map, Container
 from circleguard.enums import Detect, RatelimitWeight
-from slider.beatmap import Beatmap
+from slider import Beatmap
 
 
 class Circleguard:
