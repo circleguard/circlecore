@@ -185,6 +185,7 @@ class Check(Container):
                 num += loadable.num_replays()
             else:
                 num += 1
+        return num
 
 
 
