@@ -4,7 +4,7 @@ import itertools
 import os
 from os.path import isfile, join
 import logging
-from tempfile import NamedTemporaryFile
+from tempfile import TemporaryDirectory
 
 from circleguard.loader import Loader
 from circleguard.comparer import Comparer
@@ -14,7 +14,7 @@ from circleguard import config
 from circleguard.exceptions import CircleguardException
 from circleguard.replay import Check, ReplayMap, ReplayPath, Replay, Map, Container
 from circleguard.enums import Detect, RatelimitWeight
-from circleparse.beatmap import Beatmap
+from slider import Beatmap, Library
 
 
 class Circleguard:
@@ -54,6 +54,10 @@ class Circleguard:
         # allow for people to pass their own loader implementation/subclass
         self.loader = Loader(key, cacher=cacher) if loader is None else loader(key, cacher)
         self.options = Options()
+        # have to keep a reference to it or the folder gets deleted and can't be walked by Library
+        self.__slider_dir = TemporaryDirectory()
+        self.library = Library.create_db(self.__slider_dir.name)
+
         Circleguard.NUM += 1
 
     def run(self, container):
@@ -93,16 +97,9 @@ class Circleguard:
         for replay in cont.all_replays():
             if not replay.detect & Detect.RELAX:
                 continue
-            bm_content = self.loader.get_beatmap(replay.map_id)
-            # need a file-like object because circleparse uses open
-            # and readline, among other things
-            bm_file = NamedTemporaryFile(delete=False)
-            bm_file.write(bm_content)
-            bm_file.close()
-            bm = Beatmap(bm_file.name)
+            bm = self.library.lookup_by_id(replay.map_id, download=True, save=True)
             investigator = Investigator(replay, bm, cont.rx_thresh)
             yield from investigator.investigate()
-            os.remove(bm_file.name)
 
 
     def map_check(self, map_id, u=None, num=None, cache=None, steal_thresh=None, rx_thresh=None, mods=None, include=None, detect=None, span=None):

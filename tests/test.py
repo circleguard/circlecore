@@ -6,7 +6,7 @@ from circleguard import (Circleguard, Check, ReplayMap, ReplayPath, Detect, Rate
                         Map)
 
 KEY = os.environ.get('OSU_API_KEY')
-if KEY is None:  
+if KEY is None:
     KEY = input("Enter your api key: ")
 
 RES = Path(__file__).parent / "resources"

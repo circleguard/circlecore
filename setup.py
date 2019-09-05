@@ -42,6 +42,7 @@ setup(
         "ossapi >= 1.2.2",
         "wtc >= 1.1.3",
         "numpy",
-        "requests"
+        "requests",
+        "slider"
     ]
 )
