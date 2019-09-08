@@ -109,7 +109,7 @@ class AimCorrectionResult(InvestigationResult):
         List jerks: A list of tuples of (timestamp, jerk_value) at the suspicious jerks.
         Boolean ischeat: Whether the replay is cheated.
     """
-    
+
     def __init__(self, replay, jerks, ischeat):
         super().__init__(replay, ischeat, ResultType.AIM_CORRECTION)
         self.jerks = jerks
