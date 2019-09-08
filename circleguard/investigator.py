@@ -3,6 +3,7 @@ import numpy as np
 from circleguard.enums import Keys
 from circleguard.result import RelaxResult, AimCorrectionResult
 import circleguard.utils as utils
+import math
 
 class Investigator:
     """
@@ -49,6 +50,59 @@ class Investigator:
         for hit, press in filtered_array:
             diff_array.append(press[0]-hit[0])
         return np.std(diff_array) * 10
+
+    def aim_correction_angle(self):
+        """
+        Calculates the angle between each set of three points and finds points
+        where this angle is extremely acute (indicative of a quick jump to
+        a point, then a jump back to the normal path. ie lazy aim correction by
+        dragging a single point to hit the circle in the cheat editor)
+        """
+
+        for idx in range(len(self.data)):
+            if idx > len(self.data) - 3:
+                # avoid indexerrors
+                continue
+            a = self.data[idx]
+            b = self.data[idx + 1]
+            c = self.data[idx + 2]
+            t = b[0]
+            ax = a[1]
+            # osr y values go "higher is lower down", convert them into normal xy plane
+            # im pretty sure it works either way but debugging is so much easier when
+            # you can draw vectors and compare against the visualizer. Can probably
+            # remove for a practically unnoticeable speedup later
+            ay = 384 - a[2]
+            bx = b[1]
+            by = 384 - b[2]
+            cx = c[1]
+            cy = 384 - c[2]
+            ab = [bx - ax, by - ay]
+            bc = [cx - bx, cy - by]
+            # use law of cosines, we want C
+            # c^2 = a^2 + b^2 − 2ab cos(C)
+            # x is our c vector here; the third side of the triangle. No relation
+            # to the c point in self.data which is our third point.
+            # a = ab vector
+            # b = bc vector
+            mag_x = ((ab[0] + bc[0])**2 + (ab[1] + bc[1])**2) ** (1/2)
+            mag_a = (ab[0]**2 + ab[1]**2) ** (1/2)
+            mag_b = (bc[0]**2 + bc[1]**2) ** (1/2)
+            try:
+                frac = (mag_x**2 - mag_a**2 - mag_b**2) / (-2 * mag_a * mag_b)
+                frac = max(frac, -1) # rounding issues makes it go out of acos' domain
+            except ZeroDivisionError:
+                # happens when mag_a or mag_b is zero
+                continue
+            C = math.acos(frac)
+            degrees = math.degrees(C)
+
+            distance_a_b = (((bx - ax) ** 2) + ((by - ay) ** 2)) ** (1/2)
+            if degrees < 10 and distance_a_b > 3:
+                print(t, degrees)
+
+        yield self.replay
+
 
     def aim_correction(self):
         """
