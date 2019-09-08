@@ -1,6 +1,6 @@
 
 import numpy as np
-from circleguard.enums import Keys
+from circleguard.enums import Keys, Detect
 from circleguard.result import RelaxResult, AimCorrectionResult
 import circleguard.utils as utils
 import math
@@ -29,6 +29,7 @@ class Investigator:
 
         """
         self.replay = replay
+        self.detect = replay.detect
         self.data = replay.as_list_with_timestamps()
         self.beatmap = beatmap
         self.max_ur = max_ur
@@ -37,9 +38,12 @@ class Investigator:
         self.last_keys = [0, 0]
 
     def investigate(self):
-        ur = self.ur()
-        ischeat = True if ur < self.max_ur else False
-        yield RelaxResult(self.replay, ur, ischeat)
+        if self.detect & Detect.RELAX:
+            ur = self.ur()
+            ischeat = True if ur < self.max_ur else False
+            yield RelaxResult(self.replay, ur, ischeat)
+        if self.detect & Detect.AIM_CORRECTION:
+            yield from self.aim_correction_angle()
 
     def ur(self):
         hitobjs = self._parse_beatmap(self.beatmap)

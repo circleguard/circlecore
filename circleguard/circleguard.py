@@ -94,7 +94,7 @@ class Circleguard:
         yield from comparer.compare(mode=check.mode)
 
         for replay in check.all_replays():
-            if not replay.detect & Detect.RELAX:
+            if not (replay.detect & Detect.RELAX or replay.detect & Detect.AIM_CORRECTION):
                 continue
             bm_content = self.loader.get_beatmap(replay.map_id)
             # need a file-like object because circleparse uses open
@@ -103,7 +103,7 @@ class Circleguard:
             bm_file.write(bm_content)
             bm_file.close()
             bm = Beatmap(bm_file.name)
-            investigator = Investigator(replay, bm, check.rx_thresh)
+            investigator = Investigator(replay, bm, check.rx_thresh, 10, 10)
             yield from investigator.investigate()
             os.remove(bm_file.name)
 
