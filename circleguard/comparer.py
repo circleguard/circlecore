@@ -98,7 +98,7 @@ class Comparer:
         Returns:
             A Result object, containing the results of the comparison.
         """
-
+        self.log.log(utils.TRACE, "comparing %r and %r", replay1, replay2)
         result = Comparer._compare_two_replays(replay1, replay2)
         mean = result[0]
         sigma = result[1]
