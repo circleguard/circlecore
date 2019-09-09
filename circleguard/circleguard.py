@@ -40,11 +40,12 @@ class Circleguard:
         Args:
             String key: An osu API key.
             [Path or String] db_path: A pathlike object to the databsae file to write and/or read cached replays.
-                     If the given file doesn't exist, a fresh database if created. If this is not passed,
-                     no replays will be cached or loaded from cache.
-            [Path or String] slider_dir: A pathlike object to the directory used by slider to store beatmaps.
+                    If the given file doesn't exist, a fresh database if created. If this is not passed,
+                    no replays will be cached or loaded from cache.
+            [Path or String] slider_dir: A pathlike object to the directory used by slider to store beatmaps. If None,
+                    a temporary directory will be created, and destroyed when this circleguard object is garbage collected.
             Class loader: a subclass of circleguard.Loader, which will be used in place of circleguard.Loader if passed.
-                          Instantiated with two args - a key and cacher.
+                    Instantiated with two args - a key and cacher.
         """
 
         cacher = None
@@ -57,8 +58,8 @@ class Circleguard:
         # allow for people to pass their own loader implementation/subclass
         self.loader = Loader(key, cacher=cacher) if loader is None else loader(key, cacher)
         self.options = Options()
-        # have to keep a reference to it or the folder gets deleted and can't be walked by Library
         if slider_dir is None:
+            # have to keep a reference to it or the folder gets deleted and can't be walked by Library
             self.__slider_dir = TemporaryDirectory()
             self.library = Library(self.__slider_dir.name)
         else:
