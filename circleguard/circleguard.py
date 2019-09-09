@@ -33,7 +33,7 @@ class Circleguard:
     # used to distinguish log output for cg instances
     NUM = 1
 
-    def __init__(self, key, db_path=None, loader=None):
+    def __init__(self, key, db_path=None, slider_dir=None, loader=None):
         """
         Initializes a Circleguard instance.
 
@@ -42,6 +42,7 @@ class Circleguard:
             [Path or String] db_path: A pathlike object to the databsae file to write and/or read cached replays.
                      If the given file doesn't exist, a fresh database if created. If this is not passed,
                      no replays will be cached or loaded from cache.
+            [Path or String] slider_dir: A pathlike object to the directory used by slider to store beatmaps.
         """
 
         cacher = None
@@ -55,8 +56,11 @@ class Circleguard:
         self.loader = Loader(key, cacher=cacher) if loader is None else loader(key, cacher)
         self.options = Options()
         # have to keep a reference to it or the folder gets deleted and can't be walked by Library
-        self.__slider_dir = TemporaryDirectory()
-        self.library = Library.create_db(self.__slider_dir.name)
+        if slider_dir is None:
+            self.__slider_dir = TemporaryDirectory()
+            self.library = Library.create_db(self.__slider_dir.name)
+        else:
+            self.library = Library(slider_dir)
 
         Circleguard.NUM += 1
 
