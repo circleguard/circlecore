@@ -43,6 +43,8 @@ class Circleguard:
                      If the given file doesn't exist, a fresh database if created. If this is not passed,
                      no replays will be cached or loaded from cache.
             [Path or String] slider_dir: A pathlike object to the directory used by slider to store beatmaps.
+            Class loader: a subclass of circleguard.Loader, which will be used in place of circleguard.Loader if passed.
+                          Instantiated with two args - a key and cacher.
         """
 
         cacher = None
