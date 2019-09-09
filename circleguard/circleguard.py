@@ -60,7 +60,7 @@ class Circleguard:
         # have to keep a reference to it or the folder gets deleted and can't be walked by Library
         if slider_dir is None:
             self.__slider_dir = TemporaryDirectory()
-            self.library = Library.create_db(self.__slider_dir.name)
+            self.library = Library(self.__slider_dir.name)
         else:
             self.library = Library(slider_dir)
 
