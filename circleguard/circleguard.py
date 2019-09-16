@@ -206,7 +206,7 @@ class Circleguard:
 
         return Check([replay1, replay2], cache=cache, steal_thresh=steal_thresh, include=include, detect=Detect.STEAL)
 
-    def user_check(self, u, num, cache=None, steal_thresh=None, include=None, detect=None, span=None):
+    def user_check(self, u, num_top, num_users, cache=None, steal_thresh=None, include=None, detect=None, span=None):
         """
         Checks a user's top plays for replay steals.
 
@@ -217,10 +217,13 @@ class Circleguard:
         Obviously, if the play is not downloadable, no comparison is made against the map leaderboard for that replay either.
 
         Args:
-            Integer u: The user id of the user to check
-            Integer num: The number of replays of each map to compare against the user's replay. For now, this also serves as the
-                    number of top plays of the user to check for replay stealing and remodding.
-                    Boolean cache: Whether to cache the loaded replays. Defaults to False, or the config value if changed.
+            Integer u: The user id of the user to check.
+            Integer num_top: The number of top plays of the user to check for stealing and remodding.
+                    This is the total number of plays to check, not the number of plays with replay data -
+                    eg if a user only has 3 replays with data available in his top 50, num=50 will result in
+                    those 3 replays being checked, not the first 50 the user has data for.
+            Integer num_users: The number of replays on each map to compare against the user's replay.
+            Boolean cache: Whether to cache the loaded replays. Defaults to False, or the config value if changed.
                     If no database file was passed, this value has no effect, as replays will not be cached.
             Integer steal_thresh: If a comparison scores below this value, its Result object has ischeat set to True.
                     Defaults to 18, or the config value if changed.
@@ -237,7 +240,7 @@ class Circleguard:
             A generator containing Result objects of the comparisons.
         """
 
-        for check_list in self.create_user_check(u, num, cache, steal_thresh, include, detect, span):
+        for check_list in self.create_user_check(u, num_top, num_users, cache, steal_thresh, include, detect, span):
             # yuck; each top play has two different checks (remodding and stealing)
             # which is why we need a double loop
             for check in check_list:
