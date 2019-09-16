@@ -79,9 +79,9 @@ class Container(Loadable, abc.ABC):
         replays2 = []
         for loadable in self.loadables2:
             if isinstance(loadable, Container):
-                replays += loadable.all_replays2()
+                replays2 += loadable.all_replays2()
             else:
-                replays.append(loadable)
+                replays2.append(loadable)
         return replays2
 
     def cascade_options(self, cache, steal_thresh, rx_thresh, detect):
