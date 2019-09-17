@@ -1,14 +1,15 @@
 import logging
 
 from circleguard.circleguard import Circleguard, set_options
-from circleguard.replay import Check, Replay, ReplayMap, ReplayPath
-from circleguard.enums import Detect, RatelimitWeight
+from circleguard.replay import Check, Replay, ReplayMap, ReplayPath, Map, Container
+from circleguard.enums import Detect, RatelimitWeight, Keys
 from circleguard.utils import TRACE, ColoredFormatter
 from circleguard.loader import Loader
 from circleguard.exceptions import (CircleguardException, InvalidArgumentsException, APIException,
         NoInfoAvailableException, UnknownAPIException, InternalAPIException, InvalidKeyException, RatelimitException,
         InvalidJSONException, ReplayUnavailableException)
 from circleguard.version import __version__
+from circleguard.result import Result, InvestigationResult, ComparisonResult, RelaxResult, ReplayStealingResult, ResultType
 
 logging.addLevelName(TRACE, "TRACE")
 formatter = ColoredFormatter("[%(threadName)s][%(name)s][%(levelname)s]  %(message)s  (%(filename)s:%(lineno)s)")
@@ -18,6 +19,8 @@ logging.getLogger("circleguard").addHandler(handler_stream)
 
 __all__ = ["Circleguard", "set_options", "Check", "Replay", "ReplayMap",
            "ReplayPath", "Detect", "TRACE", "ColoredFormatter", "Loader",
-           "__version__", "RatelimitWeight", "CircleguardException", "InvalidArgumentsException",
+           "__version__", "RatelimitWeight", "Result", "InvestigationResult",
+           "ComparisonResult", "RelaxResult", "ReplayStealingResult", "ResultType",
+           "CircleguardException", "InvalidArgumentsException", "Map", "Container",
            "APIException", "NoInfoAvailableException", "UnknownAPIException", "InternalAPIException",
-           "InvalidKeyException", "RatelimitException", "InvalidJSONException", "ReplayUnavailableException"]
+           "InvalidKeyException", "RatelimitException", "InvalidJSONException", "ReplayUnavailableException", "Keys"]

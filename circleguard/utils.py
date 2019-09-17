@@ -10,27 +10,28 @@ TRACE = 5
 
 # Colored logs adapted from
 # https://stackoverflow.com/questions/384076/how-can-i-color-python-logging-output
-COLOR_MAPPING = {
-    "TRACE"    : 90, # bright black
-    "DEBUG"    : 94, # bright blue
-    "INFO"     : 95, # bright magenta
-    "WARNING"  : 31, # red
-    "ERROR"    : 91, # bright red
-    "CRITICAL" : 41, # white on red bg
-
-    "NAME"     : 32,  # green
-    "MESSAGE"  : 93,  # bright yellow
-    "FILENAME" : 92,  # bright green
-    "LINENO"   : 91   # bright red
-}
-
-COLOR_PREFIX = '\033['
-COLOR_SUFFIX = '\033[0m'
-
 class ColoredFormatter(Formatter):
+
+    COLOR_PREFIX = '\033['
+    COLOR_SUFFIX = '\033[0m'
+    COLOR_MAPPING = {
+        "TRACE"    : 90, # bright black
+        "DEBUG"    : 94, # bright blue
+        "INFO"     : 95, # bright magenta
+        "WARNING"  : 31, # red
+        "ERROR"    : 91, # bright red
+        "CRITICAL" : 41, # white on red bg
+
+        "NAME"     : 32,  # green
+        "MESSAGE"  : 93,  # bright yellow
+        "FILENAME" : 92,  # bright green
+        "LINENO"   : 91   # bright red
+    }
 
     def __init__(self, patern):
         Formatter.__init__(self, patern)
+        self.colored_log = "{prefix}{{color}}m{{msg}}{suffix}".format(
+                    prefix=self.COLOR_PREFIX, suffix=self.COLOR_SUFFIX)
 
     def format(self, record):
         # c as in colored, not as in copy
@@ -38,28 +39,28 @@ class ColoredFormatter(Formatter):
 
         # logging's choice of camelCase, not mine
         threadName = c_record.threadName
-        color = COLOR_MAPPING["NAME"]
-        c_threadName = ('{0}{1}m{2}{3}').format(COLOR_PREFIX, color, threadName, COLOR_SUFFIX)
+        color = self.COLOR_MAPPING["NAME"]
+        c_threadName = self.colored_log.format(color=color, msg=threadName)
 
         levelname = c_record.levelname
-        color = COLOR_MAPPING.get(levelname, 37) # default white
-        c_levelname = ('{0}{1}m{2}{3}').format(COLOR_PREFIX, color, levelname, COLOR_SUFFIX)
+        color = self.COLOR_MAPPING.get(levelname, 37) # default white
+        c_levelname = self.colored_log.format(color=color, msg=levelname)
 
         name = c_record.name
-        color = COLOR_MAPPING["NAME"]
-        c_name = ('{0}{1}m{2}{3}').format(COLOR_PREFIX, color, name, COLOR_SUFFIX)
+        color = self.COLOR_MAPPING["NAME"]
+        c_name = self.colored_log.format(color=color, msg=name)
 
-        message = c_record.msg # why is this msg, but we format it as %(message)s in the formatter? mysteries of life.
-        color = COLOR_MAPPING["MESSAGE"]
-        c_msg = ('{0}{1}m{2}{3}').format(COLOR_PREFIX, color, message, COLOR_SUFFIX)
+        message = c_record.msg # why is this msg, but we format it as %(message)s in the formatter? blame logging
+        color = self.COLOR_MAPPING["MESSAGE"]
+        c_msg = self.colored_log.format(color=color, msg=message)
 
         filename = c_record.filename
-        color = COLOR_MAPPING["FILENAME"]
-        c_filename = ('{0}{1}m{2}{3}').format(COLOR_PREFIX, color, filename, COLOR_SUFFIX)
+        color = self.COLOR_MAPPING["FILENAME"]
+        c_filename = self.colored_log.format(color=color, msg=filename)
 
         lineno = c_record.lineno
-        color = COLOR_MAPPING["LINENO"]
-        c_lineno = ('{0}{1}m{2}{3}').format(COLOR_PREFIX, color, lineno, COLOR_SUFFIX)
+        color = self.COLOR_MAPPING["LINENO"]
+        c_lineno = self.colored_log.format(color=color, msg=lineno)
 
         c_record.threadName = c_threadName
         c_record.levelname = c_levelname
@@ -71,6 +72,22 @@ class ColoredFormatter(Formatter):
         return Formatter.format(self, c_record)
 
 ######### UTIL METHODS ###########
+
+def span_to_list(span):
+    """
+    Takes a string span such as "1-3,6,2-4" and converts it to a set such as
+    {1,2,3,4,6}.
+    """
+    ret = set()
+    for s in span.split(","):
+        if "-" in s:
+            p = s.split("-")
+            l = list(range(int(p[0]), int(p[1])+1))
+            ret.update(l)
+        else:
+            ret.add(int(s))
+    return ret
+
 
 def mod_to_int(mod):
     """

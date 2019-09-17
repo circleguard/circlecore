@@ -44,17 +44,14 @@ class Comparer:
         # filter beatmaps we had no data for - see Loader.replay_data and OnlineReplay.from_map
         self.replays1 = [replay for replay in replays1 if replay.replay_data is not None]
         self.replays2 = [replay for replay in replays2 if replay.replay_data is not None] if replays2 else None
-
+        self.mode = "double" if self.replays2 else "single"
         self.log.debug("Comparer initialized: %r", self)
 
-    def compare(self, mode):
+    def compare(self):
         """
         If mode is "double", compares all replays in replays1 against all replays in replays2.
         If mode is "single", compares all replays in replays1 against all other replays in replays1 (len(replays1) choose 2 comparisons).
         In both cases, yields Result objects containing the result of each comparison.
-
-        Args:
-            String mode: One of either "double" or "single", determining how to choose which replays to compare.
 
         Returns:
             A generator containing Result objects of the comparisons.
@@ -65,25 +62,28 @@ class Comparer:
             silently returns.
         """
 
-        self.log.info("Comparing replays with mode: %s", mode)
+        self.log.info("Comparing replays with mode: %s", self.mode)
         self.log.debug("replays1: %r", self.replays1)
         self.log.debug("replays2: %r", self.replays2)
 
         #TODO: a little bit hacky and I don't think works 100% correctly, if mode is double but replays2 is None
-        if(not self.replays1 or self.replays2 == []):
+        if not self.replays1 or self.replays2 == []:
             if(config.failfast):
                 raise CircleguardException("No comparisons could be made from the given replays")
             else:
                 return
 
-        if(mode == "double"):
+        if self.mode == "double":
             iterator = itertools.product(self.replays1, self.replays2)
-        elif (mode == "single"):
+        elif self.mode == "single":
             iterator = itertools.combinations(self.replays1, 2)
         else:
             raise InvalidArgumentsException("'mode' must be one of 'double' or 'single'")
 
         for replay1, replay2 in iterator:
+            if replay1.replay_id == replay2.replay_id:
+                self.log.debug("Not comparing %r and %r with the same id", replay1, replay2)
+                continue
             yield self._result(replay1, replay2)
 
 
@@ -98,7 +98,7 @@ class Comparer:
         Returns:
             A Result object, containing the results of the comparison.
         """
-
+        self.log.log(utils.TRACE, "comparing %r and %r", replay1, replay2)
         result = Comparer._compare_two_replays(replay1, replay2)
         mean = result[0]
         sigma = result[1]

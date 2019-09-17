@@ -4,7 +4,7 @@ import itertools
 import os
 from os.path import isfile, join
 import logging
-from tempfile import NamedTemporaryFile
+from tempfile import TemporaryDirectory
 
 from circleguard.loader import Loader
 from circleguard.comparer import Comparer
@@ -12,9 +12,9 @@ from circleguard.investigator import Investigator
 from circleguard.cacher import Cacher
 from circleguard import config
 from circleguard.exceptions import CircleguardException
-from circleguard.replay import Check, ReplayMap, ReplayPath, Replay
+from circleguard.replay import Check, ReplayMap, ReplayPath, Replay, Map, Container
 from circleguard.enums import Detect, RatelimitWeight
-from circleparse.beatmap import Beatmap
+from slider import Beatmap, Library
 
 
 class Circleguard:
@@ -22,8 +22,8 @@ class Circleguard:
     Circleguard compares and investigates replays to detect cheats.
 
     Circleguard provides convenience methods for common use cases: map_check, verify, user_check, and local_check -
-    see each method for further documentation. If these convenience methods are not flexible enough for you, you will
-    have to instantiate your own Check object and call circleguard#run(check).
+    see each method for further documentation. If these convenience methods are not flexible enough for you, you can instantiate
+    a Container such as Check or Map and call circleguard.run(container).
 
     Under the hood, convenience methods simply instantiate a Check object and call circleguard#run(check). The run method
     returns a generator containing Result objects, which contains the result of each comparison of the replays. See the
@@ -33,14 +33,19 @@ class Circleguard:
     # used to distinguish log output for cg instances
     NUM = 1
 
-    def __init__(self, key, db_path=None, loader=None):
+    def __init__(self, key, db_path=None, slider_dir=None, loader=None):
         """
         Initializes a Circleguard instance.
 
         Args:
             String key: An osu API key.
-            [Path or String] db_path: A pathlike object to the databsae file to write and/or read cached replays. If the given file
-                                doesn't exist, it is created. If this is not passed, no replays will be cached or loaded from cache.
+            [Path or String] db_path: A pathlike object to the databsae file to write and/or read cached replays.
+                    If the given file doesn't exist, a fresh database if created. If this is not passed,
+                    no replays will be cached or loaded from cache.
+            [Path or String] slider_dir: A pathlike object to the directory used by slider to store beatmaps. If None,
+                    a temporary directory will be created, and destroyed when this circleguard object is garbage collected.
+            Class loader: a subclass of circleguard.Loader, which will be used in place of circleguard.Loader if passed.
+                    Instantiated with two args - a key and cacher.
         """
 
         cacher = None
@@ -53,97 +58,97 @@ class Circleguard:
         # allow for people to pass their own loader implementation/subclass
         self.loader = Loader(key, cacher=cacher) if loader is None else loader(key, cacher)
         self.options = Options()
+        if slider_dir is None:
+            # have to keep a reference to it or the folder gets deleted and can't be walked by Library
+            self.__slider_dir = TemporaryDirectory()
+            self.library = Library(self.__slider_dir.name)
+        else:
+            self.library = Library(slider_dir)
+
         Circleguard.NUM += 1
 
-    def run(self, check):
+    def run(self, container):
         """
-        Compares replays contained in the check object for replay steals.
+        Compares and investigates replays in the container for cheats.
 
         Args:
-            Check check: A Check object containing either one or two sets of replays. If it was initialized with
-                         a single replay set, all replays in that set are compared with each other. If it was
-                         initialized with two replay sets, all replays in the first set are compared with all
-                         replays in the second set.
+            Continer container: The container with replays to look at.
 
         Returns:
-            A generator containing Result objects of the comparisons.
+            A generator containing Result objects of the comparisons and investigations.
         """
+        cont = container
+        self.log.info("Running circleguard with %r", cont)
 
-        self.log.info("Running circleguard with a Check")
-
-        check.filter()
-        # Checks are instantiated without relation to a cg instance by necessity of
+        cont.filter(self.loader)
+        # Containers are instantiated without relation to a cg instance by necessity of
         # easy of use. This means if it is not given an option, it will default to
         # the config value at that time, not the circleguard's option value, which has
         # higher priority than the config value. So we change it here, and only so late
-        # because this is the first time the check gets tied to a cg instance and we are
+        # because this is the first time the Container gets tied to a cg instance and we are
         # able to give it the cg's option. But don't overwrite the option if it was
-        # passed to the check (will be different from the config value if that is the case).
-        # TODO work on cases where config value is changed after check instantiation but before
+        # passed to the Container (will be different from the config value if that is the case).
+        # TODO work on cases where config value is changed after container instantiation but before
         # cg is run
-        if check.steal_thresh == config.steal_thresh:
-            check.steal_thresh = self.options.steal_thresh
+        o = self.options
+        cont.cascade_options(cache=o.cache, steal_thresh=o.steal_thresh, rx_thresh=o.rx_thresh, detect=o.detect)
+        cont.load(self.loader)
+
         # steal check
-        compare1 = [replay for replay in check.replays if replay.detect & Detect.STEAL]
-        compare2 = [replay for replay in check.replays2 if replay.detect & Detect.STEAL]
-
-        check.load(self.loader)
+        compare1 = [replay for replay in cont.all_replays() if replay.detect & Detect.STEAL]
+        compare2 = [replay for replay in cont.all_replays2() if replay.detect & Detect.STEAL]
         # all replays now have replay data, above is where ratelimit waiting would occur
-        comparer = Comparer(check.steal_thresh, compare1, replays2=compare2)
-        yield from comparer.compare(mode=check.mode)
+        comparer = Comparer(cont.steal_thresh, compare1, replays2=compare2)
+        yield from comparer.compare()
 
-        for replay in check.all_replays():
+        for replay in cont.all_replays():
             if not replay.detect & Detect.RELAX:
                 continue
-            bm_content = self.loader.get_beatmap(replay.map_id)
-            # need a file-like object because circleparse uses open
-            #  and readline, among other things
-            bm_file = NamedTemporaryFile(delete=False)
-            bm_file.write(bm_content)
-            bm_file.close()
-            bm = Beatmap(bm_file.name)
-            investigator = Investigator(replay, bm, check.rx_thresh)
+            bm = self.library.lookup_by_id(replay.map_id, download=True, save=True)
+            investigator = Investigator(replay, bm, cont.rx_thresh)
             yield from investigator.investigate()
-            os.remove(bm_file.name)
 
 
-    def map_check(self, map_id, u=None, num=None, cache=None, steal_thresh=None, rx_thresh=None, mods=None, include=None, detect=None):
+    def map_check(self, map_id, u=None, num=None, cache=None, steal_thresh=None, rx_thresh=None, mods=None, include=None, detect=None, span=None):
         """
         Checks a map's leaderboard for replay steals.
 
         Args:
             Integer map_id: The id of the map (not the id of the mapset!) to compare replays from.
             Integer u: A user id. If passed, only the replay made by this user id on the given map will be
-                       compared with the rest of the lederboard of the map. No other comparisons will be made.
+                    compared with the rest of the lederboard of the map. No other comparisons will be made.
             Integer num: The number of replays to compare from the map. Defaults to 50, or the config value if changed.
-                         Loads from the top ranks of the leaderboard, so num=20 will compare the top 20 scores. This
-                         number must be between 1 and 100, as restricted by the osu api.
+                    Loads from the top ranks of the leaderboard, so num=20 will compare the top 20 scores. This
+                    number must be between 1 and 100, as restricted by the osu api.
             Boolean cache: Whether to cache the loaded replays. Defaults to False, or the config value if changed.
-                           If no database file was passed, this value has no effect, as replays will not be cached.
+                    If no database file was passed, this value has no effect, as replays will not be cached.
             Integer steal_thresh: If a comparison scores below this value, its Result object has ischeat set to True.
-                            Defaults to 18, or the config value if changed.
+                    Defaults to 18, or the config value if changed.
             Integer rx_thresh: if a replay has a ur below this value, it is considered cheated.
                     Deaults to 50, or the config value if changed.
             Integer mods: If passed, download and compare the top num replays set with these exact mods. You can find a
-                          reference on what mod maps to what integer value here: https://github.com/ppy/osu-api/wiki#mods.
-                          There is currently no support for optional mods (eg HR is required, but other mods optional,
-                          so both HR and HDHR scores would be downloaded). This is due to api limitations.
-                          If both mods and u are passed, the user's replay will be downloaded regardless of the passed mods,
-                          (ie their highest scoring play on the map), but the other replays it is compared against will
-                          be downloaded according to the passed mods.
+                    reference on what mod maps to what integer value here: https://github.com/ppy/osu-api/wiki#mods.
+                    There is currently no support for optional mods (eg HR is required, but other mods optional,
+                    so both HR and HDHR scores would be downloaded). This is due to api limitations.
+                    If both mods and u are passed, the user's replay will be downloaded regardless of the passed mods,
+                    (ie their highest scoring play on the map), but the other replays it is compared against will
+                    be downloaded according to the passed mods.
             Function include: A Predicate function that returns True if the replay should be loaded, and False otherwise.
-                              The include function will be passed a single argument - the circleguard.Replay object, or one
-                              of its subclasses.
+                    The include function will be passed a single argument - the circleguard.Replay object, or one
+                    of its subclasses.
             Detect detect: What cheats to run tests to detect for replays on this map.
+            String span: A comma separated list of ranges of top replays to check on the map. "1-3" will check the first 3 replays,
+                    and "1-3,6,2-4" will check replays 1,2,3,4,6 for instance. Values that appear multiple times or in multiple ranges
+                    are only counted once.
 
         Returns:
             A generator containing Result objects of the comparisons.
         """
-        check = self.create_map_check(map_id, u, num, cache, steal_thresh, mods, include, detect)
+        check = self.create_map_check(map_id, u, num, cache, steal_thresh, mods, include, detect, span)
         yield from self.run(check)
 
 
-    def create_map_check(self, map_id, u=None, num=None, cache=None, steal_thresh=None, mods=None, include=None, detect=None):
+    def create_map_check(self, map_id, u=None, num=None, cache=None, steal_thresh=None, mods=None, include=None, detect=None, span=None):
         """
         Creates the Check object used in the map_check convenience method. See that method for more information.
         """
@@ -155,21 +160,11 @@ class Circleguard:
         detect = detect if detect is not None else options.detect
 
         self.log.info("Map check with map id %d, u %s, num %s, cache %s, steal_thresh %s", map_id, u, num, cache, steal_thresh)
-        replays2 = None
-        replay2_id = None
-        if u:
-            info = self.loader.user_info(map_id, user_id=u)
-            replay2_id = info.replay_id
-            replays2 = [ReplayMap(info.map_id, info.user_id, info.mods)]
-        infos = self.loader.user_info(map_id, num=num, mods=mods)
-        replays = []
-        for info in infos:
-            if info.replay_id == replay2_id:
-                self.log.debug("Removing map %s, user %s, mods %s from map check with "
-                                "the same replay id as the user's replay", info.map_id, info.user_id, info.mods)
-                continue
-            replays.append(ReplayMap(info.map_id, info.user_id, info.mods))
-        return Check(replays, replays2=replays2, cache=cache, steal_thresh=steal_thresh, include=include, detect=detect)
+
+        replays = [Map(map_id, num=num, cache=cache, mods=mods, detect=detect, span=span)]
+        replays2 = [ReplayMap(map_id, u, mods=mods)] if u else None
+
+        return Check(replays, loadables2=replays2, cache=cache, steal_thresh=steal_thresh, include=include, detect=detect)
 
     def verify(self, map_id, u1, u2, cache=None, steal_thresh=None, include=None):
         """
@@ -180,12 +175,12 @@ class Circleguard:
             Integer u1: The user id of one of the users who set a replay on this map.
             Integer u2: The user id of the second user who set a replay on this map.
             Boolean cache: Whether to cache the loaded replays. Defaults to False, or the config value if changed.
-                           If no database file was passed, this value has no effect, as replays will not be cached.
+                    If no database file was passed, this value has no effect, as replays will not be cached.
             Integer steal_thresh: If a comparison scores below this value, its Result object has ischeat set to True.
-                            Defaults to 18, or the config value if changed.
+                    Defaults to 18, or the config value if changed.
             Function include: A Predicate function that returns True if the replay should be loaded, and False otherwise.
-                              The include function will be passed a single argument - the circleguard.Replay object, or one
-                              of its subclasses.
+                    The include function will be passed a single argument - the circleguard.Replay object, or one
+                    of its subclasses.
 
         Returns:
             A generator containing Result objects of the comparisons.
@@ -211,7 +206,7 @@ class Circleguard:
 
         return Check([replay1, replay2], cache=cache, steal_thresh=steal_thresh, include=include, detect=Detect.STEAL)
 
-    def user_check(self, u, num, cache=None, steal_thresh=None, include=None, detect=None):
+    def user_check(self, u, num_top, num_users, cache=None, steal_thresh=None, include=None, detect=None, span=None):
         """
         Checks a user's top plays for replay steals.
 
@@ -222,29 +217,36 @@ class Circleguard:
         Obviously, if the play is not downloadable, no comparison is made against the map leaderboard for that replay either.
 
         Args:
-            Integer u: The user id of the user to check
-            Integer num: The number of replays of each map to compare against the user's replay. For now, this also serves as the
-                         number of top plays of the user to check for replay stealing and remodding.
-                         Boolean cache: Whether to cache the loaded replays. Defaults to False, or the config value if changed.
-                         If no database file was passed, this value has no effect, as replays will not be cached.
+            Integer u: The user id of the user to check.
+            Integer num_top: The number of top plays of the user to check for stealing and remodding.
+                    This is the total number of plays to check, not the number of plays with replay data -
+                    eg if a user only has 3 replays with data available in his top 50, num=50 will result in
+                    those 3 replays being checked, not the first 50 the user has data for.
+            Integer num_users: The number of replays on each map to compare against the user's replay.
+            Boolean cache: Whether to cache the loaded replays. Defaults to False, or the config value if changed.
+                    If no database file was passed, this value has no effect, as replays will not be cached.
             Integer steal_thresh: If a comparison scores below this value, its Result object has ischeat set to True.
-                            Defaults to 18, or the config value if changed.
+                    Defaults to 18, or the config value if changed.
             Function include: A Predicate function that returns True if the replay should be loaded, and False otherwise.
-                              The include function will be passed a single argument - the circleguard.Replay object, or one
-                              of its subclasses.
+                    The include function will be passed a single argument - the circleguard.Replay object, or one
+                    of its subclasses.
             Detect detect: What cheats to run tests to detect.
+            String span: A comma separated list of ranges of top plays to check. "1-3" will check the top 3 plays,
+                    and "1-3,6,2-4" will check top plays 1,2,3,4,6 for instance. Values that appear multiple times or in multiple ranges
+                    are only counted once. Just like normal, if the user does not have a replay available for one of the top plays in the span,
+                    it will be skipped. The span refers to all of the user's top plays, not just the ones they have a replay available for.
 
         Returns:
             A generator containing Result objects of the comparisons.
         """
 
-        for check_list in self.create_user_check(u, num, cache, steal_thresh, include, detect):
+        for check_list in self.create_user_check(u, num_top, num_users, cache, steal_thresh, include, detect, span):
             # yuck; each top play has two different checks (remodding and stealing)
             # which is why we need a double loop
             for check in check_list:
                 yield from self.run(check)
 
-    def create_user_check(self, u, num_top, num_users, cache=None, steal_thresh=None, include=None, detect=None):
+    def create_user_check(self, u, num_top, num_users, cache=None, steal_thresh=None, include=None, detect=None, span=None):
         """
         Creates the Check object used in the user_check convenience method. See that method for more information.
 
@@ -261,7 +263,7 @@ class Circleguard:
 
         self.log.info("User check with u %s, num_top %s, num_users %s", u, num_top, num_users)
         ret = []
-        for map_id in self.loader.get_user_best(u, num_top):
+        for map_id in self.loader.get_user_best(u, num_top, span=span):
             info = self.loader.user_info(map_id, user_id=u)
             ureplay_id = info.replay_id # user replay id
             if not info.replay_available:
@@ -281,7 +283,7 @@ class Circleguard:
             for info in self.loader.user_info(map_id, user_id=u, limit=False)[1:]:
                 remod_replays.append(ReplayMap(info.map_id, info.user_id, mods=info.mods))
 
-            check1 = Check(user_replay, replays2=replays, cache=cache, steal_thresh=steal_thresh, include=include, detect=detect)
+            check1 = Check(user_replay, loadables2=replays, cache=cache, steal_thresh=steal_thresh, include=include, detect=detect)
             check2 = Check(user_replay + remod_replays, cache=cache, steal_thresh=steal_thresh, include=include, detect=detect)
             ret.append([check1, check2])
 
@@ -341,21 +343,13 @@ class Circleguard:
 
             online_replays = [ReplayMap(info.map_id, info.user_id, info.mods) for info in infos]
 
-        return Check(local_replays, replays2=online_replays, steal_thresh=steal_thresh, include=include, detect=detect)
+        return Check(local_replays, loadables2=online_replays, steal_thresh=steal_thresh, include=include, detect=detect)
 
     def load(self, loadable):
         """
-        Loads the given Replay or Check. This is identical to calling replay.load(cg.loader) if cg is your
-        Circleguard instance for a Replay, or identical to `for r in check.all_replays(): cg.load(r)` for a Check.
-        This method exists to emphasize that this behavior is encouraged, and tied to a specific cg instance.
+        Loads the given loadable. This is identical to calling loadable.load(cg.loader).
         """
-        # Replay and Check happen to have the same method signatures for loading,
-        # but leaving this as an (unnecessary) conditional to emphasize that this
-        # is purely coincidental.
-        if isinstance(loadable, Replay):
-            loadable.load(self.loader)
-        if isinstance(loadable, Check):
-            loadable.load(self.loader)
+        loadable.load(self.loader)
 
     def set_options(self, steal_thresh=None, rx_thresh=None, num=None, cache=None, failfast=None, loglevel=None, include=None, detect=None):
         """
@@ -365,9 +359,9 @@ class Circleguard:
         Args:
             Integer steal_thresh: If a comparison scores below this value, its Result object has ischeat set to True. 18 by default.
             Integer rx_thresh: if a replay has a ur below this value, it is considered cheated. 50 by default.
-            Integer num: How many replays to load from a map when doing a map check. 50 by default.
-            Boolean cache: Whether to cache the loaded replays. Defaults to False, or the config value if changed.
-                           If no database file was passed, this value has no effect, as replays will not be cached.
+            Integer num: How many loadables to load from a map when doing a map check. 50 by default.
+            Boolean cache: Whether to cache the loaded loadables. Defaults to False, or the config value if changed.
+                           If no database file was passed, this value has no effect, as loadables will not be cached.
             Boolean failfast: Will throw an exception if no comparisons can be made for a given Check object,
                           or silently make no comparisons otherwise. False by default.
             Integer loglevel: What level to log at. Circlecore follows standard python logging levels, with an added level of
@@ -399,9 +393,9 @@ def set_options(steal_thresh=None, rx_thresh=None, num=None, cache=None, failfas
     Args:
         Integer steal_thresh: If a comparison scores below this value, its Result object has ischeat set to True. 18 by default.
         Integer rx_thresh: if a replay has a ur below this value, it is considered cheated. 50 by default.
-        Integer num: How many replays to load from a map when doing a map check. 50 by default.
-        Boolean cache: Whether to cache the loaded replays. Defaults to False, or the config value if changed.
-                       If no database file was passed to a circleguard instance, this value has no effect, as replays will not be cached.
+        Integer num: How many loadables to load from a map when doing a map check. 50 by default.
+        Boolean cache: Whether to cache the loaded loadables. Defaults to False, or the config value if changed.
+                       If no database file was passed to a circleguard instance, this value has no effect, as loadables will not be cached.
         Boolean failfast: Will throw an exception if no comparisons can be made for a given Check object,
                           or silently make no comparisons otherwise. False by default.
         Integer loglevel: What level to log at. Circlecore follows standard python logging levels, with an added level of

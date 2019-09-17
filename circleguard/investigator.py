@@ -10,6 +10,7 @@ class Investigator:
     See Also:
         Comparer
     """
+    MASK = int(Keys.K1) | int(Keys.K2)
 
     def __init__(self, replay, beatmap, threshold):
         """
@@ -17,15 +18,14 @@ class Investigator:
 
         Attributes:
             Replay replay: The Replay object to investigate.
-            circleparse.Beatmap beatmap: The beatmap to calculate ur with.
+            slider.Beatmap beatmap: The beatmap to calculate ur with.
             Integer threshold: If a replay has a lower ur than this value,
                     it is considered a cheted repaly.
         """
-
-        self.replay = replay.as_list_with_timestamps()
+        self.replay = replay
+        self.data = replay.as_list_with_timestamps()
         self.beatmap = beatmap
         self.threshold = threshold
-        self.last_keys = [0, 0]
 
     def investigate(self):
         ur = self.ur()
@@ -34,7 +34,7 @@ class Investigator:
 
     def ur(self):
         hitobjs = self._parse_beatmap(self.beatmap)
-        keypresses = self._parse_keys(self.replay)
+        keypresses = self._parse_keys(self.data)
         filtered_array = self._filter_hits(hitobjs, keypresses)
         diff_array = []
 
@@ -46,45 +46,37 @@ class Investigator:
         hitobjs = []
 
         # parse hitobj
-        for hit in beatmap.hitobjects:
-            hitobjs.append([hit.time, hit.x, hit.y])
+        for hit in beatmap.hit_objects_no_spinners:
+            p = hit.position
+            hitobjs.append([hit.time.total_seconds() * 1000, p.x, p.y])
         return hitobjs
 
-    def _parse_keys(self, replay):
-        keypresses = []
-        self.last_keys = [0, 0]
-        for keypress in replay:
-            if self._check_keys(keypress[3]):
-                    keypresses.append(keypress)
-        return keypresses
-
-    def _check_keys(self, pressed):
-        checks = [pressed & key.value for key in (Keys.K1, Keys.K2)]
-        if checks != self.last_keys and any(checks): 
-            if not all(self.last_keys):  # skip if user was holding both buttons in previous event
-                self.last_keys = checks
-                return True
-        self.last_keys = checks
-        return False
+    def _parse_keys(self, data):
+        data = np.array(data, dtype=object)
+        keypresses = np.int32(data[:, 3]) & self.MASK
+        changes = keypresses & ~np.insert(keypresses[:-1], 0, 0)
+        return data[changes!=0]
 
     def _filter_hits(self, hitobjs, keypresses):
         array = []
-        hitwindow = 150 + 50 * (5 - self.beatmap.difficulty["OverallDifficulty"]) / 5
-        # inefficient as fugg, but not important rn
-        # filters out all clicks that didn't hit anything and stores hit and hitobj to array
-        for hitobj in hitobjs:
-            temp_diffs = []
-            temp_hits = []
-            for press in keypresses:
-                if hitobj[0] > press[0]-(hitwindow/2) and hitobj[0] < press[0]+(hitwindow/2):
-                    diff = press[0]-hitobj[0]
-                    temp_diffs.append(diff)
-                    temp_hits.append(press)
-            # only add one click per hitobj
-            if len(temp_diffs) != 0:
-                index = temp_diffs.index(min(temp_diffs, key=abs))
-                array.append([hitobj, temp_hits[index]])
-                keypresses.pop(keypresses.index(temp_hits[index]))  # remove used hits
+        hitwindow = 150 + 50 * (5 - self.beatmap.overall_difficulty) / 5
+
+        object_i = 0
+        press_i = 0
+
+        while object_i < len(hitobjs) and press_i < len(keypresses):
+            hitobj = hitobjs[object_i]
+            press = keypresses[press_i]
+
+            if press[0] < hitobj[0] - hitwindow / 2:
+                press_i += 1
+            elif press[0] > hitobj[0] + hitwindow / 2:
+                object_i += 1
+            else:
+                array.append([hitobj, press])
+                press_i += 1
+                object_i += 1
+
         return array
 
 class Hit:

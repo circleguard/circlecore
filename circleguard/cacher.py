@@ -14,7 +14,6 @@ class Cacher:
     Handles compressing and caching replay data to a database.
 
     Each Cacher instance maintains its own database connection.
-    Be wary of instantiating too many.
     """
 
     def __init__(self, cache, path):
@@ -23,7 +22,8 @@ class Cacher:
 
         Args:
             Boolean cache: Whether replays should be cached or not.
-            Path path: A pathlike object representing the absolute path to the database
+            Path path: A pathlike object representing the absolute path to the database.
+                    If the given path does not exist, a fresh database will be created there.
         """
 
         self.log = logging.getLogger(__name__)
@@ -35,8 +35,8 @@ class Cacher:
 
     def cache(self, lzma_bytes, user_info, should_cache=None):
         """
-        Writes the given lzma bytes to the database, linking it to the given map and user.
-        If an entry with the given map_id and user_id already exists, it is overwritten with
+        Writes the given lzma bytes to the database, linking it to the given user info.
+        If an entry with the given user info already exists, it is overwritten with
         the given lzma_bytes (after compression) and replay_id.
 
         The lzma string is compressed with wtc compression. See Cacher.compress and wtc.compress for more.
@@ -53,7 +53,7 @@ class Cacher:
         self.log.debug("Caching lzma bytes")
         should_cache = should_cache if should_cache else self.should_cache
 
-        if(not should_cache):
+        if not should_cache:
             self.log.debug("should_cache is false, not caching")
             return
         compressed_bytes = self._compress(lzma_bytes)
