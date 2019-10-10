@@ -18,6 +18,8 @@ extensions = [
 
 intersphinx_mapping = {"python": ("https://docs.python.org/3", None),
                        "slider": ("https://llllllllll.github.io/slider/", None)}
+# https://stackoverflow.com/a/37210251
+autodoc_member_order = 'bysource'
 
 html_theme = 'sphinx_rtd_theme'
 
