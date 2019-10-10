@@ -41,4 +41,6 @@ rst_prolog = """
 .. |ReplayPath| replace:: :class:`~circleguard.replay.ReplayPath`
 .. |Replay| replace:: :class:`~circleguard.replay.Replay`
 .. |Check| replace:: :class:`~circleguard.replay.Check`
+.. |cg.run| replace:: :func:`cg.run <circleguard.circleguard.Circleguard.run>`
+.. |Result| replace:: :class:`~circleguard.result.Result`
 """
