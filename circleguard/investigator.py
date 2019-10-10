@@ -5,34 +5,44 @@ import circleguard.utils as utils
 
 class Investigator:
     """
-    A class for checking isolated replays for cheats.
+    Manages the investigation of individual
+    :class:`~.replay.Replay`\s for cheats.
 
-    See Also:
-        Comparer
+    Parameters
+    ----------
+    replay: :class:`~.replay.Replay`
+        The replay to investigate.
+    beatmap: :class:`slider.beatmap.Beatmap`
+        The beatmap to calculate ur from, with the replay.
+    threshold: int
+        If a replay has a lower ur than ``threshold``, it is considered cheated.
+
+    See Also
+    --------
+    :class:`~.comparer.Comparer`, for comparing multiple replays.
     """
     MASK = int(Keys.K1) | int(Keys.K2)
 
     def __init__(self, replay, beatmap, threshold):
-        """
-        Initializes an Investigator instance.
-
-        Attributes:
-            Replay replay: The Replay object to investigate.
-            slider.Beatmap beatmap: The beatmap to calculate ur with.
-            Integer threshold: If a replay has a lower ur than this value,
-                    it is considered a cheted repaly.
-        """
         self.replay = replay
         self.data = replay.as_list_with_timestamps()
         self.beatmap = beatmap
         self.threshold = threshold
 
     def investigate(self):
+        """
+        In
+        """
         ur = self.ur()
         ischeat = True if ur < self.threshold else False
         yield RelaxResult(self.replay, ur, ischeat)
 
     def ur(self):
+        """
+        Calculates the ur of the replay being investigated.
+
+
+        """
         hitobjs = self._parse_beatmap(self.beatmap)
         keypresses = self._parse_keys(self.data)
         filtered_array = self._filter_hits(hitobjs, keypresses)

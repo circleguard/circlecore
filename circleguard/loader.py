@@ -18,8 +18,17 @@ from circleguard.utils import TRACE, span_to_list
 
 def request(function):
     """
-    Decorator intended to appropriately handle all request and api related exceptions.
+    A decorator that handles :mod:`requests` and api related exceptions.
+    Should be wrapped around any function that makes a request; to the api or
+    otherwise.
 
+    Parameters
+    ----------
+    function: function
+        The wrapped function.
+
+    Notes
+    -----
     Also checks if we can refresh the time at which we started our requests because
     it's been more than RATELIMIT_RESET since the first request of the cycle.
 
@@ -58,16 +67,21 @@ def request(function):
 
 def check_cache(function):
     """
-    Decorator that checks if the replay by the given user_id on the given map_id is already
-    cached. If so, returns a Replay instance from the cached data instead of requesting it
-    from the api. Otherwise, it calls the function as normal.
+    A decorator that checks if the passed
+    :class:`~circleguard.user_info.UserInfo` has its replay cached. If so,
+    returns a :class:`~circleguard.replay.Replay` instance from the cached data.
+    Otherwise, calls and returns the `function` as normal.
 
-    Note that self and user_info must be the first and second arguments to
-    the function respectively.
+    Notes
+    -----
+    ``self`` and ``user_info`` **MUST** be the first and second arguments to
+    the function, respectively.
 
-    Returns:
-        A Replay instance from the cached replay if it was cached,
-        or the return value of the function if not.
+    Returns
+    -------
+    :class:`~circleguard.replay.Replay` or Unknown:
+        A :class:`~circleguard.replay.Replay` instance from the cached data
+        if it was cached, or the return value of the function if not.
     """
 
     def wrapper(*args, **kwargs):
@@ -87,11 +101,23 @@ def check_cache(function):
 
 class Loader():
     """
-    Manages interactions with the osu api, using the ossapi wrapper.
+    Manages interactions with the osu api, using the :mod:`ossapi` wrapper.
 
-    if the api ratelimits the key, we wait until we refresh our ratelimits and retry
-    the request. Because the api does not provide the time until the next refresh (and we
-    do not periodically retry the key), if the key is ratelimited outside of this class,
+    Parameters
+    ----------
+    key: str
+        A valid api key. Can be retrieved from https://osu.ppy.sh/p/api/.
+    cacher: :class:`~circleguard.cacher.Cacher`
+        A :class:`~circleguard.cacher.Cacher` instance to manage
+        replay loading/caching. If `None`, replays will not be loaded from
+        the cache or cached to the database.
+
+    Notes
+    -----
+    If the api ratelimits the key, we wait until our ratelimits are refreshed
+    and retry the request. Because the api does not provide the time until the
+    next refresh (and we do not periodically retry the key), if the key is
+    ratelimited because of an interaction not managed by this class,
     the class may wait more time than necessary for the key to refresh.
     """
 
@@ -100,11 +126,6 @@ class Loader():
 
 
     def __init__(self, key, cacher=None):
-        """
-        Initializes a Loader instance. If a Cacher is not provided,
-        scores will not be loaded from cache or cached to the databse.
-        """
-
         self.log = logging.getLogger(__name__)
         self.api = ossapi.ossapi(key)
         self.cacher = cacher

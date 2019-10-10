@@ -14,30 +14,35 @@ import circleguard.config as config
 
 class Comparer:
     """
-    A class for managing a set of replay comparisons.
+    Manages comparing :class:`~.replay.Replay`\s for replay stealing.
 
-    Attributes:
-        Integer threshold: If a comparison scores below this value, one of the replays is considered cheated.
-        List replays1: A list of Replay instances to compare against replays2 if passed, or against itself if not.
-        List replays2: A list of Replay instances to be compared against.
+    Parameters
+    ----------
+    threshold: int
+        If a comparison scores below this value, one of the
+        :class:`~.replay.Replay` in the comparison is considered cheated.
+    replays1: list[:class:`~.replay.Replay`]
+        The replays to compare against either ``replays2`` if ``replays`` is
+        not ``None``, or against other replays in ``replays1``.
+    replays2: list[:class:`~.replay.Replay`]
+        The replays to compare against ``replays1``.
 
-    See Also:
-        Investigator
+    Notes
+    -----
+    If ``replays2`` is passed, each replay in ``replays1`` is compared against
+    each replay in ``replays2``. Otherwise, each replay in ``replays1`` is
+    compared against each other replay in ``replays1``
+    (``len(replays1) choose 2`` comparisons).
+
+    The order of ``replays1`` and ``replays2`` has no effect; comparing 1 to 2
+    is the same as comparing 2 to 1.
+
+    See Also
+    --------
+    :class:`~investigator.Investigator`, for investigating single replays.
     """
 
     def __init__(self, threshold, replays1, replays2=None):
-        """
-        Initializes a Comparer instance.
-
-        Note that the order of the two replay lists has no effect; they are only numbered for consistency.
-        Comparing 1 to 2 is the same as comparing 2 to 1.
-
-        Args:
-            Integer threshold: If a comparison scores below this value, the Result object is assigned a ischeat value of True.
-            List replays1: A list of Replay instances to compare against replays2 if passed, or against itself if not.
-            List replays2: A list of Replay instances to be compared against.
-        """
-
         self.log = logging.getLogger(__name__)
         self.threshold = threshold
 
@@ -49,17 +54,20 @@ class Comparer:
 
     def compare(self):
         """
-        If mode is "double", compares all replays in replays1 against all replays in replays2.
-        If mode is "single", compares all replays in replays1 against all other replays in replays1 (len(replays1) choose 2 comparisons).
-        In both cases, yields Result objects containing the result of each comparison.
+        If ``replays2`` is not ``None``, compares all replays in replays1
+        against all replays in replays2. Otherwise, compares all replays in
+        ``replays1`` against all other replays in ``replays1``
+        (``len(replays1) choose 2`` comparisons).
 
-        Returns:
-            A generator containing Result objects of the comparisons.
+        Yields
+        ------
+        :class:`~.result.ComparisonResult`
+            Results representing the comparison of two replays.
 
         Raises:
-            CircleguardException if no comparisons could be made from the given replays (if replays1
-            or replays2 is empty) and config.failfast is True. Otherwise, even if the replay lists are empty,
-            silently returns.
+            CircleguardException if no comparisons could be made from the given
+            replays (if ``replays1`` or ``replays2`` is empty, for instance) and
+            ``config.failfast`` is ``True``.
         """
 
         self.log.info("Comparing replays with mode: %s", self.mode)
@@ -89,14 +97,19 @@ class Comparer:
 
     def _result(self, replay1, replay2):
         """
-        Compares two replays and returns the result of that comparison.
+        Compares two :class:`~.replay.Replay`\s.
 
-        Args:
-            Replay replay1: The first replay to compare against the second
-            Replay replay2: The second replay to compare against the first
+        Parameters
+        ----------
+        replay1: :class:`~.replay.Replay`
+            The first replay to compare.
+        replay2: :class:`~.replay.Replay`
+            The second replay to compare.
 
-        Returns:
-            A Result object, containing the results of the comparison.
+        Returns
+        -------
+        :class:`~.result.ComparisonResult`
+            The result of comparing ``replay1`` to ``replay2``.
         """
         self.log.log(utils.TRACE, "comparing %r and %r", replay1, replay2)
         result = Comparer._compare_two_replays(replay1, replay2)
@@ -111,8 +124,20 @@ class Comparer:
     @staticmethod
     def _compare_two_replays(replay1, replay2):
         """
-        Compares two Replays and return their average distance
-        and standard deviation of distances.
+        Calculates the average cursor distance between two
+        :class:`~.replay.Replay`\s, and the standard deviation of the distance.
+
+        Parameters
+        ----------
+        replay1: :class:`~.replay.Replay`
+            The first replay to compare.
+        replay2: :class:`~.replay.Replay`
+            The second replay to compare.
+
+        Returns
+        -------
+        tuple (float, float)
+            (average distance, stddev) of the cursors of the two replays.
         """
 
         # get all coordinates in numpy arrays so that they're arranged like:
@@ -143,14 +168,27 @@ class Comparer:
     @staticmethod
     def _compute_data_similarity(data1, data2):
         """
-        Finds the similarity and standard deviation between two datasets.
+        Calculates the average cursor distance between two lists of cursor data,
+        and the standard deviation of the distance.
 
-        Args:
-            List data1: A list of tuples containing the (x, y) coordinate of points
-            List data2: A list of tuples containing the (x, y) coordinate of points
+        Parameters
+        ----------
+        data1: list[tuple(int, int)]
+            The first set of cursor data, containing the x and y positions
+            of the cursor at each datapoint.
+        data2: list[tuple(int, int)]
+            The first set of cursor data, containing the x and y positions
+            of the cursor at each datapoint.
 
-        Returns:
-            A tuple containing (similarity value, standard deviation) between the two datasets
+        Returns
+        -------
+        tuple (float, float)
+            (average distance, stddev) between the two datasets.
+
+        Notes
+        -----
+        The two data lists must have previously been interpolated to each other.
+        This is why we can get away with only lists of [x,y] and not [x,y,t].
         """
 
         data1 = np.array(data1)
