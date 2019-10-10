@@ -12,7 +12,8 @@ release = '2.4.0'
 extensions = [
     "sphinx.ext.autodoc",
     "sphinx.ext.napoleon",
-    "sphinx.ext.intersphinx"
+    "sphinx.ext.intersphinx",
+    "sphinx.ext.viewcode"
 ]
 
 intersphinx_mapping = {'https://docs.python.org/': None}
