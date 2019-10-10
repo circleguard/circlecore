@@ -16,8 +16,8 @@ extensions = [
     "sphinx.ext.viewcode"
 ]
 
-intersphinx_mapping = {'https://docs.python.org/': None}
-
+intersphinx_mapping = {"python": ("https://docs.python.org/3", None),
+                       "slider": ("https://llllllllll.github.io/slider/", None)}
 
 html_theme = 'sphinx_rtd_theme'
 
