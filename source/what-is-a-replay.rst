@@ -1,7 +1,7 @@
 What is a Replay?
 =================
 
-|Replay|\s are the most basic object in Circleguard. We define two
+|Replay|\s are the most basic object in Circlecore. We define two
 |Replay| subclasses, |ReplayMap| and |ReplayPath|, though we support users
 subclassing |Replay| or its two subclasses.
 

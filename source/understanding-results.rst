@@ -1,7 +1,7 @@
 Understanding Results
 =====================
 Each |Result| subclass corresponds to a different type of cheat that
-circleguard supports detecting. A full list of |Result|\s can be found under
+circlecore supports detecting. A full list of |Result|\s can be found under
 the subclasses of :class:`~circleguard.result.Result`.
 
 Although you should look at specific |Result|\s' documentation for the
@@ -16,5 +16,3 @@ The attributes available to us through
 * ``similarity`` - roughly speaking, the average distance in pixels between the
   two replays
 * ``ischeat`` - whether ``similarity`` was below whatever threshold we set
-
-s

@@ -38,7 +38,7 @@ exclude_patterns = []
 html_static_path = ['_static']
 
 
-# class references that we want to use easily in any file
+# references that we want to use easily in any file
 rst_prolog = """
 .. |ReplayMap| replace:: :class:`~circleguard.replay.ReplayMap`
 .. |ReplayPath| replace:: :class:`~circleguard.replay.ReplayPath`
@@ -46,4 +46,9 @@ rst_prolog = """
 .. |Check| replace:: :class:`~circleguard.replay.Check`
 .. |cg.run| replace:: :func:`cg.run <circleguard.circleguard.Circleguard.run>`
 .. |Result| replace:: :class:`~circleguard.result.Result`
+.. _Circleguard: https://github.com/circleguard/circleguard
+.. _osu!: http://osu.ppy.sh
+.. _tybug: https://github.com/tybug
+.. _samuelhklumpers: https://github.com/samuelhklumpers
+.. _InvisibleSymbol: https://github.com/InvisibleSymbol
 """
