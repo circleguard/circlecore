@@ -62,7 +62,7 @@ class ReplayStealingResult(ComparisonResult):
     """
     The result of a test for replay stealing between two replays.
 
-    Attributes
+    Parameters
     ----------
     replay1: :class:`~circleguard.replay.Replay`
         One of the replays involved.
