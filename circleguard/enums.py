@@ -14,38 +14,49 @@ class Error(Enum):
     UNKNOWN           = ["Unknown error.", UnknownAPIException, "Unknown error when requesting a replay. Please report this "
                                                                 "to the developers at https://github.com/circleguard/circlecore"]
 
-class Mod(Enum):
-    NoMod          = NM = 0
-    NoFail         = NF = 1
-    Easy           = EZ = 2
-    NoVideo        = NV = 4
-    Hidden         = HD = 8
-    HardRock       = HR = 16
-    SuddenDeath    = SD = 32
-    DoubleTime     = DT = 64
-    Relax          = RL = 128
-    HalfTime       = HT = 256
-    Nightcore      = NC = 512
-    Flashlight     = FL = 1024
-    Autoplay       = CN = 2048
-    SpunOut        = SO = 4096
-    Autopilot      = AP = 8192
-    Perfect        = PF = 16384
-    Key4           = K4 = 32768
-    Key5           = K5 = 65536
-    Key6           = K6 = 131072
-    Key7           = K7 = 262144
-    Key8           = K8 = 524288
-    keyMod         = KM = 1015808
-    FadeIn         = FI = 1048576
-    Random         = RD = 2097152
-    LastMod        = LM = 4194304
-    TargetPractice = TP = 8388608
-    Key9           = K9 = 16777216
-    Coop           = CO = 33554432
-    Key1           = K1 = 67108864
-    Key3           = K3 = 134217728
-    Key2           = K2 = 268435456
+int_to_mod = {
+    0           : ["NoMod",         "NM"],
+    1           : ["NoFail",        "NF"],
+    2           : ["Easy",          "EZ"],
+    4           : ["NoVideo",       "NV"],
+    8           : ["Hidden",        "HD"],
+    16          : ["HardRock",      "HR"],
+    32          : ["SuddenDeath",   "SD"],
+    64          : ["DoubleTime",    "DT"],
+    128         : ["Relax",         "RL"],
+    256         : ["HalfTime",      "HT"],
+    512         : ["Nightcore",     "NC"],
+    1024        : ["Flashlight",    "FL"],
+    2048        : ["Autoplay",      "CN"],
+    4096        : ["SpunOut",       "SO"],
+    8192        : ["Autopilot",     "AP"],
+    16384       : ["Perfect",       "PF"],
+    32768       : ["Key4",          "K4"],
+    65536       : ["Key5",          "K5"],
+    131072      : ["Key6",          "K6"],
+    262144      : ["Key7",          "K7"],
+    524288      : ["Key8",          "K8"],
+    1015808     : ["keyMod",        "KM"],
+    1048576     : ["FadeIn",        "FI"],
+    2097152     : ["Random",        "RD"],
+    4194304     : ["LastMod",       "LM"],
+    8388608     : ["TargetPractice","TP"],
+    16777216    : ["Key9",          "K9"],
+    33554432    : ["Coop",          "CO"],
+    67108864    : ["Key1",          "K1"],
+    134217728   : ["Key3",          "K3"],
+    268435456   : ["Key2",          "K2"]
+}
+        
+class Mod():
+    def __init__(self, input_enum):
+        if isinstance(input_enum, str):
+            self.value = [k for k, v in int_to_mod.items() if input_enum in v][0]
+        else:
+            self.value = input_enum
+        current_array = int_to_mod[self.value]
+        self.name = current_array[0]
+        self.short_name = current_array[1]
 
 class Detect(Flag):
                    # (in binary)
