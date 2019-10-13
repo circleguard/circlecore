@@ -85,7 +85,7 @@ class Cacher:
         for info in user_info:
             map_id = info.map_id
             user_id = info.user_id
-            mods = mod_list_to_int(info.mods)
+            mods = mod_list_to_int(info.enabled_mods)
 
             self.log.log(TRACE, "Revalidating entry with map id %s, user %d, mods %s", map_id, user_id, mods)
 
