@@ -65,6 +65,9 @@ class Mod():
     def __ne__(self, other):
         """Override the default Unequal behavior"""
         return self.value != other.value
+    
+    def __hash__(self):
+        return self.value
 
 class Detect(Flag):
                    # (in binary)
