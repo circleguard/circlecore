@@ -109,7 +109,7 @@ class Circleguard:
             yield from investigator.investigate()
 
 
-    def map_check(self, map_id, u=None, num=None, cache=None, steal_thresh=None, rx_thresh=None, mods=None, include=None, detect=None, span=None):
+    def map_check(self, map_id, u=None, num=None, cache=None, steal_thresh=None, rx_thresh=None, mods=[], include=None, detect=None, span=None):
         """
         Checks a map's leaderboard for replay steals.
 
@@ -126,8 +126,7 @@ class Circleguard:
                     Defaults to 18, or the config value if changed.
             Integer rx_thresh: if a replay has a ur below this value, it is considered cheated.
                     Deaults to 50, or the config value if changed.
-            Integer mods: If passed, download and compare the top num replays set with these exact mods. You can find a
-                    reference on what mod maps to what integer value here: https://github.com/ppy/osu-api/wiki#mods.
+            List mods: If passed, download and compare the top num replays set with these exact mods. 
                     There is currently no support for optional mods (eg HR is required, but other mods optional,
                     so both HR and HDHR scores would be downloaded). This is due to api limitations.
                     If both mods and u are passed, the user's replay will be downloaded regardless of the passed mods,
@@ -148,7 +147,7 @@ class Circleguard:
         yield from self.run(check)
 
 
-    def create_map_check(self, map_id, u=None, num=None, cache=None, steal_thresh=None, mods=None, include=None, detect=None, span=None):
+    def create_map_check(self, map_id, u=None, num=None, cache=None, steal_thresh=None, mods=[], include=None, detect=None, span=None):
         """
         Creates the Check object used in the map_check convenience method. See that method for more information.
         """

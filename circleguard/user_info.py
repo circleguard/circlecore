@@ -16,7 +16,7 @@ class UserInfo():
             Integer user_id: The id of the player who set the replay.
             String username: The username of the player who set the replay.
             Integer replay_id: The id of the replay.
-            Integer enabled_mods: The bitwise mod combination of the mods set on the replay.
+            List enabled_mods: The mod combination of the mods set on the replay.
             Boolean replay_available: Whether this replay is available from the api or not.
         """
 

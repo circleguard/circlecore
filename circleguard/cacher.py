@@ -6,7 +6,7 @@ import wtc
 
 from circleguard.loader import Loader
 from circleguard.exceptions import CircleguardException
-from circleguard.utils import TRACE
+from circleguard.utils import TRACE, mod_list_to_int
 
 
 class Cacher:
@@ -60,7 +60,7 @@ class Cacher:
 
         map_id = user_info.map_id
         user_id = user_info.user_id
-        mods = user_info.mods
+        mods = mod_list_to_int(user_info.mods)
         replay_id = user_info.replay_id
 
         result = self.cursor.execute("SELECT COUNT(1) FROM replays WHERE map_id=? AND user_id=? AND mods=?", [map_id, user_id, mods]).fetchone()[0]
@@ -85,7 +85,7 @@ class Cacher:
         for info in user_info:
             map_id = info.map_id
             user_id = info.user_id
-            mods = info.enabled_mods
+            mods = mod_list_to_int(info.mods)
 
             self.log.log(TRACE, "Revalidating entry with map id %s, user %d, mods %s", map_id, user_id, mods)
 
@@ -116,11 +116,12 @@ class Cacher:
         Args:
             String map_id: The map_id to check for.
             String user_id: The user_id to check for.
-            Integer mods: The bitwise enabled mods for the play.
+            List mods: A List of Mod objects representing the mods enabled for the play.
 
         Returns:
             The lzma bytes that would have been returned by decoding the base64 api response, or None if it wasn't cached.
         """
+        mods = mod_list_to_int(mods)
         self.log.log(TRACE, "Checking cache for a replay on map %d by user %d with mods %s", map_id, user_id, mods)
         result = self.cursor.execute("SELECT replay_data FROM replays WHERE map_id=? AND user_id=? AND mods=?", [map_id, user_id, mods]).fetchone()
         if(result):

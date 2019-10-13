@@ -58,6 +58,14 @@ class Mod():
         self.name = current_array[0]
         self.short_name = current_array[1]
 
+    def __eq__(self, other):
+        """Override the default Equals behavior"""
+        return self.value == other.value
+
+    def __ne__(self, other):
+        """Override the default Unequal behavior"""
+        return self.value != other.value
+
 class Detect(Flag):
                    # (in binary)
     STEAL = 1 << 0 # 0001

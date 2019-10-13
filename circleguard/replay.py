@@ -6,7 +6,7 @@ import numpy as np
 
 from circleguard.enums import Detect, RatelimitWeight
 from circleguard import config
-from circleguard.utils import TRACE, span_to_list
+from circleguard.utils import TRACE, span_to_list, mod_int_to_list
 
 
 class Loadable(abc.ABC):
@@ -93,7 +93,7 @@ class Container(Loadable, abc.ABC):
             loadable.cascade_options(cache, steal_thresh, rx_thresh, detect)
 
 class Map(Container):
-    def __init__(self, map_id, num=None, cache=None, steal_thresh=None, rx_thresh=None, include=None, mods=None, detect=None, span=None):
+    def __init__(self, map_id, num=None, cache=None, steal_thresh=None, rx_thresh=None, include=None, mods=[], detect=None, span=None):
         super().__init__(None, None, cache, steal_thresh, rx_thresh, include, detect)
         self.map_id = map_id
         self.num = num
@@ -199,7 +199,7 @@ class Replay(Loadable):
             Integer map_id: The map id the replay was played on, or 0 if unknown or on an unsubmitted map.
             String username: The username of the player who made the replay.
             Integer user_id: The id of the player who made the replay, or 0 if unknown or a restricted player.
-            Integer mods: The mods the replay was played with.
+            List mods: The mods the replay was played with.
             Integer replay_id: The id of this replay, or 0 if it does not have an id (unsubmitted replays have no id).
             List [circleparse.Replay.ReplayEvent] replay_data: An array containing objects with the attributes x, y, time_since_previous_action,
                             and keys_pressed. If the replay could not be loaded (from the api or otherwise), this field should be None.
@@ -261,7 +261,7 @@ class ReplayMap(Replay):
     Attributes:
         Integer map_id: The id of the map the replay was made on.
         Integer user_id: The id of the user who made the replay.
-        Integer mods: The mods the replay was played with. None if not set when instantiated and has not been loaded yet -
+        List mods: The mods the replay was played with. None if not set when instantiated and has not been loaded yet -
                       otherwise, set to the mods the replay was made with.
         String username: A readable representation of the user who made the replay. If passed,
                          username will be set to this string. Otherwise, it will be set to the user id.
@@ -276,7 +276,7 @@ class ReplayMap(Replay):
                                 documentation for more information.
     """
 
-    def __init__(self, map_id, user_id, mods=None, detect=None, cache=None):
+    def __init__(self, map_id, user_id, mods=[], detect=None, cache=None):
         """
         Initializes a ReplayMap instance.
 
@@ -396,7 +396,7 @@ class ReplayPath(Replay):
         map_id = loader.map_id(loaded.beatmap_hash)
         user_id = loader.user_id(loaded.player_name)
 
-        Replay.__init__(self, loaded.timestamp, map_id, loaded.player_name, user_id, loaded.mod_combination,
+        Replay.__init__(self, loaded.timestamp, map_id, loaded.player_name, user_id, mod_int_to_list(loaded.mod_combination),
                         loaded.replay_id, loaded.play_data, self.detect, self.weight)
         self.log.log(TRACE, "Finished loading %s", self)
 
