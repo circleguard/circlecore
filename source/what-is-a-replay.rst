@@ -37,4 +37,4 @@ Loading Replays
 load them with :meth:`cg.load <circleguard.circleguard.Circleguard.load>`.
 This design principle of objects being as cheap as possible to create, and only
 loading further data when necessary, is something that holds true throughout
-circleguard.
+circlecore.

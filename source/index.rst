@@ -2,7 +2,7 @@
 Circlecore
 ==========
 
-Circlecore is a cheat detection library for `osu!`_
+Circlecore is a cheat detection library for `osu!`_.
 
 Currently, we support the detection of the following cheats:
 
@@ -44,6 +44,7 @@ Circlecore can be installed from pip:
     what-is-a-replay
     using-checks
     understanding-results
+    convenience-methods
 
 .. toctree::
     :caption: Appendix
