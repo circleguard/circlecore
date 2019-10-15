@@ -47,8 +47,8 @@ class TestReplays(CGTestCase):
         self.assertAlmostEqual(r.similarity, 4.2608, delta=0.0001, msg="Similarity is not correct")
         self.assertEqual(r1.map_id, r2.map_id, "Replay map ids did not match")
         self.assertEqual(r1.map_id, 1988753, "Replay map id was not correct")
-        self.assertCountEqual(earlier.mods, [Mod("HD"),Mod("HR")], "Earlier replay mods was not correct") # HDHR
-        self.assertCountEqual(later.mods, [Mod("FL"),Mod("HD"),Mod("HR")], "Later replay mods was not correct") # FLHDHR
+        self.assertEqual(earlier.mods, Mod.HD + Mod.HR, "Earlier replay mods was not correct") # HDHR
+        self.assertEqual(later.mods, Mod.FL + Mod.HD + Mod.HR, "Later replay mods was not correct") # FLHDHR
         self.assertEqual(earlier.replay_id, 2801164636, "Earlier replay id was not correct")
         self.assertEqual(later.replay_id, 2805164683, "Later replay id was not correct")
         self.assertEqual(r1.username, r2.username, "Replay usernames did not match")
@@ -69,8 +69,8 @@ class TestReplays(CGTestCase):
         self.assertAlmostEqual(r.similarity, 24.2129, delta=0.0001, msg="Similarity is not correct")
         self.assertEqual(r1.map_id, r2.map_id, "Replay map ids did not match")
         self.assertEqual(r1.map_id, 722238, "Replay map id was not correct")
-        self.assertCountEqual(earlier.mods, [Mod("HD"),Mod("NC"),Mod("DT")], "Earlier replay mods was not correct") # HDNC
-        self.assertCountEqual(later.mods, [Mod("HD"),Mod("DT")], "Later replay mods was not correct") # HDDT
+        self.assertEqual(earlier.mods, Mod.HD + Mod.NC + Mod.DT, "Earlier replay mods was not correct") # HDNC
+        self.assertEqual(later.mods, Mod.HD + Mod.DT, "Later replay mods was not correct") # HDDT
         self.assertEqual(earlier.replay_id, 2157431869, "Earlier replay id was not correct")
         self.assertEqual(later.replay_id, 2309618113, "Later replay id was not correct")
         self.assertEqual(earlier.username, "Crissinop", "Earlier username was not correct")
@@ -80,7 +80,7 @@ class TestReplays(CGTestCase):
         r = ReplayPath(RES / "example_replay.osr")
         self.assertFalse(r.loaded, "Loaded status was not correct")
         self.cg.load(r)
-        self.assertCountEqual(r.mods, [Mod("HD"),Mod("DT")], "Mods was not correct")
+        self.assertEqual(r.mods, Mod.HD + Mod.DT, "Mods was not correct")
         self.assertEqual(r.replay_id, 2029801532, "Replay id was not correct")
         self.assertEqual(r.username, "MarthXT", "Username was not correct")
         self.assertEqual(r.user_id, 2909663, "User id was not correct")
@@ -94,7 +94,7 @@ class TestReplays(CGTestCase):
         self.cg.load(r)
         self.assertEqual(r.map_id, 221777, "Map id was not correct")
         self.assertEqual(r.user_id, 2757689, "Map id was not correct")
-        self.assertCountEqual(r.mods, [Mod("HD"),Mod("HR")], "Mods was not correct")
+        self.assertEqual(r.mods, Mod.HD + Mod.HR, "Mods was not correct")
         self.assertEqual(r.replay_id, 2832574010, "Replay is was not correct")
         self.assertEqual(r.weight, RatelimitWeight.HEAVY, "RatelimitWeight was not correct")
         self.assertEqual(r.username, "Toy", "Username was not correct")
@@ -230,7 +230,7 @@ class TestMap(CGTestCase):
         c = Check([m], detect=Detect.STEAL)
         r = list(self.cg.run(c))
         self.assertEqual(len(r), 1)
-        self.assertCountEqual(r[0].earlier_replay.mods, [Mod("HD"), Mod("HR")]) # cookiezi HDHR
+        self.assertEqual(r[0].earlier_replay.mods, Mod.HD + Mod.HR) # cookiezi HDHR
 
     def test_map_with_replaypath(self):
         m = Map(129891, num=1)
@@ -264,9 +264,9 @@ class TestMap(CGTestCase):
         self.assertEqual(len(r), 3)
 
 # if __name__ == '__main__':
-#     suite = TestSuite()
-#     suite.addTest(TestMap("test_map_with_replaypath"))
-#     suite.addTest(TestMap("test_map_with_replaymap"))
-#     suite.addTest(TestMap("test_map_with_replaypath_replaymap"))
+    # suite = TestSuite()
+    # suite.addTest(TestReplays("test_loading_replaymap"))
+    # suite.addTest(TestMap("test_map_with_replaymap"))
+    # suite.addTest(TestMap("test_map_with_replaypath_replaymap"))
 
-#     TextTestRunner().run(suite)
+    # TextTestRunner().run(suite)
