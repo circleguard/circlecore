@@ -91,10 +91,10 @@ class ModCombination():
         return self.value
 
     def __repr__(self):
-        return self.__str__()
+        return f"ModCombination(value={self.value})"
 
     def __str__(self):
-        return " + ".join("Mod." + mod.short_name for mod in self.decompose())
+        return self.short_name
 
     def __contains__(self, other):
         return bool(self.value & other.value)
