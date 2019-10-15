@@ -69,8 +69,8 @@ class ModCombination():
             self.short_name = int_to_mod[value][0]
             self.long_name = int_to_mod[value][1]
         else:
-            self.short_name = "".join(int_to_mod[mod.value][0] for mod in self.decompose())
-            self.long_name = " ".join(int_to_mod[mod.value][1] for mod in self.decompose())
+            self.short_name = "".join(mod.short_name for mod in self.decompose())
+            self.long_name = " ".join(mod.long_name for mod in self.decompose())
 
     def __eq__(self, other):
         """Compares the ``value`` of each object"""
