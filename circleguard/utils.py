@@ -89,22 +89,6 @@ def span_to_list(span):
     return ret
 
 
-def mod_str_to_list(mod):
-    mod_list = []
-    for acronym in [mod[i:i+2] for i in range(0, len(mod), 2)]:
-        mod_list.append(Mod(acronym))
-    return mod_list
-
-def mod_int_to_list(mod_int):
-    mod_list = [Mod(mods) for mods in bits(mod_int)]
-    return mod_list
-
-def mod_list_to_int(mod_list):
-    if len(mod_list) != 0:
-        mod_int = sum([mod.value for mod in mod_list])
-    else:
-        mod_int = None
-    return mod_int
 
 # https://github.com/kszlim/osu-replay-parser/blob/master/osrparse/replay.py#L64
 def bits(n):

@@ -131,8 +131,8 @@ class Comparer:
 
         mods1 = replay1.mods
         mods2 = replay2.mods
-        flip1 = Mod("HardRock") in mods1
-        flip2 = Mod("HardRock") in mods2
+        flip1 = Mod.HR in mods1
+        flip2 = Mod.HR in mods2
         if(flip1 ^ flip2): # xor, if one has hr but not the other
             for d in data1:
                 d[1] = 384 - d[1]
