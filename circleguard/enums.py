@@ -234,7 +234,7 @@ class Mod():
     # common mod combinations
     HDDT = HD + DT
     HDHR = HD + HR
-    HDHRDT = HD + HR + DT
+    HDDTHR = HD + HR + DT
 
 
 class Detect(Flag):
