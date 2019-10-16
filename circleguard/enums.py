@@ -63,14 +63,74 @@ class ModCombination():
 
     def __init__(self, value):
         self.value = value
-        # avoid infinite recursion with every mod decomposing into itself
-        # ad infinitum
+
+    def short_name(self):
+        """
+        The acronym-ized names of the component mods.
+
+        Returns
+        -------
+        str:
+            The short name of this ModCombination.
+
+        Examples
+        --------
+        >>> ModCombination(576).short_name()
+        "NC"
+        >>> ModCombination(24).short_name()
+        "HDHR"
+
+        Notes
+        -----
+        This is a function instead of an attribute set at initialization time
+        because otherwise we couldn't refer to  :class:`~.Mod`\s as its class
+        body isn't loaded while it's instantiating :class:`~.ModCombination`\s.
+
+        Although technically mods such as NC are represented with two bits -
+        DT and NC - being set, short_name removes DT and so returns "NC"
+        rather than "DTNC".
+        """
+
         if self.value in int_to_mod:
-            self.short_name = int_to_mod[value][0]
-            self.long_name = int_to_mod[value][1]
+            # avoid infinite recursion with every mod decomposing into itself
+            # ad infinitum
+            return int_to_mod[self.value][0]
         else:
-            self.short_name = "".join(mod.short_name for mod in self.decompose())
-            self.long_name = " ".join(mod.long_name for mod in self.decompose())
+            component_mods = self.decompose(clean=True)
+            return "".join(mod.short_name() for mod in component_mods)
+
+    def long_name(self):
+        """
+        The spelled out names of the component mods.
+
+        Returns
+        -------
+        str:
+            The long name of this ModCombination.
+
+        Examples
+        --------
+        >>> ModCombination(576).long_name()
+        "Nightore"
+        >>> ModCombination(24).long_name()
+        "Hidden HardRock"
+
+        Notes
+        -----
+        This is a function instead of an attribute set at initialization time
+        because otherwise we couldn't refer to  :class:`~.Mod`\s as its class
+        body isn't loaded while it's instantiating :class:`~.ModCombination`\s.
+
+        Although technically mods such as NC are represented with two bits -
+        DT and NC - being set, long_name removes DT and so returns "Nightcore"
+        rather than "DoubleTime Nightcore".
+        """
+
+        if self.value in int_to_mod:
+            return int_to_mod[self.value][1]
+        else:
+            component_mods = self.decompose(clean=True)
+            return " ".join(mod.long_name() for mod in component_mods)
 
     def __eq__(self, other):
         """Compares the ``value`` of each object"""
@@ -99,17 +159,32 @@ class ModCombination():
     def __contains__(self, other):
         return bool(self.value & other.value)
 
-    def decompose(self):
+    def decompose(self, clean=False):
         """
         Decomposes this mod into its base component mods, which are
         :class:`~.ModCombination`\s with a ``value`` of a power of two.
+
+        Arguments
+        ---------
+        clean: bool
+            If true, removes mods that we would think of as duplicate - if both
+            NC and DT are component mods, remove DT. If both PF and SD are
+            component mods, remove SD.
 
         Returns
         -------
         list: :class:`~.ModCombination`
             A list of the component :class:`~.ModCombination`\s of this mod.
         """
-        return [ModCombination(mod) for mod in int_to_mod.keys() if self.value & mod]
+        mods = [ModCombination(mod) for mod in int_to_mod.keys() if self.value & mod]
+        if not clean:
+            return mods
+
+        if Mod._NC in mods and Mod.DT in mods:
+            mods.remove(Mod.DT)
+        if Mod._PF in mods and Mod.SD in mods:
+            mods.remove(Mod.SD)
+        return mods
 
 class Mod():
     """
