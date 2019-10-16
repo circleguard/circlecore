@@ -156,6 +156,11 @@ class Mod():
     K3  = Key3           =  ModCombination(134217728)
     K2  = Key2           =  ModCombination(268435456)
 
+    # common mod combinations
+    HDDT = HD + DT
+    HDHR = HD + HR
+    HDHRDT = HD + HR + DT
+
 
 class Detect(Flag):
                    # (in binary)
