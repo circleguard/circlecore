@@ -15,37 +15,39 @@ class Error(Enum):
                                                                 "to the developers at https://github.com/circleguard/circlecore"]
 
 int_to_mod = {
-    0           : ["NM",         "NoMod"],
-    1           : ["NF",        "NoFail"],
-    2           : ["EZ",          "Easy"],
-    4           : ["NV",       "NoVideo"],
-    8           : ["HD",        "Hidden"],
-    16          : ["HR",      "HardRock"],
-    32          : ["SD",   "SuddenDeath"],
-    64          : ["DT",    "DoubleTime"],
-    128         : ["RL",         "Relax"],
-    256         : ["HT",      "HalfTime"],
-    512         : ["NC",     "Nightcore"],
-    1024        : ["FL",    "Flashlight"],
-    2048        : ["CN",      "Autoplay"],
-    4096        : ["SO",       "SpunOut"],
-    8192        : ["AP",     "Autopilot"],
-    16384       : ["PF",       "Perfect"],
-    32768       : ["K4",          "Key4"],
-    65536       : ["K5",          "Key5"],
-    131072      : ["K6",          "Key6"],
-    262144      : ["K7",          "Key7"],
-    524288      : ["K8",          "Key8"],
-    1015808     : ["KM",        "keyMod"],
-    1048576     : ["FI",        "FadeIn"],
-    2097152     : ["RD",        "Random"],
-    4194304     : ["LM",       "LastMod"],
-    8388608     : ["TP","TargetPractice"],
-    16777216    : ["K9",          "Key9"],
-    33554432    : ["CO",          "Coop"],
-    67108864    : ["K1",          "Key1"],
-    134217728   : ["K3",          "Key3"],
-    268435456   : ["K2",          "Key2"]
+    0          : ["NM",       "NoMod"],
+    1 << 0     : ["NF",      "NoFail"],
+    1 << 1     : ["EZ",        "Easy"],
+    1 << 2     : ["TD", "TouchDevice"],
+    1 << 3     : ["HD",      "Hidden"],
+    1 << 4     : ["HR",    "HardRock"],
+    1 << 5     : ["SD", "SuddenDeath"],
+    1 << 6     : ["DT",  "DoubleTime"],
+    1 << 7     : ["RX",       "Relax"],
+    1 << 8     : ["HT",    "HalfTime"],
+    1 << 9     : ["NC",   "Nightcore"],
+    1 << 10    : ["FL",  "Flashlight"],
+    1 << 11    : ["AT",    "Autoplay"],
+    1 << 12    : ["SO",     "SpunOut"],
+    1 << 13    : ["AP",   "Autopilot"],
+    1 << 14    : ["PF",     "Perfect"],
+    1 << 15    : ["K4",        "Key4"],
+    1 << 16    : ["K5",        "Key5"],
+    1 << 17    : ["K6",        "Key6"],
+    1 << 18    : ["K7",        "Key7"],
+    1 << 19    : ["K8",        "Key8"],
+    1 << 20    : ["FI",      "FadeIn"],
+    1 << 21    : ["RD",      "Random"],
+    1 << 22    : ["CN",      "Cinema"],
+    1 << 23    : ["TP",      "Target"],
+    1 << 24    : ["K9",        "Key9"],
+    1 << 25    : ["CO",     "KeyCoop"],
+    1 << 26    : ["K1",        "Key1"],
+    1 << 27    : ["K3",        "Key3"],
+    1 << 28    : ["K2",        "Key2"],
+    1 << 29    : ["V2",     "ScoreV2"],
+    1 << 30    : ["MR",      "Mirror"]
+
 }
 
 class ModCombination():
@@ -196,40 +198,43 @@ class Mod():
     https://osu.ppy.sh/help/wiki/Game_Modifiers.
     """
 
-    NM  = NoMod          =  ModCombination(0)
-    NF  = NoFail         =  ModCombination(1)
-    EZ  = Easy           =  ModCombination(2)
-    NV  = NoVideo        =  ModCombination(4)
-    HD  = Hidden         =  ModCombination(8)
-    HR  = HardRock       =  ModCombination(16)
-    SD  = SuddenDeath    =  ModCombination(32)
-    DT  = DoubleTime     =  ModCombination(64)
-    RL  = Relax          =  ModCombination(128)
-    HT  = HalfTime       =  ModCombination(256)
-    _NC = _Nightcore     =  ModCombination(512)
+    NM  = NoMod        = ModCombination(0)
+    NF  = NoFail       = ModCombination(1 << 0)
+    EZ  = Easy         = ModCombination(1 << 1)
+    TD  = TouchDevice  = ModCombination(1 << 2)
+    HD  = Hidden       = ModCombination(1 << 3)
+    HR  = HardRock     = ModCombination(1 << 4)
+    SD  = SuddenDeath  = ModCombination(1 << 5)
+    DT  = DoubleTime   = ModCombination(1 << 6)
+    RX  = Relax        = ModCombination(1 << 7)
+    HT  = HalfTime     = ModCombination(1 << 8)
+    _NC = _Nightcore   = ModCombination(1 << 9)
     # most people will find it more useful for NC to be defined as it is ingame
-    NC  = Nightcore      =  _NC + DT
-    FL  = Flashlight     =  ModCombination(1024)
-    CN  = Autoplay       =  ModCombination(2048)
-    SO  = SpunOut        =  ModCombination(4096)
-    AP  = Autopilot      =  ModCombination(8192)
-    _PF = _Perfect       =  ModCombination(16384)
-    PF  = Perfect        =  _PF + SD
-    K4  = Key4           =  ModCombination(32768)
-    K5  = Key5           =  ModCombination(65536)
-    K6  = Key6           =  ModCombination(131072)
-    K7  = Key7           =  ModCombination(262144)
-    K8  = Key8           =  ModCombination(524288)
-    KM  = keyMod         =  ModCombination(1015808)
-    FI  = FadeIn         =  ModCombination(1048576)
-    RD  = Random         =  ModCombination(2097152)
-    LM  = LastMod        =  ModCombination(4194304)
-    TP  = TargetPractice =  ModCombination(8388608)
-    K9  = Key9           =  ModCombination(16777216)
-    CO  = Coop           =  ModCombination(33554432)
-    K1  = Key1           =  ModCombination(67108864)
-    K3  = Key3           =  ModCombination(134217728)
-    K2  = Key2           =  ModCombination(268435456)
+    NC  = Nightcore    = _NC + DT
+    FL  = Flashlight   = ModCombination(1 << 10)
+    AT  = Autoplay     = ModCombination(1 << 11)
+    SO  = SpunOut      = ModCombination(1 << 12)
+    AP  = Autopilot    = ModCombination(1 << 13)
+    _PF = _Perfect     = ModCombination(1 << 14)
+    PF  = Perfect      = _PF + SD
+    K4  = Key4         = ModCombination(1 << 15)
+    K5  = Key5         = ModCombination(1 << 16)
+    K6  = Key6         = ModCombination(1 << 17)
+    K7  = Key7         = ModCombination(1 << 18)
+    K8  = Key8         = ModCombination(1 << 19)
+    FI  = FadeIn       = ModCombination(1 << 20)
+    RD  = Random       = ModCombination(1 << 21)
+    CN  = Cinema       = ModCombination(1 << 22)
+    TP  = Target       = ModCombination(1 << 23)
+    K9  = Key9         = ModCombination(1 << 24)
+    CO  = KeyCoop      = ModCombination(1 << 25)
+    K1  = Key1         = ModCombination(1 << 26)
+    K3  = Key3         = ModCombination(1 << 27)
+    K2  = Key2         = ModCombination(1 << 28)
+    V2  = ScoreV2      = ModCombination(1 << 29)
+    MR  = Mirror       = ModCombination(1 << 30)
+
+    KM  = KeyMod       = K1+K2+K3+K4+K5+K6+K7+K8+K9+KeyCoop
 
     # common mod combinations
     HDDT = HD + DT
