@@ -176,9 +176,12 @@ class ModCombination():
         Returns
         -------
         list: :class:`~.ModCombination`
-            A list of the component :class:`~.ModCombination`\s of this mod.
+            A list of the component :class:`~.ModCombination`\s of this mod,
+            ordered according to :data:`~.Mod.ORDER`.
         """
+
         mods = [ModCombination(mod) for mod in int_to_mod.keys() if self.value & mod]
+        mods = [mod for mod in Mod.ORDER if mod in mods] # order the mods by Mod.ORDER
         if not clean:
             return mods
 
@@ -195,7 +198,8 @@ class Mod():
     Notes
     -----
     A full list of mods and their specification can be found at
-    https://osu.ppy.sh/help/wiki/Game_Modifiers.
+    https://osu.ppy.sh/help/wiki/Game_Modifiers, or a more technical list at
+    https://github.com/ppy/osu-api/wiki#mods.
     """
 
     NM  = NoMod        = ModCombination(0)
@@ -240,6 +244,11 @@ class Mod():
     HDDT = HD + DT
     HDHR = HD + HR
     HDDTHR = HD + DT + HR
+
+    # how people naturally sort mods in combinations (HDDTHR, not DTHRHD)
+    ORDER = [EZ, HD, HT, DT, _NC, HR, FL, NF, SD, _PF, RX, AP, SO, AT,
+             V2, TD, # we stop caring about order after this point
+             FI, RD, CN ,TP, K1, K2, K3, K4, K5, K6, K7, K8, K9, CO, MR]
 
 
 class Detect(Flag):
