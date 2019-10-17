@@ -10,7 +10,7 @@ import circleparse
 import ossapi
 
 from circleguard.user_info import UserInfo
-from circleguard.enums import Error
+from circleguard.enums import Error, ModCombination
 from circleguard.exceptions import (InvalidArgumentsException, APIException, CircleguardException,
                         RatelimitException, InvalidKeyException, ReplayUnavailableException, UnknownAPIException,
                         InvalidJSONException, NoInfoAvailableException)
@@ -123,7 +123,7 @@ class Loader():
             Integer user_id: The user id to get the replay_id from.
             Boolean limit: If set, will only return a user's top score (top response). Otherwise, will
                           return every response (every score they set on that map under different mods)
-            Integer mods: The mods the replay info to retieve were played with.
+            ModCombination: The mods the replay info to retieve were played with.
             String span: A comma separated list of ranges of top replays on the map to check. "1-3" will check the first 3 replays,
                     and "1-3,6,2-4" will check replays 1,2,3,4,6 for instance. Values that appear multiple times or in multiple ranges
                     are only counted once. If both span and num are passed, span is used instead of num.
@@ -144,7 +144,7 @@ class Loader():
         if span:
             span_list = span_to_list(span)
             num = max(span_list)
-        response = self.api.get_scores({"m": "0", "b": map_id, "limit": num, "u": user_id, "mods": mods})
+        response = self.api.get_scores({"m": "0", "b": map_id, "limit": num, "u": user_id, "mods": mods if mods is None else mods.value})
         Loader.check_response(response)
         if span:
             # filter out anything not in our span
@@ -152,7 +152,7 @@ class Loader():
         # yes, it's necessary to cast the str response to int before bool - all strings are truthy.
         # strptime format from https://github.com/ppy/osu-api/wiki#apiget_scores
         infos = [UserInfo(datetime.strptime(x["date"], "%Y-%m-%d %H:%M:%S"), map_id, int(x["user_id"]), str(x["username"]), int(x["score_id"]),
-                          int(x["enabled_mods"]), bool(int(x["replay_available"]))) for x in response]
+                          ModCombination(int(x["enabled_mods"])), bool(int(x["replay_available"]))) for x in response]
 
         return infos[0] if (limit and user_id) else infos # limit only applies if user_id was set
 
@@ -206,7 +206,7 @@ class Loader():
         """
 
         self.log.log(TRACE, "Requesting replay data by user %d on map %d with mods %s", user_id, map_id, mods)
-        response = self.api.get_replay({"m": "0", "b": map_id, "u": user_id, "mods": mods})
+        response = self.api.get_replay({"m": "0", "b": map_id, "u": user_id, "mods": mods if mods is None else mods.value})
         Loader.check_response(response)
 
         return base64.b64decode(response["content"])

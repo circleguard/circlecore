@@ -126,8 +126,7 @@ class Circleguard:
                     Defaults to 18, or the config value if changed.
             Integer rx_thresh: if a replay has a ur below this value, it is considered cheated.
                     Deaults to 50, or the config value if changed.
-            Integer mods: If passed, download and compare the top num replays set with these exact mods. You can find a
-                    reference on what mod maps to what integer value here: https://github.com/ppy/osu-api/wiki#mods.
+            ModCombination mods: If passed, download and compare the top num replays set with these exact mods.
                     There is currently no support for optional mods (eg HR is required, but other mods optional,
                     so both HR and HDHR scores would be downloaded). This is due to api limitations.
                     If both mods and u are passed, the user's replay will be downloaded regardless of the passed mods,
