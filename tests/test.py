@@ -12,6 +12,12 @@ if KEY is None:
 RES = Path(__file__).parent / "resources"
 set_options(loglevel=20)
 
+# how many times our test cases hits the get_replay endpoint.
+# Keep this below a multiple of 10 (preferably at most 9) so tests run in a reasonable amount of time.
+# We may want to split tests into "heavy" and "light" where light loads <10 heavy calls and heavy loads as many as we need.
+# light can run locally, heavy can run on prs.
+HEAVY_CALL_COUNT = 7
+
 class CGTestCase(TestCase):
     @classmethod
     def setUpClass(cls):
