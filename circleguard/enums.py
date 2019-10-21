@@ -258,7 +258,7 @@ class Detect():
 
     def __init__(self, value):
         self.value = value
-        self.similarity_thresh = None
+        self.steal_thresh = None
         self.ur_thresh = None
 
     def __contains__(self, other):
@@ -268,7 +268,7 @@ class Detect():
         ret = Detect(self.value | other.value)
         d = self if Detect.STEAL in self else other if Detect.STEAL in other else None
         if d:
-            ret.similarity_thresh = d.similarity_thresh
+            ret.steal_thresh = d.steal_thresh
         d = self if Detect.RELAX in self else other if Detect.RELAX in other else None
         if d:
             ret.ur_thresh = d.ur_thresh
