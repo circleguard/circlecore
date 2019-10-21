@@ -4,8 +4,7 @@ import logging
 import circleparse
 import numpy as np
 
-from circleguard.enums import Detect, RatelimitWeight, ModCombination
-from circleguard import config
+from circleguard.enums import RatelimitWeight, ModCombination
 from circleguard.utils import TRACE, span_to_list
 
 
@@ -17,137 +16,44 @@ class Loadable(abc.ABC):
     def load(self, loader):
         pass
 
-    def filter(self, loader, include):
-        return include(self)
-
-class Container(Loadable, abc.ABC):
-
-    def __init__(self, loadables, loadables2=None, cache=None, steal_thresh=None, rx_thresh=None, include=None, detect=None):
-        """
-        Initializes a Container instance.
-
-        Args:
-            List [Loadable] replays: A list of Lodable objects.
-            Boolean cache: Whether to cache the loaded replays. Defaults to False, or the config value if changed.
-            Integer steal_thresh: If a Comparison scores below this value, it is considered cheated.
-                    Defaults to 18, or the config value if changed.
-            Integer rx_thresh: if a replay has a ur below this value, it is considered cheated.
-                    Deaults to 50, or the config value if changed.
-            Function include: A Predicate function that returns True if the replay should be loaded, and False otherwise.
-                    The include function will be passed a single argument - the circleguard.Replay object, or one
-                    of its subclasses.
-            Detect detect: What cheats to run tests to detect. This will only overwrite replay's settings in this Check
-                    if the replays were not given a Detect different from the (default) config value.
-        """
-
-        self.log = logging.getLogger(__name__ + ".Container")
-        self.loadables = loadables if loadables else []
-        self.loadables2 = loadables2 if loadables2 else []
-        self.cache = cache if cache else config.cache
-        self.steal_thresh = steal_thresh if steal_thresh else config.steal_thresh
-        self.rx_thresh = rx_thresh if rx_thresh else config.rx_thresh
-        self.include = include if include else config.include
-        self.detect = detect if detect else config.detect
-        self.loaded = False
-
-    def all_loadables(self):
-        return self.loadables + self.loadables2
-
-    def load(self, loader):
-        for loadable in self.all_loadables():
-            loadable.load(loader)
-
-    def filter(self, loader, predicate=None):
-        predicate = self.include if predicate is None else predicate
-        self.loadables = [l for l in self.loadables if l.filter(loader, predicate)]
-        self.loadables2 = [l for l in self.loadables2 if l.filter(loader, predicate)]
-
-    @abc.abstractclassmethod
+    @abc.abstractmethod
     def num_replays(self):
-        ...
+        pass
 
+    @abc.abstractmethod
     def all_replays(self):
-        replays = []
-        for loadable in self.loadables:
-            if isinstance(loadable, Container):
-                replays += loadable.all_replays()
-            else:
-                replays.append(loadable)
-        return replays
+        pass
 
-    def all_replays2(self):
-        replays2 = []
-        for loadable in self.loadables2:
-            if isinstance(loadable, Container):
-                replays2 += loadable.all_replays2()
-            else:
-                replays2.append(loadable)
-        return replays2
+class ReplayContainer(Loadable):
+    """
+    Holds a list of Replays. Has three distinct states - unloaded, info loaded,
+    and loaded. This is in constract to :class:`~.Check`, which only has
+    the second and final states.
 
-    def cascade_options(self, cache, steal_thresh, rx_thresh, detect):
-        self.cache = cache if self.cache == config.cache else self.cache
-        self.steal_thresh = steal_thresh if self.steal_thresh == config.steal_thresh else self.steal_thresh
-        self.rx_thresh = rx_thresh if self.rx_thresh == config.rx_thresh else self.rx_thresh
-        self.detect = detect if self.detect == config.detect else self.detect
-        for loadable in self.all_loadables():
-            loadable.cascade_options(cache, steal_thresh, rx_thresh, detect)
+    ReplayContainer's start unloaded and become info loaded when
+    :meth:`~.load_info` is called. They become fully loaded when :meth:`~.load`
+    is called (and if this is called when the ReplayContainer is in the first
+    state, :meth:`~.load` will load info first, then load the replays.)
 
-class Map(Container):
-    def __init__(self, map_id, num=None, cache=None, steal_thresh=None, rx_thresh=None, include=None, mods=None, detect=None, span=None):
-        super().__init__(None, None, cache, steal_thresh, rx_thresh, include, detect)
-        self.map_id = map_id
-        self.num = num
-        self.mods = mods
-        self.span = span
-        self.loaded = False
+    In the unloaded state, the container has no actual Replay objects. It may
+    have limited knowledge about their number or type.
 
+    In the info loaded state, the container has references to Replay objects,
+    but those Replay objects are unloaded.
+
+    In the loaded state, the Replay objects are loaded.
+    """
+    @abc.abstractmethod
     def load_info(self, loader):
-        if self.loadables:
-            # dont load twice
-            return
-        infos = loader.user_info(self.map_id, num=self.num, mods=self.mods, span=self.span)
-        self.loadables = [ReplayMap(info.map_id, info.user_id, info.mods, detect=self.detect) for info in infos]
-        self.cascade_options(self.cache, self.steal_thresh, self.rx_thresh, self.detect)
+        pass
 
-
-    def load(self, loader):
-        self.load_info(loader)
-        for replay in self.loadables:
-            replay.load(loader)
-
-    def filter(self, loader, predicate=None):
-        predicate = self.include if predicate is None else predicate
-        self.load_info(loader)
-        self.loadables = [replay for replay in self.loadables if replay.filter(loader, predicate)]
-        return True
-
-    def num_replays(self):
-        """
-        Returns the number of Replays (not Loadables) in this class. Adds up
-        the number of replays + container.num_replays for each container.
-        """
-        if self.loadables:
-            return len(self.loadables)
-        elif self.span:
-            return len(span_to_list(self.span))
-        else:
-            return self.num
-
-    def __repr__(self):
-        return (f"Map(map_id={self.map_id},num={self.num},cache={self.cache},mods={self.mods},"
-                f"detect={self.detect},span={self.span},loadables={self.loadables},loaded={self.loaded})")
-
-class Check(Container):
+class Check(Loadable):
     """
     Contains a list of Replay objects (or subclasses thereof) and how to proceed when
     investigating them for cheats.
 
     Attributes:
         List [Loadable] replays: A list of Loadable objects.
-        Integer steal_thresh: If a comparison scores below this value, its Result object has ischeat set to True.
-                Defaults to 18, or the config value if changed.
-        Integer rx_thresh: if a replay has a ur below this value, it is considered cheated.
-                Deaults to 50, or the config value if changed.
         Function include: A Predicate function that returns True if the replay should be loaded, and False otherwise.
                 The include function will be passed a single argument - the circleguard.Replay object, or one
                 of its subclasses.
@@ -157,17 +63,13 @@ class Check(Container):
                 more details.
     """
 
-    def __init__(self, loadables, loadables2=None, cache=None, steal_thresh=None, rx_thresh=None, include=None, detect=None):
+    def __init__(self, loadables, loadables2=None, cache=None, include=None, detect=None):
         """
         Initializes a Check instance.
 
         Args:
-            List [Loadable] replays: A list of Replay or Container objects.
+            List [Loadable] replays: A list of Replay or Map objects.
             Boolean cache: Whether to cache the loaded replays. Defaults to False, or the config value if changed.
-            Integer steal_thresh: If a Comparison scores below this value, it is considered cheated.
-                    Defaults to 18, or the config value if changed.
-            Integer rx_thresh: if a replay has a ur below this value, it is considered cheated.
-                    Deaults to 50, or the config value if changed.
             Function include: A Predicate function that returns True if the replay should be loaded, and False otherwise.
                     The include function will be passed a single argument - the circleguard.Replay object, or one
                     of its subclasses.
@@ -175,22 +77,150 @@ class Check(Container):
                     if the replays were not given a Detect different from the (default) config value.
         """
 
-        super().__init__(loadables, loadables2, cache, steal_thresh, rx_thresh, include, detect)
-        self.cascade_options(self.cache, self.steal_thresh, self.rx_thresh, self.detect)
+        self.log = logging.getLogger(__name__ + ".Check")
+        self.loadables = [loadables] if isinstance(loadables, Loadable) else loadables
+        self.loadables2 = [loadables2] if isinstance(loadables2, Loadable) else [] if loadables2 is None else loadables2
+        self.cache = cache
+        self.include = include
+        self.detect = detect
+        self.loaded = False
+
+    def all_loadables(self):
+        return self.loadables + self.loadables2
+
+    def load(self, loader):
+        for loadable in self.all_loadables():
+            loadable.load(loader)
 
     def num_replays(self):
         num = 0
         for loadable in self.all_loadables():
-            if isinstance(loadable, Container):
-                num += loadable.num_replays()
-            else:
-                num += 1
+            num += loadable.num_replays()
         return num
+
+    def all_replays(self):
+        replays = []
+        for loadable in self.loadables:
+            replays += loadable.all_replays()
+        return replays
+
+    def all_replays2(self):
+        replays2 = []
+        for loadable in self.loadables2:
+            replays2 += loadable.all_replays()
+        return replays2
+
+    def __add__(self, other):
+        self.loadables.append(other)
+        return Check(self.loadables, self.loadables2, self.cache, self.include, self.detect)
+
+
+class Map(ReplayContainer):
+    def __init__(self, map_id, num=None, span=None, mods=None, cache=None):
+        if not bool(num) ^ bool(span):
+            # technically, num and span both being set would *work*, just span
+            # would override. But this avoids any confusion.
+            raise ValueError("One of num or span must be specified, but not both")
+        self.replays = []
+        self.cache = cache
+        self.map_id = map_id
+        self.num = num
+        self.mods = mods
+        self.span = span
+        self.loaded = False
+
+    def load_info(self, loader):
+        if self.replays:
+            # dont load twice
+            return
+        for info in loader.user_info(self.map_id, num=self.num, mods=self.mods, span=self.span):
+            self.replays.append(ReplayMap(info.map_id, info.user_id, info.mods, cache=self.cache))
+
+
+    def load(self, loader):
+        self.load_info(loader)
+        for replay in self.replays:
+            replay.load(loader)
+
+    def num_replays(self):
+        if self.replays:
+            return len(self.replays)
+        elif self.span:
+            return len(span_to_list(self.span))
+        else:
+            return self.num
+
+    def all_replays(self):
+        return self.replays
+
+
+    def __getitem__(self, key):
+        if isinstance(key, slice):
+            return self.replays[key.start:key.stop:key.step]
+        else:
+            return self.replays[key]
+
+    def __iter__(self):
+        return iter(self.replays)
+
+    def __repr__(self):
+        return (f"Map(map_id={self.map_id},num={self.num},cache={self.cache},mods={self.mods},"
+                f"span={self.span},replays={self.replays},loaded={self.loaded})")
+
+
+class User(ReplayContainer):
+    def __init__(self, user_id, num=None, span=None, mods=None, cache=None, available_only=True):
+        if not bool(num) ^ bool(span):
+            raise ValueError("One of num or span must be specified, but not both")
+        self.replays = []
+        self.user_id = user_id
+        self.num = num
+        self.span = span
+        self.mods = mods
+        self.cache = cache
+        self.available_only = available_only
+
+    def load_info(self, loader):
+        if self.replays:
+            return
+        for info in loader.get_user_best(self.user_id, num=self.num, span=self.span, mods=self.mods):
+            if self.available_only and not info.replay_available:
+                continue
+            self.replays.append(ReplayMap(info.map_id, info.user_id, info.mods, cache=self.cache, info=info))
+
+
+    def load(self, loader):
+        self.load_info(loader)
+        for loadable in self.replays:
+            loadable.load(loader)
+
+    def num_replays(self):
+        if self.replays:
+            return len(self.replays)
+        elif self.span:
+            return len(span_to_list(self.span))
+        else:
+            return self.num
+
+    def all_replays(self):
+        replays = []
+        for loadable in self.replays:
+            replays += loadable.all_replays()
+        return replays
+
+    def __getitem__(self, key):
+        if isinstance(key, slice):
+            return self.replays[key.start:key.stop:key.step]
+        else:
+            return self.replays[key]
+
+
+
 
 
 
 class Replay(Loadable):
-    def __init__(self, timestamp, map_id, username, user_id, mods, replay_id, replay_data, detect, weight):
+    def __init__(self, timestamp, map_id, username, user_id, mods, replay_id, replay_data, weight):
         """
         Initializes a Replay instance.
 
@@ -204,7 +234,6 @@ class Replay(Loadable):
             List [circleparse.Replay.ReplayEvent] replay_data: An array containing objects with the attributes x, y, time_since_previous_action,
                             and keys_pressed. If the replay could not be loaded (from the api or otherwise), this field should be None.
                             This means that this replay will not be compared against other replays or investigated for cheats.
-            Detect detect: What cheats to run tests to detect.
             RatelimitWeight weight: How much it 'costs' to load this replay from the api. If the load method of the replay makes no api calls,
                             this value is RatelimitWeight.NONE. If it makes only light api calls (anything but get_replay), this value is
                             RatelimitWeight.LIGHT. If it makes any heavy api calls (get_replay), this value is RatelimitWeight.HEAVY.
@@ -218,12 +247,18 @@ class Replay(Loadable):
         self.mods = mods
         self.replay_id = replay_id
         self.replay_data = replay_data
-        self.detect = detect
         self.weight = weight
         self.loaded = True
 
+
+    def num_replays(self):
+        return 1
+
+    def all_replays(self):
+        return [self]
+
     def __repr__(self):
-        return (f"Replay(timestamp={self.timestamp},map_id={self.map_id},user_id={self.user_id},mods={self.mods},detect={self.detect},"
+        return (f"Replay(timestamp={self.timestamp},map_id={self.map_id},user_id={self.user_id},mods={self.mods},"
                f"replay_id={self.replay_id},weight={self.weight},loaded={self.loaded},username={self.username})")
 
     def __str__(self):
@@ -248,8 +283,6 @@ class Replay(Loadable):
         txyk.sort(key=lambda p: p[0])
         return txyk
 
-    def set_cg_options(self, cache, steal_thresh, rx_thresh, detect):
-        self.detect = detect if self.detect == config.detect else config.detect
 
 class ReplayMap(Replay):
     """
@@ -269,14 +302,13 @@ class ReplayMap(Replay):
                          However, if the username is known (by retrieving it through the api, or other means), it is better
                          to represent the Replay with a player's name than an id. Both username and user_id will
                          obviously still be available to you through the result object after comparison.
-        Detect detect: What cheats to run tests to detect.
         Boolean loaded: Whether this replay has been loaded. If True, calls to #load will have no effect.
                         See #load for more information.
         RatelimitWeight weight: RatelimitWeight.HEAVY, as this class' load method makes a heavy api call. See RatelimitWeight
                                 documentation for more information.
     """
 
-    def __init__(self, map_id, user_id, mods=None, detect=None, cache=None):
+    def __init__(self, map_id, user_id, mods=None, cache=None, info=None):
         """
         Initializes a ReplayMap instance.
 
@@ -285,28 +317,29 @@ class ReplayMap(Replay):
             Integer user_id: The id of the user who made the replay.
             ModCombination mods: The mods the replay was played with. If this is not set, the top scoring replay of the user on the
                           given map will be loaded. Otherwise, the replay with the given mods will be loaded.
-            Detect detect: What cheats to run tests to detect.
             Boolean cache: Whether to cache this replay
+            UserInfo info: If passed, will use this info instead of loading a user info from the api. This can speed up the loading
+                    of the Replay by reducing the number of calls by one.
         """
 
         self.log = logging.getLogger(__name__ + ".ReplayMap")
         self.map_id = map_id
         self.user_id = user_id
         self.mods = mods
-        self.detect = detect if detect is not None else config.detect
-        self.cache = cache if cache is not None else config.cache
+        self.cache = cache
+        self.info = info
         self.weight = RatelimitWeight.HEAVY
         self.loaded = False
 
     def __repr__(self):
         if self.loaded:
-            return(f"ReplayMap(timestamp={self.timestamp},map_id={self.map_id},user_id={self.user_id},mods={self.mods},"
-                f"detect={self.detect},replay_id={self.replay_id},weight={self.weight},loaded={self.loaded},"
+            return (f"ReplayMap(timestamp={self.timestamp},map_id={self.map_id},user_id={self.user_id},mods={self.mods},"
+                f"replay_id={self.replay_id},weight={self.weight},loaded={self.loaded},"
                 f"username={self.username})")
 
         else:
-            return (f"ReplayMap(map_id={self.map_id},user_id={self.user_id},mods={self.mods},detect={self.detect},"
-                f"weight={self.weight},loaded={self.loaded})")
+            return (f"ReplayMap(map_id={self.map_id},user_id={self.user_id},mods={self.mods},"
+                    f"weight={self.weight},loaded={self.loaded})")
 
     def __str__(self):
         return f"{'Loaded' if self.loaded else 'Unloaded'} ReplayMap by {self.user_id} on {self.map_id}"
@@ -322,14 +355,14 @@ class ReplayMap(Replay):
         if(self.loaded):
             self.log.debug("%s already loaded, not loading", self)
             return
-        info = loader.user_info(self.map_id, user_id=self.user_id, mods=self.mods)
+        if self.info:
+            info = self.info
+        else:
+            info = loader.user_info(self.map_id, user_id=self.user_id, mods=self.mods)
         replay_data = loader.replay_data(info, cache=self.cache)
-        Replay.__init__(self, info.timestamp, self.map_id, info.username, self.user_id, info.mods, info.replay_id, replay_data, self.detect, self.weight)
+        Replay.__init__(self, info.timestamp, self.map_id, info.username, self.user_id, info.mods, info.replay_id, replay_data, self.weight)
         self.log.log(TRACE, "Finished loading %s", self)
 
-    def cascade_options(self, cache, steal_thresh, rx_thresh, detect):
-        self.cache = cache if self.cache == config.cache else self.cache
-        self.detect = detect if self.detect == config.detect else self.detect
 
 class ReplayPath(Replay):
     """
@@ -342,35 +375,32 @@ class ReplayPath(Replay):
 
     Attributes:
         [String or Path] path: A pathlike object representing the absolute path to the osr file.
-        Detect detect: What cheats to run tests to detect.
         Boolean loaded: Whether this replay has been loaded. If True, calls to #load will have no effect.
                         See #load for more information.
         RatelimitWeight weight: RatelimitWeight.LIGHT, as this class' load method makes only light api calls.
                                 See RatelimitWeight documentation for more information.
     """
 
-    def __init__(self, path, detect=None, cache=None):
+    def __init__(self, path, cache=None):
         """
         Initializes a ReplayPath instance.
 
         Args:
             [String or Path] path: A pathlike object representing the absolute path to the osr file.
-            Detect detect: What cheats to run tests to detect.
         """
 
         self.log = logging.getLogger(__name__ + ".ReplayPath")
         self.path = path
-        self.detect = detect if detect is not None else config.detect
-        self.cache = cache if cache is not None else config.cache
+        self.cache = cache
         self.weight = RatelimitWeight.LIGHT
         self.loaded = False
 
     def __repr__(self):
         if self.loaded:
-            return (f"ReplayPath(path={self.path},map_id={self.map_id},user_id={self.user_id},mods={self.mods},detect={self.detect},"
+            return (f"ReplayPath(path={self.path},map_id={self.map_id},user_id={self.user_id},mods={self.mods},"
                     f"replay_id={self.replay_id},weight={self.weight},loaded={self.loaded},username={self.username})")
         else:
-            return f"ReplayPath(path={self.path},detect={self.detect},weight={self.weight},loaded={self.loaded})"
+            return f"ReplayPath(path={self.path},weight={self.weight},loaded={self.loaded})"
 
     def __str__(self):
         if self.loaded:
@@ -397,9 +427,5 @@ class ReplayPath(Replay):
         user_id = loader.user_id(loaded.player_name)
 
         Replay.__init__(self, loaded.timestamp, map_id, loaded.player_name, user_id, ModCombination(loaded.mod_combination),
-                        loaded.replay_id, loaded.play_data, self.detect, self.weight)
+                        loaded.replay_id, loaded.play_data, self.weight)
         self.log.log(TRACE, "Finished loading %s", self)
-
-    def cascade_options(self, cache, steal_thresh, rx_thresh, detect):
-        self.cache = cache if self.cache == config.cache else self.cache
-        self.detect = detect if self.detect == config.detect else self.detect

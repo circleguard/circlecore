@@ -2,18 +2,21 @@ import os
 from unittest import TestCase, skip, TestSuite, TextTestRunner
 from pathlib import Path
 import warnings
-from circleguard import (Circleguard, Check, ReplayMap, ReplayPath, Detect, RatelimitWeight, set_options, config,
-                        Map)
-from circleguard.enums import Mod
+from circleguard import (Circleguard, Check, ReplayMap, ReplayPath, RelaxDetect, StealDetect,
+                         RatelimitWeight, set_options, Map, User, Mod)
 
 KEY = os.environ.get('OSU_API_KEY')
 if KEY is None:
     KEY = input("Enter your api key: ")
 
 RES = Path(__file__).parent / "resources"
-set_options(loglevel=20)
+set_options(loglevel=1)
 
 class CGTestCase(TestCase):
+    @classmethod
+    def setUpClass(cls):
+        cls.cg = Circleguard(KEY)
+
     def setUp(self):
         # prints TestClassName.testMethodName.
         # See https://stackoverflow.com/a/28745033
@@ -26,14 +29,11 @@ class CGTestCase(TestCase):
                 category=ResourceWarning)
 
 class TestReplays(CGTestCase):
-    @classmethod
-    def setUpClass(cls):
-        cls.cg = Circleguard(KEY)
 
     def test_cheated_replaypath(self):
         # taken from http://redd.it/bvfv8j, remodded replay by same user (CielXDLP) from HDHR to FLHDHR
         replays = [ReplayPath(RES / "stolen_replay1.osr"), ReplayPath(RES / "stolen_replay2.osr")]
-        c = Check(replays, detect=Detect.STEAL)
+        c = Check(replays, detect=StealDetect(18))
         r = list(self.cg.run(c))
         self.assertEqual(len(r), 1, f"{len(r)} results returned instead of 1")
         r = r[0]
@@ -55,7 +55,7 @@ class TestReplays(CGTestCase):
 
     def test_legitimate_replaypath(self):
         replays = [ReplayPath(RES / "legit_replay1.osr"), ReplayPath(RES / "legit_replay2.osr")]
-        c = Check(replays, detect=Detect.STEAL)
+        c = Check(replays, detect=StealDetect(18))
         r = list(self.cg.run(c))
         self.assertEqual(len(r), 1, f"{len(r)} results returned instead of 1")
         r = r[0]
@@ -100,134 +100,13 @@ class TestReplays(CGTestCase):
         self.assertEqual(r.username, "Toy", "Username was not correct")
         self.assertTrue(r.loaded, "Loaded status was not correct")
 
-class TestOption(CGTestCase):
 
-    SIM_1_2_NO_DETECT = 24
-    SIM_1_2_DETECT = 25
-
-    @classmethod
-    def setUpClass(cls):
-        cls.cg = Circleguard(KEY)
-        # TODO use short replays to reduce comparison time (switch to ReplayPaths)
-        cls.r1 = ReplayPath(RES / "legit_replay1.osr")
-        cls.r2 = ReplayPath(RES / "legit_replay2.osr")
-        cls.r3 = ReplayPath(RES / "stolen_replay1.osr")
-        cls.cg.load(cls.r1)
-        cls.cg.load(cls.r2)
-        cls.cg.load(cls.r3)
-
-        # r1 <-> r2 similarity: 24.21291168195734
-        # r2 <-> r3 similarity:
-        # r3 <-> r1 similarity:
-
-    def setUp(self):
-        # reset settings so methods don't interfere with each other's settings
-        self.cg = Circleguard(KEY)
-        super().setUp()
-
-    def test_steal_thresh_check_true(self):
-        set_options(steal_thresh=self.SIM_1_2_NO_DETECT)
-        self.cg.set_options(steal_thresh=self.SIM_1_2_NO_DETECT)
-        c = Check([self.r1, self.r2], steal_thresh=self.SIM_1_2_DETECT)
-        r = list(self.cg.run(c))[0]
-        self.assertTrue(r.ischeat, "Thresh should have been set to detect a cheat at the Check level but was not")
-
-    def test_steal_thresh_check_false(self):
-        set_options(steal_thresh=self.SIM_1_2_DETECT)
-        self.cg.set_options(steal_thresh=self.SIM_1_2_DETECT)
-        c = Check([self.r1, self.r2], steal_thresh=self.SIM_1_2_NO_DETECT)
-        r = list(self.cg.run(c))[0]
-        self.assertFalse(r.ischeat, "Thresh should have been set to miss a cheat at the Check level but was not")
-
-    def test_steal_thresh_check_without_class_true(self):
-        set_options(steal_thresh=self.SIM_1_2_NO_DETECT)
-        c = Check([self.r1, self.r2], steal_thresh=self.SIM_1_2_DETECT)
-        r = list(self.cg.run(c))[0]
-        self.assertTrue(r.ischeat, "Thresh should have been set to detect a cheat at the Check level but was not")
-
-    def test_steal_thresh_check_without_class_false(self):
-        set_options(steal_thresh=self.SIM_1_2_DETECT)
-        c = Check([self.r1, self.r2], steal_thresh=self.SIM_1_2_NO_DETECT)
-        r = list(self.cg.run(c))[0]
-        self.assertFalse(r.ischeat, "Thresh should have been set to miss a cheat at the Check level but was not")
-
-    def test_steal_thresh_check_without_class_or_global_true(self):
-        c = Check([self.r1, self.r2], steal_thresh=self.SIM_1_2_DETECT)
-        r = list(self.cg.run(c))[0]
-        self.assertTrue(r.ischeat, "Thresh should have been set to detect a cheat at the Check level but was not")
-
-    def test_steal_thresh_check_without_class_or_global_false(self):
-        c = Check([self.r1, self.r2], steal_thresh=self.SIM_1_2_NO_DETECT)
-        r = list(self.cg.run(c))[0]
-        self.assertFalse(r.ischeat, "Thresh should have been set to miss a cheat at the Check level but was not")
-
-
-    def test_steal_thresh_class_true(self):
-        set_options(steal_thresh=self.SIM_1_2_NO_DETECT)
-        self.cg.set_options(steal_thresh=self.SIM_1_2_DETECT)
-        c = Check([self.r1, self.r2])
-        r = list(self.cg.run(c))[0]
-        self.assertTrue(r.ischeat, "Thresh should have been set to detect a cheat at the class level but was not")
-
-    def test_steal_thresh_class_false(self):
-        set_options(steal_thresh=self.SIM_1_2_DETECT)
-        self.cg.set_options(steal_thresh=self.SIM_1_2_NO_DETECT)
-        c = Check([self.r1, self.r2])
-        r = list(self.cg.run(c))[0]
-        self.assertFalse(r.ischeat, "Thresh should have been set to miss a cheat at the class level but was not")
-
-    def test_steal_thresh_class_without_global_true(self):
-        self.cg.set_options(steal_thresh=self.SIM_1_2_DETECT)
-        c = Check([self.r1, self.r2])
-        r = list(self.cg.run(c))[0]
-        self.assertTrue(r.ischeat, "Thresh should have been set to detect a cheat at the class level but was not")
-
-    def test_steal_thresh_class_without_global_false(self):
-        self.cg.set_options(steal_thresh=self.SIM_1_2_NO_DETECT)
-        c = Check([self.r1, self.r2])
-        r = list(self.cg.run(c))[0]
-        self.assertFalse(r.ischeat, "Thresh should have been set to miss a cheat at the class level but was not")
-
-    # TODO test all options, not just steal thresh
-
-class TestInclude(CGTestCase):
-    @classmethod
-    def setUpClass(cls):
-        cls.cg = Circleguard(KEY)
-
-
-    def test_include_replaypath_filter_some(self):
-        def _include(replay):
-            return replay.replay_id in [2801164636]
-
-        c = Check([ReplayPath(RES / "stolen_replay1.osr"), ReplayPath(RES / "stolen_replay2.osr")], include=_include)
-        self.cg.load(c)
-        c.filter(self.cg.loader)
-        self.assertEqual(len(c.all_replays()), 1, "A replay should have been filtered out but it was not")
-
-    def test_include_replaypath_filter_none(self):
-        c = Check([ReplayPath(RES / "stolen_replay1.osr"), ReplayPath(RES / "stolen_replay2.osr")])
-        self.cg.load(c)
-        c.filter(self.cg.loader)
-        self.assertEqual(len(c.all_replays()), 2, "No replays should have been filtered but at least one was")
-
-    def test_include_replaypath_filter_all(self):
-        def _include(replay):
-            return False
-        c = Check([ReplayPath(RES / "stolen_replay1.osr"), ReplayPath(RES / "stolen_replay2.osr")], include=_include)
-        self.cg.load(c)
-        c.filter(self.cg.loader)
-        self.assertEqual(len(c.all_replays()), 0, "All replays should have been filtered but at least one was not")
 
 class TestMap(CGTestCase):
-    @classmethod
-    def setUpClass(cls):
-        cls.cg = Circleguard(KEY)
-
 
     def test_map_alone(self):
         m = Map(129891, num=2) # Freedom Dive [Four Dimensions]
-        c = Check([m], detect=Detect.STEAL)
+        c = Check([m], detect=StealDetect(18))
         r = list(self.cg.run(c))
         self.assertEqual(len(r), 1)
         self.assertEqual(r[0].earlier_replay.mods, Mod.HD + Mod.HR) # cookiezi HDHR
@@ -237,7 +116,7 @@ class TestMap(CGTestCase):
         rpath = ReplayPath(RES / "legit_replay1.osr")
         # of course, it makes no sense to compare replays on two different maps
         # for steals, but it serves this tests' purpose.
-        c = Check([m, rpath], detect=Detect.STEAL)
+        c = Check([m, rpath], detect=StealDetect(18))
         r = list(self.cg.run(c))
         self.assertEqual(len(r), 1)
         # dont need a ton of checks here, mostly just checking that
@@ -249,7 +128,7 @@ class TestMap(CGTestCase):
     def test_map_with_replaymap(self):
         m = Map(129891, num=1)
         rmap = ReplayMap(1524183, 4196808) # Karthy HDHR on Full Moon
-        c = Check([m, rmap], detect=Detect.STEAL)
+        c = Check([m, rmap], detect=StealDetect(18))
         r = list(self.cg.run(c))
         self.assertEqual(len(r), 1)
         self.assertEqual(r[0].later_replay.username, "Karthy")
@@ -259,14 +138,45 @@ class TestMap(CGTestCase):
         m = Map(129891, num=1)
         rpath = ReplayPath(RES / "legit_replay1.osr")
         rmap = ReplayMap(1524183, 4196808) # Karthy HDHR on Full Moon
-        c = Check([m, rmap, rpath], detect=Detect.STEAL)
+        c = Check([m, rmap, rpath], detect=StealDetect(18))
         r = list(self.cg.run(c))
         self.assertEqual(len(r), 3)
 
-# if __name__ == '__main__':
-    # suite = TestSuite()
-    # suite.addTest(TestReplays("test_loading_replaymap"))
-    # suite.addTest(TestMap("test_map_with_replaymap"))
-    # suite.addTest(TestMap("test_map_with_replaypath_replaymap"))
+class TestOptions(CGTestCase):
 
-    # TextTestRunner().run(suite)
+    def test_options(self):
+        cg = self.cg
+        r1 = ReplayPath("")
+        r2 = ReplayPath("")
+        c = Check([r1, r2], detect=StealDetect(18))
+        cg.run(c)
+
+class TestUser(CGTestCase):
+    @classmethod
+    def setUpClass(cls):
+        cls.cg = Circleguard(KEY)
+        cls.user = User(124493, num=3)
+
+    def test_user_load(self):
+        self.assertEqual(len(self.user.all_replays()), 0)
+        self.assertEqual(len(self.user[:]), 0)
+        self.cg.load_info(self.user)
+        self.assertEqual(len(self.user.all_replays()), 3)
+        self.assertEqual(len(self.user[:]), 3)
+        self.cg.load(self.user)
+
+    def test_user_slice(self):
+        # 2nd (Everything will Freeze)
+        self.assertEqual(self.user[1].map_id, 555797)
+        # 1st, 2nd, and 3rd (FDFD, Everything will Freeze, and Remote Control)
+        self.assertListEqual([r.map_id for r in self.user[0:3]], [129891, 555797, 774965])
+        # 1st and 3rd (FDFD and Remote Control)
+        self.assertListEqual([r.map_id for r in self.user[0:3:2]], [129891, 774965])
+        self.assertEqual(self.user[0].map_id, 129891)
+
+if __name__ == '__main__':
+    suite = TestSuite()
+    suite.addTest(TestUser("test_user_load"))
+    suite.addTest(TestUser("test_user_slice"))
+
+    TextTestRunner().run(suite)

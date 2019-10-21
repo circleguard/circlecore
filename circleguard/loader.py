@@ -159,7 +159,7 @@ class Loader():
 
 
     @request
-    def get_user_best(self, user_id, num, span=None):
+    def get_user_best(self, user_id, num, span=None, mods=None):
         """
         Gets the top 100 best plays for the given user.
 
@@ -185,10 +185,18 @@ class Loader():
             num = max(span_list)
         response = self.api.get_user_best({"m": "0", "u": user_id, "limit": num})
         Loader.check_response(response)
+        if mods:
+            _response = []
+            for r in response:
+                if ModCombination(int(r["enabled_mods"])) == mods:
+                    _response.append(r)
+            response = _response
+
         if span:
             response = [response[i-1] for i in span_list]
-
-        return [int(x["beatmap_id"]) for x in response]
+        return [UserInfo(datetime.strptime(r["date"], "%Y-%m-%d %H:%M:%S"), int(r["beatmap_id"]), int(r["user_id"]),
+                self.username(int(r["user_id"])), int(r["score_id"]), ModCombination(int(r["enabled_mods"])),
+                bool(int(r["replay_available"]))) for r in response]
 
 
     @request

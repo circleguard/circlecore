@@ -251,14 +251,40 @@ class Mod():
              FI, RD, CN ,TP, K1, K2, K3, K4, K5, K6, K7, K8, K9, CO, MR]
 
 
-class Detect(Flag):
-                   # (in binary)
-    STEAL = 1 << 0 # 0001
-    RELAX = 1 << 1 # 0010
-    REMOD = 1 << 2 # 0100
+class Detect():
+    STEAL = 1 << 0
+    RELAX = 1 << 1
+    ALL = STEAL + RELAX
 
-    ALL = STEAL | RELAX | REMOD
-    NONE = 0
+    def __init__(self, value):
+        self.value = value
+        self.similarity_thresh = None
+        self.ur_thresh = None
+
+    def __contains__(self, other):
+        return bool(self.value & other)
+
+    def __add__(self, other):
+        ret = Detect(self.value | other.value)
+        d = self if Detect.STEAL in self else other if Detect.STEAL in other else None
+        if d:
+            ret.similarity_thresh = d.similarity_thresh
+        d = self if Detect.RELAX in self else other if Detect.RELAX in other else None
+        if d:
+            ret.ur_thresh = d.ur_thresh
+        return ret
+
+class StealDetect(Detect):
+    def __init__(self, steal_thresh):
+        super().__init__(Detect.STEAL)
+        self.steal_thresh = steal_thresh
+
+class RelaxDetect(Detect):
+    def __init__(self, ur_thresh):
+        super().__init__(Detect.RELAX)
+        self.ur_thresh = ur_thresh
+
+
 
 class RatelimitWeight(Enum):
     """
