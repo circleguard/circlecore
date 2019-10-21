@@ -47,13 +47,14 @@ class Circleguard:
                     replays will be loaded from and stored to the db. If cache is False, replays will be loaded from the db but not stored.
         """
 
+        self.cache = cache
         self.cacher = None
         if db_path is not None:
             # allows for . to be passed to db_path
             db_path = Path(db_path).absolute()
             # they can set cache to False later with:func:`~.circleguard.set_options`
             # if they want; assume caching is desired if db path is passed
-            self.cacher = Cacher(cache, db_path)
+            self.cacher = Cacher(self.cache, db_path)
 
         self.log = logging.getLogger(__name__)
         # allow for people to pass their own loader implementation/subclass
@@ -100,13 +101,13 @@ class Circleguard:
         """
         Loads the given loadable. This is identical to calling loadable.load(cg.loader).
         """
-        loadable.load(self.loader)
+        loadable.load(self.loader, self.cache)
 
     def load_info(self, container):
         """
         Loads the given ReplayContainer. This is identical to calling container.load_info(cg.loader).
         """
-        container.load_info(self.loader)
+        container.load_info(self.loader, self.cache)
 
 
     def set_options(self, cache=None):
