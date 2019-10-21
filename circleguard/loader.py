@@ -255,8 +255,8 @@ class Loader():
             self.log.warning("lzma from %r could not be decompressed, api returned corrupt replay", user_info)
             return None
         replay_data = parsed_replay.play_data
-        if self.cacher is not None:
-            self.cacher.cache(lzma_bytes, user_info, should_cache=cache)
+        if cache and self.cacher is not None:
+            self.cacher.cache(lzma_bytes, user_info)
         return replay_data
 
     @lru_cache()

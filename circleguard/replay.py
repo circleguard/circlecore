@@ -13,7 +13,7 @@ class Loadable(abc.ABC):
         pass
 
     @abc.abstractmethod
-    def load(self, loader):
+    def load(self, loader, cache):
         pass
 
     @abc.abstractmethod
@@ -81,9 +81,10 @@ class Check(Loadable):
     def all_loadables(self):
         return self.loadables + self.loadables2
 
-    def load(self, loader):
+    def load(self, loader, cache=None):
+        # cache arg only for homogeneity with func calls. No effect
         for loadable in self.all_loadables():
-            loadable.load(loader)
+            loadable.load(loader, cache=self.cache)
 
     def num_replays(self):
         num = 0
@@ -107,6 +108,9 @@ class Check(Loadable):
         self.loadables.append(other)
         return Check(self.loadables, self.loadables2, self.cache, self.detect)
 
+    def __repr__(self):
+        return (f"Check(loadables={self.loadables},loadables2={self.loadables2},cache={self.cache},"
+                f"detect={self.detect},loaded={self.loaded})")
 
 class Map(ReplayContainer):
     def __init__(self, map_id, num=None, span=None, mods=None, cache=None):
@@ -129,11 +133,12 @@ class Map(ReplayContainer):
         for info in loader.user_info(self.map_id, num=self.num, mods=self.mods, span=self.span):
             self.replays.append(ReplayMap(info.map_id, info.user_id, info.mods, cache=self.cache))
 
-
-    def load(self, loader):
+    def load(self, loader, cache):
+        # only listen to the parent's cache if ours is not set. Lower takes precedence
+        cascade_cache = cache if self.cache is None else self.cache
         self.load_info(loader)
         for replay in self.replays:
-            replay.load(loader)
+            replay.load(loader, cascade_cache)
 
     def num_replays(self):
         if self.replays:
@@ -160,6 +165,9 @@ class Map(ReplayContainer):
         return (f"Map(map_id={self.map_id},num={self.num},cache={self.cache},mods={self.mods},"
                 f"span={self.span},replays={self.replays},loaded={self.loaded})")
 
+    def __str__(self):
+        return f"Map {self.map_id}"
+
 
 class User(ReplayContainer):
     def __init__(self, user_id, num=None, span=None, mods=None, cache=None, available_only=True):
@@ -181,11 +189,12 @@ class User(ReplayContainer):
                 continue
             self.replays.append(ReplayMap(info.map_id, info.user_id, info.mods, cache=self.cache, info=info))
 
-
-    def load(self, loader):
+    def load(self, loader, cache):
+        # only listen to the parent's cache if ours is not set. Lower takes precedence
+        cascade_cache = cache if self.cache is None else self.cache
         self.load_info(loader)
         for loadable in self.replays:
-            loadable.load(loader)
+            loadable.load(loader, cascade_cache)
 
     def num_replays(self):
         if self.replays:
@@ -206,8 +215,6 @@ class User(ReplayContainer):
             return self.replays[key.start:key.stop:key.step]
         else:
             return self.replays[key]
-
-
 
 
 
@@ -327,23 +334,24 @@ class ReplayMap(Replay):
     def __repr__(self):
         if self.loaded:
             return (f"ReplayMap(timestamp={self.timestamp},map_id={self.map_id},user_id={self.user_id},mods={self.mods},"
-                f"replay_id={self.replay_id},weight={self.weight},loaded={self.loaded},"
-                f"username={self.username})")
+                f"cache={self.cache},replay_id={self.replay_id},loaded={self.loaded},username={self.username})")
 
         else:
-            return (f"ReplayMap(map_id={self.map_id},user_id={self.user_id},mods={self.mods},"
-                    f"weight={self.weight},loaded={self.loaded})")
+            return (f"ReplayMap(map_id={self.map_id},user_id={self.user_id},mods={self.mods},cache={self.cache},"
+                    f"loaded={self.loaded})")
 
     def __str__(self):
         return f"{'Loaded' if self.loaded else 'Unloaded'} ReplayMap by {self.user_id} on {self.map_id}"
 
-    def load(self, loader):
+    def load(self, loader, cache):
         """
         Loads the data for this replay from the api. This method silently returns if replay.loaded is True.
 
         The superclass Replay is initialized after this call, setting replay.loaded to True. Multiple
         calls to this method will have no effect beyond the first.
         """
+        # only listen to the parent's cache if ours is not set. Lower takes precedence
+        cache = cache if self.cache is None else self.cache
         self.log.debug("Loading %r", self)
         if(self.loaded):
             self.log.debug("%s already loaded, not loading", self)
@@ -352,7 +360,7 @@ class ReplayMap(Replay):
             info = self.info
         else:
             info = loader.user_info(self.map_id, user_id=self.user_id, mods=self.mods)
-        replay_data = loader.replay_data(info, cache=self.cache)
+        replay_data = loader.replay_data(info, cache=cache)
         Replay.__init__(self, info.timestamp, self.map_id, info.username, self.user_id, info.mods, info.replay_id, replay_data, self.weight)
         self.log.log(TRACE, "Finished loading %s", self)
 
@@ -401,7 +409,7 @@ class ReplayPath(Replay):
         else:
             return f"Unloaded ReplayPath at {self.path}"
 
-    def load(self, loader):
+    def load(self, loader, cache):
         """
         Loads the data for this replay from the osr file given by the path. See circleparse.parse_replay_file for
         implementation details. This method has no effect if replay.loaded is True.
@@ -410,6 +418,7 @@ class ReplayPath(Replay):
         calls to this method will have no effect beyond the first.
         """
 
+        # we don't cache local replays currently. Ignore cache option for if/when we need it
         self.log.debug("Loading ReplayPath %r", self)
         if self.loaded:
             self.log.debug("%s already loaded, not loading", self)

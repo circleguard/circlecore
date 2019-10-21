@@ -8,7 +8,6 @@ from circleguard.loader import Loader
 from circleguard.exceptions import CircleguardException
 from circleguard.utils import TRACE
 
-
 class Cacher:
     """
     Handles compressing and caching replay data to a database.
@@ -33,7 +32,7 @@ class Cacher:
         self.conn = sqlite3.connect(str(path))
         self.cursor = self.conn.cursor()
 
-    def cache(self, lzma_bytes, user_info, should_cache=None):
+    def cache(self, lzma_bytes, user_info):
         """
         Writes the given lzma bytes to the database, linking it to the given user info.
         If an entry with the given user info already exists, it is overwritten with
@@ -41,21 +40,21 @@ class Cacher:
 
         The lzma string is compressed with wtc compression. See Cacher.compress and wtc.compress for more.
 
-        A call to this method has no effect if the Cacher's should_cache is False.
+        A call to this method has no effect if the Cacher's cache is False.
 
         Args:
             String map_id: The map id to insert into the db.
             Bytes lzma_bytes: The lzma bytes to compress and insert into the db.
             UserInfo user_info: The UserInfo object representing this replay.
-            Boolean should_cache: If this is passed, overwrites the option set at initialization time.
+            Cache:
         """
 
         self.log.debug("Caching lzma bytes")
-        should_cache = should_cache if should_cache else self.should_cache
 
-        if not should_cache:
-            self.log.debug("should_cache is false, not caching")
+        if self.should_cache is False:
+            self.log.debug("Cacher should_cache is False, not caching")
             return
+
         compressed_bytes = self._compress(lzma_bytes)
 
         map_id = user_info.map_id

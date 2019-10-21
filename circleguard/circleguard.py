@@ -29,10 +29,8 @@ class Circleguard:
     Result class for further documentation.
     """
 
-    # used to distinguish log output for cg instances
-    NUM = 1
 
-    def __init__(self, key, db_path=None, slider_dir=None, loader=None):
+    def __init__(self, key, db_path=None, slider_dir=None, loader=None, cache=True):
         """
         Initializes a Circleguard instance.
 
@@ -45,6 +43,8 @@ class Circleguard:
                     a temporary directory will be created, and destroyed when this circleguard object is garbage collected.
             Class loader: a subclass of circleguard.Loader, which will be used in place of circleguard.Loader if passed.
                     Instantiated with two args - a key and cacher.
+            bool cache: if passed without db_path, has no effect. If db_path is passed and cache is True,
+                    replays will be loaded from and stored to the db. If cache is False, replays will be loaded from the db but not stored.
         """
 
         self.cacher = None
@@ -53,9 +53,9 @@ class Circleguard:
             db_path = Path(db_path).absolute()
             # they can set cache to False later with:func:`~.circleguard.set_options`
             # if they want; assume caching is desired if db path is passed
-            self.cacher = Cacher(True, db_path)
+            self.cacher = Cacher(cache, db_path)
 
-        self.log = logging.getLogger(__name__ + str(Circleguard.NUM))
+        self.log = logging.getLogger(__name__)
         # allow for people to pass their own loader implementation/subclass
         self.loader = Loader(key, cacher=self.cacher) if loader is None else loader(key, self.cacher)
         if slider_dir is None:
@@ -64,8 +64,6 @@ class Circleguard:
             self.library = Library(self.__slider_dir.name)
         else:
             self.library = Library(slider_dir)
-
-        Circleguard.NUM += 1
 
 
     def run(self, check):
@@ -111,7 +109,7 @@ class Circleguard:
         container.load_info(self.loader)
 
 
-    def set_options(self, cache=None, loglevel=None):
+    def set_options(self, cache=None):
         """
         Changes the default value for different options in circleguard.
         Affects only the ircleguard instance this method is called on.
@@ -125,13 +123,12 @@ class Circleguard:
                           For more information on log levels, see the standard python logging lib.
         """
 
+        # remnant code from when we had many options available in set_options. Left in for easy future expansion
         for k, v in locals().items():
             if v is None or k == "self":
                 continue
-            if k == "loglevel":
-                self.log.setLevel(loglevel)
-                continue
             if k == "cache":
+                self.cache = cache
                 self.cacher.should_cache = cache
                 continue
 
