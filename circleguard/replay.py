@@ -54,25 +54,19 @@ class Check(Loadable):
 
     Attributes:
         List [Loadable] replays: A list of Loadable objects.
-        Function include: A Predicate function that returns True if the replay should be loaded, and False otherwise.
-                The include function will be passed a single argument - the circleguard.Replay object, or one
-                of its subclasses.
         Detect detect: What cheats to run tests to detect.
         Boolean cache: Whether to cache the loaded replays. Defaults to False, or the config value if changed.
         Boolean loaded: False at instantiation, set to True once check#load is called. See check#load for
                 more details.
     """
 
-    def __init__(self, loadables, loadables2=None, cache=None, include=None, detect=None):
+    def __init__(self, loadables, loadables2=None, cache=None, detect=None):
         """
         Initializes a Check instance.
 
         Args:
             List [Loadable] replays: A list of Replay or Map objects.
             Boolean cache: Whether to cache the loaded replays. Defaults to False, or the config value if changed.
-            Function include: A Predicate function that returns True if the replay should be loaded, and False otherwise.
-                    The include function will be passed a single argument - the circleguard.Replay object, or one
-                    of its subclasses.
             Detect detect: What cheats to run tests to detect. This will only overwrite replay's settings in this Check
                     if the replays were not given a Detect different from the (default) config value.
         """
@@ -81,7 +75,6 @@ class Check(Loadable):
         self.loadables = [loadables] if isinstance(loadables, Loadable) else loadables
         self.loadables2 = [loadables2] if isinstance(loadables2, Loadable) else [] if loadables2 is None else loadables2
         self.cache = cache
-        self.include = include
         self.detect = detect
         self.loaded = False
 
@@ -112,7 +105,7 @@ class Check(Loadable):
 
     def __add__(self, other):
         self.loadables.append(other)
-        return Check(self.loadables, self.loadables2, self.cache, self.include, self.detect)
+        return Check(self.loadables, self.loadables2, self.cache, self.detect)
 
 
 class Map(ReplayContainer):
