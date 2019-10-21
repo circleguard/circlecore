@@ -3,6 +3,7 @@ import time
 import base64
 import logging
 from lzma import LZMAError
+from functools import lru_cache
 
 import requests
 from requests import RequestException
@@ -280,6 +281,18 @@ class Loader():
             return 0
         else:
             return int(response[0]["user_id"])
+
+    @lru_cache()
+    def username(self, user_id):
+        """
+        The inverse of :meth:`~.user_ud`. Retrieves the username of the
+        given user id.
+        """
+        response = self.api.get_user({"u": user_id, "type": "id"})
+        if response == []:
+            return ""
+        else:
+            return response[0]["username"]
 
     @staticmethod
     def check_response(response):
