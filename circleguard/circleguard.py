@@ -81,19 +81,19 @@ class Circleguard:
         self.log.info("Running circleguard with %r", c)
 
         c.load(self.loader)
-
+        d = c.detect
         # steal check
-        if Detect.STEAL in c.detect:
+        if Detect.STEAL in d:
             compare1 = c.all_replays()
             compare2 = c.all_replays2()
-            comparer = Comparer(c.detect.steal_thresh, compare1, replays2=compare2)
+            comparer = Comparer(d.steal_thresh, compare1, replays2=compare2)
             yield from comparer.compare()
 
         # relax check
-        if Detect.RELAX in c.detect:
+        if Detect.RELAX in d:
             for replay in c.all_replays():
                 bm = self.library.lookup_by_id(replay.map_id, download=True, save=True)
-                investigator = Investigator(replay, bm, c.detect_ur_thresh)
+                investigator = Investigator(replay, bm, d.ur_thresh)
                 yield from investigator.investigate()
 
     def load(self, loadable):
