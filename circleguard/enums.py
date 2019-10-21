@@ -156,7 +156,7 @@ class ModCombination():
         return f"ModCombination(value={self.value})"
 
     def __str__(self):
-        return self.short_name
+        return self.short_name()
 
     def __contains__(self, other):
         return bool(self.value & other.value)
