@@ -251,6 +251,7 @@ class Loader():
             self.cacher.cache(lzma_bytes, user_info, should_cache=cache)
         return replay_data
 
+    @lru_cache()
     def map_id(self, map_hash):
         """
         Retrieves the corresponding map id for the given map_hash from the api.
@@ -265,6 +266,7 @@ class Loader():
         else:
             return int(response[0]["beatmap_id"])
 
+    @lru_cache()
     def user_id(self, username):
         """
         Retrieves the corresponding user id for the given username from the api.
