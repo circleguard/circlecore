@@ -107,7 +107,7 @@ class Circleguard:
         """
         Loads the given ReplayContainer. This is identical to calling container.load_info(cg.loader).
         """
-        container.load_info(self.loader, self.cache)
+        container.load_info(self.loader)
 
 
     def set_options(self, cache=None):
