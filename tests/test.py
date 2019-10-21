@@ -134,14 +134,6 @@ class TestMap(CGTestCase):
         self.assertEqual(r[0].later_replay.username, "Karthy")
         self.assertEqual(r[0].earlier_replay.username, "chocomint")
 
-    def test_map_with_replaypath_replaymap(self):
-        m = Map(129891, num=1)
-        rpath = ReplayPath(RES / "legit_replay1.osr")
-        rmap = ReplayMap(1524183, 4196808) # Karthy HDHR on Full Moon
-        c = Check([m, rmap, rpath], detect=StealDetect(18))
-        r = list(self.cg.run(c))
-        self.assertEqual(len(r), 3)
-
 class TestOptions(CGTestCase):
 
     def test_options(self):
