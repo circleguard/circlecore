@@ -16,7 +16,7 @@ set_options(loglevel=20)
 # Keep this below a multiple of 10 (preferably at most 9) so tests run in a reasonable amount of time.
 # We may want to split tests into "heavy" and "light" where light loads <10 heavy calls and heavy loads as many as we need.
 # light can run locally, heavy can run on prs.
-HEAVY_CALL_COUNT = 7
+HEAVY_CALL_COUNT = 6
 
 class CGTestCase(TestCase):
     @classmethod
@@ -111,34 +111,28 @@ class TestReplays(CGTestCase):
 class TestMap(CGTestCase):
 
     def test_map_alone(self):
-        m = Map(129891, num=2) # Freedom Dive [Four Dimensions]
-        c = Check([m], detect=StealDetect(18))
+        m = Map(129891, num=1) # Freedom Dive [Four Dimensions]
+        c = Check([m], RelaxDetect(18))
         r = list(self.cg.run(c))
         self.assertEqual(len(r), 1)
-        self.assertEqual(r[0].earlier_replay.mods, Mod.HD + Mod.HR) # cookiezi HDHR
+        self.assertEqual(r[0].replay.mods, Mod.HD + Mod.HR) # cookiezi HDHR
 
-    def test_map_with_replaypath(self):
+    def test_map_with_replays(self):
         m = Map(129891, num=1)
         rpath = ReplayPath(RES / "legit_replay1.osr")
+        rmap = ReplayMap(1524183, 4196808) # Karthy HDHR on Full Moon
         # of course, it makes no sense to compare replays on two different maps
         # for steals, but it serves this test's purpose.
-        c = Check([m, rpath], detect=StealDetect(18))
+        c = Check([m, rpath, rmap], RelaxDetect(18))
         r = list(self.cg.run(c))
-        self.assertEqual(len(r), 1)
+        self.assertEqual(len(r), 3)
         # dont need a ton of checks here, mostly just checking that
         # running with Map and Replay combined *runs*. Other tests ensure
         # the accuracy of the Results
-        self.assertEqual(r[0].later_replay.username, "chocomint")
-        self.assertEqual(r[0].earlier_replay.username, "Crissinop")
+        self.assertAlmostEqual(r[0].ur, 65.769, places=2)
+        self.assertAlmostEqual(r[1].ur, 100.104, places=2)
+        self.assertAlmostEqual(r[2].ur, 68.518, places=2)
 
-    def test_map_with_replaymap(self):
-        m = Map(129891, num=1)
-        rmap = ReplayMap(1524183, 4196808) # Karthy HDHR on Full Moon
-        c = Check([m, rmap], detect=StealDetect(18))
-        r = list(self.cg.run(c))
-        self.assertEqual(len(r), 1)
-        self.assertEqual(r[0].later_replay.username, "Karthy")
-        self.assertEqual(r[0].earlier_replay.username, "chocomint")
 
 class TestOptions(CGTestCase):
 
@@ -174,7 +168,6 @@ class TestUser(CGTestCase):
 
 if __name__ == '__main__':
     suite = TestSuite()
-    suite.addTest(TestUser("test_user_load"))
-    suite.addTest(TestUser("test_user_slice"))
+    suite.addTest(TestMap("test_map_with_replays"))
 
     TextTestRunner().run(suite)
