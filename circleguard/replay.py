@@ -60,15 +60,14 @@ class Check(Loadable):
                 more details.
     """
 
-    def __init__(self, loadables, loadables2=None, cache=None, detect=None):
+    def __init__(self, loadables, detect, loadables2=None, cache=None):
         """
         Initializes a Check instance.
 
         Args:
             List [Loadable] replays: A list of Replay or Map objects.
             Boolean cache: Whether to cache the loaded replays. Defaults to False, or the config value if changed.
-            Detect detect: What cheats to run tests to detect. This will only overwrite replay's settings in this Check
-                    if the replays were not given a Detect different from the (default) config value.
+            Detect detect: What cheats to run tests to detect.
         """
 
         self.log = logging.getLogger(__name__ + ".Check")
