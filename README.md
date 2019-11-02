@@ -44,6 +44,8 @@ We have documentation and a tutorial at <https://circleguard.github.io/circlecor
 If you want a 30 second introduction to circlecore, see the following code snippets.
 
 ```python
+from circleguard import *
+
 cg = Circleguard("key")
 r1 = ReplayMap(221777, 2757689)
 r2 = ReplayMap(221777, 4196808)
@@ -57,6 +59,8 @@ for r in cg.run(c): # r is a StealResult
 ```
 
 ```python
+from circleguard import *
+
 cg = Circleguard("key")
 m = Map(221777, num=2)
 cg.load_info(m)
