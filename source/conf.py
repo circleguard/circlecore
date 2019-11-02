@@ -42,18 +42,31 @@ html_static_path = ["_static"]
 
 # references that we want to use easily in any file
 rst_prolog = """
+.. |Loadable| replace:: :class:`~circleguard.replay.Loadable`
+.. |Replay| replace:: :class:`~circleguard.replay.Replay`
 .. |ReplayMap| replace:: :class:`~circleguard.replay.ReplayMap`
 .. |ReplayPath| replace:: :class:`~circleguard.replay.ReplayPath`
-.. |Replay| replace:: :class:`~circleguard.replay.Replay`
+.. |ReplayContainer| replace:: :class:`~circleguard.replay.ReplayContainer`
+.. |Map| replace:: :class:`~circleguard.replay.Map`
+.. |User| replace:: :class:`~circleguard.replay.User`
+
 .. |Check| replace:: :class:`~circleguard.replay.Check`
-.. |cg.run| replace:: :func:`cg.run <circleguard.circleguard.Circleguard.run>`
 .. |Result| replace:: :class:`~circleguard.result.Result`
 .. |RelaxResult| replace:: :class:`~circleguard.result.RelaxResult`
-.. |ReplayStealingResult| replace:: :class:`~circleguard.result.ReplayStealingResult`
+.. |StealResult| replace:: :class:`~circleguard.result.StealResult`
+
 .. |Detect| replace:: :class:`~circleguard.enums.Detect`
+.. |RelaxDetect| replace:: :class:`~circleguard.enums.RelaxDetect`
+.. |StealDetect| replace:: :class:`~circleguard.enums.StealDetect`
+
+.. |cg.run| replace:: :func:`cg.run <circleguard.circleguard.Circleguard.run>`
+.. |cg.load| replace:: :func:`cg.load <circleguard.circleguard.Circleguard.load>`
+.. |cg.load_info| replace:: :func:`cg.load_info <circleguard.circleguard.Circleguard.load_info>`
+
 .. _Circleguard: https://github.com/circleguard/circleguard
 .. _osu!: http://osu.ppy.sh
 .. _tybug: https://github.com/tybug
 .. _samuelhklumpers: https://github.com/samuelhklumpers
 .. _InvisibleSymbol: https://github.com/InvisibleSymbol
+.. _osu api: https://github.com/ppy/osu-api/wiki
 """
