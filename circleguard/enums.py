@@ -275,12 +275,12 @@ class Detect():
         return ret
 
 class StealDetect(Detect):
-    def __init__(self, steal_thresh):
+    def __init__(self, steal_thresh=18):
         super().__init__(Detect.STEAL)
         self.steal_thresh = steal_thresh
 
 class RelaxDetect(Detect):
-    def __init__(self, ur_thresh):
+    def __init__(self, ur_thresh=50):
         super().__init__(Detect.RELAX)
         self.ur_thresh = ur_thresh
 
