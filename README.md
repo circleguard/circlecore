@@ -31,10 +31,10 @@ This documentation refers to the project as `circlecore` to differentiate it fro
 
 ## Links
 
-Github: https://github.com/circleguard/circlecore
-Documentation: https://circleguard.github.io/circlecore/
-Discord: https://discord.gg/VNnkTjm
-Website: https://circleguard.dev
+Github: <https://github.com/circleguard/circlecore> <br/>
+Documentation: <https://circleguard.github.io/circlecore/> <br/>
+Discord: <https://discord.gg/VNnkTjm> <br/>
+Website: <https://circleguard.dev> <br/>
 
 
 ## Usage
