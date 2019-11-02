@@ -36,6 +36,20 @@ Circlecore can be installed from pip:
     from pypi with the name ``circleguard``, and is imported as such in python
     (``import circleguard``).
 
+..
+    couple notes about these toctrees - first one is to have a link back to the
+    index page. the ``self`` keyword comes with its share of issues
+    (https://github.com/sphinx-doc/sphinx/issues/2103), but none that matter
+    that much to us. It's better than using ``index`` which works but generates
+    many warnings when building.
+
+    Hidden toctrees appear on the sidebar but not as text on the index page
+    (this file).
+
+.. toctree::
+    :hidden:
+
+    self
 
 .. toctree::
     :maxdepth: 2
