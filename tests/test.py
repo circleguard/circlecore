@@ -121,7 +121,7 @@ class TestMap(CGTestCase):
         m = Map(129891, num=1)
         rpath = ReplayPath(RES / "legit_replay1.osr")
         # of course, it makes no sense to compare replays on two different maps
-        # for steals, but it serves this tests' purpose.
+        # for steals, but it serves this test's purpose.
         c = Check([m, rpath], detect=StealDetect(18))
         r = list(self.cg.run(c))
         self.assertEqual(len(r), 1)
