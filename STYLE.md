@@ -1,6 +1,6 @@
 # Style
 
-We follow [numpy style](https://numpydoc.readthedocs.io/en/latest/format.html#docstring-standard), with the following exceptions.
+We follow [numpy style](https://numpydoc.readthedocs.io/en/latest/format.html#docstring-standard) docstrings, with the following exceptions.
 
 ## Backticks
 
