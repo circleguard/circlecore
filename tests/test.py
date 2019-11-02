@@ -16,7 +16,7 @@ set_options(loglevel=20)
 # Keep this below a multiple of 10 (preferably at most 9) so tests run in a reasonable amount of time.
 # We may want to split tests into "heavy" and "light" where light loads <10 heavy calls and heavy loads as many as we need.
 # light can run locally, heavy can run on prs.
-HEAVY_CALL_COUNT = 6
+HEAVY_CALL_COUNT = 7
 
 class CGTestCase(TestCase):
     @classmethod
@@ -109,31 +109,28 @@ class TestReplays(CGTestCase):
 
 
 class TestMap(CGTestCase):
+    @classmethod
+    def setUpClass(cls):
+        cls.cg = Circleguard(KEY)
+        cls.map = Map(221777, num=3)
 
-    def test_map_alone(self):
-        m = Map(129891, num=1) # Freedom Dive [Four Dimensions]
-        c = Check([m], RelaxDetect(18))
-        r = list(self.cg.run(c))
-        self.assertEqual(len(r), 1)
-        self.assertEqual(r[0].replay.mods, Mod.HD + Mod.HR) # cookiezi HDHR
+    def test_map_load(self):
+        self.assertEqual(len(self.map.all_replays()), 0)
+        self.assertEqual(len(self.map[:]), 0)
+        self.cg.load_info(self.map)
+        self.assertEqual(len(self.map.all_replays()), 3)
+        self.assertEqual(len(self.map[:]), 3)
+        self.cg.load(self.map)
 
-    def test_map_with_replays(self):
-        m = Map(129891, num=1)
-        rpath = ReplayPath(RES / "legit_replay1.osr")
-        rmap = ReplayMap(1524183, 4196808) # Karthy HDHR on Full Moon
-        # of course, it makes no sense to compare replays on two different maps
-        # for steals, but it serves this test's purpose.
-        c = Check([m, rpath, rmap], RelaxDetect(18))
-        r = list(self.cg.run(c))
-        self.assertEqual(len(r), 3)
-        # dont need a ton of checks here, mostly just checking that
-        # running with Map and Replay combined *runs*. Other tests ensure
-        # the accuracy of the Results
-        self.assertAlmostEqual(r[0].ur, 65.769, places=2)
-        self.assertAlmostEqual(r[1].ur, 100.104, places=2)
-        self.assertAlmostEqual(r[2].ur, 68.518, places=2)
-
-
+    def test_user_slice(self):
+        # sanity check (map id better be what we put in)
+        self.assertEqual(self.map[0].map_id, 221777)
+        # 2nd (rohulk)
+        self.assertEqual(self.map[1].user_id, 3219026)
+        # 1st, 2nd, and 3rd (toy, rohulk, epiphany)
+        self.assertListEqual([r.user_id for r in self.map[0:3]], [2757689, 3219026, 3256299])
+        # 1st and 3rd (toy and epiphany)
+        self.assertListEqual([r.user_id for r in self.map[0:3:2]], [2757689, 3256299])
 
 
 class TestUser(CGTestCase):
@@ -151,13 +148,14 @@ class TestUser(CGTestCase):
         self.cg.load(self.user)
 
     def test_user_slice(self):
+        # sanity check (user id better be what we put in)
+        self.assertEqual(self.user[0].user_id, 124493)
         # 2nd (Everything will Freeze)
         self.assertEqual(self.user[1].map_id, 555797)
         # 1st, 2nd, and 3rd (FDFD, Everything will Freeze, and Remote Control)
         self.assertListEqual([r.map_id for r in self.user[0:3]], [129891, 555797, 774965])
         # 1st and 3rd (FDFD and Remote Control)
         self.assertListEqual([r.map_id for r in self.user[0:3:2]], [129891, 774965])
-        self.assertEqual(self.user[0].map_id, 129891)
 
 if __name__ == '__main__':
     suite = TestSuite()
