@@ -24,11 +24,23 @@ class Loadable(abc.ABC):
     def all_replays(self):
         pass
 
-class ReplayContainer(Loadable):
+class InfoLoadable(abc.ABC):
     """
-    Holds a list of Replays. Has three distinct states - unloaded, info loaded,
-    and loaded. This is in constract to :class:`~.Check`, which only has
-    the second and final states.
+    A loadable which has an info loaded stage, between unloaded and loaded.
+
+    When info loaded, the :class:`~InfoLoadable` has :class:`Loadable`\s but
+    they are unloaded.
+    """
+    def __init__(self):
+        pass
+
+    @abc.abstractmethod
+    def load_info(self, loader):
+        pass
+
+class ReplayContainer(InfoLoadable):
+    """
+    Holds a list of Replays, in addition to being a :class:`~Loadable`.
 
     ReplayContainer's start unloaded and become info loaded when
     :meth:`~.load_info` is called. They become fully loaded when :meth:`~.load`
@@ -44,10 +56,14 @@ class ReplayContainer(Loadable):
     In the loaded state, the Replay objects are loaded.
     """
     @abc.abstractmethod
-    def load_info(self, loader):
+    def __getitem__(self, key):
         pass
 
-class Check(Loadable):
+    @abc.abstractmethod
+    def __iter__(self):
+        pass
+
+class Check(InfoLoadable):
     """
     Contains a list of Replay objects (or subclasses thereof) and how to proceed when
     investigating them for cheats.
@@ -84,6 +100,11 @@ class Check(Loadable):
         # cache arg only for homogeneity with func calls. No effect
         for loadable in self.all_loadables():
             loadable.load(loader, cache=self.cache)
+
+    def load_info(self, loader):
+        for loadable in self.all_loadables():
+            if isinstance(loadable, InfoLoadable):
+                loadable.load_info(loader)
 
     def num_replays(self):
         num = 0

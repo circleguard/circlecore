@@ -99,15 +99,17 @@ class Circleguard:
 
     def load(self, loadable):
         """
-        Loads the given loadable. This is identical to calling loadable.load(cg.loader).
+        Loads the given loadable.
+        This is identical to calling loadable.load(cg.loader).
         """
         loadable.load(self.loader, self.cache)
 
-    def load_info(self, container):
+    def load_info(self, info_loadable):
         """
-        Loads the given ReplayContainer. This is identical to calling container.load_info(cg.loader).
+        Loads the info of the given :class:`circleguard.replay.InfoLoadable`.
+        This is identical to calling info_loadable.load_info(cg.loader).
         """
-        container.load_info(self.loader)
+        info_loadable.load_info(self.loader)
 
 
     def set_options(self, cache=None):
