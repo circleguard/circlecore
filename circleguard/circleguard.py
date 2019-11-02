@@ -18,39 +18,34 @@ from slider import Beatmap, Library
 
 class Circleguard:
     """
-    Circleguard compares and investigates replays to detect cheats.
+    Circleguard investigates replays for cheats.
 
-    Circleguard provides convenience methods for common use cases: map_check, verify, user_check, and local_check -
-    see each method for further documentation. If these convenience methods are not flexible enough for you, you can instantiate
-    a Check and call circleguard.run(check).
-
-    Under the hood, convenience methods simply instantiate a Check object and call circleguard#run(check). The run method
-    returns a generator containing Result objects, which contains the result of each comparison of the replays. See the
-    Result class for further documentation.
+    Parameters
+    ----------
+    key: str
+        A valid api key. Can be retrieved from https://osu.ppy.sh/p/api/.
+    db_path: str or :class:`os.PathLike`
+        The path to the database file to read and write cached replays. If the
+        given path does not exist, a fresh database will be created there.
+        If `None`, no replays will be cached or loaded from cache.
+    slider_dir: str or :class:`os.PathLike`
+        The path to the directory used by :mod:`slider` to store beatmaps.
+        If `None`, a temporary directory will be created for :mod:`slider`,
+        and subdsequently destroyed when this :class:`~.circleguard`
+        object is garbage collected.
+    loader: :class:`~.Loader`
+        A :class:`~.Loader` class or subclass, which will be used in place of
+        instantiating a new :class:`~.Loader` if passed. This must be the
+        class itself, *not* an instantiation of it. It will be instantiated
+        upon circleguard instantiation, with two args - a key and a cacher.
     """
 
 
     def __init__(self, key, db_path=None, slider_dir=None, loader=None, cache=True):
-        """
-        Initializes a Circleguard instance.
-
-        Args:
-            String key: An osu API key.
-            [Path or String] db_path: A pathlike object to the databsae file to write and/or read cached replays.
-                    If the given file doesn't exist, a fresh database if created. If this is not passed,
-                    no replays will be cached or loaded from cache.
-            [Path or String] slider_dir: A pathlike object to the directory used by slider to store beatmaps. If None,
-                    a temporary directory will be created, and destroyed when this circleguard object is garbage collected.
-            Class loader: a subclass of circleguard.Loader, which will be used in place of circleguard.Loader if passed.
-                    Instantiated with two args - a key and cacher.
-            bool cache: if passed without db_path, has no effect. If db_path is passed and cache is True,
-                    replays will be loaded from and stored to the db. If cache is False, replays will be loaded from the db but not stored.
-        """
-
         self.cache = cache
         self.cacher = None
         if db_path is not None:
-            # allows for . to be passed to db_path
+            # resolve relative paths
             db_path = Path(db_path).absolute()
             # they can set cache to False later with:func:`~.circleguard.set_options`
             # if they want; assume caching is desired if db path is passed
@@ -69,13 +64,26 @@ class Circleguard:
 
     def run(self, check):
         """
-        Compares and investigates replays in the check for cheats.
+        Investigates replays held in ``container`` for cheats.
 
-        Args:
-            Check check: The check with replays to look at.
+        Parameters
+        ----------
+        container: :class:`~.Container`
+            A container holding the replays to investigate.
 
-        Returns:
-            A generator containing Result objects of the comparisons and investigations.
+        Yields
+        ------
+        :class:`~.Result`
+            A result representing a single investigation of the replays
+            in ``container``. Depending on how many replays are in
+            ``container``, and what type of cheats we are investigating for,
+            the total number of :class:`~.Result`\s yielded may vary.
+
+        Notes
+        -----
+        :class:`~.Result`\s are yielded one at a time, as circleguard finishes
+        investigating them. This means that you can process results from
+        :meth:`~.run` without waiting for all of the investigations to finish.
         """
 
         c = check
@@ -100,30 +108,42 @@ class Circleguard:
     def load(self, loadable):
         """
         Loads the given loadable.
-        This is identical to calling loadable.load(cg.loader).
+
+        Parameters
+        ----------
+        loadable: :class:`~.replay.Loadable`
+            The loadable to load.
+
+        Notes
+        -----
+        This is identical to calling ``loadable.load(cg.loader)``.
         """
         loadable.load(self.loader, self.cache)
 
     def load_info(self, info_loadable):
         """
-        Loads the info of the given :class:`circleguard.replay.InfoLoadable`.
-        This is identical to calling info_loadable.load_info(cg.loader).
+        Loads the given info loadable.
+
+        Parameters
+        ----------
+        loadable: :class:`~.replay.InfoLoadable`
+            The info loadable to load.
+
+        Notes
+        -----
+        This is identical to calling ``info_loadable.load_info(cg.loader)``.
         """
         info_loadable.load_info(self.loader)
 
 
     def set_options(self, cache=None):
         """
-        Changes the default value for different options in circleguard.
-        Affects only the ircleguard instance this method is called on.
+        Sets options for this instance of circlecore.
 
-        Args:
-            Boolean cache: Whether to cache the loaded loadables. Defaults to False, or the config value if changed.
-                           If no database file was passed, this value has no effect, as loadables will not be cached.
-            Integer loglevel: What level to log at. Circlecore follows standard python logging levels, with an added level of
-                          TRACE with a value of 5 (lower than debug, which is 10). The value passed to loglevel is
-                          passed directly to the setLevel function of this instance's logger. WARNING by default.
-                          For more information on log levels, see the standard python logging lib.
+        Parameters
+        ----------
+        cache: bool
+            Whether to cache loaded loadables.
         """
 
         # remnant code from when we had many options available in set_options. Left in for easy future expansion
@@ -139,7 +159,7 @@ def set_options(loglevel=None):
     """
     Set global options for circlecore.
 
-    Arguments
+    Parameters
     ---------
     logevel: int
         What level to log at. Circlecore follows standard python logging

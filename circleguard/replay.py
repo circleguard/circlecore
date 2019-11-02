@@ -9,11 +9,32 @@ from circleguard.utils import TRACE, span_to_list
 
 
 class Loadable(abc.ABC):
+    """
+    An object that has further information that can be loaded;
+    from the osu api, local cache, or some other location.
+
+    Notes
+    -----
+    This is an abstract class and cannot be directly instantiated.
+    """
     def __init__(self):
         pass
 
     @abc.abstractmethod
     def load(self, loader, cache):
+        """
+        Loads the information this loadable needs to become fully loaded.
+        Details left to the subclass implementation.
+
+        Parameters
+        ----------
+        loader: :class:`~circleguard.loader.Loader`
+            The loader to load this replay with. Although subclasses may not
+            end up using a :class:`~circleguard.loader.Loader` to
+            properly load the replay (if they don't load anything from the osu
+            api, for instance), the parameter is necessary for homogeneity among
+            method calls.
+        """
         pass
 
     @abc.abstractmethod
@@ -94,9 +115,37 @@ class Check(InfoLoadable):
         self.loaded = False
 
     def all_loadables(self):
+        """
+        Returns all the :class:`~circleguard.replay.Loadable`\s contained by
+        this class.
+
+        Returns
+        -------
+        list[:class:`~circleguard.replay.Loadable`]
+            All loadables in this class.
+
+        See Also
+        --------
+        :func:`~circleguard.replay.Loadable.all_replays` and
+        :func:`~circleguard.replay.Loadable.all_replays2`
+        Notes
+        -----
+        :class:`~circleguard.replay.Loadable`\s are very different from
+        :class:`~circleguard.replay.Replay`\s -
+        ``len(container.all_loadables())`` will *not* return the number of
+        replays in the container, for instance.
+        """
         return self.loadables + self.loadables2
 
     def load(self, loader, cache=None):
+        """
+        Loads all :class:`~circleguard.replay.Loadable`\s in this Container.
+
+        Parameters
+        ----------
+        loader: :class:`~circleguard.loader.Loader`
+            The loader to load the :class:`~circleguard.replay.Loadable`\s with.
+        """
         # cache arg only for homogeneity with func calls. No effect
         for loadable in self.all_loadables():
             loadable.load(loader, cache=self.cache)
@@ -240,28 +289,39 @@ class User(ReplayContainer):
         return iter(self.replays)
 
 
-
 class Replay(Loadable):
-    def __init__(self, timestamp, map_id, username, user_id, mods, replay_id, replay_data, weight):
-        """
-        Initializes a Replay instance.
+    """
+    A replay played by a player.
 
-        Args:
-            Datetime timestamp: When this replay was played.
-            Integer map_id: The map id the replay was played on, or 0 if unknown or on an unsubmitted map.
-            String username: The username of the player who made the replay.
-            Integer user_id: The id of the player who made the replay, or 0 if unknown or a restricted player.
-            ModCombination mods: The mods the replay was played with.
-            Integer replay_id: The id of this replay, or 0 if it does not have an id (unsubmitted replays have no id).
-            List [circleparse.Replay.ReplayEvent] replay_data: An array containing objects with the attributes x, y, time_since_previous_action,
-                            and keys_pressed. If the replay could not be loaded (from the api or otherwise), this field should be None.
-                            This means that this replay will not be compared against other replays or investigated for cheats.
-            RatelimitWeight weight: How much it 'costs' to load this replay from the api. If the load method of the replay makes no api calls,
-                            this value is RatelimitWeight.NONE. If it makes only light api calls (anything but get_replay), this value is
-                            RatelimitWeight.LIGHT. If it makes any heavy api calls (get_replay), this value is RatelimitWeight.HEAVY.
-                            See the RatelimitWeight documentation for more details.
-            Compare compare: How to compare this replay against other replays.
-        """
+    Parameters
+    ----------
+    timestamp: Datetime
+        When this replay was played.
+    map_id: int
+        The id of the map the replay was played on, or 0 if
+        unknown or on an unsubmitted map.
+    user_id: int
+        The id of the player who played the replay, or 0 if
+        unknown (if the player is restricted, for instance).
+    username: str
+        The username of the player who played the replay.
+    mods: :class:`~.enums.ModCombination`
+        The mods the replay was played with.
+    replay_id: int
+        The id of the replay, or 0 if the replay is unsubmitted.
+    replay_data: list[:class:`~circleparse.Replay.ReplayEvent`]
+        A list of :class:`~circleparse.Replay.ReplayEvent` objects, representing
+        the actual data of the replay. If the replay could not be loaded, this
+        should be ``None``.
+    weight: :class:`~.enums.RatelimitWeight`
+        How much it 'costs' to load this replay from the api. If the load method
+        of the replay makes no api calls, this value is RatelimitWeight.NONE.
+        If it makes only light api calls (anything but /api/get_replay),
+        this value isRatelimitWeight.LIGHT. If it makes any heavy api calls
+        (/api/get_replay), this value is RatelimitWeight.HEAVY.
+        See the RatelimitWeight documentation for more details.
+    """
+    def __init__(self, timestamp, map_id, username, user_id, mods, replay_id, replay_data, weight):
         self.timestamp = timestamp
         self.map_id = map_id
         self.username = username
@@ -289,10 +349,14 @@ class Replay(Loadable):
 
     def as_list_with_timestamps(self):
         """
-        Gets the playdata as a list of tuples of absolute time, x, y, and pressed keys.
+        Gets this replay's play data as a list of tuples of absolute time,
+        x, y, and pressed keys for each event in the data.
 
-        Returns:
-            A list of tuples of (t, x, y, keys).
+        Returns
+        -------
+        list[tuple(int, float, float, something)]
+            A list of tuples of (t, x, y, keys) for each event
+            in the replay data.
         """
         # get all offsets sum all offsets before it to get all absolute times
         timestamps = np.array([e.time_since_previous_action for e in self.replay_data])
@@ -306,44 +370,37 @@ class Replay(Loadable):
         return txyk
 
 
+    def __repr__(self):
+        return (f"Replay(timestamp={self.timestamp},map_id={self.map_id},user_id={self.user_id},mods={self.mods},detect={self.detect},"
+               f"replay_id={self.replay_id},weight={self.weight},loaded={self.loaded},username={self.username})")
+
+    def __str__(self):
+        return f"Replay by {self.username} on {self.map_id}"
+
+
 class ReplayMap(Replay):
     """
-    Represents a Replay submitted to online servers, that can be retrieved from the osu api.
+    A :class:`~.Replay` that was submitted to online servers (and is thus tied
+    to a map).
 
-    The only things you need to know to instantiate a ReplayMap
-    are the user who made the replay, and the map it was made on.
-
-    Attributes:
-        Integer map_id: The id of the map the replay was made on.
-        Integer user_id: The id of the user who made the replay.
-        ModCombination mods: The mods the replay was played with. None if not set when instantiated and has not been loaded yet -
-                      otherwise, set to the mods the replay was made with.
-        String username: A readable representation of the user who made the replay. If passed,
-                         username will be set to this string. Otherwise, it will be set to the user id.
-                         This is so you don't need to know a user's username when creating a ReplayMap, only their id.
-                         However, if the username is known (by retrieving it through the api, or other means), it is better
-                         to represent the Replay with a player's name than an id. Both username and user_id will
-                         obviously still be available to you through the result object after comparison.
-        Boolean loaded: Whether this replay has been loaded. If True, calls to #load will have no effect.
-                        See #load for more information.
-        RatelimitWeight weight: RatelimitWeight.HEAVY, as this class' load method makes a heavy api call. See RatelimitWeight
-                                documentation for more information.
+    Parameters
+    ----------
+    map_id: int
+        The id of the map the replay was played on.
+    user_id: int
+        The id of the player who played the replay.
+    mods: ModCombination
+        The mods the replay was played with. If `None`, the
+        highest scoring replay of ``user_id`` on ``map_id`` will be loaded,
+        regardless of mod combination. Otherwise, the replay with ``mods``
+        will be loaded.
+    detect: :class:`~.enums.Detect`
+        What cheats to run tests to detect.
+    cache: bool
+        Whether to cache this replay or not.
     """
 
     def __init__(self, map_id, user_id, mods=None, cache=None, info=None):
-        """
-        Initializes a ReplayMap instance.
-
-        Args:
-            Integer map_id: The id of the map the replay was made on.
-            Integer user_id: The id of the user who made the replay.
-            ModCombination mods: The mods the replay was played with. If this is not set, the top scoring replay of the user on the
-                          given map will be loaded. Otherwise, the replay with the given mods will be loaded.
-            Boolean cache: Whether to cache this replay
-            UserInfo info: If passed, will use this info instead of loading a user info from the api. This can speed up the loading
-                    of the Replay by reducing the number of calls by one.
-        """
-
         self.log = logging.getLogger(__name__ + ".ReplayMap")
         self.map_id = map_id
         self.user_id = user_id
@@ -367,10 +424,17 @@ class ReplayMap(Replay):
 
     def load(self, loader, cache):
         """
-        Loads the data for this replay from the api. This method silently returns if replay.loaded is True.
+        Loads the data for this replay from the api.
 
-        The superclass Replay is initialized after this call, setting replay.loaded to True. Multiple
-        calls to this method will have no effect beyond the first.
+        Parameters
+        ----------
+        loader: :class:`~.loader.Loader`
+            The :class:`~.loader.Loader` to load this replay with.
+
+        Notes
+        -----
+        If ``replay.loaded`` is ``True``, this method has no effect.
+        ``replay.loaded`` is set to ``True`` after this method loads the replay.
         """
         # only listen to the parent's cache if ours is not set. Lower takes precedence
         cache = cache if self.cache is None else self.cache
@@ -389,7 +453,7 @@ class ReplayMap(Replay):
 
 class ReplayPath(Replay):
     """
-    Represents a Replay saved locally.
+    A :class:`~.Replay` saved locally in an ``osr`` file.
 
     To instantiate a ReplayPath, you only need to know the path to the osr file. Although this class still
     loads some information from the api - like the map id and the user id - no RatelimitWeight.HEAVY calls
