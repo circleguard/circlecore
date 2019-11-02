@@ -236,6 +236,8 @@ class User(ReplayContainer):
         else:
             return self.replays[key]
 
+    def __iter__(self):
+        return iter(self.replays)
 
 
 
