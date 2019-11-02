@@ -45,6 +45,8 @@ Each of these classes can be passed values on instantiation to be more or
 less sensitive to suspicious plays. Replays below the threshold are considered
 cheated, and replays above are considered legitimate.
 
+Each |Detect| has a default threshold, which may or may not suit your purposes.
+
 .. note::
 
     We do not provide any finer level of granularity than a hard cutoff. If this
@@ -55,13 +57,14 @@ cheated, and replays above are considered legitimate.
 blatant relax cheats to be caught by circleguard, you might set the threshold
 to 35.74, the `current ur world record <https://www.reddit.com/r/osugame/comments/8lqcyh/new_osustandard_ur_record_by_corim/>`_.
 But if you're more skeptical (and okay with a higher false positive rate),
-a threshold of 70 or 80 might be more appropriate.
+a threshold of 60 or 70 might be more appropriate. The default ur threshold
+is 50.
 
 .. code-block:: python
 
     r = ReplayMap(221777, 2757689)
     blatant_check = Check(r, RelaxDetect(30))
-    suspicious_check = Check(r, RelaxDetect(80))
+    suspicious_check = Check(r, RelaxDetect(60))
 
 Combination
 '''''''''''
@@ -72,7 +75,7 @@ We have only shown examples with |RelaxDetect| so far, but you can combine
 .. code-block:: python
 
     m = Map(221777, num=3)
-    d = StealDetect(20) + RelaxDetect(50)
+    d = StealDetect() + RelaxDetect()
     c = Check(m, d)
 
 .. note::
