@@ -139,8 +139,8 @@ def set_options(loglevel=None):
     """
     Set global options for circlecore.
 
-    Attributes
-    ----------
+    Arguments
+    ---------
     logevel: int
         What level to log at. Circlecore follows standard python logging
         levels, with an added level of TRACE with a value of 5 (lower than
