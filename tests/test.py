@@ -134,14 +134,7 @@ class TestMap(CGTestCase):
         self.assertAlmostEqual(r[2].ur, 68.518, places=2)
 
 
-class TestOptions(CGTestCase):
 
-    def test_options(self):
-        cg = self.cg
-        r1 = ReplayPath("")
-        r2 = ReplayPath("")
-        c = Check([r1, r2], detect=StealDetect(18))
-        cg.run(c)
 
 class TestUser(CGTestCase):
     @classmethod
