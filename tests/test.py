@@ -53,8 +53,8 @@ class TestReplays(CGTestCase):
         self.assertAlmostEqual(r.similarity, 4.2608, delta=0.0001, msg="Similarity is not correct")
         self.assertEqual(r1.map_id, r2.map_id, "Replay map ids did not match")
         self.assertEqual(r1.map_id, 1988753, "Replay map id was not correct")
-        self.assertEqual(earlier.mods, Mod.HD + Mod.HR, "Earlier replay mods was not correct") # HDHR
-        self.assertEqual(later.mods, Mod.FL + Mod.HD + Mod.HR, "Later replay mods was not correct") # FLHDHR
+        self.assertEqual(earlier.mods, Mod.HD + Mod.HR, "Earlier replay mods was not correct")
+        self.assertEqual(later.mods, Mod.FL + Mod.HD + Mod.HR, "Later replay mods was not correct")
         self.assertEqual(earlier.replay_id, 2801164636, "Earlier replay id was not correct")
         self.assertEqual(later.replay_id, 2805164683, "Later replay id was not correct")
         self.assertEqual(r1.username, r2.username, "Replay usernames did not match")
@@ -75,8 +75,8 @@ class TestReplays(CGTestCase):
         self.assertAlmostEqual(r.similarity, 24.2129, delta=0.0001, msg="Similarity is not correct")
         self.assertEqual(r1.map_id, r2.map_id, "Replay map ids did not match")
         self.assertEqual(r1.map_id, 722238, "Replay map id was not correct")
-        self.assertEqual(earlier.mods, Mod.HD + Mod.NC, "Earlier replay mods was not correct") # HDNC
-        self.assertEqual(later.mods, Mod.HD + Mod.DT, "Later replay mods was not correct") # HDDT
+        self.assertEqual(earlier.mods, Mod.HD + Mod.NC, "Earlier replay mods was not correct")
+        self.assertEqual(later.mods, Mod.HD + Mod.DT, "Later replay mods was not correct")
         self.assertEqual(earlier.replay_id, 2157431869, "Earlier replay id was not correct")
         self.assertEqual(later.replay_id, 2309618113, "Later replay id was not correct")
         self.assertEqual(earlier.username, "Crissinop", "Earlier username was not correct")
