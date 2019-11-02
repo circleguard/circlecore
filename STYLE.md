@@ -15,9 +15,9 @@ def add(a, b):
     Adds `a` and `b`.
 
     Arguments:
-    int: a
+    a: int
         The first number to add.
-    int: b
+    b: int
         The second number to add.
 
     Returns:
@@ -35,9 +35,9 @@ def add(a, b):
     Adds ``a`` and ``b``.
 
     Arguments:
-    int: a
+    a: int
         The first number to add.
-    int: b
+    b: int
         The second number to add.
 
     Returns:
@@ -49,7 +49,7 @@ def add(a, b):
 
 ## Colons
 
-Numpy has colons in the middle of the argument name and its type. For no reason other than aesthetics, we place the colon to the side of the type.
+Numpy has colons in the middle of the argument name and its type. For no reason other than aesthetics, we place the colon to the side of the name.
 
 ### Numpy
 
@@ -59,9 +59,9 @@ def add(a, b):
     Adds ``a`` and ``b``.
 
     Arguments:
-    int : a
+    a : int
         The first number to add.
-    int : b
+    b : int
         The second number to add.
 
     Returns:
@@ -79,9 +79,9 @@ def add(a, b):
     Adds ``a`` and ``b``.
 
     Arguments:
-    int: a
+    a: int
         The first number to add.
-    int: b
+    b: int
         The second number to add.
 
     Returns:
