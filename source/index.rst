@@ -19,6 +19,13 @@ our documentation.
 
 Circlecore is developed by tybug_, samuelhklumpers_, and InvisibleSymbol_.
 
+Links
+-----
+
+| Github: https://github.com/circleguard/circlecore
+| Discord: https://discord.gg/VNnkTjm
+| Website: https://circleguard.dev
+
 Installation
 ------------
 
@@ -55,10 +62,11 @@ Circlecore can be installed from pip:
     :maxdepth: 2
     :caption: Tutorials
 
-    what-is-a-replay
+    foreword
+    representing-replays
     using-checks
-    understanding-results
-    convenience-methods
+    investigation
+    loading
 
 .. toctree::
     :caption: Appendix
