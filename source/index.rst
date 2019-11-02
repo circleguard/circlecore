@@ -17,14 +17,11 @@ We highly encourage projects that use circlecore - if you are using it in one
 of your apps, please let us know and we will link to you somwhere in
 our documentation.
 
-Circlecore is developed by tybug_, samuelhklumpers_, and InvisibleSymbol_.
+Circlecore is developed and maintained by:
 
-Links
------
-
-| Github: https://github.com/circleguard/circlecore
-| Discord: https://discord.gg/VNnkTjm
-| Website: https://circleguard.dev
+* tybug_
+* samuelhklumpers_
+* InvisibleSymbol_
 
 Installation
 ------------
@@ -42,6 +39,14 @@ Circlecore can be installed from pip:
     and the gui application Circleguard_. However, ``circlecore`` is installed
     from pypi with the name ``circleguard``, and is imported as such in python
     (``import circleguard``).
+
+Links
+-----
+
+| Github: https://github.com/circleguard/circlecore
+| Discord: https://discord.gg/VNnkTjm
+| Website: https://circleguard.dev
+
 
 ..
     couple notes about these toctrees - first one is to have a link back to the
