@@ -3,6 +3,7 @@ import time
 import base64
 import logging
 from lzma import LZMAError
+from functools import lru_cache
 
 import requests
 from requests import RequestException
@@ -158,7 +159,7 @@ class Loader():
 
 
     @request
-    def get_user_best(self, user_id, num, span=None):
+    def get_user_best(self, user_id, num, span=None, mods=None):
         """
         Gets the top 100 best plays for the given user.
 
@@ -184,10 +185,18 @@ class Loader():
             num = max(span_list)
         response = self.api.get_user_best({"m": "0", "u": user_id, "limit": num})
         Loader.check_response(response)
+        if mods:
+            _response = []
+            for r in response:
+                if ModCombination(int(r["enabled_mods"])) == mods:
+                    _response.append(r)
+            response = _response
+
         if span:
             response = [response[i-1] for i in span_list]
-
-        return [int(x["beatmap_id"]) for x in response]
+        return [UserInfo(datetime.strptime(r["date"], "%Y-%m-%d %H:%M:%S"), int(r["beatmap_id"]), int(r["user_id"]),
+                self.username(int(r["user_id"])), int(r["score_id"]), ModCombination(int(r["enabled_mods"])),
+                bool(int(r["replay_available"]))) for r in response]
 
 
     @request
@@ -246,10 +255,11 @@ class Loader():
             self.log.warning("lzma from %r could not be decompressed, api returned corrupt replay", user_info)
             return None
         replay_data = parsed_replay.play_data
-        if self.cacher is not None:
-            self.cacher.cache(lzma_bytes, user_info, should_cache=cache)
+        if cache and self.cacher is not None:
+            self.cacher.cache(lzma_bytes, user_info)
         return replay_data
 
+    @lru_cache()
     def map_id(self, map_hash):
         """
         Retrieves the corresponding map id for the given map_hash from the api.
@@ -264,6 +274,7 @@ class Loader():
         else:
             return int(response[0]["beatmap_id"])
 
+    @lru_cache()
     def user_id(self, username):
         """
         Retrieves the corresponding user id for the given username from the api.
@@ -280,6 +291,18 @@ class Loader():
             return 0
         else:
             return int(response[0]["user_id"])
+
+    @lru_cache()
+    def username(self, user_id):
+        """
+        The inverse of :meth:`~.user_ud`. Retrieves the username of the
+        given user id.
+        """
+        response = self.api.get_user({"u": user_id, "type": "id"})
+        if response == []:
+            return ""
+        else:
+            return response[0]["username"]
 
     @staticmethod
     def check_response(response):

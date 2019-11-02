@@ -10,7 +10,6 @@ from circleguard.enums import Mod
 from circleguard.exceptions import InvalidArgumentsException, CircleguardException
 import circleguard.utils as utils
 from circleguard.result import ReplayStealingResult
-import circleguard.config as config
 
 class Comparer:
     """
@@ -55,11 +54,6 @@ class Comparer:
 
         Returns:
             A generator containing Result objects of the comparisons.
-
-        Raises:
-            CircleguardException if no comparisons could be made from the given replays (if replays1
-            or replays2 is empty) and config.failfast is True. Otherwise, even if the replay lists are empty,
-            silently returns.
         """
 
         self.log.info("Comparing replays with mode: %s", self.mode)
@@ -68,10 +62,7 @@ class Comparer:
 
         #TODO: a little bit hacky and I don't think works 100% correctly, if mode is double but replays2 is None
         if not self.replays1 or self.replays2 == []:
-            if(config.failfast):
-                raise CircleguardException("No comparisons could be made from the given replays")
-            else:
-                return
+            return
 
         if self.mode == "double":
             iterator = itertools.product(self.replays1, self.replays2)
