@@ -29,6 +29,12 @@ pip install circleguard
 
 This documentation refers to the project as `circlecore` to differentiate it from our organization [Circleguard](https://github.com/circleguard) and the gui application [Circleguard](https://github.com/circleguard/circlegaurd). However, `circlecore` is installed from pypi with the name `circleguard`, and is imported as such in python (`import circleguard`).
 
+## Links
+
+Github: https://github.com/circleguard/circlecore
+Documentation: https://circleguard.github.io/circlecore/
+Discord: https://discord.gg/VNnkTjm
+Website: https://circleguard.dev
 
 
 ## Usage
