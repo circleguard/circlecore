@@ -3,23 +3,27 @@ from circleguard.enums import Mod
 
 class UserInfo():
     """
-    A container class, holding a user's map id, user id, username, replay id, enabled mods, and replay availability for a given replay.
+    A container class representing all the information needed
+    to load a replay from the api.
+
+    Parameters
+    ----------
+    timestamp: Datetime
+        When this replay was set.
+    map_id: int
+        The id of the map the replay was played on.
+    user_id: int
+        The id of the player who played the replay.
+    username: str
+        The username of the player who played the replay.
+    replay_id: str
+        The id of the replay.
+    mods: :class:`~circleguard.enums.ModCombination`
+        The mods the replay was played with.
+    replay_available: bool
+        Whether this replay is available from the api or not.
     """
-
     def __init__(self, timestamp, map_id, user_id, username, replay_id, mods, replay_available):
-        """
-        Initializes a UserInfo class.
-
-        Args:
-            Datetime timestamp: When this replay was set.
-            Integer map_id: The id of the map the replay was made on.
-            Integer user_id: The id of the player who set the replay.
-            String username: The username of the player who set the replay.
-            Integer replay_id: The id of the replay.
-            Integer enabled_mods: The bitwise mod combination of the mods set on the replay.
-            Boolean replay_available: Whether this replay is available from the api or not.
-        """
-
         self.timestamp = timestamp
         self.map_id = map_id
         self.user_id = user_id

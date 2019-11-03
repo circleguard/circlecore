@@ -1,10 +1,14 @@
 import logging
 
 from circleguard.circleguard import Circleguard, set_options
-from circleguard.replay import Check, Replay, ReplayMap, ReplayPath, Map, Container
-from circleguard.enums import Detect, RatelimitWeight
+from circleguard.replay import Check, Replay, ReplayMap, ReplayPath, Map, User
+from circleguard.enums import Detect, RatelimitWeight, Keys, StealDetect, RelaxDetect, Mod
 from circleguard.utils import TRACE, ColoredFormatter
 from circleguard.loader import Loader
+from circleguard.user_info import UserInfo
+from circleguard.exceptions import (CircleguardException, InvalidArgumentsException, APIException,
+        NoInfoAvailableException, UnknownAPIException, InternalAPIException, InvalidKeyException, RatelimitException,
+        InvalidJSONException, ReplayUnavailableException)
 from circleguard.version import __version__
 from circleguard.result import (Result, InvestigationResult, ComparisonResult,
         RelaxResult, ReplayStealingResult, ResultType, AimCorrectionResult)
@@ -15,8 +19,11 @@ handler_stream = logging.StreamHandler()
 handler_stream.setFormatter(formatter)
 logging.getLogger("circleguard").addHandler(handler_stream)
 
-__all__ = ["Circleguard", "set_options", "Check", "Replay", "ReplayMap",
-           "ReplayPath", "Detect", "TRACE", "Loader",
+__all__ = ["Circleguard", "set_options", "Check", "Replay", "ReplayMap", "StealDetect", "RelaxDetect",
+           "ReplayPath", "Detect", "TRACE", "ColoredFormatter", "Loader", "UserInfo",
            "__version__", "RatelimitWeight", "Result", "InvestigationResult",
            "ComparisonResult", "RelaxResult", "ReplayStealingResult", "ResultType",
-           "Map", "Container", "AimCorrectionResult"]
+           "CircleguardException", "InvalidArgumentsException", "Map", "User",
+           "APIException", "NoInfoAvailableException", "UnknownAPIException", "InternalAPIException",
+           "InvalidKeyException", "RatelimitException", "InvalidJSONException", "ReplayUnavailableException", "Keys",
+           "Mod", "AimCorrectionResult"]

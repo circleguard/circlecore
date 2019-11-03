@@ -3,6 +3,7 @@ import time
 import base64
 import logging
 from lzma import LZMAError
+from functools import lru_cache
 
 import requests
 from requests import RequestException
@@ -10,16 +11,25 @@ import circleparse
 import ossapi
 
 from circleguard.user_info import UserInfo
-from circleguard.enums import Error
+from circleguard.enums import Error, ModCombination
 from circleguard.exceptions import (InvalidArgumentsException, APIException, CircleguardException,
                         RatelimitException, InvalidKeyException, ReplayUnavailableException, UnknownAPIException,
-                        InvalidJSONException)
+                        InvalidJSONException, NoInfoAvailableException)
 from circleguard.utils import TRACE, span_to_list
 
 def request(function):
     """
-    Decorator intended to appropriately handle all request and api related exceptions.
+    A decorator that handles :mod:`requests` and api related exceptions.
+    Should be wrapped around any function that makes a request; to the api or
+    otherwise.
 
+    Parameters
+    ----------
+    function: function
+        The wrapped function.
+
+    Notes
+    -----
     Also checks if we can refresh the time at which we started our requests because
     it's been more than RATELIMIT_RESET since the first request of the cycle.
 
@@ -58,16 +68,21 @@ def request(function):
 
 def check_cache(function):
     """
-    Decorator that checks if the replay by the given user_id on the given map_id is already
-    cached. If so, returns a Replay instance from the cached data instead of requesting it
-    from the api. Otherwise, it calls the function as normal.
+    A decorator that checks if the passed
+    :class:`~circleguard.user_info.UserInfo` has its replay cached. If so,
+    returns a :class:`~circleguard.replay.Replay` instance from the cached data.
+    Otherwise, calls and returns the `function` as normal.
 
-    Note that self and user_info must be the first and second arguments to
-    the function respectively.
+    Notes
+    -----
+    ``self`` and ``user_info`` **MUST** be the first and second arguments to
+    the function, respectively.
 
-    Returns:
-        A Replay instance from the cached replay if it was cached,
-        or the return value of the function if not.
+    Returns
+    -------
+    :class:`~circleguard.replay.Replay` or Unknown:
+        A :class:`~circleguard.replay.Replay` instance from the cached data
+        if it was cached, or the return value of the function if not.
     """
 
     def wrapper(*args, **kwargs):
@@ -78,7 +93,7 @@ def check_cache(function):
             return function(*args, **kwargs)
 
         lzma = self.cacher.check_cache(user_info.map_id, user_info.user_id, user_info.mods)
-        if lzma :
+        if lzma:
             replay_data = circleparse.parse_replay(lzma, pure_lzma=True).play_data
             return replay_data
         else:
@@ -87,11 +102,23 @@ def check_cache(function):
 
 class Loader():
     """
-    Manages interactions with the osu api, using the ossapi wrapper.
+    Manages interactions with the osu api, using the :mod:`ossapi` wrapper.
 
-    if the api ratelimits the key, we wait until we refresh our ratelimits and retry
-    the request. Because the api does not provide the time until the next refresh (and we
-    do not periodically retry the key), if the key is ratelimited outside of this class,
+    Parameters
+    ----------
+    key: str
+        A valid api key. Can be retrieved from https://osu.ppy.sh/p/api/.
+    cacher: :class:`~circleguard.cacher.Cacher`
+        A :class:`~circleguard.cacher.Cacher` instance to manage
+        replay loading/caching. If `None`, replays will not be loaded from
+        the cache or cached to the database.
+
+    Notes
+    -----
+    If the api ratelimits the key, we wait until our ratelimits are refreshed
+    and retry the request. Because the api does not provide the time until the
+    next refresh (and we do not periodically retry the key), if the key is
+    ratelimited because of an interaction not managed by this class,
     the class may wait more time than necessary for the key to refresh.
     """
 
@@ -100,25 +127,9 @@ class Loader():
 
 
     def __init__(self, key, cacher=None):
-        """
-        Initializes a Loader instance. If a Cacher is not provided,
-        scores will not be loaded from cache or cached to the databse.
-        """
-
         self.log = logging.getLogger(__name__)
         self.api = ossapi.ossapi(key)
         self.cacher = cacher
-
-    @request
-    def get_beatmap(self, map_id):
-        """
-        Returns the content of the beatmap of the given map. This request is
-        not ratelimited and does not require an api key. Because of this, treat
-        this endpoint with caution - the osu-tools repository uses this endpoint
-        and peppy has said it is "ok to use for now", but even so it is not in
-        the same category as other api endpoints.
-        """
-        return requests.get(f"https://osu.ppy.sh/osu/{map_id}").content
 
     @request
     def user_info(self, map_id, num=None, user_id=None, mods=None, limit=True, span=None):
@@ -134,7 +145,7 @@ class Loader():
             Integer user_id: The user id to get the replay_id from.
             Boolean limit: If set, will only return a user's top score (top response). Otherwise, will
                           return every response (every score they set on that map under different mods)
-            Integer mods: The mods the replay info to retieve were played with.
+            ModCombination: The mods the replay info to retieve were played with.
             String span: A comma separated list of ranges of top replays on the map to check. "1-3" will check the first 3 replays,
                     and "1-3,6,2-4" will check replays 1,2,3,4,6 for instance. Values that appear multiple times or in multiple ranges
                     are only counted once. If both span and num are passed, span is used instead of num.
@@ -155,7 +166,7 @@ class Loader():
         if span:
             span_list = span_to_list(span)
             num = max(span_list)
-        response = self.api.get_scores({"m": "0", "b": map_id, "limit": num, "u": user_id, "mods": mods})
+        response = self.api.get_scores({"m": "0", "b": map_id, "limit": num, "u": user_id, "mods": mods if mods is None else mods.value})
         Loader.check_response(response)
         if span:
             # filter out anything not in our span
@@ -163,13 +174,13 @@ class Loader():
         # yes, it's necessary to cast the str response to int before bool - all strings are truthy.
         # strptime format from https://github.com/ppy/osu-api/wiki#apiget_scores
         infos = [UserInfo(datetime.strptime(x["date"], "%Y-%m-%d %H:%M:%S"), map_id, int(x["user_id"]), str(x["username"]), int(x["score_id"]),
-                          int(x["enabled_mods"]), bool(int(x["replay_available"]))) for x in response]
+                          ModCombination(int(x["enabled_mods"])), bool(int(x["replay_available"]))) for x in response]
 
         return infos[0] if (limit and user_id) else infos # limit only applies if user_id was set
 
 
     @request
-    def get_user_best(self, user_id, num, span=None):
+    def get_user_best(self, user_id, num, span=None, mods=None):
         """
         Gets the top 100 best plays for the given user.
 
@@ -195,10 +206,18 @@ class Loader():
             num = max(span_list)
         response = self.api.get_user_best({"m": "0", "u": user_id, "limit": num})
         Loader.check_response(response)
+        if mods:
+            _response = []
+            for r in response:
+                if ModCombination(int(r["enabled_mods"])) == mods:
+                    _response.append(r)
+            response = _response
+
         if span:
             response = [response[i-1] for i in span_list]
-
-        return [int(x["beatmap_id"]) for x in response]
+        return [UserInfo(datetime.strptime(r["date"], "%Y-%m-%d %H:%M:%S"), int(r["beatmap_id"]), int(r["user_id"]),
+                self.username(int(r["user_id"])), int(r["score_id"]), ModCombination(int(r["enabled_mods"])),
+                bool(int(r["replay_available"]))) for r in response]
 
 
     @request
@@ -217,7 +236,7 @@ class Loader():
         """
 
         self.log.log(TRACE, "Requesting replay data by user %d on map %d with mods %s", user_id, map_id, mods)
-        response = self.api.get_replay({"m": "0", "b": map_id, "u": user_id, "mods": mods})
+        response = self.api.get_replay({"m": "0", "b": map_id, "u": user_id, "mods": mods if mods is None else mods.value})
         Loader.check_response(response)
 
         return base64.b64decode(response["content"])
@@ -257,10 +276,11 @@ class Loader():
             self.log.warning("lzma from %r could not be decompressed, api returned corrupt replay", user_info)
             return None
         replay_data = parsed_replay.play_data
-        if self.cacher is not None:
-            self.cacher.cache(lzma_bytes, user_info, should_cache=cache)
+        if cache and self.cacher is not None:
+            self.cacher.cache(lzma_bytes, user_info)
         return replay_data
 
+    @lru_cache()
     def map_id(self, map_hash):
         """
         Retrieves the corresponding map id for the given map_hash from the api.
@@ -275,6 +295,7 @@ class Loader():
         else:
             return int(response[0]["beatmap_id"])
 
+    @lru_cache()
     def user_id(self, username):
         """
         Retrieves the corresponding user id for the given username from the api.
@@ -292,6 +313,18 @@ class Loader():
         else:
             return int(response[0]["user_id"])
 
+    @lru_cache()
+    def username(self, user_id):
+        """
+        The inverse of :meth:`~.user_ud`. Retrieves the username of the
+        given user id.
+        """
+        response = self.api.get_user({"u": user_id, "type": "id"})
+        if response == []:
+            return ""
+        else:
+            return response[0]["username"]
+
     @staticmethod
     def check_response(response):
         """
@@ -301,7 +334,8 @@ class Loader():
             String response: The api-returned response to check.
 
         Raises:
-            An Error corresponding to the type of error if there was an error. The mappings
+            An Error corresponding to the type of error if there is an error, or
+            NoInfoAvailable if the response is empty. The mappings
             for the api error message and its corresponding error are in circleguard.enums.
         """
 
@@ -312,6 +346,10 @@ class Loader():
             else:
                 raise Error.UNKNOWN.value[1](Error.UNKNOWN.value[2]) # pylint: disable=unsubscriptable-object
                 # pylint is dumb because Error is an enum and this is totally legal
+        if not response: # response is empty
+            raise NoInfoAvailableException("No info was available from the api for the given arguments.")
+
+
 
     def _enforce_ratelimit(self):
         """

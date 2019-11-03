@@ -8,23 +8,23 @@ from circleguard.loader import Loader
 from circleguard.exceptions import CircleguardException
 from circleguard.utils import TRACE
 
-
 class Cacher:
     """
     Handles compressing and caching replay data to a database.
 
+    Parameters
+    ----------
+    cache: bool
+        Whether or not replays should be cached.
+    path: str or :class:`os.PathLike`
+        The absolute path to the database. If the given path does not exist,
+        a fresh database will be created there.
+
+    Notes
+    -----
     Each Cacher instance maintains its own database connection.
-    Be wary of instantiating too many.
     """
-
     def __init__(self, cache, path):
-        """
-        Initializes a Cacher instance.
-
-        Args:
-            Boolean cache: Whether replays should be cached or not.
-            Path path: A pathlike object representing the absolute path to the database
-        """
 
         self.log = logging.getLogger(__name__)
         self.should_cache = cache
@@ -33,34 +33,43 @@ class Cacher:
         self.conn = sqlite3.connect(str(path))
         self.cursor = self.conn.cursor()
 
-    def cache(self, lzma_bytes, user_info, should_cache=None):
+    def cache(self, lzma_bytes, user_info):
         """
-        Writes the given lzma bytes to the database, linking it to the given map and user.
-        If an entry with the given map_id and user_id already exists, it is overwritten with
-        the given lzma_bytes (after compression) and replay_id.
+        Caches a replay in the form of a (compressed) lzma stream to the
+        database, linking it to the given user info.
 
-        The lzma string is compressed with wtc compression. See Cacher.compress and wtc.compress for more.
+        Parameters
+        ----------
+        map_id: str
+            The map id to insert into the db.
+        lzma_bytes: str
+            The lzma stream to compress and insert into the db.
+        user_info: :class:`~circleguard.user_info.UserInfo`
+            The UserInfo object representing this replay.
 
-        A call to this method has no effect if the Cacher's should_cache is False.
+        Notes
+        -----
+        If an entry with the given user info already exists, it is overwritten
+        by the passed lzma.
 
-        Args:
-            String map_id: The map id to insert into the db.
-            Bytes lzma_bytes: The lzma bytes to compress and insert into the db.
-            UserInfo user_info: The UserInfo object representing this replay.
-            Boolean should_cache: If this is passed, overwrites the option set at initialization time.
+        The lzma string is compressed with wtc compression. See
+        :func:`~circleguard.Cacher.compress` and :func:`~wtc.compress` for more.
+
+        A call to this method has no effect if the Cacher's ``should_cache``
+        is ``False``.
         """
 
         self.log.debug("Caching lzma bytes")
-        should_cache = should_cache if should_cache else self.should_cache
 
-        if(not should_cache):
-            self.log.debug("should_cache is false, not caching")
+        if self.should_cache is False:
+            self.log.debug("Cacher should_cache is False, not caching")
             return
+
         compressed_bytes = self._compress(lzma_bytes)
 
         map_id = user_info.map_id
         user_id = user_info.user_id
-        mods = user_info.mods
+        mods = user_info.mods.value
         replay_id = user_info.replay_id
 
         result = self.cursor.execute("SELECT COUNT(1) FROM replays WHERE map_id=? AND user_id=? AND mods=?", [map_id, user_id, mods]).fetchone()[0]
@@ -72,20 +81,41 @@ class Cacher:
 
     def revalidate(self, loader, user_info):
         """
-        Revalidates every entry in user_info, which may contain different maps or users. If an entry exists in the cache with a UserInfo's
-        map_id, user_id, and enabled_mods, the score is redownloaded and the outdated score is replaced with the new one in the cache.
+        Checks entries in ``user_info`` against their entries in the database
+        (if any) to look for score id mismatches, indicating an outdated replay.
+        If there are mismatches, the replay is redownloaded and cached from the
+        given user info.
 
-        Args:
-            Loader loader: The Loader from the circleguard instance to redownload beatmaps with if they are outdated.
-            List [UserInfo]: A list of UserInfo objects containing the up-to-date information of user's replays.
+        Parameters
+        ----------
+        loader: :class:`~circleguard.loader.Loader`
+            The Loader from the circleguard instance to redownload replays with
+            if they are outdated.
+        user_info: list[:class:`~circleguard.user_info.UserInfo`]
+            A list of UserInfo objects containing the up-to-date information
+            of user's replays.
+
+        Raises
+        ------
+        CircleguardException
+            Raised when the redownloaded replay id is lower than the cached
+            replay id. This should never happen and is indicative of either a
+            fault on our end or the api's end.
+
+            Also raised if the replay data is not available from the api when
+            redownloaded.
+
+        Notes
+        -----
+        If the replay is found to be outdated, it will be overwritten
+        by the newer replay in the database.
         """
-
         self.log.info("Revalidating cache with %d user_infos", len(user_info))
 
         for info in user_info:
             map_id = info.map_id
             user_id = info.user_id
-            mods = info.enabled_mods
+            mods = info.enabled_mods.value
 
             self.log.log(TRACE, "Revalidating entry with map id %s, user %d, mods %s", map_id, user_id, mods)
 
@@ -111,16 +141,25 @@ class Cacher:
 
     def check_cache(self, map_id, user_id, mods):
         """
-        Checks if a replay exists on the given map_id by the given user_id with the given mods, and returns the decompressed wtc (equivelant to an lzma) string if so.
+        Checks the cache for a replay described by the parameters, and returns
+        its data if the cache contains the replay.
 
-        Args:
-            String map_id: The map_id to check for.
-            String user_id: The user_id to check for.
-            Integer mods: The bitwise enabled mods for the play.
+        Parameters
+        ----------
+        map_id: int
+            The id of the map the replay was played on.
+        user_id: int
+            The id of the user that played the replay.
+        mods: :class:`circleguard.enums.ModCombination`
+            The mods this replay was played with.
 
-        Returns:
-            The lzma bytes that would have been returned by decoding the base64 api response, or None if it wasn't cached.
+        Returns
+        -------
+        str or None
+            The replay data in lzma form if the cache contains the replay,
+            or None if not.
         """
+        mods = mods.value
         self.log.log(TRACE, "Checking cache for a replay on map %d by user %d with mods %s", map_id, user_id, mods)
         result = self.cursor.execute("SELECT replay_data FROM replays WHERE map_id=? AND user_id=? AND mods=?", [map_id, user_id, mods]).fetchone()
         if(result):
@@ -131,32 +170,59 @@ class Cacher:
 
     def _write(self, statement, args):
         """
-        Writes an sql statement with the given args to the databse.
+        A helper method that writes an sql statement with
+        the given args, and commits the connection.
 
-        Args:
-            String statement: The prepared sql statement to execute.
-            List args: The values to insert into the prepared sql statement.
-                       Must be of length equal to the number of missing values in the statement.
+        Parameters
+        ----------
+        statement: str
+            The sql statement to execute.
+        args: list
+            The values to insert into the statement.
+            Must be of length equal to the number of missing values
+            (question marks) in the statement.
         """
-
         self.cursor.execute(statement, args)
         self.conn.commit()
 
     def _compress(self, lzma_bytes):
         """
-        Compresses the lzma string to a (smaller) wtc string to store in the database.
+        Compresses an lzma string with wtc compression
+        (see :func:`wtc.compress`).
 
-        Args:
-            Bytes lzma_bytes: The lzma bytes, returned by the api for replays, to compress.
+        Parameters
+        ----------
+        lzma_bytes: str
+            The lzma string representing a replay, to compress.
 
-        Returns:
-            A compressed bytes from the given bytes, using lossy wtc compression.
+        Returns
+        -------
+        str
+            The lzma_bytes string, compressed with wtc compression
+            (:func:`wtc.compress`).
+
+        Notes
+        -----
+        wtc compression is not lossless, in order to save space. Please see
+        :func:`wtc.compress` for more details.
         """
-
         self.log.log(TRACE, "Compressing lzma bytes")
         return wtc.compress(lzma_bytes)
 
     def _create_cache(self, path):
+        """
+        Creates a database with the necessary tables at the given path.
+
+        Parameters
+        ----------
+        path: str
+            The absolute path to where the database should be created.
+
+        Notes
+        -----
+        This function will create directories specified in the path if they
+        don't already exist.
+        """
         self.log.info("Cache not found at path %s, creating cache", path)
         if not os.path.exists(os.path.split(path)[0]):  # create dir if nonexistent
             os.makedirs(os.path.split(path)[0])
