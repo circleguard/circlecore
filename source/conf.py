@@ -61,7 +61,7 @@ rst_prolog = """
 
 .. |RatelimitWeight| replace:: :class:`~circleguard.enums.RatelimitWeight`
 
-.. |Circleguard| replace:: :func:`~circleguard.circleguard.Circleguard`
+.. |Circleguard| replace:: :class:`~circleguard.circleguard.Circleguard`
 .. |cg.run| replace:: :func:`cg.run <circleguard.circleguard.Circleguard.run>`
 .. |cg.load| replace:: :func:`cg.load <circleguard.circleguard.Circleguard.load>`
 .. |cg.load_info| replace:: :func:`cg.load_info <circleguard.circleguard.Circleguard.load_info>`
