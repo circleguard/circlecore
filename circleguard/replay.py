@@ -64,9 +64,11 @@ class ReplayContainer(InfoLoadable):
     Holds a list of Replays, in addition to being a :class:`~Loadable`.
 
     ReplayContainer's start unloaded and become info loaded when
-    :meth:`~.load_info` is called. They become fully loaded when :meth:`~.load`
-    is called (and if this is called when the ReplayContainer is in the first
-    state, :meth:`~.load` will load info first, then load the replays.)
+    :meth:`~ReplayContainer.load_info` is called. They become fully
+    loaded when :meth:`~ReplayContainer.load`
+    is called (and if this is called when the ReplayContainer is in the
+    unloaded state, :meth:`~ReplayContainer.load` will load info first,
+    then load the replays.)
 
     In the unloaded state, the container has no actual Replay objects. It may
     have limited knowledge about their number or type.
