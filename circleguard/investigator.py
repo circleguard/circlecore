@@ -1,7 +1,7 @@
 
 import numpy as np
 from circleguard.enums import Keys, Detect
-from circleguard.result import RelaxResult, AimCorrectionResult
+from circleguard.result import RelaxResult, CorrectionResult
 import circleguard.utils as utils
 import math
 
@@ -14,79 +14,88 @@ class Investigator:
     ----------
     replay: :class:`~.replay.Replay`
         The replay to investigate.
+    detect: :class:`~.Detect`
+        What cheats to investigate the replay for.
     beatmap: :class:`slider.beatmap.Beatmap`
-        The beatmap to calculate ur from, with the replay.
-    threshold: int
-        If a replay has a lower ur than ``threshold``, it is considered cheated.
+        The beatmap to calculate ur from, with the replay. Should be ``None``
+        if ``Detect.RELAX in detect`` is ``False``.
 
     See Also
     --------
     :class:`~.comparer.Comparer`, for comparing multiple replays.
     """
+
     MASK = int(Keys.K1) | int(Keys.K2)
 
-    def __init__(self, replay, beatmap, max_ur, min_jerk, num_jerks):
-        """
-        Initializes an Investigator instance.
+    def __init__(self, replay, detect, beatmap=None):
 
-        Attributes:
-            Replay replay: The Replay object to investigate.
-            circleparse.Beatmap beatmap: The beatmap to calculate ur with.
-            Float max_ur: If a replay has a lower ur than this value,
-                    it is considered a cheated replay.
-            Float min_jerk: If a replay has a jerk higher than this value at a point,
-                    that is considered suspicious.
-            Integer num_jerks: If a replay has more suspicious jerks than this number,
-                    it is considered a cheated replay.
-
-        """
         self.replay = replay
-        self.detect = replay.detect
-        self.data = replay.as_list_with_timestamps()
+        # TODO np.array is called on replay.as_list_with_timestamps with object=dtype,
+        # and we'll probably want a np array for speed in aim_correction as well.
+        # If that object param isn't necessary we can call np.array in init
+        self.replay_data = replay.as_list_with_timestamps()
+        self.detect = detect
         self.beatmap = beatmap
-        self.max_ur = max_ur
-        self.min_jerk = min_jerk
-        self.num_jerks = num_jerks
-        self.last_keys = [0, 0]
+        self.detect = detect
 
     def investigate(self):
-        if self.detect & Detect.RELAX:
-            ur = self.ur()
-            ischeat = True if ur < self.max_ur else False
+        d = self.detect
+        if Detect.RELAX in d:
+            ur = self.ur(self.replay_data, self.beatmap)
+            ischeat = True if ur < d.max_ur else False
             yield RelaxResult(self.replay, ur, ischeat)
-        if self.detect & Detect.AIM_CORRECTION:
-            yield from self.aim_correction_angle()
+        if Detect.CORRECTION in d:
+            suspicious_angles = self.aim_correction(self.replay_data, d.max_angle, d.min_distance)
+            ischeat = len(suspicious_angles) > 1
+            yield CorrectionResult(self.replay, suspicious_angles, ischeat)
 
-    def ur(self):
+    @staticmethod
+    def ur(replay_data, beatmap):
         """
-        Calculates the ur of the replay being investigated.
-
-
+        Calculates the ur of ``replay_data`` when played against ``beatmap``.
         """
-        hitobjs = self._parse_beatmap(self.beatmap)
-        keypresses = self._parse_keys(self.data)
-        filtered_array = self._filter_hits(hitobjs, keypresses)
+
+        hitobjs = Investigator._parse_beatmap(beatmap)
+        keypresses = Investigator._parse_keys(replay_data)
+        filtered_array = Investigator._filter_hits(hitobjs, keypresses, beatmap.overall_difficulty)
         diff_array = []
 
         for hit, press in filtered_array:
             diff_array.append(press[0]-hit[0])
         return np.std(diff_array) * 10
 
-    def aim_correction_angle(self):
+    @staticmethod
+    def aim_correction(replay_data, max_angle, min_distance):
         """
         Calculates the angle between each set of three points and finds points
         where this angle is extremely acute (indicative of a quick jump to
         a point, then a jump back to the normal path. ie lazy aim correction by
         dragging a single point to hit the circle in the cheat editor)
+
+        Notes
+        -----
+        max_angle and max_distance being passed goes a bit against the style
+        here of not passing anything more than a replay/beatmap to the
+        investigation functions (see: ur()), but if we don't we would iterate
+        twice over this massive list of angles between every two data points.
+        May be premature optimization but it just doesn't make sense to return
+        a huge list and filter it in investigate().
+
+        Returns [[float, float, float], ...] of hits where the angle was less
+        than max_angle and the distance between the data points was more than
+        min_distance. First float is time the hit occured, second float is angle
+        between the data points in degrees, third is distance between the two
+        datapoins.
         """
 
-        for idx in range(len(self.data)):
-            if idx > len(self.data) - 3:
+        suspicious_angles = []
+        for idx in range(len(replay_data)):
+            if idx > len(replay_data) - 3:
                 # avoid indexerrors
                 continue
-            a = self.data[idx]
-            b = self.data[idx + 1]
-            c = self.data[idx + 2]
+            a = replay_data[idx]
+            b = replay_data[idx + 1]
+            c = replay_data[idx + 2]
             t = b[0]
             ax = a[1]
             # osr y values go "higher is lower down", convert them into normal xy plane
@@ -112,6 +121,7 @@ class Investigator:
             try:
                 frac = (mag_x**2 - mag_a**2 - mag_b**2) / (-2 * mag_a * mag_b)
                 frac = max(frac, -1) # rounding issues makes it go out of acos' domain
+                frac = min(frac, 1)
             except ZeroDivisionError:
                 # happens when mag_a or mag_b is zero
                 continue
@@ -119,21 +129,27 @@ class Investigator:
             degrees = math.degrees(C)
 
             distance_a_b = (((bx - ax) ** 2) + ((by - ay) ** 2)) ** (1/2)
-            if degrees < 10 and distance_a_b > 3:
-                print(t, degrees)
+            if degrees < max_angle and distance_a_b > min_distance:
+                suspicious_angles.append([t, degrees, distance_a_b])
 
-        yield self.replay
+        return suspicious_angles
 
-
-    def aim_correction(self):
+    @staticmethod
+    def aim_correction_sam(replay_data, num_jerks, min_jerk):
         """
         Calculates the jerk at each moment in the Replay, counts the number of times
         it exceeds min_jerk and reports a positive if that number is over num_jerks.
         Also reports all suspicious jerks and their timestamps.
+
+        WARNING
+        -------
+        Unused function. Kept for historical purposes and ease of viewing in
+        case we want to switch to this track of aim correction in the future,
+        or provide it as an alternative.
         """
 
         # get all replay data as an array of type [(t, x, y, k)]
-        txyk = np.array(self.data)
+        txyk = np.array(replay_data)
 
         # drop keypresses
         txy = txyk[:, :3]
@@ -157,7 +173,7 @@ class Investigator:
         jerk = np.linalg.norm(jerk, axis=1)
 
         # create a mask of where the jerk reaches suspicious values
-        anomalous = jerk > self.min_jerk
+        anomalous = jerk > min_jerk
         # and retrieve and store the timestamps and the values themself
         timestamps = t[3:][anomalous]
         values = jerk[anomalous]
@@ -165,11 +181,12 @@ class Investigator:
         jerks = np.vstack((timestamps, values)).T
 
         # count the anomalies
-        ischeat = anomalous.sum() > self.num_jerks
+        ischeat = anomalous.sum() > num_jerks
 
-        yield AimCorrectionResult(self.replay, jerks, ischeat)
+        return [jerks, ischeat]
 
-    def _parse_beatmap(self, beatmap):
+    @staticmethod
+    def _parse_beatmap(beatmap):
         hitobjs = []
 
         # parse hitobj
@@ -178,15 +195,17 @@ class Investigator:
             hitobjs.append([hit.time.total_seconds() * 1000, p.x, p.y])
         return hitobjs
 
-    def _parse_keys(self, data):
+    @staticmethod
+    def _parse_keys(data):
         data = np.array(data, dtype=object)
-        keypresses = np.int32(data[:, 3]) & self.MASK
+        keypresses = np.int32(data[:, 3]) & Investigator.MASK
         changes = keypresses & ~np.insert(keypresses[:-1], 0, 0)
         return data[changes!=0]
 
-    def _filter_hits(self, hitobjs, keypresses):
+    @staticmethod
+    def _filter_hits(hitobjs, keypresses, OD):
         array = []
-        hitwindow = 150 + 50 * (5 - self.beatmap.overall_difficulty) / 5
+        hitwindow = 150 + 50 * (5 - OD) / 5
 
         object_i = 0
         press_i = 0
