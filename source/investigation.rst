@@ -1,11 +1,49 @@
 Investigation
 =============
 
+Circleguard
+-----------
+
+A |Check| by itself doesn't do anything more than organize |Detect|\s and
+|Loadable|\s together. To actually start an investigation, we need to create a
+|circleguard| object.
+
+If you don't already have an api key, visit https://osu.ppy.sh/p/api/ and enter
+``Circleguard`` for ``App Name`` and
+``https://github.com/circleguard/circlecore`` for ``App URL``. Circlecore
+needs this key to retrieve replay data and user information, among other
+things.
+
+.. note::
+
+    You may need to toy with being logged in/entering the url
+    multiple times in order to actually get to the api page.
+    The redirection on osu!'s end is rather fiddly.
+
+
+After that, circleguard instantion is easy:
+
+.. code-block:: python
+
+    cg = Circleguard("key")
+
+Replace ``"key"`` in these examples with your api key.
+
+We use ``cg`` as shorthand for a |circleguard| object throughout the
+documentation, similar to ``np`` for ``numpy``.
+
+.. todo::
+
+    talk about slider and caching, probably by briefly mentioning it here and
+    linking to an advanced/future section
+
+
+
 Running Checks
 --------------
 
-A |Check| by itself doesn't do anything more than organize the |Detect| and
-|Loadable|\s. To actually start an investigation, use |cg.run|.
+Now that we have a |Circleguard| and |Check|, we can actually investigate
+replays:
 
 .. code-block:: python
 
