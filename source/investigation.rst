@@ -64,8 +64,8 @@ As mentioned, |Loadable|\s do not load any information from the api on
 instantiation. |cg.run| is where this loading occurs, and where you should
 expect api ratelimiting (with more than 10 |ReplayMap|\s) to occur.
 
-Should you want finer control over when you load replays, see |cg.load|, loads
-a |Loadable|.
+Should you want finer control over when you load replays, see
+:doc:`../loading`.
 
 |Loadable|\s that get loaded stay loaded, so you can reuse the same object
 without fear of doubling (or worse) the loading time.
