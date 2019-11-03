@@ -286,7 +286,7 @@ class RelaxDetect(Detect):
         self.ur_thresh = ur_thresh
 
 class CorrectionDetect(Detect):
-    def __init__(self, max_angle=10, min_distance=3):
+    def __init__(self, max_angle=10, min_distance=8):
         super().__init__(Detect.CORRECTION)
         self.max_angle = max_angle
         self.min_distance = min_distance
