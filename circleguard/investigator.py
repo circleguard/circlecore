@@ -128,8 +128,12 @@ class Investigator:
             C = math.acos(frac)
             degrees = math.degrees(C)
 
+            # if the distance to either point is small, don't consider it
+            # this is just pythagorean theorem
             distance_a_b = (((bx - ax) ** 2) + ((by - ay) ** 2)) ** (1/2)
-            if degrees < max_angle and distance_a_b > min_distance:
+            distance_b_c = (((cx - bx) ** 2) + ((cy - by) ** 2)) ** (1/2)
+            our_min_dist = min(distance_a_b, distance_b_c)
+            if degrees < max_angle and our_min_dist > min_distance:
                 suspicious_angles.append([t, degrees, distance_a_b])
 
         return suspicious_angles
