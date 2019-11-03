@@ -372,14 +372,6 @@ class Replay(Loadable):
         return txyk
 
 
-    def __repr__(self):
-        return (f"Replay(timestamp={self.timestamp},map_id={self.map_id},user_id={self.user_id},mods={self.mods},detect={self.detect},"
-               f"replay_id={self.replay_id},weight={self.weight},loaded={self.loaded},username={self.username})")
-
-    def __str__(self):
-        return f"Replay by {self.username} on {self.map_id}"
-
-
 class ReplayMap(Replay):
     """
     A :class:`~.Replay` that was submitted to online servers (and is thus tied
