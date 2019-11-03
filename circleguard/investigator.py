@@ -224,10 +224,3 @@ class Investigator:
                 object_i += 1
 
         return array
-
-class Hit:
-    def __init__(self, hitobj, hit):
-        self.x = hit[1]-hitobj[1]
-        self.y = hit[2]-hitobj[2]
-        self.error = hit[0]-hitobj[0]
-        self.keys = [Keys(key_val) for key_val in utils.bits(hit[3])]
