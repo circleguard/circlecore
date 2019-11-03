@@ -1,5 +1,5 @@
-Using Checks
-============
+Creating Checks
+===============
 
 A |Check| controls aspects of the investigation, such as thresholds and what
 type of cheats to investigate for.

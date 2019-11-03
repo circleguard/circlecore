@@ -70,7 +70,7 @@ Links
 
     foreword
     representing-replays
-    using-checks
+    creating-checks
     investigation
     loading
 
