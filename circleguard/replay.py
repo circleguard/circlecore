@@ -45,7 +45,7 @@ class Loadable(abc.ABC):
     def all_replays(self):
         pass
 
-class InfoLoadable(abc.ABC):
+class InfoLoadable(Loadable):
     """
     A loadable which has an info loaded stage, between unloaded and loaded.
 
