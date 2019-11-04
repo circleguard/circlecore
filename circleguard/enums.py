@@ -197,6 +197,16 @@ class Mod():
 
     Notes
     -----
+    The nightcore mod is never set by itself. When we see plays set with ``NC``,
+    we are really seeing a ``DT + NC`` play. ``NC`` by itself is ``512``, but
+    what we expect to see is ``576`` (``512 + 64``; ``DT`` is ``64``). As such
+    ``Mod.NC`` is defined to be the more intuitive version—``DT + NC``. We
+    provide the true, technical version of the ``NC`` mod (``512``) as
+    ``Mod._NC``.
+
+    This same treatment and reasoning applies to ``Mod.PF``, which we define
+    as ``PF + SD``. The technical version of PF is available as ``Mod._PF``.
+
     A full list of mods and their specification can be found at
     https://osu.ppy.sh/help/wiki/Game_Modifiers, or a more technical list at
     https://github.com/ppy/osu-api/wiki#mods.
