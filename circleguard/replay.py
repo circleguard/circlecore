@@ -299,14 +299,16 @@ class Replay(Loadable):
 
     Parameters
     ----------
-    timestamp: Datetime
+    timestamp: :class:`datetime.datetime`
         When this replay was played.
     map_id: int
         The id of the map the replay was played on, or 0 if
         unknown or on an unsubmitted map.
     user_id: int
-        The id of the player who played the replay, or 0 if
-        unknown (if the player is restricted, for instance).
+        The id of the player who played the replay, or 0 if unknown
+        (if the player is restricted, for instance). Note that if the
+        user id is known, even if the user is restricted, it should still be
+        given instead of 0.
     username: str
         The username of the player who played the replay.
     mods: :class:`~.enums.ModCombination`
