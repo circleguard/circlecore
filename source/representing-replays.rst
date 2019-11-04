@@ -35,7 +35,7 @@ specifically the ``HDHR`` play by the same user on the same map.
 
 .. code-block:: python
 
-    r1 = ReplayMap(221777, 2757689, mods=Mod.HD + Mod.DT)
+    r1 = ReplayMap(221777, 2757689, mods=Mod.HD + Mod.HR)
 
 While in this case these are identical replays, there are times a user has two
 available replays on a map, with different mods. Because of how osu! stores
