@@ -32,8 +32,16 @@ class Loadable(abc.ABC):
             The loader to load this replay with. Although subclasses may not
             end up using a :class:`~circleguard.loader.Loader` to
             properly load the replay (if they don't load anything from the osu
-            api, for instance), the parameter is necessary for homogeneity among
-            method calls.
+            api, for instance), the parameter is necessary for homogeneity
+            among method calls.
+        cache: bool
+            Whether the loadable should cache their replay data. This argument
+            comes from a parent—either a :class:`~.InfoLoadable` or
+            :class:`~circleguard.circleguard.Circleguard` itself. Should the
+            loadable already have a ``cache`` attribute, that should take
+            precedence over the option passed in this method, but if the
+            loadable has no preference then it should listen to the ``cache``
+            here.
         """
         pass
 
@@ -88,27 +96,20 @@ class ReplayContainer(InfoLoadable):
 
 class Check(InfoLoadable):
     """
-    Contains a list of Replay objects (or subclasses thereof) and how to proceed when
-    investigating them for cheats.
+    Organizes :class:`~.Loadable`\s and what to investigate them for.
 
-    Attributes:
-        List [Loadable] replays: A list of Loadable objects.
-        Detect detect: What cheats to run tests to detect.
+    Parameters
+    ----------
+    loadables: :class:`~.Loadable`
+        The loadables to hold for investigation.
+    detect: :class:`~.Detect`
+        What cheats to investigate for.
+    loadables2: :class:`~.Loadable`
+
         Boolean cache: Whether to cache the loaded replays. Defaults to False, or the config value if changed.
-        Boolean loaded: False at instantiation, set to True once check#load is called. See check#load for
-                more details.
     """
 
     def __init__(self, loadables, detect, loadables2=None, cache=None):
-        """
-        Initializes a Check instance.
-
-        Args:
-            List [Loadable] replays: A list of Replay or Map objects.
-            Boolean cache: Whether to cache the loaded replays. Defaults to False, or the config value if changed.
-            Detect detect: What cheats to run tests to detect.
-        """
-
         self.log = logging.getLogger(__name__ + ".Check")
         self.loadables = [loadables] if isinstance(loadables, Loadable) else loadables
         self.loadables2 = [loadables2] if isinstance(loadables2, Loadable) else [] if loadables2 is None else loadables2
@@ -391,7 +392,7 @@ class ReplayMap(Replay):
     detect: :class:`~.enums.Detect`
         What cheats to run tests to detect.
     cache: bool
-        Whether to cache this replay or not.
+        Whether to cache this replay once it is loaded.
     """
 
     def __init__(self, map_id, user_id, mods=None, cache=None, info=None):
@@ -424,11 +425,14 @@ class ReplayMap(Replay):
         ----------
         loader: :class:`~.loader.Loader`
             The :class:`~.loader.Loader` to load this replay with.
+        cache: bool
+            Whether to cache this replay after loading it. This only has an
+            effect if ``self.cache`` is unset (``None``).
 
         Notes
         -----
         If ``replay.loaded`` is ``True``, this method has no effect.
-        ``replay.loaded`` is set to ``True`` after this method loads the replay.
+        ``replay.loaded`` is set to ``True`` after this method is finished.
         """
         # only listen to the parent's cache if ours is not set. Lower takes precedence
         cache = cache if self.cache is None else self.cache
@@ -449,27 +453,16 @@ class ReplayPath(Replay):
     """
     A :class:`~.Replay` saved locally in an ``osr`` file.
 
-    To instantiate a ReplayPath, you only need to know the path to the osr file. Although this class still
-    loads some information from the api - like the map id and the user id - no RatelimitWeight.HEAVY calls
-    are made, making this a relatively light replay to load. Of course, the replay has to already be downloaded
-    to instantiate this class, sometimes making it less than ideal.
-
-    Attributes:
-        [String or Path] path: A pathlike object representing the absolute path to the osr file.
-        Boolean loaded: Whether this replay has been loaded. If True, calls to #load will have no effect.
-                        See #load for more information.
-        RatelimitWeight weight: RatelimitWeight.LIGHT, as this class' load method makes only light api calls.
-                                See RatelimitWeight documentation for more information.
+    Parameters
+    ----------
+    path: str or :class`os.PathLike`
+        The path to the replay file.
+    cache: bool
+        Whether to cache this replay once it is loaded. Note that currently
+        we do not cache :class:`~.ReplayPath` regardless of this parameter.
     """
 
     def __init__(self, path, cache=None):
-        """
-        Initializes a ReplayPath instance.
-
-        Args:
-            [String or Path] path: A pathlike object representing the absolute path to the osr file.
-        """
-
         self.log = logging.getLogger(__name__ + ".ReplayPath")
         self.path = path
         self.cache = cache
@@ -491,11 +484,21 @@ class ReplayPath(Replay):
 
     def load(self, loader, cache):
         """
-        Loads the data for this replay from the osr file given by the path. See circleparse.parse_replay_file for
-        implementation details. This method has no effect if replay.loaded is True.
+        Loads the data for this replay from the osr file.
 
-        The superclass Replay is initialized after this call, setting replay.loaded to True. Multiple
-        calls to this method will have no effect beyond the first.
+        Parameters
+        ----------
+        loader: :class:`~.loader.Loader`
+            The :class:`~.loader.Loader` to load this replay with.
+        cache: bool
+            Whether to cache this replay after loading it. This only has an
+            effect if ``self.cache`` is unset (``None``). Note that currently
+            we do not cache :class:`~.ReplayPath` regardless of this parameter.
+
+        Notes
+        -----
+        If ``replay.loaded`` is ``True``, this method has no effect.
+        ``replay.loaded`` is set to ``True`` after this method is finished.
         """
 
         # we don't cache local replays currently. Ignore cache option for if/when we need it
