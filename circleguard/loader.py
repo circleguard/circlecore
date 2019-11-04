@@ -23,17 +23,17 @@ def request(function):
     Should be wrapped around any function that makes a request; to the api or
     otherwise.
 
+    Also checks if we can refresh the time at which we started our requests
+    because it's been more than RATELIMIT_RESET since the first request of the
+    cycle.
+
+    If we've refreshed our ratelimits, sets start_time to be the current
+    datetime.
+
     Parameters
     ----------
-    function: function
-        The wrapped function.
-
-    Notes
-    -----
-    Also checks if we can refresh the time at which we started our requests because
-    it's been more than RATELIMIT_RESET since the first request of the cycle.
-
-    If we've refreshed our ratelimits, sets start_time to be the current datetime.
+    function: callable
+        The function to wrap.
     """
 
     def wrapper(*args, **kwargs):
@@ -134,21 +134,47 @@ class Loader():
     @request
     def user_info(self, map_id, num=None, user_id=None, mods=None, limit=True, span=None):
         """
-        Returns a list of UserInfo objects containing a user's
-        (timestamp, map_id, user_id, username, replay_id, mods, replay_available)
-        on the given map.
+        Retrieves user infos from ``map_id``.
 
-        If limit and user_id is set, it will return a single UserInfo object, not a list.
+        Parameters
+        ----------
+        map_id: int
+            The map id to retrieve user info for.
+        num: int
+            The number of user infos on the map to retrieve.
+        user_id: int
+            If passed, only retrieve user info on ``map_id`` for this user.
+            Note that this is not necessarily limited to just the user's top
+            score on the map. See ``limit``.
+        mods: :class:`~.ModCombination`
+            The mods to limit user infos to. ie only return user infos with
+            mods that match ``mods``.
+        limit: bool
+            Whether to limit to only one response. Only has an effect if
+            ``user_id`` is passed. If ``limit`` is ``True``, will only return
+            the top scoring user info by ``user_id``. If ``False``, will return
+            all scores by ``user_id``.
+        span: str
+            A comma separated list of ranges of top replays on the map to
+            retrieve. ``span="1-3,6,2-4"`` -> replays in the range
+            ``[1,2,3,4,6]``.
 
-        Args:
-            Integer map_id: The map id to get the replay_id from.
-            Integer user_id: The user id to get the replay_id from.
-            Boolean limit: If set, will only return a user's top score (top response). Otherwise, will
-                          return every response (every score they set on that map under different mods)
-            ModCombination: The mods the replay info to retieve were played with.
-            String span: A comma separated list of ranges of top replays on the map to check. "1-3" will check the first 3 replays,
-                    and "1-3,6,2-4" will check replays 1,2,3,4,6 for instance. Values that appear multiple times or in multiple ranges
-                    are only counted once. If both span and num are passed, span is used instead of num.
+        Returns
+        -------
+        list[:class:`~.UserInfo`]
+            The user infos as specified by the arguments.
+        :class:`~.UserInfo`
+            If ``limit`` is ``True`` and ``user_id`` is passed.
+
+        Notes
+        -----
+        One of ``num``, ``user_id``, and ``span`` must be passed, but not both
+        ``num`` and either ``user_id`` or ``span``.
+
+        Raises
+        ------
+        NoInfoAvailableException
+            If there is no info available for the given parameters.
         """
 
         # we have to define a new variable to hold locals - otherwise when we call it twice inside the dict comprehension,
@@ -180,30 +206,36 @@ class Loader():
 
 
     @request
-    def get_user_best(self, user_id, num, span=None, mods=None):
+    def get_user_best(self, user_id, num=None, span=None, mods=None):
         """
         Gets the top 100 best plays for the given user.
 
-        Args:
-            String user_id: The user id to get best plays of.
-            Integer num: The number of top plays to retrieve. Must be between 1 and 100.
-            String span: A comma separated list of ranges of top plays to return "1-3" will return the map_ids for the top 3 plays of the user,
-                    and "1-3,6,2-4" will return the 1,2,3,4,6 top plays for instance. Values that appear multiple times or in multiple ranges
-                    are only returned once.
+        Parameters
+        ----------
+        user_id: str
+            The user id to get best plays of.
+        num: int
+            The number of top plays to retrieve. Must be between 1 and 100.
+        span: str
+            A comma separated list of ranges of top plays to retrieve.
+            ``span="1-3,6,2-4"`` -> replays in the range ``[1,2,3,4,6]``.
 
         Returns:
             A list of Integer map_ids for the given number of the user's top plays.
 
-        Raises:
-            InvalidArgumentsException if number is not between 1 and 100 inclusive.
+        Raises
+        ------
+        InvalidArgumentsException
+            If ``num`` or ``span`` is not between ``1`` and ``100`` inclusive.
         """
 
         self.log.log(TRACE, "Retrieving the best %d plays of user %d", num, user_id)
-        if num < 1 or num > 100:
-            raise InvalidArgumentsException("The number of best user plays to fetch must be between 1 and 100 inclusive!")
         if span:
             span_list = span_to_list(span)
             num = max(span_list)
+        if num < 1 or num > 100:
+            raise InvalidArgumentsException("The number of best user plays to fetch must be between 1 and 100 inclusive!")
+
         response = self.api.get_user_best({"m": "0", "u": user_id, "limit": num})
         Loader.check_response(response)
         if mods:
@@ -316,8 +348,8 @@ class Loader():
     @lru_cache()
     def username(self, user_id):
         """
-        The inverse of :meth:`~.user_ud`. Retrieves the username of the
-        given user id.
+        The inverse of :meth:`~circleguard.loader.Loader.user_id`. Retrieves
+        the username of the given user id.
         """
         response = self.api.get_user({"u": user_id, "type": "id"})
         if response == []:
@@ -328,14 +360,15 @@ class Loader():
     @staticmethod
     def check_response(response):
         """
-        Checks the given api response for any kind of error or unexpected response.
+        Checks the given api response for any kind of error or
+        unexpected response.
 
         Args:
             String response: The api-returned response to check.
 
         Raises:
-            An Error corresponding to the type of error if there is an error, or
-            NoInfoAvailable if the response is empty. The mappings
+            An Error corresponding to the type of error if there is an error,
+            or NoInfoAvailable if the response is empty. The mappings
             for the api error message and its corresponding error are in circleguard.enums.
         """
 
