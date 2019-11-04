@@ -246,6 +246,11 @@ class Mod():
     HDDTHR = HD + DT + HR
 
     # how people naturally sort mods in combinations (HDDTHR, not DTHRHD)
+    # sphinx uses repr() here
+    # (see https://github.com/sphinx-doc/sphinx/issues/3857), so provide
+    # our own, more human readable docstrings. #: denotes sphinx docstrings.
+    #: [EZ, HD, HT, DT, _NC, HR, FL, NF, SD, _PF, RX, AP, SO, AT, V2, TD,
+    #: FI, RD, CN ,TP, K1, K2, K3, K4, K5, K6, K7, K8, K9, CO, MR]
     ORDER = [EZ, HD, HT, DT, _NC, HR, FL, NF, SD, _PF, RX, AP, SO, AT,
              V2, TD, # we stop caring about order after this point
              FI, RD, CN ,TP, K1, K2, K3, K4, K5, K6, K7, K8, K9, CO, MR]
