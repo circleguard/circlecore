@@ -115,12 +115,16 @@ class CorrectionResult(InvestigationResult):
     """
     The result of a test for aim correction cheats.
 
-    Attributes:
-        Replay replay: The replay investigated.
-        List jerks: A list of tuples of (timestamp, jerk_value) at the suspicious jerks.
-        Boolean ischeat: Whether the replay is cheated.
+    Parameters
+    ----------
+    replay: :class:`~circleguard.replay.Replay`
+        The replay investigated.
+    snaps: list[:class:`.~Snap`]
+        A list of suspicious hits in the replay.
+    ischeat: bool
+        Whether the replay is cheated or not.
     """
 
-    def __init__(self, replay, suspicious_angles, ischeat):
+    def __init__(self, replay, snaps, ischeat):
         super().__init__(replay, ischeat, ResultType.CORRECTION)
-        self.suspicious_angles = suspicious_angles
+        self.snaps = snaps

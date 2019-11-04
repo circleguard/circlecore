@@ -134,7 +134,7 @@ class Investigator:
             distance_b_c = (((cx - bx) ** 2) + ((cy - by) ** 2)) ** (1/2)
             our_min_dist = min(distance_a_b, distance_b_c)
             if degrees < max_angle and our_min_dist > min_distance:
-                suspicious_angles.append([t, degrees, distance_a_b])
+                suspicious_angles.append(Snap(t, degrees, our_min_dist))
 
         return suspicious_angles
 
@@ -228,3 +228,29 @@ class Investigator:
                 object_i += 1
 
         return array
+
+class Snap():
+    """
+    A suspicious hit in a replay, specifically so because it snaps away from
+    the otherwise normal path. Snaps currently represent the middle datapoint
+    in a set of three replay datapoints.
+
+    Parameters
+    ----------
+    time: int
+        The time value of the middle datapoint, in ms. 0 represents the
+        beginning of the replay.
+    angle: float
+        The angle between the three datapoints.
+    distance: float
+        ``min(dist_a_b, dist_b_c)`` if ``a``, ``b``, and ``c`` are three
+        datapoints with ``b`` being the middle one.
+
+    See Also
+    --------
+    :meth:`~.Investigator.aim_correction`
+    """
+    def __init__(self, time, angle, distance):
+        self.time = time
+        self.angle = angle
+        self.distance = distance
