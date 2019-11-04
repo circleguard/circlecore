@@ -74,16 +74,18 @@ class Investigator:
         ab = xy[1:-1] - xy[:-2]
         bc = xy[2:] - xy[1:-1]
         ac = xy[2:] - xy[:-2]
-
+        # Distance a to b, b to c, and a to c
         AB = np.linalg.norm(ab, axis=1)
         BC = np.linalg.norm(bc, axis=1)
         AC = np.linalg.norm(ac, axis=1)
-
+        # Law of cosines, solve for beta
         # AC^2 = AB^2 + BC^2 - 2 * AB * BC * cos(beta)
+        # cos(beta) = -(AC^2 - AB^2 - BC^2) / (2*AB*BC)
         num = -(AC ** 2 - AB ** 2 - BC ** 2)
-        den = (2 * AB * BC)
+        denom = (2 * AB * BC)
         # use true_divide for handling division by zero
-        cos_beta = np.true_divide(num, den, out=np.full_like(num, np.nan), where=den!=0)
+        cos_beta = np.true_divide(num, denom, out=np.full_like(num, np.nan), where=denom!=0)
+        # rounding issues makes cos_beta go out of arccos' domain, so restrict it
         cos_beta = np.clip(cos_beta, -1, 1)
 
         beta = np.rad2deg(np.arccos(cos_beta))
@@ -92,6 +94,7 @@ class Investigator:
         dist_mask = min_AB_BC > min_distance
         # use less to avoid comparing to nan
         angl_mask = np.less(beta, max_angle, where=~np.isnan(beta))
+        # boolean array of datapoints where both distance and angle requirements are met
         mask = dist_mask & angl_mask
 
         return [Snap(t, b, d) for (t, b, d) in zip(t[mask], beta[mask], min_AB_BC[mask])]
