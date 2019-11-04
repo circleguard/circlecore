@@ -131,6 +131,7 @@ class Check(InfoLoadable):
         --------
         :func:`~circleguard.replay.Loadable.all_replays` and
         :func:`~circleguard.replay.Loadable.all_replays2`
+
         Notes
         -----
         :class:`~circleguard.replay.Loadable`\s are very different from
