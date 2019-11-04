@@ -89,12 +89,12 @@ different amounts of information avaialble from the |Replay|\s for each stage.
 .. code-block:: python
 
     cg = Circleguard("key")
-    m = Map(221777, num=2)
+    m = Map(221777, num=1)
     for r in m:
         print("this will never be printed")
     cg.load_info(m)
     for r in m:
-        print("this will be printed twice, followed by False each time")
+        print("this will be followed by False")
         print(r.loaded)
     cg.load(m)
     for r in m:
