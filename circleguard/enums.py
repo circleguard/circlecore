@@ -113,7 +113,7 @@ class ModCombination():
         Examples
         --------
         >>> ModCombination(576).long_name()
-        "Nightore"
+        "Nightcore"
         >>> ModCombination(24).long_name()
         "Hidden HardRock"
 
