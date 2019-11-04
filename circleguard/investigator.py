@@ -65,6 +65,38 @@ class Investigator:
         return np.std(diff_array) * 10
 
     @staticmethod
+    def aim_correction_np(replay_data, max_angle, min_distance):
+        data = np.array(replay_data).T
+
+        t, xy = data[0][1:-1], data[1:3].T
+
+        # labelling three consecutive points a, b and c
+        ab = xy[1:-1] - xy[:-2]
+        bc = xy[2:] - xy[1:-1]
+        ac = xy[2:] - xy[:-2]
+
+        AB = np.linalg.norm(ab, axis=1)
+        BC = np.linalg.norm(bc, axis=1)
+        AC = np.linalg.norm(ac, axis=1)
+
+        # AC^2 = AB^2 + BC^2 - 2 * AB * BC * cos(beta)
+        num = -(AC ** 2 - AB ** 2 - BC ** 2)
+        den = (2 * AB * BC)
+        # use true_divide for handling division by zero
+        cos_beta = np.true_divide(num, den, out=np.full_like(num, np.nan), where=den!=0)
+        cos_beta = np.clip(cos_beta, -1, 1)
+
+        beta = np.rad2deg(np.arccos(cos_beta))
+
+        min_AB_BC = np.minimum(AB, BC)
+        dist_mask = min_AB_BC > min_distance
+        # use less to avoid comparing to nan
+        angl_mask = np.less(beta, max_angle, where=~np.isnan(beta))
+        mask = dist_mask & angl_mask
+
+        return [Snap(t, b, d) for (t, b, d) in zip(t[mask], beta[mask], min_AB_BC[mask])]
+
+    @staticmethod
     def aim_correction(replay_data, max_angle, min_distance):
         """
         Calculates the angle between each set of three points and finds points
