@@ -65,7 +65,7 @@ know to construct a view of map or player.
 Map
 ~~~
 
-It is common to want to investigate all, or a subset of, a map's leaderboard.
+It is common to want to represent all, or a subset of, a map's leaderboard.
 
 .. code-block:: python
 
