@@ -177,7 +177,7 @@ class ModCombination():
         -------
         list: :class:`~.ModCombination`
             A list of the component :class:`~.ModCombination`\s of this mod,
-            ordered according to :data:`~.Mod.ORDER`.
+            ordered according to :const:`~circleguard.enums.Mod.ORDER`.
         """
 
         mods = [ModCombination(mod) for mod in int_to_mod.keys() if self.value & mod]
