@@ -74,6 +74,11 @@ def check_cache(function):
     returns a :class:`~circleguard.replay.Replay` instance from the cached data.
     Otherwise, calls and returns the `function` as normal.
 
+    Parameters
+    ----------
+    function: callable
+        The function to wrap.
+
     Notes
     -----
     ``self`` and ``user_info`` **MUST** be the first and second arguments to
