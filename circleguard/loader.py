@@ -123,9 +123,10 @@ class Loader():
     -----
     If the api ratelimits the key, we wait until our ratelimits are refreshed
     and retry the request. Because the api does not provide the time until the
-    next refresh (and we do not periodically retry the key), if the key is
-    ratelimited because of an interaction not managed by this class,
-    the class may wait more time than necessary for the key to refresh.
+    next refresh (and we do not use exponential backoff or another retry
+    strategy), if the key is ratelimited because of an interaction not managed
+    by this class, the class may wait more time than necessary for the key to
+    refresh.
     """
 
     RATELIMIT_RESET = 60 # time in seconds until the api refreshes our ratelimits
