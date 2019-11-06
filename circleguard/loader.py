@@ -184,8 +184,10 @@ class Loader():
             If there is no info available for the given parameters.
         """
 
-        # we have to define a new variable to hold locals - otherwise when we call it twice inside the dict comprehension,
-        # it rebinds to the comp scope and takes on different locals which is real bad. I spent many-a-hour figuring this out,
+        # we have to define a new variable to hold locals - otherwise when we
+        # call it twice inside the dict comprehension, it rebinds to the comp
+        # scope and takes on different locals which is real bad.
+        # I spent many-a-hour figuring this out,
         # and if anyone has a more elegant solution I'm all ears.
         locals_ = locals()
         self.log.log(TRACE, "Loading user info on map %d with options %s",
