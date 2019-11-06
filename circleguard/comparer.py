@@ -171,7 +171,7 @@ class Comparer:
 
         Returns
         -------
-        tuple (float, float)
+        tuple[float, float]
             (average distance, stddev) between the two datasets.
 
         Notes
