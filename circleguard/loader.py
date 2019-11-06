@@ -230,7 +230,8 @@ class Loader():
             ``span="1-3,6,2-4"`` -> replays in the range ``[1,2,3,4,6]``.
 
         Returns:
-            A list of Integer map_ids for the given number of the user's top plays.
+            A list of Integer map_ids for the given number of the user's top
+            plays.
 
         Raises
         ------
