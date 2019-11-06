@@ -195,6 +195,8 @@ class Mod():
     """
     An ingame osu! mod.
 
+    Common combinations are available as ``HDDT``, ``HDHR``, and ``HDDTHR``.
+
     Notes
     -----
     The nightcore mod is never set by itself. When we see plays set with ``NC``,
