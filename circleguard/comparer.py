@@ -127,7 +127,7 @@ class Comparer:
 
         Returns
         -------
-        tuple (float, float)
+        tuple[float, float]
             (average distance, stddev) of the cursors of the two replays.
         """
 
