@@ -65,7 +65,41 @@ class Investigator:
         return np.std(diff_array) * 10
 
     @staticmethod
-    def aim_correction_np(replay_data, max_angle, min_distance):
+    def aim_correction(replay_data, max_angle, min_distance):
+        """
+        Calculates the angle between each set of three points (a,b,c) and finds
+        points where this angle is extremely acute neither |ab| or |bc| are
+        small.
+
+        Parameters
+        ----------
+        replay_data: list[int, float, float, int]
+            A list of replay datapoints; [[time, x, y, keys_pressed], ...].
+        max_angle: float
+            Consider only (a,b,c) where ``∠abc < max_angle``
+        min_distance: float
+            Consider only (a,b,c) where ``|ab| > min_distance`` and
+            ``|ab| > min_distance``.
+
+        Returns
+        -------
+        list[:class:`~.Snap`]
+            Hits where the angle was less than ``max_angle`` and the distance
+            was more than ``min_distance``.
+
+        Notes
+        -----
+        This does not detect correction where multiple datapoints are placed
+        at the correction site (which creates a small ``min_distance``).
+
+        Another possible method is to look at the ratio between the angle
+        and distance.
+
+        See Also
+        --------
+        :meth:`~.aim_correction_sam` for an alternative, unused approach
+        involving velocity and jerk.
+        """
         data = np.array(replay_data).T
 
         t, xy = data[0][1:-1], data[1:3].T
