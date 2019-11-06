@@ -307,7 +307,7 @@ class Loader():
             return None
 
         lzma_bytes = self.load_replay_data(map_id, user_id, mods)
-        if(lzma_bytes is None):
+        if lzma_bytes is None:
             raise UnknownAPIException("The api guaranteed there would be a replay available, but we did not receive any data. "
                                      "Please report this to the devs, who will open an issue on osu!api if necessary.")
         try:
