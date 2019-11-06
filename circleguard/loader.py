@@ -19,21 +19,22 @@ from circleguard.utils import TRACE, span_to_list
 
 def request(function):
     """
-    A decorator that handles :mod:`requests` and api related exceptions.
-    Should be wrapped around any function that makes a request; to the api or
-    otherwise.
-
-    Also checks if we can refresh the time at which we started our requests
-    because it's been more than RATELIMIT_RESET since the first request of the
-    cycle.
-
-    If we've refreshed our ratelimits, sets start_time to be the current
-    datetime.
+    A decorator that handles :mod:`requests` and api related exceptions, as
+    well as resetting our ratelimits if appropriate.
 
     Parameters
     ----------
     function: callable
         The function to wrap.
+
+    Notes
+    -----
+    Should be wrapped around any function that makes a request; to the api or
+    otherwise.
+
+    If it has been more than :data:`Loader.RATELIMIT_RESET` since
+    :data:`Loader.start_time`, sets :data:`Loader.start_time` to be
+    :func:`datetime.now <datetime.datetime.now>`.
     """
 
     def wrapper(*args, **kwargs):
