@@ -265,16 +265,30 @@ class Loader():
     @request
     def load_replay_data(self, map_id, user_id, mods=None):
         """
-        Queries the api for replay data from the given user on the given map, with the given mods.
+        Retrieves replay data from the api.
 
-        Args:
-            UserInfo user_info: The UserInfo representing this replay.
-        Returns:
-            The lzma bytes (b64 decoded response) returned by the api, or None if the replay was not available.
+        Parameters
+        ----------
+        map_id: int
+            The map the replay was playe on.
+        user_id: int
+            The user that played the replay.
+        mods: :class:`~.ModCombination`
+            The mods the replay was played with, or ``None`` for the highest
+            scoring replay, regardless of mods.
 
-        Raises:
-            CircleguardException if the loader instance has had a new session made yet.
-            APIException if the api responds with an error we don't know.
+        Returns
+        -------
+        str
+            The lzma-encoded string, decoded from the base 64 api response,
+            representing the replay.
+        None
+            If no replay data was available.
+
+        Notes
+        -----
+        This is the low level implementation of :func:`~.replay_data`, handling
+        the actual api request.
         """
 
         self.log.log(TRACE, "Requesting replay data by user %d on map %d with mods %s", user_id, map_id, mods)
@@ -286,17 +300,27 @@ class Loader():
     @check_cache
     def replay_data(self, user_info, cache=None):
         """
-        Loads the replay data specified by the user info.
+        Retrieves replay data from the api, or from the cache if it is already
+        cached.
 
-        Args:
-            UserInfo user_info: The UserInfo object representing this replay.
+        Parameters
+        ----------
+        user_info: :class:`~.UserInfo`
+            The user info representing the replay to retrieve.
 
-        Returns:
-            The play_data field of an circleparse.Replay instance created from the replay data received from the api,
-            or None if the replay was not available.
+        Returns
+        -------
+        list[:class:`circleparse.replay.ReplayEvent`]
+            The replay events with attributes ``x``, ``y``,
+            ``time_since_previous_action``, and ``keys_pressed``.
+        None
+            If no replay data was available.
 
-        Raises:
-            UnknownAPIException if replay_available was 1, but we did not receive replay data from the api.
+        Raises
+        ------
+        UnknownAPIException
+            If ``uxser_info.replay_available` was 1, but we did not receive
+            replay data from the api.
         """
 
         user_id = user_info.user_id
@@ -325,10 +349,23 @@ class Loader():
     @lru_cache()
     def map_id(self, map_hash):
         """
-        Retrieves the corresponding map id for the given map_hash from the api.
+        Retrieves a map id from a corresponding map hash through the api.
 
-        Returns:
-            The corresponding map id, or 0 if the api returned no matches.
+        Parameters
+        ----------
+        map_hash: str
+            The md5 hash of the map to get the id of.
+
+        Returns
+        -------
+        int
+            The map id that corresponds to ``map_hash``, or 0 if ``map_hash``
+            doesn't mach any map.
+
+        Notes
+        -----
+        This function is wrapped in a :func:`functools.lru_cache` to prevent
+        duplicate api calls.
         """
 
         response = self.api.get_beatmaps({"h": map_hash})
@@ -340,13 +377,31 @@ class Loader():
     @lru_cache()
     def user_id(self, username):
         """
-        Retrieves the corresponding user id for the given username from the api.
-        Note that the api currently has no method to keep track of name changes,
-        meaning this method will return 0 for previous usernames of a user, rather
-        than their true id.
+        Retrieves a user id from a corresponding username through the api.
 
-        Returns:
-            The corresponding user id, or 0 if the api returned no matches.
+        Parameters
+        ----------
+        username: str
+            The username of the user to get the user id of.
+
+        Returns
+        -------
+        int
+            The user id that corresponds to ``username``, or ``0`` if
+            ``username`` doesn't match any user.
+
+        Notes
+        -----
+        The api redirects name changes to the current username. For instance,
+        ``user_id("cookiezi")`` will return ``124493``, despite shige's current
+        osu! username being ``chocomint``. However, I am not sure if this
+        behavior is as well defined when someone else takes the previous name
+        of a user.
+
+        This function is case insensitive.
+
+        This function is wrapped in a :func:`functools.lru_cache` to prevent
+        duplicate api calls.
         """
 
         response = self.api.get_user({"u": username, "type": "string"})
@@ -358,8 +413,26 @@ class Loader():
     @lru_cache()
     def username(self, user_id):
         """
-        The inverse of :meth:`~circleguard.loader.Loader.user_id`. Retrieves
-        the username of the given user id.
+        Retrieves the username from a corresponding user id through the api.
+
+        Parameters
+        ----------
+        user_id: int
+            The user id of the user to get the username of.
+
+        Returns
+        -------
+        str
+            The username that corresponds to ``user_id``, or an empty string
+            if ``user_id`` doesn't match any user.
+
+        Notes
+        -----
+        This function is the inverse of
+        :meth:`~circleguard.loader.Loader.user_id`.
+
+        This function is wrapped in a :func:`functools.lru_cache` to prevent
+        duplicate api calls.
         """
         response = self.api.get_user({"u": user_id, "type": "id"})
         if response == []:
@@ -370,33 +443,35 @@ class Loader():
     @staticmethod
     def check_response(response):
         """
-        Checks the given api response for any kind of error or
-        unexpected response.
+        Checks a response from the api for an error or empty response.
 
-        Args:
-            String response: The api-returned response to check.
+        Parameters
+        ----------
+        response: list or dict
+            The response returned by the api.
 
-        Raises:
-            An Error corresponding to the type of error if there is an error,
-            or NoInfoAvailable if the response is empty. The mappings
-            for the api error message and its corresponding error are in circleguard.enums.
+        Raises
+        ------
+        One of :class:`~.enums.Error`
+            If an error exists in the response.
+        NoInfoAvailable
+            If the response is empty.
         """
-
-        if("error" in response):
+        if "error" in response: # dict case
             for error in Error:
                 if(response["error"] == error.value[0]):
                     raise error.value[1](error.value[2])
             else:
                 raise Error.UNKNOWN.value[1](Error.UNKNOWN.value[2]) # pylint: disable=unsubscriptable-object
                 # pylint is dumb because Error is an enum and this is totally legal
-        if not response: # response is empty
+        if not response: # response is empty, list or dict case
             raise NoInfoAvailableException("No info was available from the api for the given arguments.")
 
 
 
     def _enforce_ratelimit(self):
         """
-        Enforces the api ratelimit by sleeping the thread until it's safe to make requests again.
+        Sleeps the thread until we have refreshed our ratelimits.
         """
 
         difference = datetime.now() - Loader.start_time
@@ -408,10 +483,18 @@ class Loader():
 
     def _ratelimit(self, length):
         """
-        Sleeps the thread for the specified amount of time. Called by #_enforce_ratelimit.
+        Sleeps the thread for ``length`` time.
 
-        Split into two functions mostly to allow Loader subclasses to overload a single function and easily
-        get the time the Loader will be ratelimited for.
+        Parameters
+        ----------
+        length: int
+            How long, in seconds, to sleep the thread for.
+
+        Notes
+        -----
+        This method is only called by :meth:`~._enforce_ratelimit`. It is split
+        into two functions to allow :class:`~.Loader` subclasses to overload
+        just this function and easily interact with the ``length``.
         """
         self.log.info("Ratelimited, sleeping for %s seconds.", length)
         time.sleep(length)
