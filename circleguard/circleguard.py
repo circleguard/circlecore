@@ -98,11 +98,13 @@ class Circleguard:
             comparer = Comparer(d.steal_thresh, compare1, replays2=compare2)
             yield from comparer.compare()
 
-        # relax check
-        if Detect.RELAX in d:
+        if Detect.RELAX in d or Detect.CORRECTION in d:
             for replay in c.all_replays():
-                bm = self.library.lookup_by_id(replay.map_id, download=True, save=True)
-                investigator = Investigator(replay, bm, d.ur_thresh)
+                bm = None
+                # don't download beatmap unless we need it for relax
+                if Detect.RELAX in d:
+                    bm = self.library.lookup_by_id(replay.map_id, download=True, save=True)
+                investigator = Investigator(replay, d, beatmap=bm)
                 yield from investigator.investigate()
 
     def load(self, loadable):

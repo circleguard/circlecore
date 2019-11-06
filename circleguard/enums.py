@@ -254,7 +254,8 @@ class Mod():
 class Detect():
     STEAL = 1 << 0
     RELAX = 1 << 1
-    ALL = STEAL + RELAX
+    CORRECTION = 1 << 2
+    ALL = STEAL + RELAX + CORRECTION
 
     def __init__(self, value):
         self.value = value
@@ -284,6 +285,11 @@ class RelaxDetect(Detect):
         super().__init__(Detect.RELAX)
         self.ur_thresh = ur_thresh
 
+class CorrectionDetect(Detect):
+    def __init__(self, max_angle=10, min_distance=8):
+        super().__init__(Detect.CORRECTION)
+        self.max_angle = max_angle
+        self.min_distance = min_distance
 
 
 class RatelimitWeight(Enum):
@@ -308,7 +314,7 @@ class ResultType(Enum):
     STEAL = "replay stealing"
     REMOD = "remodding"
     RELAX = "relax"
-    AIM_CORRECTION = "aim correction"
+    CORRECTION = "aim correction"
     TIMEWARP = "timewarp"
 
 class Keys(IntFlag):

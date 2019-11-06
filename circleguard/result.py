@@ -4,7 +4,7 @@ from circleguard.enums import ResultType
 # Hierarchy
 #                                 Result
 #          InvestigationResult             ComparisonResult
-#              RelaxResult               ReplayStealingResult
+#      RelaxResult, CorrectionResult       ReplayStealingResult
 #
 #
 class Result():
@@ -110,3 +110,21 @@ class RelaxResult(InvestigationResult):
     def __init__(self, replay: Replay, ur: int, ischeat: bool):
         super().__init__(replay, ischeat, ResultType.RELAX)
         self.ur = ur
+
+class CorrectionResult(InvestigationResult):
+    """
+    The result of a test for aim correction cheats.
+
+    Parameters
+    ----------
+    replay: :class:`~circleguard.replay.Replay`
+        The replay investigated.
+    snaps: list[:class:`.~Snap`]
+        A list of suspicious hits in the replay.
+    ischeat: bool
+        Whether the replay is cheated or not.
+    """
+
+    def __init__(self, replay, snaps, ischeat):
+        super().__init__(replay, ischeat, ResultType.CORRECTION)
+        self.snaps = snaps
