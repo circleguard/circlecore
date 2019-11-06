@@ -322,11 +322,11 @@ class ResultType(Enum):
     What type of cheat test we are representing the results for.
     """
 
-    STEAL = "replay stealing"
-    REMOD = "remodding"
-    RELAX = "relax"
-    AIM_CORRECTION = "aim correction"
-    TIMEWARP = "timewarp"
+    STEAL = "Replay Stealing"
+    REMOD = "Remodding"
+    RELAX = "Relax"
+    AIM_CORRECTION = "Aim Correction"
+    TIMEWARP = "Timewarp"
 
 class Keys(IntFlag):
     M1 = 1
