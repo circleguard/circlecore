@@ -72,7 +72,7 @@ class ModCombination():
 
         Returns
         -------
-        str:
+        str
             The short name of this ModCombination.
 
         Examples
@@ -107,7 +107,7 @@ class ModCombination():
 
         Returns
         -------
-        str:
+        str
             The long name of this ModCombination.
 
         Examples
@@ -175,7 +175,7 @@ class ModCombination():
 
         Returns
         -------
-        list: :class:`~.ModCombination`
+        list[:class:`~.ModCombination`]
             A list of the component :class:`~.ModCombination`\s of this mod,
             ordered according to :const:`~circleguard.enums.Mod.ORDER`.
         """
