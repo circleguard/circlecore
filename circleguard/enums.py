@@ -311,21 +311,30 @@ class CorrectionDetect(Detect):
 
 class RatelimitWeight(Enum):
     """
-    How much it 'costs' to load a replay from the api. If the load method of a replay makes no api calls,
-    the corresponding value is RatelimitWeight.NONE. If it makes only light api calls (anything but get_replay),
-    the corresponding value is RatelimitWeight.LIGHT. If it makes any heavy api calls (get_replay), the
-    corresponding value is RatelimitWeight.HEAVY.
+    How much it 'costs' to load a replay from the api.
 
-    This value currently has no effect on the program and is reserved for possible future functionality.
+    :data:`~.RatelimitWeight.NONE` if the load method of a replay makes no api
+    calls.
+
+    :data:`~.RatelimitWeight.LIGHT` if the load method of a replay makes only
+    light api calls (anything but ``get_replay``).
+
+    :data:`~.RatelimitWeight.HEAVY` if the load method of a replay makes any
+    heavy api calls (``get_replay``).
+
+    Notes
+    -----
+    This value currently has no effect on the program and is reserved for
+    future functionality.
     """
 
-    NONE  = "none"
-    LIGHT = "light"
-    HEAVY = "heavy"
+    NONE  = "None"
+    LIGHT = "Light"
+    HEAVY = "Heavy"
 
 class ResultType(Enum):
     """
-    What type of cheat test we are representing the results for.
+    What type of cheat test to represent the results for.
     """
 
     STEAL = "Replay Stealing"
