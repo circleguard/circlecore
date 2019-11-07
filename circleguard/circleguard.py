@@ -2,10 +2,9 @@ from pathlib import Path
 import sys
 import itertools
 import os
-import shutil
 from os.path import isfile, join
 import logging
-from tempfile import mkdtemp
+from tempfile import TemporaryDirectory
 
 from circleguard.loader import Loader
 from circleguard.comparer import Comparer
@@ -57,10 +56,11 @@ class Circleguard:
         self.loader = Loader(key, cacher=self.cacher) if loader is None else loader(key, self.cacher)
         if slider_dir is None:
             # have to keep a reference to it or the folder gets deleted and can't be walked by Library
-            self.__slider_dir = mkdtemp()
-            self.library = Library(self.__slider_dir)
+            self.__slider_dir = TemporaryDirectory()
+            self.library = Library(self.__slider_dir.name)
         else:
             self.library = Library(slider_dir)
+
 
     def run(self, check):
         """
@@ -135,6 +135,7 @@ class Circleguard:
         """
         info_loadable.load_info(self.loader)
 
+
     def set_options(self, cache=None):
         """
         Sets options for this instance of circlecore.
@@ -153,11 +154,6 @@ class Circleguard:
                 self.cache = cache
                 self.cacher.should_cache = cache
                 continue
-
-    def __del__(self):
-        self.library.close()
-        shutil.rmtree(self.__slider_dir)
-
 
 def set_options(loglevel=None):
     """
