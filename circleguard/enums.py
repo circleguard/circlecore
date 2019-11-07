@@ -261,6 +261,8 @@ class Detect():
         self.value = value
         self.steal_thresh = None
         self.ur_thresh = None
+        self.max_angle = None
+        self.min_distance = None
 
     def __contains__(self, other):
         return bool(self.value & other)
@@ -273,6 +275,10 @@ class Detect():
         d = self if Detect.RELAX in self else other if Detect.RELAX in other else None
         if d:
             ret.ur_thresh = d.ur_thresh
+        d = self if Detect.CORRECTION in self else other if Detect.CORRECTION in other else None
+        if d:
+            ret.max_angle = d.max_angle
+            ret.min_distance = d.min_distance
         return ret
 
 class StealDetect(Detect):
