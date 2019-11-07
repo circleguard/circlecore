@@ -42,7 +42,7 @@ class Investigator:
         d = self.detect
         if Detect.RELAX in d:
             ur = self.ur(self.replay_data, self.beatmap)
-            ischeat = True if ur < d.max_ur else False
+            ischeat = True if ur < d.ur_thresh else False
             yield RelaxResult(self.replay, ur, ischeat)
         if Detect.CORRECTION in d:
             suspicious_angles = self.aim_correction(self.replay_data, d.max_angle, d.min_distance)
