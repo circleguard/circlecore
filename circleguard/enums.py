@@ -269,6 +269,16 @@ class Mod():
 
 
 class Detect():
+    """
+    A cheat, or set of cheats, to run tests to detect.
+
+    Parameters
+    ----------
+    value: int
+        One (or a bitwise combination) of :data:`~.Detect.STEAL`,
+        :data:`~.Detect.RELAX`, :data:`~.Detect.CORRECTION`,
+        :data:`~.Detect.ALL`. What cheats to detect.
+    """
     STEAL = 1 << 0
     RELAX = 1 << 1
     CORRECTION = 1 << 2
@@ -276,6 +286,8 @@ class Detect():
 
     def __init__(self, value):
         self.value = value
+
+        # so we can reference them in :func:`~.__add__`
         self.steal_thresh = None
         self.ur_thresh = None
 
@@ -293,16 +305,59 @@ class Detect():
         return ret
 
 class StealDetect(Detect):
+    """
+    Defines a detection of replay stealing.
+
+    Look at the average distance between the cursors of two replays.
+
+    Parameters
+    ----------
+    steal_thresh: float
+        If the average distance in pixels of two replays is smaller than
+        this value, they are labeled cheated (stolen replays). Default 18.
+    """
     def __init__(self, steal_thresh=18):
         super().__init__(Detect.STEAL)
         self.steal_thresh = steal_thresh
 
 class RelaxDetect(Detect):
+    """
+    Defines a detection of relax.
+
+    Look at the ur of a replay.
+
+    Parameters
+    ----------
+    ur_thresh: float
+        If the ur of a replay is less than this value, it is labeled cheated
+        (relaxed).
+    """
     def __init__(self, ur_thresh=50):
         super().__init__(Detect.RELAX)
         self.ur_thresh = ur_thresh
 
 class CorrectionDetect(Detect):
+    """
+    Defines a detection of aim correction.
+
+    Look at each set of three points (a,b,c) in a replay and calculate the
+    angle between them. Look at points where this angle is extremely acute
+    and neither |ab| or |bc| are small.
+
+    Parameters
+    ----------
+    max_angle: float
+        Consider only (a,b,c) where ``∠abc < max_angle``.
+    min_distance: float
+        Consider only (a,b,c) where ``|ab| > min_distance`` and
+        ``|ab| > min_distance``.
+
+    Notes
+    -----
+    A replay is considered cheated (aim corrected) by this detect if there
+    is a single datapoint that satsfies both ``max_angle`` and
+    ``min_distance``.
+    """
     def __init__(self, max_angle=10, min_distance=8):
         super().__init__(Detect.CORRECTION)
         self.max_angle = max_angle
