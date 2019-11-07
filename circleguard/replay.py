@@ -186,6 +186,29 @@ class Check(InfoLoadable):
                 f"detect={self.detect},loaded={self.loaded})")
 
 class Map(ReplayContainer):
+    """
+    A map's top plays (leaderboard), as seen on the website.
+
+    Parameters
+    ----------
+    map_id: int
+        The map to represent the top plays for.
+    num: int
+        How many top plays on the map to represent, starting from the first
+        place play. One of ``num`` or ``span`` must be passed, but not both.
+    span: str
+        A comma separated list of ranges of top plays to retrieve.
+        ``span="1-3,6,2-4"`` -> replays in the range ``[1,2,3,4,6]``.
+    mods: :class:`~.enums.ModCombination`
+        If passed, only represent replays played with this exact mod
+        combination. Due to limitations with the api, fuzzy matching is not
+        implemented. <br>
+        This is applied before ``num`` or ``span``. That is, if ``num=2``
+        and ``mods=Mod.HD``, the top two ``HD`` plays on the map are
+        represented.
+    cache: bool
+        Whether to cache the replays once they are loaded.
+    """
     def __init__(self, map_id, num=None, span=None, mods=None, cache=None):
         if not bool(num) ^ bool(span):
             # technically, num and span both being set would *work*, just span
@@ -243,6 +266,32 @@ class Map(ReplayContainer):
 
 
 class User(ReplayContainer):
+    """
+    A user's top plays (pp-wise, as seen on the website).
+
+    Parameters
+    ----------
+    user_id: int
+        The user to represent the top plays for.
+    num: int
+        How many top plays of the user to represent, starting from their best
+        play. One of ``num`` or ``span`` must be passed, but not both.
+    span: str
+        A comma separated list of ranges of top plays to retrieve.
+        ``span="1-3,6,2-4"`` -> replays in the range ``[1,2,3,4,6]``.
+    mods: :class:`~.enums.ModCombination`
+        If passed, only represent replays played with this exact mod
+        combination. Due to limitations with the api, fuzzy matching is not
+        implemented. <br>
+        This is applied before ``num`` or ``span``. That is, if ``num=2``
+        and ``mods=Mod.HD``, the user's top two ``HD`` plays are represented.
+    cache: bool
+        Whether to cache the replays once they are loaded.
+    available_only: bool
+        Whether to represent only replays that have replay data available.
+        Replays are filtered on this basis after ``mods`` and ``num``/``span``
+        are applied. True by default.
+    """
     def __init__(self, user_id, num=None, span=None, mods=None, cache=None, available_only=True):
         if not bool(num) ^ bool(span):
             raise ValueError("One of num or span must be specified, but not both")
