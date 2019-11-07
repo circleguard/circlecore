@@ -8,7 +8,7 @@ class UserInfo():
 
     Parameters
     ----------
-    timestamp: Datetime
+    timestamp: :class:`~datetime.datetime`
         When this replay was set.
     map_id: int
         The id of the map the replay was played on.
