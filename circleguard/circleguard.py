@@ -57,9 +57,6 @@ class Circleguard:
         if slider_dir is None:
             # have to keep a reference to it or the folder gets deleted and can't be walked by Library
             self.slider_dir = TemporaryDirectory()
-            # create db and immediately disconnect
-            tmp_library = Library.create_db(self.slider_dir.name)
-            tmp_library.close()
             self.library = None
         else:
             self.library = Library(slider_dir)
@@ -104,7 +101,7 @@ class Circleguard:
         # relax check
         if Detect.RELAX in d or Detect.CORRECTION in d:
             if Detect.RELAX in d:
-                if self.library is None:
+                if not self.library:
                     # connect to library since it's a temporary one
                     library = Library(self.slider_dir.name)
                 else:
@@ -119,7 +116,7 @@ class Circleguard:
                 yield from investigator.investigate()
 
             if Detect.RELAX in d:
-                if self.library is None:
+                if not self.library:
                     # disconnect from temporary library
                     library.close()
 
