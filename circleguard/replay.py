@@ -204,7 +204,7 @@ class Map(ReplayContainer):
         for info in loader.user_info(self.map_id, num=self.num, mods=self.mods, span=self.span):
             self.replays.append(ReplayMap(info.map_id, info.user_id, info.mods, cache=self.cache))
 
-    def load(self, loader, cache):
+    def load(self, loader, cache=None):
         # only listen to the parent's cache if ours is not set. Lower takes precedence
         cascade_cache = cache if self.cache is None else self.cache
         self.load_info(loader)
@@ -260,7 +260,7 @@ class User(ReplayContainer):
                 continue
             self.replays.append(ReplayMap(info.map_id, info.user_id, info.mods, cache=self.cache, info=info))
 
-    def load(self, loader, cache):
+    def load(self, loader, cache=None):
         # only listen to the parent's cache if ours is not set. Lower takes precedence
         cascade_cache = cache if self.cache is None else self.cache
         self.load_info(loader)
