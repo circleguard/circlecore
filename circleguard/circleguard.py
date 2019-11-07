@@ -56,8 +56,8 @@ class Circleguard:
         self.loader = Loader(key, cacher=self.cacher) if loader is None else loader(key, self.cacher)
         if slider_dir is None:
             # have to keep a reference to it or the folder gets deleted and can't be walked by Library
-            self.__slider_dir = TemporaryDirectory()
-            self.library = Library(self.__slider_dir.name)
+            self.slider_dir = TemporaryDirectory()
+            self.library = None
         else:
             self.library = Library(slider_dir)
 
@@ -98,14 +98,27 @@ class Circleguard:
             comparer = Comparer(d.steal_thresh, compare1, replays2=compare2)
             yield from comparer.compare()
 
+        # relax check
         if Detect.RELAX in d or Detect.CORRECTION in d:
+            if Detect.RELAX in d:
+                if not self.library:
+                    # connect to library since it's a temporary one
+                    library = Library(self.slider_dir.name)
+                else:
+                    library = self.library
+
             for replay in c.all_replays():
                 bm = None
                 # don't download beatmap unless we need it for relax
                 if Detect.RELAX in d:
-                    bm = self.library.lookup_by_id(replay.map_id, download=True, save=True)
+                    bm = library.lookup_by_id(replay.map_id, download=True, save=True)
                 investigator = Investigator(replay, d, beatmap=bm)
                 yield from investigator.investigate()
+
+            if Detect.RELAX in d:
+                if not self.library:
+                    # disconnect from temporary library
+                    library.close()
 
     def load(self, loadable):
         """
