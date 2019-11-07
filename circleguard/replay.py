@@ -320,12 +320,7 @@ class Replay(Loadable):
         the actual data of the replay. If the replay could not be loaded, this
         should be ``None``.
     weight: :class:`~.enums.RatelimitWeight`
-        How much it 'costs' to load this replay from the api. If the load method
-        of the replay makes no api calls, this value is RatelimitWeight.NONE.
-        If it makes only light api calls (anything but /api/get_replay),
-        this value isRatelimitWeight.LIGHT. If it makes any heavy api calls
-        (/api/get_replay), this value is RatelimitWeight.HEAVY.
-        See the RatelimitWeight documentation for more details.
+        How much it 'costs' to load this replay from the api.
     """
     def __init__(self, timestamp, map_id, username, user_id, mods, replay_id, replay_data, weight):
         self.timestamp = timestamp
