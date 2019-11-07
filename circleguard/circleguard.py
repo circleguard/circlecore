@@ -56,8 +56,11 @@ class Circleguard:
         self.loader = Loader(key, cacher=self.cacher) if loader is None else loader(key, self.cacher)
         if slider_dir is None:
             # have to keep a reference to it or the folder gets deleted and can't be walked by Library
-            self.__slider_dir = TemporaryDirectory()
-            self.library = Library(self.__slider_dir.name)
+            self.slider_dir = TemporaryDirectory()
+            # create db and immediately disconnect
+            tmp_library = Library.create_db(self.slider_dir.name)
+            tmp_library.close()
+            self.library = None
         else:
             self.library = Library(slider_dir)
 
@@ -100,10 +103,20 @@ class Circleguard:
 
         # relax check
         if Detect.RELAX in d:
+            if self.library is None:
+                # connect to library since it's a temporary one
+                library = Library(self.slider_dir.name)
+            else:
+                library = self.library
+
             for replay in c.all_replays():
-                bm = self.library.lookup_by_id(replay.map_id, download=True, save=True)
+                bm = library.lookup_by_id(replay.map_id, download=True, save=True)
                 investigator = Investigator(replay, bm, d.ur_thresh)
                 yield from investigator.investigate()
+
+            if self.library is None:
+                # disconnect from temporary library
+                library.close()
 
     def load(self, loadable):
         """
