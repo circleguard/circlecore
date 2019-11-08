@@ -86,4 +86,4 @@ We have only shown examples with |RelaxDetect| so far, but you can combine
     |Detect| with different thresholds.
 
 This |Check| defines an investigation into the |Map| for relax
-(with a ur thresh of 50) and replay stealing (with a steal thresh of 20).
+and replay stealing with the respective default thresholds.

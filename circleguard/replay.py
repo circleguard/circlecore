@@ -32,8 +32,16 @@ class Loadable(abc.ABC):
             The loader to load this replay with. Although subclasses may not
             end up using a :class:`~circleguard.loader.Loader` to
             properly load the replay (if they don't load anything from the osu
-            api, for instance), the parameter is necessary for homogeneity among
-            method calls.
+            api, for instance), the parameter is necessary for homogeneity
+            among method calls.
+        cache: bool
+            Whether the loadable should cache their replay data. This argument
+            comes from a parent—either a :class:`~.InfoLoadable` or
+            :class:`~circleguard.circleguard.Circleguard` itself. Should the
+            loadable already have a ``cache`` attribute, that should take
+            precedence over the option passed in this method, but if the
+            loadable has no preference then it should listen to the ``cache``
+            here.
         """
         pass
 
@@ -88,27 +96,20 @@ class ReplayContainer(InfoLoadable):
 
 class Check(InfoLoadable):
     """
-    Contains a list of Replay objects (or subclasses thereof) and how to proceed when
-    investigating them for cheats.
+    Organizes :class:`~.Loadable`\s and what to investigate them for.
 
-    Attributes:
-        List [Loadable] replays: A list of Loadable objects.
-        Detect detect: What cheats to run tests to detect.
+    Parameters
+    ----------
+    loadables: :class:`~.Loadable`
+        The loadables to hold for investigation.
+    detect: :class:`~.Detect`
+        What cheats to investigate for.
+    loadables2: :class:`~.Loadable`
+
         Boolean cache: Whether to cache the loaded replays. Defaults to False, or the config value if changed.
-        Boolean loaded: False at instantiation, set to True once check#load is called. See check#load for
-                more details.
     """
 
     def __init__(self, loadables, detect, loadables2=None, cache=None):
-        """
-        Initializes a Check instance.
-
-        Args:
-            List [Loadable] replays: A list of Replay or Map objects.
-            Boolean cache: Whether to cache the loaded replays. Defaults to False, or the config value if changed.
-            Detect detect: What cheats to run tests to detect.
-        """
-
         self.log = logging.getLogger(__name__ + ".Check")
         self.loadables = [loadables] if isinstance(loadables, Loadable) else loadables
         self.loadables2 = [loadables2] if isinstance(loadables2, Loadable) else [] if loadables2 is None else loadables2
@@ -130,6 +131,7 @@ class Check(InfoLoadable):
         --------
         :func:`~circleguard.replay.Loadable.all_replays` and
         :func:`~circleguard.replay.Loadable.all_replays2`
+
         Notes
         -----
         :class:`~circleguard.replay.Loadable`\s are very different from
@@ -184,6 +186,29 @@ class Check(InfoLoadable):
                 f"detect={self.detect},loaded={self.loaded})")
 
 class Map(ReplayContainer):
+    """
+    A map's top plays (leaderboard), as seen on the website.
+
+    Parameters
+    ----------
+    map_id: int
+        The map to represent the top plays for.
+    num: int
+        How many top plays on the map to represent, starting from the first
+        place play. One of ``num`` or ``span`` must be passed, but not both.
+    span: str
+        A comma separated list of ranges of top plays to retrieve.
+        ``span="1-3,6,2-4"`` -> replays in the range ``[1,2,3,4,6]``.
+    mods: :class:`~.enums.ModCombination`
+        If passed, only represent replays played with this exact mod
+        combination. Due to limitations with the api, fuzzy matching is not
+        implemented. <br>
+        This is applied before ``num`` or ``span``. That is, if ``num=2``
+        and ``mods=Mod.HD``, the top two ``HD`` plays on the map are
+        represented.
+    cache: bool
+        Whether to cache the replays once they are loaded.
+    """
     def __init__(self, map_id, num=None, span=None, mods=None, cache=None):
         if not bool(num) ^ bool(span):
             # technically, num and span both being set would *work*, just span
@@ -241,6 +266,32 @@ class Map(ReplayContainer):
 
 
 class User(ReplayContainer):
+    """
+    A user's top plays (pp-wise, as seen on the website).
+
+    Parameters
+    ----------
+    user_id: int
+        The user to represent the top plays for.
+    num: int
+        How many top plays of the user to represent, starting from their best
+        play. One of ``num`` or ``span`` must be passed, but not both.
+    span: str
+        A comma separated list of ranges of top plays to retrieve.
+        ``span="1-3,6,2-4"`` -> replays in the range ``[1,2,3,4,6]``.
+    mods: :class:`~.enums.ModCombination`
+        If passed, only represent replays played with this exact mod
+        combination. Due to limitations with the api, fuzzy matching is not
+        implemented. <br>
+        This is applied before ``num`` or ``span``. That is, if ``num=2``
+        and ``mods=Mod.HD``, the user's top two ``HD`` plays are represented.
+    cache: bool
+        Whether to cache the replays once they are loaded.
+    available_only: bool
+        Whether to represent only replays that have replay data available.
+        Replays are filtered on this basis after ``mods`` and ``num``/``span``
+        are applied. True by default.
+    """
     def __init__(self, user_id, num=None, span=None, mods=None, cache=None, available_only=True):
         if not bool(num) ^ bool(span):
             raise ValueError("One of num or span must be specified, but not both")
@@ -297,14 +348,16 @@ class Replay(Loadable):
 
     Parameters
     ----------
-    timestamp: Datetime
+    timestamp: :class:`datetime.datetime`
         When this replay was played.
     map_id: int
         The id of the map the replay was played on, or 0 if
         unknown or on an unsubmitted map.
     user_id: int
-        The id of the player who played the replay, or 0 if
-        unknown (if the player is restricted, for instance).
+        The id of the player who played the replay, or 0 if unknown
+        (if the player is restricted, for instance). Note that if the
+        user id is known, even if the user is restricted, it should still be
+        given instead of 0.
     username: str
         The username of the player who played the replay.
     mods: :class:`~.enums.ModCombination`
@@ -316,12 +369,7 @@ class Replay(Loadable):
         the actual data of the replay. If the replay could not be loaded, this
         should be ``None``.
     weight: :class:`~.enums.RatelimitWeight`
-        How much it 'costs' to load this replay from the api. If the load method
-        of the replay makes no api calls, this value is RatelimitWeight.NONE.
-        If it makes only light api calls (anything but /api/get_replay),
-        this value isRatelimitWeight.LIGHT. If it makes any heavy api calls
-        (/api/get_replay), this value is RatelimitWeight.HEAVY.
-        See the RatelimitWeight documentation for more details.
+        How much it 'costs' to load this replay from the api.
     """
     def __init__(self, timestamp, map_id, username, user_id, mods, replay_id, replay_data, weight):
         self.timestamp = timestamp
@@ -391,7 +439,7 @@ class ReplayMap(Replay):
     detect: :class:`~.enums.Detect`
         What cheats to run tests to detect.
     cache: bool
-        Whether to cache this replay or not.
+        Whether to cache this replay once it is loaded.
     """
 
     def __init__(self, map_id, user_id, mods=None, cache=None, info=None):
@@ -424,11 +472,14 @@ class ReplayMap(Replay):
         ----------
         loader: :class:`~.loader.Loader`
             The :class:`~.loader.Loader` to load this replay with.
+        cache: bool
+            Whether to cache this replay after loading it. This only has an
+            effect if ``self.cache`` is unset (``None``).
 
         Notes
         -----
         If ``replay.loaded`` is ``True``, this method has no effect.
-        ``replay.loaded`` is set to ``True`` after this method loads the replay.
+        ``replay.loaded`` is set to ``True`` after this method is finished.
         """
         # only listen to the parent's cache if ours is not set. Lower takes precedence
         cache = cache if self.cache is None else self.cache
@@ -449,27 +500,16 @@ class ReplayPath(Replay):
     """
     A :class:`~.Replay` saved locally in an ``osr`` file.
 
-    To instantiate a ReplayPath, you only need to know the path to the osr file. Although this class still
-    loads some information from the api - like the map id and the user id - no RatelimitWeight.HEAVY calls
-    are made, making this a relatively light replay to load. Of course, the replay has to already be downloaded
-    to instantiate this class, sometimes making it less than ideal.
-
-    Attributes:
-        [String or Path] path: A pathlike object representing the absolute path to the osr file.
-        Boolean loaded: Whether this replay has been loaded. If True, calls to #load will have no effect.
-                        See #load for more information.
-        RatelimitWeight weight: RatelimitWeight.LIGHT, as this class' load method makes only light api calls.
-                                See RatelimitWeight documentation for more information.
+    Parameters
+    ----------
+    path: str or :class`os.PathLike`
+        The path to the replay file.
+    cache: bool
+        Whether to cache this replay once it is loaded. Note that currently
+        we do not cache :class:`~.ReplayPath` regardless of this parameter.
     """
 
     def __init__(self, path, cache=None):
-        """
-        Initializes a ReplayPath instance.
-
-        Args:
-            [String or Path] path: A pathlike object representing the absolute path to the osr file.
-        """
-
         self.log = logging.getLogger(__name__ + ".ReplayPath")
         self.path = path
         self.cache = cache
@@ -491,11 +531,21 @@ class ReplayPath(Replay):
 
     def load(self, loader, cache):
         """
-        Loads the data for this replay from the osr file given by the path. See circleparse.parse_replay_file for
-        implementation details. This method has no effect if replay.loaded is True.
+        Loads the data for this replay from the osr file.
 
-        The superclass Replay is initialized after this call, setting replay.loaded to True. Multiple
-        calls to this method will have no effect beyond the first.
+        Parameters
+        ----------
+        loader: :class:`~.loader.Loader`
+            The :class:`~.loader.Loader` to load this replay with.
+        cache: bool
+            Whether to cache this replay after loading it. This only has an
+            effect if ``self.cache`` is unset (``None``). Note that currently
+            we do not cache :class:`~.ReplayPath` regardless of this parameter.
+
+        Notes
+        -----
+        If ``replay.loaded`` is ``True``, this method has no effect.
+        ``replay.loaded`` is set to ``True`` after this method is finished.
         """
 
         # we don't cache local replays currently. Ignore cache option for if/when we need it

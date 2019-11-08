@@ -99,7 +99,7 @@ def span_to_list(span):
     Examples
     --------
     >>> span_to_list("1-3,6,2-4")
-    {1,2,3,6,4}
+    {1, 2, 3, 4, 6}
     """
     ret = set()
     for s in span.split(","):
