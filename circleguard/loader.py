@@ -19,21 +19,22 @@ from circleguard.utils import TRACE, span_to_list
 
 def request(function):
     """
-    A decorator that handles :mod:`requests` and api related exceptions.
-    Should be wrapped around any function that makes a request; to the api or
-    otherwise.
+    A decorator that handles :mod:`requests` and api related exceptions, as
+    well as resetting our ratelimits if appropriate.
 
     Parameters
     ----------
-    function: function
-        The wrapped function.
+    function: callable
+        The function to wrap.
 
     Notes
     -----
-    Also checks if we can refresh the time at which we started our requests because
-    it's been more than RATELIMIT_RESET since the first request of the cycle.
+    Should be wrapped around any function that makes a request; to the api or
+    otherwise.
 
-    If we've refreshed our ratelimits, sets start_time to be the current datetime.
+    If it has been more than :data:`Loader.RATELIMIT_RESET` since
+    :data:`Loader.start_time`, sets :data:`Loader.start_time` to be
+    :func:`datetime.now <datetime.datetime.now>`.
     """
 
     def wrapper(*args, **kwargs):
@@ -72,6 +73,11 @@ def check_cache(function):
     :class:`~circleguard.user_info.UserInfo` has its replay cached. If so,
     returns a :class:`~circleguard.replay.Replay` instance from the cached data.
     Otherwise, calls and returns the `function` as normal.
+
+    Parameters
+    ----------
+    function: callable
+        The function to wrap.
 
     Notes
     -----
@@ -117,9 +123,10 @@ class Loader():
     -----
     If the api ratelimits the key, we wait until our ratelimits are refreshed
     and retry the request. Because the api does not provide the time until the
-    next refresh (and we do not periodically retry the key), if the key is
-    ratelimited because of an interaction not managed by this class,
-    the class may wait more time than necessary for the key to refresh.
+    next refresh (and we do not use exponential backoff or another retry
+    strategy), if the key is ratelimited because of an interaction not managed
+    by this class, the class may wait more time than necessary for the key to
+    refresh.
     """
 
     RATELIMIT_RESET = 60 # time in seconds until the api refreshes our ratelimits
@@ -134,25 +141,53 @@ class Loader():
     @request
     def user_info(self, map_id, num=None, user_id=None, mods=None, limit=True, span=None):
         """
-        Returns a list of UserInfo objects containing a user's
-        (timestamp, map_id, user_id, username, replay_id, mods, replay_available)
-        on the given map.
+        Retrieves user infos from ``map_id``.
 
-        If limit and user_id is set, it will return a single UserInfo object, not a list.
+        Parameters
+        ----------
+        map_id: int
+            The map id to retrieve user info for.
+        num: int
+            The number of user infos on the map to retrieve.
+        user_id: int
+            If passed, only retrieve user info on ``map_id`` for this user.
+            Note that this is not necessarily limited to just the user's top
+            score on the map. See ``limit``.
+        mods: :class:`~.ModCombination`
+            The mods to limit user infos to. ie only return user infos with
+            mods that match ``mods``.
+        limit: bool
+            Whether to limit to only one response. Only has an effect if
+            ``user_id`` is passed. If ``limit`` is ``True``, will only return
+            the top scoring user info by ``user_id``. If ``False``, will return
+            all scores by ``user_id``.
+        span: str
+            A comma separated list of ranges of top replays on the map to
+            retrieve. ``span="1-3,6,2-4"`` -> replays in the range
+            ``[1,2,3,4,6]``.
 
-        Args:
-            Integer map_id: The map id to get the replay_id from.
-            Integer user_id: The user id to get the replay_id from.
-            Boolean limit: If set, will only return a user's top score (top response). Otherwise, will
-                          return every response (every score they set on that map under different mods)
-            ModCombination: The mods the replay info to retieve were played with.
-            String span: A comma separated list of ranges of top replays on the map to check. "1-3" will check the first 3 replays,
-                    and "1-3,6,2-4" will check replays 1,2,3,4,6 for instance. Values that appear multiple times or in multiple ranges
-                    are only counted once. If both span and num are passed, span is used instead of num.
+        Returns
+        -------
+        list[:class:`~.UserInfo`]
+            The user infos as specified by the arguments.
+        :class:`~.UserInfo`
+            If ``limit`` is ``True`` and ``user_id`` is passed.
+
+        Notes
+        -----
+        One of ``num``, ``user_id``, and ``span`` must be passed, but not both
+        ``num`` and either ``user_id`` or ``span``.
+
+        Raises
+        ------
+        NoInfoAvailableException
+            If there is no info available for the given parameters.
         """
 
-        # we have to define a new variable to hold locals - otherwise when we call it twice inside the dict comprehension,
-        # it rebinds to the comp scope and takes on different locals which is real bad. I spent many-a-hour figuring this out,
+        # we have to define a new variable to hold locals - otherwise when we
+        # call it twice inside the dict comprehension, it rebinds to the comp
+        # scope and takes on different locals which is real bad.
+        # I spent many-a-hour figuring this out,
         # and if anyone has a more elegant solution I'm all ears.
         locals_ = locals()
         self.log.log(TRACE, "Loading user info on map %d with options %s",
@@ -180,30 +215,37 @@ class Loader():
 
 
     @request
-    def get_user_best(self, user_id, num, span=None, mods=None):
+    def get_user_best(self, user_id, num=None, span=None, mods=None):
         """
         Gets the top 100 best plays for the given user.
 
-        Args:
-            String user_id: The user id to get best plays of.
-            Integer num: The number of top plays to retrieve. Must be between 1 and 100.
-            String span: A comma separated list of ranges of top plays to return "1-3" will return the map_ids for the top 3 plays of the user,
-                    and "1-3,6,2-4" will return the 1,2,3,4,6 top plays for instance. Values that appear multiple times or in multiple ranges
-                    are only returned once.
+        Parameters
+        ----------
+        user_id: str
+            The user id to get best plays of.
+        num: int
+            The number of top plays to retrieve. Must be between 1 and 100.
+        span: str
+            A comma separated list of ranges of top plays to retrieve.
+            ``span="1-3,6,2-4"`` -> replays in the range ``[1,2,3,4,6]``.
 
         Returns:
-            A list of Integer map_ids for the given number of the user's top plays.
+            A list of Integer map_ids for the given number of the user's top
+            plays.
 
-        Raises:
-            InvalidArgumentsException if number is not between 1 and 100 inclusive.
+        Raises
+        ------
+        InvalidArgumentsException
+            If ``num`` or ``span`` is not between ``1`` and ``100`` inclusive.
         """
 
         self.log.log(TRACE, "Retrieving the best %d plays of user %d", num, user_id)
-        if num < 1 or num > 100:
-            raise InvalidArgumentsException("The number of best user plays to fetch must be between 1 and 100 inclusive!")
         if span:
             span_list = span_to_list(span)
             num = max(span_list)
+        if num < 1 or num > 100:
+            raise InvalidArgumentsException("The number of best user plays to fetch must be between 1 and 100 inclusive!")
+
         response = self.api.get_user_best({"m": "0", "u": user_id, "limit": num})
         Loader.check_response(response)
         if mods:
@@ -223,16 +265,30 @@ class Loader():
     @request
     def load_replay_data(self, map_id, user_id, mods=None):
         """
-        Queries the api for replay data from the given user on the given map, with the given mods.
+        Retrieves replay data from the api.
 
-        Args:
-            UserInfo user_info: The UserInfo representing this replay.
-        Returns:
-            The lzma bytes (b64 decoded response) returned by the api, or None if the replay was not available.
+        Parameters
+        ----------
+        map_id: int
+            The map the replay was playe on.
+        user_id: int
+            The user that played the replay.
+        mods: :class:`~.ModCombination`
+            The mods the replay was played with, or ``None`` for the highest
+            scoring replay, regardless of mods.
 
-        Raises:
-            CircleguardException if the loader instance has had a new session made yet.
-            APIException if the api responds with an error we don't know.
+        Returns
+        -------
+        str
+            The lzma-encoded string, decoded from the base 64 api response,
+            representing the replay.
+        None
+            If no replay data was available.
+
+        Notes
+        -----
+        This is the low level implementation of :func:`~.replay_data`, handling
+        the actual api request.
         """
 
         self.log.log(TRACE, "Requesting replay data by user %d on map %d with mods %s", user_id, map_id, mods)
@@ -244,17 +300,27 @@ class Loader():
     @check_cache
     def replay_data(self, user_info, cache=None):
         """
-        Loads the replay data specified by the user info.
+        Retrieves replay data from the api, or from the cache if it is already
+        cached.
 
-        Args:
-            UserInfo user_info: The UserInfo object representing this replay.
+        Parameters
+        ----------
+        user_info: :class:`~.UserInfo`
+            The user info representing the replay to retrieve.
 
-        Returns:
-            The play_data field of an circleparse.Replay instance created from the replay data received from the api,
-            or None if the replay was not available.
+        Returns
+        -------
+        list[:class:`circleparse.replay.ReplayEvent`]
+            The replay events with attributes ``x``, ``y``,
+            ``time_since_previous_action``, and ``keys_pressed``.
+        None
+            If no replay data was available.
 
-        Raises:
-            UnknownAPIException if replay_available was 1, but we did not receive replay data from the api.
+        Raises
+        ------
+        UnknownAPIException
+            If ``uxser_info.replay_available` was 1, but we did not receive
+            replay data from the api.
         """
 
         user_id = user_info.user_id
@@ -265,7 +331,7 @@ class Loader():
             return None
 
         lzma_bytes = self.load_replay_data(map_id, user_id, mods)
-        if(lzma_bytes is None):
+        if lzma_bytes is None:
             raise UnknownAPIException("The api guaranteed there would be a replay available, but we did not receive any data. "
                                      "Please report this to the devs, who will open an issue on osu!api if necessary.")
         try:
@@ -283,10 +349,23 @@ class Loader():
     @lru_cache()
     def map_id(self, map_hash):
         """
-        Retrieves the corresponding map id for the given map_hash from the api.
+        Retrieves a map id from a corresponding map hash through the api.
 
-        Returns:
-            The corresponding map id, or 0 if the api returned no matches.
+        Parameters
+        ----------
+        map_hash: str
+            The md5 hash of the map to get the id of.
+
+        Returns
+        -------
+        int
+            The map id that corresponds to ``map_hash``, or 0 if ``map_hash``
+            doesn't mach any map.
+
+        Notes
+        -----
+        This function is wrapped in a :func:`functools.lru_cache` to prevent
+        duplicate api calls.
         """
 
         response = self.api.get_beatmaps({"h": map_hash})
@@ -298,13 +377,31 @@ class Loader():
     @lru_cache()
     def user_id(self, username):
         """
-        Retrieves the corresponding user id for the given username from the api.
-        Note that the api currently has no method to keep track of name changes,
-        meaning this method will return 0 for previous usernames of a user, rather
-        than their true id.
+        Retrieves a user id from a corresponding username through the api.
 
-        Returns:
-            The corresponding user id, or 0 if the api returned no matches.
+        Parameters
+        ----------
+        username: str
+            The username of the user to get the user id of.
+
+        Returns
+        -------
+        int
+            The user id that corresponds to ``username``, or ``0`` if
+            ``username`` doesn't match any user.
+
+        Notes
+        -----
+        The api redirects name changes to the current username. For instance,
+        ``user_id("cookiezi")`` will return ``124493``, despite shige's current
+        osu! username being ``chocomint``. However, I am not sure if this
+        behavior is as well defined when someone else takes the previous name
+        of a user.
+
+        This function is case insensitive.
+
+        This function is wrapped in a :func:`functools.lru_cache` to prevent
+        duplicate api calls.
         """
 
         response = self.api.get_user({"u": username, "type": "string"})
@@ -316,8 +413,26 @@ class Loader():
     @lru_cache()
     def username(self, user_id):
         """
-        The inverse of :meth:`~.user_ud`. Retrieves the username of the
-        given user id.
+        Retrieves the username from a corresponding user id through the api.
+
+        Parameters
+        ----------
+        user_id: int
+            The user id of the user to get the username of.
+
+        Returns
+        -------
+        str
+            The username that corresponds to ``user_id``, or an empty string
+            if ``user_id`` doesn't match any user.
+
+        Notes
+        -----
+        This function is the inverse of
+        :meth:`~circleguard.loader.Loader.user_id`.
+
+        This function is wrapped in a :func:`functools.lru_cache` to prevent
+        duplicate api calls.
         """
         response = self.api.get_user({"u": user_id, "type": "id"})
         if response == []:
@@ -328,32 +443,35 @@ class Loader():
     @staticmethod
     def check_response(response):
         """
-        Checks the given api response for any kind of error or unexpected response.
+        Checks a response from the api for an error or empty response.
 
-        Args:
-            String response: The api-returned response to check.
+        Parameters
+        ----------
+        response: list or dict
+            The response returned by the api.
 
-        Raises:
-            An Error corresponding to the type of error if there is an error, or
-            NoInfoAvailable if the response is empty. The mappings
-            for the api error message and its corresponding error are in circleguard.enums.
+        Raises
+        ------
+        One of :class:`~.enums.Error`
+            If an error exists in the response.
+        NoInfoAvailable
+            If the response is empty.
         """
-
-        if("error" in response):
+        if "error" in response: # dict case
             for error in Error:
                 if(response["error"] == error.value[0]):
                     raise error.value[1](error.value[2])
             else:
                 raise Error.UNKNOWN.value[1](Error.UNKNOWN.value[2]) # pylint: disable=unsubscriptable-object
                 # pylint is dumb because Error is an enum and this is totally legal
-        if not response: # response is empty
+        if not response: # response is empty, list or dict case
             raise NoInfoAvailableException("No info was available from the api for the given arguments.")
 
 
 
     def _enforce_ratelimit(self):
         """
-        Enforces the api ratelimit by sleeping the thread until it's safe to make requests again.
+        Sleeps the thread until we have refreshed our ratelimits.
         """
 
         difference = datetime.now() - Loader.start_time
@@ -365,10 +483,18 @@ class Loader():
 
     def _ratelimit(self, length):
         """
-        Sleeps the thread for the specified amount of time. Called by #_enforce_ratelimit.
+        Sleeps the thread for ``length`` time.
 
-        Split into two functions mostly to allow Loader subclasses to overload a single function and easily
-        get the time the Loader will be ratelimited for.
+        Parameters
+        ----------
+        length: int
+            How long, in seconds, to sleep the thread for.
+
+        Notes
+        -----
+        This method is only called by :meth:`~._enforce_ratelimit`. It is split
+        into two functions to allow :class:`~.Loader` subclasses to overload
+        just this function and easily interact with the ``length``.
         """
         self.log.info("Ratelimited, sleeping for %s seconds.", length)
         time.sleep(length)

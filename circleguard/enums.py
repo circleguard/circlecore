@@ -72,7 +72,7 @@ class ModCombination():
 
         Returns
         -------
-        str:
+        str
             The short name of this ModCombination.
 
         Examples
@@ -107,13 +107,13 @@ class ModCombination():
 
         Returns
         -------
-        str:
+        str
             The long name of this ModCombination.
 
         Examples
         --------
         >>> ModCombination(576).long_name()
-        "Nightore"
+        "Nightcore"
         >>> ModCombination(24).long_name()
         "Hidden HardRock"
 
@@ -175,9 +175,9 @@ class ModCombination():
 
         Returns
         -------
-        list: :class:`~.ModCombination`
+        list[:class:`~.ModCombination`]
             A list of the component :class:`~.ModCombination`\s of this mod,
-            ordered according to :data:`~.Mod.ORDER`.
+            ordered according to :const:`~circleguard.enums.Mod.ORDER`.
         """
 
         mods = [ModCombination(mod) for mod in int_to_mod.keys() if self.value & mod]
@@ -195,8 +195,20 @@ class Mod():
     """
     An ingame osu! mod.
 
+    Common combinations are available as ``HDDT``, ``HDHR``, and ``HDDTHR``.
+
     Notes
     -----
+    The nightcore mod is never set by itself. When we see plays set with ``NC``,
+    we are really seeing a ``DT + NC`` play. ``NC`` by itself is ``512``, but
+    what we expect to see is ``576`` (``512 + 64``; ``DT`` is ``64``). As such
+    ``Mod.NC`` is defined to be the more intuitive version—``DT + NC``. We
+    provide the true, technical version of the ``NC`` mod (``512``) as
+    ``Mod._NC``.
+
+    This same treatment and reasoning applies to ``Mod.PF``, which we define
+    as ``PF + SD``. The technical version of PF is available as ``Mod._PF``.
+
     A full list of mods and their specification can be found at
     https://osu.ppy.sh/help/wiki/Game_Modifiers, or a more technical list at
     https://github.com/ppy/osu-api/wiki#mods.
@@ -246,12 +258,27 @@ class Mod():
     HDDTHR = HD + DT + HR
 
     # how people naturally sort mods in combinations (HDDTHR, not DTHRHD)
+    # sphinx uses repr() here
+    # (see https://github.com/sphinx-doc/sphinx/issues/3857), so provide
+    # our own, more human readable docstrings. #: denotes sphinx docstrings.
+    #: [EZ, HD, HT, DT, _NC, HR, FL, NF, SD, _PF, RX, AP, SO, AT, V2, TD,
+    #: FI, RD, CN ,TP, K1, K2, K3, K4, K5, K6, K7, K8, K9, CO, MR]
     ORDER = [EZ, HD, HT, DT, _NC, HR, FL, NF, SD, _PF, RX, AP, SO, AT,
              V2, TD, # we stop caring about order after this point
              FI, RD, CN ,TP, K1, K2, K3, K4, K5, K6, K7, K8, K9, CO, MR]
 
 
 class Detect():
+    """
+    A cheat, or set of cheats, to run tests to detect.
+
+    Parameters
+    ----------
+    value: int
+        One (or a bitwise combination) of :data:`~.Detect.STEAL`,
+        :data:`~.Detect.RELAX`, :data:`~.Detect.CORRECTION`,
+        :data:`~.Detect.ALL`. What cheats to detect.
+    """
     STEAL = 1 << 0
     RELAX = 1 << 1
     CORRECTION = 1 << 2
@@ -259,6 +286,8 @@ class Detect():
 
     def __init__(self, value):
         self.value = value
+
+        # so we can reference them in :func:`~.__add__`
         self.steal_thresh = None
         self.ur_thresh = None
         self.max_angle = None
@@ -282,16 +311,59 @@ class Detect():
         return ret
 
 class StealDetect(Detect):
+    """
+    Defines a detection of replay stealing.
+
+    Look at the average distance between the cursors of two replays.
+
+    Parameters
+    ----------
+    steal_thresh: float
+        If the average distance in pixels of two replays is smaller than
+        this value, they are labeled cheated (stolen replays). Default 18.
+    """
     def __init__(self, steal_thresh=18):
         super().__init__(Detect.STEAL)
         self.steal_thresh = steal_thresh
 
 class RelaxDetect(Detect):
+    """
+    Defines a detection of relax.
+
+    Look at the ur of a replay.
+
+    Parameters
+    ----------
+    ur_thresh: float
+        If the ur of a replay is less than this value, it is labeled cheated
+        (relaxed).
+    """
     def __init__(self, ur_thresh=50):
         super().__init__(Detect.RELAX)
         self.ur_thresh = ur_thresh
 
 class CorrectionDetect(Detect):
+    """
+    Defines a detection of aim correction.
+
+    Look at each set of three points (a,b,c) in a replay and calculate the
+    angle between them. Look at points where this angle is extremely acute
+    and neither |ab| or |bc| are small.
+
+    Parameters
+    ----------
+    max_angle: float
+        Consider only (a,b,c) where ``∠abc < max_angle``.
+    min_distance: float
+        Consider only (a,b,c) where ``|ab| > min_distance`` and
+        ``|ab| > min_distance``.
+
+    Notes
+    -----
+    A replay is considered cheated (aim corrected) by this detect if there
+    is a single datapoint that satsfies both ``max_angle`` and
+    ``min_distance``.
+    """
     def __init__(self, max_angle=10, min_distance=8):
         super().__init__(Detect.CORRECTION)
         self.max_angle = max_angle
@@ -300,28 +372,37 @@ class CorrectionDetect(Detect):
 
 class RatelimitWeight(Enum):
     """
-    How much it 'costs' to load a replay from the api. If the load method of a replay makes no api calls,
-    the corresponding value is RatelimitWeight.NONE. If it makes only light api calls (anything but get_replay),
-    the corresponding value is RatelimitWeight.LIGHT. If it makes any heavy api calls (get_replay), the
-    corresponding value is RatelimitWeight.HEAVY.
+    How much it 'costs' to load a replay from the api.
 
-    This value currently has no effect on the program and is reserved for possible future functionality.
+    :data:`~.RatelimitWeight.NONE` if the load method of a replay makes no api
+    calls.
+
+    :data:`~.RatelimitWeight.LIGHT` if the load method of a replay makes only
+    light api calls (anything but ``get_replay``).
+
+    :data:`~.RatelimitWeight.HEAVY` if the load method of a replay makes any
+    heavy api calls (``get_replay``).
+
+    Notes
+    -----
+    This value currently has no effect on the program and is reserved for
+    future functionality.
     """
 
-    NONE  = "none"
-    LIGHT = "light"
-    HEAVY = "heavy"
+    NONE  = "None"
+    LIGHT = "Light"
+    HEAVY = "Heavy"
 
 class ResultType(Enum):
     """
-    What type of cheat test we are representing the results for.
+    What type of cheat test to represent the results for.
     """
 
-    STEAL = "replay stealing"
-    REMOD = "remodding"
-    RELAX = "relax"
-    CORRECTION = "aim correction"
-    TIMEWARP = "timewarp"
+    STEAL = "Replay Stealing"
+    REMOD = "Remodding"
+    RELAX = "Relax"
+    CORRECTION = "Aim Correction"
+    TIMEWARP = "Timewarp"
 
 class Keys(IntFlag):
     M1 = 1

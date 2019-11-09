@@ -127,7 +127,7 @@ class Comparer:
 
         Returns
         -------
-        tuple (float, float)
+        tuple[float, float]
             (average distance, stddev) of the cursors of the two replays.
         """
 
@@ -144,12 +144,9 @@ class Comparer:
         # remove time and keys from each tuple
         data1 = [d[1:3] for d in data1]
         data2 = [d[1:3] for d in data2]
-
-        mods1 = replay1.mods
-        mods2 = replay2.mods
-        flip1 = Mod.HR in mods1
-        flip2 = Mod.HR in mods2
-        if(flip1 ^ flip2): # xor, if one has hr but not the other
+        print(Mod.HR in replay1.mods)
+        print(Mod.HR in replay2.mods)
+        if (Mod.HR in replay1.mods) ^ (Mod.HR in replay2.mods): # xor, if one has hr but not the other
             for d in data1:
                 d[1] = 384 - d[1]
 
@@ -173,7 +170,7 @@ class Comparer:
 
         Returns
         -------
-        tuple (float, float)
+        tuple[float, float]
             (average distance, stddev) between the two datasets.
 
         Notes
