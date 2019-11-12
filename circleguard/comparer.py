@@ -11,6 +11,163 @@ from circleguard.exceptions import InvalidArgumentsException, CircleguardExcepti
 import circleguard.utils as utils
 from circleguard.result import ReplayStealingResult
 
+class ModifiedReplay(Replay):
+    def __init__(self, timestamp, map_id, username, user_id, mods, replay_id, replay_data, weight):
+        Replay.__init__(self, timestamp, map_id, username, user_id, mods, replay_id, replay_data, weight)
+        self.txyk = None
+    
+    def load(self, loader):
+        pass
+
+    def interpolate_to(self, timestamps):
+        txyks = []
+
+        self.as_list_with_timestamps()
+
+        i = 1
+        t_end = self.txyk[-1][0]
+        
+        for t in timestamps:
+            if t > t_end:
+                break
+            
+            while self.txyk[i][0] < t:
+                i += 1
+
+            r = (t - self.txyk[i - 1][0]) / (self.txyk[i][0] - self.txyk[i - 1][0])
+
+            x = r * self.txyk[i][1] + (1 - r) * self.txyk[i - 1][1]
+            y = r * self.txyk[i][2] + (1 - r) * self.txyk[i - 1][2]
+            k = self.txyk[i - 1]
+
+            txyks += [[t, x, y, k]]
+
+        replay = ModifiedReplay.copy(self)
+        replay.txyk = txyks
+
+        return replay
+
+    def shift(self, dx, dy):
+        txyks = []
+
+        self.as_list_with_timestamps()
+
+        for t, x, y, k in self.txyk:
+            txyks += [[t, x + dx, y + dy, k]]
+
+        replay = ModifiedReplay.copy(self)
+        replay.txyk = txyks
+
+        return replay
+
+    def as_list_with_timestamps(self):
+        if not self.txyk:
+            timestamps = np.array([e.time_since_previous_action for e in self.replay_data])
+            timestamps = timestamps.cumsum()
+
+            # zip timestamps back to data and convert t, x, y, keys to tuples
+            txyk = [[z[0], z[1].x, z[1].y, z[1].keys_pressed] for z in zip(timestamps, self.replay_data)]
+            # sort to ensure time goes forward as you move through the data
+            # in case someone decides to make time go backwards anyway
+            txyk.sort(key=lambda p: p[0])
+            self.txyk = txyk
+            
+            return txyk
+        else:
+            return self.txyk
+    
+    #filtering
+    @staticmethod
+    def copy(replay):
+        return ModifiedReplay(replay.timestamp, replay.map_id, replay.username,
+                      replay.user_id, replay.mods, replay.replay_id, replay.replay_data, replay.weight)
+
+    @staticmethod
+    def filter_single(replay):
+        data = replay.as_list_with_timestamps()
+
+        def is_valid(d):
+            return 0 <= d[1] <= 512 and 0 <= d[2] <= 384
+
+        txyk = [d1 for (d0, d1) in zip(data, data[1:]) if is_valid(d0) and is_valid(d1)]
+
+        r = ModifiedReplay.copy(replay)
+        r.loaded = True
+        r.txyk = txyk
+
+        return r
+
+    @staticmethod
+    def align_clocks(clocks):
+        n = len(clocks)
+        indices = [0] * n
+
+        output = []
+
+        def move_to(i, value):
+            while clocks[i][indices[i] + 1] <= value:
+                indices[i] += 1
+
+                if indices[i] + 1 == len(clocks[i]):
+                    return True
+                
+            return False
+        
+        while True:
+            last = 0
+
+            for i in range(n):
+                value = clocks[i][indices[i] + 1]
+                
+                if value > last:
+                    last = value
+
+            for i in range(n):
+                if move_to(i, last):
+                    return output
+
+            output += [last]
+
+    @staticmethod
+    def align_coordinates(replays):
+        rs = []
+        
+        for replay in replays:
+            replay.as_list_with_timestamps()
+
+            xs = []
+            ys = []
+
+            for _, x, y, _ in replay.txyk:
+                xs += [x]
+                ys += [y]
+
+            rs += [(np.mean(xs), np.mean(ys))]
+
+        replays = replays[:1] + [replay.shift(rs[0][0] - r[0], rs[0][1] - r[1]) for (replay, r)
+                                in zip(replays[1:], rs[1:])]
+
+        return replays
+
+    @staticmethod
+    def clean_set(replays, filter_valid=False, align_t=False, align_xy=False):
+        replays = [ModifiedReplay.copy(r) for r in replays]
+
+        if filter_valid:
+            replays = [ModifiedReplay.filter_single(replay) for replay in replays]
+
+        if align_t:
+            timestamps = [[txyk[0] for txyk in replay.as_list_with_timestamps()] for replay in replays]
+
+            timestamps = ModifiedReplay.align_clocks(timestamps)
+
+            replays = [replay.interpolate_to(timestamps) for replay in replays]
+
+        if align_xy:
+            replays = ModifiedReplay.align_coordinates(replays)
+        
+        return replays
+
 class Comparer:
     """
     Manages comparing :class:`~.replay.Replay`\s for replay stealing.
@@ -49,7 +206,11 @@ class Comparer:
         self.replays1 = [replay for replay in replays1 if replay.replay_data is not None]
         self.replays2 = [replay for replay in replays2 if replay.replay_data is not None] if replays2 else None
         self.mode = "double" if self.replays2 else "single"
+        self.clean_mode = {}
         self.log.debug("Comparer initialized: %r", self)
+
+    def set_clean_mode(self, options):
+        self.clean_mode = options
 
     def compare(self):
         """
@@ -71,6 +232,9 @@ class Comparer:
         #TODO: a little bit hacky and I don't think works 100% correctly, if mode is double but replays2 is None
         if not self.replays1 or self.replays2 == []:
             return
+
+        if self.mode == "single":
+            self.replays1 = ModifiedReplay.clean_set(self.replays1, **self.clean_mode)
 
         if self.mode == "double":
             iterator = itertools.product(self.replays1, self.replays2)
@@ -144,8 +308,7 @@ class Comparer:
         # remove time and keys from each tuple
         data1 = [d[1:3] for d in data1]
         data2 = [d[1:3] for d in data2]
-        print(Mod.HR in replay1.mods)
-        print(Mod.HR in replay2.mods)
+        
         if (Mod.HR in replay1.mods) ^ (Mod.HR in replay2.mods): # xor, if one has hr but not the other
             for d in data1:
                 d[1] = 384 - d[1]
