@@ -136,14 +136,14 @@ class Check(InfoLoadable):
         -----
         :class:`~circleguard.replay.Loadable`\s are very different from
         :class:`~circleguard.replay.Replay`\s -
-        ``len(container.all_loadables())`` will *not* return the number of
-        replays in the container, for instance.
+        ``len(check.all_loadables())`` will *not* return the number of
+        replays in the check, for instance.
         """
         return self.loadables + self.loadables2
 
     def load(self, loader, cache=None):
         """
-        Loads all :class:`~circleguard.replay.Loadable`\s in this Container.
+        Loads all :class:`~circleguard.replay.Loadable`\s in this check.
 
         Parameters
         ----------

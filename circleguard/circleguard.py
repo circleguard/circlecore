@@ -64,19 +64,20 @@ class Circleguard:
 
     def run(self, check):
         """
-        Investigates replays held in ``container`` for cheats.
+        Investigates replays held in a check for cheats.
 
         Parameters
         ----------
-        container: :class:`~.Container`
-            A container holding the replays to investigate.
+        check: :class:`~.Check`
+            A check holding the replays to investigate, and what to investigate
+            them for.
 
         Yields
         ------
         :class:`~.Result`
             A result representing a single investigation of the replays
-            in ``container``. Depending on how many replays are in
-            ``container``, and what type of cheats we are investigating for,
+            in ``check``. Depending on how many replays are in
+            ``check``, and what type of cheats we are investigating for,
             the total number of :class:`~.Result`\s yielded may vary.
 
         Notes
