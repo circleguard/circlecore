@@ -57,8 +57,8 @@ represents the replay in the file ``/Users/tybug/Desktop/replays/replay1.osr``.
 Replay Containers
 -----------------
 
-True to its name, a |ReplayContainer| represents a set of replays. These are
-provided as a convenience to minimize the amount of information you need to
+A |ReplayContainer| represents a set of replays. These classes are provided as
+a convenience to minimize the amount of information you need to
 know to construct a view of map or player.
 
 
