@@ -75,6 +75,11 @@ Links
     loading
 
 .. toctree::
+    :caption: Contributing
+
+    contributing
+
+.. toctree::
     :caption: Appendix
     :hidden:
 
