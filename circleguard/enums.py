@@ -348,7 +348,7 @@ class CorrectionDetect(Detect):
 
     Look at each set of three points (a,b,c) in a replay and calculate the
     angle between them. Look at points where this angle is extremely acute
-    and neither |ab| or |bc| are small.
+    and neither ``|ab|`` or ``|bc|`` are small.
 
     Parameters
     ----------

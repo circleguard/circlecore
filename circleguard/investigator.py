@@ -68,7 +68,8 @@ class Investigator:
     def aim_correction(replay_data, max_angle, min_distance):
         """
         Calculates the angle between each set of three points (a,b,c) and finds
-        points where this angle is extremely acute neither |ab| or |bc| are
+        points where this angle is extremely acute neither ``|ab|`` or
+        ``|bc|`` are
         small.
 
         Parameters
