@@ -73,6 +73,7 @@ Links
     creating-checks
     investigation
     loading
+    caching
 
 .. toctree::
     :caption: Contributing
