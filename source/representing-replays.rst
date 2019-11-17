@@ -71,11 +71,27 @@ It is common to want to represent all, or a subset of, a map's leaderboard.
 
     # top 50 scores on the map
     m = Map(221777, num=50)
+
+We can filter by mods:
+
+.. code-block:: python
+
     # top 12 scores with exactly HD (not HDDT or another variation). Due to
     # api restrictions, we do not provide fuzzy matching.
     m = Map(221777, num=12, mods=Mod.HD)
+
+Or only represent some of the replays on the map. Use ``span`` for any case
+when you don't simply want the first ``n`` replays.
+
+.. code-block:: python
+
     # 1st, 4th, 5th, 6th, 7h, 8th, 10th, 11th, and 12th top scores
     m = Map(221777, span="1, 4-8, 10-12")
+
+``span`` can be combined with ``mods``, just like ``num`` can:
+
+.. code-block:: python
+
     # 1st and 49th scores with exactly HD
     m = Map(221777, span="1, 49", mods=Mod.HD)
 
@@ -89,10 +105,25 @@ Similar to |Map|, a |User| represents the top plays of a user.
 
     # top 50 scores of the user
     u = User(2757689, num=50)
+
+We can still filter by mods:
+
+.. code-block:: python
+
     # top 12 scores with exactly HD (not HDDT or another variation). Due to
     # api restrictions, we do not provide fuzzy matching.
     u = User(2757689, num=12, mods=Mod.HD)
+
+or represent with a ``span``:
+
+.. code-block:: python
+
     # 1st, 4th, 5th, 6th, 7h, 8th, 10th, 11th, and 12th top scores
     u = User(2757689, span="1, 4-8, 10-12")
+
+And can still combine ``span`` and ``mods``:
+
+.. code-block:: python
+
     # 1st and 49th scores with exactly HD
     u = User(2757689, span="1, 49", mods=Mod.HD)
