@@ -10,6 +10,37 @@ We will also introduce several useful methods and functionality in this
 section.
 
 
+.. _Additional Loading Methods:
+
+Additional Loading Methods
+--------------------------
+
+|cg.load| will load a given |Loadable|. This happens naturally during |cg.run|,
+but as we will see below, you may need to have a loaded |Loadable| before you
+call |cg.run|.
+
+.. code-block:: python
+
+    cg = Circleguard("key")
+    r = ReplayMap(221777, 2757689)
+    print(r.loaded)
+    cg.load(r)
+    print(r.loaded)
+
+|cg.load_info| will load the info of a given |ReplayContainer|. See
+`Replay Containers`_ for exactly what that means. Like |cg.load|, this happens
+naturally during |cg.run|, but you may need an info loaded |ReplayContainer|
+before you call |cg.run|.
+
+.. code-block:: python
+
+    cg = Circleguard("key")
+    m = Map(221777, num=2)
+    print(m.loaded)
+    cg.load(m)
+    print(m.loaded)
+
+
 Stages
 ------
 
@@ -39,12 +70,9 @@ This means that trying to access, say, the ``replay_data`` or ``replay_id`` of
 an unloaded |Replay| will result in an error. This is usually not a problem,
 since the replays are loaded through |cg.run| and you can access
 ``replay_data`` etc. from the yielded |Result|. However, if you need to know
-further information about the replay before running it, we provide |cg.load|.
+further information about the replay before you call |cg.run|, use |cg.load|.
 After loading a |Replay|, you can then acess its other attributes without
 issue.
-
-|cg.load| gives you control over when the loading cost occurs, but there is
-no strict time benefit or loss from loading early, or waiting until |cg.run|.
 
 .. todo::
 
