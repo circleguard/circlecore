@@ -502,7 +502,7 @@ class ReplayPath(Replay):
 
     Parameters
     ----------
-    path: str or :class`os.PathLike`
+    path: str or :class:`os.PathLike`
         The path to the replay file.
     cache: bool
         Whether to cache this replay once it is loaded. Note that currently
