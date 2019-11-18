@@ -4,6 +4,7 @@ import logging
 import math
 
 import numpy as np
+import itertools as itr
 
 from circleguard.replay import Replay
 from circleguard.enums import Mod
@@ -20,6 +21,8 @@ class ModifiedReplay(Replay):
         pass
 
     def interpolate_to(self, timestamps):
+        prev_err = np.seterr(all="ignore")
+        
         txyks = []
 
         self.as_list_with_timestamps()
@@ -36,6 +39,9 @@ class ModifiedReplay(Replay):
 
             r = (t - self.txyk[i - 1][0]) / (self.txyk[i][0] - self.txyk[i - 1][0])
 
+            if np.isnan(r) or np.isinf(r):
+                continue
+
             x = r * self.txyk[i][1] + (1 - r) * self.txyk[i - 1][1]
             y = r * self.txyk[i][2] + (1 - r) * self.txyk[i - 1][2]
             k = self.txyk[i - 1]
@@ -45,15 +51,17 @@ class ModifiedReplay(Replay):
         replay = ModifiedReplay.copy(self)
         replay.txyk = txyks
 
+        np.seterr(**prev_err)
+
         return replay
 
-    def shift(self, dx, dy):
+    def shift(self, dx, dy, dt):
         txyks = []
 
         self.as_list_with_timestamps()
 
         for t, x, y, k in self.txyk:
-            txyks += [[t, x + dx, y + dy, k]]
+            txyks += [[t + dt, x + dx, y + dy, k]]
 
         replay = ModifiedReplay.copy(self)
         replay.txyk = txyks
@@ -79,8 +87,10 @@ class ModifiedReplay(Replay):
     #filtering
     @staticmethod
     def copy(replay):
-        return ModifiedReplay(replay.timestamp, replay.map_id, replay.username,
+        r = ModifiedReplay(replay.timestamp, replay.map_id, replay.username,
                       replay.user_id, replay.mods, replay.replay_id, replay.replay_data, replay.weight)
+        r.txyk = replay.as_list_with_timestamps()
+        return r
 
     @staticmethod
     def filter_single(replay):
@@ -144,13 +154,13 @@ class ModifiedReplay(Replay):
 
             rs += [(np.mean(xs), np.mean(ys))]
 
-        replays = replays[:1] + [replay.shift(rs[0][0] - r[0], rs[0][1] - r[1]) for (replay, r)
+        replays = replays[:1] + [replay.shift(rs[0][0] - r[0], rs[0][1] - r[1], 0) for (replay, r)
                                 in zip(replays[1:], rs[1:])]
 
         return replays
 
     @staticmethod
-    def clean_set(replays, filter_valid=False, align_t=False, align_xy=False):
+    def clean_set(replays, filter_valid=False, align_t=False, align_xy=False, search=None):
         replays = [ModifiedReplay.copy(r) for r in replays]
 
         if filter_valid:
@@ -198,7 +208,7 @@ class Comparer:
     :class:`~investigator.Investigator`, for investigating single replays.
     """
 
-    def __init__(self, threshold, replays1, replays2=None):
+    def __init__(self, threshold, replays1, replays2=None, dr=1.0, dt=16):
         self.log = logging.getLogger(__name__)
         self.threshold = threshold
 
@@ -208,6 +218,8 @@ class Comparer:
         self.mode = "double" if self.replays2 else "single"
         self.clean_mode = {}
         self.log.debug("Comparer initialized: %r", self)
+        self.dr = dr
+        self.dt = dt
 
     def set_clean_mode(self, options):
         self.clean_mode = options
@@ -267,7 +279,12 @@ class Comparer:
             The result of comparing ``replay1`` to ``replay2``.
         """
         self.log.log(utils.TRACE, "comparing %r and %r", replay1, replay2)
-        result = Comparer._compare_two_replays(replay1, replay2)
+
+        if "search" in self.clean_mode and self.clean_mode["search"]:
+            result = [Comparer._compare_hill_climb(replay1, replay2, self.dr, self.dt), 0]
+        else:
+            result = Comparer._compare_two_replays(replay1, replay2)
+        
         mean = result[0]
         sigma = result[1]
         ischeat = False
@@ -275,6 +292,33 @@ class Comparer:
             ischeat = True
 
         return ReplayStealingResult(replay1, replay2, mean, ischeat)
+
+    @staticmethod
+    def _compare_hill_climb(replay1, replay2, dr, dt):
+        r1copy = replay1
+        v0 = Comparer._compare_two_replays(r1copy, replay2)[0]
+
+        for _ in range(10):
+            vs = {}
+            
+            for sgn in [-1, 1]:
+                r1 = r1copy.shift(0, 0, sgn * dt)
+
+                t1, t2 = ModifiedReplay.clean_set([r1, replay2], align_xy=True, align_t=True)
+                
+                v = Comparer._compare_two_replays(t1, t2)[0]
+
+                vs[v] = r1
+
+            vmin = min(vs)
+
+            if vmin < v0:
+                v0 = vmin
+                r1copy = vs[vmin]
+            else:
+                break
+
+        return v0
 
     @staticmethod
     def _compare_two_replays(replay1, replay2):
