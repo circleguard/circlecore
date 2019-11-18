@@ -598,12 +598,11 @@ class ReplayModified(Replay):
 
             txyks += [[t, x, y, k]]
 
-        replay = ReplayModified.copy(self)
-        replay.txyk = txyks
+        self.txyk = txyks
 
         np.seterr(**prev_err)
 
-        return replay
+        return self
 
     def shift(self, dx, dy, dt):
         txyks = []
@@ -613,26 +612,15 @@ class ReplayModified(Replay):
         for t, x, y, k in self.txyk:
             txyks += [[t + dt, x + dx, y + dy, k]]
 
-        replay = ReplayModified.copy(self)
-        replay.txyk = txyks
+        self.txyk = txyks
 
-        return replay
+        return self
 
     def as_list_with_timestamps(self):
         if not self.txyk:
-            timestamps = np.array([e.time_since_previous_action for e in self.replay_data])
-            timestamps = timestamps.cumsum()
-
-            # zip timestamps back to data and convert t, x, y, keys to tuples
-            txyk = [[z[0], z[1].x, z[1].y, z[1].keys_pressed] for z in zip(timestamps, self.replay_data)]
-            # sort to ensure time goes forward as you move through the data
-            # in case someone decides to make time go backwards anyway
-            txyk.sort(key=lambda p: p[0])
-            self.txyk = txyk
+            self.txyk = Replay.as_list_with_timestamps(self)
             
-            return txyk
-        else:
-            return self.txyk
+        return self.txyk
     
     #filtering
     @staticmethod
@@ -651,11 +639,10 @@ class ReplayModified(Replay):
 
         txyk = [d1 for (d0, d1) in zip(data, data[1:]) if is_valid(d0) and is_valid(d1)]
 
-        r = ReplayModified.copy(replay)
-        r.loaded = True
-        r.txyk = txyk
+        replay.loaded = True
+        replay.txyk = txyk
 
-        return r
+        return replay
 
     @staticmethod
     def align_clocks(clocks):
@@ -710,7 +697,7 @@ class ReplayModified(Replay):
         return replays
 
     @staticmethod
-    def clean_set(replays, filter_valid=False, align_t=False, align_xy=False, search=None):
+    def clean_set(replays, filter_valid=False, align_t=False, align_xy=False):
         replays = [ReplayModified.copy(r) for r in replays]
 
         if filter_valid:

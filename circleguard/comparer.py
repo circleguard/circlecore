@@ -138,7 +138,7 @@ class Comparer:
             values = {}
             
             for sgn in [-1, 1]:
-                attempt1 = previous1.shift(0, 0, sgn * dt)
+                attempt1 = ReplayModified.copy(previous1).shift(0, 0, sgn * dt)
 
                 t1, t2 = ReplayModified.clean_set([attempt1, replay2], align_xy=True, align_t=True)
                 
