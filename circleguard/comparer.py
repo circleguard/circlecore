@@ -42,7 +42,7 @@ class Comparer:
     :class:`~investigator.Investigator`, for investigating single replays.
     """
 
-    def __init__(self, threshold, replays1, replays2=None, dr=1.0, dt=16):
+    def __init__(self, threshold, replays1, replays2=None):
         self.log = logging.getLogger(__name__)
         self.threshold = threshold
 
@@ -51,12 +51,14 @@ class Comparer:
         self.replays2 = [replay for replay in replays2 if replay.replay_data is not None] if replays2 else None
         self.mode = "double" if self.replays2 else "single"
         self.clean_mode = {}
+        self.local_search = False
+        self.dt = 16
         self.log.debug("Comparer initialized: %r", self)
-        self.dr = dr
-        self.dt = dt
 
-    def set_clean_mode(self, options):
+    def set_clean_mode(self, options, local_search=False, dt=16):
         self.clean_mode = options
+        self.local_search = local_search
+        self.dt = dt
 
     def compare(self):
         """
@@ -79,7 +81,7 @@ class Comparer:
         if not self.replays1 or self.replays2 == []:
             return
 
-        if self.mode == "single":
+        if self.mode == "single" and (self.clean_mode or self.local_search):
             self.replays1 = ReplayModified.clean_set(self.replays1, **self.clean_mode)
 
         if self.mode == "double":
@@ -114,13 +116,13 @@ class Comparer:
         """
         self.log.log(utils.TRACE, "comparing %r and %r", replay1, replay2)
 
-        if "search" in self.clean_mode and self.clean_mode["search"]:
-            result = [Comparer._compare_hill_climb(replay1, replay2, self.dr, self.dt), 0]
+        if self.local_search:
+            mean = Comparer._compare_hill_climb(replay1, replay2, self.dt)
         else:
             result = Comparer._compare_two_replays(replay1, replay2)
+            mean = result[0]
+            sigma = result[1]
         
-        mean = result[0]
-        sigma = result[1]
         ischeat = False
         if(mean < self.threshold):
             ischeat = True
@@ -128,31 +130,31 @@ class Comparer:
         return ReplayStealingResult(replay1, replay2, mean, ischeat)
 
     @staticmethod
-    def _compare_hill_climb(replay1, replay2, dr, dt):
-        r1copy = replay1
-        v0 = Comparer._compare_two_replays(r1copy, replay2)[0]
+    def _compare_hill_climb(replay1, replay2, dt):
+        previous1 = replay1
+        prev_value = 100  # whatever high value
 
         for _ in range(10):
-            vs = {}
+            values = {}
             
             for sgn in [-1, 1]:
-                r1 = r1copy.shift(0, 0, sgn * dt)
+                attempt1 = previous1.shift(0, 0, sgn * dt)
 
-                t1, t2 = ReplayModified.clean_set([r1, replay2], align_xy=True, align_t=True)
+                t1, t2 = ReplayModified.clean_set([attempt1, replay2], align_xy=True, align_t=True)
                 
-                v = Comparer._compare_two_replays(t1, t2)[0]
+                value = Comparer._compare_two_replays(t1, t2)[0]
 
-                vs[v] = r1
+                values[value] = attempt1
 
-            vmin = min(vs)
+            min_value = min(values)
 
-            if vmin < v0:
-                v0 = vmin
-                r1copy = vs[vmin]
+            if min_value < prev_value:
+                prev_value = min_value
+                previous1 = values[min_value]
             else:
                 break
 
-        return v0
+        return prev_value
 
     @staticmethod
     def _compare_two_replays(replay1, replay2):
