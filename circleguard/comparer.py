@@ -6,177 +6,11 @@ import math
 import numpy as np
 import itertools as itr
 
-from circleguard.replay import Replay
+from circleguard.replay import Replay, ReplayModified
 from circleguard.enums import Mod
 from circleguard.exceptions import InvalidArgumentsException, CircleguardException
 import circleguard.utils as utils
 from circleguard.result import ReplayStealingResult
-
-class ModifiedReplay(Replay):
-    def __init__(self, timestamp, map_id, username, user_id, mods, replay_id, replay_data, weight):
-        Replay.__init__(self, timestamp, map_id, username, user_id, mods, replay_id, replay_data, weight)
-        self.txyk = None
-    
-    def load(self, loader):
-        pass
-
-    def interpolate_to(self, timestamps):
-        prev_err = np.seterr(all="ignore")
-        
-        txyks = []
-
-        self.as_list_with_timestamps()
-
-        i = 1
-        t_end = self.txyk[-1][0]
-        
-        for t in timestamps:
-            if t > t_end:
-                break
-            
-            while self.txyk[i][0] < t:
-                i += 1
-
-            r = (t - self.txyk[i - 1][0]) / (self.txyk[i][0] - self.txyk[i - 1][0])
-
-            if np.isnan(r) or np.isinf(r):
-                continue
-
-            x = r * self.txyk[i][1] + (1 - r) * self.txyk[i - 1][1]
-            y = r * self.txyk[i][2] + (1 - r) * self.txyk[i - 1][2]
-            k = self.txyk[i - 1]
-
-            txyks += [[t, x, y, k]]
-
-        replay = ModifiedReplay.copy(self)
-        replay.txyk = txyks
-
-        np.seterr(**prev_err)
-
-        return replay
-
-    def shift(self, dx, dy, dt):
-        txyks = []
-
-        self.as_list_with_timestamps()
-
-        for t, x, y, k in self.txyk:
-            txyks += [[t + dt, x + dx, y + dy, k]]
-
-        replay = ModifiedReplay.copy(self)
-        replay.txyk = txyks
-
-        return replay
-
-    def as_list_with_timestamps(self):
-        if not self.txyk:
-            timestamps = np.array([e.time_since_previous_action for e in self.replay_data])
-            timestamps = timestamps.cumsum()
-
-            # zip timestamps back to data and convert t, x, y, keys to tuples
-            txyk = [[z[0], z[1].x, z[1].y, z[1].keys_pressed] for z in zip(timestamps, self.replay_data)]
-            # sort to ensure time goes forward as you move through the data
-            # in case someone decides to make time go backwards anyway
-            txyk.sort(key=lambda p: p[0])
-            self.txyk = txyk
-            
-            return txyk
-        else:
-            return self.txyk
-    
-    #filtering
-    @staticmethod
-    def copy(replay):
-        r = ModifiedReplay(replay.timestamp, replay.map_id, replay.username,
-                      replay.user_id, replay.mods, replay.replay_id, replay.replay_data, replay.weight)
-        r.txyk = replay.as_list_with_timestamps()
-        return r
-
-    @staticmethod
-    def filter_single(replay):
-        data = replay.as_list_with_timestamps()
-
-        def is_valid(d):
-            return 0 <= d[1] <= 512 and 0 <= d[2] <= 384
-
-        txyk = [d1 for (d0, d1) in zip(data, data[1:]) if is_valid(d0) and is_valid(d1)]
-
-        r = ModifiedReplay.copy(replay)
-        r.loaded = True
-        r.txyk = txyk
-
-        return r
-
-    @staticmethod
-    def align_clocks(clocks):
-        n = len(clocks)
-        indices = [0] * n
-
-        output = []
-
-        def move_to(i, value):
-            while clocks[i][indices[i] + 1] <= value:
-                indices[i] += 1
-
-                if indices[i] + 1 == len(clocks[i]):
-                    return True
-                
-            return False
-        
-        while True:
-            last = 0
-
-            for i in range(n):
-                value = clocks[i][indices[i] + 1]
-                
-                if value > last:
-                    last = value
-
-            for i in range(n):
-                if move_to(i, last):
-                    return output
-
-            output += [last]
-
-    @staticmethod
-    def align_coordinates(replays):
-        rs = []
-        
-        for replay in replays:
-            replay.as_list_with_timestamps()
-
-            xs = []
-            ys = []
-
-            for _, x, y, _ in replay.txyk:
-                xs += [x]
-                ys += [y]
-
-            rs += [(np.mean(xs), np.mean(ys))]
-
-        replays = replays[:1] + [replay.shift(rs[0][0] - r[0], rs[0][1] - r[1], 0) for (replay, r)
-                                in zip(replays[1:], rs[1:])]
-
-        return replays
-
-    @staticmethod
-    def clean_set(replays, filter_valid=False, align_t=False, align_xy=False, search=None):
-        replays = [ModifiedReplay.copy(r) for r in replays]
-
-        if filter_valid:
-            replays = [ModifiedReplay.filter_single(replay) for replay in replays]
-
-        if align_t:
-            timestamps = [[txyk[0] for txyk in replay.as_list_with_timestamps()] for replay in replays]
-
-            timestamps = ModifiedReplay.align_clocks(timestamps)
-
-            replays = [replay.interpolate_to(timestamps) for replay in replays]
-
-        if align_xy:
-            replays = ModifiedReplay.align_coordinates(replays)
-        
-        return replays
 
 class Comparer:
     """
@@ -246,7 +80,7 @@ class Comparer:
             return
 
         if self.mode == "single":
-            self.replays1 = ModifiedReplay.clean_set(self.replays1, **self.clean_mode)
+            self.replays1 = ReplayModified.clean_set(self.replays1, **self.clean_mode)
 
         if self.mode == "double":
             iterator = itertools.product(self.replays1, self.replays2)
@@ -304,7 +138,7 @@ class Comparer:
             for sgn in [-1, 1]:
                 r1 = r1copy.shift(0, 0, sgn * dt)
 
-                t1, t2 = ModifiedReplay.clean_set([r1, replay2], align_xy=True, align_t=True)
+                t1, t2 = ReplayModified.clean_set([r1, replay2], align_xy=True, align_t=True)
                 
                 v = Comparer._compare_two_replays(t1, t2)[0]
 

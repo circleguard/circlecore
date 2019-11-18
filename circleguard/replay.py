@@ -561,3 +561,169 @@ class ReplayPath(Replay):
         Replay.__init__(self, loaded.timestamp, map_id, loaded.player_name, user_id, ModCombination(loaded.mod_combination),
                         loaded.replay_id, loaded.play_data, self.weight)
         self.log.log(TRACE, "Finished loading %s", self)
+
+class ReplayModified(Replay):
+    def __init__(self, timestamp, map_id, username, user_id, mods, replay_id, replay_data, weight):
+        Replay.__init__(self, timestamp, map_id, username, user_id, mods, replay_id, replay_data, weight)
+        self.txyk = None
+    
+    def load(self, loader):
+        pass
+
+    def interpolate_to(self, timestamps):
+        prev_err = np.seterr(all="ignore")
+        
+        txyks = []
+
+        self.as_list_with_timestamps()
+
+        i = 1
+        t_end = self.txyk[-1][0]
+        
+        for t in timestamps:
+            if t > t_end:
+                break
+            
+            while self.txyk[i][0] < t:
+                i += 1
+
+            r = (t - self.txyk[i - 1][0]) / (self.txyk[i][0] - self.txyk[i - 1][0])
+
+            if np.isnan(r) or np.isinf(r):
+                continue
+
+            x = r * self.txyk[i][1] + (1 - r) * self.txyk[i - 1][1]
+            y = r * self.txyk[i][2] + (1 - r) * self.txyk[i - 1][2]
+            k = self.txyk[i - 1]
+
+            txyks += [[t, x, y, k]]
+
+        replay = ReplayModified.copy(self)
+        replay.txyk = txyks
+
+        np.seterr(**prev_err)
+
+        return replay
+
+    def shift(self, dx, dy, dt):
+        txyks = []
+
+        self.as_list_with_timestamps()
+
+        for t, x, y, k in self.txyk:
+            txyks += [[t + dt, x + dx, y + dy, k]]
+
+        replay = ReplayModified.copy(self)
+        replay.txyk = txyks
+
+        return replay
+
+    def as_list_with_timestamps(self):
+        if not self.txyk:
+            timestamps = np.array([e.time_since_previous_action for e in self.replay_data])
+            timestamps = timestamps.cumsum()
+
+            # zip timestamps back to data and convert t, x, y, keys to tuples
+            txyk = [[z[0], z[1].x, z[1].y, z[1].keys_pressed] for z in zip(timestamps, self.replay_data)]
+            # sort to ensure time goes forward as you move through the data
+            # in case someone decides to make time go backwards anyway
+            txyk.sort(key=lambda p: p[0])
+            self.txyk = txyk
+            
+            return txyk
+        else:
+            return self.txyk
+    
+    #filtering
+    @staticmethod
+    def copy(replay):
+        r = ReplayModified(replay.timestamp, replay.map_id, replay.username,
+                      replay.user_id, replay.mods, replay.replay_id, replay.replay_data, replay.weight)
+        r.txyk = replay.as_list_with_timestamps()
+        return r
+
+    @staticmethod
+    def filter_single(replay):
+        data = replay.as_list_with_timestamps()
+
+        def is_valid(d):
+            return 0 <= d[1] <= 512 and 0 <= d[2] <= 384
+
+        txyk = [d1 for (d0, d1) in zip(data, data[1:]) if is_valid(d0) and is_valid(d1)]
+
+        r = ReplayModified.copy(replay)
+        r.loaded = True
+        r.txyk = txyk
+
+        return r
+
+    @staticmethod
+    def align_clocks(clocks):
+        n = len(clocks)
+        indices = [0] * n
+
+        output = []
+
+        def move_to(i, value):
+            while clocks[i][indices[i] + 1] <= value:
+                indices[i] += 1
+
+                if indices[i] + 1 == len(clocks[i]):
+                    return True
+                
+            return False
+        
+        while True:
+            last = 0
+
+            for i in range(n):
+                value = clocks[i][indices[i] + 1]
+                
+                if value > last:
+                    last = value
+
+            for i in range(n):
+                if move_to(i, last):
+                    return output
+
+            output += [last]
+
+    @staticmethod
+    def align_coordinates(replays):
+        rs = []
+        
+        for replay in replays:
+            replay.as_list_with_timestamps()
+
+            xs = []
+            ys = []
+
+            for _, x, y, _ in replay.txyk:
+                xs += [x]
+                ys += [y]
+
+            rs += [(np.mean(xs), np.mean(ys))]
+
+        replays = replays[:1] + [replay.shift(rs[0][0] - r[0], rs[0][1] - r[1], 0) for (replay, r)
+                                in zip(replays[1:], rs[1:])]
+
+        return replays
+
+    @staticmethod
+    def clean_set(replays, filter_valid=False, align_t=False, align_xy=False, search=None):
+        replays = [ReplayModified.copy(r) for r in replays]
+
+        if filter_valid:
+            replays = [ReplayModified.filter_single(replay) for replay in replays]
+
+        if align_t:
+            timestamps = [[txyk[0] for txyk in replay.as_list_with_timestamps()] for replay in replays]
+
+            timestamps = ReplayModified.align_clocks(timestamps)
+
+            replays = [replay.interpolate_to(timestamps) for replay in replays]
+
+        if align_xy:
+            replays = ReplayModified.align_coordinates(replays)
+        
+        return replays
