@@ -321,10 +321,18 @@ class StealDetect(Detect):
     steal_thresh: float
         If the average distance in pixels of two replays is smaller than
         this value, they are labeled cheated (stolen replays). Default 18.
+    clean_mode: :class:`~.CleanMode`
+        The options used to clean the replays before comparing them.
     """
-    def __init__(self, steal_thresh=18):
+    def __init__(self, steal_thresh=18, clean_mode=None):
         super().__init__(Detect.STEAL)
+
         self.steal_thresh = steal_thresh
+        
+        if clean_mode:
+            self.clean_mode = clean_mode
+        else:
+            self.clean_mode = CleanMode(CleanMode.ALL)
 
 class RelaxDetect(Detect):
     """
@@ -376,9 +384,10 @@ class CleanMode():
     SEARCH = 1 << 3
     ALL = VALIDATE + SYNCHRONIZE + ALIGN + SEARCH
 
-    def __init__(self, value, search_step=16):
+    def __init__(self, value, search_step=16, step_limit=10):
         self.value = value
         self.search_step = search_step
+        self.step_limit = step_limit
 
     def __contains__(self, other):
         return bool(self.value & other)
@@ -387,9 +396,9 @@ class CleanMode():
         flags = self.value | other.value
         
         if CleanMode.SEARCH in self:
-            return CleanMode(flags, search_step=self.search_step)
+            return CleanMode(flags, search_step=self.search_step, step_limit=self.step_limit)
         elif CleanMode.SEARCH in other:
-            return CleanMode(flags, search_step=self.search_step)
+            return CleanMode(flags, search_step=self.search_step, step_limit=self.step_limit)
         else:
             return CleanMode(flags)
 
