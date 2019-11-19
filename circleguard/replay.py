@@ -563,14 +563,55 @@ class ReplayPath(Replay):
         self.log.log(TRACE, "Finished loading %s", self)
 
 class ReplayModified(Replay):
+    """
+    A :class:`~.Replay` created by modifying or copying another :class:`~.Replay`.
+
+    Parameters
+    ----------
+    timestamp: :class:`datetime.datetime`
+        When this replay was played.
+    map_id: int
+        The id of the map the replay was played on, or 0 if
+        unknown or on an unsubmitted map.
+    user_id: int
+        The id of the player who played the replay, or 0 if unknown
+        (if the player is restricted, for instance). Note that if the
+        user id is known, even if the user is restricted, it should still be
+        given instead of 0.
+    username: str
+        The username of the player who played the replay.
+    mods: :class:`~.enums.ModCombination`
+        The mods the replay was played with.
+    replay_id: int
+        The id of the replay, or 0 if the replay is unsubmitted.
+    replay_data: list[:class:`~circleparse.Replay.ReplayEvent`]
+        A list of :class:`~circleparse.Replay.ReplayEvent` objects, representing
+        the actual data of the replay. If the replay could not be loaded, this
+        should be ``None``.
+    weight: :class:`~.enums.RatelimitWeight`
+        How much it 'costs' to load this replay from the api.
+    """
+
     def __init__(self, timestamp, map_id, username, user_id, mods, replay_id, replay_data, weight):
         Replay.__init__(self, timestamp, map_id, username, user_id, mods, replay_id, replay_data, weight)
         self.txyk = None
     
     def load(self, loader):
+        """
+        Do nothing as this :class:`~.Replay` is always already loaded.
+        """
         pass
 
     def interpolate_to(self, timestamps):
+        """
+        Interpolate coordinate data in this replay to the given timestamps.
+        Drops excess timestamps and creates data at missing timestamps.
+
+        Parameters
+        ----------
+        timestamps: list(int)
+            The timestamps to interpolate to.
+        """
         prev_err = np.seterr(all="ignore")
         
         txyks = []
@@ -605,6 +646,18 @@ class ReplayModified(Replay):
         return self
 
     def shift(self, dx, dy, dt):
+        """
+        Shift the data in this :class:`~.Replay` by the specified offsets.
+
+        Parameters
+        ----------
+        dx: float
+            The offset for the x coordinate.
+        dy: float
+            The offset for the y coordinate.
+        dt: int
+            The number of ticks the timestamps should be shifted.
+        """
         txyks = []
 
         self.as_list_with_timestamps()
@@ -617,6 +670,18 @@ class ReplayModified(Replay):
         return self
 
     def as_list_with_timestamps(self):
+        """
+        Gets this replay's play data as a list of tuples of absolute time,
+        x, y, and pressed keys for each event in the data.
+        Saves the data which is returned on consequent calls.
+        This data reflects changes made by other methods.
+        
+        Returns
+        -------
+        list[tuple(int, float, float, something)]
+            A list of tuples of (t, x, y, keys) for each event
+            in the replay data.
+        """
         if not self.txyk:
             self.txyk = Replay.as_list_with_timestamps(self)
             
