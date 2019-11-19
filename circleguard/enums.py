@@ -369,6 +369,29 @@ class CorrectionDetect(Detect):
         self.max_angle = max_angle
         self.min_distance = min_distance
 
+class CleanMode():
+    VALIDATE = 1 << 0
+    SYNCHRONIZE = 1 << 1
+    ALIGN = 1 << 2
+    SEARCH = 1 << 3
+    ALL = VALIDATE + SYNCHRONIZE + ALIGN + SEARCH
+
+    def __init__(self, value, search_step=16):
+        self.value = value
+        self.search_step = search_step
+
+    def __contains__(self, other):
+        return bool(self.value & other)
+
+    def __add__(self, other):
+        flags = self.value | other.value
+        
+        if CleanMode.SEARCH in self:
+            return CleanMode(flags, search_step=self.search_step)
+        elif CleanMode.SEARCH in other:
+            return CleanMode(flags, search_step=self.search_step)
+        else:
+            return CleanMode(flags)
 
 class RatelimitWeight(Enum):
     """
