@@ -598,19 +598,23 @@ class ReplayModified(Replay):
     
     def load(self, loader):
         """
-        Do nothing as this :class:`~.Replay` is always already loaded.
+        Do nothing as this :class:`~.ReplayModified` is always already loaded.
         """
         pass
 
     def interpolate_to(self, timestamps):
         """
-        Interpolate coordinate data in this replay to the given timestamps.
+        Interpolate coordinate data in this :class:`~.ReplayModified` to the given timestamps.
         Drops excess timestamps and creates data at missing timestamps.
 
         Parameters
         ----------
         timestamps: list(int)
             The timestamps to interpolate to.
+
+        Notes
+        -----
+        This method is in-place.
         """
         prev_err = np.seterr(all="ignore")
         
@@ -647,7 +651,7 @@ class ReplayModified(Replay):
 
     def shift(self, dx, dy, dt):
         """
-        Shift the data in this :class:`~.Replay` by the specified offsets.
+        Shift the data in this :class:`~.ReplayModified` by the specified offsets.
 
         Parameters
         ----------
@@ -657,6 +661,10 @@ class ReplayModified(Replay):
             The offset for the y coordinate.
         dt: int
             The number of ticks the timestamps should be shifted.
+
+        Notes
+        -----
+        This method is in-place.
         """
         txyks = []
 
@@ -690,6 +698,20 @@ class ReplayModified(Replay):
     #filtering
     @staticmethod
     def copy(replay):
+        """
+        Copies the :class:`~.Replay`
+
+        Parameters
+        ----------
+        replay: :class:`~.Replay`
+            The replay to copy.
+        
+        Returns
+        -------
+        :class:`~.ReplayModified`
+            The copy as a :class:`~.ReplayModified`.
+        """
+        
         r = ReplayModified(replay.timestamp, replay.map_id, replay.username,
                       replay.user_id, replay.mods, replay.replay_id, replay.replay_data, replay.weight)
         r.txyk = replay.as_list_with_timestamps()
@@ -697,6 +719,25 @@ class ReplayModified(Replay):
 
     @staticmethod
     def filter_single(replay):
+        """
+        Filters all timestamps with invalid coordinates.
+
+        Parameters
+        ----------
+        replay: :class:`~.ReplayModified`
+            The replay to filter.
+
+        Returns
+        -------
+        :class:`~.ReplayModified`
+            The replay with the invalid coordinates removed.
+
+        Notes
+        -----
+        Coordinates are invalid if they are not in the range (0, 512) for the x
+        coordinate and (0, 384) for the y coordinate.
+        This method is in-place.
+        """
         data = replay.as_list_with_timestamps()
 
         def is_valid(d):
@@ -711,6 +752,25 @@ class ReplayModified(Replay):
 
     @staticmethod
     def align_clocks(clocks):
+        """
+        Selects suitable timestamps to which all the clocks of the replays
+        could be interpolated.
+
+        The timestamps are chosen to maximize frequency while
+        also guaranteeing each replay has at least one timestamp in between
+        two successive timestamps in the output.
+
+        Parameters
+        ----------
+        clocks: list(list(int))
+            The list of lists of timestamps the interpolation timestamps
+            should be selected from.
+
+        Returns
+        -------
+        list(int)
+            The timestamps maximizing frequency and satisfying constraints.
+        """
         n = len(clocks)
         indices = [0] * n
 
@@ -742,6 +802,26 @@ class ReplayModified(Replay):
 
     @staticmethod
     def align_coordinates(replays):
+        """
+        Shifts the :class:`~.ReplayModified`s in replays so that their
+        mean coordinates over time coincide.
+
+        Parameters
+        ----------
+        replays: list(:class:`~.ReplayModified`)
+            The replays to align.
+
+        Returns
+        -------
+        list(:class:`~.ReplayModified`)
+            The shifted replays.
+
+        Notes
+        -----
+        The first replay in this set is left in place, and all other replays
+        are shifted toward its mean.
+        This method is in-place.
+        """
         rs = []
         
         for replay in replays:
@@ -763,6 +843,25 @@ class ReplayModified(Replay):
 
     @staticmethod
     def clean_set(replays, filter_valid=False, align_t=False, align_xy=False):
+        """
+        Cleans all replays according to the selected options
+
+        Parameters
+        ----------
+        replays: list(:class:`~.ReplayModified`)
+            The replays to clean.
+        filter_valid: bool
+            Should invalid coordinates be removed?
+        align_t: bool
+            Should the timestamps be synchronized?
+        align_xy: bool
+            Should the mean coordinates be aligned?
+
+        Returns
+        -------
+        list(:class:`~.ReplayModified`)
+            The cleaned replays
+        """
         replays = [ReplayModified.copy(r) for r in replays]
 
         if filter_valid:
