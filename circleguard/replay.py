@@ -595,7 +595,7 @@ class ReplayModified(Replay):
     def __init__(self, timestamp, map_id, username, user_id, mods, replay_id, replay_data, weight):
         Replay.__init__(self, timestamp, map_id, username, user_id, mods, replay_id, replay_data, weight)
         self.txyk = None
-    
+
     def load(self, loader):
         """
         Do nothing as this :class:`~.ReplayModified` is always already loaded.
@@ -617,18 +617,18 @@ class ReplayModified(Replay):
         This method is in-place.
         """
         prev_err = np.seterr(all="ignore")
-        
+
         txyks = []
 
         self.as_list_with_timestamps()
 
         i = 1
         t_end = self.txyk[-1][0]
-        
+
         for t in timestamps:
             if t > t_end:
                 break
-            
+
             while self.txyk[i][0] < t:
                 i += 1
 
@@ -692,9 +692,9 @@ class ReplayModified(Replay):
         """
         if not self.txyk:
             self.txyk = Replay.as_list_with_timestamps(self)
-            
+
         return self.txyk
-    
+
     #filtering
     @staticmethod
     def copy(replay):
@@ -782,15 +782,15 @@ class ReplayModified(Replay):
 
                 if indices[i] + 1 == len(clocks[i]):
                     return True
-                
+
             return False
-        
+
         while True:
             last = 0
 
             for i in range(n):
                 value = clocks[i][indices[i] + 1]
-                
+
                 if value > last:
                     last = value
 
@@ -823,7 +823,7 @@ class ReplayModified(Replay):
         This method is in-place.
         """
         rs = []
-        
+
         for replay in replays:
             replay.as_list_with_timestamps()
 
@@ -876,5 +876,5 @@ class ReplayModified(Replay):
 
         if align_xy:
             replays = ReplayModified.align_coordinates(replays)
-        
+
         return replays
