@@ -204,6 +204,11 @@ class Loader():
         response = self.api.get_scores({"m": "0", "b": map_id, "limit": num, "u": user_id, "mods": mods if mods is None else mods.value})
         Loader.check_response(response)
         if span:
+            # filter span_list to remove indexes that would cause an indexerror
+            # when indexing ``response``
+            # span = {3, 6}; response = [a, b, c, d, e, f]; len(response) = 6
+            # we want to keep {6} since we index at [i-1], so use <= not <
+            span_list = {x for x in span_list if x <= len(response)}
             # filter out anything not in our span
             response = [response[i-1] for i in span_list]
         # yes, it's necessary to cast the str response to int before bool - all strings are truthy.
