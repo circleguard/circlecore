@@ -206,7 +206,7 @@ class Loader():
         if span:
             # filter span_list to remove indexes that would cause an indexerror
             # when indexing ``response``
-            # span = {3, 6}; response = [a, b, c, d, e, f]; len(response) = 6
+            # span_list = {3, 6}; response = [a, b, c, d, e, f]; len(response) = 6
             # we want to keep {6} since we index at [i-1], so use <= not <
             span_list = {x for x in span_list if x <= len(response)}
             # filter out anything not in our span
