@@ -176,7 +176,7 @@ class Loader():
         Notes
         -----
         One of ``num``, ``user_id``, and ``span`` must be passed, but not both
-        ``num`` and either ``user_id`` or ``span``.
+        ``num`` and ``span``.
 
         Raises
         ------
@@ -196,8 +196,8 @@ class Loader():
         if num and (num > 100 or num < 1):
             raise InvalidArgumentsException("The number of top plays to fetch must be between 1 and 100 inclusive!")
 
-        if not bool(user_id) ^ (bool(num) or bool(span)):
-            raise InvalidArgumentsException("One of num, user_id, or span must be passed, but not both num and either user_id or span")
+        if (num and span) or not (num or user_id or span):
+            raise InvalidArgumentsException("One of num, user_id, or span must be passed, but not both num and span")
         if span:
             span_list = span_to_list(span)
             num = max(span_list)
