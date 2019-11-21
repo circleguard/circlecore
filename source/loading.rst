@@ -112,7 +112,7 @@ Iterating
 
 A |ReplayContainer| can be iterated over or indexed to access its |Replay|\s.
 This will of course only work in its info loaded and loaded stages, with
-different amounts of information avaialble from the |Replay|\s for each stage.
+different amounts of information available from the |Replay|\s for each stage.
 
 .. code-block:: python
 
