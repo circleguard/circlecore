@@ -157,7 +157,7 @@ def interpolate(data1, data2, interpolation=Interpolation.linear, unflip=False):
     Interpolates the longer of the datas to match the timestamps of the shorter.
 
     Args:
-    List data1: A list of tuples of (t, x, y).
+        List data1: A list of tuples of (t, x, y).
         List data2: A list of tuples of (t, x, y).
         Boolean unflip: Preserves input order of data1 and data2 if True.
 
