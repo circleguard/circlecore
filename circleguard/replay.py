@@ -342,6 +342,79 @@ class User(ReplayContainer):
         return iter(self.replays)
 
 
+class MapUser(InfoLoadable):
+    """
+    All replays on a map by a user, not just the top replay.
+
+    Parameters
+    ----------
+    map_id: int
+        The map to represent scores by `user_id` on.
+    user_id: int
+        The user to represent scores on `map_id` for.
+    num: int
+        How many plays by `user_id` on `map_id` to represent.
+        One of ``num`` or ``span`` must be passed, but not both.
+    span: str
+        A comma separated list of ranges of plays to retrieve.
+        ``span="1-3,6,2-4"`` -> replays in the range ``[1,2,3,4,6]``.
+    cache: bool
+        Whether to cache the replays once they are loaded.
+    available_only: bool
+        Whether to represent only replays that have replay data available.
+        Replays are filtered on this basis after ``mods`` and ``num``/``span``
+        are applied. True by default.
+    """
+    def __init__(self, map_id, user_id, num=None, span=None, cache=None, available_only=True):
+        if not bool(num) ^ bool(span):
+            raise ValueError("One of num or span must be specified, but not both")
+        self.replays = []
+        self.map_id = map_id
+        self.user_id = user_id
+        self.num = num
+        self.span = span
+        self.cache = cache
+        self.available_only = available_only
+
+    def load_info(self, loader):
+        if self.replays:
+            return
+        for info in loader.user_info(self.map_id, num=self.num, span=self.span, user_id=self.user_id, limit=False):
+            if self.available_only and not info.replay_available:
+                continue
+            self.replays.append(ReplayMap(info.map_id, info.user_id, info.mods, cache=self.cache, info=info))
+
+    def load(self, loader, cache=None):
+        # only listen to the parent's cache if ours is not set. Lower takes precedence
+        cascade_cache = cache if self.cache is None else self.cache
+        self.load_info(loader)
+        for loadable in self.replays:
+            loadable.load(loader, cascade_cache)
+
+    def num_replays(self):
+        if self.replays:
+            return len(self.replays)
+        elif self.span:
+            return len(span_to_list(self.span))
+        else:
+            return self.num
+
+    def all_replays(self):
+        replays = []
+        for loadable in self.replays:
+            replays += loadable.all_replays()
+        return replays
+
+    def __getitem__(self, key):
+        if isinstance(key, slice):
+            return self.replays[key.start:key.stop:key.step]
+        else:
+            return self.replays[key]
+
+    def __iter__(self):
+        return iter(self.replays)
+
+
 class Replay(Loadable):
     """
     A replay played by a player.
