@@ -85,21 +85,21 @@ the default), but ``cache=False`` can selectively turn off caching for a
     cg.load(r1) # gets cached
     cg.load(r2) # does not get cached
 
-For a |ReplayContainer|, ``cache`` cascades to its |Replay|\s. The highest
-set ``cache`` value takes precedence; you can think of |Circleguard| as
-being at the top of the hierarchy, so its ``cache`` value overrides all others.
+For a |ReplayContainer|, ``cache`` cascades to its |Replay|\s.
 
 .. code-block:: python
 
     cg = Circleguard("key", db_path="./db.db")
     m = Map(221777, num=2, cache=False)
-    cg.load(m)
+    cg.load(m) # both replays in Map cached
 
-.. todo::
-
-    ah fuck, our current cache setting hierarchy works bottom up, with lower
-    taking precedence. This is an outdated way of thinking; we no longer have
-    infinitely nestable Loadables, so top-down makes more sense. Need to
-    change this on release
+|Check| can also get passed ``cache``. If it contains a |ReplayContainer|,
+the cache set by |ReplayContainer| takes precedence:
 
 .. code-block:: python
+
+    cg = Circleguard("key", db_path="./db.db")
+    m = Map(221777, num=2, cache=False)
+    u = User(2757689, num=3, cache=True)
+    c = Check([m, u], detect=RelaxDetect(), cache=True)
+    cg.load(c) # the 2 replays in m will not get cached, but the 3 replays in u will
