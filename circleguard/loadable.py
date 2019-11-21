@@ -227,7 +227,7 @@ class Map(ReplayContainer):
         if self.replays:
             # dont load twice
             return
-        for info in loader.user_info(self.map_id, num=self.num, mods=self.mods, span=self.span):
+        for info in loader.replay_info(self.map_id, num=self.num, mods=self.mods, span=self.span):
             self.replays.append(ReplayMap(info.map_id, info.user_id, info.mods, cache=self.cache))
 
     def load(self, loader, cache=None):
@@ -380,7 +380,7 @@ class MapUser(InfoLoadable):
     def load_info(self, loader):
         if self.replays:
             return
-        for info in loader.user_info(self.map_id, num=self.num, span=self.span, user_id=self.user_id, limit=False):
+        for info in loader.replay_info(self.map_id, num=self.num, span=self.span, user_id=self.user_id, limit=False):
             if self.available_only and not info.replay_available:
                 continue
             self.replays.append(ReplayMap(info.map_id, info.user_id, info.mods, cache=self.cache, info=info))
@@ -564,7 +564,7 @@ class ReplayMap(Replay):
         if self.info:
             info = self.info
         else:
-            info = loader.user_info(self.map_id, user_id=self.user_id, mods=self.mods)
+            info = loader.replay_info(self.map_id, user_id=self.user_id, mods=self.mods)
         replay_data = loader.replay_data(info, cache=cache)
         Replay.__init__(self, info.timestamp, self.map_id, info.username, self.user_id, info.mods, info.replay_id, replay_data, self.weight)
         self.log.log(TRACE, "Finished loading %s", self)
