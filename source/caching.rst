@@ -57,3 +57,49 @@ replay's ``db.db`` is in.
 If ``slider_dir`` is not passed, we still use slider to download beatmaps,
 but cache them to a newly created temporary directory. This means it will cache
 with respect to a single |Circleguard| object, but not persist across runs.
+
+Loadable
+~~~~~~~~
+
+A |Loadable| also has a ``cache`` option, determing if the replays in that
+|Loadable| should be cached when loaded. This has no effect if |Circleguard|
+is not passed a ``db_path`` or is in read-only mode.
+
+.. code-block:: python
+
+    cg = Circleguard("key", db_path="./db.db")
+    r1 = ReplayMap(221777, 2757689, cache=True)
+    r2 = ReplayMap(221777, 2757689)
+    cg.load(r1) # r gets cached
+    cg.load(r2) # loaded from cache, not api
+
+Passing ``cache=True`` is not very interesting in this scenario (that's
+the default), but ``cache=False`` can selectively turn off caching for a
+|Loabable|:
+
+.. code-block:: python
+
+    cg = Circleguard("key", db_path="./db.db")
+    r1 = ReplayMap(221777, 2757689, cache=True)
+    r2 = ReplayMap(1524183, 12092800, cache=False)
+    cg.load(r1) # gets cached
+    cg.load(r2) # does not get cached
+
+For a |ReplayContainer|, ``cache`` cascades to its |Replay|\s. The highest
+set ``cache`` value takes precedence; you can think of |Circleguard| as
+being at the top of the hierarchy, so its ``cache`` value overrides all others.
+
+.. code-block:: python
+
+    cg = Circleguard("key", db_path="./db.db")
+    m = Map(221777, num=2, cache=False)
+    cg.load(m)
+
+.. todo::
+
+    ah fuck, our current cache setting hierarchy works bottom up, with lower
+    taking precedence. This is an outdated way of thinking; we no longer have
+    infinitely nestable Loadables, so top-down makes more sense. Need to
+    change this on release
+
+.. code-block:: python
