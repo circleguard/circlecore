@@ -365,8 +365,8 @@ class Loader():
         Returns
         -------
         int
-            The map id that corresponds to ``map_hash``, or 0 if ``map_hash``
-            doesn't mach any map.
+            The map id that corresponds to ``map_hash``, or ``0`` if
+            ``map_hash`` doesn't mach any map.
 
         Notes
         -----
