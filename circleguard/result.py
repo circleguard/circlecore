@@ -1,4 +1,4 @@
-from circleguard.replay import Replay
+from circleguard.loadable import Replay
 from circleguard.enums import ResultType
 
 # Hierarchy
