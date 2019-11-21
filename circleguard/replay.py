@@ -150,9 +150,10 @@ class Check(InfoLoadable):
         loader: :class:`~circleguard.loader.Loader`
             The loader to load the :class:`~circleguard.replay.Loadable`\s with.
         """
-        # cache arg only for homogeneity with func calls. No effect
-        for loadable in self.all_loadables():
-            loadable.load(loader, cache=self.cache)
+        cascade_cache = cache if self.cache is None else self.cache
+        self.load_info(loader)
+        for replay in self.all_loadables():
+            replay.load(loader, cascade_cache)
 
     def load_info(self, loader):
         for loadable in self.all_loadables():
