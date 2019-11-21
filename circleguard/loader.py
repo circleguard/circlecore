@@ -221,7 +221,7 @@ class Loader():
 
         Parameters
         ----------
-        user_id: str
+        user_id: int
             The user id to get best plays of.
         num: int
             The number of top plays to retrieve. Must be between 1 and 100.
