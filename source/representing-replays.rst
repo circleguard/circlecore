@@ -127,3 +127,18 @@ And can still combine ``span`` and ``mods``:
 
     # 1st and 49th scores with exactly HD
     u = User(2757689, span="1, 49", mods=Mod.HD)
+
+
+MapUser
+~~~~~~~
+
+A |MapUser| represents all of a user's replays on a map.
+
+This is especially useful for remod checks, by comparing a user's top play on a
+map to his other replays.
+
+.. code-block:: python
+
+    r_top = ReplayMap(221777, 2757689)
+    r_remods = MapUser(221777, span="2-100") # skip first replay; that's r_top
+    r_all = [r_top, r_remods]
