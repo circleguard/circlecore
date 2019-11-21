@@ -131,10 +131,3 @@ different amounts of information available from the |Replay|\s for each stage.
 
 This example works identically for a |User|, just with the |Replay|\s
 representing their top plays instead of the leaderboards of a map.
-
-
-
-
-.. todo::
-
-    have cg.load_info accept a check, have check implement load_info
