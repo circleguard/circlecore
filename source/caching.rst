@@ -75,7 +75,7 @@ is not passed a ``db_path`` or is in read-only mode.
 
 Passing ``cache=True`` is not very interesting in this scenario (that's
 the default), but ``cache=False`` can selectively turn off caching for a
-|Loabable|:
+|Loadable|:
 
 .. code-block:: python
 
