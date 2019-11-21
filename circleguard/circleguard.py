@@ -90,7 +90,7 @@ class Circleguard:
         c = check
         self.log.info("Running circleguard with %r", c)
 
-        c.load(self.loader)
+        c.load(self.loader, self.cache)
         d = c.detect
         # steal check
         if Detect.STEAL in d:

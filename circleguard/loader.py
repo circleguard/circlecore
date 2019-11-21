@@ -226,7 +226,7 @@ class Loader():
 
         Parameters
         ----------
-        user_id: str
+        user_id: int
             The user id to get best plays of.
         num: int
             The number of top plays to retrieve. Must be between 1 and 100.
@@ -243,8 +243,9 @@ class Loader():
         InvalidArgumentsException
             If ``num`` or ``span`` is not between ``1`` and ``100`` inclusive.
         """
-
-        self.log.log(TRACE, "Retrieving the best %d plays of user %d", num, user_id)
+        locals_ = locals()
+        self.log.log(TRACE, "Loading user best of %s with options %s",
+                            user_id, {k: locals_[k] for k in locals_ if k != 'self'})
         if span:
             span_list = span_to_list(span)
             num = max(span_list)
