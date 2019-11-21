@@ -32,7 +32,7 @@ loss in precision, but note that because of this a cached replay's data will be
 *almost* (but not quite) identical to that same replay, freshly loaded.
 
 If you want to use a cache in read only mode (use previously cached replays,
-but don't add new replays), pass ``cache=False``. This has no effect on
+but don't cache new replays), pass ``cache=False``. This has no effect on
 the `slider_dir`_ argument. ``cache`` is ``True`` by default.
 
 .. code-block:: python
