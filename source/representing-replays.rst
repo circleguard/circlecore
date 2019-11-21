@@ -85,7 +85,7 @@ when you don't simply want the first ``n`` replays.
 
 .. code-block:: python
 
-    # 1st, 4th, 5th, 6th, 7h, 8th, 10th, 11th, and 12th top scores
+    # 1st, 4th, 5th, 6th, 7th, 8th, 10th, 11th, and 12th top scores
     m = Map(221777, span="1, 4-8, 10-12")
 
 ``span`` can be combined with ``mods``, just like ``num`` can:
@@ -118,7 +118,7 @@ or represent with a ``span``:
 
 .. code-block:: python
 
-    # 1st, 4th, 5th, 6th, 7h, 8th, 10th, 11th, and 12th top scores
+    # 1st, 4th, 5th, 6th, 7th, 8th, 10th, 11th, and 12th top scores
     u = User(2757689, span="1, 4-8, 10-12")
 
 And can still combine ``span`` and ``mods``:
