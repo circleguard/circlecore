@@ -69,24 +69,24 @@ It is common to want to represent all, or a subset of, a map's leaderboard.
 
 .. code-block:: python
 
-    # top 50 scores on the map
-    m = Map(221777, num=50)
+    # top 2 scores on the map
+    m = Map(221777, num=2)
 
 We can filter by mods:
 
 .. code-block:: python
 
-    # top 12 scores with exactly HD (not HDDT or another variation). Due to
+    # top 3 scores with exactly HD (not HDDT or another variation). Due to
     # api restrictions, we do not provide fuzzy matching.
-    m = Map(221777, num=12, mods=Mod.HD)
+    m = Map(221777, num=3, mods=Mod.HD)
 
 Or only represent some of the replays on the map. Use ``span`` for any case
 when you don't simply want the first ``n`` replays.
 
 .. code-block:: python
 
-    # 1st, 4th, 5th, 6th, 7th, 8th, 10th, 11th, and 12th top scores
-    m = Map(221777, span="1, 4-8, 10-12")
+    # 1st, 4th, 5th, 6th top scores
+    m = Map(221777, span="1, 4-6")
 
 ``span`` can be combined with ``mods``, just like ``num`` can:
 
@@ -103,23 +103,23 @@ Similar to |Map|, a |User| represents the top plays of a user.
 
 .. code-block:: python
 
-    # top 50 scores of the user
-    u = User(2757689, num=50)
+    # top 2 scores of the user
+    u = User(2757689, num=2)
 
 We can still filter by mods:
 
 .. code-block:: python
 
-    # top 12 scores with exactly HD (not HDDT or another variation). Due to
+    # top 3 scores with exactly HD (not HDDT or another variation). Due to
     # api restrictions, we do not provide fuzzy matching.
-    u = User(2757689, num=12, mods=Mod.HD)
+    u = User(2757689, num=3, mods=Mod.HD)
 
 or represent with a ``span``:
 
 .. code-block:: python
 
-    # 1st, 4th, 5th, 6th, 7th, 8th, 10th, 11th, and 12th top scores
-    u = User(2757689, span="1, 4-8, 10-12")
+    # 1st, 4th, 5th, 6th top scores
+    u = User(2757689, span="1, 4-6")
 
 And can still combine ``span`` and ``mods``:
 
