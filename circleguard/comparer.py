@@ -5,7 +5,7 @@ import math
 
 import numpy as np
 
-from circleguard.replay import Replay
+from circleguard.loadable import Replay
 from circleguard.enums import Mod
 from circleguard.exceptions import InvalidArgumentsException, CircleguardException
 import circleguard.utils as utils

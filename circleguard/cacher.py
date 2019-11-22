@@ -33,7 +33,7 @@ class Cacher:
         self.conn = sqlite3.connect(str(path))
         self.cursor = self.conn.cursor()
 
-    def cache(self, lzma_bytes, user_info):
+    def cache(self, lzma_bytes, replay_info):
         """
         Caches a replay in the form of a (compressed) lzma stream to the
         database, linking it to the given user info.
@@ -44,8 +44,8 @@ class Cacher:
             The map id to insert into the db.
         lzma_bytes: str
             The lzma stream to compress and insert into the db.
-        user_info: :class:`~circleguard.user_info.UserInfo`
-            The UserInfo object representing this replay.
+        replay_info: :class:`~circleguard.replay_info.ReplayInfo`
+            The ReplayInfo object representing this replay.
 
         Notes
         -----
@@ -67,10 +67,10 @@ class Cacher:
 
         compressed_bytes = self._compress(lzma_bytes)
 
-        map_id = user_info.map_id
-        user_id = user_info.user_id
-        mods = user_info.mods.value
-        replay_id = user_info.replay_id
+        map_id = replay_info.map_id
+        user_id = replay_info.user_id
+        mods = replay_info.mods.value
+        replay_id = replay_info.replay_id
 
         result = self.cursor.execute("SELECT COUNT(1) FROM replays WHERE map_id=? AND user_id=? AND mods=?", [map_id, user_id, mods]).fetchone()[0]
         self.log.log(TRACE, "Writing compressed lzma to db")
@@ -79,9 +79,9 @@ class Cacher:
         else: # else just insert
             self._write("INSERT INTO replays VALUES(?, ?, ?, ?, ?)", [map_id, user_id, compressed_bytes, replay_id, mods])
 
-    def revalidate(self, loader, user_info):
+    def revalidate(self, loader, replay_info):
         """
-        Checks entries in ``user_info`` against their entries in the database
+        Checks entries in ``replay_info`` against their entries in the database
         (if any) to look for score id mismatches, indicating an outdated replay.
         If there are mismatches, the replay is redownloaded and cached from the
         given user info.
@@ -91,8 +91,8 @@ class Cacher:
         loader: :class:`~circleguard.loader.Loader`
             The Loader from the circleguard instance to redownload replays with
             if they are outdated.
-        user_info: list[:class:`~circleguard.user_info.UserInfo`]
-            A list of UserInfo objects containing the up-to-date information
+        replay_info: list[:class:`~circleguard.replay_info.ReplayInfo`]
+            A list of ReplayInfo objects containing the up-to-date information
             of user's replays.
 
         Raises
@@ -110,9 +110,9 @@ class Cacher:
         If the replay is found to be outdated, it will be overwritten
         by the newer replay in the database.
         """
-        self.log.info("Revalidating cache with %d user_infos", len(user_info))
+        self.log.info("Revalidating cache with %d replay_infos", len(replay_info))
 
-        for info in user_info:
+        for info in replay_info:
             map_id = info.map_id
             user_id = info.user_id
             mods = info.enabled_mods.value

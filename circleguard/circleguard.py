@@ -11,7 +11,7 @@ from circleguard.comparer import Comparer
 from circleguard.investigator import Investigator
 from circleguard.cacher import Cacher
 from circleguard.exceptions import CircleguardException
-from circleguard.replay import Check, ReplayMap, ReplayPath, Replay, Map
+from circleguard.loadable import Check, ReplayMap, ReplayPath, Replay, Map
 from circleguard.enums import Detect, RatelimitWeight
 from slider import Beatmap, Library
 

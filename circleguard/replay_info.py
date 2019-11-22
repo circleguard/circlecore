@@ -1,7 +1,7 @@
 import circleguard.utils as utils
 from circleguard.enums import Mod
 
-class UserInfo():
+class ReplayInfo():
     """
     A container class representing all the information needed
     to load a replay from the api.

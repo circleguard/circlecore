@@ -53,9 +53,9 @@ Result
 .. automodule:: circleguard.result
    :members:
 
-UserInfo
+ReplayInfo
 --------
-.. automodule:: circleguard.user_info
+.. automodule:: circleguard.replay_info
    :members:
 
 Utils
