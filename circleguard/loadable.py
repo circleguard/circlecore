@@ -249,7 +249,7 @@ class Map(ReplayContainer):
         self.loaded = True
 
     def num_replays(self):
-        if self.replays:
+        if self.info_loaded:
             return len(self.replays)
         elif self.span:
             return len(span_to_list(self.span))
@@ -336,7 +336,7 @@ class User(ReplayContainer):
         self.loaded = True
 
     def num_replays(self):
-        if self.replays:
+        if self.info_loaded:
             return len(self.replays)
         elif self.span:
             return len(span_to_list(self.span))
@@ -414,7 +414,7 @@ class MapUser(InfoLoadable):
         self.loaded = True
 
     def num_replays(self):
-        if self.replays:
+        if self.info_loaded:
             return len(self.replays)
         elif self.span:
             return len(span_to_list(self.span))
