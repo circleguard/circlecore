@@ -18,7 +18,7 @@ class Loadable(abc.ABC):
     This is an abstract class and cannot be directly instantiated.
     """
     def __init__(self):
-        pass
+        self.loaded = False
 
     @abc.abstractmethod
     def load(self, loader, cache):
@@ -61,7 +61,9 @@ class InfoLoadable(Loadable):
     they are unloaded.
     """
     def __init__(self):
-        pass
+        self.info_loaded = False
+        super().__init__()
+
 
     @abc.abstractmethod
     def load_info(self, loader):
@@ -110,12 +112,12 @@ class Check(InfoLoadable):
     """
 
     def __init__(self, loadables, detect, loadables2=None, cache=None):
+        super().__init__()
         self.log = logging.getLogger(__name__ + ".Check")
         self.loadables = [loadables] if isinstance(loadables, Loadable) else loadables
         self.loadables2 = [loadables2] if isinstance(loadables2, Loadable) else [] if loadables2 is None else loadables2
         self.cache = cache
         self.detect = detect
-        self.loaded = False
 
     def all_loadables(self):
         """
@@ -150,15 +152,21 @@ class Check(InfoLoadable):
         loader: :class:`~circleguard.loader.Loader`
             The loader to load the :class:`~circleguard.replay.Loadable`\s with.
         """
+        if self.loaded:
+            return
         cascade_cache = cache if self.cache is None else self.cache
         self.load_info(loader)
         for replay in self.all_loadables():
             replay.load(loader, cascade_cache)
+        self.loaded = True
 
     def load_info(self, loader):
+        if self.info_loaded:
+            return
         for loadable in self.all_loadables():
             if isinstance(loadable, InfoLoadable):
                 loadable.load_info(loader)
+        self.info_loaded = True
 
     def num_replays(self):
         num = 0
@@ -211,6 +219,7 @@ class Map(ReplayContainer):
         Whether to cache the replays once they are loaded.
     """
     def __init__(self, map_id, num=None, span=None, mods=None, cache=None):
+        super().__init__()
         if not bool(num) ^ bool(span):
             # technically, num and span both being set would *work*, just span
             # would override. But this avoids any confusion.
@@ -221,24 +230,26 @@ class Map(ReplayContainer):
         self.num = num
         self.mods = mods
         self.span = span
-        self.loaded = False
 
     def load_info(self, loader):
-        if self.replays:
-            # dont load twice
+        if self.info_loaded:
             return
         for info in loader.replay_info(self.map_id, num=self.num, mods=self.mods, span=self.span):
             self.replays.append(ReplayMap(info.map_id, info.user_id, info.mods, cache=self.cache))
+        self.info_loaded = True
 
     def load(self, loader, cache=None):
+        if self.loaded:
+            return
         # only listen to the parent's cache if ours is not set. Lower takes precedence
         cascade_cache = cache if self.cache is None else self.cache
         self.load_info(loader)
         for replay in self.replays:
             replay.load(loader, cascade_cache)
+        self.loaded = True
 
     def num_replays(self):
-        if self.replays:
+        if self.info_loaded:
             return len(self.replays)
         elif self.span:
             return len(span_to_list(self.span))
@@ -294,6 +305,7 @@ class User(ReplayContainer):
         are applied. True by default.
     """
     def __init__(self, user_id, num=None, span=None, mods=None, cache=None, available_only=True):
+        super().__init__()
         if not bool(num) ^ bool(span):
             raise ValueError("One of num or span must be specified, but not both")
         self.replays = []
@@ -305,22 +317,26 @@ class User(ReplayContainer):
         self.available_only = available_only
 
     def load_info(self, loader):
-        if self.replays:
+        if self.info_loaded:
             return
         for info in loader.get_user_best(self.user_id, num=self.num, span=self.span, mods=self.mods):
             if self.available_only and not info.replay_available:
                 continue
             self.replays.append(ReplayMap(info.map_id, info.user_id, info.mods, cache=self.cache, info=info))
+        self.info_loaded = True
 
     def load(self, loader, cache=None):
+        if self.loaded:
+            return
         # only listen to the parent's cache if ours is not set. Lower takes precedence
         cascade_cache = cache if self.cache is None else self.cache
         self.load_info(loader)
         for loadable in self.replays:
             loadable.load(loader, cascade_cache)
+        self.loaded = True
 
     def num_replays(self):
-        if self.replays:
+        if self.info_loaded:
             return len(self.replays)
         elif self.span:
             return len(span_to_list(self.span))
@@ -367,6 +383,7 @@ class MapUser(InfoLoadable):
         are applied. True by default.
     """
     def __init__(self, map_id, user_id, num=None, span=None, cache=None, available_only=True):
+        super().__init__()
         if not bool(num) ^ bool(span):
             raise ValueError("One of num or span must be specified, but not both")
         self.replays = []
@@ -378,22 +395,26 @@ class MapUser(InfoLoadable):
         self.available_only = available_only
 
     def load_info(self, loader):
-        if self.replays:
+        if self.info_loaded:
             return
         for info in loader.replay_info(self.map_id, num=self.num, span=self.span, user_id=self.user_id, limit=False):
             if self.available_only and not info.replay_available:
                 continue
             self.replays.append(ReplayMap(info.map_id, info.user_id, info.mods, cache=self.cache, info=info))
+        self.info_loaded = True
 
     def load(self, loader, cache=None):
+        if self.loaded:
+            return
         # only listen to the parent's cache if ours is not set. Lower takes precedence
         cascade_cache = cache if self.cache is None else self.cache
         self.load_info(loader)
         for loadable in self.replays:
             loadable.load(loader, cascade_cache)
+        self.loaded = True
 
     def num_replays(self):
-        if self.replays:
+        if self.info_loaded:
             return len(self.replays)
         elif self.span:
             return len(span_to_list(self.span))
@@ -446,6 +467,7 @@ class Replay(Loadable):
         How much it 'costs' to load this replay from the api.
     """
     def __init__(self, timestamp, map_id, username, user_id, mods, replay_id, replay_data, weight):
+        super().__init__()
         self.timestamp = timestamp
         self.map_id = map_id
         self.username = username
@@ -455,7 +477,6 @@ class Replay(Loadable):
         self.replay_data = replay_data
         self.weight = weight
         self.loaded = True
-
 
     def num_replays(self):
         return 1
@@ -469,7 +490,6 @@ class Replay(Loadable):
 
     def __str__(self):
         return f"Replay by {self.username} on {self.map_id}"
-
 
     def as_list_with_timestamps(self):
         """
