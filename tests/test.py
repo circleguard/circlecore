@@ -3,7 +3,7 @@ from unittest import TestCase, skip, TestSuite, TextTestRunner
 from pathlib import Path
 import warnings
 from circleguard import (Circleguard, Check, ReplayMap, ReplayPath, RelaxDetect, StealDetect,
-                         RatelimitWeight, set_options, Map, User, Mod)
+                         RatelimitWeight, set_options, Map, User, MapUser, Mod)
 
 KEY = os.environ.get('OSU_API_KEY')
 if KEY is None:
@@ -16,7 +16,7 @@ set_options(loglevel=20)
 # Keep this below a multiple of 10 (preferably at most 9) so tests run in a reasonable amount of time.
 # We may want to split tests into "heavy" and "light" where light loads <10 heavy calls and heavy loads as many as we need.
 # light can run locally, heavy can run on prs.
-HEAVY_CALL_COUNT = 7
+HEAVY_CALL_COUNT = 9
 
 class CGTestCase(TestCase):
     @classmethod
@@ -171,6 +171,37 @@ class TestUser(CGTestCase):
         self.assertListEqual([r.map_id for r in self.user[0:3]], [129891, 555797, 774965])
         # 1st and 3rd (FDFD and Remote Control)
         self.assertListEqual([r.map_id for r in self.user[0:3:2]], [129891, 774965])
+
+class TestMapUser(CGTestCase):
+    @classmethod
+    def setUpClass(cls):
+        cls.cg = Circleguard(KEY)
+        cls.mu = MapUser(795627, 6304246, num=2)
+
+    def test_map_user_load(self):
+        self.assertEqual(len(self.mu.all_replays()), 0)
+        self.assertEqual(len(self.mu[:]), 0)
+        self.assertFalse(self.mu.loaded)
+        self.assertFalse(self.mu.info_loaded)
+
+        self.cg.load_info(self.mu)
+        self.assertFalse(self.mu.loaded)
+        self.assertTrue(self.mu.info_loaded)
+        self.assertEqual(len(self.mu.all_replays()), 2)
+        self.assertEqual(len(self.mu[:]), 2)
+
+        self.cg.load(self.mu)
+        self.assertTrue(self.mu.loaded)
+        self.assertTrue(self.mu.info_loaded)
+
+    def test_map_user_slice(self):
+        # sanity checks (user and map id better be what we put in)
+        self.assertEqual(self.mu[0].user_id, 6304246)
+        self.assertEqual(self.mu[1].user_id, 6304246)
+        self.assertEqual(self.mu[0].map_id, 795627)
+        self.assertEqual(self.mu[1].map_id, 795627)
+        # test slicing
+        self.assertListEqual([r.map_id for r in self.mu[0:2]], [795627, 795627])
 
 if __name__ == '__main__':
     suite = TestSuite()
