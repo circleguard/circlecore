@@ -115,7 +115,7 @@ class Comparer:
             result = Comparer._compare_two_replays(replay1, replay2)
             mean = result[0]
             sigma = result[1]
-        
+
         ischeat = False
         if(mean < self.detect.steal_thresh):
             ischeat = True
@@ -131,12 +131,11 @@ class Comparer:
 
         for _ in range(10):
             values = {}
-            
+
             for sgn in [-1, 1]:
                 attempt1 = ReplayModified.copy(previous1).shift(0, 0, sgn * dt)
 
                 t1, t2 = ReplayModified.clean_set([attempt1, replay2], mode)
-                
                 value = Comparer._compare_two_replays(t1, t2)[0]
 
                 values[value] = attempt1
@@ -183,7 +182,7 @@ class Comparer:
         # remove time and keys from each tuple
         data1 = [d[1:3] for d in data1]
         data2 = [d[1:3] for d in data2]
-        
+
         if (Mod.HR in replay1.mods) ^ (Mod.HR in replay2.mods): # xor, if one has hr but not the other
             for d in data1:
                 d[1] = 384 - d[1]
