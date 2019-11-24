@@ -107,8 +107,15 @@ class Check(InfoLoadable):
     detect: :class:`~.Detect`
         What cheats to investigate for.
     loadables2: :class:`~.Loadable`
-
-        Boolean cache: Whether to cache the loaded replays. Defaults to False, or the config value if changed.
+        A second set of loadables. Only used when :class:`.~StealDetect` is
+        passed in ``detect``. If passed, the loadables in ``loadables`` will
+        not be compared to each other, but instead to each replay in
+        ``loadables2``, for replay stealing.
+    cache: bool
+        Whether to cache the loadables once they are loaded. This will be
+        overriden by a ``cache`` option set by a :class:`.~Loadable` in
+        ``loadables``. It only affects children loadables when they do not have
+        a ``cache`` option set.
     """
 
     def __init__(self, loadables, detect, loadables2=None, cache=None):
