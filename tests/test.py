@@ -117,10 +117,18 @@ class TestMap(CGTestCase):
     def test_map_load(self):
         self.assertEqual(len(self.map.all_replays()), 0)
         self.assertEqual(len(self.map[:]), 0)
+        self.assertFalse(self.map.loaded)
+        self.assertFalse(self.map.info_loaded)
+
         self.cg.load_info(self.map)
+        self.assertFalse(self.map.loaded)
+        self.assertTrue(self.map.info_loaded)
         self.assertEqual(len(self.map.all_replays()), 3)
         self.assertEqual(len(self.map[:]), 3)
+
         self.cg.load(self.map)
+        self.assertTrue(self.map.loaded)
+        self.assertTrue(self.map.info_loaded)
 
     def test_user_slice(self):
         # sanity check (map id better be what we put in)
@@ -142,10 +150,17 @@ class TestUser(CGTestCase):
     def test_user_load(self):
         self.assertEqual(len(self.user.all_replays()), 0)
         self.assertEqual(len(self.user[:]), 0)
+        self.assertFalse(self.user.loaded)
+        self.assertFalse(self.user.info_loaded)
+
         self.cg.load_info(self.user)
+        self.assertFalse(self.user.loaded)
+        self.assertTrue(self.user.info_loaded)
         self.assertEqual(len(self.user.all_replays()), 3)
         self.assertEqual(len(self.user[:]), 3)
         self.cg.load(self.user)
+        self.assertTrue(self.user.loaded)
+        self.assertTrue(self.user.info_loaded)
 
     def test_user_slice(self):
         # sanity check (user id better be what we put in)
