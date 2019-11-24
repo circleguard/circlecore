@@ -289,6 +289,7 @@ class Detect():
 
         # so we can reference them in :func:`~.__add__`
         self.steal_thresh = None
+        self.clean_mode = None
         self.ur_thresh = None
         self.max_angle = None
         self.min_distance = None
@@ -301,6 +302,7 @@ class Detect():
         d = self if Detect.STEAL in self else other if Detect.STEAL in other else None
         if d:
             ret.steal_thresh = d.steal_thresh
+            ret.clean_mode = d.clean_mode
         d = self if Detect.RELAX in self else other if Detect.RELAX in other else None
         if d:
             ret.ur_thresh = d.ur_thresh
@@ -322,9 +324,10 @@ class StealDetect(Detect):
         If the average distance in pixels of two replays is smaller than
         this value, they are labeled cheated (stolen replays). Default 18.
     """
-    def __init__(self, steal_thresh=18):
+    def __init__(self, steal_thresh=18, clean_mode=None):
         super().__init__(Detect.STEAL)
         self.steal_thresh = steal_thresh
+        self.clean_mode = clean_mode if clean_mode else CleanMode(CleanMode.ALIGN + CleanMode.VALIDATE + CleanMode.SYNCHRONIZE)
 
 class RelaxDetect(Detect):
     """

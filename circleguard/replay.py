@@ -4,7 +4,7 @@ import logging
 import circleparse
 import numpy as np
 
-from circleguard.enums import RatelimitWeight, ModCombination
+from circleguard.enums import RatelimitWeight, ModCombination, CleanMode
 from circleguard.utils import TRACE, span_to_list
 
 
@@ -762,20 +762,20 @@ class ReplayModified(Replay):
         return replays
 
     @staticmethod
-    def clean_set(replays, filter_valid=False, align_t=False, align_xy=False):
+    def clean_set(replays, mode):
         replays = [ReplayModified.copy(r) for r in replays]
 
-        if filter_valid:
+        if CleanMode.VALIDATE in mode:
             replays = [ReplayModified.filter_single(replay) for replay in replays]
 
-        if align_t:
+        if CleanMode.SYNCHRONIZE in mode:
             timestamps = [[txyk[0] for txyk in replay.as_list_with_timestamps()] for replay in replays]
 
             timestamps = ReplayModified.align_clocks(timestamps)
 
             replays = [replay.interpolate_to(timestamps) for replay in replays]
 
-        if align_xy:
+        if CleanMode.ALIGN in mode:
             replays = ReplayModified.align_coordinates(replays)
         
         return replays

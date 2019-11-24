@@ -7,7 +7,7 @@ import numpy as np
 import itertools as itr
 
 from circleguard.replay import Replay, ReplayModified
-from circleguard.enums import Mod
+from circleguard.enums import Mod, CleanMode
 from circleguard.exceptions import InvalidArgumentsException, CircleguardException
 import circleguard.utils as utils
 from circleguard.result import ReplayStealingResult
@@ -18,7 +18,8 @@ class Comparer:
 
     Parameters
     ----------
-    threshold: int
+    detect: :class:`~.Detect`
+        Information on how to prepare for comparison and the steal threshold.
         If a comparison scores below this value, one of the
         :class:`~.replay.Replay` in the comparison is considered cheated.
     replays1: list[:class:`~.replay.Replay`]
@@ -42,23 +43,15 @@ class Comparer:
     :class:`~investigator.Investigator`, for investigating single replays.
     """
 
-    def __init__(self, threshold, replays1, replays2=None):
+    def __init__(self, detect, replays1, replays2=None):
         self.log = logging.getLogger(__name__)
-        self.threshold = threshold
+        self.detect = detect
 
         # filter beatmaps we had no data for - see Loader.replay_data and OnlineReplay.from_map
         self.replays1 = [replay for replay in replays1 if replay.replay_data is not None]
         self.replays2 = [replay for replay in replays2 if replay.replay_data is not None] if replays2 else None
         self.mode = "double" if self.replays2 else "single"
-        self.clean_mode = {}
-        self.local_search = False
-        self.dt = 16
         self.log.debug("Comparer initialized: %r", self)
-
-    def set_clean_mode(self, options, local_search=False, dt=16):
-        self.clean_mode = options
-        self.local_search = local_search
-        self.dt = dt
 
     def compare(self):
         """
@@ -81,8 +74,8 @@ class Comparer:
         if not self.replays1 or self.replays2 == []:
             return
 
-        if self.mode == "single" and (self.clean_mode or self.local_search):
-            self.replays1 = ReplayModified.clean_set(self.replays1, **self.clean_mode)
+        if self.mode == "single" and self.detect.clean_mode.value:
+            self.replays1 = ReplayModified.clean_set(self.replays1, self.detect.clean_mode)
 
         if self.mode == "double":
             iterator = itertools.product(self.replays1, self.replays2)
@@ -116,15 +109,15 @@ class Comparer:
         """
         self.log.log(utils.TRACE, "comparing %r and %r", replay1, replay2)
 
-        if self.local_search:
-            mean = Comparer._compare_hill_climb(replay1, replay2, self.dt)
+        if CleanMode.SEARCH in self.detect.clean_mode:
+            mean = Comparer._compare_hill_climb(replay1, replay2, self.detect.clean_mode.search_step)
         else:
             result = Comparer._compare_two_replays(replay1, replay2)
             mean = result[0]
             sigma = result[1]
         
         ischeat = False
-        if(mean < self.threshold):
+        if(mean < self.detect.steal_thresh):
             ischeat = True
 
         return ReplayStealingResult(replay1, replay2, mean, ischeat)
@@ -134,13 +127,15 @@ class Comparer:
         previous1 = replay1
         prev_value = 100  # whatever high value
 
+        mode = CleanMode(CleanMode.ALIGN + CleanMode.SYNCHRONIZE)
+
         for _ in range(10):
             values = {}
             
             for sgn in [-1, 1]:
                 attempt1 = ReplayModified.copy(previous1).shift(0, 0, sgn * dt)
 
-                t1, t2 = ReplayModified.clean_set([attempt1, replay2], align_xy=True, align_t=True)
+                t1, t2 = ReplayModified.clean_set([attempt1, replay2], mode)
                 
                 value = Comparer._compare_two_replays(t1, t2)[0]
 
@@ -245,7 +240,7 @@ class Comparer:
         return (mu, sigma)
 
     def __repr__(self):
-        return f"Comparer(threshold={self.threshold},replays1={self.replays1},replays2={self.replays2})"
+        return f"Comparer(threshold={self.detect.steal_thresh},replays1={self.replays1},replays2={self.replays2})"
 
     def __str__(self):
-        return f"Comparer with thresh {self.threshold}"
+        return f"Comparer with thresh {self.detect.steal_thresh}"
