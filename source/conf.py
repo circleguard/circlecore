@@ -9,6 +9,7 @@ copyright = "2019, Liam DeVoe, samuelhklumpers, InvisibleSymbol"
 author = "Liam DeVoe, samuelhklumpers, InvisibleSymbol"
 release = "2.4.0"
 version = "2.4.0"
+master_doc = 'index'
 
 extensions = [
     "sphinx.ext.autodoc",
