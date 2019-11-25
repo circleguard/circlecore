@@ -43,7 +43,7 @@ Loader
 .. automodule:: circleguard.loader
    :members:
 
-Replay
+Loadable
 ------
 .. automodule:: circleguard.loadable
    :members:
