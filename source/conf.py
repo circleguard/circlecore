@@ -50,6 +50,7 @@ rst_prolog = """
 .. |ReplayContainer| replace:: :class:`~circleguard.loadable.ReplayContainer`
 .. |Map| replace:: :class:`~circleguard.loadable.Map`
 .. |User| replace:: :class:`~circleguard.loadable.User`
+.. |MapUser| replace:: :class:`~circleguard.loadable.MapUser`
 
 .. |Check| replace:: :class:`~circleguard.loadable.Check`
 .. |Result| replace:: :class:`~circleguard.result.Result`
