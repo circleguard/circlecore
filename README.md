@@ -7,6 +7,7 @@ Circlecore is a cheat detection library for osu!.
 Circlecore currently supports detection of the following cheats:
 
 * Replay Stealing
+* Relax
 * Aim Correction
 
 Designed for use in [Circleguard](https://github.com/circleguard/circleguard), circlecore is easily integratable into any existing python project and we have worked hard to ensure it is easy to use.
