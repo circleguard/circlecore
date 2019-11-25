@@ -29,7 +29,7 @@ class InvestigationResult(Result):
 
     Parameters
     ----------
-    replay: :class:`~circleguard.replay.Replay`
+    replay: :class:`~circleguard.loadable.Replay`
         The replay investigated.
     ischeat: bool
         Whether the replay is cheated or not.
@@ -45,9 +45,9 @@ class ComparisonResult(Result):
 
     Parameters
     ----------
-    replay1: :class:`~circleguard.replay.Replay`
+    replay1: :class:`~circleguard.loadable.Replay`
         One of the replays involved.
-    replay2: :class:`~circleguard.replay.Replay`
+    replay2: :class:`~circleguard.loadable.Replay`
         The other replay involved.
     ischeat: bool
         Whether one of the replays is cheated or not.
@@ -64,14 +64,14 @@ class ReplayStealingResult(ComparisonResult):
 
     Parameters
     ----------
-    replay1: :class:`~circleguard.replay.Replay`
+    replay1: :class:`~circleguard.loadable.Replay`
         One of the replays involved.
-    replay2: :class:`~circleguard.replay.Replay`
+    replay2: :class:`~circleguard.loadable.Replay`
         The other replay involved.
-    earlier_replay: :class:`~circleguard.replay.Replay`
+    earlier_replay: :class:`~circleguard.loadable.Replay`
         The earlier of the two replays (when the score was made). This is a
         reference to either replay1 or replay2.
-    later_replay: :class:`~circleguard.replay.Replay`
+    later_replay: :class:`~circleguard.loadable.Replay`
         The later of the two replays (when the score was made). This is a
         reference to either replay1 or replay2.
     similarity: int
@@ -99,7 +99,7 @@ class RelaxResult(InvestigationResult):
 
     Parameters
     ----------
-    replay: :class:`~circleguard.replay.Replay`
+    replay: :class:`~circleguard.loadable.Replay`
         The replay investigated.
     ur: int
         The unstable rate of the replay. More information on UR available at
@@ -117,7 +117,7 @@ class CorrectionResult(InvestigationResult):
 
     Parameters
     ----------
-    replay: :class:`~circleguard.replay.Replay`
+    replay: :class:`~circleguard.loadable.Replay`
         The replay investigated.
     snaps: list[:class:`.~Snap`]
         A list of suspicious hits in the replay.

@@ -128,23 +128,23 @@ class Check(InfoLoadable):
 
     def all_loadables(self):
         """
-        Returns all the :class:`~circleguard.replay.Loadable`\s contained by
+        Returns all the :class:`~circleguard.loadable.Loadable`\s contained by
         this class.
 
         Returns
         -------
-        list[:class:`~circleguard.replay.Loadable`]
+        list[:class:`~circleguard.loadable.Loadable`]
             All loadables in this class.
 
         See Also
         --------
-        :func:`~circleguard.replay.Loadable.all_replays` and
-        :func:`~circleguard.replay.Loadable.all_replays2`
+        :func:`~circleguard.loadable.Loadable.all_replays` and
+        :func:`~circleguard.loadable.Loadable.all_replays2`
 
         Notes
         -----
-        :class:`~circleguard.replay.Loadable`\s are very different from
-        :class:`~circleguard.replay.Replay`\s -
+        :class:`~circleguard.loadable.Loadable`\s are very different from
+        :class:`~circleguard.loadable.Replay`\s -
         ``len(check.all_loadables())`` will *not* return the number of
         replays in the check, for instance.
         """
@@ -152,12 +152,12 @@ class Check(InfoLoadable):
 
     def load(self, loader, cache=None):
         """
-        Loads all :class:`~circleguard.replay.Loadable`\s in this check.
+        Loads all :class:`~circleguard.loadable.Loadable`\s in this check.
 
         Parameters
         ----------
         loader: :class:`~circleguard.loader.Loader`
-            The loader to load the :class:`~circleguard.replay.Loadable`\s with.
+            The loader to load the :class:`~circleguard.loadable.Loadable`\s with.
         """
         if self.loaded:
             return

@@ -43,9 +43,9 @@ Loader
 .. automodule:: circleguard.loader
    :members:
 
-Replay
+Loadable
 ------
-.. automodule:: circleguard.replay
+.. automodule:: circleguard.loadable
    :members:
 
 Result
