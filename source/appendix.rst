@@ -45,7 +45,7 @@ Loader
 
 Replay
 ------
-.. automodule:: circleguard.replay
+.. automodule:: circleguard.loadable
    :members:
 
 Result

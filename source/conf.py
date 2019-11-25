@@ -42,15 +42,15 @@ html_static_path = ["_static"]
 
 # references that we want to use easily in any file
 rst_prolog = """
-.. |Loadable| replace:: :class:`~circleguard.replay.Loadable`
-.. |Replay| replace:: :class:`~circleguard.replay.Replay`
-.. |ReplayMap| replace:: :class:`~circleguard.replay.ReplayMap`
-.. |ReplayPath| replace:: :class:`~circleguard.replay.ReplayPath`
-.. |ReplayContainer| replace:: :class:`~circleguard.replay.ReplayContainer`
-.. |Map| replace:: :class:`~circleguard.replay.Map`
-.. |User| replace:: :class:`~circleguard.replay.User`
+.. |Loadable| replace:: :class:`~circleguard.loadable.Loadable`
+.. |Replay| replace:: :class:`~circleguard.loadable.Replay`
+.. |ReplayMap| replace:: :class:`~circleguard.loadable.ReplayMap`
+.. |ReplayPath| replace:: :class:`~circleguard.loadable.ReplayPath`
+.. |ReplayContainer| replace:: :class:`~circleguard.loadable.ReplayContainer`
+.. |Map| replace:: :class:`~circleguard.loadable.Map`
+.. |User| replace:: :class:`~circleguard.loadable.User`
 
-.. |Check| replace:: :class:`~circleguard.replay.Check`
+.. |Check| replace:: :class:`~circleguard.loadable.Check`
 .. |Result| replace:: :class:`~circleguard.result.Result`
 .. |RelaxResult| replace:: :class:`~circleguard.result.RelaxResult`
 .. |StealResult| replace:: :class:`~circleguard.result.StealResult`
