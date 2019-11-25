@@ -182,6 +182,19 @@ class Check(InfoLoadable):
         return num
 
     def all_replays(self):
+        """
+        Returns all the :class:`~.replay`\s in this check. Contrast with
+        :func:`~.all_loadables`, which returns all the :class:`.~Loadable`\s
+        in this check.
+
+        Warnings
+        --------
+        If you want an accurate list of :class:`~.replay`\s in this check, you
+        must call :func:`.~circleguard.load` on this :class:`~.Check` before
+        :func:`~.all_replays`. :class:`~.InfoLoadable`\s contained in this
+        :class:`~.Check` may not be info loaded otherwise, and thus do not have
+        a complete list of the replays they represent.
+        """
         replays = []
         for loadable in self.loadables:
             replays += loadable.all_replays()
@@ -264,6 +277,16 @@ class Map(ReplayContainer):
             return self.num
 
     def all_replays(self):
+        """
+        Returns all the :class:`~.replay`\s in this map.
+
+        Warnings
+        --------
+        If you want an accurate list of :class:`~.replay`\s in this map, you
+        must call :func:`.~circleguard.load` on this map before
+        :func:`~.all_replays`. Otherwise, this class is not info loaded, and
+        does not have a complete list of replays it represents.
+        """
         return self.replays
 
 
@@ -351,6 +374,16 @@ class User(ReplayContainer):
             return self.num
 
     def all_replays(self):
+        """
+        Returns all the :class:`~.replay`\s in this map.
+
+        Warnings
+        --------
+        If you want an accurate list of :class:`~.replay`\s in this user, you
+        must call :func:`.~circleguard.load` on this user before
+        :func:`~.all_replays`. Otherwise, this class is not info loaded, and
+        does not have a complete list of replays it represents.
+        """
         replays = []
         for loadable in self.replays:
             replays += loadable.all_replays()
@@ -429,6 +462,16 @@ class MapUser(InfoLoadable):
             return self.num
 
     def all_replays(self):
+        """
+        Returns all the :class:`~.replay`\s in this MapUser.
+
+        Warnings
+        --------
+        If you want an accurate list of :class:`~.replay`\s in this MapUser,
+        you must call :func:`.~circleguard.load` on this MapUser before
+        :func:`~.all_replays`. Otherwise, this class is not info loaded, and
+        does not have a complete list of replays it represents.
+        """
         replays = []
         for loadable in self.replays:
             replays += loadable.all_replays()
