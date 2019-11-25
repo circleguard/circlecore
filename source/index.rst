@@ -44,7 +44,7 @@ Links
 -----
 
 | Github: https://github.com/circleguard/circlecore
-| Documentation: https://circleguard.github.io/circlecore/
+| Documentation: https://circleguard.dev/docs/circlecore
 | Discord: https://discord.gg/VNnkTjm
 | Website: https://circleguard.dev
 

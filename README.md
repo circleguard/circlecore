@@ -33,14 +33,14 @@ This documentation refers to the project as `circlecore` to differentiate it fro
 ## Links
 
 Github: <https://github.com/circleguard/circlecore> <br/>
-Documentation: <https://circleguard.github.io/circlecore/> <br/>
+Documentation: <https://circleguard.dev/docs/circlecore> <br/>
 Discord: <https://discord.gg/VNnkTjm> <br/>
 Website: <https://circleguard.dev> <br/>
 
 
 ## Usage
 
-We have documentation and a tutorial at <https://circleguard.github.io/circlecore/>.
+We have documentation and a tutorial at <https://circleguard.dev/docs/circlecore>.
 
 If you want a 30 second introduction to circlecore, see the following code snippets.
 
