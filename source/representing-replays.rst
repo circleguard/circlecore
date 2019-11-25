@@ -50,9 +50,9 @@ instance,
 
 .. code-block:: python
 
-    r2 = ReplayPath("/Users/tybug/Desktop/replays/replay1.osr")
+    r2 = ReplayPath("/path/to/your/replay.osr")
 
-represents the replay in the file ``/Users/tybug/Desktop/replays/replay1.osr``.
+represents the replay in the file ``/path/to/your/replay.osr``.
 
 Replay Containers
 -----------------
