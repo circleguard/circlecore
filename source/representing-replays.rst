@@ -5,7 +5,7 @@ Circlecore needs a replay to investigate before it can tell you anything
 about if that replay is cheated. There are several ways to create a replay
 through circlecore.
 
-All four of the following classes are subclasses of |Loadable|.
+All of the following classes are subclasses of |Loadable|.
 
 .. note::
 
