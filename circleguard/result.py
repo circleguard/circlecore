@@ -1,10 +1,10 @@
-from circleguard.replay import Replay
+from circleguard.loadable import Replay
 from circleguard.enums import ResultType
 
 # Hierarchy
 #                                 Result
 #          InvestigationResult             ComparisonResult
-#              RelaxResult               ReplayStealingResult
+#      RelaxResult, CorrectionResult       ReplayStealingResult
 #
 #
 class Result():
@@ -12,18 +12,14 @@ class Result():
     The result of a test for cheats, either on a single replay or a
     collection of replays.
 
-    Attributes:
-        Boolean ischeat: Whetherone or more of the replays involved is cheated.
-        ResultType type: What type of cheat test we are representing the results for.
+    Parameters
+    ----------
+    ischeat: bool
+        Whether one or more of the replays involved is cheated or not.
+    type: :class:`~circleguard.enums.ResultType`
+        What type of cheat test we are representing the results for.
     """
-
     def __init__(self, ischeat: bool, type_: ResultType):
-        """
-        Initializes a Result instance.
-
-        Boolean ischeat: Whether one or more of the replays involved is cheated.
-        ResultType type: What type of cheat test we are representing the results for.
-        """
         self.ischeat = ischeat
         self.type = type_
 
@@ -31,9 +27,12 @@ class InvestigationResult(Result):
     """
     The result of a test for cheats on a single replay.
 
-    Attributes:
-        Replay replay: The replay investigated.
-        Boolean ischeat: Whether the replay is cheated.
+    Parameters
+    ----------
+    replay: :class:`~circleguard.loadable.Replay`
+        The replay investigated.
+    ischeat: bool
+        Whether the replay is cheated or not.
     """
 
     def __init__(self, replay: Replay, ischeat: bool, type_: ResultType):
@@ -44,10 +43,14 @@ class ComparisonResult(Result):
     """
     The result of a test for cheats by comparing two replays.
 
-    Attributes:
-        Replay replay1: One of the replays involved.
-        Replay replay2: The other replay involved.
-        Boolean ischeat: Whether one of the replays is cheated.
+    Parameters
+    ----------
+    replay1: :class:`~circleguard.loadable.Replay`
+        One of the replays involved.
+    replay2: :class:`~circleguard.loadable.Replay`
+        The other replay involved.
+    ischeat: bool
+        Whether one of the replays is cheated or not.
     """
 
     def __init__(self, replay1: Replay, replay2: Replay, ischeat: bool, type_: ResultType):
@@ -59,20 +62,24 @@ class ReplayStealingResult(ComparisonResult):
     """
     The result of a test for replay stealing between two replays.
 
-    This Result contains the two Replay objects that were compared, and the similarity
-    between them. Attributes about the two replays (usernames, mods, map id, etc)
-    can be accessed through the replay1 and replay2 objects, as well as the later_replay
-    and earlier_replay objects, which are references to one of either replay1 or replay2.
-
-    Attributes:
-        Replay replay1: One of the replays involved.
-        Replay replay2: The other replay involved.
-        Replay earlier_replay: The earlier of the two replays (when the score was made). This is a
-                reference to either replay1 or replay2.
-        Replay later_replay: The later of the two replays (when the score was made). This is a
-                reference to either replay1 or replay2.
-        Integer similarity: How similar the two replays are (the lower, the more similar).
-        Boolean ischeat: Whether one of the replays is cheated.
+    Parameters
+    ----------
+    replay1: :class:`~circleguard.loadable.Replay`
+        One of the replays involved.
+    replay2: :class:`~circleguard.loadable.Replay`
+        The other replay involved.
+    earlier_replay: :class:`~circleguard.loadable.Replay`
+        The earlier of the two replays (when the score was made). This is a
+        reference to either replay1 or replay2.
+    later_replay: :class:`~circleguard.loadable.Replay`
+        The later of the two replays (when the score was made). This is a
+        reference to either replay1 or replay2.
+    similarity: int
+        How similar the two replays are (the lower, the more similar).
+        Similarity is, roughly speaking, a measure of the average pixel
+        distance between the two replays.
+    ischeat: bool
+        Whether one of the replays is cheated or not.
     """
 
     def __init__(self, replay1: Replay, replay2: Replay, similarity: int, ischeat: bool):
@@ -90,12 +97,34 @@ class RelaxResult(InvestigationResult):
     """
     The result of a test for relax cheats.
 
-    Attributes:
-        Replay replay: The replay investigated.
-        Integer ur: The unstable rate of the replay.
-        Boolean ischeat: Whether the replay is cheated.
+    Parameters
+    ----------
+    replay: :class:`~circleguard.loadable.Replay`
+        The replay investigated.
+    ur: int
+        The unstable rate of the replay. More information on UR available at
+        https://osu.ppy.sh/help/wiki/Accuracy#accuracy
+    ischeat: bool
+        Whether the replay is cheated or not.
     """
-
     def __init__(self, replay: Replay, ur: int, ischeat: bool):
         super().__init__(replay, ischeat, ResultType.RELAX)
         self.ur = ur
+
+class CorrectionResult(InvestigationResult):
+    """
+    The result of a test for aim correction cheats.
+
+    Parameters
+    ----------
+    replay: :class:`~circleguard.loadable.Replay`
+        The replay investigated.
+    snaps: list[:class:`.~Snap`]
+        A list of suspicious hits in the replay.
+    ischeat: bool
+        Whether the replay is cheated or not.
+    """
+
+    def __init__(self, replay, snaps, ischeat):
+        super().__init__(replay, ischeat, ResultType.CORRECTION)
+        self.snaps = snaps

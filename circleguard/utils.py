@@ -8,9 +8,16 @@ from circleguard.enums import Mod
 
 TRACE = 5
 
-# Colored logs adapted from
-# https://stackoverflow.com/questions/384076/how-can-i-color-python-logging-output
 class ColoredFormatter(Formatter):
+    """
+    A subclass of :class:`logging.Formatter` that uses ANSI escape codes
+    to color different parts of the :class:`logging.LogRecord` when printed to the
+    console.
+
+    Notes
+    -----
+    Adapted from https://stackoverflow.com/a/46482050.
+    """
 
     COLOR_PREFIX = '\033['
     COLOR_SUFFIX = '\033[0m'
@@ -43,7 +50,7 @@ class ColoredFormatter(Formatter):
         c_threadName = self.colored_log.format(color=color, msg=threadName)
 
         levelname = c_record.levelname
-        color = self.COLOR_MAPPING.get(levelname, 37) # default white
+        color = self.COLOR_MAPPING.get(levelname, 37) # default to white
         c_levelname = self.colored_log.format(color=color, msg=levelname)
 
         name = c_record.name
@@ -75,8 +82,24 @@ class ColoredFormatter(Formatter):
 
 def span_to_list(span):
     """
-    Takes a string span such as "1-3,6,2-4" and converts it to a set such as
-    {1,2,3,4,6}.
+    Converts a span to the set of numbers covered by that span.
+
+    Parameters
+    ----------
+    span: str
+        The span of numbers to convert to a set. A number may occur more than
+        once - whether explicitly or in a range - in the span, but will
+        only occur once in the returned set.
+
+    Returns
+    -------
+    set
+        The set of numbers described by the `span`.
+
+    Examples
+    --------
+    >>> span_to_list("1-3,6,2-4")
+    {1, 2, 3, 4, 6}
     """
     ret = set()
     for s in span.split(","):
@@ -89,24 +112,6 @@ def span_to_list(span):
     return ret
 
 
-def mod_to_int(mod):
-    """
-    Returns the integer representation of a mod string. The mods in the string can be in any order -
-    "HDDT" will be parsed the same as "DTHD".
-
-    Args:
-        String mod: The modstring to convert.
-
-    Returns:
-        The integer representation of the passed mod string.
-
-    """
-
-    mod_total = 0
-    for acronym in [mod[i:i+2] for i in range(0, len(mod), 2)]:
-        mod_total += Mod[acronym].value
-
-    return mod_total
 
 # https://github.com/kszlim/osu-replay-parser/blob/master/osrparse/replay.py#L64
 def bits(n):
@@ -152,7 +157,7 @@ def interpolate(data1, data2, interpolation=Interpolation.linear, unflip=False):
     Interpolates the longer of the datas to match the timestamps of the shorter.
 
     Args:
-    List data1: A list of tuples of (t, x, y).
+        List data1: A list of tuples of (t, x, y).
         List data2: A list of tuples of (t, x, y).
         Boolean unflip: Preserves input order of data1 and data2 if True.
 
