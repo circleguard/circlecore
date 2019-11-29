@@ -36,7 +36,7 @@ class Cacher:
     def cache(self, lzma_bytes, replay_info):
         """
         Caches a replay in the form of a (compressed) lzma stream to the
-        database, linking it to the given user info.
+        database, linking it to the given replay info.
 
         Parameters
         ----------
@@ -49,7 +49,7 @@ class Cacher:
 
         Notes
         -----
-        If an entry with the given user info already exists, it is overwritten
+        If an entry with the given replay info already exists, it is overwritten
         by the passed lzma.
 
         The lzma string is compressed with wtc compression. See
@@ -84,7 +84,7 @@ class Cacher:
         Checks entries in ``replay_info`` against their entries in the database
         (if any) to look for score id mismatches, indicating an outdated replay.
         If there are mismatches, the replay is redownloaded and cached from the
-        given user info.
+        given replay info.
 
         Parameters
         ----------

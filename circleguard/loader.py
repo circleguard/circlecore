@@ -141,25 +141,25 @@ class Loader():
     @request
     def replay_info(self, map_id, num=None, user_id=None, mods=None, limit=True, span=None):
         """
-        Retrieves user infos from ``map_id``.
+        Retrieves replay infos from ``map_id``.
 
         Parameters
         ----------
         map_id: int
-            The map id to retrieve user info for.
+            The map id to retrieve replay info for.
         num: int
-            The number of user infos on the map to retrieve.
+            The number of replay infos on the map to retrieve.
         user_id: int
-            If passed, only retrieve user info on ``map_id`` for this user.
+            If passed, only retrieve replay info on ``map_id`` for this user.
             Note that this is not necessarily limited to just the user's top
             score on the map. See ``limit``.
         mods: :class:`~.ModCombination`
-            The mods to limit user infos to. ie only return user infos with
+            The mods to limit replay infos to. ie only return replay infos with
             mods that match ``mods``.
         limit: bool
             Whether to limit to only one response. Only has an effect if
             ``user_id`` is passed. If ``limit`` is ``True``, will only return
-            the top scoring user info by ``user_id``. If ``False``, will return
+            the top scoring replay info by ``user_id``. If ``False``, will return
             all scores by ``user_id``.
         span: str
             A comma separated list of ranges of top replays on the map to
@@ -169,7 +169,7 @@ class Loader():
         Returns
         -------
         list[:class:`~.ReplayInfo`]
-            The user infos as specified by the arguments.
+            The replay infos as specified by the arguments.
         :class:`~.ReplayInfo`
             If ``limit`` is ``True`` and ``user_id`` is passed.
 
@@ -190,7 +190,7 @@ class Loader():
         # I spent many-a-hour figuring this out,
         # and if anyone has a more elegant solution I'm all ears.
         locals_ = locals()
-        self.log.log(TRACE, "Loading user info on map %d with options %s",
+        self.log.log(TRACE, "Loading replay info on map %d with options %s",
                             map_id, {k: locals_[k] for k in locals_ if k != 'self'})
 
         if num and (num > 100 or num < 1):
@@ -312,7 +312,7 @@ class Loader():
         Parameters
         ----------
         replay_info: :class:`~.ReplayInfo`
-            The user info representing the replay to retrieve.
+            The replay info representing the replay to retrieve.
 
         Returns
         -------
