@@ -1,0 +1,1 @@
+* Fix incorrect `__add__` method for `Check`
