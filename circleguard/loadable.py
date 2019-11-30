@@ -400,7 +400,7 @@ class User(ReplayContainer):
         return iter(self.replays)
 
 
-class MapUser(InfoLoadable):
+class MapUser(ReplayContainer):
     """
     All replays on a map by a user, not just the top replay.
 
