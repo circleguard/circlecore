@@ -208,7 +208,8 @@ class Check(InfoLoadable):
 
     def __add__(self, other):
         self.loadables.append(other)
-        return Check(self.loadables, self.loadables2, self.cache, self.detect)
+        # TODO why not just return ``self``?
+        return Check(self.loadables, self.detect, self.loadables2, self.cache)
 
     def __repr__(self):
         return (f"Check(loadables={self.loadables},loadables2={self.loadables2},cache={self.cache},"
