@@ -163,8 +163,8 @@ class Check(InfoLoadable):
             return
         cascade_cache = cache if self.cache is None else self.cache
         self.load_info(loader)
-        for replay in self.all_loadables():
-            replay.load(loader, cascade_cache)
+        for loadable in self.all_loadables():
+            loadable.load(loader, cascade_cache)
         self.loaded = True
 
     def load_info(self, loader):
