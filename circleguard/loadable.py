@@ -256,7 +256,7 @@ class Map(ReplayContainer):
         if self.info_loaded:
             return
         for info in loader.replay_info(self.map_id, num=self.num, mods=self.mods, span=self.span):
-            self.replays.append(ReplayMap(info.map_id, info.user_id, info.mods, cache=self.cache))
+            self.replays.append(ReplayMap(info.map_id, info.user_id, info.mods, cache=self.cache, info=info))
         self.info_loaded = True
 
     def load(self, loader, cache=None):
