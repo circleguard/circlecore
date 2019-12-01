@@ -2,7 +2,7 @@ import logging
 
 from circleguard.circleguard import Circleguard, set_options
 from circleguard.loadable import Check, Replay, ReplayMap, ReplayPath, Map, User, MapUser
-from circleguard.enums import Detect, RatelimitWeight, Keys, StealDetect, RelaxDetect, Mod, CorrectionDetect
+from circleguard.enums import Detect, RatelimitWeight, Keys, Key, StealDetect, RelaxDetect, Mod, CorrectionDetect
 from circleguard.utils import TRACE, ColoredFormatter
 from circleguard.loader import Loader
 from circleguard.replay_info import ReplayInfo
@@ -25,5 +25,5 @@ __all__ = ["Circleguard", "set_options", "Check", "Replay", "ReplayMap", "StealD
            "ComparisonResult", "RelaxResult", "ReplayStealingResult", "ResultType",
            "CircleguardException", "InvalidArgumentsException", "Map", "User",
            "APIException", "NoInfoAvailableException", "UnknownAPIException", "InternalAPIException",
-           "InvalidKeyException", "RatelimitException", "InvalidJSONException", "ReplayUnavailableException", "Keys",
+           "InvalidKeyException", "RatelimitException", "InvalidJSONException", "ReplayUnavailableException", "Keys", "Key",
            "Mod", "CorrectionResult", "MapUser"]
