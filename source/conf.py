@@ -11,6 +11,11 @@ release = "2.4.0"
 version = "2.4.0"
 master_doc = 'index'
 
+# https://www.sphinx-doc.org/en/master/usage/configuration.html#confval-html_show_copyright
+html_show_copyright = False
+# https://www.sphinx-doc.org/en/master/usage/configuration.html#confval-html_show_sphinx
+html_show_sphinx = False
+
 extensions = [
     "sphinx.ext.autodoc",
     "sphinx.ext.napoleon",
