@@ -4,9 +4,9 @@
 # list see the documentation:
 # https://www.sphinx-doc.org/en/master/usage/configuration.html
 
-# This will fail if circlecore's dependencies aren't installed.
-# Which shouldn't be an issue because the only people running ``make html``
-# (building the docs) are people with circlecore properly installed, hopefully.
+import os, sys
+# prefer local package over installed one
+sys.path.insert(0, os.path.dirname(os.getcwd()))
 from circleguard import __version__
 
 project = "Circleguard"
