@@ -28,11 +28,6 @@ Should you only have a single |Loadable| to investigate (common when using
     # an iterable still works
     c1 = Check([m], detect=RelaxDetect())
 
-.. code-block:: python
-
-    r1 = ReplayMap(221777, 2757689)
-    c = Check([r1], detect=RelaxDetect())
-
 Detect
 ~~~~~~
 

@@ -13,11 +13,6 @@ Because the osu api places
 `rather heavy ratelimits <https://github.com/ppy/osu-api/wiki#rate-limiting>`_
 (10 per minute) on
 loading replays, a low quantity of replays has been used where appropriate
-in the examples, to reduce frustration should you choose to try the provided
+in the examples, to reduce frustration should you run the provided
 code. Know that the api (and subsequently circlecore) supports loading
 up to 100 top scores from a map or user.
-
-osu! stores the top 1000 scores of a map, but only provides the first 100 as
-automatically discoverable through the api. Should you know about a specific
-score outside of the top 1000 on a map, you can still load and investigate it
-through circlecore.

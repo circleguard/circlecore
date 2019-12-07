@@ -10,7 +10,7 @@ from requests import RequestException
 import circleparse
 import ossapi
 
-from circleguard.user_info import UserInfo
+from circleguard.replay_info import ReplayInfo
 from circleguard.enums import Error, ModCombination
 from circleguard.exceptions import (InvalidArgumentsException, APIException, CircleguardException,
                         RatelimitException, InvalidKeyException, ReplayUnavailableException, UnknownAPIException,
@@ -70,8 +70,8 @@ def request(function):
 def check_cache(function):
     """
     A decorator that checks if the passed
-    :class:`~circleguard.user_info.UserInfo` has its replay cached. If so,
-    returns a :class:`~circleguard.replay.Replay` instance from the cached data.
+    :class:`~circleguard.replay_info.ReplayInfo` has its replay cached. If so,
+    returns a :class:`~circleguard.loadable.Replay` instance from the cached data.
     Otherwise, calls and returns the `function` as normal.
 
     Parameters
@@ -81,24 +81,24 @@ def check_cache(function):
 
     Notes
     -----
-    ``self`` and ``user_info`` **MUST** be the first and second arguments to
+    ``self`` and ``replay_info`` **MUST** be the first and second arguments to
     the function, respectively.
 
     Returns
     -------
-    :class:`~circleguard.replay.Replay` or Unknown:
-        A :class:`~circleguard.replay.Replay` instance from the cached data
+    :class:`~circleguard.loadable.Replay` or Unknown:
+        A :class:`~circleguard.loadable.Replay` instance from the cached data
         if it was cached, or the return value of the function if not.
     """
 
     def wrapper(*args, **kwargs):
         self = args[0]
-        user_info = args[1]
+        replay_info = args[1]
 
         if self.cacher is None:
             return function(*args, **kwargs)
 
-        lzma = self.cacher.check_cache(user_info.map_id, user_info.user_id, user_info.mods)
+        lzma = self.cacher.check_cache(replay_info.map_id, replay_info.user_id, replay_info.mods)
         if lzma:
             replay_data = circleparse.parse_replay(lzma, pure_lzma=True).play_data
             return replay_data
@@ -139,27 +139,27 @@ class Loader():
         self.cacher = cacher
 
     @request
-    def user_info(self, map_id, num=None, user_id=None, mods=None, limit=True, span=None):
+    def replay_info(self, map_id, num=None, user_id=None, mods=None, limit=True, span=None):
         """
-        Retrieves user infos from ``map_id``.
+        Retrieves replay infos from ``map_id``.
 
         Parameters
         ----------
         map_id: int
-            The map id to retrieve user info for.
+            The map id to retrieve replay info for.
         num: int
-            The number of user infos on the map to retrieve.
+            The number of replay infos on the map to retrieve.
         user_id: int
-            If passed, only retrieve user info on ``map_id`` for this user.
+            If passed, only retrieve replay info on ``map_id`` for this user.
             Note that this is not necessarily limited to just the user's top
             score on the map. See ``limit``.
         mods: :class:`~.ModCombination`
-            The mods to limit user infos to. ie only return user infos with
+            The mods to limit replay infos to. ie only return replay infos with
             mods that match ``mods``.
         limit: bool
             Whether to limit to only one response. Only has an effect if
             ``user_id`` is passed. If ``limit`` is ``True``, will only return
-            the top scoring user info by ``user_id``. If ``False``, will return
+            the top scoring replay info by ``user_id``. If ``False``, will return
             all scores by ``user_id``.
         span: str
             A comma separated list of ranges of top replays on the map to
@@ -168,15 +168,15 @@ class Loader():
 
         Returns
         -------
-        list[:class:`~.UserInfo`]
-            The user infos as specified by the arguments.
-        :class:`~.UserInfo`
+        list[:class:`~.ReplayInfo`]
+            The replay infos as specified by the arguments.
+        :class:`~.ReplayInfo`
             If ``limit`` is ``True`` and ``user_id`` is passed.
 
         Notes
         -----
         One of ``num``, ``user_id``, and ``span`` must be passed, but not both
-        ``num`` and either ``user_id`` or ``span``.
+        ``num`` and ``span``.
 
         Raises
         ------
@@ -190,25 +190,30 @@ class Loader():
         # I spent many-a-hour figuring this out,
         # and if anyone has a more elegant solution I'm all ears.
         locals_ = locals()
-        self.log.log(TRACE, "Loading user info on map %d with options %s",
+        self.log.log(TRACE, "Loading replay info on map %d with options %s",
                             map_id, {k: locals_[k] for k in locals_ if k != 'self'})
 
         if num and (num > 100 or num < 1):
             raise InvalidArgumentsException("The number of top plays to fetch must be between 1 and 100 inclusive!")
 
-        if not bool(user_id) ^ (bool(num) or bool(span)):
-            raise InvalidArgumentsException("One of num, user_id, or span must be passed, but not both num and either user_id or span")
+        if (num and span) or not (num or user_id or span):
+            raise InvalidArgumentsException("One of num, user_id, or span must be passed, but not both num and span")
         if span:
             span_list = span_to_list(span)
             num = max(span_list)
         response = self.api.get_scores({"m": "0", "b": map_id, "limit": num, "u": user_id, "mods": mods if mods is None else mods.value})
         Loader.check_response(response)
         if span:
+            # filter span_list to remove indexes that would cause an indexerror
+            # when indexing ``response``
+            # span_list = {3, 6}; response = [a, b, c, d, e, f]; len(response) = 6
+            # we want to keep {6} since we index at [i-1], so use <= not <
+            span_list = {x for x in span_list if x <= len(response)}
             # filter out anything not in our span
             response = [response[i-1] for i in span_list]
         # yes, it's necessary to cast the str response to int before bool - all strings are truthy.
         # strptime format from https://github.com/ppy/osu-api/wiki#apiget_scores
-        infos = [UserInfo(datetime.strptime(x["date"], "%Y-%m-%d %H:%M:%S"), map_id, int(x["user_id"]), str(x["username"]), int(x["score_id"]),
+        infos = [ReplayInfo(datetime.strptime(x["date"], "%Y-%m-%d %H:%M:%S"), map_id, int(x["user_id"]), str(x["username"]), int(x["score_id"]),
                           ModCombination(int(x["enabled_mods"])), bool(int(x["replay_available"]))) for x in response]
 
         return infos[0] if (limit and user_id) else infos # limit only applies if user_id was set
@@ -221,7 +226,7 @@ class Loader():
 
         Parameters
         ----------
-        user_id: str
+        user_id: int
             The user id to get best plays of.
         num: int
             The number of top plays to retrieve. Must be between 1 and 100.
@@ -238,8 +243,9 @@ class Loader():
         InvalidArgumentsException
             If ``num`` or ``span`` is not between ``1`` and ``100`` inclusive.
         """
-
-        self.log.log(TRACE, "Retrieving the best %d plays of user %d", num, user_id)
+        locals_ = locals()
+        self.log.log(TRACE, "Loading user best of %s with options %s",
+                            user_id, {k: locals_[k] for k in locals_ if k != 'self'})
         if span:
             span_list = span_to_list(span)
             num = max(span_list)
@@ -257,7 +263,7 @@ class Loader():
 
         if span:
             response = [response[i-1] for i in span_list]
-        return [UserInfo(datetime.strptime(r["date"], "%Y-%m-%d %H:%M:%S"), int(r["beatmap_id"]), int(r["user_id"]),
+        return [ReplayInfo(datetime.strptime(r["date"], "%Y-%m-%d %H:%M:%S"), int(r["beatmap_id"]), int(r["user_id"]),
                 self.username(int(r["user_id"])), int(r["score_id"]), ModCombination(int(r["enabled_mods"])),
                 bool(int(r["replay_available"]))) for r in response]
 
@@ -298,15 +304,15 @@ class Loader():
         return base64.b64decode(response["content"])
 
     @check_cache
-    def replay_data(self, user_info, cache=None):
+    def replay_data(self, replay_info, cache=None):
         """
         Retrieves replay data from the api, or from the cache if it is already
         cached.
 
         Parameters
         ----------
-        user_info: :class:`~.UserInfo`
-            The user info representing the replay to retrieve.
+        replay_info: :class:`~.ReplayInfo`
+            The replay info representing the replay to retrieve.
 
         Returns
         -------
@@ -323,10 +329,10 @@ class Loader():
             replay data from the api.
         """
 
-        user_id = user_info.user_id
-        map_id = user_info.map_id
-        mods = user_info.mods
-        if(not user_info.replay_available):
+        user_id = replay_info.user_id
+        map_id = replay_info.map_id
+        mods = replay_info.mods
+        if(not replay_info.replay_available):
             self.log.debug("Replay data by user %d on map %d with mods %s not available", user_id, map_id, mods)
             return None
 
@@ -339,11 +345,11 @@ class Loader():
         # see https://github.com/circleguard/circlecore/issues/61
         # api sometimes returns corrupt replays
         except LZMAError:
-            self.log.warning("lzma from %r could not be decompressed, api returned corrupt replay", user_info)
+            self.log.warning("lzma from %r could not be decompressed, api returned corrupt replay", replay_info)
             return None
         replay_data = parsed_replay.play_data
         if cache and self.cacher is not None:
-            self.cacher.cache(lzma_bytes, user_info)
+            self.cacher.cache(lzma_bytes, replay_info)
         return replay_data
 
     @lru_cache()
@@ -359,8 +365,8 @@ class Loader():
         Returns
         -------
         int
-            The map id that corresponds to ``map_hash``, or 0 if ``map_hash``
-            doesn't mach any map.
+            The map id that corresponds to ``map_hash``, or ``0`` if
+            ``map_hash`` doesn't mach any map.
 
         Notes
         -----

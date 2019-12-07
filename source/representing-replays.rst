@@ -5,7 +5,7 @@ Circlecore needs a replay to investigate before it can tell you anything
 about if that replay is cheated. There are several ways to create a replay
 through circlecore.
 
-All four of the following classes are subclasses of |Loadable|.
+All of the following classes are subclasses of |Loadable|.
 
 .. note::
 
@@ -50,15 +50,15 @@ instance,
 
 .. code-block:: python
 
-    r2 = ReplayPath("/Users/tybug/Desktop/replays/replay1.osr")
+    r2 = ReplayPath("/path/to/your/replay.osr")
 
-represents the replay in the file ``/Users/tybug/Desktop/replays/replay1.osr``.
+represents the replay in the file ``/path/to/your/replay.osr``.
 
 Replay Containers
 -----------------
 
-True to its name, a |ReplayContainer| represents a set of replays. These are
-provided as a convenience to minimize the amount of information you need to
+A |ReplayContainer| represents a set of replays. These classes are provided as
+a convenience to minimize the amount of information you need to
 know to construct a view of map or player.
 
 
@@ -69,13 +69,29 @@ It is common to want to represent all, or a subset of, a map's leaderboard.
 
 .. code-block:: python
 
-    # top 50 scores on the map
-    m = Map(221777, num=50)
-    # top 12 scores with exactly HD (not HDDT or another variation). Due to
+    # top 2 scores on the map
+    m = Map(221777, num=2)
+
+We can filter by mods:
+
+.. code-block:: python
+
+    # top 3 scores with exactly HD (not HDDT or another variation). Due to
     # api restrictions, we do not provide fuzzy matching.
-    m = Map(221777, num=12, mods=Mod.HD)
-    # 1st, 4th, 5th, 6th, 7h, 8th, 10th, 11th, and 12th top scores
-    m = Map(221777, span="1, 4-8, 10-12")
+    m = Map(221777, num=3, mods=Mod.HD)
+
+Or only represent some of the replays on the map. Use ``span`` for any case
+when you don't simply want the first ``n`` replays.
+
+.. code-block:: python
+
+    # 1st, 4th, 5th, 6th top scores
+    m = Map(221777, span="1, 4-6")
+
+``span`` can be combined with ``mods``, just like ``num`` can:
+
+.. code-block:: python
+
     # 1st and 49th scores with exactly HD
     m = Map(221777, span="1, 49", mods=Mod.HD)
 
@@ -87,12 +103,42 @@ Similar to |Map|, a |User| represents the top plays of a user.
 
 .. code-block:: python
 
-    # top 50 scores of the user
-    u = User(2757689, num=50)
-    # top 12 scores with exactly HD (not HDDT or another variation). Due to
+    # top 2 scores of the user
+    u = User(2757689, num=2)
+
+We can still filter by mods:
+
+.. code-block:: python
+
+    # top 3 scores with exactly HD (not HDDT or another variation). Due to
     # api restrictions, we do not provide fuzzy matching.
-    u = User(2757689, num=12, mods=Mod.HD)
-    # 1st, 4th, 5th, 6th, 7h, 8th, 10th, 11th, and 12th top scores
-    u = User(2757689, span="1, 4-8, 10-12")
+    u = User(2757689, num=3, mods=Mod.HD)
+
+or represent with a ``span``:
+
+.. code-block:: python
+
+    # 1st, 4th, 5th, 6th top scores
+    u = User(2757689, span="1, 4-6")
+
+And can still combine ``span`` and ``mods``:
+
+.. code-block:: python
+
     # 1st and 49th scores with exactly HD
     u = User(2757689, span="1, 49", mods=Mod.HD)
+
+
+MapUser
+~~~~~~~
+
+A |MapUser| represents all of a user's replays on a map.
+
+This is especially useful for remod checks, by comparing a user's top play on a
+map to his other replays.
+
+.. code-block:: python
+
+    r_top = ReplayMap(221777, 2757689)
+    r_remods = MapUser(221777, span="2-100") # skip first replay; that's r_top
+    r_all = [r_top, r_remods]

@@ -1,7 +1,7 @@
 import circleguard.utils as utils
 from circleguard.enums import Mod
 
-class UserInfo():
+class ReplayInfo():
     """
     A container class representing all the information needed
     to load a replay from the api.
@@ -16,7 +16,7 @@ class UserInfo():
         The id of the player who played the replay.
     username: str
         The username of the player who played the replay.
-    replay_id: str
+    replay_id: int
         The id of the replay.
     mods: :class:`~circleguard.enums.ModCombination`
         The mods the replay was played with.

@@ -20,8 +20,9 @@ setup(
     name="circleguard",
     version=VERSION,
     description="A player made and maintained cheat detection tool for osu!. "
-                "Provides support for detecting replay stealing and remodding "
-                "from a profile, map, or set of osr files.",
+                "Provides support for detecting replay stealing, remodding, "
+                "relax, and aim correction from a profile, map, or set of osr "
+                "files.",
     long_description=long_description,
     long_description_content_type="text/markdown",
     classifiers=[

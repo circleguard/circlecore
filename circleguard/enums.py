@@ -354,7 +354,7 @@ class CorrectionDetect(Detect):
 
     Look at each set of three points (a,b,c) in a replay and calculate the
     angle between them. Look at points where this angle is extremely acute
-    and neither |ab| or |bc| are small.
+    and neither ``|ab|`` or ``|bc|`` are small.
 
     Parameters
     ----------
@@ -449,9 +449,13 @@ class ResultType(Enum):
     CORRECTION = "Aim Correction"
     TIMEWARP = "Timewarp"
 
-class Keys(IntFlag):
+class Key(IntFlag):
     M1 = 1
     M2 = 2
     K1 = 4
     K2 = 8
     SMOKE = 16
+
+# TODO remove in 4.x
+# @deprecated
+Keys = Key

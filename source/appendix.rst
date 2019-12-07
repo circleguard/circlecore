@@ -43,9 +43,9 @@ Loader
 .. automodule:: circleguard.loader
    :members:
 
-Replay
-------
-.. automodule:: circleguard.replay
+Loadable
+--------
+.. automodule:: circleguard.loadable
    :members:
 
 Result
@@ -53,9 +53,9 @@ Result
 .. automodule:: circleguard.result
    :members:
 
-UserInfo
---------
-.. automodule:: circleguard.user_info
+ReplayInfo
+----------
+.. automodule:: circleguard.replay_info
    :members:
 
 Utils

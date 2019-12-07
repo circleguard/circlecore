@@ -6,7 +6,7 @@ import math
 import numpy as np
 import itertools as itr
 
-from circleguard.replay import Replay, ReplayModified
+from circleguard.loadable import Replay, ReplayModified
 from circleguard.enums import Mod, CleanMode
 from circleguard.exceptions import InvalidArgumentsException, CircleguardException
 import circleguard.utils as utils
@@ -47,7 +47,7 @@ class Comparer:
         self.log = logging.getLogger(__name__)
         self.detect = detect
 
-        # filter beatmaps we had no data for - see Loader.replay_data and OnlineReplay.from_map
+        # filter beatmaps we had no data for
         self.replays1 = [replay for replay in replays1 if replay.replay_data is not None]
         self.replays2 = [replay for replay in replays2 if replay.replay_data is not None] if replays2 else None
         self.mode = "double" if self.replays2 else "single"
