@@ -6,7 +6,7 @@ from circleguard import (Circleguard, Check, ReplayMap, ReplayPath, RelaxDetect,
                          RatelimitWeight, set_options, Map, User, MapUser, Mod)
 
 KEY = os.environ.get('OSU_API_KEY')
-if KEY is None:
+if not KEY:
     KEY = input("Enter your api key: ")
 
 RES = Path(__file__).parent / "resources"
@@ -130,7 +130,7 @@ class TestMap(CGTestCase):
         self.assertTrue(self.map.loaded)
         self.assertTrue(self.map.info_loaded)
 
-    def test_user_slice(self):
+    def test_map_slice(self):
         # sanity check (map id better be what we put in)
         self.assertEqual(self.map[0].map_id, 221777)
         # 2nd (rohulk)
