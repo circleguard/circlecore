@@ -1,7 +1,7 @@
 
 import numpy as np
-from circleguard.enums import Keys, Detect
 from circleguard.result import RelaxResult, CorrectionResult
+from circleguard.enums import Key, Detect
 import circleguard.utils as utils
 import math
 
@@ -25,7 +25,7 @@ class Investigator:
     :class:`~.comparer.Comparer`, for comparing multiple replays.
     """
 
-    MASK = int(Keys.K1) | int(Keys.K2)
+    MASK = int(Key.M1) | int(Key.M2)
 
     def __init__(self, replay, detect, beatmap=None):
 
@@ -60,7 +60,7 @@ class Investigator:
         filtered_array = Investigator._filter_hits(hitobjs, keypresses, beatmap.overall_difficulty)
         diff_array = []
 
-        for hit, press in filtered_array:
+        for hit, press, _ in filtered_array:
             diff_array.append(press[0]-hit[0])
         return np.std(diff_array) * 10
 
@@ -198,9 +198,26 @@ class Investigator:
     @staticmethod
     def _parse_keys(data):
         data = np.array(data, dtype=object)
-        keypresses = np.int32(data[:, 3]) & Investigator.MASK
-        changes = keypresses & ~np.insert(keypresses[:-1], 0, 0)
-        return data[changes!=0]
+        presses = []
+        buffer_k1 = None
+        buffer_k2 = None
+        for i in data:
+            if Key.M1 in Key(i[3]) and buffer_k1 is None:
+                d = i
+                d[3] = int(Key(d[3]) & Key.K1 | Key(d[3]) & Key.M1)
+                buffer_k1 = d
+            elif Key.M1 not in Key(i[3]) and buffer_k1 is not None:
+                presses.append([buffer_k1, i])
+                buffer_k1 = None
+
+            if Key.M2 in Key(i[3]) and buffer_k2 is None:
+                d = i
+                d[3] = int(Key(d[3]) & Key.K2 | Key(d[3]) & Key.M2)
+                buffer_k2 = d
+            elif Key.M2 not in Key(i[3]) and buffer_k2 is not None:
+                presses.append([buffer_k2, i])
+                buffer_k2 = None
+        return np.array(presses)
 
     @staticmethod
     def _filter_hits(hitobjs, keypresses, OD):
@@ -214,12 +231,12 @@ class Investigator:
             hitobj = hitobjs[object_i]
             press = keypresses[press_i]
 
-            if press[0] < hitobj[0] - hitwindow / 2:
+            if press[0][0] < hitobj[0] - hitwindow / 2:
                 press_i += 1
-            elif press[0] > hitobj[0] + hitwindow / 2:
+            elif press[0][0] > hitobj[0] + hitwindow / 2:
                 object_i += 1
             else:
-                array.append([hitobj, press])
+                array.append([hitobj, press[0], press[1]])
                 press_i += 1
                 object_i += 1
 
