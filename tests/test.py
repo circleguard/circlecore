@@ -34,16 +34,16 @@ class CGTestCase(TestCase):
                 message="unclosed",
                 category=ResourceWarning)
 
-class TestReplays(CGTestCase):
+class TestDetection(CGTestCase):
 
-    def test_cheated_replaypath(self):
+    def test_steal_cheated(self):
         # taken from http://redd.it/bvfv8j, remodded replay by same user (CielXDLP) from HDHR to FLHDHR
-        replays = [ReplayPath(RES / "stolen_replay1.osr"), ReplayPath(RES / "stolen_replay2.osr")]
-        c = Check(replays, detect=StealDetect(18))
+        stolen_replays = [ReplayPath(RES / "stolen_replay1.osr"), ReplayPath(RES / "stolen_replay2.osr")]
+        c = Check(stolen_replays, detect=StealDetect())
         r = list(self.cg.run(c))
         self.assertEqual(len(r), 1, f"{len(r)} results returned instead of 1")
         r = r[0]
-        self.assertTrue(r.ischeat, "Cheated replays were not detected as cheated")
+        self.assertTrue(r.ischeat, "Cheated replays were not detected as cheated for StealDetect")
 
         r1 = r.replay1
         r2 = r.replay2
@@ -59,13 +59,13 @@ class TestReplays(CGTestCase):
         self.assertEqual(later.replay_id, 2805164683, "Later replay id was not correct")
         self.assertEqual(r1.username, r2.username, "Replay usernames did not match")
 
-    def test_legitimate_replaypath(self):
-        replays = [ReplayPath(RES / "legit_replay1.osr"), ReplayPath(RES / "legit_replay2.osr")]
-        c = Check(replays, detect=StealDetect(18))
+    def test_steal_legit(self):
+        legit_replays = [ReplayPath(RES / "legit_replay1.osr"), ReplayPath(RES / "legit_replay2.osr")]
+        c = Check(legit_replays, detect=StealDetect())
         r = list(self.cg.run(c))
         self.assertEqual(len(r), 1, f"{len(r)} results returned instead of 1")
         r = r[0]
-        self.assertFalse(r.ischeat, "Legitimate replays were detected as stolen")
+        self.assertFalse(r.ischeat, "Legitimate replays were detected as cheated for StealDetect")
 
         r1 = r.replay1
         r2 = r.replay2
@@ -81,6 +81,25 @@ class TestReplays(CGTestCase):
         self.assertEqual(later.replay_id, 2309618113, "Later replay id was not correct")
         self.assertEqual(earlier.username, "Crissinop", "Earlier username was not correct")
         self.assertEqual(later.username, "TemaZpro", "Later username was not correct")
+
+    def test_macro_cheated(self):
+        replays = [ReplayPath(RES / "macro_replay.osr")]
+        c = Check(replays, detect=MacroDetect())
+        r = list(self.cg.run(c))
+        self.assertEqual(len(r), 1, f"{len(r)} results returned instead of 1")
+        r = r[0]
+        self.assertTrue(r.ischeat, "Macro replay was not detected as cheated for MacroDetect")
+
+    def test_macro_legit(self):
+        replays = [ReplayPath(RES / "legit_replay1.osr")]
+        c = Check(replays, detect=MacroDetect())
+        r = list(self.cg.run(c))
+        self.assertEqual(len(r), 1, f"{len(r)} results returned instead of 1")
+        r = r[0]
+        self.assertFalse(r.ischeat, "Legitimate replay was detected as cheated for MacroDetect")
+        self.assertEqual(len(r.presses), 0, f"Detected {len(r.presses)} macro presses on legitimate replay instead of 0")
+
+class TestLoading(CGTestCase):
 
     def test_loading_replaypath(self):
         r = ReplayPath(RES / "example_replay.osr")
@@ -204,31 +223,7 @@ class TestMapUser(CGTestCase):
         self.assertListEqual([r.map_id for r in self.mu[0:2]], [795627, 795627])
 
 
-class TestMacroDetect(CGTestCase):
-    @classmethod
-    def setUpClass(cls):
-        cls.cg = Circleguard(KEY)
+# if __name__ == '__main__':
+#     suite = TestSuite()
 
-    def test_macro_replaypath(self):
-        replays = [ReplayPath(RES / "macro_replay.osr")]
-        c = Check(replays, detect=MacroDetect())
-        r = list(self.cg.run(c))
-        self.assertEqual(len(r), 1, f"{len(r)} results returned instead of 1")
-        r = r[0]
-        self.assertTrue(r.ischeat, "Macro replay was not detected as cheated")
-
-    def test_legitimate_replaypath(self):
-        replays = [ReplayPath(RES / "legit_replay1.osr")]
-        c = Check(replays, detect=MacroDetect())
-        r = list(self.cg.run(c))
-        self.assertEqual(len(r), 1, f"{len(r)} results returned instead of 1")
-        r = r[0]
-        self.assertFalse(r.ischeat, "Legitimate replays were detected as a Macro one")
-        self.assertEqual(len(r.presses), 0, "Detected Macro presses on a legitimate replay")
-
-
-if __name__ == '__main__':
-    suite = TestSuite()
-    suite.addTest(TestMap("test_map_with_replays"))
-
-    TextTestRunner().run(suite)
+#     TextTestRunner().run(suite)
