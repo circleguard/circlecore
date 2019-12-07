@@ -45,9 +45,9 @@ class Investigator:
             ischeat = ur < d.relax_max_ur
             yield RelaxResult(self.replay, ur, ischeat)
         if Detect.CORRECTION in d:
-            suspicious_angles = self.aim_correction(self.replay_data, d.correction_max_angle, d.correction_min_distance)
-            ischeat = len(suspicious_angles) > 1
-            yield CorrectionResult(self.replay, suspicious_angles, ischeat)
+            snaps = self.aim_correction(self.replay_data, d.correction_max_angle, d.correction_min_distance)
+            ischeat = len(snaps) > 1
+            yield CorrectionResult(self.replay, snaps, ischeat)
         if Detect.MACRO in d:
             presses = self.macro_detection(self.replay_data, self.beatmap, d.macro_max_length)
             ischeat = len(presses) > d.macro_min_count
