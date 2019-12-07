@@ -365,8 +365,8 @@ class CorrectionDetect(Detect):
     """
     Defines a detection of aim correction.
 
-    Look at each set of three points (a,b,c) in a replay and calculate the
-    angle between them. Look at points where this angle is extremely acute
+    Looks at each set of three points (a,b,c) in a replay and calculate the
+    angle between them. Looks at points where this angle is extremely acute
     and neither ``|ab|`` or ``|bc|`` are small.
 
     Parameters
