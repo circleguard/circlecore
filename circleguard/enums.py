@@ -372,10 +372,11 @@ class CorrectionDetect(Detect):
     Parameters
     ----------
     max_angle: float
-        Consider only (a,b,c) where ``∠abc < max_angle``.
+        Consider only (a,b,c) where ``∠abc < max_angle``, in degrees. Default
+        10.
     min_distance: float
         Consider only (a,b,c) where ``|ab| > min_distance`` and
-        ``|ab| > min_distance``.
+        ``|ab| > min_distance``, in pixels. Default 8.
 
     Notes
     -----
@@ -404,10 +405,11 @@ class MacroDetect(Detect):
     Parameters
     ----------
     max_length: float
-        Consider only Presses where ``press < min_distance``.
+        Consider only Presses where ``press < max_length``, in milliseconds.
+        Default 5.
     min_amount: int
-        If the amount of Presses that satisfy ``max_length`` is under this
-        value, the replay is labeled cheated.
+        If the amount of Presses that satisfy ``max_length`` is greater than
+        or equal to this number, the replay is labeled cheated. Default 1.
     """
     def __init__(self, max_length=5, min_count=1):
         super().__init__(Detect.MACRO)
