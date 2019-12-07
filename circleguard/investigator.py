@@ -40,6 +40,11 @@ class Investigator:
 
     def investigate(self):
         d = self.detect
+        # TODO we're iterating over the replay three separate times here if
+        # all three detects are passed; certainly not the most efficient way
+        # to do it. Figure out how to keep the code clean but do all three tests
+        # in a single O(n) pass through the replay (or whatever the best case
+        # happens to be).
         if Detect.RELAX in d:
             ur = self.ur(self.replay_data, self.beatmap)
             ischeat = ur < d.relax_max_ur
