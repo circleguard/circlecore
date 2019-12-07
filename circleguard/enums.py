@@ -279,11 +279,28 @@ class Detect():
         :data:`~.Detect.RELAX`, :data:`~.Detect.CORRECTION`,
         :data:`~.Detect.MACRO`, or :data:`~.Detect.ALL`. What cheats to detect.
     """
-    STEAL = 1 << 0
-    RELAX = 1 << 1
-    CORRECTION = 1 << 2
-    MACRO = 1 << 3
-    ALL = STEAL + RELAX + CORRECTION + MACRO
+    COMPARISON = 1 << 0
+    INVESTIGATION = 1 << 1
+    ALL_TYPES = COMPARISON | INVESTIGATION
+
+    # ``1 << 5`` to leave room for expansion of ALL_TYPES.
+    REQUIRES_BEATMAP = 1 << 5
+    ALL_REQUIRES = REQUIRES_BEATMAP
+
+    # these COMPARISON and INVESTIGATION flags allow for
+    # ``if Detect.INVESTIGATION in detect```; instead of messing around with
+    # subclass constructors, just flip the bit here. It separates the
+    # responsibility from the subclass a bit which is unfortuante (all
+    # "customization", eg if you're a comparison or an investigation, should
+    # happen in the subclass ideally) but I think this is just cleaner.
+    STEAL = 1 << 10      | COMPARISON
+    RELAX = 1 << 11      | INVESTIGATION | REQUIRES_BEATMAP
+    CORRECTION = 1 << 12 | INVESTIGATION
+    # TODO macro detection should ideally not require a beatmap.
+    # It only does because Investigator.hit_map needs a beatmap, but
+    # that method provides more information than a macro detect needs.
+    MACRO = 1 << 13      | INVESTIGATION | REQUIRES_BEATMAP
+    ALL = STEAL | RELAX | CORRECTION | MACRO
 
     def __init__(self, value):
         self.value = value
@@ -303,6 +320,18 @@ class Detect():
         self.min_distance = None
 
     def __contains__(self, other):
+        if bool(other & Detect.ALL & ~Detect.ALL_TYPES & ~Detect.ALL_REQUIRES):
+            # ``other`` is a lowest level type
+            # (steal/relax/correction/macro/etc). (We have to filter out
+            # ALL_TYPES and ALL_REQUIRES or else this check will always be
+            # true).
+            # The problem with this is ``bool(Detect.RELAX & Detect.MACRO)``
+            # is ``true``, because they share ``Detect.INVESTIGATION`` (and
+            # could potentially also share a ``REQUIRES_*``, though they don't
+            # happen to right now). So we need to remove the ``ALL_TYPES`` and
+            # ``ALL_REQUIRES`` bits.
+            return bool(self.value & other & ~Detect.ALL_TYPES & ~Detect.ALL_REQUIRES)
+        # otherwise we're good, no overlap; proceed as normal.
         return bool(self.value & other)
 
     def __add__(self, other):
