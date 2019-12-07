@@ -277,7 +277,7 @@ class Detect():
     value: int
         One (or a bitwise combination) of :data:`~.Detect.STEAL`,
         :data:`~.Detect.RELAX`, :data:`~.Detect.CORRECTION`,
-        :data:`~.Detect.ALL`. What cheats to detect.
+        :data:`~.Detect.MACRO`, or :data:`~.Detect.ALL`. What cheats to detect.
     """
     STEAL = 1 << 0
     RELAX = 1 << 1
