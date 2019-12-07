@@ -395,9 +395,11 @@ class CorrectionDetect(Detect):
 
 class MacroDetect(Detect):
     """
-    Defines a detection of Macro usage.
+    Defines a detection of Macro usage (using a third party program to input
+    keypresses, usually for an inhumanly short amount of time).
 
-    Looks at how long each press was.
+    Looks at how long each keypress in a replay is. Look at keypresses that are
+    extremely short in duration.
 
     Parameters
     ----------
