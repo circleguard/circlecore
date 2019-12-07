@@ -282,7 +282,8 @@ class Detect():
     STEAL = 1 << 0
     RELAX = 1 << 1
     CORRECTION = 1 << 2
-    ALL = STEAL + RELAX + CORRECTION
+    MACRO = 1 << 3
+    ALL = STEAL + RELAX + CORRECTION + MACRO
 
     def __init__(self, value):
         self.value = value
@@ -292,6 +293,8 @@ class Detect():
         self.ur_thresh = None
         self.max_angle = None
         self.min_distance = None
+        self.max_length = None
+        self.min_amount = None
 
     def __contains__(self, other):
         return bool(self.value & other)
@@ -308,6 +311,10 @@ class Detect():
         if d:
             ret.max_angle = d.max_angle
             ret.min_distance = d.min_distance
+        d = self if Detect.MACRO in self else other if Detect.MACRO in other else None
+        if d:
+            ret.max_length = d.max_length
+            ret.min_amount = d.min_distance
         return ret
 
 class StealDetect(Detect):
@@ -370,6 +377,25 @@ class CorrectionDetect(Detect):
         self.min_distance = min_distance
 
 
+class MacroDetect(Detect):
+    """
+    Defines a detection of Macro usage.
+
+    Looks at how long each press was.
+
+    Parameters
+    ----------
+    max_length: int
+        Consider only Presses where ``press < min_distance``
+    min_amount: int
+        If the amount of Presses under :max_length: is higher than this value, it is labeled cheated.
+    """
+    def __init__(self, max_length=5, min_amount=10):
+        super().__init__(Detect.MACRO)
+        self.max_length = max_length
+        self.min_amount = min_amount
+
+
 class RatelimitWeight(Enum):
     """
     How much it 'costs' to load a replay from the api.
@@ -403,6 +429,8 @@ class ResultType(Enum):
     RELAX = "Relax"
     CORRECTION = "Aim Correction"
     TIMEWARP = "Timewarp"
+    MACRO = "Macro Usage"
+
 
 class Key(IntFlag):
     M1 = 1

@@ -99,9 +99,8 @@ class Circleguard:
             comparer = Comparer(d.steal_thresh, compare1, replays2=compare2)
             yield from comparer.compare()
 
-        # relax check
-        if Detect.RELAX in d or Detect.CORRECTION in d:
-            if Detect.RELAX in d:
+        if Detect.RELAX in d or Detect.CORRECTION in d or Detect.MACRO in d:
+            if Detect.RELAX in d or Detect.MACRO in d:
                 if not self.library:
                     # connect to library since it's a temporary one
                     library = Library(self.slider_dir.name)
@@ -110,13 +109,13 @@ class Circleguard:
 
             for replay in c.all_replays():
                 bm = None
-                # don't download beatmap unless we need it for relax
-                if Detect.RELAX in d:
+                # don't download beatmap unless we need it
+                if Detect.RELAX in d or Detect.MACRO in d:
                     bm = library.lookup_by_id(replay.map_id, download=True, save=True)
                 investigator = Investigator(replay, d, beatmap=bm)
                 yield from investigator.investigate()
 
-            if Detect.RELAX in d:
+            if Detect.RELAX in d or Detect.MACRO in d:
                 if not self.library:
                     # disconnect from temporary library
                     library.close()

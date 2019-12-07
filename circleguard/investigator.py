@@ -1,7 +1,7 @@
 
 import numpy as np
-from circleguard.result import RelaxResult, CorrectionResult
 from circleguard.enums import Key, Detect
+from circleguard.result import RelaxResult, CorrectionResult, MacroResult
 import circleguard.utils as utils
 import math
 
@@ -48,6 +48,10 @@ class Investigator:
             suspicious_angles = self.aim_correction(self.replay_data, d.max_angle, d.min_distance)
             ischeat = len(suspicious_angles) > 1
             yield CorrectionResult(self.replay, suspicious_angles, ischeat)
+        if Detect.MACRO in d:
+            presses = self.macro_detection(self.replay_data, self.beatmap, d.max_length)
+            ischeat = True if len(presses) > d.min_amount else False
+            yield MacroResult(self.replay, presses, ischeat)
 
     @staticmethod
     def ur(replay_data, beatmap):
@@ -186,6 +190,12 @@ class Investigator:
         return [jerks, ischeat]
 
     @staticmethod
+    def macro_detection(replay_data, beatmap, max_length):
+        hm = Investigator.hit_map(replay_data, beatmap)
+        presses = [press for press in hm if press.press_length < max_length]
+        return presses
+
+    @staticmethod
     def _parse_beatmap(beatmap):
         hitobjs = []
 
@@ -220,6 +230,16 @@ class Investigator:
         return np.array(presses)
 
     @staticmethod
+    def hit_map(replay_data, beatmap):
+        hitobjs = Investigator._parse_beatmap(beatmap)
+        keypresses = Investigator._parse_keys(replay_data)
+        filtered_array = Investigator._filter_hits(hitobjs, keypresses, beatmap.overall_difficulty)
+        array = []
+        for hit, press_begin, press_end in filtered_array:
+            array.append(Press(hit, press_begin, press_end))
+        return array
+
+    @staticmethod
     def _filter_hits(hitobjs, keypresses, OD):
         array = []
         hitwindow = 150 + 50 * (5 - OD) / 5
@@ -241,6 +261,7 @@ class Investigator:
                 object_i += 1
 
         return array
+
 
 class Snap():
     """
@@ -267,3 +288,12 @@ class Snap():
         self.time = time
         self.angle = angle
         self.distance = distance
+
+
+class Press:
+    def __init__(self, hitobj, hit_begin, hit_end):
+        self.x = hit_begin[1]-hitobj[1]
+        self.y = hit_begin[2]-hitobj[2]
+        self.error = hit_begin[0]-hitobj[0]
+        self.press_length = hit_end[0] - hit_begin[0]
+        self.key = Key(hit_begin[3] - hit_end[3])

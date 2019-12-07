@@ -2,7 +2,7 @@ import os
 from unittest import TestCase, skip, TestSuite, TextTestRunner
 from pathlib import Path
 import warnings
-from circleguard import (Circleguard, Check, ReplayMap, ReplayPath, RelaxDetect, StealDetect,
+from circleguard import (Circleguard, Check, ReplayMap, ReplayPath, RelaxDetect, StealDetect, MacroDetect,
                          RatelimitWeight, set_options, Map, User, MapUser, Mod)
 
 KEY = os.environ.get('OSU_API_KEY')
@@ -202,6 +202,30 @@ class TestMapUser(CGTestCase):
         self.assertEqual(self.mu[1].map_id, 795627)
         # test slicing
         self.assertListEqual([r.map_id for r in self.mu[0:2]], [795627, 795627])
+
+
+class TestMacroDetect(CGTestCase):
+    @classmethod
+    def setUpClass(cls):
+        cls.cg = Circleguard(KEY)
+
+    def test_macro_replaypath(self):
+        replays = [ReplayPath(RES / "macro_replay.osr")]
+        c = Check(replays, detect=MacroDetect())
+        r = list(self.cg.run(c))
+        self.assertEqual(len(r), 1, f"{len(r)} results returned instead of 1")
+        r = r[0]
+        self.assertTrue(r.ischeat, "Macro replay was not detected as cheated")
+
+    def test_legitimate_replaypath(self):
+        replays = [ReplayPath(RES / "legit_replay1.osr")]
+        c = Check(replays, detect=MacroDetect())
+        r = list(self.cg.run(c))
+        self.assertEqual(len(r), 1, f"{len(r)} results returned instead of 1")
+        r = r[0]
+        self.assertFalse(r.ischeat, "Legitimate replays were detected as a Macro one")
+        self.assertEqual(len(r.presses), 0, "Detected Macro presses on a legitimate replay")
+
 
 if __name__ == '__main__':
     suite = TestSuite()

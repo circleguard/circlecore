@@ -128,3 +128,9 @@ class CorrectionResult(InvestigationResult):
     def __init__(self, replay, snaps, ischeat):
         super().__init__(replay, ischeat, ResultType.CORRECTION)
         self.snaps = snaps
+
+
+class MacroResult(InvestigationResult):
+    def __init__(self, replay, presses, ischeat):
+        super().__init__(replay, ischeat, ResultType.MACRO)
+        self.presses = presses
