@@ -110,7 +110,7 @@ class Comparer:
         self.log.log(utils.TRACE, "comparing %r and %r", replay1, replay2)
 
         if CleanMode.SEARCH in self.detect.clean_mode:
-            mean = Comparer._compare_hill_climb(replay1, replay2, self.detect.clean_mode.search_step)
+            mean = Comparer._compare_hill_climb(replay1, replay2, self.detect.clean_mode)
         else:
             result = Comparer._compare_two_replays(replay1, replay2)
             mean = result[0]
@@ -123,7 +123,7 @@ class Comparer:
         return ReplayStealingResult(replay1, replay2, mean, ischeat)
 
     @staticmethod
-    def _compare_hill_climb(replay1, replay2, dt):
+    def _compare_hill_climb(replay1, replay2, search_mode):
         """
         Shifts two :class:`~.replay.Replay`\s through time greedily to
         find a local minimum for similarity values.
@@ -134,8 +134,8 @@ class Comparer:
             The first replay to compare.
         replay2: :class:`~.replay.Replay`
             The second replay to compare.
-        dt: int
-            The time interval to search on.
+        search_mode: :class:`~.enums.CleanMode`
+            The time interval to search on and the maximal number of steps
 
         Returns
         -------
@@ -146,15 +146,17 @@ class Comparer:
         previous1 = replay1
         prev_value = 100  # whatever high value
 
-        mode = CleanMode(CleanMode.ALIGN + CleanMode.SYNCHRONIZE)
+        clean_mode = CleanMode(CleanMode.ALIGN + CleanMode.SYNCHRONIZE)
 
-        for _ in range(10):
+        dt = search_mode.search_step
+
+        for _ in range(search_mode.step_limit):
             values = {}
 
             for sgn in [-1, 1]:
                 attempt1 = ReplayModified.copy(previous1).shift(0, 0, sgn * dt)
 
-                t1, t2 = ReplayModified.clean_set([attempt1, replay2], mode)
+                t1, t2 = ReplayModified.clean_set([attempt1, replay2], clean_mode)
                 value = Comparer._compare_two_replays(t1, t2)[0]
 
                 values[value] = attempt1
