@@ -2,3 +2,4 @@
 * Fix incorrect `__add__` method for `Check`
 * Rename `Keys` to `Key` (`Keys` left available as deprecated)
 * Don't double load `ReplayInfo` when using `Map`
+* Rename `Detect` attributes to reflect the `Detect` class (eg, `max_angle` -> `correction_max_angle`). This avoids confusion of attributes when multiple `Detect`s are combined. Previous names left available as deprecated.

@@ -289,12 +289,18 @@ class Detect():
         self.value = value
 
         # so we can reference them in :func:`~.__add__`
+        self.steal_max_sim = None
+        self.relax_max_ur = None
+        self.correction_max_angle = None
+        self.correction_min_distance = None
+        self.macro_max_length = None
+        self.macro_min_count = None
+        # TODO remove in 4.0.0
+        # @deprecated
         self.steal_thresh = None
         self.ur_thresh = None
         self.max_angle = None
         self.min_distance = None
-        self.max_length = None
-        self.min_amount = None
 
     def __contains__(self, other):
         return bool(self.value & other)
@@ -303,18 +309,18 @@ class Detect():
         ret = Detect(self.value | other.value)
         d = self if Detect.STEAL in self else other if Detect.STEAL in other else None
         if d:
-            ret.steal_thresh = d.steal_thresh
+            ret.steal_max_sim = d.steal_max_sim
         d = self if Detect.RELAX in self else other if Detect.RELAX in other else None
         if d:
-            ret.ur_thresh = d.ur_thresh
+            ret.relax_max_ur = d.relax_max_ur
         d = self if Detect.CORRECTION in self else other if Detect.CORRECTION in other else None
         if d:
-            ret.max_angle = d.max_angle
-            ret.min_distance = d.min_distance
+            ret.correction_max_angle = d.correction_max_angle
+            ret.correction_min_distance = d.correction_min_distance
         d = self if Detect.MACRO in self else other if Detect.MACRO in other else None
         if d:
-            ret.max_length = d.max_length
-            ret.min_amount = d.min_distance
+            ret.macro_max_length = d.macro_max_length
+            ret.macro_min_count = d.macro_min_count
         return ret
 
 class StealDetect(Detect):
@@ -331,7 +337,10 @@ class StealDetect(Detect):
     """
     def __init__(self, steal_thresh=18):
         super().__init__(Detect.STEAL)
-        self.steal_thresh = steal_thresh
+        self.steal_max_sim = steal_thresh
+        # TODO remove in 4.0.0, changed steal_thresh arg to ``thresh``
+        # @deprecated
+        self.steal_thresh = self.steal_max_sim
 
 class RelaxDetect(Detect):
     """
@@ -347,7 +356,10 @@ class RelaxDetect(Detect):
     """
     def __init__(self, ur_thresh=50):
         super().__init__(Detect.RELAX)
-        self.ur_thresh = ur_thresh
+        self.relax_max_ur = ur_thresh
+        # TODO remove in 4.0.0
+        # @deprecated
+        self.ur_thresh = self.relax_max_ur
 
 class CorrectionDetect(Detect):
     """
@@ -373,8 +385,12 @@ class CorrectionDetect(Detect):
     """
     def __init__(self, max_angle=10, min_distance=8):
         super().__init__(Detect.CORRECTION)
-        self.max_angle = max_angle
-        self.min_distance = min_distance
+        self.correction_max_angle = max_angle
+        self.correction_min_distance = min_distance
+        # TODO remove in 4.0.0
+        # @deprecated
+        self.max_angle = self.correction_max_angle
+        self.min_distance = self.correction_min_distance
 
 
 class MacroDetect(Detect):
@@ -385,15 +401,16 @@ class MacroDetect(Detect):
 
     Parameters
     ----------
-    max_length: int
-        Consider only Presses where ``press < min_distance``
+    max_length: float
+        Consider only Presses where ``press < min_distance``.
     min_amount: int
-        If the amount of Presses under :max_length: is higher than this value, it is labeled cheated.
+        If the amount of Presses that satisfy ``max_length`` is under this
+        value, the replay is labeled cheated.
     """
-    def __init__(self, max_length=5, min_amount=10):
+    def __init__(self, max_length=5, min_count=1):
         super().__init__(Detect.MACRO)
-        self.max_length = max_length
-        self.min_amount = min_amount
+        self.macro_max_length = max_length
+        self.macro_min_count = min_count
 
 
 class RatelimitWeight(Enum):
