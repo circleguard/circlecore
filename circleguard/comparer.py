@@ -124,6 +124,25 @@ class Comparer:
 
     @staticmethod
     def _compare_hill_climb(replay1, replay2, dt):
+        """
+        Shifts two :class:`~.replay.Replay`\s through time greedily to
+        find a local minimum for similarity values.
+
+        Parameters
+        ----------
+        replay1: :class:`~.replay.Replay`
+            The first replay to compare.
+        replay2: :class:`~.replay.Replay`
+            The second replay to compare.
+        dt: int
+            The time interval to search on.
+
+        Returns
+        -------
+        float
+            The similarity value in a local minimum.
+        """
+
         previous1 = replay1
         prev_value = 100  # whatever high value
 

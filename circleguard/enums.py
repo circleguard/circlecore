@@ -376,6 +376,21 @@ class CorrectionDetect(Detect):
         self.min_distance = min_distance
 
 class CleanMode():
+    """
+    The specification of the options used to clean replays for comparison.
+
+    Parameters
+    ----------
+    value: int
+        One (or a bitwise combination) of :data:`~.CleanMode.VALIDATE`,
+        :data:`~.CleanMode.SYNCHRONIZE`, :data:`~.CleanMode.ALIGN`, :data:`~.CleanMode.SEARCH`.
+        The options used.
+    search_step: int
+        The time interval used when searching.
+    step_limit: int
+        The maximal amount of steps performed when searching.
+    """
+
     VALIDATE = 1 << 0
     SYNCHRONIZE = 1 << 1
     ALIGN = 1 << 2

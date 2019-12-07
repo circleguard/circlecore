@@ -562,6 +562,7 @@ class ReplayPath(Replay):
                         loaded.replay_id, loaded.play_data, self.weight)
         self.log.log(TRACE, "Finished loading %s", self)
 
+
 class ReplayModified(Replay):
     """
     A :class:`~.Replay` created by modifying or copying another :class:`~.Replay`.
@@ -695,7 +696,6 @@ class ReplayModified(Replay):
 
         return self.txyk
 
-    #filtering
     @staticmethod
     def copy(replay):
         """
@@ -843,6 +843,22 @@ class ReplayModified(Replay):
 
     @staticmethod
     def clean_set(replays, mode):
+        """
+        Cleans the :class:`~.ReplayModified`s in replays using the methods specified in the mode.
+
+        Parameters
+        ----------
+        replays: list(:class:`~.ReplayModified`)
+            The replays to clean.
+        mode: :class:`~.CleanMode`
+            The mode specifying the used methods.
+
+        Returns
+        -------
+        list(:class:`~.ReplayModified`)
+            The cleaned :class:`~.ReplayModified`s
+        """
+
         replays = [ReplayModified.copy(r) for r in replays]
 
         if CleanMode.VALIDATE in mode:
