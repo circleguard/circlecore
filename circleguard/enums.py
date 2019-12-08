@@ -407,7 +407,7 @@ class CleanMode():
 
     def __add__(self, other):
         flags = self.value | other.value
-        
+
         if CleanMode.SEARCH in self:
             return CleanMode(flags, search_step=self.search_step, step_limit=self.step_limit)
         elif CleanMode.SEARCH in other:

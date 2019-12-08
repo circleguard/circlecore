@@ -829,7 +829,7 @@ class ReplayModified(Replay):
         x, y, and pressed keys for each event in the data.
         Saves the data which is returned on consequent calls.
         This data reflects changes made by other methods.
-        
+
         Returns
         -------
         list[tuple(int, float, float, something)]
@@ -850,13 +850,13 @@ class ReplayModified(Replay):
         ----------
         replay: :class:`~.Replay`
             The replay to copy.
-        
+
         Returns
         -------
         :class:`~.ReplayModified`
             The copy as a :class:`~.ReplayModified`.
         """
-        
+
         r = ReplayModified(replay.timestamp, replay.map_id, replay.username,
                       replay.user_id, replay.mods, replay.replay_id, replay.replay_data, replay.weight)
         r.txyk = replay.as_list_with_timestamps()
