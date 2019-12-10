@@ -296,10 +296,7 @@ class Detect():
     STEAL = 1 << 10      | COMPARISON
     RELAX = 1 << 11      | INVESTIGATION | REQUIRES_BEATMAP
     CORRECTION = 1 << 12 | INVESTIGATION
-    # TODO macro detection should ideally not require a beatmap.
-    # It only does because Investigator.hit_map needs a beatmap, but
-    # that method provides more information than a macro detect needs.
-    MACRO = 1 << 13      | INVESTIGATION | REQUIRES_BEATMAP
+    MACRO = 1 << 13      | INVESTIGATION
     ALL = STEAL | RELAX | CORRECTION | MACRO
 
     def __init__(self, value):

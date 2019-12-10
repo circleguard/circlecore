@@ -54,7 +54,7 @@ class Investigator:
             ischeat = len(snaps) > 1
             yield CorrectionResult(self.replay, snaps, ischeat)
         if Detect.MACRO in d:
-            presses = self.macro_detection(self.replay_data, self.beatmap, d.macro_max_length)
+            presses = self.macro_detection(self.replay_data, d.macro_max_length)
             ischeat = len(presses) > d.macro_min_count
             yield MacroResult(self.replay, presses, ischeat)
 
@@ -195,7 +195,7 @@ class Investigator:
         return [jerks, ischeat]
 
     @staticmethod
-    def macro_detection(replay_data, beatmap, max_length):
+    def macro_detection(replay_data, max_length):
         """
         Returns a list of :meth:`~.Press`\s that have a longer press_length than ``max_length``.
 
@@ -211,8 +211,9 @@ class Investigator:
         list[:class:`~.Press`]
             A list of :meth:`~.Press`\s
         """
-        hm = Investigator.hit_map(replay_data, beatmap)
-        presses = [press for press in hm if press.press_length < max_length]
+
+        keypresses = Investigator._parse_keys(replay_data)
+        presses = [[press_in, press_out] for press_in, press_out in keypresses if press_out[0] - press_in[0] < max_length]
         return presses
 
     @staticmethod
@@ -373,6 +374,7 @@ class Snap:
         self.time = time
         self.angle = angle
         self.distance = distance
+
 
 class Press:
     """
