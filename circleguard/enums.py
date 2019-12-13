@@ -391,10 +391,11 @@ class CleanMode():
         The maximal amount of steps performed when searching.
     """
 
-    VALIDATE = 1 << 0
-    SYNCHRONIZE = 1 << 1
-    ALIGN = 1 << 2
-    SEARCH = 1 << 3
+    VALIDATE = 1 << 0  # remove out of bounds data
+    SYNCHRONIZE = 1 << 1  # find suitable nearly shared common timestamps for interpolation
+                          # has the side effect of removing a skipped intro if at least one player skips
+    ALIGN = 1 << 2  # shift all replays so that their average coincides, minimizing the MSE
+    SEARCH = 1 << 3  # use a local search over time to minimize the MSE, uses VALIDATE and ALIGN
     ALL = VALIDATE + SYNCHRONIZE + ALIGN + SEARCH
 
     def __init__(self, value, search_step=16, step_limit=10):
