@@ -407,13 +407,15 @@ class CleanMode():
 
     def __add__(self, other):
         flags = self.value | other.value
+        ret = CleanMode(flags)
 
-        if CleanMode.SEARCH in self:
-            return CleanMode(flags, search_step=self.search_step, step_limit=self.step_limit)
-        elif CleanMode.SEARCH in other:
-            return CleanMode(flags, search_step=self.search_step, step_limit=self.step_limit)
-        else:
-            return CleanMode(flags)
+        c = self if CleanMode.SEARCH in self else other if CleanMode.SEARCH in other else None
+
+        if c:
+            ret.search_step = c.search_step
+            ret.step_limit = c.step_limit
+
+        return ret
 
 class RatelimitWeight(Enum):
     """
