@@ -34,8 +34,8 @@ class CGTestCase(TestCase):
                 message="unclosed",
                 category=ResourceWarning)
 
-class TestDetection(CGTestCase):
 
+class TestDetection(CGTestCase):
     def test_steal_cheated(self):
         # taken from http://redd.it/bvfv8j, remodded replay by same user (CielXDLP) from HDHR to FLHDHR
         stolen_replays = [ReplayPath(RES / "stolen_replay1.osr"), ReplayPath(RES / "stolen_replay2.osr")]
@@ -90,6 +90,7 @@ class TestDetection(CGTestCase):
         r = r[0]
         self.assertTrue(r.ischeat, "Macro replay was not detected as cheated for MacroDetect")
         self.assertEqual(len(r.presses), 385, f"Detected {len(r.presses)} macro presses on cheated replay instead of 385")
+        self.assertEqual(r.presses[0].press_length, 0, f"First press_length was incorrect")
 
     def test_macro_legit(self):
         replays = [ReplayPath(RES / "legit_replay1.osr")]
