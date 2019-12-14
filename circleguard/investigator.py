@@ -63,14 +63,13 @@ class Investigator:
         """
         Calculates the ur of ``replay_data`` when played against ``beatmap``.
         """
-
         hitobjs = Investigator._parse_beatmap(beatmap)
         keypresses = Investigator._parse_keys(replay_data)
         filtered_array = Investigator._filter_hits(hitobjs, keypresses, beatmap.overall_difficulty)
         diff_array = []
 
-        for hit, press, _ in filtered_array:
-            diff_array.append(press[0]-hit[0])
+        for hit in filtered_array:
+            diff_array.append(hit.press.press_length)
         return np.std(diff_array) * 10
 
     @staticmethod
@@ -197,23 +196,22 @@ class Investigator:
     @staticmethod
     def macro_detection(replay_data, max_length):
         """
-        Returns a list of :meth:`~.Press`\s that have a longer press_length than ``max_length``.
+        Returns a list of :meth:`~.Press`\s that have a longer ``press_length`` than ``max_length``.
 
         Parameters
         ----------
         replay_data: list[int, float, float, int]
             A list of replay datapoints; [[time, x, y, keys_pressed], ...].
-        beatmap: :class:`slider.beatmap.Beatmap`
-            The beatmap to which the Presses are mapped to.
+        max_length: int
+            Amount of time needed to classify a press as cheated.
 
         Returns
         -------
         list[:class:`~.Press`]
-            A list of :meth:`~.Press`\s
+            A list of Presses.
         """
-
         keypresses = Investigator._parse_keys(replay_data)
-        presses = [[press_in, press_out] for press_in, press_out in keypresses if press_out[0] - press_in[0] < max_length]
+        presses = [p for p in keypresses if p.press_length < max_length]
         return presses
 
     @staticmethod
@@ -228,21 +226,20 @@ class Investigator:
 
         Returns
         -------
-        list
-            A list of beatmap hitobjects; [[time, x, y], ...].
+        list[:class:`~.HitObject`]
+            A list of beatmap hitobjects.
         """
         hitobjs = []
 
         # parse hitobj
         for hit in beatmap.hit_objects_no_spinners:
-            p = hit.position
-            hitobjs.append([hit.time.total_seconds() * 1000, p.x, p.y])
+            hitobjs.append(HitObject(hit))
         return hitobjs
 
     @staticmethod
     def _parse_keys(data):
         """
-        Parses the raw replay data into presses and releases.
+        Parses the raw replay data into :class:`~.Press`\es.
 
         Parameters
         ----------
@@ -251,10 +248,8 @@ class Investigator:
 
         Returns
         -------
-        list
-            A list of keypress events, each consisting of two arrays;
-            [[[time, x, y, keys_pressed],[time, x, y, keys_pressed]] ...]
-            The first array represents the start of a press, the second one represents the end of the press.
+        list[:class:`~.Press`]
+            A list of Presses.
         """
         data = np.array(data, dtype=object)
         presses = []
@@ -266,7 +261,7 @@ class Investigator:
                 d[3] = int(Key(d[3]) & Key.K1 | Key(d[3]) & Key.M1)
                 buffer_k1 = d
             elif Key.M1 not in Key(i[3]) and buffer_k1 is not None:
-                presses.append([buffer_k1, i])
+                presses.append(Press(buffer_k1, i))
                 buffer_k1 = None
 
             if Key.M2 in Key(i[3]) and buffer_k2 is None:
@@ -274,14 +269,14 @@ class Investigator:
                 d[3] = int(Key(d[3]) & Key.K2 | Key(d[3]) & Key.M2)
                 buffer_k2 = d
             elif Key.M2 not in Key(i[3]) and buffer_k2 is not None:
-                presses.append([buffer_k2, i])
+                presses.append(Press(buffer_k2, i))
                 buffer_k2 = None
         return np.array(presses)
 
     @staticmethod
     def hit_map(replay_data, beatmap):
         """
-        Generates a list of :meth:`~.Press`\s.
+        Generates a list of :class:`Hit`\s.
 
         Parameters
         ----------
@@ -292,17 +287,14 @@ class Investigator:
 
         Returns
         -------
-        list[:class:`~.Press`]
-            A list of :meth:`~.Press`\s
+        list[:class:`~.Hit`]
+            A list of :class:`Hit`\s
 
         """
         hitobjs = Investigator._parse_beatmap(beatmap)
         keypresses = Investigator._parse_keys(replay_data)
-        filtered_array = Investigator._filter_hits(hitobjs, keypresses, beatmap.overall_difficulty)
-        array = []
-        for hit, press_begin, press_end in filtered_array:
-            array.append(Press(hit, press_begin, press_end))
-        return array
+        hit_array = Investigator._filter_hits(hitobjs, keypresses, beatmap.overall_difficulty)
+        return hit_array
 
     @staticmethod
     def _filter_hits(hitobjs, keypresses, OD):
@@ -312,20 +304,17 @@ class Investigator:
 
         Parameters
         ----------
-        hitobjs: list
-            A list of beatmap hitobjects; [[time, x, y], ...]. Usually the direct output of :meth:`~._parse_beatmap()`
-        keypresses: list
-            A list of keypress events, each consisting of two arrays;
-            [[[time, x, y, keys_pressed],[time, x, y, keys_pressed]] ...]
-            The first array represents the start of a press, the second one represents the end of the press.
-            Usually the direct output of :meth:`~._parse_keys`
+        hitobjs: list[:class:`~.HitObject`]
+            A list of beatmap hitobjects. Usually the direct output of :meth:`~._parse_beatmap()`
+        keypresses: list[:class:`~.Press`]
+            A list of keypress events. Usually the direct output of :meth:`~._parse_keys`
         OD: float
             The Overall Difficulty to calculate the hitwindow from.
 
         Returns
         -------
-        list
-            A list of hit events; ``[[hitobj, press[0], press[1]], ...]``.
+        list[:class:`~.Hit`]
+            A list of hit events.
         """
         array = []
         hitwindow = 150 + 50 * (5 - OD) / 5
@@ -337,12 +326,12 @@ class Investigator:
             hitobj = hitobjs[object_i]
             press = keypresses[press_i]
 
-            if press[0][0] < hitobj[0] - hitwindow / 2:
+            if press.time_press < hitobj.time - hitwindow / 2:
                 press_i += 1
-            elif press[0][0] > hitobj[0] + hitwindow / 2:
+            elif press.time_press > hitobj.time + hitwindow / 2:
                 object_i += 1
             else:
-                array.append([hitobj, press[0], press[1]])
+                array.append(Hit(hitobj, press))
                 press_i += 1
                 object_i += 1
 
@@ -378,12 +367,10 @@ class Snap:
 
 class Press:
     """
-    Represents a hit in a replay. This class is expected to be used with the output of :meth:`~._filter_hits()`
+    Represents a press in a replay.
 
     Parameters
     ----------
-    hitobj: list[int, float, float]
-        A list consisting of the hit object time, x and y; [t, x, y]
     hit_begin: list[int, float, float, int]
         A replay datapoint; [time, x, y, keys_pressed]. This is the beginning of the Press.
     hit_end: list[int, float, float, int]
@@ -392,24 +379,77 @@ class Press:
     Attributes
     ----------
     x : float
-        The Δ of the X coordinate from hitobj and hit_begin
+        The X coordinate from hit_begin.
     y : float
-        The Δ of the Y coordinate from hitobj and hit_begin
-    error: int
-        The Δ of the time from hitobj and hit_begin
+        The Y coordinate from hit_begin.
+    time_press: int
+        The the time from hit_begin.
+    time_release: int
+        The the time from hit_release.
     press_length: int
         Amount of time between hit_begin and hit_end
-    key: int
+    key: :class:`enums.Key`
         The Key which was used to press. Calculated by subtracting hit_end from the hit_begin
-
-
-    See Also
-    --------
-    :meth:`~.Investigator.hit_map`
     """
-    def __init__(self, hitobj, hit_begin, hit_end):
-        self.x = hit_begin[1]-hitobj[1]
-        self.y = hit_begin[2]-hitobj[2]
-        self.error = hit_begin[0]-hitobj[0]
+    def __init__(self, hit_begin, hit_end):
+        self.x = hit_begin[1]
+        self.y = hit_begin[2]
+        self.time_press = hit_begin[0]
+        self.time_release = hit_end[0]
         self.press_length = hit_end[0] - hit_begin[0]
         self.key = Key(hit_begin[3] - hit_end[3])
+
+
+class HitObject:
+    """
+    Represents a HitObject of a beatmap.
+
+    Parameters
+    ----------
+    hitobj: :class:`slider.beatmap.Circle`, :class:`slider.beatmap.Slider`
+        A HitObject of the beatmap.
+    Attributes
+    ----------
+    x : int
+        The X coordinate of the Hitobject.
+    y : int
+        The Y coordinate of the Hitobject.
+    time: float
+        The the time of the Hitobject.
+    """
+    def __init__(self, hitobj):
+        self.x = hitobj.position.x
+        self.y = hitobj.position.y
+        self.time = hitobj.time.total_seconds() * 1000
+
+
+class Hit:
+    """
+    Represents a hit of a Hitobject in a replay.
+
+    Parameters
+    ----------
+    hitobj: :class:`HitObject`
+        A HitObject.
+    press: :class:`Press`
+        A Press.
+
+    Attributes
+    ----------
+    press: :class:`Press`
+        The passed press.
+    hitobject: :class:`HitObject`
+        The passed hitobj.
+    dx: float
+        The Δ of the X coordinate from the Press and the HitObject.
+    dy: float
+        The Δ of the Y coordinate from the Press and the HitObject.
+    hit_error: float
+        The Δ of the time from the Press and the HitObject.
+    """
+    def __init__(self, hitobj, press):
+        self.press = press
+        self.hitobject = hitobj
+        self.dx = hitobj.x - press.x
+        self.dy = hitobj.y - press.y
+        self.hit_error = hitobj.time - press.time_press

@@ -433,7 +433,7 @@ class MacroDetect(Detect):
     max_length: float
         Consider only Presses where ``press < max_length``, in milliseconds.
         Default 5.
-    min_amount: int
+    min_count: int
         If the amount of Presses that satisfy ``max_length`` is greater than
         or equal to this number, the replay is labeled cheated. Default 1.
     """
