@@ -89,6 +89,7 @@ class TestDetection(CGTestCase):
         self.assertEqual(len(r), 1, f"{len(r)} results returned instead of 1")
         r = r[0]
         self.assertTrue(r.ischeat, "Macro replay was not detected as cheated for MacroDetect")
+        self.assertEqual(len(r.presses), 385, f"Detected {len(r.presses)} macro presses on cheated replay instead of 385")
 
     def test_macro_legit(self):
         replays = [ReplayPath(RES / "legit_replay1.osr")]
