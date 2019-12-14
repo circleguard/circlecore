@@ -69,7 +69,7 @@ class Investigator:
         diff_array = []
 
         for hit in filtered_array:
-            diff_array.append(hit.press.press_length)
+            diff_array.append(hit.hit_error)
         return np.std(diff_array) * 10
 
     @staticmethod
