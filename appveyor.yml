@@ -8,7 +8,7 @@ install:
   - "%python_37% -V"
   - "%python_37% -m pip install -e ."
 
-test_script:
+build_script:
   - "%python_37% -m unittest"
 
 on_failure:
