@@ -101,8 +101,28 @@ class TestDetection(CGTestCase):
         self.assertFalse(r.ischeat, "Legitimate replay was detected as cheated for MacroDetect")
         self.assertEqual(len(r.presses), 0, f"Detected {len(r.presses)} macro presses on legitimate replay instead of 0")
 
-class TestLoading(CGTestCase):
+    def test_relax_cheated(self):
+        replays = [ReplayPath(RES / "relax_replay.osr")]
+        c = Check(replays, detect=RelaxDetect())
+        r = list(self.cg.run(c))
+        self.assertEqual(len(r), 1, f"{len(r)} results returned instead of 1")
+        r = r[0]
+        print(r.ur)
+        self.assertAlmostEqual(r.ur, 32.16085272844355, delta=0.0001, msg="UR is not correct")
+        self.assertTrue(r.ischeat, "Macro replay was not detected as cheated for RelaxDetect")
 
+    def test_relax_legit(self):
+        replays = [ReplayPath(RES / "legit_replay1.osr")]
+        c = Check(replays, detect=RelaxDetect())
+        r = list(self.cg.run(c))
+        self.assertEqual(len(r), 1, f"{len(r)} results returned instead of 1")
+        r = r[0]
+        print(r.ur)
+        self.assertAlmostEqual(r.ur, 100.10443519262643, delta=0.0001, msg="UR is not correct")
+        self.assertFalse(r.ischeat, "Legitimate replay was detected as cheated for RelaxDetect")
+
+
+class TestLoading(CGTestCase):
     def test_loading_replaypath(self):
         r = ReplayPath(RES / "example_replay.osr")
         self.assertFalse(r.loaded, "Loaded status was not correct")
@@ -126,7 +146,6 @@ class TestLoading(CGTestCase):
         self.assertEqual(r.weight, RatelimitWeight.HEAVY, "RatelimitWeight was not correct")
         self.assertEqual(r.username, "Toy", "Username was not correct")
         self.assertTrue(r.loaded, "Loaded status was not correct")
-
 
 
 class TestMap(CGTestCase):
