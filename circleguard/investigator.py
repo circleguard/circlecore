@@ -257,17 +257,13 @@ class Investigator:
         buffer_k2 = None
         for i in data:
             if Key.M1 in Key(i[3]) and buffer_k1 is None:
-                d = i
-                d[3] = int(Key(d[3]) & Key.K1 | Key(d[3]) & Key.M1)
-                buffer_k1 = d
+                buffer_k1 = i
             elif Key.M1 not in Key(i[3]) and buffer_k1 is not None:
                 presses.append(Press(buffer_k1, i))
                 buffer_k1 = None
 
             if Key.M2 in Key(i[3]) and buffer_k2 is None:
-                d = i
-                d[3] = int(Key(d[3]) & Key.K2 | Key(d[3]) & Key.M2)
-                buffer_k2 = d
+                buffer_k2 = i
             elif Key.M2 not in Key(i[3]) and buffer_k2 is not None:
                 presses.append(Press(buffer_k2, i))
                 buffer_k2 = None
