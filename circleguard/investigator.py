@@ -450,6 +450,6 @@ class Hit:
     def __init__(self, hitobj, press):
         self.press = press
         self.hitobject = hitobj
-        self.dx = hitobj.x - press.x
-        self.dy = hitobj.y - press.y
-        self.hit_error = hitobj.time - press.time_press
+        self.dx = press.x - hitobj.x
+        self.dy = press.y - hitobj.y
+        self.hit_error = press.time_press - hitobj.time
