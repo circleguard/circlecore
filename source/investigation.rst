@@ -137,8 +137,8 @@ And here is how we might use a |StealResult|:
     c = Check([r1, r2], StealDetect(50))
     for r in cg.run(c): # r is a StealResult
         if not r.ischeat:
-            print("replays by {r.replay1.username} and {r.replay2.username}"
-                  "are not stolen")
+            print(f"replays by {r.replay1.username} and {r.replay2.username} "
+                   "are not stolen")
             continue
         print(f"{r.later_replay.username}'s replay on map {r.later_replay.map_id}"
               f" +{r.later_replay.mods} is stolen from {r.earlier_replay.username}"

@@ -32,8 +32,9 @@ Detect
 ~~~~~~
 
 |Detect| lets you control exactly what circlecore is investigating the
-|Loadable|\s in a |Check| for. You may only care about finding relax cheaters.
-Additionally, some cheats are quicker to investigate for than others.
+|Loadable|\s in a |Check| for. You may only care about finding relax cheaters,
+for instance. Additionally, some cheats are quicker to investigate for than
+others.
 
 Each |Detect| subclass (|RelaxDetect|, |StealDetect|) corresponds to a cheat.
 Each of these classes can be passed values on instantiation to be more or
