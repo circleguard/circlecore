@@ -2,3 +2,4 @@
 * Fix incorrect `__add__` method for `Check`
 * Rename `Keys` to `Key` (`Keys` left available as deprecated)
 * Don't double load `ReplayInfo` when using `Map`
+* fix mod subtraction not being commutative (eg `Mod.HDHR - Mod.HR` has a different meaning from `Mod.HR - Mod.HDHR`)
