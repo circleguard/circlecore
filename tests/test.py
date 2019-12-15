@@ -107,7 +107,6 @@ class TestDetection(CGTestCase):
         r = list(self.cg.run(c))
         self.assertEqual(len(r), 1, f"{len(r)} results returned instead of 1")
         r = r[0]
-        print(r.ur)
         self.assertAlmostEqual(r.ur, 32.16085272844355, delta=0.01, msg="UR is not correct")
         self.assertTrue(r.ischeat, "Macro replay was not detected as cheated for RelaxDetect")
 
@@ -117,7 +116,6 @@ class TestDetection(CGTestCase):
         r = list(self.cg.run(c))
         self.assertEqual(len(r), 1, f"{len(r)} results returned instead of 1")
         r = r[0]
-        print(r.ur)
         self.assertAlmostEqual(r.ur, 100.10443519262643, delta=0.01, msg="UR is not correct")
         self.assertFalse(r.ischeat, "Legitimate replay was detected as cheated for RelaxDetect")
 
@@ -127,7 +125,6 @@ class TestDetection(CGTestCase):
         r = list(self.cg.run(c))
         self.assertEqual(len(r), 1, f"{len(r)} results returned instead of 1")
         r = r[0]
-        print(r.ur)
         self.assertAlmostEqual(r.ur, 64.51, delta=0.01, msg="UR is not correct")
         self.assertFalse(r.ischeat, "Legitimate replay was detected as cheated for RelaxDetect")
 
