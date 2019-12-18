@@ -386,9 +386,10 @@ class User(ReplayContainer):
         Warnings
         --------
         If you want an accurate list of :class:`~.Replay`\s in this user, you
-        must call :func:`circleguard.circleguard.Circleguard.load` on this user
-        before :func:`~User.all_replays`. Otherwise, this class is not info
-        loaded, and does not have a complete list of replays it represents.
+        must call :func:`~circleguard.circleguard.Circleguard.load` on this
+        user before :func:`~User.all_replays`. Otherwise, this class is not
+        info loaded, and does not have a complete list of replays it
+        represents.
         """
         replays = []
         for loadable in self.replays:
@@ -474,7 +475,7 @@ class MapUser(ReplayContainer):
         Warnings
         --------
         If you want an accurate list of :class:`~.Replay`\s in this MapUser,
-        you must call :func:`circleguard.circleguard.Circleguard.load` on this
+        you must call :func:`~circleguard.circleguard.Circleguard.load` on this
         MapUser before :func:`~.all_replays`. Otherwise, this class is not info
         loaded, and does not have a complete list of replays it represents.
         """
