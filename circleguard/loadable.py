@@ -555,7 +555,7 @@ class Replay(Loadable):
 
         Returns
         -------
-        list[tuple(int, float, float, something)]
+        list[tuple(int, float, float, int)]
             A list of tuples of (t, x, y, keys) for each event
             in the replay data.
         """
