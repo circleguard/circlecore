@@ -94,7 +94,7 @@ For a |ReplayContainer|, ``cache`` cascades to its |Replay|\s.
     cg.load(m) # neither replay in Map cached
 
 |Check| can also get passed ``cache``. If it contains a |ReplayContainer|,
-the cache set by |ReplayContainer| takes precedence:
+the cache set by the |ReplayContainer| takes precedence:
 
 .. code-block:: python
 
