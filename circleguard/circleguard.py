@@ -127,7 +127,7 @@ class Circleguard:
 
         Parameters
         ----------
-        loadable: :class:`~.replay.Loadable`
+        loadable: :class:`~circleguard.loadable.Loadable`
             The loadable to load.
 
         Notes
@@ -142,7 +142,7 @@ class Circleguard:
 
         Parameters
         ----------
-        loadable: :class:`~.replay.InfoLoadable`
+        loadable: :class:`~circleguard.loadable.InfoLoadable`
             The info loadable to load.
 
         Notes
