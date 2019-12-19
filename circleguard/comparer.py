@@ -2,11 +2,12 @@ import itertools
 import sys
 import logging
 import math
+import copy
 
 import numpy as np
 import itertools as itr
 
-from circleguard.loadable import Replay, ReplayModified
+from circleguard.loadable import Replay
 from circleguard.enums import Mod, CleanMode
 from circleguard.exceptions import InvalidArgumentsException, CircleguardException
 import circleguard.utils as utils
@@ -75,7 +76,7 @@ class Comparer:
             return
 
         if self.mode == "single" and self.detect.clean_mode.value:
-            self.replays1 = ReplayModified.clean_set(self.replays1, self.detect.clean_mode)
+            self.replays1 = Comparer.clean_set(self.replays1, self.detect.clean_mode)
 
         if self.mode == "double":
             iterator = itertools.product(self.replays1, self.replays2)
@@ -154,9 +155,9 @@ class Comparer:
             values = {}
 
             for sgn in [-1, 1]:
-                attempt1 = ReplayModified.copy(previous1).shift(0, 0, sgn * dt)
+                attempt1 = Comparer.shift(copy.deepcopy(previous1), 0, 0, sgn * dt)
 
-                t1, t2 = ReplayModified.clean_set([attempt1, replay2], clean_mode)
+                t1, t2 = Comparer.clean_set([attempt1, replay2], clean_mode)
                 value = Comparer._compare_two_replays(t1, t2)[0]
 
                 values[value] = attempt1
@@ -258,6 +259,239 @@ class Comparer:
         mu, sigma = distance.mean(), distance.std()
 
         return (mu, sigma)
+
+    @staticmethod
+    def interpolate_to(replay, timestamps):
+        """
+        Interpolate coordinate data in the :class:`~.Replay` to the given timestamps.
+        Drops excess timestamps and creates data at missing timestamps.
+
+        Parameters
+        ----------
+        replay: :class:`~.Replay`
+            The replay to interpolate.
+        timestamps: list(int)
+            The timestamps to interpolate to.
+            
+        Returns
+        -------
+        :class:`~.Replay`
+            The interpolated replay.
+
+        Notes
+        -----
+        This method is in-place.
+        """
+        prev_err = np.seterr(all="ignore")
+
+        ts = []
+        xys = []
+        ks = []
+
+        i = 1
+        t_end = replay.t[-1]
+
+        for t in timestamps:
+            if t > t_end:
+                break
+
+            while replay.t[i] < t:
+                i += 1
+
+            r = (t - replay.t[i - 1]) / (replay.t[i] - replay.t[i - 1])
+
+            if np.isnan(r) or np.isinf(r):
+                continue
+
+            xy = r * replay.xy[i] + (1 - r) * replay.xy[i - 1]
+            k = replay.k[i - 1]
+
+            ts += [t]
+            xys += [xy]
+            ks += [k]
+
+        replay.t = np.array(ts, dtype=int)
+        replay.xy = np.array(xys, dtype=float)
+        replay.k = np.array(ks, dtype=int)
+
+        np.seterr(**prev_err)
+
+        return replay
+
+    @staticmethod
+    def shift(replay, dx, dy, dt):
+        """
+        Shift the data in the :class:`~.Replay` by the specified offsets.
+
+        Parameters
+        ----------
+        replay: :class:`~.Replay`
+            The replay to shift
+        dx: float
+            The offset for the x coordinate.
+        dy: float
+            The offset for the y coordinate.
+        dt: int
+            The number of ticks the timestamps should be shifted.
+            
+        Returns
+        -------
+        :class:`~.Replay`
+            The shifted replay.
+
+        Notes
+        -----
+        This method is in-place.
+        """
+
+        replay.t += dt
+        replay.xy += [dx, dy]
+
+        return replay
+
+    @staticmethod
+    def filter(replay):
+        """
+        Filters all timestamps with invalid coordinates.
+
+        Parameters
+        ----------
+        replay: :class:`~.Replay`
+            The replay to filter.
+
+        Returns
+        -------
+        :class:`~.Replay`
+            The replay with the invalid coordinates removed.
+
+        Notes
+        -----
+        Coordinates are invalid if they are not in the range (0, 512) for the x
+        coordinate and (0, 384) for the y coordinate.
+        This method is in-place.
+        """
+        valid = np.all(([0, 0] <= replay.xy) & (replay.xy <= [512, 384]), axis=1)
+
+        replay.t = replay.t[valid]
+        replay.xy = replay.xy[valid]
+        replay.k = replay.k[valid]
+
+        return replay
+
+    @staticmethod
+    def align_clocks(clocks):
+        """
+        Selects suitable timestamps to which all the clocks of the replays
+        could be interpolated.
+
+        The timestamps are chosen to maximize frequency while
+        also guaranteeing each replay has at least one timestamp in between
+        two successive timestamps in the output.
+
+        Parameters
+        ----------
+        clocks: list(list(int))
+            The list of lists of timestamps the interpolation timestamps
+            should be selected from.
+
+        Returns
+        -------
+        list(int)
+            The timestamps maximizing frequency and satisfying constraints.
+        """
+        n = len(clocks)
+        indices = [0] * n
+
+        output = []
+
+        def move_to(i, value):
+            while clocks[i][indices[i] + 1] <= value:
+                indices[i] += 1
+
+                if indices[i] + 1 == len(clocks[i]):
+                    return True
+
+            return False
+
+        while True:
+            last = 0
+
+            for i in range(n):
+                value = clocks[i][indices[i] + 1]
+
+                if value > last:
+                    last = value
+
+            for i in range(n):
+                if move_to(i, last):
+                    return output
+
+            output += [last]
+
+    @staticmethod
+    def align_coordinates(replays):
+        """
+        Shifts the :class:`~.Replay`s in replays so that their
+        mean coordinates over time coincide.
+
+        Parameters
+        ----------
+        replays: list()
+            The replays to align.
+
+        Returns
+        -------
+        list(:class:`~.Replay`)
+            The shifted replays.
+
+        Notes
+        -----
+        The first replay in this set is left in place, and all other replays
+        are shifted toward its mean.
+        This method is in-place.
+        """
+        m = replays[0].xy.mean(axis=0)
+
+        replays = replays[:1] +\
+                   [Comparer.shift(replay, m[0] - replay.xy.mean(axis=0)[0], m[1] - replay.xy.mean(axis=0)[1], 0)
+                   for replay in replays[1:]]
+
+        return replays
+
+    @staticmethod
+    def clean_set(replays, mode):
+        """
+        Cleans the :class:`~.Replay`s in replays using the methods specified in the mode.
+
+        Parameters
+        ----------
+        replays: list(:class:`~.Replay`)
+            The replays to clean.
+        mode: :class:`~.CleanMode`
+            The mode specifying the used methods.
+
+        Returns
+        -------
+        list(:class:`~.Replay`)
+            The cleaned :class:`~.Replay`s
+        """
+
+        replays = [copy.deepcopy(r) for r in replays]
+
+        if CleanMode.VALIDATE in mode:
+            replays = [Comparer.filter(replay) for replay in replays]
+
+        if CleanMode.SYNCHRONIZE in mode:
+            timestamps = [replay.t for replay in replays]
+
+            timestamps = Comparer.align_clocks(timestamps)
+
+            replays = [Comparer.interpolate_to(replay, timestamps) for replay in replays]
+
+        if CleanMode.ALIGN in mode:
+            replays = Comparer.align_coordinates(replays)
+
+        return replays
 
     def __repr__(self):
         return f"Comparer(threshold={self.detect.steal_thresh},replays1={self.replays1},replays2={self.replays2})"
