@@ -120,12 +120,21 @@ class TestDetection(CGTestCase):
         self.assertFalse(r.ischeat, "Legitimate replay was detected as cheated for RelaxDetect")
 
     def test_relax_legit2(self):
-        replays = [ReplayPath(RES / "d.osr")]
+        replays = [ReplayPath(RES / "legit_replay3.osr")]
         c = Check(replays, detect=RelaxDetect())
         r = list(self.cg.run(c))
         self.assertEqual(len(r), 1, f"{len(r)} results returned instead of 1")
         r = r[0]
         self.assertAlmostEqual(r.ur, 64.51, delta=0.01, msg="UR is not correct")
+        self.assertFalse(r.ischeat, "Legitimate replay was detected as cheated for RelaxDetect")
+
+    def test_relax_legit3(self):
+        replays = [ReplayPath(RES / "legit_replay4.osr")]
+        c = Check(replays, detect=RelaxDetect())
+        r = list(self.cg.run(c))
+        self.assertEqual(len(r), 1, f"{len(r)} results returned instead of 1")
+        r = r[0]
+        self.assertAlmostEqual(r.ur, 147.58, delta=0.01, msg="UR is not correct")
         self.assertFalse(r.ischeat, "Legitimate replay was detected as cheated for RelaxDetect")
 
 
