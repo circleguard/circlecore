@@ -20,10 +20,10 @@ class Comparer:
     threshold: int
         If a comparison scores below this value, one of the
         :class:`~.replay.Replay` in the comparison is considered cheated.
-    replays1: list[:class:`~.replay.Replay`]
+    replays1: list[:class:`~circleguard.loadable.Replay`]
         The replays to compare against either ``replays2`` if ``replays`` is
         not ``None``, or against other replays in ``replays1``.
-    replays2: list[:class:`~.replay.Replay`]
+    replays2: list[:class:`~circleguard.loadable.Replay`]
         The replays to compare against ``replays1``.
 
     Notes

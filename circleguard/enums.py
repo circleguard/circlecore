@@ -147,7 +147,7 @@ class ModCombination():
         return ModCombination(self.value | other.value)
 
     def __sub__(self, other):
-        return ModCombination(self.value ^ other.value)
+        return ModCombination(self.value & ~other.value)
 
     def __hash__(self):
         return self.value

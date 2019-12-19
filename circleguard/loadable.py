@@ -74,10 +74,10 @@ class ReplayContainer(InfoLoadable):
     Holds a list of Replays, in addition to being a :class:`~Loadable`.
 
     ReplayContainer's start unloaded and become info loaded when
-    :meth:`~ReplayContainer.load_info` is called. They become fully
-    loaded when :meth:`~ReplayContainer.load`
+    :meth:`~InfoLoadable.load_info` is called. They become fully
+    loaded when :meth:`~Loadable.load`
     is called (and if this is called when the ReplayContainer is in the
-    unloaded state, :meth:`~ReplayContainer.load` will load info first,
+    unloaded state, :meth:`~Loadable.load` will load info first,
     then load the replays.)
 
     In the unloaded state, the container has no actual Replay objects. It may
@@ -107,13 +107,13 @@ class Check(InfoLoadable):
     detect: :class:`~.Detect`
         What cheats to investigate for.
     loadables2: :class:`~.Loadable`
-        A second set of loadables. Only used when :class:`.~StealDetect` is
+        A second set of loadables. Only used when :class:`~StealDetect` is
         passed in ``detect``. If passed, the loadables in ``loadables`` will
         not be compared to each other, but instead to each replay in
         ``loadables2``, for replay stealing.
     cache: bool
         Whether to cache the loadables once they are loaded. This will be
-        overriden by a ``cache`` option set by a :class:`.~Loadable` in
+        overriden by a ``cache`` option set by a :class:`~Loadable` in
         ``loadables``. It only affects children loadables when they do not have
         a ``cache`` option set.
     """
@@ -133,13 +133,12 @@ class Check(InfoLoadable):
 
         Returns
         -------
-        list[:class:`~circleguard.loadable.Loadable`]
+        list[:class:`~Loadable`]
             All loadables in this class.
 
         See Also
         --------
-        :func:`~circleguard.loadable.Loadable.all_replays` and
-        :func:`~circleguard.loadable.Loadable.all_replays2`
+        :func:`~Check.all_replays` and :func:`~Check.all_replays2`.
 
         Notes
         -----
@@ -183,17 +182,18 @@ class Check(InfoLoadable):
 
     def all_replays(self):
         """
-        Returns all the :class:`~.replay`\s in this check. Contrast with
-        :func:`~.all_loadables`, which returns all the :class:`.~Loadable`\s
-        in this check.
+        Returns all the :class:`~.Replay`\s in this check. Contrast with
+        :func:`~Check.all_loadables`, which returns all the
+        :class:`~.Loadable`\s in this check.
 
         Warnings
         --------
-        If you want an accurate list of :class:`~.replay`\s in this check, you
-        must call :func:`.~circleguard.load` on this :class:`~.Check` before
-        :func:`~.all_replays`. :class:`~.InfoLoadable`\s contained in this
-        :class:`~.Check` may not be info loaded otherwise, and thus do not have
-        a complete list of the replays they represent.
+        If you want an accurate list of :class:`~.Replay`\s in this check, you
+        must call :func:`~circleguard.circleguard.Circleguard.load` on this
+        :class:`~Check` before :func:`~Check.all_replays`.
+        :class:`~.InfoLoadable`\s contained in this :class:`~Check` may not be
+        info loaded otherwise, and thus do not have a complete list of the
+        replays they represent.
         """
         replays = []
         for loadable in self.loadables:
@@ -201,6 +201,10 @@ class Check(InfoLoadable):
         return replays
 
     def all_replays2(self):
+        """
+        Returns all the :class:`~.Replay`\s contained by ``replays2`` of this
+        check.
+        """
         replays2 = []
         for loadable in self.loadables2:
             replays2 += loadable.all_replays()
@@ -279,14 +283,15 @@ class Map(ReplayContainer):
 
     def all_replays(self):
         """
-        Returns all the :class:`~.replay`\s in this map.
+        Returns all the :class:`~.Replay`\s in this map.
 
         Warnings
         --------
-        If you want an accurate list of :class:`~.replay`\s in this map, you
-        must call :func:`.~circleguard.load` on this map before
-        :func:`~.all_replays`. Otherwise, this class is not info loaded, and
-        does not have a complete list of replays it represents.
+        If you want an accurate list of :class:`~.Replay`\s in this map, you
+        must call :func:`~circleguard.circleguard.Circleguard.load` on this map
+        before :func:`~Map.all_replays`. Otherwise, this
+        class is not info loaded, and does not have a complete list of replays
+        it represents.
         """
         return self.replays
 
@@ -376,14 +381,15 @@ class User(ReplayContainer):
 
     def all_replays(self):
         """
-        Returns all the :class:`~.replay`\s in this map.
+        Returns all the :class:`~.Replay`\s in this user.
 
         Warnings
         --------
-        If you want an accurate list of :class:`~.replay`\s in this user, you
-        must call :func:`.~circleguard.load` on this user before
-        :func:`~.all_replays`. Otherwise, this class is not info loaded, and
-        does not have a complete list of replays it represents.
+        If you want an accurate list of :class:`~.Replay`\s in this user, you
+        must call :func:`~circleguard.circleguard.Circleguard.load` on this
+        user before :func:`~User.all_replays`. Otherwise, this class is not
+        info loaded, and does not have a complete list of replays it
+        represents.
         """
         replays = []
         for loadable in self.replays:
@@ -464,14 +470,14 @@ class MapUser(ReplayContainer):
 
     def all_replays(self):
         """
-        Returns all the :class:`~.replay`\s in this MapUser.
+        Returns all the :class:`~.Replay`\s in this MapUser.
 
         Warnings
         --------
-        If you want an accurate list of :class:`~.replay`\s in this MapUser,
-        you must call :func:`.~circleguard.load` on this MapUser before
-        :func:`~.all_replays`. Otherwise, this class is not info loaded, and
-        does not have a complete list of replays it represents.
+        If you want an accurate list of :class:`~.Replay`\s in this MapUser,
+        you must call :func:`~circleguard.circleguard.Circleguard.load` on this
+        MapUser before :func:`~.all_replays`. Otherwise, this class is not info
+        loaded, and does not have a complete list of replays it represents.
         """
         replays = []
         for loadable in self.replays:
@@ -549,7 +555,7 @@ class Replay(Loadable):
 
         Returns
         -------
-        list[tuple(int, float, float, something)]
+        list[tuple(int, float, float, int)]
             A list of tuples of (t, x, y, keys) for each event
             in the replay data.
         """
@@ -577,7 +583,7 @@ class ReplayMap(Replay):
     user_id: int
         The id of the player who played the replay.
     mods: ModCombination
-        The mods the replay was played with. If `None`, the
+        The mods the replay was played with. If ``None``, the
         highest scoring replay of ``user_id`` on ``map_id`` will be loaded,
         regardless of mod combination. Otherwise, the replay with ``mods``
         will be loaded.
