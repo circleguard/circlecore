@@ -529,6 +529,8 @@ class Replay(Loadable):
         self.weight = weight
         self.loaded = True
 
+        self.t, self.xy, self.k = self.as_arrays()
+
     def num_replays(self):
         return 1
 
@@ -541,6 +543,25 @@ class Replay(Loadable):
 
     def __str__(self):
         return f"Replay by {self.username} on {self.map_id}"
+
+    def as_arrays(self):
+        """
+        Gets this replay's play data as arrays of absolute time, x and y, and pressed keys.
+
+        Returns
+        -------
+        array[int], array[[float]], array[int]
+            A list of tuples of (t, x, y, keys) for each event
+            in the replay data.
+        """
+        block = list(zip(*[(e.time_since_previous_action, e.x, e.y, e.keys_pressed) for e in self.replay_data]))
+
+        t = np.array(block[0], dtype=int)
+        t = t.cumsum()
+        xy = np.array([block[1], block[2]], dtype=float).T
+        k = np.array(block[3], dtype=int)
+
+        return t, xy, k
 
     def as_list_with_timestamps(self):
         """
