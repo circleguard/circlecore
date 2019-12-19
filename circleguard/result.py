@@ -119,7 +119,7 @@ class CorrectionResult(InvestigationResult):
     ----------
     replay: :class:`~circleguard.loadable.Replay`
         The replay investigated.
-    snaps: list[:class:`.~Snap`]
+    snaps: list[:class:`~circleguard.investigator.Snap`]
         A list of suspicious hits in the replay.
     ischeat: bool
         Whether the replay is cheated or not.
