@@ -147,7 +147,7 @@ class Comparer:
         previous1 = replay1
         prev_value = 100  # whatever high value
 
-        clean_mode = CleanMode(CleanMode.ALIGN + CleanMode.SYNCHRONIZE)
+        clean_mode = CleanMode(CleanMode.ALIGN + CleanMode.VALIDATE)
 
         dt = search_mode.search_step
 

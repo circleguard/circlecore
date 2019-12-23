@@ -392,11 +392,14 @@ class CleanMode():
     """
 
     VALIDATE = 1 << 0  # remove out of bounds data
-    SYNCHRONIZE = 1 << 1  # find suitable nearly shared common timestamps for interpolation
+    SYNCHRONIZE = 1 << 1  # find suitable nearly shared common timestamps for interpolation, not recommended due to instability on time shifts
                           # has the side effect of removing a skipped intro if at least one player skips
     ALIGN = 1 << 2  # shift all replays so that their average coincides, minimizing the MSE
     SEARCH = 1 << 3  # use a local search over time to minimize the MSE, uses VALIDATE and ALIGN
+                     # the slow preset which is effective in almost all cases, including time shifts
     ALL = VALIDATE + SYNCHRONIZE + ALIGN + SEARCH
+    FAST = VALIDATE + ALIGN  # the fast preset which is effective in most cases, notably not time shifts
+
 
     def __init__(self, value, search_step=16, step_limit=10):
         self.value = value
