@@ -3,7 +3,7 @@ from unittest import TestCase, skip, TestSuite, TextTestRunner
 from pathlib import Path
 import warnings
 from circleguard import (Circleguard, Check, ReplayMap, ReplayPath, RelaxDetect, StealDetect,
-                         RatelimitWeight, set_options, Map, User, MapUser, Mod)
+                         RatelimitWeight, set_options, Map, User, MapUser, Mod, Loader)
 
 KEY = os.environ.get('OSU_API_KEY')
 if not KEY:
@@ -17,6 +17,7 @@ set_options(loglevel=20)
 # We may want to split tests into "heavy" and "light" where light loads <10 heavy calls and heavy loads as many as we need.
 # light can run locally, heavy can run on prs.
 HEAVY_CALL_COUNT = 9
+
 
 class CGTestCase(TestCase):
     @classmethod
@@ -34,8 +35,8 @@ class CGTestCase(TestCase):
                 message="unclosed",
                 category=ResourceWarning)
 
-class TestReplays(CGTestCase):
 
+class TestReplays(CGTestCase):
     def test_cheated_replaypath(self):
         # taken from http://redd.it/bvfv8j, remodded replay by same user (CielXDLP) from HDHR to FLHDHR
         replays = [ReplayPath(RES / "stolen_replay1.osr"), ReplayPath(RES / "stolen_replay2.osr")]
@@ -107,7 +108,6 @@ class TestReplays(CGTestCase):
         self.assertTrue(r.loaded, "Loaded status was not correct")
 
 
-
 class TestMap(CGTestCase):
     @classmethod
     def setUpClass(cls):
@@ -172,6 +172,7 @@ class TestUser(CGTestCase):
         # 1st and 3rd (FDFD and Remote Control)
         self.assertListEqual([r.map_id for r in self.user[0:3:2]], [129891, 774965])
 
+
 class TestMapUser(CGTestCase):
     @classmethod
     def setUpClass(cls):
@@ -202,6 +203,33 @@ class TestMapUser(CGTestCase):
         self.assertEqual(self.mu[1].map_id, 795627)
         # test slicing
         self.assertListEqual([r.map_id for r in self.mu[0:2]], [795627, 795627])
+
+
+class TestLoader(CGTestCase):
+    @classmethod
+    def setUpClass(cls):
+        cls.loader = Loader(KEY)
+
+    def test_wrong_map_id(self):
+        result = self.loader.map_id("E")
+        self.assertEqual(result, 0)
+
+    def test_working_map_id(self):
+        result = self.loader.map_id("9d0a8fec2fe3f778334df6bdc60b113c")
+        self.assertEqual(result, 221777)
+
+    def test_wrong_user_id(self):
+        result = self.loader.user_id("E")
+        self.assertEqual(result, 0)
+
+    def test_working_user_id1(self):
+        result = self.loader.user_id("] [")
+        self.assertEqual(result, 13506780)
+
+    def test_working_user_id2(self):
+        result = self.loader.user_id("727")
+        self.assertEqual(result, 10750899)
+
 
 if __name__ == '__main__':
     suite = TestSuite()
