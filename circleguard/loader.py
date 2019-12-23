@@ -376,10 +376,11 @@ class Loader():
         """
 
         response = self.api.get_beatmaps({"h": map_hash})
-        if response == []:
+        try:
+            Loader.check_response(response)
+        except NoInfoAvailableException:
             return 0
-        else:
-            return int(response[0]["beatmap_id"])
+        return int(response[0]["beatmap_id"])
 
     @lru_cache()
     def user_id(self, username):
@@ -412,10 +413,11 @@ class Loader():
         """
 
         response = self.api.get_user({"u": username, "type": "string"})
-        if response == []:
+        try:
+            Loader.check_response(response)
+        except NoInfoAvailableException:
             return 0
-        else:
-            return int(response[0]["user_id"])
+        return int(response[0]["user_id"])
 
     @lru_cache()
     def username(self, user_id):
@@ -442,10 +444,11 @@ class Loader():
         duplicate api calls.
         """
         response = self.api.get_user({"u": user_id, "type": "id"})
-        if response == []:
+        try:
+            Loader.check_response(response)
+        except NoInfoAvailableException:
             return ""
-        else:
-            return response[0]["username"]
+        return response[0]["username"]
 
     @staticmethod
     def check_response(response):
