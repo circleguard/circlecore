@@ -663,6 +663,7 @@ class ReplayPath(Replay):
     def __init__(self, path, cache=None):
         self.log = logging.getLogger(__name__ + ".ReplayPath")
         self.path = path
+        self.hash = None
         self.cache = cache
         self.weight = RatelimitWeight.LIGHT
         self.loaded = False
@@ -708,6 +709,7 @@ class ReplayPath(Replay):
         loaded = circleparse.parse_replay_file(self.path)
         map_id = loader.map_id(loaded.beatmap_hash)
         user_id = loader.user_id(loaded.player_name)
+        self.hash = loaded.beatmap_hash
 
         Replay.__init__(self, loaded.timestamp, map_id, loaded.player_name, user_id, ModCombination(loaded.mod_combination),
                         loaded.replay_id, loaded.play_data, self.weight)
