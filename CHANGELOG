@@ -3,3 +3,5 @@
 * Rename `Keys` to `Key` (`Keys` left available as deprecated)
 * Don't double load `ReplayInfo` when using `Map`
 * fix mod subtraction not being commutative (eg `Mod.HDHR - Mod.HR` has a different meaning from `Mod.HR - Mod.HDHR`)
+* store beatmap hash in `ReplayPath`
+* properly check response for `map_id`, `user_id`, and `username` functions
