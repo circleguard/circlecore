@@ -5,3 +5,5 @@
 * fix mod subtraction not being commutative (eg `Mod.HDHR - Mod.HR` has a different meaning from `Mod.HR - Mod.HDHR`)
 * store beatmap hash in `ReplayPath`
 * properly check response for `map_id`, `user_id`, and `username` functions
+* enforce ratelimit to all Loader functions
+* Don't reraise InvalidKeyException as an CircleguardException
