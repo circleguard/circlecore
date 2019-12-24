@@ -301,7 +301,6 @@ class Loader():
         self.log.log(TRACE, "Requesting replay data by user %d on map %d with mods %s", user_id, map_id, mods)
         response = self.api.get_replay({"m": "0", "b": map_id, "u": user_id, "mods": mods if mods is None else mods.value})
         Loader.check_response(response)
-
         return base64.b64decode(response["content"])
 
     @check_cache
