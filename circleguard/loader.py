@@ -353,6 +353,7 @@ class Loader():
         return replay_data
 
     @lru_cache()
+    @request
     def map_id(self, map_hash):
         """
         Retrieves a map id from a corresponding map hash through the api.
@@ -382,6 +383,7 @@ class Loader():
         return int(response[0]["beatmap_id"])
 
     @lru_cache()
+    @request
     def user_id(self, username):
         """
         Retrieves a user id from a corresponding username through the api.
@@ -419,6 +421,7 @@ class Loader():
         return int(response[0]["user_id"])
 
     @lru_cache()
+    @request
     def username(self, user_id):
         """
         Retrieves the username from a corresponding user id through the api.
