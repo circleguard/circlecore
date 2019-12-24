@@ -17,6 +17,7 @@ from circleguard.exceptions import (InvalidArgumentsException, APIException, Cir
                         InvalidJSONException, NoInfoAvailableException)
 from circleguard.utils import TRACE, span_to_list
 
+
 def request(function):
     """
     A decorator that handles :mod:`requests` and api related exceptions, as
@@ -54,8 +55,6 @@ def request(function):
             self.log.warning("Invalid json exception: {}. API likely having issues; sleeping for 3 seconds then retrying".format(e))
             time.sleep(3)
             ret = request(function)(*args, **kwargs)
-        except InvalidKeyException as e:
-            raise CircleguardException("The given key is invalid")
         except RequestException as e:
             self.log.warning("Request exception: {}. Likely a network issue; sleeping for 5 seconds then retrying".format(e))
             time.sleep(5)
@@ -105,6 +104,7 @@ def check_cache(function):
         else:
             return function(*args, **kwargs)
     return wrapper
+
 
 class Loader():
     """
@@ -353,6 +353,7 @@ class Loader():
         return replay_data
 
     @lru_cache()
+    @request
     def map_id(self, map_hash):
         """
         Retrieves a map id from a corresponding map hash through the api.
@@ -382,6 +383,7 @@ class Loader():
         return int(response[0]["beatmap_id"])
 
     @lru_cache()
+    @request
     def user_id(self, username):
         """
         Retrieves a user id from a corresponding username through the api.
@@ -419,6 +421,7 @@ class Loader():
         return int(response[0]["user_id"])
 
     @lru_cache()
+    @request
     def username(self, user_id):
         """
         Retrieves the username from a corresponding user id through the api.
@@ -475,8 +478,6 @@ class Loader():
                 # pylint is dumb because Error is an enum and this is totally legal
         if not response: # response is empty, list or dict case
             raise NoInfoAvailableException("No info was available from the api for the given arguments.")
-
-
 
     def _enforce_ratelimit(self):
         """
