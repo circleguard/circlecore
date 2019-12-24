@@ -210,7 +210,7 @@ class TestLoader(CGTestCase):
     def setUpClass(cls):
         cls.loader = Loader(KEY)
 
-    def test_wrong_map_id(self):
+    def test_incorrect_map_id(self):
         result = self.loader.map_id("E")
         self.assertEqual(result, 0)
 
@@ -218,7 +218,7 @@ class TestLoader(CGTestCase):
         result = self.loader.map_id("9d0a8fec2fe3f778334df6bdc60b113c")
         self.assertEqual(result, 221777)
 
-    def test_wrong_user_id(self):
+    def test_incorrect_user_id(self):
         result = self.loader.user_id("E")
         self.assertEqual(result, 0)
 
@@ -230,7 +230,7 @@ class TestLoader(CGTestCase):
         result = self.loader.user_id("727")
         self.assertEqual(result, 10750899)
 
-    def test_wrong_username(self):
+    def test_incorrect_username(self):
         result = self.loader.username(0)
         self.assertEqual(result, "")
 
