@@ -3,7 +3,7 @@ from unittest import TestCase, skip, TestSuite, TextTestRunner
 from pathlib import Path
 import warnings
 from circleguard import (Circleguard, Check, ReplayMap, ReplayPath, RelaxDetect, StealDetect,
-                         RatelimitWeight, set_options, Map, User, MapUser, Mod, Loader)
+                         RatelimitWeight, set_options, Map, User, MapUser, Mod, Loader, InvalidKeyException)
 
 KEY = os.environ.get('OSU_API_KEY')
 if not KEY:
@@ -237,6 +237,12 @@ class TestLoader(CGTestCase):
     def test_working_username(self):
         result = self.loader.username(13506780)
         self.assertEqual(result, "] [")
+
+    def test_incorrect_key(self):
+        loader = Loader("LULW 727 LULW")
+        self.assertRaises(InvalidKeyException, loader.username, 13506780)
+        self.assertRaises(InvalidKeyException, loader.user_id, "] [")
+        self.assertRaises(InvalidKeyException, loader.map_id, "9d0a8fec2fe3f778334df6bdc60b113c")
 
 
 if __name__ == '__main__':
