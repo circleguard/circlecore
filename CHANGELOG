@@ -1,7 +1,12 @@
-* Fix `MapUser` inheritence (now properly inherits from `ReplayContainer`)
-* Fix incorrect `__add__` method for `Check`
-* Rename `Keys` to `Key` (`Keys` left available as deprecated)
-* Don't double load `ReplayInfo` when using `Map`
+* fix `MapUser` inheritence (now properly inherits from `ReplayContainer`)
+* fix incorrect `__add__` method for `Check`
+* rename `Keys` to `Key` (`Keys` left available as deprecated)
+* don't double load `ReplayInfo` when using `Map`
 * fix mod subtraction not being commutative (eg `Mod.HDHR - Mod.HR` has a different meaning from `Mod.HR - Mod.HDHR`)
-* Rename `Detect` attributes to reflect the `Detect` class (eg, `max_angle` -> `correction_max_angle`). This avoids confusion of attributes when multiple `Detect`s are combined. Previous names left available as deprecated.
-* Add `Detect.INVESTIGATION`, `Detect.COMPARISON`, and `Detect.REQUIRES_BEATMAP` that can be tested against a `Detect` similarly to `Detect.STEAL in detect` (`Detect.REQUIRES_BEATMAP in detect`), to see if a detect contains an investigation (relax, aim correction, macro), a comparison (steal), or requires a beatmap download, respectively.
+* store beatmap hash in `ReplayPath`
+* properly check response for `map_id`, `user_id`, and `username` functions
+* enforce ratelimit to all Loader functions
+* don't reraise InvalidKeyException as an CircleguardException
+* rename `Detect` attributes to reflect the `Detect` class (eg, `max_angle` -> `correction_max_angle`). This avoids confusion of attributes when multiple `Detect`s are combined. Previous names left available as deprecated.
+* add `Detect.INVESTIGATION`, `Detect.COMPARISON`, and `Detect.REQUIRES_BEATMAP` that can be tested against a `Detect` similarly to `Detect.STEAL in detect` (`Detect.REQUIRES_BEATMAP in detect`), to see if a detect contains an investigation (relax, aim correction, macro), a comparison (steal), or requires a beatmap download, respectively.
+
