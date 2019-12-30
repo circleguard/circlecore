@@ -11,6 +11,7 @@
 * enforce ratelimit to all Loader functions
 * don't reraise `InvalidKeyException` as a `CircleguardException`
 * add CHANGELOG file to both track unreleased changes and past changes
+* various documentation links and wording fixes
 
 # v3.0.0
 
