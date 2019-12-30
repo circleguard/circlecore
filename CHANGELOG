@@ -1,9 +1,0 @@
-* fix `MapUser` inheritence (now properly inherits from `ReplayContainer`)
-* fix incorrect `__add__` method for `Check`
-* rename `Keys` to `Key` (`Keys` left available as deprecated)
-* don't double load `ReplayInfo` when using `Map`
-* fix mod subtraction not being commutative (eg `Mod.HDHR - Mod.HR` has a different meaning from `Mod.HR - Mod.HDHR`)
-* store beatmap hash in `ReplayPath`
-* properly check response for `map_id`, `user_id`, and `username` functions
-* enforce ratelimit to all Loader functions
-* don't reraise InvalidKeyException as a CircleguardException
