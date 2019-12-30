@@ -38,7 +38,8 @@ class Comparer:
 
     See Also
     --------
-    :class:`~investigator.Investigator`, for investigating single replays.
+    :class:`~circleguard.investigator.Investigator`, for investigating single
+    replays.
     """
 
     def __init__(self, threshold, replays1, replays2=None):
