@@ -4,12 +4,22 @@
 # list see the documentation:
 # https://www.sphinx-doc.org/en/master/usage/configuration.html
 
+# This will fail if circlecore's dependencies aren't installed.
+# Which shouldn't be an issue because the only people running ``make html``
+# (building the docs) are people with circlecore properly installed, hopefully.
+from circleguard import __version__
+
 project = "Circleguard"
 copyright = "2019, Liam DeVoe, samuelhklumpers, InvisibleSymbol"
 author = "Liam DeVoe, samuelhklumpers, InvisibleSymbol"
-release = "2.4.0"
-version = "2.4.0"
+release = "v" + __version__
+version = "v" + __version__
 master_doc = 'index'
+
+# https://www.sphinx-doc.org/en/master/usage/configuration.html#confval-html_show_copyright
+html_show_copyright = False
+# https://www.sphinx-doc.org/en/master/usage/configuration.html#confval-html_show_sphinx
+html_show_sphinx = False
 
 extensions = [
     "sphinx.ext.autodoc",

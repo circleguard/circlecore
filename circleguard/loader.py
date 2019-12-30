@@ -17,6 +17,7 @@ from circleguard.exceptions import (InvalidArgumentsException, APIException, Cir
                         InvalidJSONException, NoInfoAvailableException)
 from circleguard.utils import TRACE, span_to_list
 
+
 def request(function):
     """
     A decorator that handles :mod:`requests` and api related exceptions, as
@@ -54,8 +55,6 @@ def request(function):
             self.log.warning("Invalid json exception: {}. API likely having issues; sleeping for 3 seconds then retrying".format(e))
             time.sleep(3)
             ret = request(function)(*args, **kwargs)
-        except InvalidKeyException as e:
-            raise CircleguardException("The given key is invalid")
         except RequestException as e:
             self.log.warning("Request exception: {}. Likely a network issue; sleeping for 5 seconds then retrying".format(e))
             time.sleep(5)
@@ -106,6 +105,7 @@ def check_cache(function):
             return function(*args, **kwargs)
     return wrapper
 
+
 class Loader():
     """
     Manages interactions with the osu api, using the :mod:`ossapi` wrapper.
@@ -141,25 +141,25 @@ class Loader():
     @request
     def replay_info(self, map_id, num=None, user_id=None, mods=None, limit=True, span=None):
         """
-        Retrieves user infos from ``map_id``.
+        Retrieves replay infos from ``map_id``.
 
         Parameters
         ----------
         map_id: int
-            The map id to retrieve user info for.
+            The map id to retrieve replay info for.
         num: int
-            The number of user infos on the map to retrieve.
+            The number of replay infos on the map to retrieve.
         user_id: int
-            If passed, only retrieve user info on ``map_id`` for this user.
+            If passed, only retrieve replay info on ``map_id`` for this user.
             Note that this is not necessarily limited to just the user's top
             score on the map. See ``limit``.
         mods: :class:`~.ModCombination`
-            The mods to limit user infos to. ie only return user infos with
+            The mods to limit replay infos to. ie only return replay infos with
             mods that match ``mods``.
         limit: bool
             Whether to limit to only one response. Only has an effect if
             ``user_id`` is passed. If ``limit`` is ``True``, will only return
-            the top scoring user info by ``user_id``. If ``False``, will return
+            the top scoring replay info by ``user_id``. If ``False``, will return
             all scores by ``user_id``.
         span: str
             A comma separated list of ranges of top replays on the map to
@@ -169,7 +169,7 @@ class Loader():
         Returns
         -------
         list[:class:`~.ReplayInfo`]
-            The user infos as specified by the arguments.
+            The replay infos as specified by the arguments.
         :class:`~.ReplayInfo`
             If ``limit`` is ``True`` and ``user_id`` is passed.
 
@@ -190,7 +190,7 @@ class Loader():
         # I spent many-a-hour figuring this out,
         # and if anyone has a more elegant solution I'm all ears.
         locals_ = locals()
-        self.log.log(TRACE, "Loading user info on map %d with options %s",
+        self.log.log(TRACE, "Loading replay info on map %d with options %s",
                             map_id, {k: locals_[k] for k in locals_ if k != 'self'})
 
         if num and (num > 100 or num < 1):
@@ -234,9 +234,10 @@ class Loader():
             A comma separated list of ranges of top plays to retrieve.
             ``span="1-3,6,2-4"`` -> replays in the range ``[1,2,3,4,6]``.
 
-        Returns:
-            A list of Integer map_ids for the given number of the user's top
-            plays.
+        Returns
+        -------
+        list[int]
+            A list of map_ids for the given number of the user's top plays.
 
         Raises
         ------
@@ -300,7 +301,6 @@ class Loader():
         self.log.log(TRACE, "Requesting replay data by user %d on map %d with mods %s", user_id, map_id, mods)
         response = self.api.get_replay({"m": "0", "b": map_id, "u": user_id, "mods": mods if mods is None else mods.value})
         Loader.check_response(response)
-
         return base64.b64decode(response["content"])
 
     @check_cache
@@ -312,7 +312,7 @@ class Loader():
         Parameters
         ----------
         replay_info: :class:`~.ReplayInfo`
-            The user info representing the replay to retrieve.
+            The replay info representing the replay to retrieve.
 
         Returns
         -------
@@ -353,6 +353,7 @@ class Loader():
         return replay_data
 
     @lru_cache()
+    @request
     def map_id(self, map_hash):
         """
         Retrieves a map id from a corresponding map hash through the api.
@@ -375,12 +376,14 @@ class Loader():
         """
 
         response = self.api.get_beatmaps({"h": map_hash})
-        if response == []:
+        try:
+            Loader.check_response(response)
+        except NoInfoAvailableException:
             return 0
-        else:
-            return int(response[0]["beatmap_id"])
+        return int(response[0]["beatmap_id"])
 
     @lru_cache()
+    @request
     def user_id(self, username):
         """
         Retrieves a user id from a corresponding username through the api.
@@ -411,12 +414,14 @@ class Loader():
         """
 
         response = self.api.get_user({"u": username, "type": "string"})
-        if response == []:
+        try:
+            Loader.check_response(response)
+        except NoInfoAvailableException:
             return 0
-        else:
-            return int(response[0]["user_id"])
+        return int(response[0]["user_id"])
 
     @lru_cache()
+    @request
     def username(self, user_id):
         """
         Retrieves the username from a corresponding user id through the api.
@@ -441,10 +446,11 @@ class Loader():
         duplicate api calls.
         """
         response = self.api.get_user({"u": user_id, "type": "id"})
-        if response == []:
+        try:
+            Loader.check_response(response)
+        except NoInfoAvailableException:
             return ""
-        else:
-            return response[0]["username"]
+        return response[0]["username"]
 
     @staticmethod
     def check_response(response):
@@ -472,8 +478,6 @@ class Loader():
                 # pylint is dumb because Error is an enum and this is totally legal
         if not response: # response is empty, list or dict case
             raise NoInfoAvailableException("No info was available from the api for the given arguments.")
-
-
 
     def _enforce_ratelimit(self):
         """

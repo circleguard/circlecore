@@ -20,10 +20,10 @@ class Comparer:
     threshold: int
         If a comparison scores below this value, one of the
         :class:`~.replay.Replay` in the comparison is considered cheated.
-    replays1: list[:class:`~.replay.Replay`]
+    replays1: list[:class:`~circleguard.loadable.Replay`]
         The replays to compare against either ``replays2`` if ``replays`` is
         not ``None``, or against other replays in ``replays1``.
-    replays2: list[:class:`~.replay.Replay`]
+    replays2: list[:class:`~circleguard.loadable.Replay`]
         The replays to compare against ``replays1``.
 
     Notes
@@ -38,14 +38,15 @@ class Comparer:
 
     See Also
     --------
-    :class:`~investigator.Investigator`, for investigating single replays.
+    :class:`~circleguard.investigator.Investigator`, for investigating single
+    replays.
     """
 
     def __init__(self, threshold, replays1, replays2=None):
         self.log = logging.getLogger(__name__)
         self.threshold = threshold
 
-        # filter beatmaps we had no data for - see Loader.replay_data and OnlineReplay.from_map
+        # filter beatmaps we had no data for
         self.replays1 = [replay for replay in replays1 if replay.replay_data is not None]
         self.replays2 = [replay for replay in replays2 if replay.replay_data is not None] if replays2 else None
         self.mode = "double" if self.replays2 else "single"

@@ -147,7 +147,7 @@ class ModCombination():
         return ModCombination(self.value | other.value)
 
     def __sub__(self, other):
-        return ModCombination(self.value ^ other.value)
+        return ModCombination(self.value & ~other.value)
 
     def __hash__(self):
         return self.value
@@ -404,9 +404,13 @@ class ResultType(Enum):
     CORRECTION = "Aim Correction"
     TIMEWARP = "Timewarp"
 
-class Keys(IntFlag):
+class Key(IntFlag):
     M1 = 1
     M2 = 2
     K1 = 4
     K2 = 8
     SMOKE = 16
+
+# TODO remove in 4.x
+# @deprecated
+Keys = Key

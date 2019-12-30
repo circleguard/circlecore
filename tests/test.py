@@ -3,10 +3,10 @@ from unittest import TestCase, skip, TestSuite, TextTestRunner
 from pathlib import Path
 import warnings
 from circleguard import (Circleguard, Check, ReplayMap, ReplayPath, RelaxDetect, StealDetect,
-                         RatelimitWeight, set_options, Map, User, MapUser, Mod)
+                         RatelimitWeight, set_options, Map, User, MapUser, Mod, Loader, InvalidKeyException)
 
 KEY = os.environ.get('OSU_API_KEY')
-if KEY is None:
+if not KEY:
     KEY = input("Enter your api key: ")
 
 RES = Path(__file__).parent / "resources"
@@ -17,6 +17,7 @@ set_options(loglevel=20)
 # We may want to split tests into "heavy" and "light" where light loads <10 heavy calls and heavy loads as many as we need.
 # light can run locally, heavy can run on prs.
 HEAVY_CALL_COUNT = 9
+
 
 class CGTestCase(TestCase):
     @classmethod
@@ -34,8 +35,8 @@ class CGTestCase(TestCase):
                 message="unclosed",
                 category=ResourceWarning)
 
-class TestReplays(CGTestCase):
 
+class TestReplays(CGTestCase):
     def test_cheated_replaypath(self):
         # taken from http://redd.it/bvfv8j, remodded replay by same user (CielXDLP) from HDHR to FLHDHR
         replays = [ReplayPath(RES / "stolen_replay1.osr"), ReplayPath(RES / "stolen_replay2.osr")]
@@ -107,7 +108,6 @@ class TestReplays(CGTestCase):
         self.assertTrue(r.loaded, "Loaded status was not correct")
 
 
-
 class TestMap(CGTestCase):
     @classmethod
     def setUpClass(cls):
@@ -130,7 +130,7 @@ class TestMap(CGTestCase):
         self.assertTrue(self.map.loaded)
         self.assertTrue(self.map.info_loaded)
 
-    def test_user_slice(self):
+    def test_map_slice(self):
         # sanity check (map id better be what we put in)
         self.assertEqual(self.map[0].map_id, 221777)
         # 2nd (rohulk)
@@ -172,6 +172,7 @@ class TestUser(CGTestCase):
         # 1st and 3rd (FDFD and Remote Control)
         self.assertListEqual([r.map_id for r in self.user[0:3:2]], [129891, 774965])
 
+
 class TestMapUser(CGTestCase):
     @classmethod
     def setUpClass(cls):
@@ -202,6 +203,43 @@ class TestMapUser(CGTestCase):
         self.assertEqual(self.mu[1].map_id, 795627)
         # test slicing
         self.assertListEqual([r.map_id for r in self.mu[0:2]], [795627, 795627])
+
+
+class TestLoader(CGTestCase):
+    @classmethod
+    def setUpClass(cls):
+        cls.loader = Loader(KEY)
+
+    def test_loading_map_id(self):
+        result = self.loader.map_id("E")
+        self.assertEqual(result, 0)
+
+        result = self.loader.map_id("9d0a8fec2fe3f778334df6bdc60b113c")
+        self.assertEqual(result, 221777)
+
+    def test_loading_user_id(self):
+        result = self.loader.user_id("E")
+        self.assertEqual(result, 0)
+
+        result = self.loader.user_id("] [")
+        self.assertEqual(result, 13506780)
+
+        result = self.loader.user_id("727")
+        self.assertEqual(result, 10750899)
+
+    def test_loading_username(self):
+        result = self.loader.username(0)
+        self.assertEqual(result, "")
+
+        result = self.loader.username(13506780)
+        self.assertEqual(result, "] [")
+
+    def test_incorrect_key(self):
+        loader = Loader("incorrect key")
+        self.assertRaises(InvalidKeyException, loader.username, 13506780)
+        self.assertRaises(InvalidKeyException, loader.user_id, "] [")
+        self.assertRaises(InvalidKeyException, loader.map_id, "9d0a8fec2fe3f778334df6bdc60b113c")
+
 
 if __name__ == '__main__':
     suite = TestSuite()

@@ -35,17 +35,16 @@ before you call |cg.run|.
 .. code-block:: python
 
     cg = Circleguard("key")
-    m = Map(221777, num=2)
-    print(m.loaded)
+    m = Map(221777, num=1)
+    print(m.info_loaded, m.loaded)
+    cg.load_info(m)
+    print(m.info_loaded, m.loaded)
     cg.load(m)
-    print(m.loaded)
+    print(m.info_loaded, m.loaded)
 
 
 Stages
 ------
-
-This is not an idea truly formalized in the codebase (yet), but is a useful
-crutch of an explanation.
 
 Different |Loadable|\s have different stages, where varying amounts of
 information is available to you. Each stage requires loading more information
@@ -78,8 +77,7 @@ issue.
 
     link to advanced section where we do talk about ratelimitweight/etc
 
-    have replay data be empty by default, maybe truly formalize the unloaded
-    /loaded relationship as well
+    have replay data be empty by default
 
 Replay Containers
 ~~~~~~~~~~~~~~~~~

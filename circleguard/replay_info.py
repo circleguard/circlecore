@@ -8,7 +8,7 @@ class ReplayInfo():
 
     Parameters
     ----------
-    timestamp: :class:`~datetime.datetime`
+    timestamp: :class:`datetime.datetime`
         When this replay was set.
     map_id: int
         The id of the map the replay was played on.
@@ -16,7 +16,7 @@ class ReplayInfo():
         The id of the player who played the replay.
     username: str
         The username of the player who played the replay.
-    replay_id: str
+    replay_id: int
         The id of the replay.
     mods: :class:`~circleguard.enums.ModCombination`
         The mods the replay was played with.

@@ -1,5 +1,4 @@
 image: Visual Studio 2017
-build: off
 
 environment:
   python_37: C:/Python37/python.exe
@@ -8,7 +7,7 @@ install:
   - "%python_37% -V"
   - "%python_37% -m pip install -e ."
 
-test_script:
+build_script:
   - "%python_37% -m unittest"
 
 on_failure:
