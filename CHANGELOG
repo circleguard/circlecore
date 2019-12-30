@@ -6,4 +6,4 @@
 * store beatmap hash in `ReplayPath`
 * properly check response for `map_id`, `user_id`, and `username` functions
 * enforce ratelimit to all Loader functions
-* don't reraise InvalidKeyException as an CircleguardException
+* don't reraise InvalidKeyException as a CircleguardException
