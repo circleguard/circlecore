@@ -155,7 +155,6 @@ class Comparer:
         for _ in range(search_mode.step_limit):
             values = {}
 
-            print()
             for sgn in [-1, 1]:
                 replay1.t = t1 + sgn * dt
                 v = replay1.t
