@@ -76,7 +76,7 @@ class Comparer:
             return
 
         if self.mode == "single" and self.detect.clean_mode.value:
-            self.replays1 = Comparer.clean_set(self.replays1, self.detect.clean_mode)
+            Comparer.clean_set(self.replays1, self.detect.clean_mode)
 
         if self.mode == "double":
             iterator = itertools.product(self.replays1, self.replays2)
@@ -126,7 +126,7 @@ class Comparer:
     @staticmethod
     def _compare_hill_climb(replay1, replay2, search_mode):
         """
-        Shifts two :class:`~.replay.Replay`\s through time greedily to
+        Shifts two :class:`~.replay.Replay` s through time greedily to
         find a local minimum for similarity values.
 
         Parameters
@@ -144,7 +144,8 @@ class Comparer:
             The similarity value in a local minimum.
         """
 
-        previous1 = replay1
+        t1, xy1, k1 = replay1.t, replay1.xy, replay1.k
+        t2, xy2, k2 = replay2.t, replay2.xy, replay2.k
         prev_value = 100  # whatever high value
 
         clean_mode = CleanMode(CleanMode.ALIGN + CleanMode.VALIDATE)
@@ -154,19 +155,24 @@ class Comparer:
         for _ in range(search_mode.step_limit):
             values = {}
 
+            print()
             for sgn in [-1, 1]:
-                attempt1 = Comparer.shift(copy.deepcopy(previous1), 0, 0, sgn * dt)
+                replay1.t = t1 + sgn * dt
+                v = replay1.t
 
-                t1, t2 = Comparer.clean_set([attempt1, replay2], clean_mode)
-                value = Comparer._compare_two_replays(t1, t2)[0]
+                Comparer.clean_set([replay1, replay2], clean_mode)
+                value = Comparer._compare_two_replays(replay1, replay2)[0]
 
-                values[value] = attempt1
+                values[value] = v
+
+                replay1.t, replay1.xy, replay1.k = t1, xy1, k1
+                replay2.t, replay2.xy, replay2.k = t2, xy2, k2
 
             min_value = min(values)
 
             if min_value < prev_value:
                 prev_value = min_value
-                previous1 = values[min_value]
+                t1 = values[min_value]
             else:
                 break
 
@@ -266,122 +272,59 @@ class Comparer:
         return (mu, sigma)
 
     @staticmethod
-    def interpolate_to(replay, timestamps):
+    def interpolate_to(t_from, xy, k, t_to):
         """
-        Interpolate coordinate data in the :class:`~.Replay` to the given timestamps.
+        Interpolate the data to the given timestamps.
         Drops excess timestamps and creates data at missing timestamps.
 
         Parameters
         ----------
-        replay: :class:`~.Replay`
-            The replay to interpolate.
-        timestamps: list(int)
-            The timestamps to interpolate to.
-            
+        t_from: ndarray[int]
+            The original timestamps
+        xy: ndarray[[float]]
+            The coordinate data
+        k: ndarray[int]
+            The keypress data
+        t_to: ndarray[int]
+            The timestamps to interpolate to
+
         Returns
         -------
-        :class:`~.Replay`
-            The interpolated replay.
-
-        Notes
-        -----
-        This method is in-place.
+        ndarray[int], ndarray[[float]], ndarray[int]
+            The interpolated data
         """
-        prev_err = np.seterr(all="ignore")
-
-        ts = []
-        xys = []
-        ks = []
-
-        i = 1
-        t_end = replay.t[-1]
-
-        for t in timestamps:
-            if t > t_end:
-                break
-
-            while replay.t[i] < t:
-                i += 1
-
-            r = (t - replay.t[i - 1]) / (replay.t[i] - replay.t[i - 1])
-
-            if np.isnan(r) or np.isinf(r):
-                continue
-
-            xy = r * replay.xy[i] + (1 - r) * replay.xy[i - 1]
-            k = replay.k[i - 1]
-
-            ts += [t]
-            xys += [xy]
-            ks += [k]
-
-        replay.t = np.array(ts, dtype=int)
-        replay.xy = np.array(xys, dtype=float)
-        replay.k = np.array(ks, dtype=int)
-
-        np.seterr(**prev_err)
-
-        return replay
+        xy = xy.T
+        xy = np.transpose([np.interp(t_to, t_from, xy[0]), np.interp(t_to, t_from, xy[1])])
+        k = k[np.searchsorted(t_from, t_to)]  # may need side="right"
+        return t_to, xy, k
 
     @staticmethod
-    def shift(replay, dx, dy, dt):
-        """
-        Shift the data in the :class:`~.Replay` by the specified offsets.
-
-        Parameters
-        ----------
-        replay: :class:`~.Replay`
-            The replay to shift
-        dx: float
-            The offset for the x coordinate.
-        dy: float
-            The offset for the y coordinate.
-        dt: int
-            The number of ticks the timestamps should be shifted.
-            
-        Returns
-        -------
-        :class:`~.Replay`
-            The shifted replay.
-
-        Notes
-        -----
-        This method is in-place.
-        """
-
-        replay.t += dt
-        replay.xy += [dx, dy]
-
-        return replay
-
-    @staticmethod
-    def filter(replay):
+    def filter(t, xy, k):
         """
         Filters all timestamps with invalid coordinates.
 
         Parameters
         ----------
-        replay: :class:`~.Replay`
-            The replay to filter.
+        t: ndarray[int]
+            The timestamps
+        xy: ndarray[[float]]
+            The coordinates to filter
+        k: ndarray[int]
+            The keypress data
 
         Returns
         -------
-        :class:`~.Replay`
-            The replay with the invalid coordinates removed.
+        ndarray[int], ndarray[[float]], ndarray[int]
+            The data with the invalid coordinates removed.
 
         Notes
         -----
         Coordinates are invalid if they are not in the range (0, 512) for the x
         coordinate and (0, 384) for the y coordinate.
-        This method is in-place.
         """
-        valid = np.all(([0, 0] <= replay.xy) & (replay.xy <= [512, 384]), axis=1)
+        valid = np.all(([0, 0] <= xy) & (xy <= [512, 384]), axis=1)
 
-        replay.t = replay.t[valid]
-        replay.xy = replay.xy[valid]
-        replay.k = replay.k[valid]
-
-        return replay
+        return t[valid], xy[valid], k[valid]
 
     @staticmethod
     def align_clocks(clocks):
@@ -395,13 +338,13 @@ class Comparer:
 
         Parameters
         ----------
-        clocks: list(list(int))
-            The list of lists of timestamps the interpolation timestamps
+        clocks: list(ndarray[int])
+            The list of arrays of timestamps the interpolation timestamps
             should be selected from.
 
         Returns
         -------
-        list(int)
+        ndarray[int]
             The timestamps maximizing frequency and satisfying constraints.
         """
         n = len(clocks)
@@ -434,34 +377,31 @@ class Comparer:
             output += [last]
 
     @staticmethod
-    def align_coordinates(replays):
+    def align_coordinates(xys):
         """
-        Shifts the :class:`~.Replay`s in replays so that their
-        mean coordinates over time coincide.
+        Shifts the coordinates so that their
+        means over time coincide.
 
         Parameters
         ----------
-        replays: list()
-            The replays to align.
+        xys: ndarray[[float]]
+            The coordinatess to align.
 
         Returns
         -------
-        list(:class:`~.Replay`)
-            The shifted replays.
+        ndarray[[float]]
+            The shifted coordinatess.
 
         Notes
         -----
-        The first replay in this set is left in place, and all other replays
+        The first coordinates in this set is left in place, and all other coordinatess
         are shifted toward its mean.
-        This method is in-place.
         """
-        m = replays[0].xy.mean(axis=0)
+        m = xys[0].mean(axis=0)
 
-        replays = replays[:1] +\
-                   [Comparer.shift(replay, m[0] - replay.xy.mean(axis=0)[0], m[1] - replay.xy.mean(axis=0)[1], 0)
-                   for replay in replays[1:]]
+        xys = xys[:1] + [xy + (m - xy.mean(axis=0)) for xy in xys[1:]]
 
-        return replays
+        return xys
 
     @staticmethod
     def clean_set(replays, mode):
@@ -481,22 +421,26 @@ class Comparer:
             The cleaned :class:`~.Replay`s
         """
 
-        replays = [copy.deepcopy(r) for r in replays]
+        data = [[r.t, r.xy, r.k] for r in replays]
 
         if CleanMode.VALIDATE in mode:
-            replays = [Comparer.filter(replay) for replay in replays]
+            for d in data:
+                d[:] = Comparer.filter(*d)
 
         if CleanMode.SYNCHRONIZE in mode:
-            timestamps = [replay.t for replay in replays]
+            t = Comparer.align_clocks([d[0] for d in data])
 
-            timestamps = Comparer.align_clocks(timestamps)
-
-            replays = [Comparer.interpolate_to(replay, timestamps) for replay in replays]
+            for d in data:
+                d[:] = t, *Comparer.interpolate_to(*d, t)
 
         if CleanMode.ALIGN in mode:
-            replays = Comparer.align_coordinates(replays)
+            for i, xy in enumerate(Comparer.align_coordinates([d[1] for d in data])):
+                data[i][1] = xy
 
-        return replays
+        for r, d in zip(replays, data):
+            r.t = d[0]
+            r.xy = d[1]
+            r.k = d[2]
 
     def __repr__(self):
         return f"Comparer(threshold={self.detect.steal_thresh},replays1={self.replays1},replays2={self.replays2})"

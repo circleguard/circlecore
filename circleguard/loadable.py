@@ -4,7 +4,7 @@ import logging
 import circleparse
 import numpy as np
 
-from circleguard.enums import RatelimitWeight, ModCombination, CleanMode
+from circleguard.enums import RatelimitWeight, ModCombination
 from circleguard.utils import TRACE, span_to_list
 
 
@@ -529,7 +529,12 @@ class Replay(Loadable):
         self.weight = weight
         self.loaded = True
 
-        self.t, self.xy, self.k = self.as_arrays()
+        block = list(zip(*[(e.time_since_previous_action, e.x, e.y, e.keys_pressed) for e in self.replay_data]))
+
+        t = np.array(block[0], dtype=int)
+        self.t = t.cumsum()
+        self.xy = np.array([block[1], block[2]], dtype=float).T
+        self.k = np.array(block[3], dtype=int)
 
     def num_replays(self):
         return 1
@@ -543,47 +548,6 @@ class Replay(Loadable):
 
     def __str__(self):
         return f"Replay by {self.username} on {self.map_id}"
-
-    def as_arrays(self):
-        """
-        Gets this replay's play data as arrays of absolute time, x and y, and pressed keys.
-
-        Returns
-        -------
-        ndarray[int], ndarray[[float]], ndarray[int]
-            The arrays of time, x and y, and pressed keys.
-        """
-        block = list(zip(*[(e.time_since_previous_action, e.x, e.y, e.keys_pressed) for e in self.replay_data]))
-
-        t = np.array(block[0], dtype=int)
-        t = t.cumsum()
-        xy = np.array([block[1], block[2]], dtype=float).T
-        k = np.array(block[3], dtype=int)
-
-        return t, xy, k
-
-    def as_list_with_timestamps(self):
-        """
-        Gets this replay's play data as a list of tuples of absolute time,
-        x, y, and pressed keys for each event in the data.
-
-        Returns
-        -------
-        list[tuple(int, float, float, something)]
-            A list of tuples of (t, x, y, keys) for each event
-            in the replay data.
-        """
-        # get all offsets sum all offsets before it to get all absolute times
-        timestamps = np.array([e.time_since_previous_action for e in self.replay_data])
-        timestamps = timestamps.cumsum()
-
-        # zip timestamps back to data and convert t, x, y, keys to tuples
-        txyk = [[z[0], z[1].x, z[1].y, z[1].keys_pressed] for z in zip(timestamps, self.replay_data)]
-        # sort to ensure time goes forward as you move through the data
-        # in case someone decides to make time go backwards anyway
-        txyk.sort(key=lambda p: p[0])
-        return txyk
-
 
 class ReplayMap(Replay):
     """
