@@ -3,7 +3,7 @@ from unittest import TestCase, skip, TestSuite, TextTestRunner
 from pathlib import Path
 import warnings
 from circleguard import (Circleguard, Check, ReplayMap, ReplayPath, RelaxDetect, StealDetect, MacroDetect,
-                         RatelimitWeight, set_options, Map, User, MapUser, Mod)
+                         RatelimitWeight, set_options, Map, User, MapUser, Mod, Loader, InvalidKeyException)
 
 KEY = os.environ.get('OSU_API_KEY')
 if not KEY:
@@ -17,6 +17,7 @@ set_options(loglevel=20)
 # We may want to split tests into "heavy" and "light" where light loads <10 heavy calls and heavy loads as many as we need.
 # light can run locally, heavy can run on prs.
 HEAVY_CALL_COUNT = 9
+
 
 class CGTestCase(TestCase):
     @classmethod
@@ -33,6 +34,7 @@ class CGTestCase(TestCase):
         warnings.filterwarnings(action="ignore",
                 message="unclosed",
                 category=ResourceWarning)
+
 
 
 class TestDetection(CGTestCase):
@@ -120,12 +122,21 @@ class TestDetection(CGTestCase):
         self.assertFalse(r.ischeat, "Legitimate replay was detected as cheated for RelaxDetect")
 
     def test_relax_legit2(self):
-        replays = [ReplayPath(RES / "d.osr")]
+        replays = [ReplayPath(RES / "legit_replay3.osr")]
         c = Check(replays, detect=RelaxDetect())
         r = list(self.cg.run(c))
         self.assertEqual(len(r), 1, f"{len(r)} results returned instead of 1")
         r = r[0]
         self.assertAlmostEqual(r.ur, 64.51, delta=0.01, msg="UR is not correct")
+        self.assertFalse(r.ischeat, "Legitimate replay was detected as cheated for RelaxDetect")
+
+    def test_relax_legit3(self):
+        replays = [ReplayPath(RES / "legit_replay4.osr")]
+        c = Check(replays, detect=RelaxDetect())
+        r = list(self.cg.run(c))
+        self.assertEqual(len(r), 1, f"{len(r)} results returned instead of 1")
+        r = r[0]
+        self.assertAlmostEqual(r.ur, 147.58, delta=0.01, msg="UR is not correct")
         self.assertFalse(r.ischeat, "Legitimate replay was detected as cheated for RelaxDetect")
 
 
@@ -219,6 +230,7 @@ class TestUser(CGTestCase):
         # 1st and 3rd (FDFD and Remote Control)
         self.assertListEqual([r.map_id for r in self.user[0:3:2]], [129891, 774965])
 
+
 class TestMapUser(CGTestCase):
     @classmethod
     def setUpClass(cls):
@@ -251,7 +263,42 @@ class TestMapUser(CGTestCase):
         self.assertListEqual([r.map_id for r in self.mu[0:2]], [795627, 795627])
 
 
-# if __name__ == '__main__':
-#     suite = TestSuite()
+class TestLoader(CGTestCase):
+    @classmethod
+    def setUpClass(cls):
+        cls.loader = Loader(KEY)
 
-#     TextTestRunner().run(suite)
+    def test_loading_map_id(self):
+        result = self.loader.map_id("E")
+        self.assertEqual(result, 0)
+
+        result = self.loader.map_id("9d0a8fec2fe3f778334df6bdc60b113c")
+        self.assertEqual(result, 221777)
+
+    def test_loading_user_id(self):
+        result = self.loader.user_id("E")
+        self.assertEqual(result, 0)
+
+        result = self.loader.user_id("] [")
+        self.assertEqual(result, 13506780)
+
+        result = self.loader.user_id("727")
+        self.assertEqual(result, 10750899)
+
+    def test_loading_username(self):
+        result = self.loader.username(0)
+        self.assertEqual(result, "")
+
+        result = self.loader.username(13506780)
+        self.assertEqual(result, "] [")
+
+    def test_incorrect_key(self):
+        loader = Loader("incorrect key")
+        self.assertRaises(InvalidKeyException, loader.username, 13506780)
+        self.assertRaises(InvalidKeyException, loader.user_id, "] [")
+        self.assertRaises(InvalidKeyException, loader.map_id, "9d0a8fec2fe3f778334df6bdc60b113c")
+
+
+if __name__ == '__main__':
+    suite = TestSuite()
+    suite.addTest(TestMap("test_map_with_replays"))
