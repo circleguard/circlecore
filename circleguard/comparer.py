@@ -371,7 +371,7 @@ class Comparer:
 
             for i in range(n):
                 if move_to(i, last):
-                    return output
+                    return np.array(output)
 
             output += [last]
 
@@ -430,7 +430,7 @@ class Comparer:
             t = Comparer.align_clocks([d[0] for d in data])
 
             for d in data:
-                d[:] = t, *Comparer.interpolate_to(*d, t)
+                d[:] = Comparer.interpolate_to(*d, t)
 
         if CleanMode.ALIGN in mode:
             for i, xy in enumerate(Comparer.align_coordinates([d[1] for d in data])):
