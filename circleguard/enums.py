@@ -401,8 +401,8 @@ class CleanMode():
     SYNCHRONIZE = 1 << 1
     # shift all replays so that their average coincides, minimizing the MSE
     ALIGN       = 1 << 2
-    # use a local search over time to minimize the MSE. Effectively uses
-    # VALIDATE and ALIGN.
+    # use a local search over time (hill climbing) to minimize the MSE.
+    # Effectively uses VALIDATE and ALIGN.
     SEARCH      = 1 << 3
 
     # the fast preset which is effective in most cases, notably not time shifts
