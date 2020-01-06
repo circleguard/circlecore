@@ -5,7 +5,6 @@ import math
 import copy
 
 import numpy as np
-import itertools as itr
 
 from circleguard.loadable import Replay
 from circleguard.enums import Mod, CleanMode
