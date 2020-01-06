@@ -58,7 +58,7 @@ class ComparisonResult(Result):
         self.replay1 = replay1
         self.replay2 = replay2
 
-class ReplayStealingResult(ComparisonResult):
+class StealResult(ComparisonResult):
     """
     The result of a test for replay stealing between two replays.
 
@@ -93,6 +93,10 @@ class ReplayStealingResult(ComparisonResult):
             self.earlier_replay: Replay = self.replay2
             self.later_replay: Replay = self.replay1
 
+# TODO remove in 4.x
+# @deprecated
+ReplayStealingResult = StealResult
+
 class RelaxResult(InvestigationResult):
     """
     The result of a test for relax cheats.
@@ -119,7 +123,7 @@ class CorrectionResult(InvestigationResult):
     ----------
     replay: :class:`~circleguard.loadable.Replay`
         The replay investigated.
-    snaps: list[:class:`.~Snap`]
+    snaps: list[:class:`~circleguard.investigator.Snap`]
         A list of suspicious hits in the replay.
     ischeat: bool
         Whether the replay is cheated or not.

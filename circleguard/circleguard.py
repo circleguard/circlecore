@@ -29,13 +29,13 @@ class Circleguard:
         given path does not exist, a fresh database will be created there.
         If `None`, no replays will be cached or loaded from cache.
     slider_dir: str or :class:`os.PathLike`
-        The path to the directory used by :mod:`slider` to store beatmaps.
-        If `None`, a temporary directory will be created for :mod:`slider`,
-        and subdsequently destroyed when this :class:`~.circleguard`
-        object is garbage collected.
-    loader: :class:`~.Loader`
-        A :class:`~.Loader` class or subclass, which will be used in place of
-        instantiating a new :class:`~.Loader` if passed. This must be the
+        The path to the directory used by :class:`slider.library.Library` to
+        store beatmaps. If `None`, a temporary directory will be created for
+        :class:`slider.library.Library` and subsequently destroyed when this
+        :class:`~Circleguard` object is garbage collected.
+    loader: :class:`~circleguard.loader.Loader`
+        A loader class or subclass, which will be used in place of
+        instantiating a new loader if passed. This must be the
         class itself, *not* an instantiation of it. It will be instantiated
         upon circleguard instantiation, with two args - a key and a cacher.
     """
@@ -127,7 +127,7 @@ class Circleguard:
 
         Parameters
         ----------
-        loadable: :class:`~.replay.Loadable`
+        loadable: :class:`~circleguard.loadable.Loadable`
             The loadable to load.
 
         Notes
@@ -142,7 +142,7 @@ class Circleguard:
 
         Parameters
         ----------
-        loadable: :class:`~.replay.InfoLoadable`
+        loadable: :class:`~circleguard.loadable.InfoLoadable`
             The info loadable to load.
 
         Notes

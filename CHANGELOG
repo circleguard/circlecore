@@ -1,4 +1,0 @@
-* Fix `MapUser` inheritence (now properly inherits from `ReplayContainer`)
-* Fix incorrect `__add__` method for `Check`
-* Rename `Keys` to `Key` (`Keys` left available as deprecated)
-* Don't double load `ReplayInfo` when using `Map`
