@@ -213,9 +213,8 @@ class Comparer:
             xy1 = np.array([xy1x, xy1y]).T
             xy2 = replay2.xy
 
-        # remove time and keys from each tuple
-
-        if (Mod.HR in replay1.mods) ^ (Mod.HR in replay2.mods): # xor, if one has hr but not the other
+        # flip if one but not both has HR
+        if (Mod.HR in replay1.mods) ^ (Mod.HR in replay2.mods):
             for d in xy1:
                 d[1] = 384 - d[1]
 
