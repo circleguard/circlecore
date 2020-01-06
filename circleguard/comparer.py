@@ -393,8 +393,8 @@ class Comparer:
 
         Notes
         -----
-        The first coordinates in this set is left in place, and all other coordinatess
-        are shifted toward its mean.
+        The first coordinates in this set is left in place, and all other
+        coordinates are shifted toward its mean.
         """
         m = xys[0].mean(axis=0)
 
