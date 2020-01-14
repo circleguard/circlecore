@@ -1,4 +1,4 @@
-* rename `ReplayStealingResult` to `StealResult` (for consistency with `Result` names matching their respective `Detect` names)
+* rename `ReplayStealingResult` to `StealResult` (for consistency with `Result` names matching their respective `Detect` names). `ReplayStealingResult` left available as deprecated.
 
 # v3.1.0
 
