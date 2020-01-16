@@ -146,7 +146,7 @@ class Comparer:
 
         t1, xy1, k1 = replay1.t, replay1.xy, replay1.k
         t2, xy2, k2 = replay2.t, replay2.xy, replay2.k
-        prev_value = 100  # whatever high value
+        prev_value = math.inf # arbitrarily high value
 
         clean_mode = CleanMode.FAST
 
