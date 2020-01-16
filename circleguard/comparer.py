@@ -135,7 +135,7 @@ class Comparer:
             The first replay to compare.
         replay2: :class:`~.replay.Replay`
             The second replay to compare.
-        search_mode: :class:`~.enums.CleanMode`
+        search_mode: :class:`~.enums.CleanOption`
             The time interval to search on and the maximal number of steps
 
         Returns
@@ -148,7 +148,7 @@ class Comparer:
         t2, xy2, k2 = replay2.t, replay2.xy, replay2.k
         prev_value = 100  # whatever high value
 
-        clean_mode = CleanMode(CleanMode.ALIGN + CleanMode.VALIDATE)
+        clean_mode = CleanMode.FAST
 
         dt = search_mode.search_step
 
@@ -410,7 +410,7 @@ class Comparer:
         ----------
         replays: list(:class:`~.Replay`)
             The replays to clean.
-        mode: :class:`~.CleanMode`
+        mode: :class:`~.CleanOption`
             The mode specifying the used methods.
 
         Returns

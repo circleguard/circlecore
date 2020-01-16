@@ -323,14 +323,14 @@ class StealDetect(Detect):
     steal_thresh: float
         If the average distance in pixels of two replays is smaller than
         this value, they are labeled cheated (stolen replays). Default 18.
-    clean_mode: :class:`~.CleanMode`
+    clean_mode: :class:`~.CleanOption`
         The options used to clean the replays before comparing them.
     """
     def __init__(self, steal_thresh=18, clean_mode=None):
         super().__init__(Detect.STEAL)
 
         self.steal_thresh = steal_thresh
-        self.clean_mode = clean_mode if clean_mode else CleanMode(CleanMode.ALIGN + CleanMode.VALIDATE + CleanMode.SYNCHRONIZE)
+        self.clean_mode = clean_mode if clean_mode else CleanMode.FAST
 
 class RelaxDetect(Detect):
     """
@@ -375,7 +375,8 @@ class CorrectionDetect(Detect):
         self.max_angle = max_angle
         self.min_distance = min_distance
 
-class CleanMode():
+
+class CleanOption():
     """
     The specification of the options used to clean replays for comparison.
 
@@ -390,39 +391,21 @@ class CleanMode():
     step_limit: int
         The maximal amount of steps performed when searching.
     """
-
-    # remove frames with an x or y coordinate out of the play area
-    # (512 by 384 px)
-    VALIDATE    = 1 << 0
-    # find suitable nearly shared common timestamps for interpolation,
-    # not recommended due to instability on time shifts.
-    # Also remove breaks in one or both datasets, eg when one or both players
-    # skip the intro of a song
-    SYNCHRONIZE = 1 << 1
-    # shift all replays so that their average coincides, minimizing the MSE
-    ALIGN       = 1 << 2
-    # use a local search over time (hill climbing) to minimize the MSE.
-    # Effectively uses VALIDATE and ALIGN.
-    SEARCH      = 1 << 3
-
-    # the fast preset which is effective in most cases, notably not time shifts
-    FAST        = VALIDATE + ALIGN
-    # the slow preset which is effective in almost all cases, including time
-    # shifts
-    SLOW        = SEARCH
-
-
     def __init__(self, value, search_step=16, step_limit=10):
         self.value = value
         self.search_step = search_step
         self.step_limit = step_limit
 
+    def set_search_options(self, search_step, step_limit):
+        self.search_step = search_step
+        self.step_limit = step_limit
+
     def __contains__(self, other):
-        return bool(self.value & other)
+        return not bool(~self.value & other.value)
 
     def __add__(self, other):
         flags = self.value | other.value
-        ret = CleanMode(flags)
+        ret = CleanOption(flags)
 
         c = self if CleanMode.SEARCH in self else other if CleanMode.SEARCH in other else None
 
@@ -431,6 +414,37 @@ class CleanMode():
             ret.step_limit = c.step_limit
 
         return ret
+
+
+class CleanMode():
+    # no-op
+    NONE            = CleanOption(0)
+
+    # remove frames with an x or y coordinate out of the play area
+    # (512 by 384 px)
+    VALIDATE        = CleanOption(1 << 0)
+
+    # find suitable nearly shared common timestamps for interpolation,
+    # not recommended due to instability on time shifts.
+    # Also remove breaks in one or both datasets, eg when one or both players
+    # skip the intro of a song
+    SYNCHRONIZE     = CleanOption(1 << 1)
+
+    # shift all replays so that their average coincides, minimizing the MSE
+    ALIGN           = CleanOption(1 << 2)
+
+    # use a local search over time to minimize the MSE, uses VALIDATE and ALIGN
+    # the slow preset which is effective in almost all cases, including time
+    # shifts
+    SEARCH = SLOW   = CleanOption(1 << 3)
+
+    # the combination of all options, not actually useful because SEARCH
+    # uses VALIDATE and ALIGN
+    ALL             = CleanOption(1 << 0 + 1 << 1 + 1 << 2 + 1 << 3)
+
+    # the fast preset which is effective in most cases, notably not time shifts
+    # FAST = VALIDATE + ALIGN
+    FAST            = CleanOption(1 << 0 + 1 << 2)
 
 class RatelimitWeight(Enum):
     """
