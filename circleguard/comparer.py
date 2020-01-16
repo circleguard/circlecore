@@ -126,8 +126,8 @@ class Comparer:
     @staticmethod
     def _compare_hill_climb(replay1, replay2, search_mode):
         """
-        Shifts two :class:`~.replay.Replay` s through time greedily to
-        find a local minimum for similarity values.
+        Shifts two :class:`~.replay.Replay`\s through time to find a local
+        minimum for similarity values.
 
         Parameters
         ----------
@@ -141,7 +141,25 @@ class Comparer:
         Returns
         -------
         float
-            The similarity value in a local minimum.
+            The similarity value after having shifted the replays through time
+            to a local similarity minimum.
+
+        Notes
+        -----
+        Specifically, this method uses hill climbing with a step size of
+        ``search_mode.search_step`` and a step # limit of
+        ``search_mode.step_limit``. An overview follows:
+        * shift the time values of the first replay ``search_step``
+          milliseconds to the left and the right.
+        * Clean the two replays with  ``CleanMode.FAST`` and calculate the
+          similarity value of the two replays for both the left and right time
+          shift.
+        * Take the shift (and time values) which minimized the similarity.
+          Repeat the process, taking those new time values as the starting
+          point.
+        * If neither the shift to the left nor right produces a lower similarity
+          than the previous time values, we are at a local minimum. Return the
+          current similarity.
         """
 
         t1, xy1, k1 = replay1.t, replay1.xy, replay1.k
@@ -155,6 +173,7 @@ class Comparer:
         for _ in range(search_mode.step_limit):
             values = {}
 
+            # try shifting both backwards and forwards in time
             for sgn in [-1, 1]:
                 replay1.t = t1 + sgn * dt
                 v = replay1.t
@@ -167,11 +186,14 @@ class Comparer:
                 replay1.t, replay1.xy, replay1.k = t1, xy1, k1
                 replay2.t, replay2.xy, replay2.k = t2, xy2, k2
 
+            # take the times with the lowest similarity
             min_value = min(values)
 
             if min_value < prev_value:
                 prev_value = min_value
                 t1 = values[min_value]
+            # if the lowest value isn't better than our current, we're at
+            # a local min. Break and return our current similarity value.
             else:
                 break
 
