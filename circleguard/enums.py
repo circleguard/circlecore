@@ -267,6 +267,77 @@ class Mod():
              V2, TD, # we stop caring about order after this point
              FI, RD, CN ,TP, K1, K2, K3, K4, K5, K6, K7, K8, K9, CO, MR]
 
+class CleanOption():
+    """
+    A combination of the options used to clean replays before comparison.
+
+    Parameters
+    ----------
+    value: int
+        The clean mode(s) to use. One (or a bitwise combination) of
+        :data:`~.CleanMode.VALIDATE`, :data:`~.CleanMode.SYNCHRONIZE`,
+        :data:`~.CleanMode.ALIGN`, or :data:`~.CleanMode.SEARCH`.
+    search_step: int
+        The time interval used when searching. Only used with
+        :data:`~.CleanMode.SEARCH`.
+    step_limit: int
+        The maximal amount of steps performed when searching. Only used with
+        :data:`~.CleanMode.SEARCH`.
+
+    Notes
+    -----
+    This class is not meant to be instantiated. Use :class:`~.CleanMode` and
+    combine them as necessary instead.
+    """
+    def __init__(self, value, search_step=16, step_limit=10):
+        self.value = value
+        self.search_step = search_step
+        self.step_limit = step_limit
+
+    def __contains__(self, other):
+        return not bool(~self.value & other.value)
+
+    def __add__(self, other):
+        flags = self.value | other.value
+        ret = CleanOption(flags)
+
+        c = self if CleanMode.SEARCH in self else other if CleanMode.SEARCH in other else None
+        if c:
+            ret.search_step = c.search_step
+            ret.step_limit = c.step_limit
+        return ret
+
+
+class CleanMode():
+    # no-op
+    NONE         = CleanOption(0)
+    # remove frames with an x or y coordinate out of the play area
+    # (512 by 384 px)
+    VALIDATE     = CleanOption(1 << 0)
+    # find suitable nearly shared common timestamps for interpolation,
+    # not recommended due to instability on time shifts.
+    # Also remove breaks in one or both datasets, eg when one or both players
+    # skip the intro of a song
+    SYNCHRONIZE  = CleanOption(1 << 1)
+    # shift all replays so that their average coincides, minimizing the MSE
+    ALIGN        = CleanOption(1 << 2)
+    # use a local search over time to minimize the MSE, uses VALIDATE and ALIGN
+    SEARCH       = CleanOption(1 << 3)
+
+    # XXX below is a hack by instantiating a new object with the bitwise or of
+    # the values to avoid using CleanOption#__add__, which would reference
+    # CleanMode by necessity of checking for CleanMode.SEARCH to set search_step
+    # and set_limit attributes. Not pretty, but better than alternatives.
+
+    # the fast preset which is effective in most cases, notably not time shifts
+    FAST         = CleanOption(VALIDATE.value | ALIGN.value)
+    # slower than CleanMode.FAST but effective in almost all cases, including
+    # time shifts
+    SLOW         = SEARCH
+    # the combination of all modes. Not actually useful because SEARCH
+    # uses VALIDATE and ALIGN
+    ALL          = CleanOption(VALIDATE.value | SYNCHRONIZE.value | ALIGN.value | SEARCH.value)
+
 
 class Detect():
     """
@@ -275,9 +346,9 @@ class Detect():
     Parameters
     ----------
     value: int
-        One (or a bitwise combination) of :data:`~.Detect.STEAL`,
-        :data:`~.Detect.RELAX`, :data:`~.Detect.CORRECTION`,
-        :data:`~.Detect.ALL`. What cheats to detect.
+        What cheats to detect. One (or a bitwise combination) of
+        :data:`~.Detect.STEAL`, :data:`~.Detect.RELAX`,
+        :data:`~.Detect.CORRECTION`, or :data:`~.Detect.ALL`.
     """
     STEAL = 1 << 0
     RELAX = 1 << 1
@@ -323,14 +394,14 @@ class StealDetect(Detect):
     steal_thresh: float
         If the average distance in pixels of two replays is smaller than
         this value, they are labeled cheated (stolen replays). Default 18.
-    clean_mode: :class:`~.CleanOption`
-        The options used to clean the replays before comparing them.
+    clean_mode: :class:`~.CleanO`
+        The  used to clean the replays before comparing them.
     """
-    def __init__(self, steal_thresh=18, clean_mode=None):
+    def __init__(self, steal_thresh=18, clean_mode=CleanMode.FAST):
         super().__init__(Detect.STEAL)
 
         self.steal_thresh = steal_thresh
-        self.clean_mode = clean_mode if clean_mode else CleanMode.FAST
+        self.clean_mode = clean_mode
 
 class RelaxDetect(Detect):
     """
@@ -375,76 +446,6 @@ class CorrectionDetect(Detect):
         self.max_angle = max_angle
         self.min_distance = min_distance
 
-
-class CleanOption():
-    """
-    The specification of the options used to clean replays for comparison.
-
-    Parameters
-    ----------
-    value: int
-        One (or a bitwise combination) of :data:`~.CleanMode.VALIDATE`,
-        :data:`~.CleanMode.SYNCHRONIZE`, :data:`~.CleanMode.ALIGN`, :data:`~.CleanMode.SEARCH`.
-        The options used.
-    search_step: int
-        The time interval used when searching.
-    step_limit: int
-        The maximal amount of steps performed when searching.
-    """
-    def __init__(self, value, search_step=16, step_limit=10):
-        self.value = value
-        self.search_step = search_step
-        self.step_limit = step_limit
-
-    def set_search_options(self, search_step, step_limit):
-        self.search_step = search_step
-        self.step_limit = step_limit
-
-    def __contains__(self, other):
-        return not bool(~self.value & other.value)
-
-    def __add__(self, other):
-        flags = self.value | other.value
-        ret = CleanOption(flags)
-
-        c = self if CleanMode.SEARCH in self else other if CleanMode.SEARCH in other else None
-
-        if c:
-            ret.search_step = c.search_step
-            ret.step_limit = c.step_limit
-
-        return ret
-
-
-class CleanMode():
-    # no-op
-    NONE            = CleanOption(0)
-
-    # remove frames with an x or y coordinate out of the play area
-    # (512 by 384 px)
-    VALIDATE        = CleanOption(1 << 0)
-
-    # find suitable nearly shared common timestamps for interpolation,
-    # not recommended due to instability on time shifts.
-    # Also remove breaks in one or both datasets, eg when one or both players
-    # skip the intro of a song
-    SYNCHRONIZE     = CleanOption(1 << 1)
-
-    # shift all replays so that their average coincides, minimizing the MSE
-    ALIGN           = CleanOption(1 << 2)
-
-    # use a local search over time to minimize the MSE, uses VALIDATE and ALIGN
-    # the slow preset which is effective in almost all cases, including time
-    # shifts
-    SEARCH = SLOW   = CleanOption(1 << 3)
-
-    # the combination of all options, not actually useful because SEARCH
-    # uses VALIDATE and ALIGN
-    ALL             = CleanOption(1 << 0 + 1 << 1 + 1 << 2 + 1 << 3)
-
-    # the fast preset which is effective in most cases, notably not time shifts
-    # FAST = VALIDATE + ALIGN
-    FAST            = CleanOption(1 << 0 + 1 << 2)
 
 class RatelimitWeight(Enum):
     """
