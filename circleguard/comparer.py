@@ -218,11 +218,6 @@ class Comparer:
             (average distance, stddev) of the cursors of the two replays.
         """
 
-        # get all coordinates in numpy arrays so that they're arranged like:
-        # [ x_1 x_2 ... x_n
-        #   y_1 y_2 ... y_n ]
-        # indexed by columns first.
-
         # interpolate
         if len(replay1.t) > len(replay2.t):
             xy1 = replay1.xy
