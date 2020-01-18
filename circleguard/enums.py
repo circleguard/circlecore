@@ -451,10 +451,10 @@ class StealDetect(Detect):
     steal_thresh: float
         If the average distance in pixels of two replays is smaller than
         this value, they are labeled cheated (stolen replays). Default 18.
-    clean_mode: :class:`~.CleanO`
-        The  used to clean the replays before comparing them.
+    clean_mode: :class:`~.CleanMode`
+        The clean mode used to clean the replays before comparing them.
     """
-    def __init__(self, steal_thresh=18, clean_mode=CleanMode.FAST):
+    def __init__(self, steal_thresh=18, clean_mode=FastCMode()):
         super().__init__(Detect.STEAL)
 
         self.steal_thresh = steal_thresh
