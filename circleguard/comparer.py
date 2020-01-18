@@ -18,9 +18,7 @@ class Comparer:
     Parameters
     ----------
     detect: :class:`~.Detect`
-        Information on how to prepare for comparison and the steal threshold.
-        If a comparison scores below this value, one of the
-        :class:`~.replay.Replay` in the comparison is considered cheated.
+        What cheats to investigate the replay for.
     replays1: list[:class:`~circleguard.loadable.Replay`]
         The replays to compare against either ``replays2`` if ``replays`` is
         not ``None``, or against other replays in ``replays1``.
