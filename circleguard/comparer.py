@@ -2,7 +2,6 @@ import itertools
 import sys
 import logging
 import math
-import copy
 
 import numpy as np
 
