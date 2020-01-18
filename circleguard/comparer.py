@@ -6,7 +6,7 @@ import math
 import numpy as np
 
 from circleguard.loadable import Replay
-from circleguard.enums import Mod, CleanMode
+from circleguard.enums import Mod, CleanMode, FastCMode
 from circleguard.exceptions import InvalidArgumentsException, CircleguardException
 import circleguard.utils as utils
 from circleguard.result import ReplayStealingResult
@@ -148,7 +148,7 @@ class Comparer:
         ``search_mode.step_limit``. An overview follows:
         * shift the time values of the first replay ``search_step``
           milliseconds to the left and the right.
-        * Clean the two replays with  ``CleanMode.FAST`` and calculate the
+        * Clean the two replays with  ``FastCMode`` and calculate the
           similarity value of the two replays for both the left and right time
           shift.
         * Take the shift (and time values) which minimized the similarity.
@@ -163,7 +163,7 @@ class Comparer:
         t2, xy2, k2 = replay2.t, replay2.xy, replay2.k
         prev_value = math.inf # arbitrarily high value
 
-        clean_mode = CleanMode.FAST
+        clean_mode = FastCMode()
 
         dt = search_mode.search_step
 
