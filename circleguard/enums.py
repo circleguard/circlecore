@@ -277,17 +277,6 @@ class CleanMode():
         The clean mode(s) to use. One (or a bitwise combination) of
         :data:`~.CleanMode.VALIDATE`, :data:`~.CleanMode.SYNCHRONIZE`,
         :data:`~.CleanMode.ALIGN`, or :data:`~.CleanMode.SEARCH`.
-    search_step: int
-        The time interval used when searching. Only used with
-        :data:`~.CleanMode.SEARCH`.
-    step_limit: int
-        The maximal amount of steps performed when searching. Only used with
-        :data:`~.CleanMode.SEARCH`.
-
-    Notes
-    -----
-    This class is not meant to be instantiated. Use :class:`~.CleanMode` and
-    combine them as necessary instead.
     """
     # no-op
     NONE         = 0
