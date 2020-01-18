@@ -267,7 +267,7 @@ class Mod():
              V2, TD, # we stop caring about order after this point
              FI, RD, CN ,TP, K1, K2, K3, K4, K5, K6, K7, K8, K9, CO, MR]
 
-class CleanOption():
+class CleanMode():
     """
     A combination of the options used to clean replays before comparison.
 
@@ -289,17 +289,26 @@ class CleanOption():
     This class is not meant to be instantiated. Use :class:`~.CleanMode` and
     combine them as necessary instead.
     """
-    def __init__(self, value, search_step=16, step_limit=10):
+    # no-op
+    NONE         = 0
+    VALIDATE     = 1 << 0
+    SYNCHRONIZE  = 1 << 1
+    ALIGN        = 1 << 2
+    SEARCH       = 1 << 3
+    FAST         = VALIDATE | ALIGN
+    SLOW         = SEARCH
+
+    def __init__(self, value):
+        # so we can reference them in :func:`~.__add__`
         self.value = value
-        self.search_step = search_step
-        self.step_limit = step_limit
+        self.search_step = None
+        self.step_limit = None
 
     def __contains__(self, other):
-        return not bool(~self.value & other.value)
+        return not bool(~self.value & other)
 
     def __add__(self, other):
-        flags = self.value | other.value
-        ret = CleanOption(flags)
+        ret = CleanMode(self.value | other.value)
 
         c = self if CleanMode.SEARCH in self else other if CleanMode.SEARCH in other else None
         if c:
@@ -307,36 +316,95 @@ class CleanOption():
             ret.step_limit = c.step_limit
         return ret
 
+class ValidateCMode(CleanMode):
+    """
+    Removes frames with an x or y coordiante outside of the play area
+    (512 by 384).
+    """
+    def __init__(self):
+        super().__init__(CleanMode.VALIDATE)
 
-class CleanMode():
-    # no-op
-    NONE         = CleanOption(0)
-    # remove frames with an x or y coordinate out of the play area
-    # (512 by 384 px)
-    VALIDATE     = CleanOption(1 << 0)
-    # find suitable nearly shared common timestamps for interpolation,
-    # not recommended due to instability on time shifts.
-    # Also remove breaks in one or both datasets, eg when one or both players
-    # skip the intro of a song
-    SYNCHRONIZE  = CleanOption(1 << 1)
-    # shift all replays so that their average coincides, minimizing the MSE
-    ALIGN        = CleanOption(1 << 2)
-    # use a local search over time to minimize the MSE, uses VALIDATE and ALIGN
-    SEARCH       = CleanOption(1 << 3)
+class SynchronizeCMode(CleanMode):
+    """
+    Finds suitable nearly shared common timestamps for interpolation. Also
+    removes breaks in either replay, eg when one or both players
+    skip the intro of a song.
 
-    # XXX below is a hack by instantiating a new object with the bitwise or of
-    # the values to avoid using CleanOption#__add__, which would reference
-    # CleanMode by necessity of checking for CleanMode.SEARCH to set search_step
-    # and set_limit attributes. Not pretty, but better than alternatives.
+    Warnings
+    --------
+    Not recommended due to instability on time shifts.
+    """
+    def __init__(self):
+        super().__init__(CleanMode.SYNCHRONIZE)
 
-    # the fast preset which is effective in most cases, notably not time shifts
-    FAST         = CleanOption(VALIDATE.value | ALIGN.value)
-    # slower than CleanMode.FAST but effective in almost all cases, including
-    # time shifts
-    SLOW         = SEARCH
-    # the combination of all modes. Not actually useful because SEARCH
-    # uses VALIDATE and ALIGN
-    ALL          = CleanOption(VALIDATE.value | SYNCHRONIZE.value | ALIGN.value | SEARCH.value)
+class AlignCMode(CleanMode):
+    """
+    shifts the x and y coordinates of the replays so that their average
+    coincides, minimizing the similarity.
+    """
+    def __init__(self):
+        super().__init__(CleanMode.ALIGN)
+
+class SearchCMode(CleanMode):
+    """
+    Uses a local search (hill climbing) that shifts replays forwards or
+    backwards through time to try and find a local minimum for the similarity.
+
+    Parameters
+    ----------
+    search_step: int
+        How many milliseconds to shift a replay when performing the hill
+        climbing algorithm. 16 milliseconds (1 frame at 60 fps) by default.
+    step_limit: int
+        How many times to shift a replay when performing hill climbing
+        before exiting the search. Note that the search will always exit once
+        it finds a local minimum - this value determines how many iterations we
+        are willing to do to find a local minimum.
+
+    Notes
+    -----
+    Uses :class:`~.ValidateCMode` and :class:`~.AlignCMode` internally.
+    """
+    def __init__(self, search_step=16, step_limit=10):
+        super().__init__(CleanMode.SEARCH)
+        self.search_step = search_step
+        self.step_limit = step_limit
+
+class FastCMode(CleanMode):
+    """
+    The fast clean mode preset. Effective in most situations, but not when
+    one replay has been shifted through time.
+
+    This is usually the economic :class:`~.CleanMode` choice, unless you
+    suspect the replay has been shifted through time, in which case use
+    :class:`~.SlowCMode`.
+
+    Notes
+    -----
+    This class is equivalent to ``ValidateCMode() + AlignCMode()``.
+
+    See Also
+    --------
+    :class:`~.SlowCMode`, for a slower but more effective alternative.
+    """
+    def __init__(self):
+        super().__init__(CleanMode.FAST)
+
+class SlowCMode(CleanMode):
+    """
+    The slow clean mode preset. Effective in almost all situations, including
+    when one replay has been shifted through time.
+
+    Notes
+    -----
+    This class is equivalent to ``SearchCMode()``.
+
+    See Also
+    --------
+    :class:`~.SlowCMode`, for a faster but less effective alternative.
+    """
+    def __init__(self):
+        super().__init__(CleanMode.SLOW)
 
 
 class Detect():
