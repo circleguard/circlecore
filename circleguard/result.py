@@ -58,7 +58,7 @@ class ComparisonResult(Result):
         self.replay1 = replay1
         self.replay2 = replay2
 
-class ReplayStealingResult(ComparisonResult):
+class StealResult(ComparisonResult):
     """
     The result of a test for replay stealing between two replays.
 
@@ -92,6 +92,10 @@ class ReplayStealingResult(ComparisonResult):
         else:
             self.earlier_replay: Replay = self.replay2
             self.later_replay: Replay = self.replay1
+
+# TODO remove in 4.x
+# @deprecated
+ReplayStealingResult = StealResult
 
 class RelaxResult(InvestigationResult):
     """
