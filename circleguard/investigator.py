@@ -1,9 +1,10 @@
 
 import numpy as np
-from circleguard.enums import Key, Detect
+from circleguard.enums import Key, Detect, Mod
 from circleguard.result import RelaxResult, CorrectionResult, MacroResult
-import circleguard.utils as utils
+from slider.mod import circle_radius, od_to_ms
 import math
+
 
 class Investigator:
     """
@@ -30,10 +31,6 @@ class Investigator:
     def __init__(self, replay, detect, beatmap=None):
 
         self.replay = replay
-        # TODO np.array is called on replay.as_list_with_timestamps with object=dtype,
-        # and we'll probably want a np array for speed in aim_correction as well.
-        # If that object param isn't necessary we can call np.array in init
-        self.replay_data = replay.as_list_with_timestamps()
         self.detect = detect
         self.beatmap = beatmap
         self.detect = detect
@@ -46,34 +43,31 @@ class Investigator:
         # in a single O(n) pass through the replay (or whatever the best case
         # happens to be).
         if Detect.RELAX in d:
-            ur = self.ur(self.replay_data, self.beatmap)
+            ur = self.ur(self.replay, self.beatmap)
             ischeat = ur < d.relax_max_ur
             yield RelaxResult(self.replay, ur, ischeat)
         if Detect.CORRECTION in d:
-            snaps = self.aim_correction(self.replay_data, d.correction_max_angle, d.correction_min_distance)
+            snaps = self.aim_correction(self.replay, d.correction_max_angle, d.correction_min_distance)
             ischeat = len(snaps) > 1
             yield CorrectionResult(self.replay, snaps, ischeat)
         if Detect.MACRO in d:
-            presses = self.macro_detection(self.replay_data, d.macro_max_length)
+            presses = self.macro_detection(self.replay, d.macro_max_length)
             ischeat = len(presses) > d.macro_min_count
             yield MacroResult(self.replay, presses, ischeat)
 
     @staticmethod
-    def ur(replay_data, beatmap):
+    def ur(replay, beatmap):
         """
-        Calculates the ur of ``replay_data`` when played against ``beatmap``.
+        Calculates the ur of ``replay`` when played against ``beatmap``.
         """
-        hitobjs = Investigator._parse_beatmap(beatmap)
-        keypresses = Investigator._parse_keys(replay_data)
-        filtered_array = Investigator._filter_hits(hitobjs, keypresses, beatmap.overall_difficulty)
+        hm = Investigator.hit_map(replay, beatmap)
         diff_array = []
-
-        for hit in filtered_array:
-            diff_array.append(hit.hit_error)
+        for h in hm:
+            diff_array.append(h.hit_error)
         return np.std(diff_array) * 10
 
     @staticmethod
-    def aim_correction(replay_data, max_angle, min_distance):
+    def aim_correction(replay, max_angle, min_distance):
         """
         Calculates the angle between each set of three points (a,b,c) and finds
         points where this angle is extremely acute neither ``|ab|`` or
@@ -82,8 +76,8 @@ class Investigator:
 
         Parameters
         ----------
-        replay_data: list[int, float, float, int]
-            A list of replay datapoints; [[time, x, y, keys_pressed], ...].
+        replay: :class:`~.Replay`
+            A Replay object.
         max_angle: float
             Consider only (a,b,c) where ``∠abc < max_angle``
         min_distance: float
@@ -109,7 +103,7 @@ class Investigator:
         :meth:`~.aim_correction_sam` for an alternative, unused approach
         involving velocity and jerk.
         """
-        data = np.array(replay_data).T
+        data = np.array(replay.as_list_with_timestamps()).T
 
         t, xy = data[0][1:-1], data[1:3].T
 
@@ -143,7 +137,7 @@ class Investigator:
         return [Snap(t, b, d) for (t, b, d) in zip(t[mask], beta[mask], min_AB_BC[mask])]
 
     @staticmethod
-    def aim_correction_sam(replay_data, num_jerks, min_jerk):
+    def aim_correction_sam(replay, num_jerks, min_jerk):
         """
         Calculates the jerk at each moment in the Replay, counts the number of times
         it exceeds min_jerk and reports a positive if that number is over num_jerks.
@@ -157,7 +151,7 @@ class Investigator:
         """
 
         # get all replay data as an array of type [(t, x, y, k)]
-        txyk = np.array(replay_data)
+        txyk = np.array(replay.as_list_with_timestamps())
 
         # drop keypresses
         txy = txyk[:, :3]
@@ -194,14 +188,14 @@ class Investigator:
         return [jerks, ischeat]
 
     @staticmethod
-    def macro_detection(replay_data, max_length):
+    def macro_detection(replay, max_length):
         """
         Returns a list of :meth:`~.Press`\s that have a longer ``press_length`` than ``max_length``.
 
         Parameters
         ----------
-        replay_data: list[int, float, float, int]
-            A list of replay datapoints; [[time, x, y, keys_pressed], ...].
+        replay: :class:`~.Replay`
+            A Replay object.
         max_length: int
             Amount of time needed to classify a press as cheated.
 
@@ -210,12 +204,12 @@ class Investigator:
         list[:class:`~.Press`]
             A list of Presses.
         """
-        keypresses = Investigator._parse_keys(replay_data)
+        keypresses = Investigator._parse_keys(replay)
         presses = [p for p in keypresses if p.press_length < max_length]
         return presses
 
     @staticmethod
-    def _parse_beatmap(beatmap):
+    def _parse_beatmap(beatmap, cs):
         """
         Parses the beatmap.
 
@@ -229,29 +223,29 @@ class Investigator:
         list[:class:`~.HitObject`]
             A list of beatmap hitobjects.
         """
+        objects = beatmap.hit_objects_no_spinners
         hitobjs = []
-
         # parse hitobj
-        for hit in beatmap.hit_objects_no_spinners:
+        for hit in objects:
             hitobjs.append(HitObject(hit))
         return hitobjs
 
     @staticmethod
-    def _parse_keys(data):
+    def _parse_keys(replay):
         """
         Parses the raw replay data into :class:`~.Press`\es.
 
         Parameters
         ----------
-        data: list[int, float, float, int]
-            A list of replay datapoints; [[time, x, y, keys_pressed], ...].
+        replay: :class:`~.Replay`
+            A Replay object.
 
         Returns
         -------
         list[:class:`~.Press`]
             A list of Presses.
         """
-        data = np.array(data, dtype=object)
+        data = np.array(replay.as_list_with_timestamps(), dtype=object)
         presses = []
         buffer_k1 = None
         buffer_k2 = None
@@ -261,7 +255,7 @@ class Investigator:
                 d[3] = int(Key(d[3]) & Key.K1 | Key(d[3]) & Key.M1)
                 buffer_k1 = d
             elif Key.M1 not in Key(i[3]) and buffer_k1 is not None:
-                presses.append(Press(buffer_k1, i))
+                presses.append(Press(buffer_k1, i, hr=Mod.HR in replay.mods))
                 buffer_k1 = None
 
             if Key.M2 in Key(i[3]) and buffer_k2 is None:
@@ -269,19 +263,26 @@ class Investigator:
                 d[3] = int(Key(d[3]) & Key.K2 | Key(d[3]) & Key.M2)
                 buffer_k2 = d
             elif Key.M2 not in Key(i[3]) and buffer_k2 is not None:
-                presses.append(Press(buffer_k2, i))
+                presses.append(Press(buffer_k2, i, hr=Mod.HR in replay.mods))
                 buffer_k2 = None
+        # clean up buffers
+        if buffer_k1 is not None:
+            presses.append(Press(buffer_k1, data[-1]))
+        if buffer_k2 is not None:
+            presses.append(Press(buffer_k2, data[-1]))
+        # sort presses to be safe
+        presses.sort(key=lambda x: x.time_press)
         return np.array(presses)
 
     @staticmethod
-    def hit_map(replay_data, beatmap):
+    def hit_map(replay, beatmap):
         """
         Generates a list of :class:`Hit`\s.
 
         Parameters
         ----------
-        replay_data: list[int, float, float, int]
-            A list of replay datapoints; [[time, x, y, keys_pressed], ...].
+        replay: :class:`~.Replay`
+            A Replay object.
         beatmap: :class:`slider.beatmap.Beatmap`
             The beatmap to which the Presses are mapped to.
 
@@ -291,13 +292,26 @@ class Investigator:
             A list of :class:`Hit`\s
 
         """
-        hitobjs = Investigator._parse_beatmap(beatmap)
-        keypresses = Investigator._parse_keys(replay_data)
-        hit_array = Investigator._filter_hits(hitobjs, keypresses, beatmap.overall_difficulty)
+        od = beatmap.od(easy=Mod.EZ in replay.mods,
+                        hard_rock=Mod.HR in replay.mods,
+                        half_time=Mod.HT in replay.mods,
+                        double_time=Mod.DT in replay.mods)
+        cs = beatmap.cs(easy=Mod.EZ in replay.mods,
+                        hard_rock=Mod.HR in replay.mods,)
+        hitwindow = od_to_ms(od).hit_50
+        circle = circle_radius(cs)
+        hitobjs = Investigator._parse_beatmap(beatmap, cs)
+        keypresses = Investigator._parse_keys(replay)
+        hit_array = Investigator._filter_hits(hitobjs, keypresses, hitwindow, circle)
         return hit_array
 
     @staticmethod
-    def _filter_hits(hitobjs, keypresses, OD):
+    def calculate_distance(hitobj, press):
+        dist = math.sqrt((press.x - hitobj.x) ** 2 + (press.y - hitobj.y) ** 2)
+        return dist
+
+    @staticmethod
+    def _filter_hits(hitobjs, keypresses, hitwindow, circle_radius):
         """
         Maps ``hitobjs`` onto ``keypresses``, removing all useless ``keypresses`` in the process.
         This class is expected to be used with the output of :meth:`~._parse_beatmap()` and :meth:`~._parse_keys`
@@ -317,7 +331,6 @@ class Investigator:
             A list of hit events.
         """
         array = []
-        hitwindow = 150 + 50 * (5 - OD) / 5
 
         object_i = 0
         press_i = 0
@@ -326,15 +339,16 @@ class Investigator:
             hitobj = hitobjs[object_i]
             press = keypresses[press_i]
 
-            if press.time_press < hitobj.time - hitwindow / 2:
+            if press.time_press < hitobj.time - hitwindow:
                 press_i += 1
-            elif press.time_press > hitobj.time + hitwindow / 2:
+            elif press.time_press > hitobj.time + hitwindow:
                 object_i += 1
-            else:
+            elif Investigator.calculate_distance(hitobj, press) < circle_radius:
                 array.append(Hit(hitobj, press))
                 press_i += 1
                 object_i += 1
-
+            else:
+                press_i += 1
         return array
 
 
@@ -375,6 +389,8 @@ class Press:
         A replay datapoint; [time, x, y, keys_pressed]. This is the beginning of the Press.
     hit_end: list[int, float, float, int]
         A replay datapoint; [time, x, y, keys_pressed]. This is the end of the Press.
+    hr: bool, optional
+        If the y axis should be flipped.
 
     Attributes
     ----------
@@ -391,13 +407,13 @@ class Press:
     key: :class:`enums.Key`
         The Key which was used to press. Calculated by subtracting hit_end from the hit_begin
     """
-    def __init__(self, hit_begin, hit_end):
+    def __init__(self, hit_begin, hit_end, hr=False):
         self.x = hit_begin[1]
-        self.y = hit_begin[2]
+        self.y = hit_begin[2] if not hr else 384 - hit_begin[2]
         self.time_press = hit_begin[0]
         self.time_release = hit_end[0]
         self.press_length = hit_end[0] - hit_begin[0]
-        self.key = Key(hit_begin[3] - hit_end[3])
+        self.key = Key(hit_begin[3])
 
 
 class HitObject:
