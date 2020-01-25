@@ -96,7 +96,7 @@ class Circleguard:
         if Detect.STEAL in d:
             compare1 = c.all_replays()
             compare2 = c.all_replays2()
-            comparer = Comparer(d.steal_max_sim, compare1, replays2=compare2)
+            comparer = Comparer(d, compare1, replays2=compare2)
             yield from comparer.compare()
 
         if Detect.INVESTIGATION in d:

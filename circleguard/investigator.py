@@ -231,6 +231,67 @@ class Investigator:
         return hitobjs
 
     @staticmethod
+    def _compress(replay, press1, release1, press2, release2):
+        # compress the press and release data into presses
+
+        # return [Press(p, r, replay.data[p]) for (p, r) in zip(press1, release1)]
+        #        + [Press(p, r, replay.data[p]) for (p, r) in zip(press2, release2)]
+
+        # maybe sort
+        ...
+
+    @staticmethod
+    def _parse_keys_np_a(replay):
+        # more readable
+        k = replay.k
+
+        bounded = np.hstack([[0], k, [0]])
+        bounded1 = bounded & Key.M1
+        bounded2 = bounded & Key.M2
+
+        diffs1 = np.diff(bounded1)
+        diffs2 = np.diff(bounded2)
+
+        run_starts_1, = np.where(diffs1 > 0)
+        run_ends_1, = np.where(diffs1 > 0)
+        run_starts_2, = np.where(diffs2 > 0)
+        run_ends_2, = np.where(diffs2 > 0)
+
+        return run_starts_1, run_ends_1, run_starts_2, run_ends_2
+
+    @staticmethod
+    def _parse_keys_np_b(replay):
+        # uses two less &s, and one less diff and where on a large array, but two more array-array indexings
+        k = replay.k
+
+        bounded = np.hstack([[0], k, [0]])
+        diffs = np.diff(bounded)
+        changes, = np.where(diffs != 0)
+
+        before = bounded[changes]
+        after = bounded[changes + 1]
+
+        before_1 = before & Key.M1
+        before_2 = before & Key.M2
+        after_1 = after & Key.M1
+        after_2 = after & Key.M2
+
+        diffs1 = after_1 - before_1
+        diffs2 = after_2 - before_2
+
+        run_starts_1, = np.where(diffs1 > 0)
+        run_ends_1, = np.where(diffs1 < 0)
+        run_starts_2, = np.where(diffs2 > 0)
+        run_ends_2, = np.where(diffs2 < 0)
+
+        run_starts_1 = changes[run_starts_1]
+        run_ends_1 = changes[run_ends_1]
+        run_starts_2 = changes[run_starts_2]
+        run_ends_2 = changes[run_ends_2]
+
+        return run_starts_1, run_ends_1, run_starts_2, run_ends_2
+
+    @staticmethod
     def _parse_keys(replay):
         """
         Parses the raw replay data into :class:`~.Press`\es.
