@@ -635,7 +635,7 @@ class ReplayMap(Replay):
         # only listen to the parent's cache if ours is not set. Lower takes precedence
         cache = cache if self.cache is None else self.cache
         self.log.debug("Loading %r", self)
-        if(self.loaded):
+        if self.loaded:
             self.log.debug("%s already loaded, not loading", self)
             return
         if self.info:
