@@ -1,4 +1,9 @@
+# Unreleased
+
 * rename `ReplayStealingResult` to `StealResult` (for consistency with `Result` names matching their respective `Detect` names). `ReplayStealingResult` left available as deprecated.
+* mods can now be instantiated through `Mod`. Instantiation through `ModCombination` is highly discouraged.
+* mods can now be instantiated with a string, not only an int. The string
+must be a combination, in any order, of the two length strings that represent mods. For instance, `Mod("HDHR")` is valid, and `Mod("HDHR") == Mod.HDHR` is `True`.
 
 # v3.1.0
 
