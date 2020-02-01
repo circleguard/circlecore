@@ -273,9 +273,9 @@ class Mod(ModCombination):
              FI, RD, CN ,TP, K1, K2, K3, K4, K5, K6, K7, K8, K9, CO, MR]
 
     def __init__(self, value):
-        if type(value) is int:
+        if isinstance(value, int):
             super().__init__(value)
-        if type(value) is str:
+        if isinstance(value, str):
             super().__init__(Mod._parse_mod_string(value))
 
     @staticmethod
@@ -309,7 +309,7 @@ class Mod(ModCombination):
             single_mod_string = mod_string[i - 2: i]
             # there better only be one Mod that has an acronym matching ours,
             # but a comp + 0 index works too
-            matching_mods = [mod for mod in Mod.ALL if mod.short_name() == single_mod_string]
+            matching_mods = [mod for mod in Mod.ORDER if mod.short_name() == single_mod_string]
             if not matching_mods:
                 raise ValueError(f"Invalid mod string (no matching mod found for {single_mod_string})")
             mod_value += matching_mods[0].value
