@@ -240,6 +240,32 @@ class TestLoader(CGTestCase):
         self.assertRaises(InvalidKeyException, loader.user_id, "] [")
         self.assertRaises(InvalidKeyException, loader.map_id, "9d0a8fec2fe3f778334df6bdc60b113c")
 
+class TestEquality(CGTestCase):
+    @classmethod
+    def setUpClass(cls):
+        cls.cg = Circleguard(KEY)
+
+        cls.user = User(2757689, num=2) # toy, #1=sidetracked day, #2=View of The River Styx
+        cls.user1 = User(2757689, num=2, cache=False)
+        cls.user2 = User(2757689, num=2, mods=Mod.HT)
+        cls.user3 = User(2757689, num=1)
+
+        cls.map = Map(1754777, num=4) #sidetracked day: umbre, karthy, -duckleader-, toy
+        cls.map1 = Map(1754777, num=4, cache=False)
+        cls.map2 = Map(1754777, num=4, cache=False)
+        cls.map3 = Map(1754777, num=4, cache=False)
+
+        cls.r = ReplayMap(1754777, 2766034) # umbre +HDHR on sidetracked day
+
+        cls.cg.load_info(cls.user)
+        cls.cg.load_info(cls.user1)
+        cls.cg.load_info(cls.user2)
+
+    def test_identical_equality(self):
+        self.assertEqual(self.user, self.user1)
+        self.assertNotEqual(self.user, self.user2)
+        self.assertNotEqual(self.user, self.user3)
+
 
 if __name__ == '__main__':
     suite = TestSuite()
