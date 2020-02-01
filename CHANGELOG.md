@@ -1,3 +1,5 @@
+# Unreleased
+
 * rename `ReplayStealingResult` to `StealResult` (for consistency with `Result` names matching their respective `Detect` names). `ReplayStealingResult` left available as deprecated.
 * mods can now be instantiated through `Mod`. Instantiation through `ModCombination` is highly discouraged.
 * mods can now be instantiated with a string, not only an int. The string
