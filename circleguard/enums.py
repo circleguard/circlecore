@@ -305,8 +305,8 @@ class Mod(ModCombination):
         if len(mod_string) % 2 != 0:
             raise ValueError(f"Invalid mod string {mod_string} (not of even length)")
         mod_value = 0
-        for i in range(2, len(mod_string) + 1, 2):
-            single_mod_string = mod_string[i - 2: i]
+        for i in range(0, len(mod_string) - 1, 2):
+            single_mod_string = mod_string[i: i + 2]
             # there better only be one Mod that has an acronym matching ours,
             # but a comp + 0 index works too
             matching_mods = [mod for mod in Mod.ORDER if mod.short_name() == single_mod_string]
