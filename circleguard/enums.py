@@ -268,13 +268,9 @@ class Mod(ModCombination):
     # our own, more human readable docstrings. #: denotes sphinx docstrings.
     #: [EZ, HD, HT, DT, _NC, HR, FL, NF, SD, _PF, RX, AP, SO, AT, V2, TD,
     #: FI, RD, CN ,TP, K1, K2, K3, K4, K5, K6, K7, K8, K9, CO, MR]
-    ORDER = [EZ, HD, HT, DT, _NC, HR, FL, NF, SD, _PF, RX, AP, SO, AT,
+    ORDER = [NM, EZ, HD, HT, DT, _NC, HR, FL, NF, SD, _PF, RX, AP, SO, AT,
              V2, TD, # we stop caring about order after this point
              FI, RD, CN ,TP, K1, K2, K3, K4, K5, K6, K7, K8, K9, CO, MR]
-
-    # same as ORDER but with NM included
-    ALL = [NM, EZ, HD, HT, DT, _NC, HR, FL, NF, SD, _PF, RX, AP, SO, AT,
-           V2, TD, FI, RD, CN ,TP, K1, K2, K3, K4, K5, K6, K7, K8, K9, CO, MR]
 
     def __init__(self, value):
         if type(value) is int:
