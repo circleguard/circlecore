@@ -92,7 +92,6 @@ class ModCombination():
         DT and NC - being set, short_name removes DT and so returns "NC"
         rather than "DTNC".
         """
-
         if self.value in int_to_mod:
             # avoid infinite recursion with every mod decomposing into itself
             # ad infinitum
@@ -191,7 +190,7 @@ class ModCombination():
             mods.remove(Mod.SD)
         return mods
 
-class Mod():
+class Mod(ModCombination):
     """
     An ingame osu! mod.
 
@@ -212,6 +211,12 @@ class Mod():
     A full list of mods and their specification can be found at
     https://osu.ppy.sh/help/wiki/Game_Modifiers, or a more technical list at
     https://github.com/ppy/osu-api/wiki#mods.
+
+    Warnings
+    --------
+    The fact that this class subclasses ModCombination is slightly misleading.
+    This is only done so that this class can be instantiated directly, backed
+    by an internal ModCombination, instead of exposing ModCombination to users.
     """
 
     NM  = NoMod        = ModCombination(0)
@@ -267,6 +272,52 @@ class Mod():
              V2, TD, # we stop caring about order after this point
              FI, RD, CN ,TP, K1, K2, K3, K4, K5, K6, K7, K8, K9, CO, MR]
 
+    # same as ORDER but with NM included
+    ALL = [NM, EZ, HD, HT, DT, _NC, HR, FL, NF, SD, _PF, RX, AP, SO, AT,
+           V2, TD, FI, RD, CN ,TP, K1, K2, K3, K4, K5, K6, K7, K8, K9, CO, MR]
+
+    def __init__(self, value):
+        if type(value) is int:
+            super().__init__(value)
+        if type(value) is str:
+            super().__init__(Mod._parse_mod_string(value))
+
+    @staticmethod
+    def _parse_mod_string(mod_string):
+        """
+        Creates an integer representation of a mod string made up of two letter
+        mod names ("HDHR", for example).
+
+        Arguments
+        ---------
+        mod_string: str
+            The mod string to represent as an int.
+
+        Returns
+        -------
+        int:
+            The integer representation of the mod string.
+
+        Raises
+        ------
+        ValueError:
+            If mod_string is empty, not of even length, or any of its 2-length
+            substrings do not correspond to a ModCombination in Mod.ALL.
+        """
+        if mod_string == "":
+            raise ValueError("Invalid mod string (cannot be empty)")
+        if len(mod_string) % 2 != 0:
+            raise ValueError(f"Invalid mod string {mod_string} (not of even length)")
+        mod_value = 0
+        for i in range(2, len(mod_string) + 1, 2):
+            single_mod_string = mod_string[i - 2: i]
+            # there better only be one Mod that has an acronym matching ours,
+            # but a comp + 0 index works too
+            matching_mods = [mod for mod in Mod.ALL if mod.short_name() == single_mod_string]
+            if not matching_mods:
+                raise ValueError(f"Invalid mod string (no matching mod found for {single_mod_string})")
+            mod_value += matching_mods[0].value
+        return mod_value
 
 class Detect():
     """
