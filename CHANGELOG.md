@@ -2,6 +2,7 @@
 * mods can now be instantiated through `Mod`. Instantiation through `ModCombination` is highly discouraged.
 * mods can now be instantiated with a string, not only an int. The string
 must be a combination, in any order, of the two length strings that represent mods. For instance, `Mod("HDHR")` is valid, and `Mod("HDHR") == Mod.HDHR` is `True`.
+* add `Mod.ALL` which contains all atomic (single) mods defined by `Mod`. This differs from `Mod.ORDER` in that it includes `Mod.NM`.
 
 # v3.1.0
 
