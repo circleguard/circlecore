@@ -291,12 +291,12 @@ class Mod(ModCombination):
 
         Returns
         -------
-        int:
+        int
             The integer representation of the mod string.
 
         Raises
         ------
-        ValueError:
+        ValueError
             If mod_string is empty, not of even length, or any of its 2-length
             substrings do not correspond to a ModCombination in Mod.ORDER.
         """
