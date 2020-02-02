@@ -298,7 +298,7 @@ class Mod(ModCombination):
         ------
         ValueError:
             If mod_string is empty, not of even length, or any of its 2-length
-            substrings do not correspond to a ModCombination in Mod.ALL.
+            substrings do not correspond to a ModCombination in Mod.ORDER.
         """
         if mod_string == "":
             raise ValueError("Invalid mod string (cannot be empty)")
