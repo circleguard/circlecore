@@ -29,10 +29,10 @@ class ColoredFormatter(Formatter):
         "ERROR"    : 91, # bright red
         "CRITICAL" : 41, # white on red bg
 
-        "NAME"     : 32,  # green
-        "MESSAGE"  : 93,  # bright yellow
-        "FILENAME" : 92,  # bright green
-        "LINENO"   : 91   # bright red
+        "NAME"     : 32, # green
+        "MESSAGE"  : 93, # bright yellow
+        "FILENAME" : 92, # bright green
+        "LINENO"   : 91  # bright red
     }
 
     def __init__(self, patern):

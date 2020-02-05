@@ -224,7 +224,7 @@ class Cacher:
         don't already exist.
         """
         self.log.info("Cache not found at path %s, creating cache", path)
-        if not os.path.exists(os.path.split(path)[0]):  # create dir if nonexistent
+        if not os.path.exists(os.path.split(path)[0]): # create dir if nonexistent
             os.makedirs(os.path.split(path)[0])
         conn = sqlite3.connect(str(path))
         c = conn.cursor()
