@@ -107,6 +107,30 @@ class TestReplays(CGTestCase):
         self.assertEqual(r.username, "Toy", "Username was not correct")
         self.assertTrue(r.loaded, "Loaded status was not correct")
 
+    def test_num_invariance(self):
+        replays = [ReplayPath(RES / "stolen_replay1.osr"), ReplayPath(RES / "stolen_replay2.osr"),
+                   ReplayPath(RES / "legit_replay1.osr"), ReplayPath(RES / "legit_replay2.osr")]
+
+        for num in range(2, 5):
+            c = Check(replays[:num], detect=StealDetect(18))
+            r = list(self.cg.run(c))
+            r = r[0]
+            self.assertTrue(r.ischeat, f"Cheated replays were not detected as cheated at num {num}")
+
+            r1 = r.replay1
+            r2 = r.replay2
+            earlier = r.earlier_replay
+            later = r.later_replay
+
+            self.assertAlmostEqual(r.similarity, 4.2608, delta=0.0001, msg=f"Similarity is not correct at num {num}")
+            self.assertEqual(r1.map_id, r2.map_id, f"Replay map ids did not match at num {num}")
+            self.assertEqual(r1.map_id, 1988753, f"Replay map id was not correct at num {num}")
+            self.assertEqual(earlier.mods, Mod.HD + Mod.HR, f"Earlier replay mods was not correct at num {num}")
+            self.assertEqual(later.mods, Mod.FL + Mod.HD + Mod.HR, f"Later replay mods was not correct at num {num}")
+            self.assertEqual(earlier.replay_id, 2801164636, f"Earlier replay id was not correct at num {num}")
+            self.assertEqual(later.replay_id, 2805164683, f"Later replay id was not  at num {num}")
+            self.assertEqual(r1.username, r2.username, f"Replay usernames did not match at num {num}")
+
 
 class TestMap(CGTestCase):
     @classmethod
