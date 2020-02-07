@@ -132,24 +132,30 @@ class Comparer:
             (average distance, stddev) of the cursors of the two replays.
         """
 
-        # get all coordinates in numpy arrays so that they're arranged like:
-        # [ x_1 x_2 ... x_n
-        #   y_1 y_2 ... y_n ]
-        # indexed by columns first.
-        data1 = replay1.as_list_with_timestamps()
-        data2 = replay2.as_list_with_timestamps()
-
         # interpolate
-        (data1, data2) = utils.interpolate(data1, data2)
+        if len(replay1.t) > len(replay2.t):
+            xy1 = np.array(replay1.xy)  # implicit fast copy to avoid overwriting this array on replay1 when flipping for HR
 
-        # remove time and keys from each tuple
-        data1 = [d[1:3] for d in data1]
-        data2 = [d[1:3] for d in data2]
-        if (Mod.HR in replay1.mods) ^ (Mod.HR in replay2.mods): # xor, if one has hr but not the other
-            for d in data1:
+            xy2x = np.interp(replay1.t, replay2.t, replay2.xy[:, 0])
+            xy2y = np.interp(replay1.t, replay2.t, replay2.xy[:, 1])
+            xy2 = np.array([xy2x, xy2y]).T
+            normal = np.all(np.abs(xy2) < 600, axis=1)
+            xy2 = xy2[normal]
+        else:
+            xy1x = np.interp(replay2.t, replay1.t, replay1.xy[:, 0])
+            xy1y = np.interp(replay2.t, replay1.t, replay1.xy[:, 1])
+            xy1 = np.array([xy1x, xy1y]).T
+            normal = np.all(np.abs(xy1) < 600, axis=1)
+            xy1 = xy1[normal]
+
+            xy2 = np.array(replay2.xy)  # implicit fast copy to avoid overwriting this array on replay2 when flipping for HR
+
+        # flip if one but not both has HR
+        if (Mod.HR in replay1.mods) ^ (Mod.HR in replay2.mods):
+            for d in xy1:
                 d[1] = 384 - d[1]
 
-        (mu, sigma) = Comparer._compute_data_similarity(data1, data2)
+        (mu, sigma) = Comparer._compute_data_similarity(xy1, xy2)
         return (mu, sigma)
 
     @staticmethod
