@@ -152,8 +152,7 @@ class Comparer:
 
         # flip if one but not both has HR
         if (Mod.HR in replay1.mods) ^ (Mod.HR in replay2.mods):
-            for d in xy1:
-                d[1] = 384 - d[1]
+            xy1[:, 1] = 384 - xy1[:, 1]
 
         (mu, sigma) = Comparer._compute_data_similarity(xy1, xy2)
         return (mu, sigma)
