@@ -139,16 +139,16 @@ class Comparer:
             xy2x = np.interp(replay1.t, replay2.t, replay2.xy[:, 0])
             xy2y = np.interp(replay1.t, replay2.t, replay2.xy[:, 1])
             xy2 = np.array([xy2x, xy2y]).T
-            normal = np.all(np.abs(xy2) < 600, axis=1)
-            xy2 = xy2[normal]
         else:
             xy1x = np.interp(replay2.t, replay1.t, replay1.xy[:, 0])
             xy1y = np.interp(replay2.t, replay1.t, replay1.xy[:, 1])
             xy1 = np.array([xy1x, xy1y]).T
-            normal = np.all(np.abs(xy1) < 600, axis=1)
-            xy1 = xy1[normal]
 
             xy2 = np.array(replay2.xy)  # implicit fast copy to avoid overwriting this array on replay2 when flipping for HR
+
+        valid = np.all(([0, 0] <= xy1) & (xy1 <= [512, 384]), axis=1) & np.all(([0, 0] <= xy2) & (xy2 <= [512, 384]), axis=1)
+        xy1 = xy1[valid]
+        xy2 = xy2[valid]
 
         # flip if one but not both has HR
         if (Mod.HR in replay1.mods) ^ (Mod.HR in replay2.mods):
