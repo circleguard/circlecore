@@ -114,7 +114,7 @@ class TestReplays(CGTestCase):
         for num in range(2, 5):
             c = Check(replays[:num], detect=StealDetect(18))
             r = list(self.cg.run(c))
-            results_num = num * (num - 1) / 2
+            results_num = num * (num - 1) / 2 #n choose k formula with k=2
             self.assertEqual(len(r), results_num, f"{len(r)} results returned instead of {results_num}")
             r = r[0]
             self.assertTrue(r.ischeat, f"Cheated replays were not detected as cheated at num {num}")
