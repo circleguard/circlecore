@@ -51,7 +51,7 @@ class TestReplays(CGTestCase):
         earlier = r.earlier_replay
         later = r.later_replay
 
-        self.assertAlmostEqual(r.similarity, 4.2608, delta=0.0001, msg="Similarity is not correct")
+        self.assertAlmostEqual(r.similarity, 2.1911, delta=0.0001, msg="Similarity is not correct")
         self.assertEqual(r1.map_id, r2.map_id, "Replay map ids did not match")
         self.assertEqual(r1.map_id, 1988753, "Replay map id was not correct")
         self.assertEqual(earlier.mods, Mod.HD + Mod.HR, "Earlier replay mods was not correct")
@@ -73,7 +73,7 @@ class TestReplays(CGTestCase):
         earlier = r.earlier_replay
         later = r.later_replay
 
-        self.assertAlmostEqual(r.similarity, 24.2129, delta=0.0001, msg="Similarity is not correct")
+        self.assertAlmostEqual(r.similarity, 23.6604, delta=0.0001, msg="Similarity is not correct")
         self.assertEqual(r1.map_id, r2.map_id, "Replay map ids did not match")
         self.assertEqual(r1.map_id, 722238, "Replay map id was not correct")
         self.assertEqual(earlier.mods, Mod.HD + Mod.NC, "Earlier replay mods was not correct")
@@ -124,7 +124,7 @@ class TestReplays(CGTestCase):
             earlier = r.earlier_replay
             later = r.later_replay
 
-            self.assertAlmostEqual(r.similarity, 2.6211, delta=0.0001, msg=f"Similarity is not correct at num {num}")
+            self.assertAlmostEqual(r.similarity, 2.1911, delta=0.0001, msg=f"Similarity is not correct at num {num}")
             self.assertEqual(r1.map_id, r2.map_id, f"Replay map ids did not match at num {num}")
             self.assertEqual(r1.map_id, 1988753, f"Replay map id was not correct at num {num}")
             self.assertEqual(earlier.mods, Mod.HD + Mod.HR, f"Earlier replay mods was not correct at num {num}")
