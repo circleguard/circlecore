@@ -110,14 +110,3 @@ def span_to_list(span):
         else:
             ret.add(int(s))
     return ret
-
-
-
-# https://github.com/kszlim/osu-replay-parser/blob/master/osrparse/replay.py#L64
-def bits(n):
-    if n == 0:
-        yield 0
-    while n:
-        b = n & (~n+1)
-        yield b
-        n ^= b
