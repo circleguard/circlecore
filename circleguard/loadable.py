@@ -74,8 +74,8 @@ class LoadableContainer(Loadable):
     def __contains__(self, loadable):
         our_replays = self.all_replays()
         if isinstance(loadable, LoadableContainer):
-            # if we contain all the Replays in the info loadable, we contain
-            # the info loadable as well
+            # if we contain all the Replays in the loadable container, we contain
+            # the loadable container as well
             return all([replay in our_replays for replay in loadable.all_replays()])
         return loadable in our_replays
 
