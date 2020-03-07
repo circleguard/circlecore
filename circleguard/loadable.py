@@ -541,8 +541,7 @@ class Replay(Loadable):
         xy = np.array([block[1], block[2]], dtype=float).T
         k = np.array(block[3], dtype=int)
 
-        t_sort = np.argsort(t)
-        t = t[t_sort]
+        t, t_sort = np.unique(t, return_index=True)
         xy = xy[t_sort]
         k = k[t_sort]
 

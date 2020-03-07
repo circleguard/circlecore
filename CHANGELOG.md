@@ -7,6 +7,7 @@
   * changes similarity values slightly, both increasing and decreasing simvals for legit and stolen replays.
   * no measurable impact on the effectiveness of circlecore to detect stolen replays.
   * increases comparison speed.
+* use only unique timestamps when interpolating (also changes similarity values slightly)
 
 # v3.1.0
 
