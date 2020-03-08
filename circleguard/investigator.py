@@ -128,9 +128,9 @@ class Investigator:
         min_AB_BC = np.minimum(AB, BC)
         dist_mask = min_AB_BC > min_distance
         # use less to avoid comparing to nan
-        angl_mask = np.less(beta, max_angle, where=~np.isnan(beta))
+        angle_mask = np.less(beta, max_angle, where=~np.isnan(beta))
         # boolean array of datapoints where both distance and angle requirements are met
-        mask = dist_mask & angl_mask
+        mask = dist_mask & angle_mask
 
         return [Snap(t, b, d) for (t, b, d) in zip(t[mask], beta[mask], min_AB_BC[mask])]
 

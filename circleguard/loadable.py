@@ -535,6 +535,20 @@ class Replay(Loadable):
         self.weight = weight
         self.loaded = True
 
+        block = list(zip(*[(e.time_since_previous_action, e.x, e.y, e.keys_pressed) for e in self.replay_data]))
+
+        t = np.array(block[0], dtype=int).cumsum()
+        xy = np.array([block[1], block[2]], dtype=float).T
+        k = np.array(block[3], dtype=int)
+
+        t, t_sort = np.unique(t, return_index=True)
+        xy = xy[t_sort]
+        k = k[t_sort]
+
+        self.t = t
+        self.xy = xy
+        self.k = k
+
     def num_replays(self):
         return 1
 
