@@ -25,7 +25,7 @@ class Investigator:
     :class:`~.comparer.Comparer`, for comparing multiple replays.
     """
 
-    MASK = int(Keys.K1) | int(Keys.K2)
+    MASK = int(Keys.M1) | int(Keys.M2)
 
     def __init__(self, replay, detect, beatmap=None):
 
