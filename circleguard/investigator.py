@@ -68,9 +68,8 @@ class Investigator:
     def aim_correction(replay_data, max_angle, min_distance):
         """
         Calculates the angle between each set of three points (a,b,c) and finds
-        points where this angle is extremely acute neither ``|ab|`` or
-        ``|bc|`` are
-        small.
+        points where this angle is extremely acute and neither ``|ab|`` or
+        ``|bc|`` are small.
 
         Parameters
         ----------
@@ -115,7 +114,7 @@ class Investigator:
         AC = np.linalg.norm(ac, axis=1)
         # Law of cosines, solve for beta
         # AC^2 = AB^2 + BC^2 - 2 * AB * BC * cos(beta)
-        # cos(beta) = -(AC^2 - AB^2 - BC^2) / (2*AB*BC)
+        # cos(beta) = -(AC^2 - AB^2 - BC^2) / (2 * AB * BC)
         num = -(AC ** 2 - AB ** 2 - BC ** 2)
         denom = (2 * AB * BC)
         # use true_divide for handling division by zero
