@@ -25,7 +25,7 @@ class Investigator:
     :class:`~.comparer.Comparer`, for comparing multiple replays.
     """
 
-    MASK = int(Keys.K1) | int(Keys.K2)
+    MASK = int(Keys.M1) | int(Keys.M2)
 
     def __init__(self, replay, detect, beatmap=None):
 
@@ -68,9 +68,8 @@ class Investigator:
     def aim_correction(replay_data, max_angle, min_distance):
         """
         Calculates the angle between each set of three points (a,b,c) and finds
-        points where this angle is extremely acute neither ``|ab|`` or
-        ``|bc|`` are
-        small.
+        points where this angle is extremely acute and neither ``|ab|`` or
+        ``|bc|`` are small.
 
         Parameters
         ----------
@@ -115,7 +114,7 @@ class Investigator:
         AC = np.linalg.norm(ac, axis=1)
         # Law of cosines, solve for beta
         # AC^2 = AB^2 + BC^2 - 2 * AB * BC * cos(beta)
-        # cos(beta) = -(AC^2 - AB^2 - BC^2) / (2*AB*BC)
+        # cos(beta) = -(AC^2 - AB^2 - BC^2) / (2 * AB * BC)
         num = -(AC ** 2 - AB ** 2 - BC ** 2)
         denom = (2 * AB * BC)
         # use true_divide for handling division by zero
@@ -128,9 +127,9 @@ class Investigator:
         min_AB_BC = np.minimum(AB, BC)
         dist_mask = min_AB_BC > min_distance
         # use less to avoid comparing to nan
-        angl_mask = np.less(beta, max_angle, where=~np.isnan(beta))
+        angle_mask = np.less(beta, max_angle, where=~np.isnan(beta))
         # boolean array of datapoints where both distance and angle requirements are met
-        mask = dist_mask & angl_mask
+        mask = dist_mask & angle_mask
 
         return [Snap(t, b, d) for (t, b, d) in zip(t[mask], beta[mask], min_AB_BC[mask])]
 

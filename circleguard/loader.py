@@ -141,7 +141,7 @@ class Loader():
     @request
     def replay_info(self, map_id, num=None, user_id=None, mods=None, limit=True, span=None):
         """
-        Retrieves replay infos from ``map_id``.
+        Retrieves replay infos from a map's leaderboard.
 
         Parameters
         ----------
@@ -154,8 +154,8 @@ class Loader():
             Note that this is not necessarily limited to just the user's top
             score on the map. See ``limit``.
         mods: :class:`~.ModCombination`
-            The mods to limit replay infos to. ie only return replay infos with
-            mods that match ``mods``.
+            If passed, will only retrieve replay infos for scores that were
+            played with the given mods.
         limit: bool
             Whether to limit to only one response. Only has an effect if
             ``user_id`` is passed. If ``limit`` is ``True``, will only return
@@ -169,7 +169,7 @@ class Loader():
         Returns
         -------
         list[:class:`~.ReplayInfo`]
-            The replay infos as specified by the arguments.
+            The replay infos representing the map's leaderboard.
         :class:`~.ReplayInfo`
             If ``limit`` is ``True`` and ``user_id`` is passed.
 
@@ -222,7 +222,7 @@ class Loader():
     @request
     def get_user_best(self, user_id, num=None, span=None, mods=None):
         """
-        Gets the top 100 best plays for the given user.
+        Retrieves replay infos from a user's top plays.
 
         Parameters
         ----------
@@ -233,11 +233,14 @@ class Loader():
         span: str
             A comma separated list of ranges of top plays to retrieve.
             ``span="1-3,6,2-4"`` -> replays in the range ``[1,2,3,4,6]``.
+        mods: :class:`~.ModCombination`
+            If passed, will only retrieve replay infos for scores that were
+            played with the given mods.
 
         Returns
         -------
-        list[int]
-            A list of map_ids for the given number of the user's top plays.
+        list[:class:`~.ReplayInfo`]
+            The replay infos representing the user's top plays.
 
         Raises
         ------
@@ -277,7 +280,7 @@ class Loader():
         Parameters
         ----------
         map_id: int
-            The map the replay was playe on.
+            The map the replay was played on.
         user_id: int
             The user that played the replay.
         mods: :class:`~.ModCombination`

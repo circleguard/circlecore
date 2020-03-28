@@ -29,11 +29,10 @@ class Loadable(abc.ABC):
         Parameters
         ----------
         loader: :class:`~circleguard.loader.Loader`
-            The loader to load this replay with. Although subclasses may not
-            end up using a :class:`~circleguard.loader.Loader` to
-            properly load the replay (if they don't load anything from the osu
-            api, for instance), the parameter is necessary for homogeneity
-            among method calls.
+            The loader to load this loadable with. Although subclasses may not
+            end up using a :class:`~circleguard.loader.Loader` to load
+            themselves (if they don't load anything from the osu api, for
+            instance), a loader is still passed regardless.
         cache: bool
             Whether the loadable should cache their replay data. This argument
             comes from a parent—either a :class:`~.LoadableContainer` or
@@ -55,8 +54,10 @@ class LoadableContainer(Loadable):
     A loadable which contains other loadables. This means that it has three
     stages - unloaded, info loaded, and loaded.
 
-    When info loaded, the :class:`~LoadableContainer` has :class:`Loadable`\s but
-    they are unloaded.
+    When info loaded, the :class:`~LoadableContainer` has :class:`~Loadable`\s
+    but they are unloaded.
+
+    When loaded, the :class:`~InfoLoadable` has loaded :class:`Loadable`\s.
     """
     def __init__(self, cache):
         super().__init__()
@@ -93,8 +94,6 @@ class LoadableContainer(Loadable):
 class ReplayContainer(LoadableContainer):
     """
     A LoadableContainer guaranteed to only contain Replays and its subclasses.
-
-    Holds a list of Replays, in addition to being a :class:`~Loadable`.
 
     ReplayContainer's start unloaded and become info loaded when
     :meth:`~LoadableContainer.load_info` is called. They become fully
@@ -147,12 +146,12 @@ class Check(LoadableContainer):
     def all_loadables(self):
         """
         Returns all the :class:`~circleguard.loadable.Loadable`\s contained by
-        this class.
+        this check.
 
         Returns
         -------
         list[:class:`~Loadable`]
-            All loadables in this class.
+            All the loadables in this check.
 
         See Also
         --------
@@ -551,8 +550,7 @@ class Replay(Loadable):
 
 class ReplayMap(Replay):
     """
-    A :class:`~.Replay` that was submitted to online servers (and is thus tied
-    to a map).
+    A :class:`~.Replay` that was submitted to online servers.
 
     Parameters
     ----------
@@ -565,8 +563,6 @@ class ReplayMap(Replay):
         highest scoring replay of ``user_id`` on ``map_id`` will be loaded,
         regardless of mod combination. Otherwise, the replay with ``mods``
         will be loaded.
-    detect: :class:`~.enums.Detect`
-        What cheats to run tests to detect.
     cache: bool
         Whether to cache this replay once it is loaded.
     """
@@ -643,7 +639,7 @@ class ReplayMap(Replay):
 
 class ReplayPath(Replay):
     """
-    A :class:`~.Replay` saved locally in an ``osr`` file.
+    A :class:`~.Replay` saved locally in a ``.osr`` file.
 
     Parameters
     ----------

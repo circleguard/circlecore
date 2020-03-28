@@ -3,8 +3,8 @@ from circleguard.enums import Mod
 
 class ReplayInfo():
     """
-    A container class representing all the information needed
-    to load a replay from the api.
+    A container class representing all the information we get about a replay
+    from the api.
 
     Parameters
     ----------

@@ -1,4 +1,17 @@
+# v3.2.1
+
+* correctly calculate ur for replays using mouse clicks (as opposed to keyboard clicks).
+
+# v3.2.0
+
 * rename `ReplayStealingResult` to `StealResult` (for consistency with `Result` names matching their respective `Detect` names). `ReplayStealingResult` left available as deprecated.
+* mods can now be instantiated through `Mod`. Instantiation through `ModCombination` is highly discouraged.
+* mods can now be instantiated with a string, as well as an int. The string must be a combination, in any order, of the two length strings that represent mods. For instance, `Mod("HDHR")` is valid, and `Mod("HDHR") == Mod.HDHR` is `True`.
+* use `np.interp` instead of a homebrew interpolation.
+  * changes similarity values slightly, both increasing and decreasing simvals for legit and stolen replays.
+  * no measurable impact on the effectiveness of circlecore to detect stolen replays.
+  * increases comparison speed.
+* use only unique timestamps when interpolating (also changes similarity values slightly)
 
 # v3.1.0
 

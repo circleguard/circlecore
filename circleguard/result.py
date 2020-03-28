@@ -75,7 +75,7 @@ class StealResult(ComparisonResult):
         The later of the two replays (when the score was made). This is a
         reference to either replay1 or replay2.
     similarity: int
-        How similar the two replays are (the lower, the more similar).
+        The similarity of the two replays (the lower, the more similar).
         Similarity is, roughly speaking, a measure of the average pixel
         distance between the two replays.
     ischeat: bool
