@@ -93,7 +93,7 @@ class LoadableContainer(Loadable):
 
 class ReplayContainer(LoadableContainer):
     """
-    A LoadableContainer guaranteed to only contain Replays and its subclasses.
+    A LoadableContainer that only holds Replays and subclasses thereof.
 
     ReplayContainer's start unloaded and become info loaded when
     :meth:`~LoadableContainer.load_info` is called. They become fully
