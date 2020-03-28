@@ -82,6 +82,8 @@ class LoadableContainer(Loadable):
     def __iter__(self):
         return iter(self.all_replays())
 
+# TODO remove in 4.x
+InfoLoadable = LoadableContainer
 
 class ReplayContainer(LoadableContainer):
     """
