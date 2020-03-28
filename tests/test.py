@@ -278,8 +278,8 @@ class TestEquality(CGTestCase):
 
         cls.map = Map(1754777, num=4) #sidetracked day: umbre, karthy, -duckleader-, toy
         cls.map1 = Map(1754777, num=4, cache=False)
-        cls.map2 = Map(1754777, num=4, cache=False)
-        cls.map3 = Map(1754777, num=4, cache=False)
+        cls.map2 = Map(1754777, num=4, mods=Mod.HD)
+        cls.map3 = Map(1754777, num=2)
 
         cls.r = ReplayMap(1754777, 2766034) # umbre +HDHR on sidetracked day
 
@@ -287,10 +287,18 @@ class TestEquality(CGTestCase):
         cls.cg.load_info(cls.user1)
         cls.cg.load_info(cls.user2)
 
+        cls.cg.load_info(cls.map)
+        cls.cg.load_info(cls.map1)
+        cls.cg.load_info(cls.map2)
+
     def test_identical_equality(self):
         self.assertEqual(self.user, self.user1)
         self.assertNotEqual(self.user, self.user2)
         self.assertNotEqual(self.user, self.user3)
+
+        self.assertEqual(self.map, self.map1)
+        self.assertNotEqual(self.map, self.map2)
+        self.assertNotEqual(self.map, self.map3)
 
 
 if __name__ == '__main__':
