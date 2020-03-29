@@ -317,6 +317,119 @@ class Mod(ModCombination):
             mod_value += matching_mods[0].value
         return mod_value
 
+
+class CleanMode():
+    """
+    A combination of the options used to clean replays before comparison.
+
+    Parameters
+    ----------
+    value: int
+        The clean mode(s) to use. One (or a bitwise combination) of
+        :data:`~.CleanMode.VALIDATE`, :data:`~.CleanMode.SYNCHRONIZE`,
+        :data:`~.CleanMode.ALIGN`, or :data:`~.CleanMode.SEARCH`.
+    """
+    # no-op
+    NONE         = 0
+    STANDARD     = 1 << 0
+    SEARCH       = 1 << 1
+    FAST         = STANDARD
+    SLOW         = SEARCH | FAST
+
+    def __init__(self, value):
+        # so we can reference them in :func:`~.__add__`
+        self.value = value
+        self.search_step = None
+        self.step_limit = None
+
+    def __contains__(self, other):
+        return not bool(~self.value & other)
+
+    def __add__(self, other):
+        ret = CleanMode(self.value | other.value)
+
+        c = self if CleanMode.SEARCH in self else other if CleanMode.SEARCH in other else None
+        if c:
+            ret.search_step = c.search_step
+            ret.step_limit = c.step_limit
+        return ret
+
+class StandardCMode(CleanMode):
+    """
+    Removes frames with an x or y coordinate outside of the play area
+    (512 by 384). Interpolates one replay to the other, then compares each frame
+    and returns the mean value of the distances between each cursor as the
+    similarity value.
+
+    Notes
+    -----
+    This is the standard comparison algorithm, used in circlecore since almost
+    the very beginning. It has incredibly few false positives, but may let some
+    false negatives slip through. See other ``CleanMode``\s for alternatives.
+    """
+    def __init__(self):
+        super().__init__(CleanMode.STANDARD)
+
+class SearchCMode(CleanMode):
+    """
+    Uses a local search (hill climbing) that shifts replays forwards and/or
+    backwards through time to try and find a local minimum for the similarity.
+
+    Parameters
+    ----------
+    search_step: int
+        How many milliseconds to shift a replay when performing the hill
+        climbing algorithm. 16 milliseconds (1 frame at 60 fps) by default.
+    step_limit: int
+        How many times to shift a replay when performing hill climbing
+        before exiting the search. Note that the search will always exit once
+        it finds a local minimum - this value determines how many iterations we
+        are willing to do to find a local minimum.
+    """
+    def __init__(self, search_step=16, step_limit=10):
+        super().__init__(CleanMode.SEARCH)
+        self.search_step = search_step
+        self.step_limit = step_limit
+
+class FastCMode(CleanMode):
+    """
+    The fast clean mode preset. Effective in most situations, but not when
+    one replay has been shifted through time.
+
+    This is usually the economic :class:`~.CleanMode` choice, unless you
+    suspect the replay has been shifted through time (or are not concerned
+    about extra comparison time), in which case use :class:`~.SlowCMode`.
+
+    Notes
+    -----
+    This class is equivalent to ``StandardCMode()``.
+
+    See Also
+    --------
+    :class:`~.SlowCMode`, for a slower but more effective alternative.
+    """
+    def __init__(self):
+        super().__init__(CleanMode.FAST)
+
+class SlowCMode(CleanMode):
+    """
+    The slow clean mode preset. Effective in almost all situations, including
+    when one replay has been shifted through time.
+
+    Notes
+    -----
+    This class is equivalent to ``SearchCMode() + FastCMode()``, and tests both
+    ``SearchCMode`` and ``FastCMode``, returning the lowest similarity of the
+    two.
+
+    See Also
+    --------
+    :class:`~.SlowCMode`, for a faster but less effective alternative.
+    """
+    def __init__(self):
+        super().__init__(CleanMode.SLOW)
+
+
 class Detect():
     """
     A cheat, or set of cheats, to run tests to detect.
