@@ -136,9 +136,9 @@ class Circleguard:
         """
         loadable.load(self.loader, self.cache)
 
-    def load_info(self, info_loadable):
+    def load_info(self, loadable_container):
         """
-        Loads the given info loadable.
+        Loads the given loadable container.
 
         Parameters
         ----------
@@ -147,9 +147,10 @@ class Circleguard:
 
         Notes
         -----
-        This is identical to calling ``info_loadable.load_info(cg.loader)``.
+        This is identical to calling
+        ``loadable_container.load_info(cg.loader)``.
         """
-        info_loadable.load_info(self.loader)
+        loadable_container.load_info(self.loader)
 
 
     def set_options(self, cache=None):

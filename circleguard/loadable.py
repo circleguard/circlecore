@@ -35,7 +35,7 @@ class Loadable(abc.ABC):
             instance), a loader is still passed regardless.
         cache: bool
             Whether the loadable should cache their replay data. This argument
-            comes from a parent—either a :class:`~.InfoLoadable` or
+            comes from a parent—either a :class:`~.LoadableContainer` or
             :class:`~circleguard.circleguard.Circleguard` itself. Should the
             loadable already have a ``cache`` attribute, that should take
             precedence over the option passed in this method, but if the
@@ -45,38 +45,52 @@ class Loadable(abc.ABC):
         pass
 
     @abc.abstractmethod
-    def num_replays(self):
+    def __eq__(self, loadable):
+        pass
+
+
+class LoadableContainer(Loadable):
+    """
+    A loadable which contains other loadables. This means that it has three
+    stages - unloaded, info loaded, and loaded.
+
+    When info loaded, the :class:`~LoadableContainer` has :class:`~Loadable`\s
+    but they are unloaded.
+
+    When loaded, the :class:`~InfoLoadable` has loaded :class:`Loadable`\s.
+    """
+    def __init__(self, cache):
+        super().__init__()
+        self.cache = cache
+        self.info_loaded = False
+
+    @abc.abstractmethod
+    def load_info(self, loader):
         pass
 
     @abc.abstractmethod
     def all_replays(self):
         pass
 
-class InfoLoadable(Loadable):
+    def __getitem__(self, key):
+        replays = self.all_replays()
+        if isinstance(key, slice):
+            return replays[key.start:key.stop:key.step]
+        else:
+            return replays[key]
+
+    def __iter__(self):
+        return iter(self.all_replays())
+
+# TODO remove in 4.x
+InfoLoadable = LoadableContainer
+
+class ReplayContainer(LoadableContainer):
     """
-    A loadable which has an info loaded stage, between unloaded and loaded.
-
-    When info loaded, the :class:`~InfoLoadable` has :class:`~Loadable`\s but
-    they are unloaded.
-
-    When loaded, the :class:`~InfoLoadable` has loaded :class:`Loadable`\s.
-    """
-    def __init__(self):
-        self.info_loaded = False
-        super().__init__()
-
-
-    @abc.abstractmethod
-    def load_info(self, loader):
-        pass
-
-class ReplayContainer(InfoLoadable):
-    """
-    An :class:`~InfoLoadable` which only holds :class:`~Replay`\s, and no other
-    :class:`~Loadable` subclasses.
+    A LoadableContainer that only holds Replays and subclasses thereof.
 
     ReplayContainer's start unloaded and become info loaded when
-    :meth:`~InfoLoadable.load_info` is called. They become fully
+    :meth:`~LoadableContainer.load_info` is called. They become fully
     loaded when :meth:`~Loadable.load`
     is called (and if this is called when the ReplayContainer is in the
     unloaded state, :meth:`~Loadable.load` will load info first,
@@ -90,15 +104,11 @@ class ReplayContainer(InfoLoadable):
 
     In the loaded state, the Replay objects are loaded.
     """
-    @abc.abstractmethod
-    def __getitem__(self, key):
-        pass
+    def __init__(self, cache):
+        super().__init__(cache)
 
-    @abc.abstractmethod
-    def __iter__(self):
-        pass
 
-class Check(InfoLoadable):
+class Check(LoadableContainer):
     """
     Organizes :class:`~.Loadable`\s and what to investigate them for.
 
@@ -121,11 +131,10 @@ class Check(InfoLoadable):
     """
 
     def __init__(self, loadables, detect, loadables2=None, cache=None):
-        super().__init__()
+        super().__init__(cache)
         self.log = logging.getLogger(__name__ + ".Check")
         self.loadables = [loadables] if isinstance(loadables, Loadable) else loadables
         self.loadables2 = [loadables2] if isinstance(loadables2, Loadable) else [] if loadables2 is None else loadables2
-        self.cache = cache
         self.detect = detect
 
     def all_loadables(self):
@@ -172,17 +181,14 @@ class Check(InfoLoadable):
         if self.info_loaded:
             return
         for loadable in self.all_loadables():
-            if isinstance(loadable, InfoLoadable):
+            if isinstance(loadable, LoadableContainer):
                 loadable.load_info(loader)
         self.info_loaded = True
 
-    def num_replays(self):
-        num = 0
-        for loadable in self.all_loadables():
-            num += loadable.num_replays()
-        return num
-
     def all_replays(self):
+        return self.all_replays1() + self.all_replays2()
+
+    def all_replays1(self):
         """
         Returns all the :class:`~.Replay`\s in this check. Contrast with
         :func:`~Check.all_loadables`, which returns all the
@@ -193,13 +199,16 @@ class Check(InfoLoadable):
         If you want an accurate list of :class:`~.Replay`\s in this check, you
         must call :func:`~circleguard.circleguard.Circleguard.load` on this
         :class:`~Check` before :func:`~Check.all_replays`.
-        :class:`~.InfoLoadable`\s contained in this :class:`~Check` may not be
-        info loaded otherwise, and thus do not have a complete list of the
+        :class:`~.LoadableContainer`\s contained in this :class:`~Check` may not
+        be info loaded otherwise, and thus do not have a complete list of the
         replays they represent.
         """
         replays = []
         for loadable in self.loadables:
-            replays += loadable.all_replays()
+            if isinstance(loadable, LoadableContainer):
+                replays += loadable.all_replays()
+            else:
+                replays.append(loadable) # loadable is a Replay
         return replays
 
     def all_replays2(self):
@@ -209,8 +218,16 @@ class Check(InfoLoadable):
         """
         replays2 = []
         for loadable in self.loadables2:
-            replays2 += loadable.all_replays()
+            if isinstance(loadable, LoadableContainer):
+                replays2 += loadable.all_replays()
+            else:
+                replays2.append(loadable) # loadable is a Replay
         return replays2
+
+    def __eq__(self, loadable):
+        if not isinstance(loadable, Check):
+            return False
+        return self.all_replays() == loadable.all_replays()
 
     def __add__(self, other):
         self.loadables.append(other)
@@ -246,13 +263,12 @@ class Map(ReplayContainer):
         Whether to cache the replays once they are loaded.
     """
     def __init__(self, map_id, num=None, span=None, mods=None, cache=None):
-        super().__init__()
+        super().__init__(cache)
         if not bool(num) ^ bool(span):
             # technically, num and span both being set would *work*, just span
             # would override. But this avoids any confusion.
             raise ValueError("One of num or span must be specified, but not both")
         self.replays = []
-        self.cache = cache
         self.map_id = map_id
         self.num = num
         self.mods = mods
@@ -275,14 +291,6 @@ class Map(ReplayContainer):
             replay.load(loader, cascade_cache)
         self.loaded = True
 
-    def num_replays(self):
-        if self.info_loaded:
-            return len(self.replays)
-        elif self.span:
-            return len(span_to_list(self.span))
-        else:
-            return self.num
-
     def all_replays(self):
         """
         Returns all the :class:`~.Replay`\s in this map.
@@ -297,15 +305,11 @@ class Map(ReplayContainer):
         """
         return self.replays
 
-
-    def __getitem__(self, key):
-        if isinstance(key, slice):
-            return self.replays[key.start:key.stop:key.step]
-        else:
-            return self.replays[key]
-
-    def __iter__(self):
-        return iter(self.replays)
+    def __eq__(self, loadable):
+        if not isinstance(loadable, Map):
+            return False
+        return (self.map_id == loadable.map_id and self.num == loadable.num
+                and self.mods == loadable.mods and self.span == loadable.span)
 
     def __repr__(self):
         return (f"Map(map_id={self.map_id},num={self.num},cache={self.cache},mods={self.mods},"
@@ -343,7 +347,7 @@ class User(ReplayContainer):
         are applied. True by default.
     """
     def __init__(self, user_id, num=None, span=None, mods=None, cache=None, available_only=True):
-        super().__init__()
+        super().__init__(cache)
         if not bool(num) ^ bool(span):
             raise ValueError("One of num or span must be specified, but not both")
         self.replays = []
@@ -351,7 +355,6 @@ class User(ReplayContainer):
         self.num = num
         self.span = span
         self.mods = mods
-        self.cache = cache
         self.available_only = available_only
 
     def load_info(self, loader):
@@ -373,14 +376,6 @@ class User(ReplayContainer):
             loadable.load(loader, cascade_cache)
         self.loaded = True
 
-    def num_replays(self):
-        if self.info_loaded:
-            return len(self.replays)
-        elif self.span:
-            return len(span_to_list(self.span))
-        else:
-            return self.num
-
     def all_replays(self):
         """
         Returns all the :class:`~.Replay`\s in this user.
@@ -393,19 +388,14 @@ class User(ReplayContainer):
         info loaded, and does not have a complete list of replays it
         represents.
         """
-        replays = []
-        for loadable in self.replays:
-            replays += loadable.all_replays()
-        return replays
+        return self.replays
 
-    def __getitem__(self, key):
-        if isinstance(key, slice):
-            return self.replays[key.start:key.stop:key.step]
-        else:
-            return self.replays[key]
 
-    def __iter__(self):
-        return iter(self.replays)
+    def __eq__(self, loadable):
+        if not isinstance(loadable, User):
+            return False
+        return (self.user_id == loadable.user_id and self.num == loadable.num
+                and self.mods == loadable.mods and self.span == loadable.span)
 
 
 class MapUser(ReplayContainer):
@@ -432,7 +422,7 @@ class MapUser(ReplayContainer):
         are applied. True by default.
     """
     def __init__(self, map_id, user_id, num=None, span=None, cache=None, available_only=True):
-        super().__init__()
+        super().__init__(cache)
         if not bool(num) ^ bool(span):
             raise ValueError("One of num or span must be specified, but not both")
         self.replays = []
@@ -440,7 +430,6 @@ class MapUser(ReplayContainer):
         self.user_id = user_id
         self.num = num
         self.span = span
-        self.cache = cache
         self.available_only = available_only
 
     def load_info(self, loader):
@@ -462,14 +451,6 @@ class MapUser(ReplayContainer):
             loadable.load(loader, cascade_cache)
         self.loaded = True
 
-    def num_replays(self):
-        if self.info_loaded:
-            return len(self.replays)
-        elif self.span:
-            return len(span_to_list(self.span))
-        else:
-            return self.num
-
     def all_replays(self):
         """
         Returns all the :class:`~.Replay`\s in this MapUser.
@@ -481,19 +462,13 @@ class MapUser(ReplayContainer):
         MapUser before :func:`~.all_replays`. Otherwise, this class is not info
         loaded, and does not have a complete list of replays it represents.
         """
-        replays = []
-        for loadable in self.replays:
-            replays += loadable.all_replays()
-        return replays
+        return self.replays
 
-    def __getitem__(self, key):
-        if isinstance(key, slice):
-            return self.replays[key.start:key.stop:key.step]
-        else:
-            return self.replays[key]
-
-    def __iter__(self):
-        return iter(self.replays)
+    def __eq__(self, loadable):
+        if not isinstance(loadable, MapUser):
+            return False
+        return (self.map_id == loadable.map_id and self.user_id == loadable.user_id
+                and self.num == loadable.num and self.span == loadable.span)
 
 
 class Replay(Loadable):
@@ -550,12 +525,6 @@ class Replay(Loadable):
         self.t = t
         self.xy = xy
         self.k = k
-
-    def num_replays(self):
-        return 1
-
-    def all_replays(self):
-        return [self]
 
     def __repr__(self):
         return (f"Replay(timestamp={self.timestamp},map_id={self.map_id},user_id={self.user_id},mods={self.mods},"
@@ -616,18 +585,6 @@ class ReplayMap(Replay):
         self.weight = RatelimitWeight.HEAVY
         self.loaded = False
 
-    def __repr__(self):
-        if self.loaded:
-            return (f"ReplayMap(timestamp={self.timestamp},map_id={self.map_id},user_id={self.user_id},mods={self.mods},"
-                f"cache={self.cache},replay_id={self.replay_id},loaded={self.loaded},username={self.username})")
-
-        else:
-            return (f"ReplayMap(map_id={self.map_id},user_id={self.user_id},mods={self.mods},cache={self.cache},"
-                    f"loaded={self.loaded})")
-
-    def __str__(self):
-        return f"{'Loaded' if self.loaded else 'Unloaded'} ReplayMap by {self.user_id} on {self.map_id}"
-
     def load(self, loader, cache):
         """
         Loads the data for this replay from the api.
@@ -648,7 +605,7 @@ class ReplayMap(Replay):
         # only listen to the parent's cache if ours is not set. Lower takes precedence
         cache = cache if self.cache is None else self.cache
         self.log.debug("Loading %r", self)
-        if(self.loaded):
+        if self.loaded:
             self.log.debug("%s already loaded, not loading", self)
             return
         if self.info:
@@ -658,6 +615,34 @@ class ReplayMap(Replay):
         replay_data = loader.replay_data(info, cache=cache)
         Replay.__init__(self, info.timestamp, self.map_id, info.username, self.user_id, info.mods, info.replay_id, replay_data, self.weight)
         self.log.log(TRACE, "Finished loading %s", self)
+
+    def __eq__(self, loadable):
+        """
+        Warning
+        -------
+        This equality check does not take into account attributes such as
+        ``cache``. This is intentional - equality here means "do they represent
+        the same replay".
+
+        TODO possible false positive if a user overwrites their score inbetween
+        loading two otherwise identical replay maps. Similar situation to
+        ReplayPath equality. Could equality check replay data instead if both
+        are loaded.
+        """
+        if not isinstance(loadable, ReplayMap):
+            return False
+        return self.map_id == loadable.map_id and self.user_id == loadable.user_id and self.mods == loadable.mods
+
+    def __repr__(self):
+        if self.loaded:
+            return (f"ReplayMap(timestamp={self.timestamp},map_id={self.map_id},user_id={self.user_id},mods={self.mods},"
+                f"cache={self.cache},replay_id={self.replay_id},loaded={self.loaded},username={self.username})")
+        else:
+            return (f"ReplayMap(map_id={self.map_id},user_id={self.user_id},mods={self.mods},cache={self.cache},"
+                    f"loaded={self.loaded})")
+
+    def __str__(self):
+        return f"{'Loaded' if self.loaded else 'Unloaded'} ReplayMap by {self.user_id} on {self.map_id}"
 
 
 class ReplayPath(Replay):
@@ -680,19 +665,6 @@ class ReplayPath(Replay):
         self.cache = cache
         self.weight = RatelimitWeight.LIGHT
         self.loaded = False
-
-    def __repr__(self):
-        if self.loaded:
-            return (f"ReplayPath(path={self.path},map_id={self.map_id},user_id={self.user_id},mods={self.mods},"
-                    f"replay_id={self.replay_id},weight={self.weight},loaded={self.loaded},username={self.username})")
-        else:
-            return f"ReplayPath(path={self.path},weight={self.weight},loaded={self.loaded})"
-
-    def __str__(self):
-        if self.loaded:
-            return f"Loaded ReplayPath by {self.username} on {self.map_id} at {self.path}"
-        else:
-            return f"Unloaded ReplayPath at {self.path}"
 
     def load(self, loader, cache):
         """
@@ -727,3 +699,40 @@ class ReplayPath(Replay):
         Replay.__init__(self, loaded.timestamp, map_id, loaded.player_name, user_id, ModCombination(loaded.mod_combination),
                         loaded.replay_id, loaded.play_data, self.weight)
         self.log.log(TRACE, "Finished loading %s", self)
+
+    def __eq__(self, loadable):
+        """
+        Warnings
+        --------
+        XXX replays with the same path but different replay data (because the
+        file at the path got changed for one but not the other) will return
+        True in an equality check when they are not necessarily representing
+        the same replay.
+
+        TODO possible solution - check replay_data equality if both are loaded?
+        might be unexpected behavior to some
+        ```
+        r1 = ReplayPath("./1.osr")
+        cg.load(r1)
+        # change the file located at ./1.osr to another osr file
+        r2 = ReplayPath("./1.osr")
+        cg.load(r2)
+        r1 == r2 # True, but they contain different replay_data
+        ```
+        """
+        if not isinstance(loadable, ReplayPath):
+            return False
+        return self.path == loadable.path
+
+    def __repr__(self):
+        if self.loaded:
+            return (f"ReplayPath(path={self.path},map_id={self.map_id},user_id={self.user_id},mods={self.mods},"
+                    f"replay_id={self.replay_id},weight={self.weight},loaded={self.loaded},username={self.username})")
+        else:
+            return f"ReplayPath(path={self.path},weight={self.weight},loaded={self.loaded})"
+
+    def __str__(self):
+        if self.loaded:
+            return f"Loaded ReplayPath by {self.username} on {self.map_id} at {self.path}"
+        else:
+            return f"Unloaded ReplayPath at {self.path}"
