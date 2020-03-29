@@ -291,11 +291,12 @@ class TestEquality(CGTestCase):
         cls.cg.load_info(cls.map1)
         cls.cg.load_info(cls.map2)
 
-    def test_identical_equality(self):
+    def test_equality_user(self):
         self.assertEqual(self.user, self.user1)
         self.assertNotEqual(self.user, self.user2)
         self.assertNotEqual(self.user, self.user3)
 
+    def test_equality_map(self):
         self.assertEqual(self.map, self.map1)
         self.assertNotEqual(self.map, self.map2)
         self.assertNotEqual(self.map, self.map3)
