@@ -281,6 +281,14 @@ class TestEquality(CGTestCase):
         cls.map2 = Map(1754777, num=4, mods=Mod.HD)
         cls.map3 = Map(1754777, num=2)
 
+        cls.r = ReplayMap(1754777, 2766034) # umbre +HDHR on sidetracked day
+        cls.r1 = ReplayMap(1754777, 2766034, cache=True)
+        cls.r2 = ReplayMap(1754777, 2766034, mods=Mod.NF)
+
+        cls.r3 = ReplayPath(RES / "legit_replay1.osr")
+        cls.r4 = ReplayPath(RES / "legit_replay1.osr", cache=True)
+        cls.r5 = ReplayPath(RES / "stolen_replay1.osr")
+
         cls.cg.load_info(cls.user)
         cls.cg.load_info(cls.user1)
         cls.cg.load_info(cls.user2)
@@ -298,6 +306,14 @@ class TestEquality(CGTestCase):
         self.assertEqual(self.map, self.map1)
         self.assertNotEqual(self.map, self.map2)
         self.assertNotEqual(self.map, self.map3)
+
+    def test_equality_replaymap(self):
+        self.assertEqual(self.r, self.r1)
+        self.assertNotEqual(self.r, self.r2)
+
+    def test_equality_replaypath(self):
+        self.assertEqual(self.r3, self.r4)
+        self.assertNotEqual(self.r3, self.r5)
 
 
 if __name__ == '__main__':
