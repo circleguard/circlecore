@@ -104,11 +104,9 @@ class Comparer:
             The result of comparing ``replay1`` to ``replay2``.
         """
         self.log.log(utils.TRACE, "comparing %r and %r", replay1, replay2)
-        result = Comparer._compare_two_replays(replay1, replay2)
+        mean = Comparer._compare_two_replays(replay1, replay2)
         result2 = Comparer._compare_hill_climb(replay1, replay2)
-        print(f"normal comparison: {result[0]:.6f}, hill climb: {result2:.6f}")
-        mean = result[0]
-        sigma = result[1]
+        print(f"normal comparison: {mean:.6f}, hill climb: {result2:.6f}")
         ischeat = False
         if(mean < self.threshold):
             ischeat = True
@@ -156,8 +154,8 @@ class Comparer:
         if (Mod.HR in replay1.mods) ^ (Mod.HR in replay2.mods):
             xy1[:, 1] = 384 - xy1[:, 1]
 
-        (mu, sigma) = Comparer._compute_data_similarity(xy1, xy2)
-        return (mu, sigma)
+        mean = Comparer._compute_data_similarity(xy1, xy2)
+        return mean
 
     @staticmethod
     def _compare_hill_climb(replay1, replay2):
@@ -275,9 +273,7 @@ class Comparer:
         # => [ d_1 ... d_2 ]
         distance = (distance ** 2).sum(axis=1) ** 0.5
 
-        mu, sigma = distance.mean(), distance.std()
-
-        return (mu, sigma)
+        return distance.mean()
 
     def __repr__(self):
         return f"Comparer(threshold={self.threshold},replays1={self.replays1},replays2={self.replays2})"
