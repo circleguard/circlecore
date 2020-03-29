@@ -266,6 +266,55 @@ class TestLoader(CGTestCase):
         self.assertRaises(InvalidKeyException, loader.user_id, "] [")
         self.assertRaises(InvalidKeyException, loader.map_id, "9d0a8fec2fe3f778334df6bdc60b113c")
 
+class TestEquality(CGTestCase):
+    @classmethod
+    def setUpClass(cls):
+        cls.cg = Circleguard(KEY)
+
+        cls.user = User(2757689, num=2) # toy, #1=sidetracked day, #2=View of The River Styx
+        cls.user1 = User(2757689, num=2, cache=False)
+        cls.user2 = User(2757689, num=2, mods=Mod.HT)
+        cls.user3 = User(2757689, num=1)
+
+        cls.map = Map(1754777, num=4) #sidetracked day: umbre, karthy, -duckleader-, toy
+        cls.map1 = Map(1754777, num=4, cache=False)
+        cls.map2 = Map(1754777, num=4, mods=Mod.HD)
+        cls.map3 = Map(1754777, num=2)
+
+        cls.r = ReplayMap(1754777, 2766034) # umbre +HDHR on sidetracked day
+        cls.r1 = ReplayMap(1754777, 2766034, cache=True)
+        cls.r2 = ReplayMap(1754777, 2766034, mods=Mod.NF)
+
+        cls.r3 = ReplayPath(RES / "legit_replay1.osr")
+        cls.r4 = ReplayPath(RES / "legit_replay1.osr", cache=True)
+        cls.r5 = ReplayPath(RES / "stolen_replay1.osr")
+
+        cls.cg.load_info(cls.user)
+        cls.cg.load_info(cls.user1)
+        cls.cg.load_info(cls.user2)
+
+        cls.cg.load_info(cls.map)
+        cls.cg.load_info(cls.map1)
+        cls.cg.load_info(cls.map2)
+
+    def test_equality_user(self):
+        self.assertEqual(self.user, self.user1)
+        self.assertNotEqual(self.user, self.user2)
+        self.assertNotEqual(self.user, self.user3)
+
+    def test_equality_map(self):
+        self.assertEqual(self.map, self.map1)
+        self.assertNotEqual(self.map, self.map2)
+        self.assertNotEqual(self.map, self.map3)
+
+    def test_equality_replaymap(self):
+        self.assertEqual(self.r, self.r1)
+        self.assertNotEqual(self.r, self.r2)
+
+    def test_equality_replaypath(self):
+        self.assertEqual(self.r3, self.r4)
+        self.assertNotEqual(self.r3, self.r5)
+
 
 if __name__ == '__main__':
     suite = TestSuite()
