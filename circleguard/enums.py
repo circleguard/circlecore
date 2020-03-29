@@ -452,6 +452,7 @@ class Detect():
 
         # so we can reference them in :func:`~.__add__`
         self.steal_thresh = None
+        self.cmode = None
         self.ur_thresh = None
         self.max_angle = None
         self.min_distance = None
@@ -464,6 +465,7 @@ class Detect():
         d = self if Detect.STEAL in self else other if Detect.STEAL in other else None
         if d:
             ret.steal_thresh = d.steal_thresh
+            ret.cmode = d.cmode
         d = self if Detect.RELAX in self else other if Detect.RELAX in other else None
         if d:
             ret.ur_thresh = d.ur_thresh
@@ -484,10 +486,13 @@ class StealDetect(Detect):
     steal_thresh: float
         If the average distance in pixels of two replays is smaller than
         this value, they are labeled cheated (stolen replays). Default 18.
+    cmode: :class:`~.CMode`
+        The algorithm, or combination thereof, used to compare replays.
     """
-    def __init__(self, steal_thresh=18):
+    def __init__(self, steal_thresh=18, cmode=FastCMode()):
         super().__init__(Detect.STEAL)
         self.steal_thresh = steal_thresh
+        self.cmode = cmode
 
 class RelaxDetect(Detect):
     """
