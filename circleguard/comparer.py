@@ -6,7 +6,7 @@ import math
 import numpy as np
 
 from circleguard.loadable import Replay
-from circleguard.enums import Mod
+from circleguard.enums import Mod, CMode
 from circleguard.exceptions import InvalidArgumentsException, CircleguardException
 import circleguard.utils as utils
 from circleguard.result import ReplayStealingResult
@@ -17,9 +17,8 @@ class Comparer:
 
     Parameters
     ----------
-    threshold: int
-        If a comparison scores below this value, the :class:`~.result.Result`
-        of the comparison is considered cheated.
+    detect: :class:`~.Detect`
+        What cheats to investigate the replay for.
     replays1: list[:class:`~circleguard.loadable.Replay`]
         The replays to compare against either ``replays2`` if ``replays2`` is
         not ``None``, or against other replays in ``replays1``.
@@ -42,9 +41,9 @@ class Comparer:
     replays.
     """
 
-    def __init__(self, threshold, replays1, replays2=None):
+    def __init__(self, detect, replays1, replays2=None):
         self.log = logging.getLogger(__name__)
-        self.threshold = threshold
+        self.detect = detect
 
         # filter beatmaps we had no data for
         self.replays1 = [replay for replay in replays1 if replay.replay_data is not None]
@@ -104,11 +103,21 @@ class Comparer:
             The result of comparing ``replay1`` to ``replay2``.
         """
         self.log.log(utils.TRACE, "comparing %r and %r", replay1, replay2)
-        mean = Comparer._compare_two_replays(replay1, replay2)
-        result2 = Comparer._compare_hill_climb(replay1, replay2)
-        print(f"normal comparison: {mean:.6f}, hill climb: {result2:.6f}")
+
+        cmode = self.detect.clean_mode
+        means = []
+        if CMode.SEARCH in cmode:
+            mean = Comparer._compare_hill_climb(replay1, replay2, cmode)
+            means.append(mean)
+        if CMode.STANDARD in cmode:
+            mean = Comparer._compare_two_replays(replay1, replay2)
+            means.append(mean)
+
+        # take lowest of all tests, protection against ``CMode.SEARCH``
+        # (or other future cmodes) failing spectacularly
+        mean = min(means)
         ischeat = False
-        if(mean < self.threshold):
+        if(mean < self.detect.steal_thresh):
             ischeat = True
 
         return ReplayStealingResult(replay1, replay2, mean, ischeat)
@@ -158,7 +167,7 @@ class Comparer:
         return mean
 
     @staticmethod
-    def _compare_hill_climb(replay1, replay2):
+    def _compare_hill_climb(replay1, replay2, search_cmode):
         """
         Shifts two :class:`~.replay.Replay`\s through time to find a local
         minimum for similarity values.
@@ -169,6 +178,9 @@ class Comparer:
             The first replay to compare.
         replay2: :class:`~.replay.Replay`
             The second replay to compare.
+        search_cmode: :class:`~.enums.SearchCMode`
+            The clean mode containing the time interval to search on and the
+             maximal number of steps
 
         Returns
         -------
@@ -179,8 +191,8 @@ class Comparer:
        Notes
         -----
         Specifically, this method uses hill climbing with a step size of
-        ``search_mode.search_step`` and a step # limit of
-        ``search_mode.step_limit``. An overview follows:
+        ``search_cmode.search_step`` and a step # limit of
+        ``search_cmode.step_limit``. An overview follows:
         * shift the time values of the first replay ``search_step``
           milliseconds to the left and the right.
         * Clean the two replays with  ``FastCMode`` and calculate the
@@ -198,8 +210,8 @@ class Comparer:
         t2, xy2, k2 = replay2.t, replay2.xy, replay2.k
         prev_value = math.inf # arbitrarily high value
 
-        dt = 16
-        step_limit = 10
+        dt = search_cmode.search_step
+        step_limit = search_cmode.step_limit
 
         for _ in range(step_limit):
             values = {}
@@ -276,7 +288,7 @@ class Comparer:
         return distance.mean()
 
     def __repr__(self):
-        return f"Comparer(threshold={self.threshold},replays1={self.replays1},replays2={self.replays2})"
+        return f"Comparer(threshold={self.detect.steal_thresh},replays1={self.replays1},replays2={self.replays2})"
 
     def __str__(self):
-        return f"Comparer with thresh {self.threshold}"
+        return f"Comparer with thresh {self.detect.steal_thresh}"
