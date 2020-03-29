@@ -206,8 +206,7 @@ class Comparer:
           current similarity.
         """
 
-        t1, xy1, k1 = replay1.t, replay1.xy, replay1.k
-        t2, xy2, k2 = replay2.t, replay2.xy, replay2.k
+        t1 = replay1.t
         prev_value = math.inf # arbitrarily high value
 
         dt = search_cmode.search_step
@@ -224,8 +223,7 @@ class Comparer:
                 value = Comparer._compare_two_replays(replay1, replay2)
 
                 values[value] = v
-                replay1.t, replay1.xy, replay1.k = t1, xy1, k1
-                replay2.t, replay2.xy, replay2.k = t2, xy2, k2
+                replay1.t = t1
 
             # take the times with the lowest similarity
             min_value = min(values)
