@@ -221,7 +221,7 @@ class Comparer:
                 replay1.t = t1 + sgn * dt
                 v = replay1.t
 
-                value = Comparer._compare_two_replays(replay1, replay2)[0]
+                value = Comparer._compare_two_replays(replay1, replay2)
 
                 values[value] = v
                 replay1.t, replay1.xy, replay1.k = t1, xy1, k1
