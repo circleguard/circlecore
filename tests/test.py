@@ -281,8 +281,6 @@ class TestEquality(CGTestCase):
         cls.map2 = Map(1754777, num=4, mods=Mod.HD)
         cls.map3 = Map(1754777, num=2)
 
-        cls.r = ReplayMap(1754777, 2766034) # umbre +HDHR on sidetracked day
-
         cls.cg.load_info(cls.user)
         cls.cg.load_info(cls.user1)
         cls.cg.load_info(cls.user2)
