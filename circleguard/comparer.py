@@ -207,7 +207,8 @@ class Comparer:
         """
 
         t1 = replay1.t
-        prev_value = math.inf # arbitrarily high value
+        # start with sim value at 0 shift
+        prev_value = Comparer._compare_two_replays(replay1, replay2)
 
         dt = search_cmode.search_step
         step_limit = search_cmode.step_limit
