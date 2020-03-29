@@ -104,7 +104,7 @@ class Comparer:
         """
         self.log.log(utils.TRACE, "comparing %r and %r", replay1, replay2)
 
-        cmode = self.detect.clean_mode
+        cmode = self.detect.cmode
         means = []
         if CMode.SEARCH in cmode:
             mean = Comparer._compare_hill_climb(replay1, replay2, cmode)
