@@ -427,8 +427,13 @@ class SlowCMode(CMode):
     --------
     :class:`~.SlowCMode`, for a faster but less effective alternative.
     """
-    def __init__(self):
+    def __init__(self, search_step=16, step_limit=10):
+        # TODO this init is pretty bad, repeats ``SearchCMode`` 's init,
+        # but I'd like to be able to modify ``SearchCMode`` parameters directly
+        # through ``SlowCMode``.
         super().__init__(CMode.SLOW)
+        self.search_step = search_step
+        self.step_limit = step_limit
 
 
 class Detect():
