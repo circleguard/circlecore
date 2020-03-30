@@ -1,3 +1,7 @@
+# Unreleased
+
+* fix error when loading a replay that has replay info but is not downloadable
+
 # v3.2.1
 
 * correctly calculate ur for replays using mouse clicks (as opposed to keyboard clicks).
