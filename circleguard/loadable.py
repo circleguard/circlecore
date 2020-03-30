@@ -511,6 +511,15 @@ class Replay(Loadable):
         self.replay_data = replay_data
         self.weight = weight
         self.loaded = True
+        # initialize in case ``replay_data`` is ``None``, still want
+        # the attributes
+        self.t = None
+        self.xy = None
+        self.k = None
+
+        # replay wasn't available, can't preprocess the data
+        if self.replay_data is None:
+            return
 
         block = list(zip(*[(e.time_since_previous_action, e.x, e.y, e.keys_pressed) for e in self.replay_data]))
 
