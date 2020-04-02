@@ -9,6 +9,8 @@
 * default implementation of `__iter__` and `__getitem__` in LoadableContainer
 * `check.all_replays()` now returns the expected value (`loadables1 + loadables2`), new method `#all_replays1` which returns only the replays in `loadables1`.
 
+## Now using ossapi v1.2.3
+
 # v3.2.1
 
 * correctly calculate ur for replays using mouse clicks (as opposed to keyboard clicks).
