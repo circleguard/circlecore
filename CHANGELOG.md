@@ -1,6 +1,13 @@
-# Unreleased
+# v3.2.2
 
 * fix error when loading a replay that has replay info but is not downloadable
+* InfoLoadable renamed to LoadableContainer
+* cache passed as part of super call
+* `__eq__` required for Loadable
+* `num_replays` method removed (should use `len(loadable_container.all_replays()` instead)
+* all_replays required by `LoadableContainer`, not `Loadable`
+* default implementation of `__iter__` and `__getitem__` in LoadableContainer
+* `check.all_replays()` now returns the expected value (`loadables1 + loadables2`), new method `#all_replays1` which returns only the replays in `loadables1`.
 
 # v3.2.1
 
