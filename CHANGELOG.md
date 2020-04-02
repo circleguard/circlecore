@@ -11,6 +11,10 @@
 
 ## Now using ossapi v1.2.3
 
+* use 15 second timeout for requests
+
+# v3.2.1
+
 * correctly calculate ur for replays using mouse clicks (as opposed to keyboard clicks).
 
 # v3.2.0
