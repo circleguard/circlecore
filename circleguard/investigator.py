@@ -45,7 +45,7 @@ class Investigator:
             ischeat = True if ur < d.ur_thresh else False
             yield RelaxResult(self.replay, ur, ischeat)
         if Detect.CORRECTION in d:
-            suspicious_angles = self.aim_correction(self.replay_data, d.max_angle, d.min_distance)
+            suspicious_angles = self.aim_correction(self.replay, d.max_angle, d.min_distance)
             ischeat = len(suspicious_angles) > 1
             yield CorrectionResult(self.replay, suspicious_angles, ischeat)
 
@@ -65,7 +65,7 @@ class Investigator:
         return np.std(diff_array) * 10
 
     @staticmethod
-    def aim_correction(replay_data, max_angle, min_distance):
+    def aim_correction(replay, max_angle, min_distance):
         """
         Calculates the angle between each set of three points (a,b,c) and finds
         points where this angle is extremely acute and neither ``|ab|`` or
@@ -100,9 +100,8 @@ class Investigator:
         :meth:`~.aim_correction_sam` for an alternative, unused approach
         involving velocity and jerk.
         """
-        data = np.array(replay_data).T
-
-        t, xy = data[0][1:-1], data[1:3].T
+        t = replay.t[1:-1]
+        xy = replay.xy
 
         # labelling three consecutive points a, b and c
         ab = xy[1:-1] - xy[:-2]
