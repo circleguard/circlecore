@@ -73,8 +73,8 @@ class Investigator:
 
         Parameters
         ----------
-        replay_data: list[int, float, float, int]
-            A list of replay datapoints; [[time, x, y, keys_pressed], ...].
+        replay: :class:`~.Replay`
+            The replay to investigate for aim correction.
         max_angle: float
             Consider only (a,b,c) where ``∠abc < max_angle``
         min_distance: float
