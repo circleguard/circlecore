@@ -1,3 +1,7 @@
+# v3.2.3
+
+* fix error while investigating replays with no replay data
+
 # v3.2.2
 
 * fix error when loading a replay that has replay info but is not downloadable

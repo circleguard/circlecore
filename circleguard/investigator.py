@@ -34,6 +34,9 @@ class Investigator:
         self.detect = detect
 
     def investigate(self):
+        # equivalent of filtering out replays with no replay data from comparer on init
+        if self.replay.replay_data is None:
+            return
         d = self.detect
         if Detect.RELAX in d:
             ur = self.ur(self.replay, self.beatmap)
