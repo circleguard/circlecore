@@ -2,8 +2,9 @@ import os
 from unittest import TestCase, skip, TestSuite, TextTestRunner
 from pathlib import Path
 import warnings
-from circleguard import (Circleguard, Check, ReplayMap, ReplayPath, RelaxDetect, StealDetect,
+from circleguard import (Circleguard, Check, ReplayMap, ReplayPath, RelaxDetect, StealDetect, CorrectionDetect,
                          RatelimitWeight, set_options, Map, User, MapUser, Mod, Loader, InvalidKeyException)
+from circleguard.investigator import Snap
 
 KEY = os.environ.get('OSU_API_KEY')
 if not KEY:
@@ -132,6 +133,26 @@ class TestReplays(CGTestCase):
             self.assertEqual(earlier.replay_id, 2801164636, f"Earlier replay id was not correct at num {num}")
             self.assertEqual(later.replay_id, 2805164683, f"Later replay id was not correct at num {num}")
             self.assertEqual(r1.username, r2.username, f"Replay usernames did not match at num {num}")
+
+class TestCorrection(CGTestCase):
+    @classmethod
+    def setUpClass(cls):
+        cls.cg = Circleguard(KEY)
+        cls.r1 = ReplayPath(RES / "corrected_replay1.osr")
+
+    def test_cheated_replay(self):
+        r = list(self.cg.run(Check([self.r1], CorrectionDetect())))[0]
+        # a manually created list of the snaps we expect
+        snaps = [Snap(5103, 7.384911923724048, 16.690094595298124), Snap(5117, 2.416213724504259, 16.690094595298124),
+                Snap(5653, 2.1613829243169778, 28.173853467561035), Snap(5654, 1.9686798813790376, 30.682106150883786),
+                Snap(11928, 7.066243710087534, 29.17995173985042), Snap(14344, 4.790948481959315, 26.483834782750026),
+                Snap(29043, 2.6889121724888554, 27.616040224659283), Snap(35045, 6.125744537289182, 22.60244399984435),
+                Snap(71652, 6.3489039438849675, 27.599185310439854), Snap(71658, 0.37921550389837144, 27.599185310439854),
+                Snap(72776, 8.213512430693951, 18.259776223163296), Snap(72783, 3.5832313588698526, 18.259776223163296),
+                Snap(72973, 8.669108577465696, 9.264559325191904), Snap(76502, 3.041304996956702, 21.769196838193192),
+                Snap(79052, 8.771412124628759, 8.218413906588092)]
+        self.assertListEqual(r.snaps, snaps)
+
 
 
 class TestMap(CGTestCase):
