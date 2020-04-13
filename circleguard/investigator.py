@@ -248,3 +248,7 @@ class Snap():
         self.time = time
         self.angle = angle
         self.distance = distance
+
+    def __eq__(self, other):
+        return (self.time == other.time and self.angle == other.angle
+                and self.distance == other.distance)
