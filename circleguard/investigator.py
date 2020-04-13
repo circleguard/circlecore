@@ -30,10 +30,6 @@ class Investigator:
     def __init__(self, replay, detect, beatmap=None):
 
         self.replay = replay
-        # TODO np.array is called on replay.as_list_with_timestamps with object=dtype,
-        # and we'll probably want a np array for speed in aim_correction as well.
-        # If that object param isn't necessary we can call np.array in init
-        self.replay_data = replay.as_list_with_timestamps()
         self.detect = detect
         self.beatmap = beatmap
         self.detect = detect
@@ -52,7 +48,7 @@ class Investigator:
     @staticmethod
     def ur(replay, beatmap):
         """
-        Calculates the ur of ``replay_data`` when played against ``beatmap``.
+        Calculates the ur of ``replay`` when played against ``beatmap``.
         """
 
         hitobjs = Investigator._parse_beatmap(beatmap)

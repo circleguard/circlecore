@@ -542,28 +542,6 @@ class Replay(Loadable):
     def __str__(self):
         return f"Replay by {self.username} on {self.map_id}"
 
-    def as_list_with_timestamps(self):
-        """
-        Gets this replay's play data as a list of tuples of absolute time,
-        x, y, and pressed keys for each event in the data.
-
-        Returns
-        -------
-        list[tuple(int, float, float, int)]
-            A list of tuples of (t, x, y, keys) for each event
-            in the replay data.
-        """
-        # get all offsets sum all offsets before it to get all absolute times
-        timestamps = np.array([e.time_since_previous_action for e in self.replay_data])
-        timestamps = timestamps.cumsum()
-
-        # zip timestamps back to data and convert t, x, y, keys to tuples
-        txyk = [[z[0], z[1].x, z[1].y, z[1].keys_pressed] for z in zip(timestamps, self.replay_data)]
-        # sort to ensure time goes forward as you move through the data
-        # in case someone decides to make time go backwards anyway
-        txyk.sort(key=lambda p: p[0])
-        return txyk
-
 
 class ReplayMap(Replay):
     """
