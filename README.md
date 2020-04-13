@@ -12,8 +12,6 @@ Circlecore currently supports detection of the following cheats:
 
 Designed for use in [Circleguard](https://github.com/circleguard/circleguard), circlecore is easily integratable into any existing python project and we have worked hard to ensure it is easy to use.
 
-We highly encourage projects that use circlecore - if you are using it in one of your apps, please let us know and we will link to you somwhere in our readme or documentation.
-
 Circleguard is developed and maintained by:
 
 * [tybug](https://github.com/tybug)
