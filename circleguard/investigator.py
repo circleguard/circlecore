@@ -41,7 +41,7 @@ class Investigator:
     def investigate(self):
         d = self.detect
         if Detect.RELAX in d:
-            ur = self.ur(self.replay_data, self.beatmap)
+            ur = self.ur(self.replay, self.beatmap)
             ischeat = True if ur < d.ur_thresh else False
             yield RelaxResult(self.replay, ur, ischeat)
         if Detect.CORRECTION in d:
@@ -50,18 +50,18 @@ class Investigator:
             yield CorrectionResult(self.replay, suspicious_angles, ischeat)
 
     @staticmethod
-    def ur(replay_data, beatmap):
+    def ur(replay, beatmap):
         """
         Calculates the ur of ``replay_data`` when played against ``beatmap``.
         """
 
         hitobjs = Investigator._parse_beatmap(beatmap)
-        keypresses = Investigator._parse_keys(replay_data)
-        filtered_array = Investigator._filter_hits(hitobjs, keypresses, beatmap.overall_difficulty)
+        keypress_times = Investigator._parse_keypress_times(replay)
+        filtered_array = Investigator._filter_hits(hitobjs, keypress_times, beatmap.overall_difficulty)
         diff_array = []
 
-        for hit, press in filtered_array:
-            diff_array.append(press[0]-hit[0])
+        for hitobj_time, press_time in filtered_array:
+            diff_array.append(press_time - hitobj_time)
         return np.std(diff_array) * 10
 
     @staticmethod
@@ -194,30 +194,29 @@ class Investigator:
         return hitobjs
 
     @staticmethod
-    def _parse_keys(data):
-        data = np.array(data, dtype=object)
-        keypresses = np.int32(data[:, 3]) & Investigator.MASK
+    def _parse_keypress_times(replay):
+        keypresses = replay.k & Investigator.MASK
         changes = keypresses & ~np.insert(keypresses[:-1], 0, 0)
-        return data[changes!=0]
+        return replay.t[changes != 0]
 
     @staticmethod
-    def _filter_hits(hitobjs, keypresses, OD):
+    def _filter_hits(hitobjs, keypress_times, OD):
         array = []
         hitwindow = 150 + 50 * (5 - OD) / 5
 
         object_i = 0
         press_i = 0
 
-        while object_i < len(hitobjs) and press_i < len(keypresses):
-            hitobj = hitobjs[object_i]
-            press = keypresses[press_i]
+        while object_i < len(hitobjs) and press_i < len(keypress_times):
+            hitobj_time = hitobjs[object_i][0]
+            press_time = keypress_times[press_i]
 
-            if press[0] < hitobj[0] - hitwindow / 2:
+            if press_time < hitobj_time - hitwindow / 2:
                 press_i += 1
-            elif press[0] > hitobj[0] + hitwindow / 2:
+            elif press_time > hitobj_time + hitwindow / 2:
                 object_i += 1
             else:
-                array.append([hitobj, press])
+                array.append([hitobj_time, press_time])
                 press_i += 1
                 object_i += 1
 
