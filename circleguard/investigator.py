@@ -28,7 +28,6 @@ class Investigator:
     MASK = int(Keys.M1) | int(Keys.M2)
 
     def __init__(self, replay, detect, beatmap=None):
-
         self.replay = replay
         self.detect = detect
         self.beatmap = beatmap
