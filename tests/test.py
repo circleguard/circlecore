@@ -2,7 +2,7 @@ import os
 from unittest import TestCase, skip, TestSuite, TextTestRunner
 from pathlib import Path
 import warnings
-from circleguard import (Circleguard, Check, ReplayMap, ReplayPath, RelaxDetect, StealDetect,
+from circleguard import (Circleguard, Check, ReplayMap, ReplayPath, RelaxDetect, StealDetect, CorrectionDetect,
                          RatelimitWeight, set_options, Map, User, MapUser, Mod, Loader, InvalidKeyException)
 
 KEY = os.environ.get('OSU_API_KEY')
@@ -12,6 +12,8 @@ if not KEY:
 RES = Path(__file__).parent / "resources"
 set_options(loglevel=20)
 
+# what precision we want to guarantee for our tests
+DELTA = 0.00001
 # how many times our test cases hits the get_replay endpoint.
 # Keep this below a multiple of 10 (preferably at most 9) so tests run in a reasonable amount of time.
 # We may want to split tests into "heavy" and "light" where light loads <10 heavy calls and heavy loads as many as we need.
@@ -51,7 +53,7 @@ class TestReplays(CGTestCase):
         earlier = r.earlier_replay
         later = r.later_replay
 
-        self.assertAlmostEqual(r.similarity, 2.1923, delta=0.0001, msg="Similarity is not correct")
+        self.assertAlmostEqual(r.similarity, 2.19236, delta=DELTA, msg="Similarity is not correct")
         self.assertEqual(r1.map_id, r2.map_id, "Replay map ids did not match")
         self.assertEqual(r1.map_id, 1988753, "Replay map id was not correct")
         self.assertEqual(earlier.mods, Mod.HD + Mod.HR, "Earlier replay mods was not correct")
@@ -73,7 +75,7 @@ class TestReplays(CGTestCase):
         earlier = r.earlier_replay
         later = r.later_replay
 
-        self.assertAlmostEqual(r.similarity, 23.0359, delta=0.0001, msg="Similarity is not correct")
+        self.assertAlmostEqual(r.similarity, 23.03593, delta=DELTA, msg="Similarity is not correct")
         self.assertEqual(r1.map_id, r2.map_id, "Replay map ids did not match")
         self.assertEqual(r1.map_id, 722238, "Replay map id was not correct")
         self.assertEqual(earlier.mods, Mod.HD + Mod.NC, "Earlier replay mods was not correct")
@@ -124,7 +126,7 @@ class TestReplays(CGTestCase):
             earlier = r.earlier_replay
             later = r.later_replay
 
-            self.assertAlmostEqual(r.similarity, 2.1923, delta=0.0001, msg=f"Similarity is not correct at num {num}")
+            self.assertAlmostEqual(r.similarity, 2.19236, delta=DELTA, msg=f"Similarity is not correct at num {num}")
             self.assertEqual(r1.map_id, r2.map_id, f"Replay map ids did not match at num {num}")
             self.assertEqual(r1.map_id, 1988753, f"r1 map id was not correct at num {num}")
             self.assertEqual(earlier.mods, Mod.HD + Mod.HR, f"Earlier replay mods was not correct at num {num}")
@@ -132,6 +134,30 @@ class TestReplays(CGTestCase):
             self.assertEqual(earlier.replay_id, 2801164636, f"Earlier replay id was not correct at num {num}")
             self.assertEqual(later.replay_id, 2805164683, f"Later replay id was not correct at num {num}")
             self.assertEqual(r1.username, r2.username, f"Replay usernames did not match at num {num}")
+
+class TestCorrection(CGTestCase):
+    @classmethod
+    def setUpClass(cls):
+        cls.cg = Circleguard(KEY)
+        cls.r1 = ReplayPath(RES / "corrected_replay1.osr")
+
+    def test_cheated_replay(self):
+        r = list(self.cg.run(Check([self.r1], CorrectionDetect())))[0]
+        snaps = r.snaps
+
+        self.assertEqual(len(snaps), 15)
+        # beginning
+        self.assertEqual(snaps[0].time, 5103)
+        self.assertAlmostEqual(snaps[0].angle, 7.38491, delta=DELTA)
+        self.assertAlmostEqual(snaps[0].distance, 16.69009, delta=DELTA)
+        # middle
+        self.assertEqual(snaps[8].time, 71652)
+        self.assertAlmostEqual(snaps[8].angle, 6.34890, delta=DELTA)
+        self.assertAlmostEqual(snaps[8].distance, 27.59918, delta=DELTA)
+        # end
+        self.assertEqual(snaps[14].time, 79052)
+        self.assertAlmostEqual(snaps[14].angle, 8.77141, delta=DELTA)
+        self.assertAlmostEqual(snaps[14].distance, 8.21841, delta=DELTA)
 
 
 class TestMap(CGTestCase):
