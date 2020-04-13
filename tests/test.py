@@ -4,7 +4,6 @@ from pathlib import Path
 import warnings
 from circleguard import (Circleguard, Check, ReplayMap, ReplayPath, RelaxDetect, StealDetect, CorrectionDetect,
                          RatelimitWeight, set_options, Map, User, MapUser, Mod, Loader, InvalidKeyException)
-from circleguard.investigator import Snap
 
 KEY = os.environ.get('OSU_API_KEY')
 if not KEY:
