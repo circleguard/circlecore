@@ -1,3 +1,7 @@
+# unreleased
+
+* correctly assign `True` to `ischeat` in `CorrectionDetect` when there is only one snap (previously `False`)
+
 # v3.2.3
 
 * fix error while investigating replays with no replay data
