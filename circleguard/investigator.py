@@ -44,7 +44,7 @@ class Investigator:
             yield RelaxResult(self.replay, ur, ischeat)
         if Detect.CORRECTION in d:
             suspicious_angles = self.aim_correction(self.replay, d.max_angle, d.min_distance)
-            ischeat = len(suspicious_angles) > 1
+            ischeat = len(suspicious_angles) > 0
             yield CorrectionResult(self.replay, suspicious_angles, ischeat)
 
     @staticmethod
