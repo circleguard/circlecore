@@ -123,6 +123,9 @@ def convert_ur(ur, mods, *, to):
     mods: Mod
         The mods the replay was played with. Only ``Mod.DT`` and ``Mod.HT``
         will affect the unstable rate conversion.
+    to: string
+        What to convert the ur to. One of ``cv`` (converted) or ``ucv``
+        (unconverted).
     """
     if to not in ["cv", "ucv"]:
         raise ValueError(f"Expected one of cv, ucv. Got {to}")
