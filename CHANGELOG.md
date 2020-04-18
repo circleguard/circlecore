@@ -1,6 +1,8 @@
 # unreleased
 
 * correctly assign `True` to `ischeat` in `CorrectionDetect` when there is only one snap (previously `False`)
+* use converted (cv) ur when determining `ischeat` for `RelaxResult`
+* provide cvUR as `result.ur` and ucvUR as `result.ucv_ur`
 
 # v3.2.3
 
