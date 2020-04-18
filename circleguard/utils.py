@@ -110,3 +110,34 @@ def span_to_list(span):
         else:
             ret.add(int(s))
     return ret
+
+def convert_ur(ur, mods, *, to):
+    """
+    Converts an unstable rate to a converted unstable rate, depending on the
+    mods the replay was played with.
+
+    Parameters
+    ----------
+    ur: float
+        The unconverted ur of the replay.
+    mods: Mod
+        The mods the replay was played with. Only ``Mod.DT`` and ``Mod.HT``
+        will affect the unstable rate conversion.
+    to: string
+        What to convert the ur to. One of ``cv`` (converted) or ``ucv``
+        (unconverted).
+    """
+    if to not in ["cv", "ucv"]:
+        raise ValueError(f"Expected one of cv, ucv. Got {to}")
+
+    conversion_factor = 1
+
+    if Mod.DT in mods:
+        conversion_factor = (1 / 1.5)
+    elif Mod.HT in mods:
+        conversion_factor = (1 / 0.75)
+
+    if to == "cv":
+        return ur * conversion_factor
+    elif to == "ucv":
+        return ur / conversion_factor
