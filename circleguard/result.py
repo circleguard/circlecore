@@ -108,7 +108,7 @@ class RelaxResult(InvestigationResult):
         The replay investigated.
     ur: int
         The (unconverted) unstable rate of the replay. More information on UR
-        available athttps://osu.ppy.sh/help/wiki/Accuracy#accuracy
+        available at https://osu.ppy.sh/help/wiki/Accuracy#accuracy
     ischeat: bool
         Whether the replay is cheated or not.
     """
