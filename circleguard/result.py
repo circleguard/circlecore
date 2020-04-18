@@ -1,5 +1,6 @@
 from circleguard.loadable import Replay
 from circleguard.enums import ResultType, Mod
+from circleguard.utils import ur_to_cv_ur
 
 # Hierarchy
 #                                 Result
@@ -106,22 +107,16 @@ class RelaxResult(InvestigationResult):
     replay: :class:`~circleguard.loadable.Replay`
         The replay investigated.
     ur: int
-        The unstable rate of the replay. More information on UR available at
-        https://osu.ppy.sh/help/wiki/Accuracy#accuracy
+        The (unconverted) unstable rate of the replay. More information on UR
+        available athttps://osu.ppy.sh/help/wiki/Accuracy#accuracy
     ischeat: bool
         Whether the replay is cheated or not.
     """
     def __init__(self, replay: Replay, ur: int, ischeat: bool):
         super().__init__(replay, ischeat, ResultType.RELAX)
-        self.ur = ur
+        self.ur = ur_to_cv_ur(ur, replay.mods)
+        self.ucv_ur = ur
 
-        conversion_factor = 1
-        if Mod.DT in replay.mods:
-            conversion_factor = (1 / 1.5)
-        elif Mod.HT in replay.mods:
-            conversion_factor = (1 / 0.75)
-
-        self.cv_ur = ur * conversion_factor
 
 class CorrectionResult(InvestigationResult):
     """

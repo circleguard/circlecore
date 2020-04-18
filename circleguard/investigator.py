@@ -2,7 +2,7 @@
 import numpy as np
 from circleguard.enums import Keys, Detect
 from circleguard.result import RelaxResult, CorrectionResult
-import circleguard.utils as utils
+from circleguard.utils import ur_to_cv_ur
 import math
 
 class Investigator:
@@ -40,7 +40,8 @@ class Investigator:
         d = self.detect
         if Detect.RELAX in d:
             ur = self.ur(self.replay, self.beatmap)
-            ischeat = True if ur < d.ur_thresh else False
+            cv_ur = ur_to_cv_ur(ur, self.replay.mods)
+            ischeat = True if cv_ur < d.ur_thresh else False
             yield RelaxResult(self.replay, ur, ischeat)
         if Detect.CORRECTION in d:
             suspicious_angles = self.aim_correction(self.replay, d.max_angle, d.min_distance)
