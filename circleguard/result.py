@@ -1,5 +1,5 @@
 from circleguard.loadable import Replay
-from circleguard.enums import ResultType
+from circleguard.enums import ResultType, Mod
 
 # Hierarchy
 #                                 Result
@@ -114,6 +114,14 @@ class RelaxResult(InvestigationResult):
     def __init__(self, replay: Replay, ur: int, ischeat: bool):
         super().__init__(replay, ischeat, ResultType.RELAX)
         self.ur = ur
+
+        conversion_factor = 1
+        if Mod.DT in replay.mods:
+            conversion_factor = (1 / 1.5)
+        elif Mod.HT in replay.mods:
+            conversion_factor = (1 / 0.75)
+
+        self.cv_ur = ur * conversion_factor
 
 class CorrectionResult(InvestigationResult):
     """
