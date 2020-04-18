@@ -1,6 +1,6 @@
 from circleguard.loadable import Replay
 from circleguard.enums import ResultType, Mod
-from circleguard.utils import ur_to_cv_ur
+from circleguard.utils import convert_ur
 
 # Hierarchy
 #                                 Result
@@ -114,7 +114,7 @@ class RelaxResult(InvestigationResult):
     """
     def __init__(self, replay: Replay, ur: int, ischeat: bool):
         super().__init__(replay, ischeat, ResultType.RELAX)
-        self.ur = ur_to_cv_ur(ur, replay.mods)
+        self.ur = convert_ur(ur, replay.mods, to="cv")
         self.ucv_ur = ur
 
 
