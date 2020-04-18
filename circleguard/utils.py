@@ -126,11 +126,15 @@ def convert_ur(ur, mods, *, to):
     """
     if to not in ["cv", "ucv"]:
         raise ValueError(f"Expected one of cv, ucv. Got {to}")
+
     conversion_factor = 1
 
     if Mod.DT in mods:
-        conversion_factor = (1 / 1.5) if to == "cv" else 1.5
+        conversion_factor = (1 / 1.5)
     elif Mod.HT in mods:
-        conversion_factor = (1 / 0.75) if to == "cv" else 0.75
+        conversion_factor = (1 / 0.75)
 
-    return ur * conversion_factor
+    if to == "cv":
+        return ur * conversion_factor
+    elif to == "ucv":
+        return ur / conversion_factor
