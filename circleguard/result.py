@@ -94,9 +94,6 @@ class StealResult(ComparisonResult):
             self.earlier_replay: Replay = self.replay2
             self.later_replay: Replay = self.replay1
 
-# TODO remove in 4.x
-# @deprecated
-ReplayStealingResult = StealResult
 
 class RelaxResult(InvestigationResult):
     """

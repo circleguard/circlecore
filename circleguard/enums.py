@@ -459,7 +459,3 @@ class Key(IntFlag):
     K1 = 4
     K2 = 8
     SMOKE = 16
-
-# TODO remove in 4.x
-# @deprecated
-Keys = Key

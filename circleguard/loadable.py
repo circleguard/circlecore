@@ -121,9 +121,6 @@ class LoadableContainer(Loadable):
         return iter(self.all_replays())
 
 
-# TODO remove in 4.x
-InfoLoadable = LoadableContainer
-
 class ReplayContainer(LoadableContainer):
     """
     A LoadableContainer that only holds Replays and subclasses thereof.
