@@ -37,3 +37,8 @@ class Span():
         # could probably optimize out the ``to_set``` call, but it's cheap
         # anyway
         return max(self.to_set())
+
+    def __eq__(self, span):
+        if not isinstance(span, Span):
+            return False
+        return self.to_set() == span.to_set()
