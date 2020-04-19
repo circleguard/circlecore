@@ -5,7 +5,7 @@ import circleparse
 import numpy as np
 
 from circleguard.enums import RatelimitWeight, ModCombination
-from circleguard.utils import TRACE, span_to_list
+from circleguard.utils import TRACE
 
 
 class Loadable(abc.ABC):
@@ -171,19 +171,13 @@ class Check(LoadableContainer):
         passed in ``detect``. If passed, the loadables in ``loadables`` will
         not be compared to each other, but instead to each replay in
         ``loadables2``, for replay stealing.
-    cache: bool
-        Whether to cache the loadables once they are loaded. This will be
-        overriden by a ``cache`` option set by a :class:`~Loadable` in
-        ``loadables``. It only affects children loadables when they do not have
-        a ``cache`` option set.
     """
 
-    def __init__(self, loadables, detect, loadables2=None, cache=None):
+    def __init__(self, loadables, loadables2, cache):
         super().__init__(cache)
         self.log = logging.getLogger(__name__ + ".Check")
-        self.loadables = [loadables] if isinstance(loadables, Loadable) else loadables
+        self.loadables1 = [loadables] if isinstance(loadables, Loadable) else loadables
         self.loadables2 = [loadables2] if isinstance(loadables2, Loadable) else [] if loadables2 is None else loadables2
-        self.detect = detect
 
     def all_loadables(self):
         """
@@ -197,7 +191,7 @@ class Check(LoadableContainer):
 
         See Also
         --------
-        :func:`~Check.all_replays` and :func:`~Check.all_replays2`.
+        :func:`~Check.all_replays`.
 
         Notes
         -----
@@ -206,28 +200,23 @@ class Check(LoadableContainer):
         ``len(check.all_loadables())`` will *not* return the number of
         replays in the check, for instance.
         """
-        return self.loadables + self.loadables2
+        return self.loadables1 + self.loadables2
 
     def all_replays(self):
-        return self.all_replays1() + self.all_replays2()
-
-    def all_replays1(self):
         """
         Returns all the :class:`~.Replay`\s in this check. Contrast with
         :func:`~Check.all_loadables`, which returns all the
         :class:`~.Loadable`\s in this check.
+        """
+        return self.all_replays1() + self.all_replays2()
 
-        Warnings
-        --------
-        If you want an accurate list of :class:`~.Replay`\s in this check, you
-        must call :func:`~circleguard.circleguard.Circleguard.load` on this
-        :class:`~Check` before :func:`~Check.all_replays`.
-        :class:`~.LoadableContainer`\s contained in this :class:`~Check` may not
-        be info loaded otherwise, and thus do not have a complete list of the
-        replays they represent.
+    def all_replays1(self):
+        """
+        Returns all the :class:`~.Replay`\s contained by ``loadables1`` of this
+        check.
         """
         replays = []
-        for loadable in self.loadables:
+        for loadable in self.loadables1:
             if isinstance(loadable, LoadableContainer):
                 replays += loadable.all_replays()
             else:
@@ -236,7 +225,7 @@ class Check(LoadableContainer):
 
     def all_replays2(self):
         """
-        Returns all the :class:`~.Replay`\s contained by ``replays2`` of this
+        Returns all the :class:`~.Replay`\s contained by ``loadables2`` of this
         check.
         """
         replays2 = []
@@ -252,14 +241,9 @@ class Check(LoadableContainer):
             return False
         return self.all_replays() == loadable.all_replays()
 
-    def __add__(self, other):
-        self.loadables.append(other)
-        # TODO why not just return ``self``?
-        return Check(self.loadables, self.detect, self.loadables2, self.cache)
-
     def __repr__(self):
-        return (f"Check(loadables={self.loadables},loadables2={self.loadables2},cache={self.cache},"
-                f"detect={self.detect},loaded={self.loaded})")
+        return (f"Check(loadables={self.loadables1},loadables2={self.loadables2},"
+                f"loaded={self.loaded})")
 
 
 class Map(ReplayContainer):
@@ -286,22 +270,17 @@ class Map(ReplayContainer):
     cache: bool
         Whether to cache the replays once they are loaded.
     """
-    def __init__(self, map_id, num=None, span=None, mods=None, cache=None):
+    def __init__(self, map_id, span, mods=None, cache=None):
         super().__init__(cache)
-        if not bool(num) ^ bool(span):
-            # technically, num and span both being set would *work*, just span
-            # would override. But this avoids any confusion.
-            raise ValueError("One of num or span must be specified, but not both")
         self.replays = []
         self.map_id = map_id
-        self.num = num
         self.mods = mods
         self.span = span
 
     def load_info(self, loader):
         if self.info_loaded:
             return
-        for info in loader.replay_info(self.map_id, num=self.num, mods=self.mods, span=self.span):
+        for info in loader.replay_info(self.map_id, self.span, mods=self.mods):
             self.replays.append(ReplayMap(info.map_id, info.user_id, info.mods, cache=self.cache, info=info))
         self.info_loaded = True
 
@@ -311,11 +290,11 @@ class Map(ReplayContainer):
     def __eq__(self, loadable):
         if not isinstance(loadable, Map):
             return False
-        return (self.map_id == loadable.map_id and self.num == loadable.num
-                and self.mods == loadable.mods and self.span == loadable.span)
+        return (self.map_id == loadable.map_id and self.mods == loadable.mods
+                and self.span == loadable.span)
 
     def __repr__(self):
-        return (f"Map(map_id={self.map_id},num={self.num},cache={self.cache},mods={self.mods},"
+        return (f"Map(map_id={self.map_id},cache={self.cache},mods={self.mods},"
                 f"span={self.span},replays={self.replays},loaded={self.loaded})")
 
     def __str__(self):
