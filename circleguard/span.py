@@ -38,6 +38,14 @@ class Span():
         # anyway
         return max(self.to_set())
 
+    @classmethod
+    def from_string_or_span(cls, data):
+        if isinstance(data, Span):
+            return data
+        if isinstance(data, str):
+            return Span(data)
+        raise ValueError(f"Expected data to be a str or Span, got type {type(data)}.")
+
     def __eq__(self, span):
         if not isinstance(span, Span):
             return False

@@ -255,7 +255,7 @@ class Map(ReplayContainer):
     ----------
     map_id: int
         The map to represent the top plays for.
-    span: Span
+    span: str or Span
         A comma separated list of ranges of top plays to retrieve.
         ``span="1-3,6,2-4"`` -> replays in the range ``[1,2,3,4,6]``.
     mods: :class:`~.enums.ModCombination`
@@ -273,7 +273,7 @@ class Map(ReplayContainer):
         self.replays = []
         self.map_id = map_id
         self.mods = mods
-        self.span = Span(span) if type(span) is str else span
+        self.span = Span.from_string_or_span(span)
 
     def load_info(self, loader):
         if self.info_loaded:
@@ -307,7 +307,7 @@ class User(ReplayContainer):
     ----------
     user_id: int
         The user to represent the top plays for.
-    span: Span
+    span: str or Span
         A comma separated list of ranges of top plays to retrieve.
         ``span="1-3,6,2-4"`` -> replays in the range ``[1,2,3,4,6]``.
     mods: :class:`~.enums.ModCombination`
@@ -327,7 +327,7 @@ class User(ReplayContainer):
         super().__init__(cache)
         self.replays = []
         self.user_id = user_id
-        self.span = Span(span) if type(span) is str else span
+        self.span = Span.from_string_or_span(span)
         self.mods = mods
         self.available_only = available_only
 
@@ -371,7 +371,7 @@ class MapUser(ReplayContainer):
         The map to represent scores by `user_id` on.
     user_id: int
         The user to represent scores on `map_id` for.
-    span: Span
+    span: str or Span
         A comma separated list of ranges of plays to retrieve.
         ``span="1-3,6,2-4"`` -> replays in the range ``[1,2,3,4,6]``.
     cache: bool
@@ -386,7 +386,7 @@ class MapUser(ReplayContainer):
         self.replays = []
         self.map_id = map_id
         self.user_id = user_id
-        self.span = Span(span) if type(span) is str else span
+        self.span = Span.from_string_or_span(span)
         self.available_only = available_only
 
     def load_info(self, loader):
