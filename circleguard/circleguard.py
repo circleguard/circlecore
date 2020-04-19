@@ -62,23 +62,20 @@ class Circleguard:
             self.library = Library(slider_dir)
 
 
-    def run(self, check):
+    def run(self, loadables, detect, loadables2=None):
         """
-        Investigates replays held in a check for cheats.
+        Investigates loadables for cheats.
 
         Parameters
         ----------
-        check: :class:`~.Check`
-            A check holding the replays to investigate, and what to investigate
-            them for.
+        loadables: list[:class:`~.Loadable`]
+            The loadables to investigate.
 
         Yields
         ------
         :class:`~.Result`
-            A result representing a single investigation of the replays
-            in ``check``. Depending on how many replays are in
-            ``check``, and what type of cheats we are investigating for,
-            the total number of :class:`~.Result`\s yielded may vary.
+            A result representing an investigation of one or more of the replays
+            in ``loadables``, depending on the ``detect`` passed.
 
         Notes
         -----
@@ -87,11 +84,11 @@ class Circleguard:
         :meth:`~.run` without waiting for all of the investigations to finish.
         """
 
-        c = check
-        self.log.info("Running circleguard with %r", c)
+        c = Check(loadables, loadables2, self.cache)
+        d = detect
+        self.log.info("Running circleguard with check %r", c)
 
-        c.load(self.loader, self.cache)
-        d = c.detect
+        c.load(self.loader)
         # steal check
         if Detect.STEAL in d:
             compare1 = c.all_replays()

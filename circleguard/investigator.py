@@ -1,6 +1,6 @@
 
 import numpy as np
-from circleguard.enums import Keys, Detect
+from circleguard.enums import Key, Detect
 from circleguard.result import RelaxResult, CorrectionResult
 from circleguard.utils import convert_ur
 import math
@@ -25,7 +25,7 @@ class Investigator:
     :class:`~.comparer.Comparer`, for comparing multiple replays.
     """
 
-    MASK = int(Keys.M1) | int(Keys.M2)
+    MASK = int(Key.M1) | int(Key.M2)
 
     def __init__(self, replay, detect, beatmap=None):
         self.replay = replay

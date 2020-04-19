@@ -9,7 +9,7 @@ from circleguard.loadable import Replay
 from circleguard.enums import Mod
 from circleguard.exceptions import InvalidArgumentsException, CircleguardException
 import circleguard.utils as utils
-from circleguard.result import ReplayStealingResult
+from circleguard.result import StealResult
 
 class Comparer:
     """
@@ -111,7 +111,7 @@ class Comparer:
         if(mean < self.threshold):
             ischeat = True
 
-        return ReplayStealingResult(replay1, replay2, mean, ischeat)
+        return StealResult(replay1, replay2, mean, ischeat)
 
     @staticmethod
     def _compare_two_replays(replay1, replay2):
