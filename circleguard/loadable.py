@@ -6,7 +6,8 @@ import numpy as np
 
 from circleguard.enums import RatelimitWeight, ModCombination
 from circleguard.utils import TRACE
-
+from circleguard.loader import Loader
+from circleguard.span import Span
 
 class Loadable(abc.ABC):
     """
@@ -254,17 +255,14 @@ class Map(ReplayContainer):
     ----------
     map_id: int
         The map to represent the top plays for.
-    num: int
-        How many top plays on the map to represent, starting from the first
-        place play. One of ``num`` or ``span`` must be passed, but not both.
-    span: str
+    span: Span
         A comma separated list of ranges of top plays to retrieve.
         ``span="1-3,6,2-4"`` -> replays in the range ``[1,2,3,4,6]``.
     mods: :class:`~.enums.ModCombination`
         If passed, only represent replays played with this exact mod
         combination. Due to limitations with the api, fuzzy matching is not
         implemented. <br>
-        This is applied before ``num`` or ``span``. That is, if ``num=2``
+        This is applied before span``. That is, if ``span="1-2"``
         and ``mods=Mod.HD``, the top two ``HD`` plays on the map are
         represented.
     cache: bool
@@ -275,7 +273,7 @@ class Map(ReplayContainer):
         self.replays = []
         self.map_id = map_id
         self.mods = mods
-        self.span = span
+        self.span = Span(span) if type(span) is str else span
 
     def load_info(self, loader):
         if self.info_loaded:
@@ -309,40 +307,34 @@ class User(ReplayContainer):
     ----------
     user_id: int
         The user to represent the top plays for.
-    num: int
-        How many top plays of the user to represent, starting from their best
-        play. One of ``num`` or ``span`` must be passed, but not both.
-    span: str
+    span: Span
         A comma separated list of ranges of top plays to retrieve.
         ``span="1-3,6,2-4"`` -> replays in the range ``[1,2,3,4,6]``.
     mods: :class:`~.enums.ModCombination`
         If passed, only represent replays played with this exact mod
         combination. Due to limitations with the api, fuzzy matching is not
         implemented. <br>
-        This is applied before ``num`` or ``span``. That is, if ``num=2``
+        This is applied before ``span``. That is, if ``span="1-2"``
         and ``mods=Mod.HD``, the user's top two ``HD`` plays are represented.
     cache: bool
         Whether to cache the replays once they are loaded.
     available_only: bool
         Whether to represent only replays that have replay data available.
-        Replays are filtered on this basis after ``mods`` and ``num``/``span``
+        Replays are filtered on this basis after ``mods`` and ``span``
         are applied. True by default.
     """
-    def __init__(self, user_id, num=None, span=None, mods=None, cache=None, available_only=True):
+    def __init__(self, user_id, span, mods=None, cache=None, available_only=True):
         super().__init__(cache)
-        if not bool(num) ^ bool(span):
-            raise ValueError("One of num or span must be specified, but not both")
         self.replays = []
         self.user_id = user_id
-        self.num = num
-        self.span = span
+        self.span = Span(span) if type(span) is str else span
         self.mods = mods
         self.available_only = available_only
 
     def load_info(self, loader):
         if self.info_loaded:
             return
-        for info in loader.get_user_best(self.user_id, num=self.num, span=self.span, mods=self.mods):
+        for info in loader.get_user_best(self.user_id, span=self.span, mods=self.mods):
             if self.available_only and not info.replay_available:
                 continue
             self.replays.append(ReplayMap(info.map_id, info.user_id, info.mods, cache=self.cache, info=info))
@@ -365,8 +357,8 @@ class User(ReplayContainer):
     def __eq__(self, loadable):
         if not isinstance(loadable, User):
             return False
-        return (self.user_id == loadable.user_id and self.num == loadable.num
-                and self.mods == loadable.mods and self.span == loadable.span)
+        return (self.user_id == loadable.user_id and self.mods == loadable.mods
+                and self.span == loadable.span)
 
 
 class MapUser(ReplayContainer):
@@ -379,34 +371,28 @@ class MapUser(ReplayContainer):
         The map to represent scores by `user_id` on.
     user_id: int
         The user to represent scores on `map_id` for.
-    num: int
-        How many plays by `user_id` on `map_id` to represent.
-        One of ``num`` or ``span`` must be passed, but not both.
-    span: str
+    span: Span
         A comma separated list of ranges of plays to retrieve.
         ``span="1-3,6,2-4"`` -> replays in the range ``[1,2,3,4,6]``.
     cache: bool
         Whether to cache the replays once they are loaded.
     available_only: bool
         Whether to represent only replays that have replay data available.
-        Replays are filtered on this basis after ``mods`` and ``num``/``span``
+        Replays are filtered on this basis after ``mods`` and ``span``
         are applied. True by default.
     """
-    def __init__(self, map_id, user_id, num=None, span=None, cache=None, available_only=True):
+    def __init__(self, map_id, user_id, span=Loader.MAX_MAP_SPAN, cache=None, available_only=True):
         super().__init__(cache)
-        if not bool(num) ^ bool(span):
-            raise ValueError("One of num or span must be specified, but not both")
         self.replays = []
         self.map_id = map_id
         self.user_id = user_id
-        self.num = num
-        self.span = span
+        self.span = Span(span) if type(span) is str else span
         self.available_only = available_only
 
     def load_info(self, loader):
         if self.info_loaded:
             return
-        for info in loader.replay_info(self.map_id, num=self.num, span=self.span, user_id=self.user_id, limit=False):
+        for info in loader.replay_info(self.map_id, span=self.span, user_id=self.user_id, limit=False):
             if self.available_only and not info.replay_available:
                 continue
             self.replays.append(ReplayMap(info.map_id, info.user_id, info.mods, cache=self.cache, info=info))
@@ -419,7 +405,7 @@ class MapUser(ReplayContainer):
         if not isinstance(loadable, MapUser):
             return False
         return (self.map_id == loadable.map_id and self.user_id == loadable.user_id
-                and self.num == loadable.num and self.span == loadable.span)
+                and self.span == loadable.span)
 
 
 class Replay(Loadable):
