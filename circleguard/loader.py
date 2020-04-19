@@ -201,10 +201,10 @@ class Loader():
 
         if not (span or user_id):
             raise InvalidArgumentsException("One of user_id or span must be passed, but not both")
-        limit = None
+        api_limit = None
         if span:
-            limit = span.max()
-        response = self.api.get_scores({"m": "0", "b": map_id, "limit": limit, "u": user_id, "mods": mods if mods is None else mods.value})
+            api_limit = span.max()
+        response = self.api.get_scores({"m": "0", "b": map_id, "limit": api_limit, "u": user_id, "mods": mods if mods is None else mods.value})
         Loader.check_response(response)
         if span:
             span_set = span.to_set()
@@ -254,8 +254,8 @@ class Loader():
         self.log.log(TRACE, "Loading user best of %s with options %s",
                             user_id, {k: locals_[k] for k in locals_ if k != 'self'})
 
-        limit = span.max()
-        response = self.api.get_user_best({"m": "0", "u": user_id, "limit": limit})
+        api_limit = span.max()
+        response = self.api.get_user_best({"m": "0", "u": user_id, "limit": api_limit})
         Loader.check_response(response)
         if mods:
             _response = []
