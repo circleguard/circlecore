@@ -12,6 +12,7 @@ from circleguard.exceptions import (CircleguardException, InvalidArgumentsExcept
 from circleguard.version import __version__
 from circleguard.result import (Result, InvestigationResult, ComparisonResult,
         RelaxResult, ResultType, CorrectionResult)
+from circleguard.span import Span
 
 logging.addLevelName(TRACE, "TRACE")
 formatter = ColoredFormatter("[%(threadName)s][%(name)s][%(levelname)s]  %(message)s  (%(filename)s:%(lineno)s)")
@@ -26,4 +27,4 @@ __all__ = ["Circleguard", "set_options", "Check", "Replay", "ReplayMap", "StealD
            "CircleguardException", "InvalidArgumentsException", "Map", "User",
            "APIException", "NoInfoAvailableException", "UnknownAPIException", "InternalAPIException",
            "InvalidKeyException", "RatelimitException", "InvalidJSONException", "ReplayUnavailableException", "Key",
-           "Mod", "CorrectionResult", "MapUser", "ReplayContainer", "LoadableContainer", "Loadable"]
+           "Mod", "CorrectionResult", "MapUser", "ReplayContainer", "LoadableContainer", "Loadable", "Span"]
