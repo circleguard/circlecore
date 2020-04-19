@@ -155,7 +155,7 @@ class Loader():
         ----------
         map_id: int
             The map id to retrieve replay info for.
-        span: str
+        span: Span
             A comma separated list of ranges of top replays on the map to
             retrieve. ``span="1-3,6,2-4"`` -> replays in the range
             ``[1,2,3,4,6]``.
@@ -171,7 +171,6 @@ class Loader():
             ``user_id`` is passed. If ``limit`` is ``True``, will only return
             the top scoring replay info by ``user_id``. If ``False``, will return
             all scores by ``user_id``.
-
 
         Returns
         -------
@@ -232,7 +231,7 @@ class Loader():
         ----------
         user_id: int
             The user id to get best plays of.
-        span: str
+        span: Span
             A comma separated list of ranges of top plays to retrieve.
             ``span="1-3,6,2-4"`` -> replays in the range ``[1,2,3,4,6]``.
         mods: :class:`~.ModCombination`
