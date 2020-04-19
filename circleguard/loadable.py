@@ -64,12 +64,50 @@ class LoadableContainer(Loadable):
         self.cache = cache
         self.info_loaded = False
 
-    @abc.abstractmethod
+    def load(self, loader, cache=None):
+        """
+        Loads all :class:`~circleguard.loadable.Loadable`\s contained by this
+        loadable container.
+
+        Parameters
+        ----------
+        loader: :class:`~circleguard.loader.Loader`
+            The loader to load the :class:`~circleguard.loadable.Loadable`\s
+            with.
+        """
+        if self.loaded:
+            return
+        cascade_cache = cache if self.cache is None else self.cache
+        self.load_info(loader)
+        for loadable in self.all_loadables():
+            loadable.load(loader, cascade_cache)
+        self.loaded = True
+
     def load_info(self, loader):
+        if self.info_loaded:
+            return
+        for loadable in self.all_loadables():
+            if isinstance(loadable, LoadableContainer):
+                loadable.load_info(loader)
+        self.info_loaded = True
+
+    @abc.abstractmethod
+    def all_loadables(self):
         pass
 
     @abc.abstractmethod
     def all_replays(self):
+        """
+        Returns all the :class:`~.Replay`\s in this loadable container.
+
+        Warnings
+        --------
+        If you want an accurate list of :class:`~.Replay`\s in this instance,
+        you must call :func:`~circleguard.circleguard.Circleguard.load` on this
+        instance before :func:`~Map.all_replays`. Otherwise, this
+        instance is not info loaded, and does not have a complete list of
+        replays it represents.
+        """
         pass
 
     def __getitem__(self, key):
@@ -81,6 +119,7 @@ class LoadableContainer(Loadable):
 
     def __iter__(self):
         return iter(self.all_replays())
+
 
 # TODO remove in 4.x
 InfoLoadable = LoadableContainer
@@ -106,6 +145,18 @@ class ReplayContainer(LoadableContainer):
     """
     def __init__(self, cache):
         super().__init__(cache)
+
+    # redefine as abstract. THe LoadableContainer definition serves as a good
+    # default implementation for other user-defined loadable containers, but not
+    # for ReplayContainers and user-defined subclasses thereof.
+    @abc.abstractmethod
+    def load_info(self, loader):
+        pass
+
+    def all_loadables(self):
+        # ReplayContainers only contain replays, so these two functions
+        # are equivalent
+        return self.all_replays()
 
 
 class Check(LoadableContainer):
@@ -160,31 +211,6 @@ class Check(LoadableContainer):
         """
         return self.loadables + self.loadables2
 
-    def load(self, loader, cache=None):
-        """
-        Loads all :class:`~circleguard.loadable.Loadable`\s in this check.
-
-        Parameters
-        ----------
-        loader: :class:`~circleguard.loader.Loader`
-            The loader to load the :class:`~circleguard.loadable.Loadable`\s with.
-        """
-        if self.loaded:
-            return
-        cascade_cache = cache if self.cache is None else self.cache
-        self.load_info(loader)
-        for loadable in self.all_loadables():
-            loadable.load(loader, cascade_cache)
-        self.loaded = True
-
-    def load_info(self, loader):
-        if self.info_loaded:
-            return
-        for loadable in self.all_loadables():
-            if isinstance(loadable, LoadableContainer):
-                loadable.load_info(loader)
-        self.info_loaded = True
-
     def all_replays(self):
         return self.all_replays1() + self.all_replays2()
 
@@ -238,6 +264,7 @@ class Check(LoadableContainer):
         return (f"Check(loadables={self.loadables},loadables2={self.loadables2},cache={self.cache},"
                 f"detect={self.detect},loaded={self.loaded})")
 
+
 class Map(ReplayContainer):
     """
     A map's top plays (leaderboard), as seen on the website.
@@ -281,28 +308,7 @@ class Map(ReplayContainer):
             self.replays.append(ReplayMap(info.map_id, info.user_id, info.mods, cache=self.cache, info=info))
         self.info_loaded = True
 
-    def load(self, loader, cache=None):
-        if self.loaded:
-            return
-        # only listen to the parent's cache if ours is not set. Lower takes precedence
-        cascade_cache = cache if self.cache is None else self.cache
-        self.load_info(loader)
-        for replay in self.replays:
-            replay.load(loader, cascade_cache)
-        self.loaded = True
-
     def all_replays(self):
-        """
-        Returns all the :class:`~.Replay`\s in this map.
-
-        Warnings
-        --------
-        If you want an accurate list of :class:`~.Replay`\s in this map, you
-        must call :func:`~circleguard.circleguard.Circleguard.load` on this map
-        before :func:`~Map.all_replays`. Otherwise, this
-        class is not info loaded, and does not have a complete list of replays
-        it represents.
-        """
         return self.replays
 
     def __eq__(self, loadable):
@@ -377,17 +383,6 @@ class User(ReplayContainer):
         self.loaded = True
 
     def all_replays(self):
-        """
-        Returns all the :class:`~.Replay`\s in this user.
-
-        Warnings
-        --------
-        If you want an accurate list of :class:`~.Replay`\s in this user, you
-        must call :func:`~circleguard.circleguard.Circleguard.load` on this
-        user before :func:`~User.all_replays`. Otherwise, this class is not
-        info loaded, and does not have a complete list of replays it
-        represents.
-        """
         return self.replays
 
 
@@ -441,27 +436,7 @@ class MapUser(ReplayContainer):
             self.replays.append(ReplayMap(info.map_id, info.user_id, info.mods, cache=self.cache, info=info))
         self.info_loaded = True
 
-    def load(self, loader, cache=None):
-        if self.loaded:
-            return
-        # only listen to the parent's cache if ours is not set. Lower takes precedence
-        cascade_cache = cache if self.cache is None else self.cache
-        self.load_info(loader)
-        for loadable in self.replays:
-            loadable.load(loader, cascade_cache)
-        self.loaded = True
-
     def all_replays(self):
-        """
-        Returns all the :class:`~.Replay`\s in this MapUser.
-
-        Warnings
-        --------
-        If you want an accurate list of :class:`~.Replay`\s in this MapUser,
-        you must call :func:`~circleguard.circleguard.Circleguard.load` on this
-        MapUser before :func:`~.all_replays`. Otherwise, this class is not info
-        loaded, and does not have a complete list of replays it represents.
-        """
         return self.replays
 
     def __eq__(self, loadable):
