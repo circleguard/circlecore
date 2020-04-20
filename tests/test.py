@@ -46,7 +46,7 @@ class TestReplays(CGTestCase):
         r = list(self.cg.steal_check(replays))
         self.assertEqual(len(r), 1, f"{len(r)} results returned instead of 1")
         r = r[0]
-        self.assertTrue(r.ischeat, "Cheated replays were not detected as cheated")
+        self.assertTrue(r.similarity < 18, "Cheated replays were not detected as cheated")
 
         r1 = r.replay1
         r2 = r.replay2
@@ -67,7 +67,7 @@ class TestReplays(CGTestCase):
         r = list(self.cg.steal_check(replays))
         self.assertEqual(len(r), 1, f"{len(r)} results returned instead of 1")
         r = r[0]
-        self.assertFalse(r.ischeat, "Legitimate replays were detected as stolen")
+        self.assertFalse(r.similarity < 18, "Legitimate replays were detected as stolen")
 
         r1 = r.replay1
         r2 = r.replay2
@@ -117,7 +117,7 @@ class TestReplays(CGTestCase):
             results_num = num * (num - 1) / 2 #n choose k formula with k=2
             self.assertEqual(len(r), results_num, f"{len(r)} results returned instead of {results_num}")
             r = r[0]
-            self.assertTrue(r.ischeat, f"Cheated replays were not detected as cheated at num {num}")
+            self.assertTrue(r.similarity < 18, f"Cheated replays were not detected as cheated at num {num}")
 
             r1 = r.replay1
             r2 = r.replay2
