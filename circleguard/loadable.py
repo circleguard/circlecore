@@ -58,7 +58,7 @@ class LoadableContainer(Loadable):
     When info loaded, the :class:`~LoadableContainer` has :class:`~Loadable`\s
     but they are unloaded.
 
-    When loaded, the :class:`~InfoLoadable` has loaded :class:`Loadable`\s.
+    When loaded, the :class:`~LoadableContainer` has loaded :class:`Loadable`\s.
     """
     def __init__(self, cache):
         super().__init__()

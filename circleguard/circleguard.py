@@ -179,8 +179,8 @@ class Circleguard:
 
         Parameters
         ----------
-        loadable: :class:`~circleguard.loadable.InfoLoadable`
-            The info loadable to load.
+        loadable: :class:`~circleguard.loadable.LoadableContainer`
+            The loadable container to load.
 
         Notes
         -----
