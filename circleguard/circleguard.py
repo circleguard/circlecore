@@ -12,7 +12,8 @@ from circleguard.investigator import Investigator
 from circleguard.cacher import Cacher
 from circleguard.exceptions import CircleguardException
 from circleguard.loadable import Check, ReplayMap, ReplayPath, Replay, Map
-from circleguard.enums import Detect, RatelimitWeight
+from circleguard.enums import RatelimitWeight
+from circleguard.detect import Detect, StealDetect, RelaxDetect, CorrectionDetect
 from slider import Beatmap, Library
 
 
@@ -64,7 +65,7 @@ class Circleguard:
 
     def run(self, loadables, detect, loadables2=None):
         """
-        Investigates loadables for cheats.
+        Investigates the given loadables for cheats.
 
         Parameters
         ----------
@@ -93,7 +94,7 @@ class Circleguard:
         if Detect.STEAL in d:
             compare1 = c.all_replays()
             compare2 = c.all_replays2()
-            comparer = Comparer(d.steal_thresh, compare1, replays2=compare2)
+            comparer = Comparer(d.max_sim, compare1, replays2=compare2)
             yield from comparer.compare()
 
         # relax check
@@ -117,6 +118,45 @@ class Circleguard:
                 if not self.library:
                     # disconnect from temporary library
                     library.close()
+
+    def steal_check(self, loadables, max_sim=StealDetect.DEFAULT_SIM, loadables2=None):
+        """
+        Investigates the given loadables for replay stealing.
+
+        Yields
+        ------
+        :class:`~.StealResult`
+            A result representing a replay stealing investigtion into a pair of
+            loadables from ``loadables`` and/or ``loadables2``.
+        """
+        c = StealDetect(max_sim)
+        yield from self.run(loadables, c, loadables2)
+
+    def relax_check(self, loadables, max_ur=RelaxDetect.DEFAULT_UR):
+        """
+        Investigates the given loadables for relax.
+
+        Yields
+        ------
+        :class:`~.RelaxResult`
+            A result representing a relax investigation into a loadable from
+            ``loadables``.
+        """
+        c = RelaxDetect(max_ur)
+        yield from self.run(loadables, c)
+
+    def correction_check(self, loadables, max_angle=CorrectionDetect.DEFAULT_ANGLE, min_distance=CorrectionDetect.DEFAULT_DISTANCE):
+        """
+        Investigates the given loadables for aim correction.
+
+        Yields
+        ------
+        :class:`~.CorrectionResult`
+            A result representing an aim correction investigation into a
+            loadable from ``loadables``.
+        """
+        c = CorrectionDetect(max_angle, min_distance)
+        yield from self.run(loadables, c)
 
     def load(self, loadable):
         """

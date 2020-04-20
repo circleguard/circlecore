@@ -1,9 +1,11 @@
+import math
 
 import numpy as np
-from circleguard.enums import Key, Detect
+
+from circleguard.enums import Key
+from circleguard.detect import Detect
 from circleguard.result import RelaxResult, CorrectionResult
 from circleguard.utils import convert_ur
-import math
 
 class Investigator:
     """
@@ -41,7 +43,7 @@ class Investigator:
         if Detect.RELAX in d:
             ur = self.ur(self.replay, self.beatmap)
             cv_ur = convert_ur(ur, self.replay.mods, to="cv")
-            ischeat = True if cv_ur < d.ur_thresh else False
+            ischeat = True if cv_ur < d.max_ur else False
             yield RelaxResult(self.replay, ur, ischeat)
         if Detect.CORRECTION in d:
             suspicious_angles = self.aim_correction(self.replay, d.max_angle, d.min_distance)

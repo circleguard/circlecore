@@ -42,7 +42,7 @@ class TestReplays(CGTestCase):
     def test_cheated_replaypath(self):
         # taken from http://redd.it/bvfv8j, remodded replay by same user (CielXDLP) from HDHR to FLHDHR
         replays = [ReplayPath(RES / "stolen_replay1.osr"), ReplayPath(RES / "stolen_replay2.osr")]
-        r = list(self.cg.run(replays, detect=StealDetect(18)))
+        r = list(self.cg.steal_check(replays))
         self.assertEqual(len(r), 1, f"{len(r)} results returned instead of 1")
         r = r[0]
         self.assertTrue(r.ischeat, "Cheated replays were not detected as cheated")
@@ -63,7 +63,7 @@ class TestReplays(CGTestCase):
 
     def test_legitimate_replaypath(self):
         replays = [ReplayPath(RES / "legit_replay1.osr"), ReplayPath(RES / "legit_replay2.osr")]
-        r = list(self.cg.run(replays, detect=StealDetect(18)))
+        r = list(self.cg.steal_check(replays))
         self.assertEqual(len(r), 1, f"{len(r)} results returned instead of 1")
         r = r[0]
         self.assertFalse(r.ischeat, "Legitimate replays were detected as stolen")
@@ -112,7 +112,7 @@ class TestReplays(CGTestCase):
                    ReplayPath(RES / "legit_replay1.osr"), ReplayPath(RES / "legit_replay2.osr")]
 
         for num in range(2, 5):
-            r = list(self.cg.run(replays[:num], StealDetect(18)))
+            r = list(self.cg.steal_check(replays[:num]))
             results_num = num * (num - 1) / 2 #n choose k formula with k=2
             self.assertEqual(len(r), results_num, f"{len(r)} results returned instead of {results_num}")
             r = r[0]
@@ -139,7 +139,7 @@ class TestCorrection(CGTestCase):
         cls.r1 = ReplayPath(RES / "corrected_replay1.osr")
 
     def test_cheated_replay(self):
-        r = list(self.cg.run([self.r1], CorrectionDetect()))[0]
+        r = list(self.cg.correction_check([self.r1]))[0]
         snaps = r.snaps
 
         self.assertEqual(len(snaps), 15)

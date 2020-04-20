@@ -2,7 +2,8 @@ import logging
 
 from circleguard.circleguard import Circleguard, set_options
 from circleguard.loadable import Check, Replay, ReplayMap, ReplayPath, Map, User, MapUser, ReplayContainer, LoadableContainer, Loadable
-from circleguard.enums import Detect, RatelimitWeight, Key, StealDetect, RelaxDetect, Mod, CorrectionDetect
+from circleguard.enums import Key, Mod, RatelimitWeight
+from circleguard.detect import Detect, StealDetect, RelaxDetect, CorrectionDetect
 from circleguard.utils import TRACE, ColoredFormatter
 from circleguard.loader import Loader
 from circleguard.replay_info import ReplayInfo
