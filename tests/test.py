@@ -139,7 +139,7 @@ class TestCorrection(CGTestCase):
         cls.r1 = ReplayPath(RES / "corrected_replay1.osr")
 
     def test_cheated_replay(self):
-        r = list(self.cg.correction_check([self.r1]))[0]
+        r = list(self.cg.correction_check(self.r1))[0]
         snaps = r.snaps
 
         self.assertEqual(len(snaps), 15)
