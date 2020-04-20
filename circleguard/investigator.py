@@ -2,8 +2,7 @@ import math
 
 import numpy as np
 
-from circleguard.enums import Key
-from circleguard.detect import Detect
+from circleguard.enums import Key, Detect
 from circleguard.result import RelaxResult, CorrectionResult
 from circleguard.utils import convert_ur
 
@@ -29,9 +28,11 @@ class Investigator:
 
     MASK = int(Key.M1) | int(Key.M2)
 
-    def __init__(self, replay, detect, beatmap=None):
+    def __init__(self, replay, detect, max_angle, min_distance, beatmap=None):
         self.replay = replay
         self.detect = detect
+        self.max_angle = max_angle
+        self.min_distance = min_distance
         self.beatmap = beatmap
         self.detect = detect
 
@@ -39,16 +40,12 @@ class Investigator:
         # equivalent of filtering out replays with no replay data from comparer on init
         if self.replay.replay_data is None:
             return
-        d = self.detect
-        if Detect.RELAX in d:
+        if self.detect & Detect.RELAX:
             ur = self.ur(self.replay, self.beatmap)
-            cv_ur = convert_ur(ur, self.replay.mods, to="cv")
-            ischeat = True if cv_ur < d.max_ur else False
-            yield RelaxResult(self.replay, ur, ischeat)
-        if Detect.CORRECTION in d:
-            suspicious_angles = self.aim_correction(self.replay, d.max_angle, d.min_distance)
-            ischeat = len(suspicious_angles) > 0
-            yield CorrectionResult(self.replay, suspicious_angles, ischeat)
+            yield RelaxResult(self.replay, ur)
+        if self.detect & Detect.CORRECTION:
+            suspicious_angles = self.aim_correction(self.replay, self.max_angle, self.min_distance)
+            yield CorrectionResult(self.replay, suspicious_angles)
 
     @staticmethod
     def ur(replay, beatmap):

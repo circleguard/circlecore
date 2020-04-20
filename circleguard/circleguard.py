@@ -12,8 +12,7 @@ from circleguard.investigator import Investigator
 from circleguard.cacher import Cacher
 from circleguard.exceptions import CircleguardException
 from circleguard.loadable import Check, ReplayMap, ReplayPath, Replay, Map
-from circleguard.enums import RatelimitWeight
-from circleguard.detect import Detect, StealDetect, RelaxDetect, CorrectionDetect
+from circleguard.enums import RatelimitWeight, Detect
 from slider import Beatmap, Library
 
 
@@ -40,7 +39,8 @@ class Circleguard:
         class itself, *not* an instantiation of it. It will be instantiated
         upon circleguard instantiation, with two args - a key and a cacher.
     """
-
+    DEFAULT_ANGLE = 10
+    DEFAULT_DISTANCE = 8
 
     def __init__(self, key, db_path=None, slider_dir=None, loader=None, cache=True):
         self.cache = cache
@@ -63,7 +63,7 @@ class Circleguard:
             self.library = Library(slider_dir)
 
 
-    def run(self, loadables, detect, loadables2=None):
+    def run(self, loadables, detect, loadables2=None, max_angle=DEFAULT_ANGLE, min_distance=DEFAULT_DISTANCE):
         """
         Investigates the given loadables for cheats.
 
@@ -86,20 +86,19 @@ class Circleguard:
         """
 
         c = Check(loadables, loadables2, self.cache)
-        d = detect
         self.log.info("Running circleguard with check %r", c)
 
         c.load(self.loader)
-        # steal check
-        if Detect.STEAL in d:
-            compare1 = c.all_replays()
-            compare2 = c.all_replays2()
-            comparer = Comparer(d.max_sim, compare1, replays2=compare2)
+        # comparer investigations
+        if detect & Detect.STEAL:
+            replays1 = c.all_replays1()
+            replays2 = c.all_replays2()
+            comparer = Comparer(replays1, replays2=replays2)
             yield from comparer.compare()
 
-        # relax check
-        if Detect.RELAX in d or Detect.CORRECTION in d:
-            if Detect.RELAX in d:
+        # investigator investigations
+        if detect & (Detect.RELAX | Detect.CORRECTION):
+            if detect & Detect.RELAX:
                 if not self.library:
                     # connect to library since it's a temporary one
                     library = Library(self.slider_dir.name)
@@ -109,17 +108,17 @@ class Circleguard:
             for replay in c.all_replays():
                 bm = None
                 # don't download beatmap unless we need it for relax
-                if Detect.RELAX in d:
+                if detect & Detect.RELAX:
                     bm = library.lookup_by_id(replay.map_id, download=True, save=True)
-                investigator = Investigator(replay, d, beatmap=bm)
+                investigator = Investigator(replay, detect, max_angle, min_distance, beatmap=bm)
                 yield from investigator.investigate()
 
-            if Detect.RELAX in d:
+            if detect & Detect.RELAX:
                 if not self.library:
                     # disconnect from temporary library
                     library.close()
 
-    def steal_check(self, loadables, max_sim=StealDetect.DEFAULT_SIM, loadables2=None):
+    def steal_check(self, loadables, loadables2=None):
         """
         Investigates the given loadables for replay stealing.
 
@@ -129,10 +128,9 @@ class Circleguard:
             A result representing a replay stealing investigtion into a pair of
             loadables from ``loadables`` and/or ``loadables2``.
         """
-        c = StealDetect(max_sim)
-        yield from self.run(loadables, c, loadables2)
+        yield from self.run(loadables, Detect.STEAL, loadables2)
 
-    def relax_check(self, loadables, max_ur=RelaxDetect.DEFAULT_UR):
+    def relax_check(self, loadables):
         """
         Investigates the given loadables for relax.
 
@@ -142,10 +140,9 @@ class Circleguard:
             A result representing a relax investigation into a loadable from
             ``loadables``.
         """
-        c = RelaxDetect(max_ur)
-        yield from self.run(loadables, c)
+        yield from self.run(loadables, Detect.RELAX)
 
-    def correction_check(self, loadables, max_angle=CorrectionDetect.DEFAULT_ANGLE, min_distance=CorrectionDetect.DEFAULT_DISTANCE):
+    def correction_check(self, loadables, max_angle=DEFAULT_ANGLE, min_distance=DEFAULT_DISTANCE):
         """
         Investigates the given loadables for aim correction.
 
@@ -155,8 +152,7 @@ class Circleguard:
             A result representing an aim correction investigation into a
             loadable from ``loadables``.
         """
-        c = CorrectionDetect(max_angle, min_distance)
-        yield from self.run(loadables, c)
+        yield from self.run(loadables, Detect.CORRECTION, max_angle=max_angle, min_distance=min_distance)
 
     def load(self, loadable):
         """

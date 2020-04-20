@@ -341,6 +341,15 @@ class RatelimitWeight(Enum):
     LIGHT = "Light"
     HEAVY = "Heavy"
 
+class Detect(IntFlag):
+    """
+    A cheat, or set of cheats, to investigate for.
+    """
+    STEAL      = 1 << 0
+    RELAX      = 1 << 1
+    CORRECTION = 1 << 2
+    ALL = STEAL + RELAX + CORRECTION
+
 class ResultType(Enum):
     """
     What type of cheat test to represent the results for.
@@ -353,8 +362,8 @@ class ResultType(Enum):
     TIMEWARP = "Timewarp"
 
 class Key(IntFlag):
-    M1 = 1
-    M2 = 2
-    K1 = 4
-    K2 = 8
-    SMOKE = 16
+    M1    = 1 << 0
+    M2    = 1 << 1
+    K1    = 1 << 2
+    K2    = 1 << 3
+    SMOKE = 1 << 4

@@ -20,8 +20,7 @@ class Result():
     type: :class:`~circleguard.enums.ResultType`
         What type of cheat test we are representing the results for.
     """
-    def __init__(self, ischeat: bool, type_: ResultType):
-        self.ischeat = ischeat
+    def __init__(self, type_: ResultType):
         self.type = type_
 
 class InvestigationResult(Result):
@@ -32,12 +31,10 @@ class InvestigationResult(Result):
     ----------
     replay: :class:`~circleguard.loadable.Replay`
         The replay investigated.
-    ischeat: bool
-        Whether the replay is cheated or not.
     """
 
-    def __init__(self, replay: Replay, ischeat: bool, type_: ResultType):
-        super().__init__(ischeat, type_)
+    def __init__(self, replay: Replay, type_: ResultType):
+        super().__init__(type_)
         self.replay = replay
 
 class ComparisonResult(Result):
@@ -50,8 +47,6 @@ class ComparisonResult(Result):
         One of the replays involved.
     replay2: :class:`~circleguard.loadable.Replay`
         The other replay involved.
-    ischeat: bool
-        Whether one of the replays is cheated or not.
     """
 
     def __init__(self, replay1: Replay, replay2: Replay, ischeat: bool, type_: ResultType):
@@ -79,12 +74,10 @@ class StealResult(ComparisonResult):
         The similarity of the two replays (the lower, the more similar).
         Similarity is, roughly speaking, a measure of the average pixel
         distance between the two replays.
-    ischeat: bool
-        Whether one of the replays is cheated or not.
     """
 
-    def __init__(self, replay1: Replay, replay2: Replay, similarity: int, ischeat: bool):
-        super().__init__(replay1, replay2, ischeat, ResultType.STEAL)
+    def __init__(self, replay1: Replay, replay2: Replay, similarity: int,):
+        super().__init__(replay1, replay2, ResultType.STEAL)
 
         self.similarity = similarity
         if self.replay1.timestamp < self.replay2.timestamp:
@@ -103,14 +96,12 @@ class RelaxResult(InvestigationResult):
     ----------
     replay: :class:`~circleguard.loadable.Replay`
         The replay investigated.
-    ur: int
+    ur: float
         The (unconverted) unstable rate of the replay. More information on UR
         available at https://osu.ppy.sh/help/wiki/Accuracy#accuracy
-    ischeat: bool
-        Whether the replay is cheated or not.
     """
-    def __init__(self, replay: Replay, ur: int, ischeat: bool):
-        super().__init__(replay, ischeat, ResultType.RELAX)
+    def __init__(self, replay: Replay, ur: float):
+        super().__init__(replay, ResultType.RELAX)
         self.ur = convert_ur(ur, replay.mods, to="cv")
         self.ucv_ur = ur
 
@@ -125,10 +116,8 @@ class CorrectionResult(InvestigationResult):
         The replay investigated.
     snaps: list[:class:`~circleguard.investigator.Snap`]
         A list of suspicious hits in the replay.
-    ischeat: bool
-        Whether the replay is cheated or not.
     """
 
-    def __init__(self, replay, snaps, ischeat):
-        super().__init__(replay, ischeat, ResultType.CORRECTION)
+    def __init__(self, replay, snaps):
+        super().__init__(replay, ResultType.CORRECTION)
         self.snaps = snaps
