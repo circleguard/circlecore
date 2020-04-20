@@ -49,8 +49,8 @@ class ComparisonResult(Result):
         The other replay involved.
     """
 
-    def __init__(self, replay1: Replay, replay2: Replay, ischeat: bool, type_: ResultType):
-        super().__init__(ischeat, type_)
+    def __init__(self, replay1: Replay, replay2: Replay, type_: ResultType):
+        super().__init__(type_)
         self.replay1 = replay1
         self.replay2 = replay2
 
