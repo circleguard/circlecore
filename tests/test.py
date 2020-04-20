@@ -2,8 +2,9 @@ import os
 from unittest import TestCase, skip, TestSuite, TextTestRunner
 from pathlib import Path
 import warnings
-from circleguard import (Circleguard, Check, ReplayMap, ReplayPath, RelaxDetect, StealDetect, CorrectionDetect,
-                         RatelimitWeight, set_options, Map, User, MapUser, Mod, Loader, InvalidKeyException)
+from circleguard import (Circleguard, Check, ReplayMap, ReplayPath, Detect,
+                         RatelimitWeight, set_options, Map, User, MapUser, Mod,
+                         Loader, InvalidKeyException)
 
 KEY = os.environ.get('OSU_API_KEY')
 if not KEY:
