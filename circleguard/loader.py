@@ -40,7 +40,7 @@ def request(function):
 
     def wrapper(*args, **kwargs):
         difference = datetime.now() - Loader.start_time
-        if(difference.seconds > Loader.RATELIMIT_RESET):
+        if difference.seconds > Loader.RATELIMIT_RESET:
             Loader.start_time = datetime.now()
         # catch them exceptions boy
         ret = None
@@ -337,7 +337,7 @@ class Loader():
         user_id = replay_info.user_id
         map_id = replay_info.map_id
         mods = replay_info.mods
-        if(not replay_info.replay_available):
+        if not replay_info.replay_available:
             self.log.debug("Replay data by user %d on map %d with mods %s not available", user_id, map_id, mods)
             return None
 
@@ -476,7 +476,7 @@ class Loader():
         """
         if "error" in response: # dict case
             for error in Error:
-                if(response["error"] == error.value[0]):
+                if response["error"] == error.value[0]:
                     raise error.value[1](error.value[2])
             else:
                 raise Error.UNKNOWN.value[1](Error.UNKNOWN.value[2]) # pylint: disable=unsubscriptable-object
