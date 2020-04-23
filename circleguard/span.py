@@ -11,16 +11,16 @@ class Span(set):
 
     def __init__(self, data):
         # allow passing both span or string
-        if isinstance(data, Span):
-            span = data.span
-        elif isinstance(data, str):
-            span = data
-        else:
+        if not (isinstance(data, Span) or isinstance(data, str)):
             raise ValueError(f"Expected data to be a str or Span, got type {type(data)}.")
+        if isinstance(data, Span):
+            # python allows initializing a set with a set
+            super().__init__(data)
+            return
+        elif isinstance(data, str):
+            span_set = self._to_set(data)
+            super().__init__(span_set)
 
-
-        span_set = self._to_set(span)
-        super().__init__(span_set)
 
     def _to_set(self, span):
         """
