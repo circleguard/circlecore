@@ -1,8 +1,28 @@
-class Span():
-    def __init__(self, span):
-        self.span = span
+class Span(set):
+    """
+    A set of numbers represented by a string, which can include ranges or
+    single numbers, separated by a comma.
 
-    def to_set(self):
+    Examples
+    --------
+    >>> Span("1-3,6,2-4")
+    {1, 2, 3, 4, 6}
+    """
+
+    def __init__(self, data):
+        # allow passing both span or string
+        if isinstance(data, Span):
+            span = data.span
+        elif isinstance(data, str):
+            span = data
+        else:
+            raise ValueError(f"Expected data to be a str or Span, got type {type(data)}.")
+
+
+        span_set = self._to_set(span)
+        super().__init__(span_set)
+
+    def _to_set(self, span):
         """
         Converts a span to the set of numbers covered by that span.
 
@@ -16,15 +36,15 @@ class Span():
         Returns
         -------
         set
-            The set of numbers described by the `span`.
+            The set of numbers described by the ``span``.
 
         Examples
         --------
-        >>> span_to_list("1-3,6,2-4")
+        >>> _to_set("1-3,6,2-4")
         {1, 2, 3, 4, 6}
         """
         ret = set()
-        for s in self.span.split(","):
+        for s in span.split(","):
             if "-" in s:
                 p = s.split("-")
                 l = list(range(int(p[0]), int(p[1])+1))
@@ -32,21 +52,3 @@ class Span():
             else:
                 ret.add(int(s))
         return ret
-
-    def max(self):
-        # could probably optimize out the ``to_set``` call, but it's cheap
-        # anyway
-        return max(self.to_set())
-
-    @classmethod
-    def from_string_or_span(cls, data):
-        if isinstance(data, Span):
-            return data
-        if isinstance(data, str):
-            return Span(data)
-        raise ValueError(f"Expected data to be a str or Span, got type {type(data)}.")
-
-    def __eq__(self, span):
-        if not isinstance(span, Span):
-            return False
-        return self.to_set() == span.to_set()

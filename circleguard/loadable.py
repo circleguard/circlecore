@@ -273,7 +273,7 @@ class Map(ReplayContainer):
         self.replays = []
         self.map_id = map_id
         self.mods = mods
-        self.span = Span.from_string_or_span(span)
+        self.span = Span(span)
 
     def load_info(self, loader):
         if self.info_loaded:
@@ -327,7 +327,7 @@ class User(ReplayContainer):
         super().__init__(cache)
         self.replays = []
         self.user_id = user_id
-        self.span = Span.from_string_or_span(span)
+        self.span = Span(span)
         self.mods = mods
         self.available_only = available_only
 
@@ -386,7 +386,7 @@ class MapUser(ReplayContainer):
         self.replays = []
         self.map_id = map_id
         self.user_id = user_id
-        self.span = Span.from_string_or_span(span)
+        self.span = Span(span)
         self.available_only = available_only
 
     def load_info(self, loader):

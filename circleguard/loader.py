@@ -202,18 +202,17 @@ class Loader():
             raise InvalidArgumentsException("One of user_id or span must be passed, but not both")
         api_limit = None
         if span:
-            api_limit = span.max()
+            api_limit = max(span)
         response = self.api.get_scores({"m": "0", "b": map_id, "limit": api_limit, "u": user_id, "mods": mods if mods is None else mods.value})
         Loader.check_response(response)
         if span:
-            span_set = span.to_set()
             # filter span_set to remove indexes that would cause an indexerror
             # when indexing ``response``
             # span_set = {3, 6}; response = [a, b, c, d, e, f]; len(response) = 6
             # we want to keep {6} since we index at [i-1], so use <= not <
-            span_list = {x for x in span_set if x <= len(response)}
+            _span = {x for x in span if x <= len(response)}
             # filter out anything not in our span
-            response = [response[i-1] for i in span_set]
+            response = [response[i-1] for i in _span]
         # yes, it's necessary to cast the str response to int before bool - all strings are truthy.
         # strptime format from https://github.com/ppy/osu-api/wiki#apiget_scores
         infos = [ReplayInfo(datetime.strptime(x["date"], "%Y-%m-%d %H:%M:%S"), map_id, int(x["user_id"]), str(x["username"]), int(x["score_id"]),
@@ -253,7 +252,7 @@ class Loader():
         self.log.log(TRACE, "Loading user best of %s with options %s",
                             user_id, {k: locals_[k] for k in locals_ if k != 'self'})
 
-        api_limit = span.max()
+        api_limit = max(span)
         response = self.api.get_user_best({"m": "0", "u": user_id, "limit": api_limit})
         Loader.check_response(response)
         if mods:
@@ -263,14 +262,13 @@ class Loader():
                     _response.append(r)
             response = _response
 
-        span_set = span.to_set()
         # remove span indices which would cause an index error because there
         # weren't that many replay infos returned by the api. eg if there
         # were 4 responses, remove any span above 4
         response_limit = len(response)
-        span_set = [x for x in span_set if x <= response_limit]
+        _span = [x for x in span if x <= response_limit]
 
-        response = [response[i-1] for i in span_set]
+        response = [response[i-1] for i in _span]
         return [ReplayInfo(datetime.strptime(r["date"], "%Y-%m-%d %H:%M:%S"), int(r["beatmap_id"]), int(r["user_id"]),
                 self.username(int(r["user_id"])), int(r["score_id"]), ModCombination(int(r["enabled_mods"])),
                 bool(int(r["replay_available"]))) for r in response]
