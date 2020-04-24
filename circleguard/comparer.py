@@ -163,7 +163,7 @@ class Comparer:
 
         Returns
         -------
-        foat
+        float
             The average distance between the two datasets.
 
         Notes
