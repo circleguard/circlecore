@@ -34,10 +34,9 @@ class Circleguard:
         :class:`slider.library.Library` and subsequently destroyed when this
         :class:`~Circleguard` object is garbage collected.
     loader: :class:`~circleguard.loader.Loader`
-        A loader class or subclass, which will be used in place of
-        instantiating a new loader if passed. This must be the
-        class itself, *not* an instantiation of it. It will be instantiated
-        upon circleguard instantiation, with two args - a key and a cacher.
+        This loader will be used instead of the base loader if passed.
+        This must be the class itself, *not* an instantiation of it. It will be
+        with two args - a key and a cacher.
     """
     DEFAULT_ANGLE = 10
     DEFAULT_DISTANCE = 8
@@ -71,6 +70,18 @@ class Circleguard:
         ----------
         loadables: list[:class:`~.Loadable`]
             The loadables to investigate.
+        detect: :class:`~.Detect`
+            What cheats to investigate for.
+        loadables2: list[:class:`~.Loadable`]
+            For :data:`~Detect.STEAL`, compare each loadable in ``loadables``
+            against each loadable in ``loadables2`` for replay stealing,
+            instead of to other loadables in ``loadables``.
+        max_angle: float
+            For :data:`Detect.CORRECTION`, consider only points (a,b,c) where
+            ``∠abc < max_angle``.
+        min_distance: float
+            For :data:`Detect.CORRECTION`, consider only points (a,b,c) where
+            ``|ab| > min_distance`` and ``|bc| > min_distance``.
 
         Yields
         ------
