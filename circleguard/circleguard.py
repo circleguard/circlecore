@@ -26,7 +26,7 @@ class Circleguard:
         A valid api key. Can be retrieved from https://osu.ppy.sh/p/api/.
     db_path: str or :class:`os.PathLike`
         The path to the database file to read and write cached replays. If the
-        given path does not exist, a fresh database will be created there.
+        path does not exist, a fresh database will be created there.
         If `None`, no replays will be cached or loaded from cache.
     slider_dir: str or :class:`os.PathLike`
         The path to the directory used by :class:`slider.library.Library` to
@@ -64,7 +64,7 @@ class Circleguard:
 
     def run(self, loadables, detect, loadables2=None, max_angle=DEFAULT_ANGLE, min_distance=DEFAULT_DISTANCE):
         """
-        Investigates the given loadables for cheats.
+        Investigates loadables for cheats.
 
         Parameters
         ----------
@@ -131,7 +131,16 @@ class Circleguard:
 
     def steal_check(self, loadables, loadables2=None):
         """
-        Investigates the given loadables for replay stealing.
+        Investigates loadables for replay stealing.
+
+        Parameters
+        ----------
+        loadables: list[:class:`~.Loadable`]
+            The loadables to investigate.
+        loadables2: list[:class:`~.Loadable`]
+            If passed, compare each loadable in ``loadables``
+            against each loadable in ``loadables2`` for replay stealing,
+            instead of to other loadables in ``loadables``.
 
         Yields
         ------
@@ -143,7 +152,12 @@ class Circleguard:
 
     def relax_check(self, loadables):
         """
-        Investigates the given loadables for relax.
+        Investigates loadables for relax.
+
+        Parameters
+        ----------
+        loadables: list[:class:`~.Loadable`]
+            The loadables to investigate.
 
         Yields
         ------
@@ -155,7 +169,12 @@ class Circleguard:
 
     def correction_check(self, loadables, max_angle=DEFAULT_ANGLE, min_distance=DEFAULT_DISTANCE):
         """
-        Investigates the given loadables for aim correction.
+        Investigates loadables for aim correction.
+
+        Parameters
+        ----------
+        loadables: list[:class:`~.Loadable`]
+            The loadables to investigate.
 
         Yields
         ------
@@ -167,7 +186,7 @@ class Circleguard:
 
     def load(self, loadable):
         """
-        Loads the given loadable.
+        Loads a loadable.
 
         Parameters
         ----------
@@ -182,7 +201,7 @@ class Circleguard:
 
     def load_info(self, loadable_container):
         """
-        Loads the given loadable container.
+        Loads a loadable container.
 
         Parameters
         ----------
