@@ -96,7 +96,7 @@ class Circleguard:
         :meth:`~.run` without waiting for all of the investigations to finish.
         """
 
-        c = Check(loadables, loadables2, self.cache)
+        c = Check(loadables, self.cache, loadables2=loadables2)
         self.log.info("Running circleguard with check %r", c)
 
         c.load(self.loader)

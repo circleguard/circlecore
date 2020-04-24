@@ -11,15 +11,17 @@ from circleguard.span import Span
 
 class Loadable(abc.ABC):
     """
-    An object that has further information that can be loaded;
-    from the osu api, local cache, or some other location.
+    Represents one or multiple replays, which have replay data to be loaded from
+    some additional source - the osu! api, local cache, or some other location.
 
-    Notes
-    -----
-    This is an abstract class and cannot be directly instantiated.
+    Parameters
+    ----------
+    cache: bool
+        Whether to cache the replay data once loaded.
     """
-    def __init__(self):
+    def __init__(self, cache):
         self.loaded = False
+        self.cache = cache
 
     @abc.abstractmethod
     def load(self, loader, cache):
@@ -35,12 +37,12 @@ class Loadable(abc.ABC):
             themselves (if they don't load anything from the osu api, for
             instance), a loader is still passed regardless.
         cache: bool
-            Whether the loadable should cache their replay data. This argument
+            Whether to cache the replay data once loaded. This argument
             comes from a parent—either a :class:`~.LoadableContainer` or
             :class:`~circleguard.circleguard.Circleguard` itself. Should the
-            loadable already have a ``cache`` attribute, that should take
+            loadable already have a set ``cache`` value, that should take
             precedence over the option passed in this method, but if the
-            loadable has no preference then it should listen to the ``cache``
+            loadable has no preference then it should respect the value passed
             here.
         """
         pass
@@ -61,8 +63,7 @@ class LoadableContainer(Loadable):
     When loaded, the :class:`~LoadableContainer` has loaded :class:`Loadable`\s.
     """
     def __init__(self, cache):
-        super().__init__()
-        self.cache = cache
+        super().__init__(cache)
         self.info_loaded = False
 
     def load(self, loader, cache=None):
@@ -144,7 +145,7 @@ class ReplayContainer(LoadableContainer):
     def __init__(self, cache):
         super().__init__(cache)
 
-    # redefine as abstract. THe LoadableContainer definition serves as a good
+    # redefine as abstract. The LoadableContainer definition serves as a good
     # default implementation for other user-defined loadable containers, but not
     # for ReplayContainers and user-defined subclasses thereof.
     @abc.abstractmethod
@@ -163,18 +164,19 @@ class Check(LoadableContainer):
 
     Parameters
     ----------
-    loadables: :class:`~.Loadable`
+    loadables: list[:class:`~.Loadable`]
         The loadables to hold for investigation.
-    detect: :class:`~.Detect`
-        What cheats to investigate for.
-    loadables2: :class:`~.Loadable`
-        A second set of loadables. Only used when :class:`~StealDetect` is
-        passed in ``detect``. If passed, the loadables in ``loadables`` will
-        not be compared to each other, but instead to each replay in
-        ``loadables2``, for replay stealing.
+    cache: bool
+        Whether to cache the loadables once they are loaded. This will be
+        overriden by a ``cache`` option set by a :class:`~Loadable` in
+        ``loadables``. It only affects children loadables when they do not have
+        a ``cache`` option set.
+    loadables2: list[:class:`~.Loadable`]
+        A second set of loadables to hold. Useful for partitioning loadables for
+        a replay stealing investigations.
     """
 
-    def __init__(self, loadables, loadables2, cache):
+    def __init__(self, loadables, cache, loadables2=None):
         super().__init__(cache)
         self.log = logging.getLogger(__name__ + ".Check")
         self.loadables1 = [loadables] if isinstance(loadables, Loadable) else loadables
@@ -208,6 +210,11 @@ class Check(LoadableContainer):
         Returns all the :class:`~.Replay`\s in this check. Contrast with
         :func:`~Check.all_loadables`, which returns all the
         :class:`~.Loadable`\s in this check.
+
+        Returns
+        -------
+        list[:class:`~Replay`]
+            All the replays in this check.
         """
         return self.all_replays1() + self.all_replays2()
 
@@ -215,6 +222,11 @@ class Check(LoadableContainer):
         """
         Returns all the :class:`~.Replay`\s contained by ``loadables1`` of this
         check.
+
+        Returns
+        -------
+        list[:class:`~Replay`]
+            All the replays contained by ``loadables1`` of this check.
         """
         replays = []
         for loadable in self.loadables1:
@@ -228,6 +240,11 @@ class Check(LoadableContainer):
         """
         Returns all the :class:`~.Replay`\s contained by ``loadables2`` of this
         check.
+
+        Returns
+        -------
+        list[:class:`~Replay`]
+            All the replays contained by ``loadables2`` of this check.
         """
         replays2 = []
         for loadable in self.loadables2:
@@ -414,6 +431,13 @@ class Replay(Loadable):
 
     Parameters
     ----------
+    weight: :class:`~.enums.RatelimitWeight`
+        How much it 'costs' to load this replay from the api.
+    cache: bool
+        Whether to cache this replay once it is loaded.
+
+    Attributes
+    ----------
     timestamp: :class:`datetime.datetime`
         When this replay was played.
     map_id: int
@@ -430,35 +454,58 @@ class Replay(Loadable):
         The mods the replay was played with.
     replay_id: int
         The id of the replay, or 0 if the replay is unsubmitted.
-    replay_data: list[:class:`~circleparse.Replay.ReplayEvent`]
-        A list of :class:`~circleparse.Replay.ReplayEvent` objects, representing
-        the actual data of the replay. If the replay could not be loaded, this
-        should be ``None``.
-    weight: :class:`~.enums.RatelimitWeight`
-        How much it 'costs' to load this replay from the api.
+    t: ndarray[int]
+        A 1d array containing the timestamp for each frame. <br>
+        This is only nonnull after the replay has been loaded.
+    xy: ndarray[float]
+        A 2d, two column array, containing the ``x`` and ``y`` coordinates of
+        each frame in the first and second column respectively. <br>
+        This is only nonnull after the replay has been loaded.
+    k: ndarray[int]
+        A 1d array containing the keys pressed for each frame. <br>
+        This is only nonnull after the replay has been loaded.
     """
-    def __init__(self, timestamp, map_id, username, user_id, mods, replay_id, replay_data, weight):
-        super().__init__()
-        self.timestamp = timestamp
-        self.map_id = map_id
-        self.username = username
-        self.user_id = user_id
-        self.mods = mods
-        self.replay_id = replay_id
-        self.replay_data = replay_data
+    def __init__(self, weight, cache):
+        super().__init__(cache)
         self.weight = weight
-        self.loaded = True
-        # initialize in case ``replay_data`` is ``None``, still want
-        # the attributes
+
+        # remains ``None`` until replay is loaded
+        self.timestamp   = None
+        self.map_id      = None
+        self.username    = None
+        self.user_id     = None
+        self.mods        = None
+        self.replay_id   = None
+        self.replay_data = None
+
+        # remains ``None``` when replay is unloaded or loaded but with no data
         self.t = None
         self.xy = None
         self.k = None
 
+    def _process_replay_data(self, replay_data):
+        """
+        Preprocesses the replay data (turns it into numpy arrays) for fast
+        manipulation when investigating.
+
+        Paramters
+        ---------
+        replay_data: list[:class:`~circleparse.Replay.ReplayEvent`]
+            A list of :class:`~circleparse.Replay.ReplayEvent` objects,
+            representing the actual data of the replay. If the replay could not
+            be loaded, this should be ``None``.
+
+        Notes
+        -----
+        This method must be called before a replay can be considered loaded
+        (ie before you set ``loaded`` to ``True``).
+        """
+        self.replay_data = replay_data
         # replay wasn't available, can't preprocess the data
-        if self.replay_data is None:
+        if replay_data is None:
             return
 
-        block = list(zip(*[(e.time_since_previous_action, e.x, e.y, e.keys_pressed) for e in self.replay_data]))
+        block = list(zip(*[(e.time_since_previous_action, e.x, e.y, e.keys_pressed) for e in replay_data]))
 
         t = np.array(block[0], dtype=int).cumsum()
         xy = np.array([block[1], block[2]], dtype=float).T
@@ -500,14 +547,12 @@ class ReplayMap(Replay):
     """
 
     def __init__(self, map_id, user_id, mods=None, cache=None, info=None):
+        super().__init__(RatelimitWeight.HEAVY, cache)
         self.log = logging.getLogger(__name__ + ".ReplayMap")
         self.map_id = map_id
         self.user_id = user_id
         self.mods = mods
-        self.cache = cache
         self.info = info
-        self.weight = RatelimitWeight.HEAVY
-        self.loaded = False
 
     def load(self, loader, cache):
         """
@@ -536,8 +581,15 @@ class ReplayMap(Replay):
             info = self.info
         else:
             info = loader.replay_info(self.map_id, user_id=self.user_id, mods=self.mods)
+
+        self.timestamp = info.timestamp
+        self.username = info.username
+        self.mods = info.mods
+        self.replay_id = info.replay_id
+
         replay_data = loader.replay_data(info, cache=cache)
-        Replay.__init__(self, info.timestamp, self.map_id, info.username, self.user_id, info.mods, info.replay_id, replay_data, self.weight)
+        self._process_replay_data(replay_data)
+        self.loaded = True
         self.log.log(TRACE, "Finished loading %s", self)
 
     def __eq__(self, loadable):
@@ -583,12 +635,10 @@ class ReplayPath(Replay):
     """
 
     def __init__(self, path, cache=None):
+        super().__init__(RatelimitWeight.LIGHT, cache)
         self.log = logging.getLogger(__name__ + ".ReplayPath")
         self.path = path
         self.hash = None
-        self.cache = cache
-        self.weight = RatelimitWeight.LIGHT
-        self.loaded = False
 
     def load(self, loader, cache):
         """
@@ -616,12 +666,17 @@ class ReplayPath(Replay):
             return
 
         loaded = circleparse.parse_replay_file(self.path)
-        map_id = loader.map_id(loaded.beatmap_hash)
-        user_id = loader.user_id(loaded.player_name)
+        self.timestamp = loaded.timestamp
+        self.map_id = loader.map_id(loaded.beatmap_hash)
+        self.username = loaded.player_name
+        # TODO make this lazy loaded so we don't waste an api call
+        self.user_id = loader.user_id(loaded.player_name)
+        self.mods = ModCombination(loaded.mod_combination)
+        self.replay_id = loaded.replay_id
         self.hash = loaded.beatmap_hash
 
-        Replay.__init__(self, loaded.timestamp, map_id, loaded.player_name, user_id, ModCombination(loaded.mod_combination),
-                        loaded.replay_id, loaded.play_data, self.weight)
+        self._process_replay_data(loaded.play_data)
+        self.loaded = True
         self.log.log(TRACE, "Finished loading %s", self)
 
     def __eq__(self, loadable):
