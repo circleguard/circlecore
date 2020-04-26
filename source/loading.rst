@@ -1,23 +1,17 @@
 Loading
 =======
 
-How |Loadable|\s act before and after being loaded is not immediately obvious,
-and a misconception can result in hours of frustrated debugging. This section
-tries to explain in greater detail how loading works and what you need to do
-to get the information you need from a |Loadable|.
-
-We will also introduce several useful methods and functionality in this
-section.
-
+How |Loadable|\s act before and after being loaded is not immediately obvious.
+This section explains in greater detail how loading works.
 
 .. _Additional Loading Methods:
 
 Additional Loading Methods
 --------------------------
 
-|cg.load| will load a given |Loadable|. This happens naturally during |cg.run|,
-but as we will see below, you may need to have a loaded |Loadable| before you
-call |cg.run|.
+|cg.load| will load a given |Loadable|. This happens naturally when you
+call |cg.run|, but it is possible to need to have a loaded |Loadable| before
+you call |cg.run|, for various reasons.
 
 .. code-block:: python
 
@@ -42,7 +36,6 @@ before you call |cg.run|.
     cg.load(m)
     print(m.info_loaded, m.loaded)
 
-
 Stages
 ------
 
@@ -51,13 +44,11 @@ information is available to you. Each stage requires loading more information
 from the api, which can be an expensive operation. This is why we defer loading
 until necessary.
 
-
 Replays
 ~~~~~~~
 
 A |Replay| has two stages. Upon instantiation it is unloaded, and when
-either |cg.run| or |cg.load| is called on it (or a parent |Check|) it
-become loaded.
+either |cg.run| or |cg.load| is called on it, it becomes loaded.
 
 When unloaded, a |Replay| has only the attributes you passed to it—``path``
 for |ReplayPath| and ``user_id`` and ``map_id`` for |ReplayMap|, alongside any
@@ -83,9 +74,8 @@ Replay Containers
 ~~~~~~~~~~~~~~~~~
 
 A |ReplayContainer| is slightly more complicated, and has three stages. It
-starts unloaded, becomes info loaded when |cg.load_info| is called on it
-(or a parent |Check|), and becomes loaded when |cg.load| is called on it (or a
-parent |Check|).
+starts unloaded, becomes info loaded when |cg.load_info| is called on it,
+and becomes loaded when |cg.load| is called on it.
 
 When unloaded, a |ReplayContainer| only has the attributes you passed to it—
 ``user_id`` for |User| and ``map_id`` for |Map|, alongside any optional

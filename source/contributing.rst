@@ -1,8 +1,7 @@
 Contributing
 ============
 
-We are an entirely open source project, and contributions are more than
-welcome.
+We are an open source project, and contributions are more than welcome.
 
 We try to keep track of issues through the
 `circlecore github <https://github.com/circleguard/circlecore/issues>`_,

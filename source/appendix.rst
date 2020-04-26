@@ -38,14 +38,20 @@ Investigator
 .. automodule:: circleguard.investigator
    :members:
 
+Loadable
+--------
+.. automodule:: circleguard.loadable
+   :members:
+
 Loader
 ------
 .. automodule:: circleguard.loader
    :members:
 
-Loadable
---------
-.. automodule:: circleguard.loadable
+
+ReplayInfo
+----------
+.. automodule:: circleguard.replay_info
    :members:
 
 Result
@@ -53,9 +59,9 @@ Result
 .. automodule:: circleguard.result
    :members:
 
-ReplayInfo
-----------
-.. automodule:: circleguard.replay_info
+Span
+-----
+.. automodule:: circleguard.span
    :members:
 
 Utils

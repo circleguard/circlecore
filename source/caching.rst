@@ -43,7 +43,7 @@ slider_dir
 ~~~~~~~~~~
 
 We use `slider <https://github.com/llllllllll/slider>`_ when working with
-beatmaps. Currently, we only need to download beatmaps when |RelaxDetect| is
+beatmaps. Currently, we only need to download beatmaps when |Detect.RELAX| is
 used. If ``slider_dir`` is passed, downloaded beatmaps will be cached to that
 directory (which must exist). This directory may be the same directory the
 replay's ``db.db`` is in.
