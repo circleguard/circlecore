@@ -29,7 +29,7 @@ before you call |cg.run|.
 .. code-block:: python
 
     cg = Circleguard("key")
-    m = Map(221777, num=1)
+    m = Map(221777, span="1")
     print(m.info_loaded, m.loaded)
     cg.load_info(m)
     print(m.info_loaded, m.loaded)
@@ -105,7 +105,7 @@ different amounts of information available from the |Replay|\s for each stage.
 .. code-block:: python
 
     cg = Circleguard("key")
-    m = Map(221777, num=1)
+    m = Map(221777, span="1")
     for r in m:
         print("this will never be printed")
     cg.load_info(m)

@@ -90,7 +90,7 @@ For a |ReplayContainer|, ``cache`` cascades to its |Replay|\s.
 .. code-block:: python
 
     cg = Circleguard("key", db_path="./db.db")
-    m = Map(221777, num=2, cache=False)
+    m = Map(221777, span="1-2", cache=False)
     cg.load(m) # neither replay in Map cached
 
 |Check| can also get passed ``cache``. If it contains a |ReplayContainer|,
@@ -99,7 +99,7 @@ the cache set by the |ReplayContainer| takes precedence:
 .. code-block:: python
 
     cg = Circleguard("key", db_path="./db.db")
-    m = Map(221777, num=2, cache=False)
-    u = User(2757689, num=3, cache=True)
+    m = Map(221777, span="1-2", cache=False)
+    u = User(2757689, span="1-3", cache=True)
     c = Check([m, u], detect=RelaxDetect(), cache=True)
     cg.load(c) # the 2 replays in m will not get cached, but the 3 replays in u will
