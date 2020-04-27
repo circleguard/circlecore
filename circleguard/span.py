@@ -16,7 +16,6 @@ class Span(set):
         if isinstance(data, Span):
             # python allows initializing a set with a set
             super().__init__(data)
-            return
         elif isinstance(data, str):
             span_set = self._to_set(data)
             super().__init__(span_set)
