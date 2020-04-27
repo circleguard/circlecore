@@ -1,3 +1,7 @@
+# v4.0.1
+
+* fix `ReplayMap`s inside a `Map` not having some attributes set after the `Map` is info loaded
+
 # v4.0.0
 
 * add `cg.steal_check`, `cg.relax_check`, and `cg.correction_check` as convenience methods. These methods call `cg.run` internally
