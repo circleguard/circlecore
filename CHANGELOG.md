@@ -1,8 +1,16 @@
-# unreleased
+# v4.0.0
 
-* correctly assign `True` to `ischeat` in `CorrectionDetect` when there is only one snap (previously `False`)
-* use converted (cv) ur when determining `ischeat` for `RelaxResult`
+* add `cg.steal_check`, `cg.relax_check`, and `cg.correction_check` as convenience methods. These methods call `cg.run` internally
+* don't require `Check` when using `cg.run`. `cg.run` now accepts an iterable of `Loadable`s and a `Detect`
 * provide cvUR as `result.ur` and ucvUR as `result.ucv_ur`
+* add new `Span` class, which can be used to represent a range of numbers with a string
+* remove `num` argument to loadables. Use the `Span` class, or an appropriate string, instead
+* remove `ischeat` from `Result`s and remove thresholds for determining a cheated replay. Users should determine their own threholds and check against `Result` attributes
+* make `Detect` an `IntFlag` instead of a full class
+* add default `load` and `load_info` implementations to `LoadableContainer`
+* don't use `Replay.__init__` to process replay data. Use `Replay#_process_replay_data` instead
+* require `cache` in `Loadable` instantiation
+* add `Loader.MAX_MAP_SPAN` and `Loader.MAX_USER_SPAN`, representing the most replays you can get from a map and user respectively
 
 # v3.2.3
 
