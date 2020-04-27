@@ -15,7 +15,7 @@ things.
 
 .. note::
 
-    Due to a redirection bug (https://github.com/ppy/osu-web/issues/2867)
+    Due to a `redirection bug <https://github.com/ppy/osu-web/issues/2867>`_
     on the website, you may need to log in and refresh the page before being
     able to access the api page.
 
