@@ -43,7 +43,7 @@ slider_dir
 ~~~~~~~~~~
 
 We use `slider <https://github.com/llllllllll/slider>`_ when working with
-beatmaps. Currently, we only need to download beatmaps when |RelaxDetect| is
+beatmaps. Currently, we only need to download beatmaps when |Detect.RELAX| is
 used. If ``slider_dir`` is passed, downloaded beatmaps will be cached to that
 directory (which must exist). This directory may be the same directory the
 replay's ``db.db`` is in.
@@ -90,7 +90,7 @@ For a |ReplayContainer|, ``cache`` cascades to its |Replay|\s.
 .. code-block:: python
 
     cg = Circleguard("key", db_path="./db.db")
-    m = Map(221777, num=2, cache=False)
+    m = Map(221777, span="1-2", cache=False)
     cg.load(m) # neither replay in Map cached
 
 |Check| can also get passed ``cache``. If it contains a |ReplayContainer|,
@@ -99,7 +99,7 @@ the cache set by the |ReplayContainer| takes precedence:
 .. code-block:: python
 
     cg = Circleguard("key", db_path="./db.db")
-    m = Map(221777, num=2, cache=False)
-    u = User(2757689, num=3, cache=True)
+    m = Map(221777, span="1-2", cache=False)
+    u = User(2757689, span="1-3", cache=True)
     c = Check([m, u], detect=RelaxDetect(), cache=True)
     cg.load(c) # the 2 replays in m will not get cached, but the 3 replays in u will

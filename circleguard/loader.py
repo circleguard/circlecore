@@ -15,8 +15,8 @@ from circleguard.enums import Error, ModCombination
 from circleguard.exceptions import (InvalidArgumentsException, APIException, CircleguardException,
                         RatelimitException, InvalidKeyException, ReplayUnavailableException, UnknownAPIException,
                         InvalidJSONException, NoInfoAvailableException)
-from circleguard.utils import TRACE, span_to_list
-
+from circleguard.utils import TRACE
+from circleguard.span import Span
 
 def request(function):
     """
@@ -40,7 +40,7 @@ def request(function):
 
     def wrapper(*args, **kwargs):
         difference = datetime.now() - Loader.start_time
-        if(difference.seconds > Loader.RATELIMIT_RESET):
+        if difference.seconds > Loader.RATELIMIT_RESET:
             Loader.start_time = datetime.now()
         # catch them exceptions boy
         ret = None
@@ -129,8 +129,16 @@ class Loader():
     refresh.
     """
 
-    RATELIMIT_RESET = 60 # time in seconds until the api refreshes our ratelimits
-    start_time = datetime.min # when we started our requests cycle
+    # the maximum number of replay info available through the respective api
+    # calls. Note that osu! stores at least the top 1000 replays, but does not
+    # make these discoverable unless you know the eaact user id, map id, and
+    # mods of the replay.
+    MAX_MAP_SPAN = Span("1-100")
+    MAX_USER_SPAN = Span("1-100")
+    # time in seconds until the api refreshes our ratelimits
+    RATELIMIT_RESET = 60
+    # when we started our requests cycle
+    start_time = datetime.min
 
 
     def __init__(self, key, cacher=None):
@@ -139,7 +147,7 @@ class Loader():
         self.cacher = cacher
 
     @request
-    def replay_info(self, map_id, num=None, user_id=None, mods=None, limit=True, span=None):
+    def replay_info(self, map_id, span=None, user_id=None, mods=None, limit=True):
         """
         Retrieves replay infos from a map's leaderboard.
 
@@ -147,8 +155,10 @@ class Loader():
         ----------
         map_id: int
             The map id to retrieve replay info for.
-        num: int
-            The number of replay infos on the map to retrieve.
+        span: Span
+            A comma separated list of ranges of top replays on the map to
+            retrieve. ``span="1-3,6,2-4"`` -> replays in the range
+            ``[1,2,3,4,6]``.
         user_id: int
             If passed, only retrieve replay info on ``map_id`` for this user.
             Note that this is not necessarily limited to just the user's top
@@ -161,10 +171,6 @@ class Loader():
             ``user_id`` is passed. If ``limit`` is ``True``, will only return
             the top scoring replay info by ``user_id``. If ``False``, will return
             all scores by ``user_id``.
-        span: str
-            A comma separated list of ranges of top replays on the map to
-            retrieve. ``span="1-3,6,2-4"`` -> replays in the range
-            ``[1,2,3,4,6]``.
 
         Returns
         -------
@@ -175,8 +181,7 @@ class Loader():
 
         Notes
         -----
-        One of ``num``, ``user_id``, and ``span`` must be passed, but not both
-        ``num`` and ``span``.
+        One of ``user_id`` or ``span`` must be passed.
 
         Raises
         ------
@@ -193,24 +198,21 @@ class Loader():
         self.log.log(TRACE, "Loading replay info on map %d with options %s",
                             map_id, {k: locals_[k] for k in locals_ if k != 'self'})
 
-        if num and (num > 100 or num < 1):
-            raise InvalidArgumentsException("The number of top plays to fetch must be between 1 and 100 inclusive!")
-
-        if (num and span) or not (num or user_id or span):
-            raise InvalidArgumentsException("One of num, user_id, or span must be passed, but not both num and span")
+        if not (span or user_id):
+            raise InvalidArgumentsException("One of user_id or span must be passed, but not both")
+        api_limit = None
         if span:
-            span_list = span_to_list(span)
-            num = max(span_list)
-        response = self.api.get_scores({"m": "0", "b": map_id, "limit": num, "u": user_id, "mods": mods if mods is None else mods.value})
+            api_limit = max(span)
+        response = self.api.get_scores({"m": "0", "b": map_id, "limit": api_limit, "u": user_id, "mods": mods if mods is None else mods.value})
         Loader.check_response(response)
         if span:
-            # filter span_list to remove indexes that would cause an indexerror
+            # filter span_set to remove indexes that would cause an indexerror
             # when indexing ``response``
-            # span_list = {3, 6}; response = [a, b, c, d, e, f]; len(response) = 6
+            # span_set = {3, 6}; response = [a, b, c, d, e, f]; len(response) = 6
             # we want to keep {6} since we index at [i-1], so use <= not <
-            span_list = {x for x in span_list if x <= len(response)}
+            _span = {x for x in span if x <= len(response)}
             # filter out anything not in our span
-            response = [response[i-1] for i in span_list]
+            response = [response[i-1] for i in _span]
         # yes, it's necessary to cast the str response to int before bool - all strings are truthy.
         # strptime format from https://github.com/ppy/osu-api/wiki#apiget_scores
         infos = [ReplayInfo(datetime.strptime(x["date"], "%Y-%m-%d %H:%M:%S"), map_id, int(x["user_id"]), str(x["username"]), int(x["score_id"]),
@@ -220,7 +222,7 @@ class Loader():
 
 
     @request
-    def get_user_best(self, user_id, num=None, span=None, mods=None):
+    def get_user_best(self, user_id, span, mods=None):
         """
         Retrieves replay infos from a user's top plays.
 
@@ -228,9 +230,7 @@ class Loader():
         ----------
         user_id: int
             The user id to get best plays of.
-        num: int
-            The number of top plays to retrieve. Must be between 1 and 100.
-        span: str
+        span: Span
             A comma separated list of ranges of top plays to retrieve.
             ``span="1-3,6,2-4"`` -> replays in the range ``[1,2,3,4,6]``.
         mods: :class:`~.ModCombination`
@@ -245,18 +245,15 @@ class Loader():
         Raises
         ------
         InvalidArgumentsException
-            If ``num`` or ``span`` is not between ``1`` and ``100`` inclusive.
+            If any elements in ``span`` are not between ``1`` and ``100``
+            inclusive.
         """
         locals_ = locals()
         self.log.log(TRACE, "Loading user best of %s with options %s",
                             user_id, {k: locals_[k] for k in locals_ if k != 'self'})
-        if span:
-            span_list = span_to_list(span)
-            num = max(span_list)
-        if num < 1 or num > 100:
-            raise InvalidArgumentsException("The number of best user plays to fetch must be between 1 and 100 inclusive!")
 
-        response = self.api.get_user_best({"m": "0", "u": user_id, "limit": num})
+        api_limit = max(span)
+        response = self.api.get_user_best({"m": "0", "u": user_id, "limit": api_limit})
         Loader.check_response(response)
         if mods:
             _response = []
@@ -265,8 +262,13 @@ class Loader():
                     _response.append(r)
             response = _response
 
-        if span:
-            response = [response[i-1] for i in span_list]
+        # remove span indices which would cause an index error because there
+        # weren't that many replay infos returned by the api. eg if there
+        # were 4 responses, remove any span above 4
+        response_limit = len(response)
+        _span = [x for x in span if x <= response_limit]
+
+        response = [response[i-1] for i in _span]
         return [ReplayInfo(datetime.strptime(r["date"], "%Y-%m-%d %H:%M:%S"), int(r["beatmap_id"]), int(r["user_id"]),
                 self.username(int(r["user_id"])), int(r["score_id"]), ModCombination(int(r["enabled_mods"])),
                 bool(int(r["replay_available"]))) for r in response]
@@ -335,7 +337,7 @@ class Loader():
         user_id = replay_info.user_id
         map_id = replay_info.map_id
         mods = replay_info.mods
-        if(not replay_info.replay_available):
+        if not replay_info.replay_available:
             self.log.debug("Replay data by user %d on map %d with mods %s not available", user_id, map_id, mods)
             return None
 
@@ -474,7 +476,7 @@ class Loader():
         """
         if "error" in response: # dict case
             for error in Error:
-                if(response["error"] == error.value[0]):
+                if response["error"] == error.value[0]:
                     raise error.value[1](error.value[2])
             else:
                 raise Error.UNKNOWN.value[1](Error.UNKNOWN.value[2]) # pylint: disable=unsubscriptable-object

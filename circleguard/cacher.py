@@ -17,7 +17,7 @@ class Cacher:
     cache: bool
         Whether or not replays should be cached.
     path: str or :class:`os.PathLike`
-        The absolute path to the database. If the given path does not exist,
+        The absolute path to the database. If the path does not exist,
         a fresh database will be created there.
 
     Notes
@@ -36,7 +36,7 @@ class Cacher:
     def cache(self, lzma_bytes, replay_info):
         """
         Caches a replay in the form of a (compressed) lzma stream to the
-        database, linking it to the given replay info.
+        database, linking it to the replay info.
 
         Parameters
         ----------
@@ -74,7 +74,7 @@ class Cacher:
 
         result = self.cursor.execute("SELECT COUNT(1) FROM replays WHERE map_id=? AND user_id=? AND mods=?", [map_id, user_id, mods]).fetchone()[0]
         self.log.log(TRACE, "Writing compressed lzma to db")
-        if(result): # already exists so we overwrite (this happens when we call Cacher.revalidate)
+        if result: # already exists so we overwrite (this happens when we call Cacher.revalidate)
             self._write("UPDATE replays SET replay_data=?, replay_id=? WHERE map_id=? AND user_id=? AND mods=?", [compressed_bytes, replay_id, map_id, user_id, mods])
         else: # else just insert
             self._write("INSERT INTO replays VALUES(?, ?, ?, ?, ?)", [map_id, user_id, compressed_bytes, replay_id, mods])
@@ -84,7 +84,7 @@ class Cacher:
         Checks entries in ``replay_info`` against their entries in the database
         (if any) to look for score id mismatches, indicating an outdated replay.
         If there are mismatches, the replay is redownloaded and cached from the
-        given replay info.
+        replay info.
 
         Parameters
         ----------
@@ -120,21 +120,21 @@ class Cacher:
             self.log.log(TRACE, "Revalidating entry with map id %s, user %d, mods %s", map_id, user_id, mods)
 
             result = self.cursor.execute("SELECT replay_id FROM replays WHERE map_id=? AND user_id=? AND mods=?", [map_id, user_id, mods]).fetchall()
-            if(not result):
+            if not result:
                 self.log.trace("Nothing cached with map id %s, user %d, mods %s", map_id, user_id, mods)
                 continue # nothing cached
 
             db_replay_id = result[0][0] # blame sqlite for nesting tuples in lists
             new_replay_id = info.replay_id
 
-            if(db_replay_id != new_replay_id):
-                if(db_replay_id > new_replay_id):
+            if db_replay_id != new_replay_id:
+                if db_replay_id > new_replay_id:
                     raise CircleguardException("The cached replay id of {} is higher than the new replay id of {}. Map id: {}, User id: {}, mods: {}"
                                                 .format(db_replay_id, new_replay_id, user_id, map_id, mods))
 
                 self.log.info("Cached replay on map %d by user %d with mods %d is outdated, redownloading", map_id, user_id, mods)
                 lzma_data = loader.replay_data(info)
-                if(lzma_data is None):
+                if lzma_data is None:
                     raise CircleguardException("We could not load lzma data for map {}, user {}, mods {}, replay available {} while revalidating."
                                                 .format(map_id, user_id, mods, info.replay_available))
                 self.cache(lzma_data, info)
@@ -162,7 +162,7 @@ class Cacher:
         mods = mods.value
         self.log.log(TRACE, "Checking cache for a replay on map %d by user %d with mods %s", map_id, user_id, mods)
         result = self.cursor.execute("SELECT replay_data FROM replays WHERE map_id=? AND user_id=? AND mods=?", [map_id, user_id, mods]).fetchone()
-        if(result):
+        if result:
             self.log.debug("Loading replay on map %d by user %d with mods %s from cache", map_id, user_id, mods)
             return wtc.decompress(result[0])
         self.log.log(TRACE, "No replay found in cache")

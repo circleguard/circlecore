@@ -9,7 +9,7 @@ from circleguard.loadable import Replay
 from circleguard.enums import Mod
 from circleguard.exceptions import InvalidArgumentsException, CircleguardException
 import circleguard.utils as utils
-from circleguard.result import ReplayStealingResult
+from circleguard.result import StealResult
 
 class Comparer:
     """
@@ -17,9 +17,6 @@ class Comparer:
 
     Parameters
     ----------
-    threshold: int
-        If a comparison scores below this value, the :class:`~.result.Result`
-        of the comparison is considered cheated.
     replays1: list[:class:`~circleguard.loadable.Replay`]
         The replays to compare against either ``replays2`` if ``replays2`` is
         not ``None``, or against other replays in ``replays1``.
@@ -42,9 +39,8 @@ class Comparer:
     replays.
     """
 
-    def __init__(self, threshold, replays1, replays2=None):
+    def __init__(self, replays1, replays2=None):
         self.log = logging.getLogger(__name__)
-        self.threshold = threshold
 
         # filter beatmaps we had no data for
         self.replays1 = [replay for replay in replays1 if replay.replay_data is not None]
@@ -104,14 +100,8 @@ class Comparer:
             The result of comparing ``replay1`` to ``replay2``.
         """
         self.log.log(utils.TRACE, "comparing %r and %r", replay1, replay2)
-        result = Comparer._compare_two_replays(replay1, replay2)
-        mean = result[0]
-        sigma = result[1]
-        ischeat = False
-        if(mean < self.threshold):
-            ischeat = True
-
-        return ReplayStealingResult(replay1, replay2, mean, ischeat)
+        mean = Comparer._compare_two_replays(replay1, replay2)
+        return StealResult(replay1, replay2, mean)
 
     @staticmethod
     def _compare_two_replays(replay1, replay2):
@@ -128,8 +118,8 @@ class Comparer:
 
         Returns
         -------
-        tuple[float, float]
-            (average distance, stddev) of the cursors of the two replays.
+        float
+            The mean distance of the cursors of the two replays.
         """
 
         # interpolate
@@ -154,8 +144,7 @@ class Comparer:
         if (Mod.HR in replay1.mods) ^ (Mod.HR in replay2.mods):
             xy1[:, 1] = 384 - xy1[:, 1]
 
-        (mu, sigma) = Comparer._compute_data_similarity(xy1, xy2)
-        return (mu, sigma)
+        return Comparer._compute_data_similarity(xy1, xy2)
 
     @staticmethod
     def _compute_data_similarity(data1, data2):
@@ -174,8 +163,8 @@ class Comparer:
 
         Returns
         -------
-        tuple[float, float]
-            (average distance, stddev) between the two datasets.
+        float
+            The average distance between the two datasets.
 
         Notes
         -----
@@ -201,12 +190,10 @@ class Comparer:
         # => [ d_1 ... d_2 ]
         distance = (distance ** 2).sum(axis=1) ** 0.5
 
-        mu, sigma = distance.mean(), distance.std()
-
-        return (mu, sigma)
+        return distance.mean()
 
     def __repr__(self):
-        return f"Comparer(threshold={self.threshold},replays1={self.replays1},replays2={self.replays2})"
+        return f"Comparer(replays1={self.replays1},replays2={self.replays2})"
 
     def __str__(self):
-        return f"Comparer with thresh {self.threshold}"
+        return f"Comparer with {len(self.replays1)} and {len(self.replays2)} replays"

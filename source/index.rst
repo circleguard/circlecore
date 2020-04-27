@@ -13,9 +13,8 @@ Currently, we support the detection of the following cheats:
 Designed for use in Circleguard_, circlecore is easily integratable into any
 existing python project and we have worked hard to ensure it is easy to use.
 
-We highly encourage projects that use circlecore - if you are using it in one
-of your apps, please let us know and we will link to you somwhere in
-our documentation.
+Follow the links below or on the sidebar for an introduction to using
+circlecore!
 
 Circlecore is developed and maintained by:
 
@@ -70,8 +69,8 @@ Links
 
     foreword
     representing-replays
-    creating-checks
-    investigation
+    investigating-replays
+    results
     loading
     caching
 

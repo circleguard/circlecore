@@ -1,11 +1,8 @@
 Representing Replays
 ====================
 
-Circlecore needs a replay to investigate before it can tell you anything
-about if that replay is cheated. There are several ways to create a replay
-through circlecore.
-
-All of the following classes are subclasses of |Loadable|.
+Before you can investigate replays using circlecore, you need to know a few ways
+to represent them.
 
 .. note::
 
@@ -58,9 +55,10 @@ Replay Containers
 -----------------
 
 A |ReplayContainer| represents a set of replays. These classes are provided as
-a convenience to minimize the amount of information you need to
-know to construct a view of map or player.
+a convenience, so you don't have to instantiate dozens of |Replay|\s yourself.
 
+The ``span`` argument is an easy way to represent ranges of replays. See |Span|
+for more information.
 
 Map
 ~~~
@@ -70,7 +68,7 @@ It is common to want to represent all, or a subset of, a map's leaderboard.
 .. code-block:: python
 
     # top 2 scores on the map
-    m = Map(221777, num=2)
+    m = Map(221777, span="1-2")
 
 We can filter by mods:
 
@@ -78,22 +76,14 @@ We can filter by mods:
 
     # top 3 scores with exactly HD (not HDDT or another variation). Due to
     # api restrictions, we do not provide fuzzy matching.
-    m = Map(221777, num=3, mods=Mod.HD)
+    m = Map(221777, span="1-3", mods=Mod.HD)
 
-Or only represent some of the replays on the map. Use ``span`` for any case
-when you don't simply want the first ``n`` replays.
+Or only represent some of the replays on the map:
 
 .. code-block:: python
 
     # 1st, 4th, 5th, 6th top scores
     m = Map(221777, span="1, 4-6")
-
-``span`` can be combined with ``mods``, just like ``num`` can:
-
-.. code-block:: python
-
-    # 1st and 49th scores with exactly HD
-    m = Map(221777, span="1, 49", mods=Mod.HD)
 
 
 Users
@@ -104,7 +94,7 @@ Similar to |Map|, a |User| represents the top plays of a user.
 .. code-block:: python
 
     # top 2 scores of the user
-    u = User(2757689, num=2)
+    u = User(2757689, span="1-2")
 
 We can still filter by mods:
 
@@ -112,22 +102,7 @@ We can still filter by mods:
 
     # top 3 scores with exactly HD (not HDDT or another variation). Due to
     # api restrictions, we do not provide fuzzy matching.
-    u = User(2757689, num=3, mods=Mod.HD)
-
-or represent with a ``span``:
-
-.. code-block:: python
-
-    # 1st, 4th, 5th, 6th top scores
-    u = User(2757689, span="1, 4-6")
-
-And can still combine ``span`` and ``mods``:
-
-.. code-block:: python
-
-    # 1st and 49th scores with exactly HD
-    u = User(2757689, span="1, 49", mods=Mod.HD)
-
+    u = User(2757689, span="1-3", mods=Mod.HD)
 
 MapUser
 ~~~~~~~

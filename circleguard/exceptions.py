@@ -21,7 +21,7 @@ class InternalAPIException(APIException):
     """Indicates a response from the API that we know how to handle."""
 
 class InvalidKeyException(InternalAPIException):
-    """Indicates that the given api key was rejected by the api."""
+    """Indicates that an api key was rejected by the api."""
 
 class RatelimitException(InternalAPIException):
     """Indicates that our key has been ratelimited and we should retry the request at a later date."""

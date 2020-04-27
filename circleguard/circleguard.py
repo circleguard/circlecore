@@ -12,7 +12,7 @@ from circleguard.investigator import Investigator
 from circleguard.cacher import Cacher
 from circleguard.exceptions import CircleguardException
 from circleguard.loadable import Check, ReplayMap, ReplayPath, Replay, Map
-from circleguard.enums import Detect, RatelimitWeight
+from circleguard.enums import RatelimitWeight, Detect
 from slider import Beatmap, Library
 
 
@@ -26,7 +26,7 @@ class Circleguard:
         A valid api key. Can be retrieved from https://osu.ppy.sh/p/api/.
     db_path: str or :class:`os.PathLike`
         The path to the database file to read and write cached replays. If the
-        given path does not exist, a fresh database will be created there.
+        path does not exist, a fresh database will be created there.
         If `None`, no replays will be cached or loaded from cache.
     slider_dir: str or :class:`os.PathLike`
         The path to the directory used by :class:`slider.library.Library` to
@@ -34,12 +34,12 @@ class Circleguard:
         :class:`slider.library.Library` and subsequently destroyed when this
         :class:`~Circleguard` object is garbage collected.
     loader: :class:`~circleguard.loader.Loader`
-        A loader class or subclass, which will be used in place of
-        instantiating a new loader if passed. This must be the
-        class itself, *not* an instantiation of it. It will be instantiated
-        upon circleguard instantiation, with two args - a key and a cacher.
+        This loader will be used instead of the base loader if passed.
+        This must be the class itself, *not* an instantiation of it. It will be
+        with two args - a key and a cacher.
     """
-
+    DEFAULT_ANGLE = 10
+    DEFAULT_DISTANCE = 8
 
     def __init__(self, key, db_path=None, slider_dir=None, loader=None, cache=True):
         self.cache = cache
@@ -62,23 +62,32 @@ class Circleguard:
             self.library = Library(slider_dir)
 
 
-    def run(self, check):
+    def run(self, loadables, detect, loadables2=None, max_angle=DEFAULT_ANGLE, min_distance=DEFAULT_DISTANCE):
         """
-        Investigates replays held in a check for cheats.
+        Investigates loadables for cheats.
 
         Parameters
         ----------
-        check: :class:`~.Check`
-            A check holding the replays to investigate, and what to investigate
-            them for.
+        loadables: list[:class:`~.Loadable`]
+            The loadables to investigate.
+        detect: :class:`~.Detect`
+            What cheats to investigate for.
+        loadables2: list[:class:`~.Loadable`]
+            For :data:`~Detect.STEAL`, compare each loadable in ``loadables``
+            against each loadable in ``loadables2`` for replay stealing,
+            instead of to other loadables in ``loadables``.
+        max_angle: float
+            For :data:`Detect.CORRECTION`, consider only points (a,b,c) where
+            ``∠abc < max_angle``.
+        min_distance: float
+            For :data:`Detect.CORRECTION`, consider only points (a,b,c) where
+            ``|ab| > min_distance`` and ``|bc| > min_distance``.
 
         Yields
         ------
         :class:`~.Result`
-            A result representing a single investigation of the replays
-            in ``check``. Depending on how many replays are in
-            ``check``, and what type of cheats we are investigating for,
-            the total number of :class:`~.Result`\s yielded may vary.
+            A result representing an investigation of one or more of the replays
+            in ``loadables``, depending on the ``detect`` passed.
 
         Notes
         -----
@@ -87,21 +96,20 @@ class Circleguard:
         :meth:`~.run` without waiting for all of the investigations to finish.
         """
 
-        c = check
-        self.log.info("Running circleguard with %r", c)
+        c = Check(loadables, self.cache, loadables2=loadables2)
+        self.log.info("Running circleguard with check %r", c)
 
-        c.load(self.loader, self.cache)
-        d = c.detect
-        # steal check
-        if Detect.STEAL in d:
-            compare1 = c.all_replays()
-            compare2 = c.all_replays2()
-            comparer = Comparer(d.steal_thresh, compare1, replays2=compare2)
+        c.load(self.loader)
+        # comparer investigations
+        if detect & Detect.STEAL:
+            replays1 = c.all_replays1()
+            replays2 = c.all_replays2()
+            comparer = Comparer(replays1, replays2=replays2)
             yield from comparer.compare()
 
-        # relax check
-        if Detect.RELAX in d or Detect.CORRECTION in d:
-            if Detect.RELAX in d:
+        # investigator investigations
+        if detect & (Detect.RELAX | Detect.CORRECTION):
+            if detect & Detect.RELAX:
                 if not self.library:
                     # connect to library since it's a temporary one
                     library = Library(self.slider_dir.name)
@@ -111,19 +119,74 @@ class Circleguard:
             for replay in c.all_replays():
                 bm = None
                 # don't download beatmap unless we need it for relax
-                if Detect.RELAX in d:
+                if detect & Detect.RELAX:
                     bm = library.lookup_by_id(replay.map_id, download=True, save=True)
-                investigator = Investigator(replay, d, beatmap=bm)
+                investigator = Investigator(replay, detect, max_angle, min_distance, beatmap=bm)
                 yield from investigator.investigate()
 
-            if Detect.RELAX in d:
+            if detect & Detect.RELAX:
                 if not self.library:
                     # disconnect from temporary library
                     library.close()
 
+    def steal_check(self, loadables, loadables2=None):
+        """
+        Investigates loadables for replay stealing.
+
+        Parameters
+        ----------
+        loadables: list[:class:`~.Loadable`]
+            The loadables to investigate.
+        loadables2: list[:class:`~.Loadable`]
+            If passed, compare each loadable in ``loadables``
+            against each loadable in ``loadables2`` for replay stealing,
+            instead of to other loadables in ``loadables``.
+
+        Yields
+        ------
+        :class:`~.StealResult`
+            A result representing a replay stealing investigtion into a pair of
+            loadables from ``loadables`` and/or ``loadables2``.
+        """
+        yield from self.run(loadables, Detect.STEAL, loadables2)
+
+    def relax_check(self, loadables):
+        """
+        Investigates loadables for relax.
+
+        Parameters
+        ----------
+        loadables: list[:class:`~.Loadable`]
+            The loadables to investigate.
+
+        Yields
+        ------
+        :class:`~.RelaxResult`
+            A result representing a relax investigation into a loadable from
+            ``loadables``.
+        """
+        yield from self.run(loadables, Detect.RELAX)
+
+    def correction_check(self, loadables, max_angle=DEFAULT_ANGLE, min_distance=DEFAULT_DISTANCE):
+        """
+        Investigates loadables for aim correction.
+
+        Parameters
+        ----------
+        loadables: list[:class:`~.Loadable`]
+            The loadables to investigate.
+
+        Yields
+        ------
+        :class:`~.CorrectionResult`
+            A result representing an aim correction investigation into a
+            loadable from ``loadables``.
+        """
+        yield from self.run(loadables, Detect.CORRECTION, max_angle=max_angle, min_distance=min_distance)
+
     def load(self, loadable):
         """
-        Loads the given loadable.
+        Loads a loadable.
 
         Parameters
         ----------
@@ -138,12 +201,12 @@ class Circleguard:
 
     def load_info(self, loadable_container):
         """
-        Loads the given loadable container.
+        Loads a loadable container.
 
         Parameters
         ----------
-        loadable: :class:`~circleguard.loadable.InfoLoadable`
-            The info loadable to load.
+        loadable: :class:`~circleguard.loadable.LoadableContainer`
+            The loadable container to load.
 
         Notes
         -----

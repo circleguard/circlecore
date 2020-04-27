@@ -66,17 +66,24 @@ rst_prolog = """
 .. |Result| replace:: :class:`~circleguard.result.Result`
 .. |RelaxResult| replace:: :class:`~circleguard.result.RelaxResult`
 .. |StealResult| replace:: :class:`~circleguard.result.StealResult`
+.. |CorrectionResult| replace:: :class:`~circleguard.result.CorrectionResult`
 
 .. |Detect| replace:: :class:`~circleguard.enums.Detect`
-.. |RelaxDetect| replace:: :class:`~circleguard.enums.RelaxDetect`
-.. |StealDetect| replace:: :class:`~circleguard.enums.StealDetect`
+.. |Detect.STEAL| replace:: :class:`~circleguard.enums.Detect.STEAL`
+.. |Detect.RELAX| replace:: :class:`~circleguard.enums.Detect.RELAX`
+.. |Detect.CORRECTION| replace:: :data:`~circleguard.enums.Detect.CORRECTION`
 
 .. |RatelimitWeight| replace:: :class:`~circleguard.enums.RatelimitWeight`
 
 .. |Circleguard| replace:: :class:`~circleguard.circleguard.Circleguard`
-.. |cg.run| replace:: :func:`cg.run <circleguard.circleguard.Circleguard.run>`
-.. |cg.load| replace:: :func:`cg.load <circleguard.circleguard.Circleguard.load>`
-.. |cg.load_info| replace:: :func:`cg.load_info <circleguard.circleguard.Circleguard.load_info>`
+.. |cg.run| replace:: :func:`cg.run() <circleguard.circleguard.Circleguard.run>`
+.. |cg.steal_check| replace:: :func:`~circleguard.circleguard.Circleguard.steal_check`
+.. |cg.relax_check| replace:: :func:`~circleguard.circleguard.Circleguard.relax_check`
+.. |cg.correction_check| replace:: :func:`~circleguard.circleguard.Circleguard.correction_check`
+.. |cg.load| replace:: :func:`cg.load() <circleguard.circleguard.Circleguard.load>`
+.. |cg.load_info| replace:: :func:`cg.load_info() <circleguard.circleguard.Circleguard.load_info>`
+
+.. |Span| replace:: :class:`~circleguard.span.Span`
 
 .. _Circleguard: https://github.com/circleguard/circleguard
 .. _Circlecore: https://github.com/circleguard/circlecore

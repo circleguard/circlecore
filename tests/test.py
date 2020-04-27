@@ -2,8 +2,9 @@ import os
 from unittest import TestCase, skip, TestSuite, TextTestRunner
 from pathlib import Path
 import warnings
-from circleguard import (Circleguard, Check, ReplayMap, ReplayPath, RelaxDetect, StealDetect, CorrectionDetect,
-                         RatelimitWeight, set_options, Map, User, MapUser, Mod, Loader, InvalidKeyException)
+from circleguard import (Circleguard, Check, ReplayMap, ReplayPath, Detect,
+                         RatelimitWeight, set_options, Map, User, MapUser, Mod,
+                         Loader, InvalidKeyException)
 
 KEY = os.environ.get('OSU_API_KEY')
 if not KEY:
@@ -42,11 +43,10 @@ class TestReplays(CGTestCase):
     def test_cheated_replaypath(self):
         # taken from http://redd.it/bvfv8j, remodded replay by same user (CielXDLP) from HDHR to FLHDHR
         replays = [ReplayPath(RES / "stolen_replay1.osr"), ReplayPath(RES / "stolen_replay2.osr")]
-        c = Check(replays, detect=StealDetect(18))
-        r = list(self.cg.run(c))
+        r = list(self.cg.steal_check(replays))
         self.assertEqual(len(r), 1, f"{len(r)} results returned instead of 1")
         r = r[0]
-        self.assertTrue(r.ischeat, "Cheated replays were not detected as cheated")
+        self.assertTrue(r.similarity < 18, "Cheated replays were not detected as cheated")
 
         r1 = r.replay1
         r2 = r.replay2
@@ -64,11 +64,10 @@ class TestReplays(CGTestCase):
 
     def test_legitimate_replaypath(self):
         replays = [ReplayPath(RES / "legit_replay1.osr"), ReplayPath(RES / "legit_replay2.osr")]
-        c = Check(replays, detect=StealDetect(18))
-        r = list(self.cg.run(c))
+        r = list(self.cg.steal_check(replays))
         self.assertEqual(len(r), 1, f"{len(r)} results returned instead of 1")
         r = r[0]
-        self.assertFalse(r.ischeat, "Legitimate replays were detected as stolen")
+        self.assertFalse(r.similarity < 18, "Legitimate replays were detected as stolen")
 
         r1 = r.replay1
         r2 = r.replay2
@@ -114,12 +113,11 @@ class TestReplays(CGTestCase):
                    ReplayPath(RES / "legit_replay1.osr"), ReplayPath(RES / "legit_replay2.osr")]
 
         for num in range(2, 5):
-            c = Check(replays[:num], detect=StealDetect(18))
-            r = list(self.cg.run(c))
+            r = list(self.cg.steal_check(replays[:num]))
             results_num = num * (num - 1) / 2 #n choose k formula with k=2
             self.assertEqual(len(r), results_num, f"{len(r)} results returned instead of {results_num}")
             r = r[0]
-            self.assertTrue(r.ischeat, f"Cheated replays were not detected as cheated at num {num}")
+            self.assertTrue(r.similarity < 18, f"Cheated replays were not detected as cheated at num {num}")
 
             r1 = r.replay1
             r2 = r.replay2
@@ -142,7 +140,7 @@ class TestCorrection(CGTestCase):
         cls.r1 = ReplayPath(RES / "corrected_replay1.osr")
 
     def test_cheated_replay(self):
-        r = list(self.cg.run(Check([self.r1], CorrectionDetect())))[0]
+        r = list(self.cg.correction_check(self.r1))[0]
         snaps = r.snaps
 
         self.assertEqual(len(snaps), 15)
@@ -164,7 +162,7 @@ class TestMap(CGTestCase):
     @classmethod
     def setUpClass(cls):
         cls.cg = Circleguard(KEY)
-        cls.map = Map(221777, num=3)
+        cls.map = Map(221777, "1-3")
 
     def test_map_load(self):
         self.assertEqual(len(self.map.all_replays()), 0)
@@ -197,7 +195,7 @@ class TestUser(CGTestCase):
     @classmethod
     def setUpClass(cls):
         cls.cg = Circleguard(KEY)
-        cls.user = User(124493, num=3)
+        cls.user = User(124493, span="1-3")
 
     def test_user_load(self):
         self.assertEqual(len(self.user.all_replays()), 0)
@@ -229,7 +227,7 @@ class TestMapUser(CGTestCase):
     @classmethod
     def setUpClass(cls):
         cls.cg = Circleguard(KEY)
-        cls.mu = MapUser(795627, 6304246, num=2)
+        cls.mu = MapUser(795627, 6304246, span="1-2")
 
     def test_map_user_load(self):
         self.assertEqual(len(self.mu.all_replays()), 0)
@@ -297,15 +295,15 @@ class TestEquality(CGTestCase):
     def setUpClass(cls):
         cls.cg = Circleguard(KEY)
 
-        cls.user = User(2757689, num=2) # toy, #1=sidetracked day, #2=View of The River Styx
-        cls.user1 = User(2757689, num=2, cache=False)
-        cls.user2 = User(2757689, num=2, mods=Mod.HT)
-        cls.user3 = User(2757689, num=1)
+        cls.user = User(2757689, "1-2") # toy, #1=sidetracked day, #2=View of The River Styx
+        cls.user1 = User(2757689, "1-2", cache=False)
+        cls.user2 = User(2757689, "1-2", mods=Mod.HT)
+        cls.user3 = User(2757689, "1")
 
-        cls.map = Map(1754777, num=4) #sidetracked day: umbre, karthy, -duckleader-, toy
-        cls.map1 = Map(1754777, num=4, cache=False)
-        cls.map2 = Map(1754777, num=4, mods=Mod.HD)
-        cls.map3 = Map(1754777, num=2)
+        cls.map = Map(1754777, "1-4") #sidetracked day: umbre, karthy, -duckleader-, toy
+        cls.map1 = Map(1754777, "1-4", cache=False)
+        cls.map2 = Map(1754777, "1-4", mods=Mod.HD)
+        cls.map3 = Map(1754777, "1-2")
 
         cls.r = ReplayMap(1754777, 2766034) # umbre +HDHR on sidetracked day
         cls.r1 = ReplayMap(1754777, 2766034, cache=True)

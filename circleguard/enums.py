@@ -317,107 +317,6 @@ class Mod(ModCombination):
             mod_value += matching_mods[0].value
         return mod_value
 
-class Detect():
-    """
-    A cheat, or set of cheats, to run tests to detect.
-
-    Parameters
-    ----------
-    value: int
-        One (or a bitwise combination) of :data:`~.Detect.STEAL`,
-        :data:`~.Detect.RELAX`, :data:`~.Detect.CORRECTION`,
-        :data:`~.Detect.ALL`. What cheats to detect.
-    """
-    STEAL = 1 << 0
-    RELAX = 1 << 1
-    CORRECTION = 1 << 2
-    ALL = STEAL + RELAX + CORRECTION
-
-    def __init__(self, value):
-        self.value = value
-
-        # so we can reference them in :func:`~.__add__`
-        self.steal_thresh = None
-        self.ur_thresh = None
-        self.max_angle = None
-        self.min_distance = None
-
-    def __contains__(self, other):
-        return bool(self.value & other)
-
-    def __add__(self, other):
-        ret = Detect(self.value | other.value)
-        d = self if Detect.STEAL in self else other if Detect.STEAL in other else None
-        if d:
-            ret.steal_thresh = d.steal_thresh
-        d = self if Detect.RELAX in self else other if Detect.RELAX in other else None
-        if d:
-            ret.ur_thresh = d.ur_thresh
-        d = self if Detect.CORRECTION in self else other if Detect.CORRECTION in other else None
-        if d:
-            ret.max_angle = d.max_angle
-            ret.min_distance = d.min_distance
-        return ret
-
-class StealDetect(Detect):
-    """
-    Defines a detection of replay stealing.
-
-    Look at the average distance between the cursors of two replays.
-
-    Parameters
-    ----------
-    steal_thresh: float
-        If the average distance in pixels of two replays is smaller than
-        this value, they are labeled cheated (stolen replays). Default 18.
-    """
-    def __init__(self, steal_thresh=18):
-        super().__init__(Detect.STEAL)
-        self.steal_thresh = steal_thresh
-
-class RelaxDetect(Detect):
-    """
-    Defines a detection of relax.
-
-    Look at the ur of a replay.
-
-    Parameters
-    ----------
-    ur_thresh: float
-        If the ur of a replay is less than this value, it is labeled cheated
-        (relaxed).
-    """
-    def __init__(self, ur_thresh=50):
-        super().__init__(Detect.RELAX)
-        self.ur_thresh = ur_thresh
-
-class CorrectionDetect(Detect):
-    """
-    Defines a detection of aim correction.
-
-    Look at each set of three points (a,b,c) in a replay and calculate the
-    angle between them. Look at points where this angle is extremely acute
-    and neither ``|ab|`` or ``|bc|`` are small.
-
-    Parameters
-    ----------
-    max_angle: float
-        Consider only (a,b,c) where ``∠abc < max_angle``.
-    min_distance: float
-        Consider only (a,b,c) where ``|ab| > min_distance`` and
-        ``|ab| > min_distance``.
-
-    Notes
-    -----
-    A replay is considered cheated (aim corrected) by this detect if there
-    is a single datapoint that satsfies both ``max_angle`` and
-    ``min_distance``.
-    """
-    def __init__(self, max_angle=10, min_distance=8):
-        super().__init__(Detect.CORRECTION)
-        self.max_angle = max_angle
-        self.min_distance = min_distance
-
 
 class RatelimitWeight(Enum):
     """
@@ -442,6 +341,15 @@ class RatelimitWeight(Enum):
     LIGHT = "Light"
     HEAVY = "Heavy"
 
+class Detect(IntFlag):
+    """
+    A cheat, or set of cheats, to investigate for.
+    """
+    STEAL      = 1 << 0
+    RELAX      = 1 << 1
+    CORRECTION = 1 << 2
+    ALL = STEAL + RELAX + CORRECTION
+
 class ResultType(Enum):
     """
     What type of cheat test to represent the results for.
@@ -454,12 +362,8 @@ class ResultType(Enum):
     TIMEWARP = "Timewarp"
 
 class Key(IntFlag):
-    M1 = 1
-    M2 = 2
-    K1 = 4
-    K2 = 8
-    SMOKE = 16
-
-# TODO remove in 4.x
-# @deprecated
-Keys = Key
+    M1    = 1 << 0
+    M2    = 1 << 1
+    K1    = 1 << 2
+    K2    = 1 << 3
+    SMOKE = 1 << 4

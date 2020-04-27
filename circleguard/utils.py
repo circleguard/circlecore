@@ -78,38 +78,7 @@ class ColoredFormatter(Formatter):
 
         return Formatter.format(self, c_record)
 
-######### UTIL METHODS ###########
-
-def span_to_list(span):
-    """
-    Converts a span to the set of numbers covered by that span.
-
-    Parameters
-    ----------
-    span: str
-        The span of numbers to convert to a set. A number may occur more than
-        once - whether explicitly or in a range - in the span, but will
-        only occur once in the returned set.
-
-    Returns
-    -------
-    set
-        The set of numbers described by the `span`.
-
-    Examples
-    --------
-    >>> span_to_list("1-3,6,2-4")
-    {1, 2, 3, 4, 6}
-    """
-    ret = set()
-    for s in span.split(","):
-        if "-" in s:
-            p = s.split("-")
-            l = list(range(int(p[0]), int(p[1])+1))
-            ret.update(l)
-        else:
-            ret.add(int(s))
-    return ret
+######### UTILS ###########
 
 def convert_ur(ur, mods, *, to):
     """
