@@ -60,7 +60,7 @@ Result
    :members:
 
 Span
------
+----
 .. automodule:: circleguard.span
    :members:
 
