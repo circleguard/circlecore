@@ -134,7 +134,7 @@ class Loader():
     # make these discoverable unless you know the eaact user id, map id, and
     # mods of the replay.
     MAX_MAP_SPAN = Span("1-100")
-    MAX_USER_NUM = Span("1-100")
+    MAX_USER_SPAN = Span("1-100")
     # time in seconds until the api refreshes our ratelimits
     RATELIMIT_RESET = 60
     # when we started our requests cycle
