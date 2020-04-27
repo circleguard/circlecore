@@ -15,10 +15,9 @@ things.
 
 .. note::
 
-    You may need to toy with being logged in/entering the url
-    multiple times in order to actually get to the api page.
-    The redirection on osu!'s end is rather fiddly.
-
+    Due to a redirection bug (https://github.com/ppy/osu-web/issues/2867)
+    on the website, you may need to log in and refresh the page before being
+    able to access the api page.
 
 After that, circleguard instantion is easy:
 
