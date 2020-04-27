@@ -553,6 +553,13 @@ class ReplayMap(Replay):
         self.user_id = user_id
         self.mods = mods
         self.info = info
+        if info:
+            self.timestamp = info.timestamp
+            self.map_id = info.map_id
+            self.user_id = info.user_id
+            self.username = info.username
+            self.replay_id = info.replay_id
+            self.mods = info.mods
 
     def load(self, loader, cache):
         """
