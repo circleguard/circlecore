@@ -81,7 +81,7 @@ rst_prolog = """
 .. |cg.relax_check| replace:: :func:`~circleguard.circleguard.Circleguard.relax_check`
 .. |cg.correction_check| replace:: :func:`~circleguard.circleguard.Circleguard.correction_check`
 .. |cg.load| replace:: :func:`cg.load() <circleguard.circleguard.Circleguard.load>`
-.. |cg.load_info| replace:: :func:`cg.load_info <circleguard.circleguard.Circleguard.load_info>`
+.. |cg.load_info| replace:: :func:`cg.load_info() <circleguard.circleguard.Circleguard.load_info>`
 
 .. |Span| replace:: :class:`~circleguard.span.Span`
 
