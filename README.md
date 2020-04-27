@@ -48,20 +48,16 @@ from circleguard import *
 cg = Circleguard("key")
 r1 = ReplayMap(221777, 2757689)
 r2 = ReplayMap(221777, 4196808)
-c = Check([r1, r2], StealDetect(50))
-for r in cg.run(c): # r is a StealResult
-    if not r.ischeat:
-        print(f"replays by {r.replay1.username} and {r.replay2.username} are not stolen")
-        continue
-    print(f"{r.later_replay.username}'s replay on map {r.later_replay.map_id} +{r.later_replay.mods}"
-          f"is stolen from {r.earlier_replay.username} with similarity {r.similarity}")
+for r in cg.steal_check([r1, r2]): # r is a StealResult
+    print(f"{r.replay1.username} +{r.replay1.mods} vs {r.replay2.username} "
+          f"+{r.replay2.mods} on {r.replay1.map_id}. {r.similarity} sim")
 ```
 
 ```python
 from circleguard import *
 
 cg = Circleguard("key")
-m = Map(221777, num=2)
+m = Map(221777, span="1-2")
 cg.load_info(m)
 for r in m:
     print(f"User {r.username} +{r.mods} on map {r.map_id}")
