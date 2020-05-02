@@ -265,8 +265,8 @@ class Loader():
         # remove span indices which would cause an index error because there
         # weren't that many replay infos returned by the api. eg if there
         # were 4 responses, remove any span above 4
-        response_limit = len(response)
-        _span = [x for x in span if x <= response_limit]
+        response_count = len(response)
+        _span = [x for x in span if x <= response_count]
 
         response = [response[i-1] for i in _span]
         return [ReplayInfo(datetime.strptime(r["date"], "%Y-%m-%d %H:%M:%S"), int(r["beatmap_id"]), int(r["user_id"]),
