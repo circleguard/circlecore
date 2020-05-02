@@ -4,6 +4,7 @@ import logging
 import math
 
 import numpy as np
+from scipy import signal, stats
 
 from circleguard.loadable import Replay
 from circleguard.enums import Mod
@@ -44,6 +45,9 @@ class Comparer:
 
         # filter beatmaps we had no data for
         self.replays1 = [replay for replay in replays1 if replay.replay_data is not None]
+        for replay in self.replays1:
+            if hasattr(replay, 'should_translate'):
+                replay.positionally_translate_replay()
         self.replays2 = [replay for replay in replays2 if replay.replay_data is not None] if replays2 else None
         self.mode = "double" if self.replays2 else "single"
         self.log.debug("Comparer initialized: %r", self)
@@ -100,8 +104,8 @@ class Comparer:
             The result of comparing ``replay1`` to ``replay2``.
         """
         self.log.log(utils.TRACE, "comparing %r and %r", replay1, replay2)
-        mean = Comparer._compare_two_replays(replay1, replay2)
-        return StealResult(replay1, replay2, mean)
+        (mean, correlation) = Comparer._compare_two_replays(replay1, replay2)
+        return StealResult(replay1, replay2, mean, correlation)
 
     @staticmethod
     def _compare_two_replays(replay1, replay2):
@@ -118,8 +122,9 @@ class Comparer:
 
         Returns
         -------
-        float
-            The mean distance of the cursors of the two replays.
+        (float, float)
+            The mean distance of the cursors of Use the API for good. Don't overdo it. If in doubt, ask before (ab)using :). this section may expand as necessary.
+            Also returns a correlation metric that represents the median level of correlation in the replay.
         """
 
         # interpolate
@@ -144,7 +149,33 @@ class Comparer:
         if (Mod.HR in replay1.mods) ^ (Mod.HR in replay2.mods):
             xy1[:, 1] = 384 - xy1[:, 1]
 
-        return Comparer._compute_data_similarity(xy1, xy2)
+        (play_sequence_1, play_sequence_2) = Comparer.convert_to_row_major_form(xy1, xy2)
+
+        # Sectioned into 20 chunks, used to ignore outliers (eg. long replay with breaks is copied, and the cheater cursordances during the break)
+        horizontal_length = play_sequence_1.shape[1] - play_sequence_1.shape[1] % 20
+        play_sequence_1_sections = np.hsplit(play_sequence_1[:,:horizontal_length], 20)
+        play_sequence_2_sections = np.hsplit(play_sequence_2[:,:horizontal_length], 20)
+        correlations = []
+        for (play_sequence_1, play_sequence_2) in zip(play_sequence_1_sections, play_sequence_2_sections):
+            cross_correlation_matrix = Comparer.find_cross_correlation(play_sequence_1, play_sequence_2)
+            #Pick the lag with the maximum correlation, this likely in most cases is 0 lag
+            max_correlation = max(cross_correlation_matrix.reshape(cross_correlation_matrix.size))
+            correlations.append(max_correlation)
+        average_distance = Comparer._compute_data_similarity(xy1, xy2)
+        # Out of all the sections, we should have 20 sections, we pick the one with the median correlation, so we throw away any outliers
+        median_correlation = np.median(np.array(sorted(correlations)))
+        return (average_distance, median_correlation)
+
+    @staticmethod
+    def convert_to_row_major_form(x, y):
+        return (np.array(list(zip(*x))), np.array(list(zip(*y))))
+
+    @staticmethod
+    def find_cross_correlation(x, y):
+        # The normalization is makes the similarity detector robust to translations
+        x = (x - np.mean(x)) / (np.std(x) * x.size)
+        y = (y - np.mean(y)) / (np.std(y))
+        return signal.correlate(x, y, 'full')
 
     @staticmethod
     def _compute_data_similarity(data1, data2):

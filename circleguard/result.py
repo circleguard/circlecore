@@ -74,12 +74,16 @@ class StealResult(ComparisonResult):
         The similarity of the two replays (the lower, the more similar).
         Similarity is, roughly speaking, a measure of the average pixel
         distance between the two replays.
+    correlation: float
+        The median correlation of the two replays (the closer to 1, the more correlated).
+        A value of 1.0 would be perfectly correlated, and a result of 0 would be uncorrelated.
     """
 
-    def __init__(self, replay1: Replay, replay2: Replay, similarity: int,):
+    def __init__(self, replay1: Replay, replay2: Replay, similarity: int, correlation: float=0.0):
         super().__init__(replay1, replay2, ResultType.STEAL)
 
         self.similarity = similarity
+        self.correlation = correlation
         if self.replay1.timestamp < self.replay2.timestamp:
             self.earlier_replay: Replay = self.replay1
             self.later_replay: Replay = self.replay2

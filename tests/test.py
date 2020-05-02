@@ -2,6 +2,7 @@ import os
 from unittest import TestCase, skip, TestSuite, TextTestRunner
 from pathlib import Path
 import warnings
+import numpy as np
 from circleguard import (Circleguard, Check, ReplayMap, ReplayPath, Detect,
                          RatelimitWeight, set_options, Map, User, MapUser, Mod,
                          Loader, InvalidKeyException)
@@ -25,7 +26,7 @@ HEAVY_CALL_COUNT = 9
 class CGTestCase(TestCase):
     @classmethod
     def setUpClass(cls):
-        cls.cg = Circleguard(KEY)
+        cls.cg = Circleguard(KEY, db_path='cache.db')
 
     def setUp(self):
         # prints TestClassName.testMethodName.
@@ -54,6 +55,31 @@ class TestReplays(CGTestCase):
         later = r.later_replay
 
         self.assertAlmostEqual(r.similarity, 2.19236, delta=DELTA, msg="Similarity is not correct")
+        self.assertEqual(r1.map_id, r2.map_id, "Replay map ids did not match")
+        self.assertEqual(r1.map_id, 1988753, "Replay map id was not correct")
+        self.assertEqual(earlier.mods, Mod.HD + Mod.HR, "Earlier replay mods was not correct")
+        self.assertEqual(later.mods, Mod.FL + Mod.HD + Mod.HR, "Later replay mods was not correct")
+        self.assertEqual(earlier.replay_id, 2801164636, "Earlier replay id was not correct")
+        self.assertEqual(later.replay_id, 2805164683, "Later replay id was not correct")
+        self.assertEqual(r1.username, r2.username, "Replay usernames did not match")
+
+
+    def test_robustness_to_translation(self):
+        # taken from http://redd.it/bvfv8j, remodded replay by same user (CielXDLP) from HDHR to FLHDHR
+        replays = [ReplayPath(RES / "stolen_replay1.osr"), ReplayPath(RES / "stolen_replay2.osr")]
+        for replay in replays[1:]:
+            replay.should_translate = True
+        r = list(self.cg.steal_check(replays))
+
+        self.assertEqual(len(r), 1, f"{len(r)} results returned instead of 1")
+        r = r[0]
+        self.assertTrue(r.similarity > 10 and r.correlation > 0.999, "Cheated replays were not detected as cheated")
+
+        r1 = r.replay1
+        r2 = r.replay2
+        earlier = r.earlier_replay
+        later = r.later_replay
+
         self.assertEqual(r1.map_id, r2.map_id, "Replay map ids did not match")
         self.assertEqual(r1.map_id, 1988753, "Replay map id was not correct")
         self.assertEqual(earlier.mods, Mod.HD + Mod.HR, "Earlier replay mods was not correct")
