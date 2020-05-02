@@ -63,12 +63,19 @@ class TestReplays(CGTestCase):
         self.assertEqual(later.replay_id, 2805164683, "Later replay id was not correct")
         self.assertEqual(r1.username, r2.username, "Replay usernames did not match")
 
+    @staticmethod
+    def add_noise_and_positional_translation_to_replay(replay, pixel_offset, std_deviation):
+        mean = [pixel_offset, pixel_offset]
+        covariance_matrix = [[std_deviation, std_deviation],[std_deviation,std_deviation]]
+        replay.xy = replay.xy + np.random.default_rng().multivariate_normal(mean, covariance_matrix, len(replay.xy))
+        return replay
 
     def test_robustness_to_translation(self):
         # taken from http://redd.it/bvfv8j, remodded replay by same user (CielXDLP) from HDHR to FLHDHR
         replays = [ReplayPath(RES / "stolen_replay1.osr"), ReplayPath(RES / "stolen_replay2.osr")]
-        for replay in replays[1:]:
-            replay.should_translate = True
+        replay_2 = replays[1]
+        self.cg.load(replay_2)
+        TestReplays.add_noise_and_positional_translation_to_replay(replay_2, 10, 3)
         r = list(self.cg.steal_check(replays))
 
         self.assertEqual(len(r), 1, f"{len(r)} results returned instead of 1")

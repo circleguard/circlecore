@@ -722,8 +722,3 @@ class ReplayPath(Replay):
             return f"Loaded ReplayPath by {self.username} on {self.map_id} at {self.path}"
         else:
             return f"Unloaded ReplayPath at {self.path}"
-
-    def positionally_translate_replay(self):
-        noise = np.random.normal(0, 1, )
-        self.xy = self.xy + np.random.default_rng().multivariate_normal([10, 10], [[3,3],[3,3]],(len(self.xy)))
-        return self

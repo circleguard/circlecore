@@ -45,9 +45,6 @@ class Comparer:
 
         # filter beatmaps we had no data for
         self.replays1 = [replay for replay in replays1 if replay.replay_data is not None]
-        for replay in self.replays1:
-            if hasattr(replay, 'should_translate'):
-                replay.positionally_translate_replay()
         self.replays2 = [replay for replay in replays2 if replay.replay_data is not None] if replays2 else None
         self.mode = "double" if self.replays2 else "single"
         self.log.debug("Comparer initialized: %r", self)
@@ -151,10 +148,12 @@ class Comparer:
 
         (play_sequence_1, play_sequence_2) = Comparer.convert_to_row_major_form(xy1, xy2)
 
+        NUM_CHUNKS = 20
+
         # Sectioned into 20 chunks, used to ignore outliers (eg. long replay with breaks is copied, and the cheater cursordances during the break)
-        horizontal_length = play_sequence_1.shape[1] - play_sequence_1.shape[1] % 20
-        play_sequence_1_sections = np.hsplit(play_sequence_1[:,:horizontal_length], 20)
-        play_sequence_2_sections = np.hsplit(play_sequence_2[:,:horizontal_length], 20)
+        horizontal_length = play_sequence_1.shape[1] - play_sequence_1.shape[1] % NUM_CHUNKS
+        play_sequence_1_sections = np.hsplit(play_sequence_1[:,:horizontal_length], NUM_CHUNKS)
+        play_sequence_2_sections = np.hsplit(play_sequence_2[:,:horizontal_length], NUM_CHUNKS)
         correlations = []
         for (play_sequence_1, play_sequence_2) in zip(play_sequence_1_sections, play_sequence_2_sections):
             cross_correlation_matrix = Comparer.find_cross_correlation(play_sequence_1, play_sequence_2)
