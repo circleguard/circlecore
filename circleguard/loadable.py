@@ -357,19 +357,8 @@ class User(ReplayContainer):
             self.replays.append(ReplayMap(info.map_id, info.user_id, info.mods, cache=self.cache, info=info))
         self.info_loaded = True
 
-    def load(self, loader, cache=None):
-        if self.loaded:
-            return
-        # only listen to the parent's cache if ours is not set. Lower takes precedence
-        cascade_cache = cache if self.cache is None else self.cache
-        self.load_info(loader)
-        for loadable in self.replays:
-            loadable.load(loader, cascade_cache)
-        self.loaded = True
-
     def all_replays(self):
         return self.replays
-
 
     def __eq__(self, loadable):
         if not isinstance(loadable, User):
@@ -395,8 +384,8 @@ class MapUser(ReplayContainer):
         Whether to cache the replays once they are loaded.
     available_only: bool
         Whether to represent only replays that have replay data available.
-        Replays are filtered on this basis after ``mods`` and ``span``
-        are applied. True by default.
+        Replays are filtered on this basis after ``span`` is applied.
+        True by default.
     """
     def __init__(self, map_id, user_id, span=Loader.MAX_MAP_SPAN, cache=None, available_only=True):
         super().__init__(cache)
