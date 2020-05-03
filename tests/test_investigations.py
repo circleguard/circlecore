@@ -116,7 +116,7 @@ class TestSteal(CGTestCase):
 
     def test_robustness_to_translation(self):
         # taken from http://redd.it/bvfv8j, remodded replay by same user (CielXDLP) from HDHR to FLHDHR
-        replays = [ReplayPath(RES / "stolen_replay1.osr"), ReplayPath(RES / "stolen_replay2.osr")]
+        replays = [self.stolen1, self.stolen2]
         replay_2 = replays[1]
         self.cg.load(replay_2)
         TestSteal.add_noise_and_positional_translation_to_replay(replay_2, 10, 3)
