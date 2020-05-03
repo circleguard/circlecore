@@ -85,6 +85,22 @@ class LoadableContainer(Loadable):
             loadable.load(loader, cascade_cache)
         self.loaded = True
 
+    # TODO in core 5.0.0: don't provide a default implementation of this method.
+    # we currently assume that users will only use LoadableContainer for two
+    # things:
+    # * needs to define ``Replay`` instances on load info and does not hold any
+    #   ``LoadableContainer``s. In which case you should use ReplayContainer,
+    #   which has ``load_info`` as abstract
+    # * does not need to define any ``Replay`` instances on load info, and holds
+    #   ``LoadableContainer``s. In which case you should use ``Check`` or
+    #   subclass LoadableContainer
+    # But there is a third option - needing to define ``Replay`` instances on
+    # load info, *and* holding ``LoadableContainer``s. In which case this
+    # default does not do what we want. It's not worth it to define this method
+    # here, so move this implementation to ``Check`` (or maybe even split into
+    # a further two subclasses, "does not create anything new on load info" which
+    # Check would inherit from, and "does create new Loadables on load info",
+    # which is the third case here).
     def load_info(self, loader):
         if self.info_loaded:
             return
