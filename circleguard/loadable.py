@@ -85,6 +85,22 @@ class LoadableContainer(Loadable):
             loadable.load(loader, cascade_cache)
         self.loaded = True
 
+    # TODO in core 5.0.0: don't provide a default implementation of this method.
+    # we currently assume that users will only use LoadableContainer for two
+    # things:
+    # * needs to define ``Replay`` instances on load info and does not hold any
+    #   ``LoadableContainer``s. In which case you should use ReplayContainer,
+    #   which has ``load_info`` as abstract
+    # * does not need to define any ``Replay`` instances on load info, and holds
+    #   ``LoadableContainer``s. In which case you should use ``Check`` or
+    #   subclass LoadableContainer
+    # But there is a third option - needing to define ``Replay`` instances on
+    # load info, *and* holding ``LoadableContainer``s. In which case this
+    # default does not do what we want. It's not worth it to define this method
+    # here, so move this implementation to ``Check`` (or maybe even split into
+    # a further two subclasses, "does not create anything new on load info" which
+    # Check would inherit from, and "does create new Loadables on load info",
+    # which is the third case here).
     def load_info(self, loader):
         if self.info_loaded:
             return
@@ -357,19 +373,8 @@ class User(ReplayContainer):
             self.replays.append(ReplayMap(info.map_id, info.user_id, info.mods, cache=self.cache, info=info))
         self.info_loaded = True
 
-    def load(self, loader, cache=None):
-        if self.loaded:
-            return
-        # only listen to the parent's cache if ours is not set. Lower takes precedence
-        cascade_cache = cache if self.cache is None else self.cache
-        self.load_info(loader)
-        for loadable in self.replays:
-            loadable.load(loader, cascade_cache)
-        self.loaded = True
-
     def all_replays(self):
         return self.replays
-
 
     def __eq__(self, loadable):
         if not isinstance(loadable, User):
@@ -395,8 +400,8 @@ class MapUser(ReplayContainer):
         Whether to cache the replays once they are loaded.
     available_only: bool
         Whether to represent only replays that have replay data available.
-        Replays are filtered on this basis after ``mods`` and ``span``
-        are applied. True by default.
+        Replays are filtered on this basis after ``span`` is applied.
+        True by default.
     """
     def __init__(self, map_id, user_id, span=Loader.MAX_MAP_SPAN, cache=None, available_only=True):
         super().__init__(cache)
