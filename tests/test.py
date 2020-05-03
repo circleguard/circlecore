@@ -25,7 +25,8 @@ HEAVY_CALL_COUNT = 9
 class CGTestCase(TestCase):
     @classmethod
     def setUpClass(cls):
-        cls.cg = Circleguard(KEY)
+        cache_path = Path(__file__).parent / "cache.db"
+        cls.cg = Circleguard(KEY, db_path=cache_path)
 
     def setUp(self):
         # prints TestClassName.testMethodName.
@@ -136,7 +137,7 @@ class TestReplays(CGTestCase):
 class TestCorrection(CGTestCase):
     @classmethod
     def setUpClass(cls):
-        cls.cg = Circleguard(KEY)
+        super().setUpClass()
         cls.r1 = ReplayPath(RES / "corrected_replay1.osr")
 
     def test_cheated_replay(self):
@@ -161,7 +162,7 @@ class TestCorrection(CGTestCase):
 class TestMap(CGTestCase):
     @classmethod
     def setUpClass(cls):
-        cls.cg = Circleguard(KEY)
+        super().setUpClass()
         cls.map = Map(221777, "1-3")
 
     def test_map_load(self):
@@ -194,7 +195,7 @@ class TestMap(CGTestCase):
 class TestUser(CGTestCase):
     @classmethod
     def setUpClass(cls):
-        cls.cg = Circleguard(KEY)
+        super().setUpClass()
         cls.user = User(124493, span="1-3")
 
     def test_user_load(self):
@@ -226,7 +227,7 @@ class TestUser(CGTestCase):
 class TestMapUser(CGTestCase):
     @classmethod
     def setUpClass(cls):
-        cls.cg = Circleguard(KEY)
+        super().setUpClass()
         cls.mu = MapUser(795627, 6304246, span="1-2")
 
     def test_map_user_load(self):
@@ -258,6 +259,7 @@ class TestMapUser(CGTestCase):
 class TestLoader(CGTestCase):
     @classmethod
     def setUpClass(cls):
+        super().setUpClass()
         cls.loader = Loader(KEY)
 
     def test_loading_map_id(self):
