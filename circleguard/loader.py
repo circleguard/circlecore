@@ -131,7 +131,7 @@ class Loader():
 
     # the maximum number of replay info available through the respective api
     # calls. Note that osu! stores at least the top 1000 replays, but does not
-    # make these discoverable unless you know the eaact user id, map id, and
+    # make these discoverable unless you know the exact user id, map id, and
     # mods of the replay.
     MAX_MAP_SPAN = Span("1-100")
     MAX_USER_SPAN = Span("1-100")
