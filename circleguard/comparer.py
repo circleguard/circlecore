@@ -162,7 +162,6 @@ class Comparer:
         average_distance = Comparer._compute_data_similarity(xy1, xy2)
         # Out of all the sections, we should have 20 sections, we pick the one with the median correlation, so we throw away any outliers
         median_correlation = np.median(np.array(sorted(correlations)))
-        print(f'median correlation is: {median_correlation}')
         return (average_distance, median_correlation)
 
     @staticmethod
