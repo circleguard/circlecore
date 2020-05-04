@@ -105,7 +105,7 @@ class Comparer:
         return StealResult(replay1, replay2, mean, correlation)
 
     @staticmethod
-    def _compare_two_replays(replay1, replay2):
+    def _compare_two_replays(replay1, replay2, num_chunks=20):
         """
         Calculates the average cursor distance between two
         :class:`~.replay.Replay`\s, and the standard deviation of the distance.
@@ -120,7 +120,7 @@ class Comparer:
         Returns
         -------
         (float, float)
-            The mean distance of the cursors of Use the API for good. Don't overdo it. If in doubt, ask before (ab)using :). this section may expand as necessary.
+            The mean distance of the cursors of the two replays.
             Also returns a correlation metric that represents the median level of correlation in the replay.
         """
 
@@ -146,14 +146,13 @@ class Comparer:
         if (Mod.HR in replay1.mods) ^ (Mod.HR in replay2.mods):
             xy1[:, 1] = 384 - xy1[:, 1]
 
-        (play_sequence_1, play_sequence_2) = Comparer.convert_to_row_major_form(xy1, xy2)
-
-        NUM_CHUNKS = 20
+        play_sequence_1 = xy1.T
+        play_sequence_2 = xy2.T
 
         # Sectioned into 20 chunks, used to ignore outliers (eg. long replay with breaks is copied, and the cheater cursordances during the break)
-        horizontal_length = play_sequence_1.shape[1] - play_sequence_1.shape[1] % NUM_CHUNKS
-        play_sequence_1_sections = np.hsplit(play_sequence_1[:,:horizontal_length], NUM_CHUNKS)
-        play_sequence_2_sections = np.hsplit(play_sequence_2[:,:horizontal_length], NUM_CHUNKS)
+        horizontal_length = play_sequence_1.shape[1] - play_sequence_1.shape[1] % num_chunks
+        play_sequence_1_sections = np.hsplit(play_sequence_1[:,:horizontal_length], num_chunks)
+        play_sequence_2_sections = np.hsplit(play_sequence_2[:,:horizontal_length], num_chunks)
         correlations = []
         for (play_sequence_1, play_sequence_2) in zip(play_sequence_1_sections, play_sequence_2_sections):
             cross_correlation_matrix = Comparer.find_cross_correlation(play_sequence_1, play_sequence_2)
@@ -166,15 +165,11 @@ class Comparer:
         return (average_distance, median_correlation)
 
     @staticmethod
-    def convert_to_row_major_form(x, y):
-        return (np.array(list(zip(*x))), np.array(list(zip(*y))))
-
-    @staticmethod
-    def find_cross_correlation(x, y):
-        # The normalization is makes the similarity detector robust to translations
-        x = (x - np.mean(x)) / (np.std(x) * x.size)
-        y = (y - np.mean(y)) / (np.std(y))
-        return signal.correlate(x, y, 'full')
+    def find_cross_correlation(play_sequence_1, play_sequence_2):
+        # The normalization makes the similarity detector robust to translations
+        play_sequence_1 = (play_sequence_1 - np.mean(play_sequence_1)) / (np.std(play_sequence_1) * play_sequence_1.size)
+        play_sequence_2 = (play_sequence_2 - np.mean(play_sequence_2)) / (np.std(play_sequence_2))
+        return signal.correlate(play_sequence_1, play_sequence_2, 'full')
 
     @staticmethod
     def _compute_data_similarity(data1, data2):
