@@ -146,8 +146,8 @@ class Comparer:
         if (Mod.HR in replay1.mods) ^ (Mod.HR in replay2.mods):
             xy1[:, 1] = 384 - xy1[:, 1]
 
-        play_sequence_1 = xy1.T
-        play_sequence_2 = xy2.T
+        play_sequence_1 = xy1.T.copy() # Need copy, as the cross_correlate method uses an in-place modification of the matrix
+        play_sequence_2 = xy2.T.copy()
 
         # Sectioned into 20 chunks, used to ignore outliers (eg. long replay with breaks is copied, and the cheater cursordances during the break)
         horizontal_length = play_sequence_1.shape[1] - play_sequence_1.shape[1] % num_chunks
@@ -162,14 +162,17 @@ class Comparer:
         average_distance = Comparer._compute_data_similarity(xy1, xy2)
         # Out of all the sections, we should have 20 sections, we pick the one with the median correlation, so we throw away any outliers
         median_correlation = np.median(np.array(sorted(correlations)))
+        print(f'median correlation is: {median_correlation}')
         return (average_distance, median_correlation)
 
     @staticmethod
     def find_cross_correlation(play_sequence_1, play_sequence_2):
         # The normalization makes the similarity detector robust to translations
-        play_sequence_1 = (play_sequence_1 - np.mean(play_sequence_1)) / (np.std(play_sequence_1) * play_sequence_1.size)
-        play_sequence_2 = (play_sequence_2 - np.mean(play_sequence_2)) / (np.std(play_sequence_2))
-        return signal.correlate(play_sequence_1, play_sequence_2, 'full')
+        play_sequence_1 -= np.mean(play_sequence_1)
+        play_sequence_2 -= np.mean(play_sequence_2)
+        norm = np.std(play_sequence_1) * np.std(play_sequence_2) * play_sequence_1.size
+        return signal.correlate(play_sequence_1, play_sequence_2) / norm
+
 
     @staticmethod
     def _compute_data_similarity(data1, data2):
