@@ -105,7 +105,7 @@ class Comparer:
         return StealResult(replay1, replay2, mean, correlation)
 
     @staticmethod
-    def _compare_two_replays(replay1, replay2, num_chunks=6):
+    def _compare_two_replays(replay1, replay2, num_chunks=1):
         """
         Calculates the average cursor distance between two
         :class:`~.replay.Replay`\s, and the standard deviation of the distance.
