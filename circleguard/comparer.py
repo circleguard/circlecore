@@ -105,7 +105,7 @@ class Comparer:
         return StealResult(replay1, replay2, mean, correlation)
 
     @staticmethod
-    def _compare_two_replays(replay1, replay2, num_chunks=20):
+    def _compare_two_replays(replay1, replay2, num_chunks=6):
         """
         Calculates the average cursor distance between two
         :class:`~.replay.Replay`\s, and the standard deviation of the distance.
@@ -146,18 +146,18 @@ class Comparer:
         if (Mod.HR in replay1.mods) ^ (Mod.HR in replay2.mods):
             xy1[:, 1] = 384 - xy1[:, 1]
 
-        play_sequence_1 = xy1.T.copy() # Need copy, as the cross_correlate method uses an in-place modification of the matrix
-        play_sequence_2 = xy2.T.copy()
+        xy1_copy = xy1.T.copy() # Need copy, as the cross_correlate method uses an in-place modification of the matrix
+        xy2_copy = xy2.T.copy()
 
         # Sectioned into 20 chunks, used to ignore outliers (eg. long replay with breaks is copied, and the cheater cursordances during the break)
-        horizontal_length = play_sequence_1.shape[1] - play_sequence_1.shape[1] % num_chunks
-        play_sequence_1_sections = np.hsplit(play_sequence_1[:,:horizontal_length], num_chunks)
-        play_sequence_2_sections = np.hsplit(play_sequence_2[:,:horizontal_length], num_chunks)
+        horizontal_length = xy1_copy.shape[1] - xy1_copy.shape[1] % num_chunks
+        xy1_copy_sections = np.hsplit(xy1_copy[:,:horizontal_length], num_chunks)
+        xy2_copy_sections = np.hsplit(xy2_copy[:,:horizontal_length], num_chunks)
         correlations = []
-        for (play_sequence_1, play_sequence_2) in zip(play_sequence_1_sections, play_sequence_2_sections):
-            cross_correlation_matrix = Comparer.find_cross_correlation(play_sequence_1, play_sequence_2)
+        for (xy1_copy, xy2_copy) in zip(xy1_copy_sections, xy2_copy_sections):
+            cross_correlation_matrix = Comparer.find_cross_correlation(xy1_copy, xy2_copy)
             #Pick the lag with the maximum correlation, this likely in most cases is 0 lag
-            max_correlation = max(cross_correlation_matrix.reshape(cross_correlation_matrix.size))
+            max_correlation = np.max(cross_correlation_matrix.size)
             correlations.append(max_correlation)
         average_distance = Comparer._compute_data_similarity(xy1, xy2)
         # Out of all the sections, we should have 20 sections, we pick the one with the median correlation, so we throw away any outliers
@@ -165,12 +165,12 @@ class Comparer:
         return (average_distance, median_correlation)
 
     @staticmethod
-    def find_cross_correlation(play_sequence_1, play_sequence_2):
+    def find_cross_correlation(xy1_copy, xy2_copy):
         # The normalization makes the similarity detector robust to translations
-        play_sequence_1 -= np.mean(play_sequence_1)
-        play_sequence_2 -= np.mean(play_sequence_2)
-        norm = np.std(play_sequence_1) * np.std(play_sequence_2) * play_sequence_1.size
-        return signal.correlate(play_sequence_1, play_sequence_2) / norm
+        xy1_copy -= np.mean(xy1_copy)
+        xy2_copy -= np.mean(xy2_copy)
+        norm = np.std(xy1_copy) * np.std(xy2_copy) * xy1_copy.size
+        return signal.correlate(xy1_copy, xy2_copy) / norm
 
 
     @staticmethod
