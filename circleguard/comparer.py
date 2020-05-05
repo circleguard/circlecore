@@ -147,17 +147,17 @@ class Comparer:
             xy1[:, 1] = 384 - xy1[:, 1]
 
         xy1_copy = xy1.T.copy() # Need copy, as the cross_correlate method uses an in-place modification of the matrix
-        xy2_copy = xy2.T.copy()
+        play_sequence_2 = xy2.T.copy()
 
         # Sectioned into 20 chunks, used to ignore outliers (eg. long replay with breaks is copied, and the cheater cursordances during the break)
         horizontal_length = xy1_copy.shape[1] - xy1_copy.shape[1] % num_chunks
-        xy1_copy_sections = np.hsplit(xy1_copy[:,:horizontal_length], num_chunks)
-        xy2_copy_sections = np.hsplit(xy2_copy[:,:horizontal_length], num_chunks)
+        xy1_sections = np.hsplit(xy1_copy[:,:horizontal_length], num_chunks)
+        xy2_sections = np.hsplit(play_sequence_2[:,:horizontal_length], num_chunks)
         correlations = []
-        for (xy1_copy, xy2_copy) in zip(xy1_copy_sections, xy2_copy_sections):
-            cross_correlation_matrix = Comparer.find_cross_correlation(xy1_copy, xy2_copy)
+        for (xy1_copy, play_sequence_2) in zip(xy1_sections, xy2_sections):
+            cross_correlation_matrix = Comparer.find_cross_correlation(xy1_copy, play_sequence_2)
             #Pick the lag with the maximum correlation, this likely in most cases is 0 lag
-            max_correlation = np.max(cross_correlation_matrix.size)
+            max_correlation = np.max(cross_correlation_matrix)
             correlations.append(max_correlation)
         average_distance = Comparer._compute_data_similarity(xy1, xy2)
         # Out of all the sections, we should have 20 sections, we pick the one with the median correlation, so we throw away any outliers
@@ -165,12 +165,12 @@ class Comparer:
         return (average_distance, median_correlation)
 
     @staticmethod
-    def find_cross_correlation(xy1_copy, xy2_copy):
+    def find_cross_correlation(xy1, xy2):
         # The normalization makes the similarity detector robust to translations
-        xy1_copy -= np.mean(xy1_copy)
-        xy2_copy -= np.mean(xy2_copy)
-        norm = np.std(xy1_copy) * np.std(xy2_copy) * xy1_copy.size
-        return signal.correlate(xy1_copy, xy2_copy) / norm
+        xy1 -= np.mean(xy1)
+        xy2 -= np.mean(xy2)
+        norm = np.std(xy1) * np.std(xy2) * xy1.size
+        return signal.correlate(xy1, xy2) / norm
 
 
     @staticmethod
