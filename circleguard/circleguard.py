@@ -5,7 +5,7 @@ import os
 from os.path import isfile, join
 import logging
 from tempfile import TemporaryDirectory
-from typing import Generator
+from typing import Iterable
 
 from circleguard.loader import Loader
 from circleguard.comparer import Comparer
@@ -65,7 +65,7 @@ class Circleguard:
 
 
     def run(self, loadables, detect, loadables2=None, max_angle=DEFAULT_ANGLE, min_distance=DEFAULT_DISTANCE)\
-        -> Generator[Result, None, None]:
+        -> Iterable[Result]:
         """
         Investigates loadables for cheats.
 
@@ -132,7 +132,7 @@ class Circleguard:
                     # disconnect from temporary library
                     library.close()
 
-    def steal_check(self, loadables, loadables2=None) -> Generator[StealResult, None, None]:
+    def steal_check(self, loadables, loadables2=None) -> Iterable[StealResult]:
         """
         Investigates loadables for replay stealing.
 
@@ -153,7 +153,7 @@ class Circleguard:
         """
         yield from self.run(loadables, Detect.STEAL, loadables2)
 
-    def relax_check(self, loadables) -> Generator[RelaxResult, None, None]:
+    def relax_check(self, loadables) -> Iterable[RelaxResult]:
         """
         Investigates loadables for relax.
 
@@ -171,7 +171,7 @@ class Circleguard:
         yield from self.run(loadables, Detect.RELAX)
 
     def correction_check(self, loadables, max_angle=DEFAULT_ANGLE, min_distance=DEFAULT_DISTANCE)\
-        -> Generator[CorrectionResult, None, None]:
+        -> Iterable[CorrectionResult]:
         """
         Investigates loadables for aim correction.
 
