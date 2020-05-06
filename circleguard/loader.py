@@ -97,9 +97,9 @@ def check_cache(function):
         if self.cacher is None:
             return function(*args, **kwargs)
 
-        lzma = self.cacher.check_cache(replay_info.map_id, replay_info.user_id, replay_info.mods)
-        if lzma:
-            replay_data = circleparse.parse_replay(lzma, pure_lzma=True).play_data
+        decompressed_lzma = self.cacher.check_cache(replay_info.map_id, replay_info.user_id, replay_info.mods)
+        if decompressed_lzma:
+            replay_data = circleparse.parse_replay(decompressed_lzma, pure_lzma=True, decompressed_lzma=True).play_data
             return replay_data
         else:
             return function(*args, **kwargs)
