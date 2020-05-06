@@ -5,6 +5,7 @@ import os
 from os.path import isfile, join
 import logging
 from tempfile import TemporaryDirectory
+from typing import Iterable
 
 from circleguard.loader import Loader
 from circleguard.comparer import Comparer
@@ -13,6 +14,7 @@ from circleguard.cacher import Cacher
 from circleguard.exceptions import CircleguardException
 from circleguard.loadable import Check, ReplayMap, ReplayPath, Replay, Map
 from circleguard.enums import RatelimitWeight, Detect
+from circleguard.result import Result, StealResult, RelaxResult, CorrectionResult
 from slider import Beatmap, Library
 
 
@@ -62,7 +64,8 @@ class Circleguard:
             self.library = Library(slider_dir)
 
 
-    def run(self, loadables, detect, loadables2=None, max_angle=DEFAULT_ANGLE, min_distance=DEFAULT_DISTANCE):
+    def run(self, loadables, detect, loadables2=None, max_angle=DEFAULT_ANGLE, min_distance=DEFAULT_DISTANCE)\
+        -> Iterable[Result]:
         """
         Investigates loadables for cheats.
 
@@ -129,7 +132,7 @@ class Circleguard:
                     # disconnect from temporary library
                     library.close()
 
-    def steal_check(self, loadables, loadables2=None):
+    def steal_check(self, loadables, loadables2=None) -> Iterable[StealResult]:
         """
         Investigates loadables for replay stealing.
 
@@ -150,7 +153,7 @@ class Circleguard:
         """
         yield from self.run(loadables, Detect.STEAL, loadables2)
 
-    def relax_check(self, loadables):
+    def relax_check(self, loadables) -> Iterable[RelaxResult]:
         """
         Investigates loadables for relax.
 
@@ -167,7 +170,8 @@ class Circleguard:
         """
         yield from self.run(loadables, Detect.RELAX)
 
-    def correction_check(self, loadables, max_angle=DEFAULT_ANGLE, min_distance=DEFAULT_DISTANCE):
+    def correction_check(self, loadables, max_angle=DEFAULT_ANGLE, min_distance=DEFAULT_DISTANCE)\
+        -> Iterable[CorrectionResult]:
         """
         Investigates loadables for aim correction.
 
