@@ -164,7 +164,7 @@ class Cacher:
         result = self.cursor.execute("SELECT replay_data FROM replays WHERE map_id=? AND user_id=? AND mods=?", [map_id, user_id, mods]).fetchone()
         if result:
             self.log.debug("Loading replay on map %d by user %d with mods %s from cache", map_id, user_id, mods)
-            return wtc.decompress(result[0], return_decompressed_lzma=True)
+            return wtc.decompress(result[0], decompressed_lzma=True)
         self.log.log(TRACE, "No replay found in cache")
         return None
 
