@@ -1,3 +1,7 @@
+# Unreleased
+
+* make loading replays from cache roughly twice as fast
+
 # v4.0.1
 
 * fix `ReplayMap`s inside a `Map` not having some attributes set after the `Map` is info loaded
