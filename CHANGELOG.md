@@ -1,4 +1,4 @@
-# Unreleased
+# v4.0.2
 
 * loading replays from cache is now roughly twice as fast
 
