@@ -1,6 +1,6 @@
 # Unreleased
 
-* make loading replays from cache roughly twice as fast
+* loading replays from cache is now roughly twice as fast
 
 # v4.0.1
 
