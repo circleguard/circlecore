@@ -513,10 +513,14 @@ class Replay(Loadable):
         block = list(zip(*[(e.time_since_previous_action, e.x, e.y, e.keys_pressed) for e in replay_data]))
 
         t = np.array(block[0], dtype=int).cumsum()
+        # flip t so numpy pritorities older frames over earlier ones
+        t = np.flip(t)
         xy = np.array([block[1], block[2]], dtype=float).T
         k = np.array(block[3], dtype=int)
 
         t, t_sort = np.unique(t, return_index=True)
+        # flip t back so we can apply it to xy and k
+        t_sort = np.flip(t_sort)
         xy = xy[t_sort]
         k = k[t_sort]
 
