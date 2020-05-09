@@ -510,11 +510,27 @@ class Replay(Loadable):
         if replay_data is None:
             return
 
-        block = list(zip(*[(e.time_since_previous_action, e.x, e.y, e.keys_pressed) for e in replay_data]))
+        data = []
+        running_t = 0
+        for e in replay_data:
+            e_t = e.time_since_previous_action
+            running_t += e_t
+            # lazer ignores frames with negative time, but still adds it to the running time
+            # https://github.com/ppy/osu/blob/1587d4b26fbad691242544a62dbf017a78705ae3/osu.Game/Scoring/Legacy/LegacyScoreDecoder.cs#L247-L250
+            if e_t < 0:
+                continue
+            d = (running_t, e.x, e.y, e.keys_pressed)
+            data.append(d)
 
-        t = np.array(block[0], dtype=int).cumsum()
+        block = np.array(list(zip(*data)))
+
+        t = np.array(block[0], dtype=int)
         xy = np.array([block[1], block[2]], dtype=float).T
         k = np.array(block[3], dtype=int)
+
+        for i in range(50):
+            print(t[i], xy[i])
+        print("=====================")
 
         t, t_sort = np.unique(t, return_index=True)
         xy = xy[t_sort]
