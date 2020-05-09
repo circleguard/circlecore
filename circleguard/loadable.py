@@ -510,15 +510,31 @@ class Replay(Loadable):
         if replay_data is None:
             return
 
+        # remove invalid zero time frame at beginning of replay
+        # https://github.com/ppy/osu/blob/1587d4b26fbad691242544a62dbf017a78705ae3/osu.Game/Scoring/Legacy/LegacyScoreDecoder.cs#L242-L245
+        if replay_data[0].time_since_previous_action == 0:
+            replay_data = replay_data[1:]
+
         data = []
         running_t = 0
+        # negative frame times are valid when they're at the beginning of a
+        # replay (they're frames from before the first hitobject at t=0).
+        # Count all negative frames until we hit our first positive one, then
+        # don't count negative frames after (eg in the middle of the replay).
+        positive_seen = False
+
         for e in replay_data:
             e_t = e.time_since_previous_action
-            running_t += e_t
             # lazer ignores frames with negative time, but still adds it to the running time
             # https://github.com/ppy/osu/blob/1587d4b26fbad691242544a62dbf017a78705ae3/osu.Game/Scoring/Legacy/LegacyScoreDecoder.cs#L247-L250
             if e_t < 0:
+                if not positive_seen:
+                    running_t += e_t
                 continue
+            else:
+                positive_seen = True
+            running_t += e_t
+
             d = (running_t, e.x, e.y, e.keys_pressed)
             data.append(d)
 
