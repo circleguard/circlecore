@@ -1,3 +1,7 @@
+# Unreleased
+
+* correctly order replay frames and remove invalid frames. This changes similarity values slightly
+
 # v4.0.2
 
 * loading replays from cache is now roughly twice as fast
