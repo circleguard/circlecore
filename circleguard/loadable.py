@@ -515,7 +515,8 @@ class Replay(Loadable):
         if replay_data[0].time_since_previous_action == 0:
             replay_data = replay_data[1:]
 
-        data = []
+        # t, x, y, k
+        data = [[], [], [], []]
         running_t = 0
         # negative frame times are valid when they're at the beginning of a
         # replay (they're frames from before the first hitobject at t=0).
@@ -535,10 +536,12 @@ class Replay(Loadable):
                 positive_seen = True
             running_t += e_t
 
-            d = (running_t, e.x, e.y, e.keys_pressed)
-            data.append(d)
+            data[0].append(running_t)
+            data[1].append(e.x)
+            data[2].append(e.y)
+            data[3].append(e.keys_pressed)
 
-        block = np.array(list(zip(*data)))
+        block = np.array(data)
 
         t = np.array(block[0], dtype=int)
         xy = np.array([block[1], block[2]], dtype=float).T
