@@ -66,10 +66,12 @@ class StealResult(ComparisonResult):
         The other replay involved.
     earlier_replay: :class:`~circleguard.loadable.Replay`
         The earlier of the two replays (when the score was made). This is a
-        reference to either replay1 or replay2.
+        reference to either replay1 or replay2, or ``None`` if one of the
+        replays did not provide a timestamp.
     later_replay: :class:`~circleguard.loadable.Replay`
         The later of the two replays (when the score was made). This is a
-        reference to either replay1 or replay2.
+        reference to either replay1 or replay2, or ``None`` if one of the
+        replays did not provide a timestamp.
     similarity: int
         The similarity of the two replays (the lower, the more similar).
         Similarity is, roughly speaking, a measure of the average pixel
@@ -80,6 +82,10 @@ class StealResult(ComparisonResult):
         super().__init__(replay1, replay2, ResultType.STEAL)
 
         self.similarity = similarity
+        # can't compare ``None`` timestamps
+        if not self.replay1.timestamp or not self.replay2.timestamp:
+            return
+
         if self.replay1.timestamp < self.replay2.timestamp:
             self.earlier_replay: Replay = self.replay1
             self.later_replay: Replay = self.replay2
