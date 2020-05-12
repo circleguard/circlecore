@@ -4,7 +4,8 @@ import logging
 import circleparse
 import numpy as np
 
-from circleguard.enums import RatelimitWeight, ModCombination
+from circleguard.enums import RatelimitWeight
+from circleguard.mod import Mod
 from circleguard.utils import TRACE
 from circleguard.loader import Loader
 from circleguard.span import Span
@@ -714,7 +715,7 @@ class ReplayPath(Replay):
         self.username = loaded.player_name
         # TODO make this lazy loaded so we don't waste an api call
         self.user_id = loader.user_id(loaded.player_name)
-        self.mods = ModCombination(loaded.mod_combination)
+        self.mods = Mod(loaded.mod_combination)
         self.replay_id = loaded.replay_id
         self.hash = loaded.beatmap_hash
 

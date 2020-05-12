@@ -1,5 +1,5 @@
 import circleguard.utils as utils
-from circleguard.enums import Mod
+from circleguard.mod import Mod
 
 class ReplayInfo():
     """
@@ -18,7 +18,7 @@ class ReplayInfo():
         The username of the player who played the replay.
     replay_id: int
         The id of the replay.
-    mods: :class:`~circleguard.enums.ModCombination`
+    mods: :class:`~circleguard.mod.ModCombination`
         The mods the replay was played with.
     replay_available: bool
         Whether this replay is available from the api or not.
