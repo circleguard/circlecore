@@ -43,7 +43,6 @@ class TestSteal(CGTestCase):
         mean = [pixel_offset, pixel_offset]
         covariance_matrix = [[std_deviation, std_deviation],[std_deviation,std_deviation]]
         replay.xy = replay.xy + np.random.default_rng().multivariate_normal(mean, covariance_matrix, len(replay.xy))
-        return replay
 
     def test_cheated(self):
         # taken from http://redd.it/bvfv8j, remodded replay by same user (CielXDLP) from HDHR to FLHDHR
