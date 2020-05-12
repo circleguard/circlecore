@@ -123,7 +123,7 @@ class TestSteal(CGTestCase):
 
         self.assertEqual(len(r), 1, f"{len(r)} results returned instead of 1")
         r = r[0]
-        self.assertTrue(r.similarity > 10 and r.correlation > 0.999, "Cheated replays were not detected as cheated")
+        self.assertTrue(r.similarity < 18 and r.correlation > 0.999, "Cheated replays were not detected as cheated")
 
         r1 = r.replay1
         r2 = r.replay2
