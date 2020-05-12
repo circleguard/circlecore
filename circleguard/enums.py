@@ -345,10 +345,14 @@ class Detect(IntFlag):
     """
     A cheat, or set of cheats, to investigate for.
     """
-    STEAL      = 1 << 0
-    RELAX      = 1 << 1
-    CORRECTION = 1 << 2
-    ALL = STEAL + RELAX + CORRECTION
+    STEAL_SIM      = 1 << 0
+    STEAL_CORR     = 1 << 3
+    RELAX          = 1 << 1
+    CORRECTION     = 1 << 2
+    ALL            = STEAL_SIM | STEAL_CORR | RELAX | CORRECTION
+    # TODO remove in 5.0.0 probably, or figure out a better way to do this
+    # (this being specifying different algorithms for the same cheat)
+    STEAL          = STEAL_SIM
 
 class ResultType(Enum):
     """
