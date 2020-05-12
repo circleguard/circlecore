@@ -13,8 +13,6 @@ set_options(loglevel=20)
 
 # what precision we want to guarantee for our tests
 DELTA = 0.00001
-# similarity threshold for calling a steal cheated
-THRESHOLD_STEAL = 18
 # how many times our test cases hits the get_replay endpoint.
 # Keep this below a multiple of 10 (preferably at most 9) so tests run in a reasonable amount of time.
 # We may want to split tests into "heavy" and "light" where light loads <10 heavy calls and heavy loads as many as we need.
