@@ -11,7 +11,8 @@ import circleparse
 import ossapi
 
 from circleguard.replay_info import ReplayInfo
-from circleguard.enums import Error, ModCombination
+from circleguard.enums import Error
+from circleguard.mod import Mod
 from circleguard.exceptions import (InvalidArgumentsException, APIException, CircleguardException,
                         RatelimitException, InvalidKeyException, ReplayUnavailableException, UnknownAPIException,
                         InvalidJSONException, NoInfoAvailableException)

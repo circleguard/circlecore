@@ -4,7 +4,8 @@ import logging
 import circleparse
 import numpy as np
 
-from circleguard.enums import RatelimitWeight, ModCombination
+from circleguard.enums import RatelimitWeight
+from circleguard.mod import Mod
 from circleguard.utils import TRACE
 from circleguard.loader import Loader
 from circleguard.span import Span
