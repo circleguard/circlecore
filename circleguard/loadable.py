@@ -827,6 +827,24 @@ class ReplayPath(Replay):
             return f"Unloaded ReplayPath at {self.path}"
 
 
+class ReplayID(Replay):
+    def __init__(self, replay_id, cache=None):
+        super().__init__(RatelimitWeight.HEAVY, cache)
+        self.replay_id = replay_id
+
+    def load(self, loader, cache):
+        # TODO file github issue about loading info from replay id,
+        # right now we can literally only load the replay data which
+        # is pretty useless if we don't have a map id or the mods used
+        cache = cache if self.cache is None else self.cache
+        replay_data = loader.replay_data_from_id(self.replay_id, cache)
+        self._process_replay_data(replay_data)
+        self.loaded = True
+
+    def __eq__(self, other):
+        return self.replay_id == other.replay_id
+
+
 class CachedReplay(Replay):
     def __init__(self, user_id, map_id, mods, replay_data, replay_id):
         super().__init__(RatelimitWeight.NONE, False)

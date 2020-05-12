@@ -357,6 +357,23 @@ class Loader():
             self.cacher.cache(lzma_bytes, replay_info)
         return replay_data
 
+    # TODO make this check cache for the replay
+    def replay_data_from_id(self, replay_id, cache):
+        """
+        Retrieves replay data from the api, given a replay id.
+
+        Parameters
+        ----------
+        replay_id: int
+            The id of the replay to retrieve data for.
+        """
+        response = self.api.get_replay({"s": replay_id})
+        Loader.check_response(response)
+        lzma = base64.b64decode(response["content"])
+        replay_data = circleparse.parse_replay(lzma, pure_lzma=True).play_data
+        # TODO cache the replay here if the api ever gives us the info we need
+        return replay_data
+
     @lru_cache()
     @request
     def map_id(self, map_hash):
