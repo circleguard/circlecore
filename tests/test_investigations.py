@@ -66,7 +66,7 @@ class TestSteal(CGTestCase):
         self.assertEqual(later.replay_id, 2805164683, "Later replay id was not correct")
         self.assertEqual(r1.username, r2.username, "Replay usernames did not match")
 
-    def test_legitimate_replaypath(self):
+    def test_legitimate(self):
         replays = [self.legit1, self.legit2]
         r = list(self.cg.steal_check(replays))
         self.assertEqual(len(r), 1, f"{len(r)} results returned instead of 1")
