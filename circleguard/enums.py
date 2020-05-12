@@ -42,11 +42,24 @@ class RatelimitWeight(Enum):
 class Detect(IntFlag):
     """
     A cheat, or set of cheats, to investigate for.
+
+    Notes
+    -----
+    Also defines thresholds we feel are reasonable to determine a replay as
+    cheated. These values are more conservative - that is, we try to not give
+    false positives. You should decide where you fall on the scale
+    of "few false positives, many false negatives" to "many false positives,
+    few false negatives" for yourself, if necessary.
     """
     STEAL      = 1 << 0
     RELAX      = 1 << 1
     CORRECTION = 1 << 2
-    ALL = STEAL + RELAX + CORRECTION
+    ALL        = STEAL + RELAX + CORRECTION
+
+    SIM_LIMIT = 17
+    # unconverted ur threshold
+    UR_LIMIT = 50
+    # no aim correction threshold - any snap is suspicious
 
 
 class ResultType(Enum):
