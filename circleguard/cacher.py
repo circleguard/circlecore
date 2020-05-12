@@ -156,15 +156,15 @@ class Cacher:
         Returns
         -------
         str or None
-            The replay data in lzma form if the cache contains the replay,
-            or None if not.
+            The replay data in decompressed lzma form if the cache contains the
+            replay, or None if not.
         """
         mods = mods.value
         self.log.log(TRACE, "Checking cache for a replay on map %d by user %d with mods %s", map_id, user_id, mods)
         result = self.cursor.execute("SELECT replay_data FROM replays WHERE map_id=? AND user_id=? AND mods=?", [map_id, user_id, mods]).fetchone()
         if result:
             self.log.debug("Loading replay on map %d by user %d with mods %s from cache", map_id, user_id, mods)
-            return wtc.decompress(result[0])
+            return wtc.decompress(result[0], decompressed_lzma=True)
         self.log.log(TRACE, "No replay found in cache")
         return None
 

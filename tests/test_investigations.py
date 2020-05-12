@@ -23,7 +23,7 @@ class TestCorrection(CGTestCase):
         self.assertAlmostEqual(snaps[8].angle, 6.34890, delta=DELTA)
         self.assertAlmostEqual(snaps[8].distance, 27.59918, delta=DELTA)
         # end
-        self.assertEqual(snaps[14].time, 79052)
+        self.assertEqual(snaps[14].time, 79053)
         self.assertAlmostEqual(snaps[14].angle, 8.77141, delta=DELTA)
         self.assertAlmostEqual(snaps[14].distance, 8.21841, delta=DELTA)
 
@@ -58,7 +58,7 @@ class TestSteal(CGTestCase):
         earlier = r.earlier_replay
         later = r.later_replay
 
-        self.assertAlmostEqual(r.similarity, 2.19236, delta=DELTA, msg="Similarity is not correct")
+        self.assertAlmostEqual(r.similarity, 2.20915, delta=DELTA, msg="Similarity is not correct")
         self.assertEqual(r1.map_id, r2.map_id, "Replay map ids did not match")
         self.assertEqual(r1.map_id, 1988753, "Replay map id was not correct")
         self.assertEqual(earlier.mods, Mod.HD + Mod.HR, "Earlier replay mods was not correct")
@@ -79,7 +79,7 @@ class TestSteal(CGTestCase):
         earlier = r.earlier_replay
         later = r.later_replay
 
-        self.assertAlmostEqual(r.similarity, 23.03593, delta=DELTA, msg="Similarity is not correct")
+        self.assertAlmostEqual(r.similarity, 23.11035, delta=DELTA, msg="Similarity is not correct")
         self.assertEqual(r1.map_id, r2.map_id, "Replay map ids did not match")
         self.assertEqual(r1.map_id, 722238, "Replay map id was not correct")
         self.assertEqual(earlier.mods, Mod.HD + Mod.NC, "Earlier replay mods was not correct")
@@ -104,7 +104,7 @@ class TestSteal(CGTestCase):
             earlier = r.earlier_replay
             later = r.later_replay
 
-            self.assertAlmostEqual(r.similarity, 2.19236, delta=DELTA, msg=f"Similarity is not correct at num {num}")
+            self.assertAlmostEqual(r.similarity, 2.20915, delta=DELTA, msg=f"Similarity is not correct at num {num}")
             self.assertEqual(r1.map_id, r2.map_id, f"Replay map ids did not match at num {num}")
             self.assertEqual(r1.map_id, 1988753, f"r1 map id was not correct at num {num}")
             self.assertEqual(earlier.mods, Mod.HD + Mod.HR, f"Earlier replay mods was not correct at num {num}")

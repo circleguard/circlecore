@@ -510,9 +510,40 @@ class Replay(Loadable):
         if replay_data is None:
             return
 
-        block = list(zip(*[(e.time_since_previous_action, e.x, e.y, e.keys_pressed) for e in replay_data]))
+        # remove invalid zero time frame at beginning of replay
+        # https://github.com/ppy/osu/blob/1587d4b26fbad691242544a62dbf017a78705ae3/osu.Game/Scoring/Legacy/LegacyScoreDecoder.cs#L242-L245
+        if replay_data[0].time_since_previous_action == 0:
+            replay_data = replay_data[1:]
 
-        t = np.array(block[0], dtype=int).cumsum()
+        # t, x, y, k
+        data = [[], [], [], []]
+        running_t = 0
+        # negative frame times are valid when they're at the beginning of a
+        # replay (they're frames from before the first hitobject at t=0).
+        # Count all negative frames until we hit our first positive one, then
+        # don't count negative frames after (eg in the middle of the replay).
+        positive_seen = False
+
+        for e in replay_data:
+            e_t = e.time_since_previous_action
+            # lazer ignores frames with negative time, but still adds it to the running time
+            # https://github.com/ppy/osu/blob/1587d4b26fbad691242544a62dbf017a78705ae3/osu.Game/Scoring/Legacy/LegacyScoreDecoder.cs#L247-L250
+            if e_t < 0:
+                if not positive_seen:
+                    running_t += e_t
+                continue
+            else:
+                positive_seen = True
+            running_t += e_t
+
+            data[0].append(running_t)
+            data[1].append(e.x)
+            data[2].append(e.y)
+            data[3].append(e.keys_pressed)
+
+        block = np.array(data)
+
+        t = np.array(block[0], dtype=int)
         xy = np.array([block[1], block[2]], dtype=float).T
         k = np.array(block[3], dtype=int)
 

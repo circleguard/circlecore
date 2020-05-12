@@ -122,6 +122,6 @@ class CorrectionResult(InvestigationResult):
         A list of suspicious hits in the replay.
     """
 
-    def __init__(self, replay, snaps):
+    def __init__(self, replay: Replay, snaps: list):
         super().__init__(replay, ResultType.CORRECTION)
         self.snaps = snaps
