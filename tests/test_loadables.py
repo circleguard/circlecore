@@ -3,7 +3,7 @@ from circleguard import (Circleguard, Check, ReplayMap, ReplayPath, Detect,
                          RatelimitWeight, set_options, Map, User, MapUser, Mod,
                          Loader, InvalidKeyException)
 
-from tests.utils import CGTestCase, RES, KEY, DELTA, THRESHOLD_STEAL
+from tests.utils import CGTestCase, RES
 
 
 class TestReplays(CGTestCase):
@@ -133,7 +133,7 @@ class TestMapUser(CGTestCase):
 class TestEquality(CGTestCase):
     @classmethod
     def setUpClass(cls):
-        cls.cg = Circleguard(KEY)
+        super().setUpClass()
 
         cls.user = User(2757689, "1-2") # toy, #1=sidetracked day, #2=View of The River Styx
         cls.user1 = User(2757689, "1-2", cache=False)
