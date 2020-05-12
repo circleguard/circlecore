@@ -715,7 +715,7 @@ class ReplayPath(Replay):
         self.username = loaded.player_name
         # TODO make this lazy loaded so we don't waste an api call
         self.user_id = loader.user_id(loaded.player_name)
-        self.mods = ModCombination(loaded.mod_combination)
+        self.mods = Mod(loaded.mod_combination)
         self.replay_id = loaded.replay_id
         self.hash = loaded.beatmap_hash
 
