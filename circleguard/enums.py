@@ -61,6 +61,7 @@ class Detect(IntFlag):
     STEAL          = STEAL_SIM
 
     SIM_LIMIT = 17
+    CORR_LIMIT = 0.99
     # unconverted ur threshold
     UR_LIMIT = 50
     # no aim correction threshold - any snap is suspicious

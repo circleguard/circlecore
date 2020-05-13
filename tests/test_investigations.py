@@ -126,4 +126,4 @@ class TestSteal(CGTestCase):
             if isinstance(r, StealResultSim):
                 self.assertTrue(r.similarity < Detect.SIM_LIMIT, "Cheated replays were not detected as cheated with sim")
             if isinstance(r, StealResultCorr):
-                self.assertTrue(r.correlation > 0.999, "Cheated replays were not detected as cheated with corr")
+                self.assertTrue(r.correlation > Detect.CORR_LIMIT, "Cheated replays were not detected as cheated with corr")
