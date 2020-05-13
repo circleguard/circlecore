@@ -5,7 +5,6 @@
 .spyproject
 .vscode/
 .env
-venv
 circleguard.egg-info/
 tests/cache.db
 TODO
@@ -37,7 +36,6 @@ bld/
 [Ll]og/
 build/
 dist/
-cache.db
 
 # Visual Studio 2015 cache/options directory
 .vs/
