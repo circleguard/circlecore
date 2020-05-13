@@ -7,7 +7,8 @@ import numpy as np
 from scipy import signal, stats
 
 from circleguard.loadable import Replay
-from circleguard.enums import Mod, Detect
+from circleguard.enums import Detect
+from circleguard.mod import Mod
 from circleguard.exceptions import InvalidArgumentsException, CircleguardException
 import circleguard.utils as utils
 from circleguard.result import StealResultSim, StealResultCorr

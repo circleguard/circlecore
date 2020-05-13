@@ -1,7 +1,7 @@
 import numpy as np
 
 from circleguard import ReplayPath, Mod, Detect, StealResultSim, StealResultCorr
-from tests.utils import CGTestCase, DELTA, RES, THRESHOLD_STEAL
+from tests.utils import CGTestCase, DELTA, RES
 
 class TestCorrection(CGTestCase):
     @classmethod
@@ -50,7 +50,7 @@ class TestSteal(CGTestCase):
         r = list(self.cg.steal_check(replays))
         self.assertEqual(len(r), 1, f"{len(r)} results returned instead of 1")
         r = r[0]
-        self.assertTrue(r.similarity < THRESHOLD_STEAL, "Cheated replays were not detected as cheated")
+        self.assertTrue(r.similarity < Detect.SIM_LIMIT, "Cheated replays were not detected as cheated")
 
         r1 = r.replay1
         r2 = r.replay2
@@ -71,7 +71,7 @@ class TestSteal(CGTestCase):
         r = list(self.cg.steal_check(replays))
         self.assertEqual(len(r), 1, f"{len(r)} results returned instead of 1")
         r = r[0]
-        self.assertFalse(r.similarity < THRESHOLD_STEAL, "Legitimate replays were detected as stolen")
+        self.assertFalse(r.similarity < Detect.SIM_LIMIT, "Legitimate replays were detected as stolen")
 
         r1 = r.replay1
         r2 = r.replay2
@@ -96,7 +96,7 @@ class TestSteal(CGTestCase):
             results_num = num * (num - 1) / 2 # n choose k formula with k=2
             self.assertEqual(len(r), results_num, f"{len(r)} results returned instead of {results_num}")
             r = r[0]
-            self.assertTrue(r.similarity < THRESHOLD_STEAL, f"Cheated replays were not detected as cheated at num {num}")
+            self.assertTrue(r.similarity < Detect.SIM_LIMIT, f"Cheated replays were not detected as cheated at num {num}")
 
             r1 = r.replay1
             r2 = r.replay2
@@ -124,6 +124,6 @@ class TestSteal(CGTestCase):
         self.assertEqual(len(results), 2, f"{len(results)} results returned instead of 2")
         for r in results:
             if isinstance(r, StealResultSim):
-                self.assertTrue(r.similarity < THRESHOLD_STEAL, "Cheated replays were not detected as cheated with sim")
+                self.assertTrue(r.similarity < Detect.SIM_LIMIT, "Cheated replays were not detected as cheated with sim")
             if isinstance(r, StealResultCorr):
                 self.assertTrue(r.correlation > 0.999, "Cheated replays were not detected as cheated with corr")

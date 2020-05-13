@@ -2,7 +2,8 @@ import logging
 
 from circleguard.circleguard import Circleguard, set_options
 from circleguard.loadable import Check, Replay, ReplayMap, ReplayPath, Map, User, MapUser, ReplayContainer, LoadableContainer, Loadable
-from circleguard.enums import Key, Mod, RatelimitWeight, Detect, ResultType
+from circleguard.enums import Key, RatelimitWeight, Detect, ResultType
+from circleguard.mod import Mod
 from circleguard.utils import TRACE, ColoredFormatter
 from circleguard.loader import Loader
 from circleguard.replay_info import ReplayInfo
@@ -27,7 +28,9 @@ __all__ = [
 "Check", "ReplayContainer", "LoadableContainer", "Map", "User", "MapUser",
 "Replay", "ReplayMap", "ReplayPath", "Loadable",
 # enums
-"Key", "Mod", "RatelimitWeight", "Detect", "ResultType",
+"Key", "RatelimitWeight", "Detect", "ResultType",
+# mod
+"Mod",
 # utils
 "TRACE",
 # loader

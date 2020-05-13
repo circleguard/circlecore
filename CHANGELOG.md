@@ -1,6 +1,7 @@
 # Unreleased
 
 * correctly order replay frames and remove invalid frames. This changes similarity values slightly
+* add default cutoffs to `Detect` as `SIM_LIMIT` and `UR_LIMIT`. These are values we feel are enough to call a replay cheated. They are not used in our code but are provided as a convenience.
 
 # v4.0.2
 

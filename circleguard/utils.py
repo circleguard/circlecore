@@ -1,7 +1,7 @@
 from logging import Formatter
 from copy import copy
 
-from circleguard.enums import Mod
+from circleguard.mod import Mod
 
 
 ########### LOGGING ##############

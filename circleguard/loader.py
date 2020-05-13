@@ -11,7 +11,8 @@ import circleparse
 import ossapi
 
 from circleguard.replay_info import ReplayInfo
-from circleguard.enums import Error, ModCombination
+from circleguard.enums import Error
+from circleguard.mod import Mod
 from circleguard.exceptions import (InvalidArgumentsException, APIException, CircleguardException,
                         RatelimitException, InvalidKeyException, ReplayUnavailableException, UnknownAPIException,
                         InvalidJSONException, NoInfoAvailableException)
@@ -216,7 +217,7 @@ class Loader():
         # yes, it's necessary to cast the str response to int before bool - all strings are truthy.
         # strptime format from https://github.com/ppy/osu-api/wiki#apiget_scores
         infos = [ReplayInfo(datetime.strptime(x["date"], "%Y-%m-%d %H:%M:%S"), map_id, int(x["user_id"]), str(x["username"]), int(x["score_id"]),
-                          ModCombination(int(x["enabled_mods"])), bool(int(x["replay_available"]))) for x in response]
+                          Mod(int(x["enabled_mods"])), bool(int(x["replay_available"]))) for x in response]
 
         return infos[0] if (limit and user_id) else infos # limit only applies if user_id was set
 
@@ -258,7 +259,7 @@ class Loader():
         if mods:
             _response = []
             for r in response:
-                if ModCombination(int(r["enabled_mods"])) == mods:
+                if Mod(int(r["enabled_mods"])) == mods:
                     _response.append(r)
             response = _response
 
@@ -270,7 +271,7 @@ class Loader():
 
         response = [response[i-1] for i in _span]
         return [ReplayInfo(datetime.strptime(r["date"], "%Y-%m-%d %H:%M:%S"), int(r["beatmap_id"]), int(r["user_id"]),
-                self.username(int(r["user_id"])), int(r["score_id"]), ModCombination(int(r["enabled_mods"])),
+                self.username(int(r["user_id"])), int(r["score_id"]), Mod(int(r["enabled_mods"])),
                 bool(int(r["replay_available"]))) for r in response]
 
 
