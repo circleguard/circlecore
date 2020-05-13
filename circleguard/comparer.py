@@ -152,8 +152,9 @@ class Comparer:
         xy1 = xy1.T
         xy2 = xy2.T
 
-        # Sectioned into 20 chunks, used to ignore outliers (eg. long replay
-        # with breaks is copied, and the cheater cursordances during the break)
+        # section into chunks, used to reduce the effect of outliers
+        # (eg. cheater inserts replay data during breaks that places them
+        # far away from the actual replay)
         horizontal_length = xy1.shape[1] - xy1.shape[1] % num_chunks
         xy1_sections = np.hsplit(xy1[:,:horizontal_length], num_chunks)
         xy2_sections = np.hsplit(xy2[:,:horizontal_length], num_chunks)
