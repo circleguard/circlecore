@@ -1,6 +1,6 @@
 import numpy as np
 
-from circleguard import ReplayPath, Mod
+from circleguard import ReplayPath, Mod, Detect, StealResultSim, StealResultCorr
 from tests.utils import CGTestCase, DELTA, RES, THRESHOLD_STEAL
 
 class TestCorrection(CGTestCase):
@@ -119,21 +119,12 @@ class TestSteal(CGTestCase):
         replays = [self.stolen1, stolen2]
         self.cg.load(stolen2)
         TestSteal.add_noise_and_positional_translation_to_replay(stolen2, 10, 3)
-        r = list(self.cg.steal_check(replays))
+        results = list(self.cg.steal_check(replays, method=Detect.STEAL_CORR | Detect.STEAL_SIM))
 
-        self.assertEqual(len(r), 1, f"{len(r)} results returned instead of 1")
-        r = r[0]
-        self.assertTrue(r.similarity < THRESHOLD_STEAL and r.correlation > 0.999, "Cheated replays were not detected as cheated")
-
-        r1 = r.replay1
-        r2 = r.replay2
-        earlier = r.earlier_replay
-        later = r.later_replay
-
-        self.assertEqual(r1.map_id, r2.map_id, "Replay map ids did not match")
-        self.assertEqual(r1.map_id, 1988753, "Replay map id was not correct")
-        self.assertEqual(earlier.mods, Mod.HD + Mod.HR, "Earlier replay mods was not correct")
-        self.assertEqual(later.mods, Mod.FL + Mod.HD + Mod.HR, "Later replay mods was not correct")
-        self.assertEqual(earlier.replay_id, 2801164636, "Earlier replay id was not correct")
-        self.assertEqual(later.replay_id, 2805164683, "Later replay id was not correct")
-        self.assertEqual(r1.username, r2.username, "Replay usernames did not match")
+        self.assertEqual(len(results), 2, f"{len(results)} results returned instead of 2")
+        for r in results:
+            if isinstance(r, StealResultSim):
+                self.assertTrue(r.similarity < THRESHOLD_STEAL, "Cheated replays were not detected as cheated with sim")
+            if isinstance(r, StealResultCorr):
+                print(r.correlation)
+                self.assertTrue(r.correlation > 0.999, "Cheated replays were not detected as cheated with corr")

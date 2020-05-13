@@ -7,10 +7,10 @@ import numpy as np
 from scipy import signal, stats
 
 from circleguard.loadable import Replay
-from circleguard.enums import Mod
+from circleguard.enums import Mod, Detect
 from circleguard.exceptions import InvalidArgumentsException, CircleguardException
 import circleguard.utils as utils
-from circleguard.result import StealResult
+from circleguard.result import StealResultSim, StealResultCorr
 
 class Comparer:
     """
@@ -40,14 +40,15 @@ class Comparer:
     replays.
     """
 
-    def __init__(self, replays1, replays2=None):
+    def __init__(self, replays1, replays2, detect):
         self.log = logging.getLogger(__name__)
 
         # filter beatmaps we had no data for
         self.replays1 = [replay for replay in replays1 if replay.replay_data is not None]
         self.replays2 = [replay for replay in replays2 if replay.replay_data is not None] if replays2 else None
+
         self.mode = "double" if self.replays2 else "single"
-        self.log.debug("Comparer initialized: %r", self)
+        self.detect = detect
 
     def compare(self):
         """
@@ -66,8 +67,8 @@ class Comparer:
         self.log.debug("replays1: %r", self.replays1)
         self.log.debug("replays2: %r", self.replays2)
 
-        #TODO: a little bit hacky and I don't think works 100% correctly, if mode is double but replays2 is None
-        if not self.replays1 or self.replays2 == []:
+        # can't make any comparisons
+        if not self.replays1:
             return
 
         if self.mode == "double":
@@ -81,10 +82,10 @@ class Comparer:
             if replay1.replay_id == replay2.replay_id:
                 self.log.debug("Not comparing %r and %r with the same id", replay1, replay2)
                 continue
-            yield self._result(replay1, replay2)
+            yield from self.compare_two_replays(replay1, replay2)
 
 
-    def _result(self, replay1, replay2):
+    def compare_two_replays(self, replay1, replay2):
         """
         Compares two :class:`~.replay.Replay`\s.
 
@@ -101,14 +102,20 @@ class Comparer:
             The result of comparing ``replay1`` to ``replay2``.
         """
         self.log.log(utils.TRACE, "comparing %r and %r", replay1, replay2)
-        (mean, correlation) = Comparer._compare_two_replays(replay1, replay2)
-        return StealResult(replay1, replay2, mean, correlation)
+
+        if Detect.STEAL_SIM & self.detect:
+            mean = Comparer.compute_similarity(replay1, replay2)
+            yield StealResultSim(replay1, replay2, mean)
+        if Detect.STEAL_CORR & self.detect:
+            correlation = Comparer.compute_correlation(replay1, replay2)
+            yield StealResultCorr(replay1, replay2, correlation)
+
 
     @staticmethod
-    def _compare_two_replays(replay1, replay2, num_chunks=1):
+    def compute_similarity(replay1, replay2):
         """
         Calculates the average cursor distance between two
-        :class:`~.replay.Replay`\s, and the standard deviation of the distance.
+        :class:`~.replay.Replay`\s after interpolation and filtering.
 
         Parameters
         ----------
@@ -119,14 +126,15 @@ class Comparer:
 
         Returns
         -------
-        (float, float)
+        float
             The mean distance of the cursors of the two replays.
-            Also returns a correlation metric that represents the median level of correlation in the replay.
         """
 
         # interpolate
         if len(replay1.t) > len(replay2.t):
-            xy1 = np.array(replay1.xy)  # implicit fast copy to avoid overwriting this array on replay1 when flipping for HR
+            # implicit fast copy to avoid overwriting this array on replay1
+            # when flipping for HR
+            xy1 = np.array(replay1.xy)
 
             xy2x = np.interp(replay1.t, replay2.t, replay2.xy[:, 0])
             xy2y = np.interp(replay1.t, replay2.t, replay2.xy[:, 1])
@@ -135,8 +143,9 @@ class Comparer:
             xy1x = np.interp(replay2.t, replay1.t, replay1.xy[:, 0])
             xy1y = np.interp(replay2.t, replay1.t, replay1.xy[:, 1])
             xy1 = np.array([xy1x, xy1y]).T
-
-            xy2 = np.array(replay2.xy)  # implicit fast copy to avoid overwriting this array on replay2 when flipping for HR
+            # implicit fast copy to avoid overwriting this array on replay2
+            # when flipping for HR
+            xy2 = np.array(replay2.xy)
 
         valid = np.all(([0, 0] <= xy1) & (xy1 <= [512, 384]), axis=1) & np.all(([0, 0] <= xy2) & (xy2 <= [512, 384]), axis=1)
         xy1 = xy1[valid]
@@ -146,78 +155,42 @@ class Comparer:
         if (Mod.HR in replay1.mods) ^ (Mod.HR in replay2.mods):
             xy1[:, 1] = 384 - xy1[:, 1]
 
-        xy1_copy = xy1.T.copy() # Need copy, as the cross_correlate method uses an in-place modification of the matrix
-        play_sequence_2 = xy2.T.copy()
+        # euclidean distance
+        distance = xy1 - xy2
+        distance = (distance ** 2).sum(axis=1) ** 0.5
+        mean = distance.mean()
+        return mean
 
-        # Sectioned into 20 chunks, used to ignore outliers (eg. long replay with breaks is copied, and the cheater cursordances during the break)
-        horizontal_length = xy1_copy.shape[1] - xy1_copy.shape[1] % num_chunks
-        xy1_sections = np.hsplit(xy1_copy[:,:horizontal_length], num_chunks)
-        xy2_sections = np.hsplit(play_sequence_2[:,:horizontal_length], num_chunks)
+    @staticmethod
+    def compute_correlation(replay1, replay2, num_chunks=1):
+        # copy arrays, as we'll be modifying them
+        xy1 = np.array(replay1.xy)
+        xy2 = np.array(replay2.xy)
+
+        # flip if one but not both has HR
+        if (Mod.HR in replay1.mods) ^ (Mod.HR in replay2.mods):
+            xy1[:, 1] = 384 - xy1[:, 1]
+
+        xy1 = xy1.T
+        xy2 = xy2.T
+
+        # Sectioned into 20 chunks, used to ignore outliers (eg. long replay
+        # with breaks is copied, and the cheater cursordances during the break)
+        horizontal_length = xy1.shape[1] - xy1.shape[1] % num_chunks
+        xy1_sections = np.hsplit(xy1[:,:horizontal_length], num_chunks)
+        xy2_sections = np.hsplit(xy2[:,:horizontal_length], num_chunks)
         correlations = []
-        for (xy1_copy, play_sequence_2) in zip(xy1_sections, xy2_sections):
-            cross_correlation_matrix = Comparer.find_cross_correlation(xy1_copy, play_sequence_2)
-            #Pick the lag with the maximum correlation, this likely in most cases is 0 lag
+        for (xy1_section, xy2_section) in zip(xy1_sections, xy2_sections):
+            xy1_section -= np.mean(xy1_section)
+            xy2_section -= np.mean(xy2_section)
+            norm = np.std(xy1_section) * np.std(xy2_section) * xy1_section.size
+            cross_correlation_matrix = signal.correlate(xy1_section, xy2_section) / norm
+            # Pick the lag with the maximum correlation, this likely in
+            # most cases is 0 lag
             max_correlation = np.max(cross_correlation_matrix)
             correlations.append(max_correlation)
-        average_distance = Comparer._compute_data_similarity(xy1, xy2)
-        # Out of all the sections, we should have 20 sections, we pick the one with the median correlation, so we throw away any outliers
-        median_correlation = np.median(np.array(sorted(correlations)))
-        return (average_distance, median_correlation)
-
-    @staticmethod
-    def find_cross_correlation(xy1, xy2):
-        # The normalization makes the similarity detector robust to translations
-        xy1 -= np.mean(xy1)
-        xy2 -= np.mean(xy2)
-        norm = np.std(xy1) * np.std(xy2) * xy1.size
-        return signal.correlate(xy1, xy2) / norm
-
-
-    @staticmethod
-    def _compute_data_similarity(data1, data2):
-        """
-        Calculates the average cursor distance between two lists of cursor data,
-        and the standard deviation of the distance.
-
-        Parameters
-        ----------
-        data1: list[tuple(int, int)]
-            The first set of cursor data, containing the x and y positions
-            of the cursor at each datapoint.
-        data2: list[tuple(int, int)]
-            The second set of cursor data, containing the x and y positions
-            of the cursor at each datapoint.
-
-        Returns
-        -------
-        float
-            The average distance between the two datasets.
-
-        Notes
-        -----
-        The two data lists must have previously been interpolated to each other.
-        This is why we can get away with only lists of [x,y] and not [x,y,t].
-        """
-
-        data1 = np.array(data1)
-        data2 = np.array(data2)
-
-        # switch if the second is longer, so that data1 is always the longest.
-        if len(data2) > len(data1):
-            (data1, data2) = (data2, data1)
-
-        shortest = len(data2)
-
-        distance = data1[:shortest] - data2
-        # square all numbers and sum over the second axis (add row 2 to row 1),
-        # finally take the square root of each number to get all distances.
-        # [ x_1 x_2 ... x_n   => [ x_1 ** 2 ... x_n ** 2
-        #   y_1 y_2 ... y_n ] =>   y_1 ** 2 ... y_n ** 2 ]
-        # => [ x_1 ** 2 + y_1 ** 2 ... x_n ** 2 + y_n ** 2 ]
-        # => [ d_1 ... d_2 ]
-        distance = (distance ** 2).sum(axis=1) ** 0.5
-
-        return distance.mean()
+        # take the median of all the chunks so we throw away any outliers
+        return np.median(correlations)
 
     def __repr__(self):
         return f"Comparer(replays1={self.replays1},replays2={self.replays2})"

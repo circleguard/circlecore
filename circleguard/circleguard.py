@@ -104,10 +104,10 @@ class Circleguard:
 
         c.load(self.loader)
         # comparer investigations
-        if detect & Detect.STEAL:
+        if detect & (Detect.STEAL_SIM | Detect.STEAL_CORR):
             replays1 = c.all_replays1()
             replays2 = c.all_replays2()
-            comparer = Comparer(replays1, replays2=replays2)
+            comparer = Comparer(replays1, replays2, detect)
             yield from comparer.compare()
 
         # investigator investigations
@@ -132,7 +132,7 @@ class Circleguard:
                     # disconnect from temporary library
                     library.close()
 
-    def steal_check(self, loadables, loadables2=None) -> Iterable[StealResult]:
+    def steal_check(self, loadables, loadables2=None, method=Detect.STEAL_SIM) -> Iterable[StealResult]:
         """
         Investigates loadables for replay stealing.
 
@@ -144,6 +144,10 @@ class Circleguard:
             If passed, compare each loadable in ``loadables``
             against each loadable in ``loadables2`` for replay stealing,
             instead of to other loadables in ``loadables``.
+        method: :class`~.Detect`
+            What method to use to investigate the loadables for replay stealing.
+            This should be one of ``Detect.STEAL_SIM`` or ``Detect.STEAL_CORR``,
+            or both (or'd together).
 
         Yields
         ------
@@ -151,7 +155,7 @@ class Circleguard:
             A result representing a replay stealing investigtion into a pair of
             loadables from ``loadables`` and/or ``loadables2``.
         """
-        yield from self.run(loadables, Detect.STEAL, loadables2)
+        yield from self.run(loadables, method, loadables2)
 
     def relax_check(self, loadables) -> Iterable[RelaxResult]:
         """
