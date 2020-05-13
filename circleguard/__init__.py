@@ -12,7 +12,7 @@ from circleguard.exceptions import (CircleguardException, InvalidArgumentsExcept
         InvalidJSONException, ReplayUnavailableException)
 from circleguard.version import __version__
 from circleguard.result import (Result, InvestigationResult, ComparisonResult,
-        StealResult, RelaxResult, CorrectionResult)
+        StealResult, StealResultSim, StealResultCorr, RelaxResult, CorrectionResult)
 from circleguard.span import Span
 
 logging.addLevelName(TRACE, "TRACE")
@@ -46,7 +46,7 @@ __all__ = [
 "__version__",
 # results
 "Result", "InvestigationResult", "ComparisonResult", "StealResult",
-"RelaxResult", "CorrectionResult",
+"StealResultSim", "StealResultCorr", "RelaxResult", "CorrectionResult",
 # span
 "Span"
 ]
