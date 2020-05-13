@@ -1,5 +1,8 @@
 # Unreleased
 
+* add a new replay stealing detect, `Detect.STEAL_CORR`, using signal processing cross-correlation methods
+* rename `Detect.STEAL` to `Detect.STEAL_SIM`, with `Detect.STEAL` remaining as deprecated
+* split `StealResult` into `StealResultSim` and `StealResultCorr`
 * correctly order replay frames and remove invalid frames. This changes similarity values slightly
 * add default cutoffs to `Detect` as `SIM_LIMIT` and `UR_LIMIT`. These are values we feel are enough to call a replay cheated. They are not used in our code but are provided as a convenience.
 
