@@ -103,73 +103,50 @@ class Comparer:
         """
         self.log.log(utils.TRACE, "comparing %r and %r", replay1, replay2)
 
+        # perform preprocessing here as an optimization, so it is not repeated
+        # within different comparison algorithms. This will likely need to
+        # become more advanced if we add more (and different) algorithms.
+        xy1, xy2 = Comparer.interpolate(replay1, replay2)
+        xy1, xy2 = Comparer.clean(xy1, xy2)
+
+        # flip if one but not both has HR
+        if (Mod.HR in replay1.mods) ^ (Mod.HR in replay2.mods):
+            xy1[:, 1] = 384 - xy1[:, 1]
+
         if Detect.STEAL_SIM & self.detect:
-            mean = Comparer.compute_similarity(replay1, replay2)
+            mean = Comparer.compute_similarity(xy1, xy2)
             yield StealResultSim(replay1, replay2, mean)
         if Detect.STEAL_CORR & self.detect:
-            correlation = Comparer.compute_correlation(replay1, replay2)
+            correlation = Comparer.compute_correlation(xy1, xy2)
             yield StealResultCorr(replay1, replay2, correlation)
 
 
     @staticmethod
-    def compute_similarity(replay1, replay2):
+    def compute_similarity(xy1, xy2):
         """
-        Calculates the average cursor distance between two
-        :class:`~.replay.Replay`\s after interpolation and filtering.
+        Calculates the average distance between two sets of cursor position
+        data.
 
         Parameters
         ----------
-        replay1: :class:`~.replay.Replay`
-            The first replay to compare.
-        replay2: :class:`~.replay.Replay`
-            The second replay to compare.
+        replay1: ndarray
+            The first xy data to compare.
+        replay2: ndarray
+            The second xy data to compare.
 
         Returns
         -------
         float
-            The mean distance of the cursors of the two replays.
+            The mean distance between the two datasets.
         """
-
-        # interpolate
-        if len(replay1.t) > len(replay2.t):
-            # implicit fast copy to avoid overwriting this array on replay1
-            # when flipping for HR
-            xy1 = np.array(replay1.xy)
-
-            xy2x = np.interp(replay1.t, replay2.t, replay2.xy[:, 0])
-            xy2y = np.interp(replay1.t, replay2.t, replay2.xy[:, 1])
-            xy2 = np.array([xy2x, xy2y]).T
-        else:
-            xy1x = np.interp(replay2.t, replay1.t, replay1.xy[:, 0])
-            xy1y = np.interp(replay2.t, replay1.t, replay1.xy[:, 1])
-            xy1 = np.array([xy1x, xy1y]).T
-            # implicit fast copy to avoid overwriting this array on replay2
-            # when flipping for HR
-            xy2 = np.array(replay2.xy)
-
-        valid = np.all(([0, 0] <= xy1) & (xy1 <= [512, 384]), axis=1) & np.all(([0, 0] <= xy2) & (xy2 <= [512, 384]), axis=1)
-        xy1 = xy1[valid]
-        xy2 = xy2[valid]
-
-        # flip if one but not both has HR
-        if (Mod.HR in replay1.mods) ^ (Mod.HR in replay2.mods):
-            xy1[:, 1] = 384 - xy1[:, 1]
 
         # euclidean distance
         distance = xy1 - xy2
         distance = (distance ** 2).sum(axis=1) ** 0.5
-        mean = distance.mean()
-        return mean
+        return distance.mean()
 
     @staticmethod
-    def compute_correlation(replay1, replay2, num_chunks=1):
-        # copy arrays, as we'll be modifying them
-        xy1 = np.array(replay1.xy)
-        xy2 = np.array(replay2.xy)
-
-        # flip if one but not both has HR
-        if (Mod.HR in replay1.mods) ^ (Mod.HR in replay2.mods):
-            xy1[:, 1] = 384 - xy1[:, 1]
+    def compute_correlation(xy1, xy2, num_chunks=1):
 
         xy1 = xy1.T
         xy2 = xy2.T
@@ -191,6 +168,60 @@ class Comparer:
             correlations.append(max_correlation)
         # take the median of all the chunks so we throw away any outliers
         return np.median(correlations)
+
+
+    @staticmethod
+    def interpolate(replay1, replay2):
+        """
+        Interpolates the xy data of the shorter replay to the longer replay.
+
+        Returns
+        -------
+        (ndarray, ndarray)
+            The interpolated replay data of the first and second replay
+            respectively.
+
+        Notes
+        -----
+        This method does not modify the xy data of the passed replays.
+        Also note that the length of the two returned arrays will be equal.
+        This is a (desired) side effect of interpolating.
+        """
+
+        if len(replay1.t) > len(replay2.t):
+            # copy data. Not necessary for ``replay2.xy`` because ``np.interp``
+            # is not in place, and we use that as xy2
+            xy1 = np.array(replay1.xy)
+
+            xy2x = np.interp(replay1.t, replay2.t, replay2.xy[:, 0])
+            xy2y = np.interp(replay1.t, replay2.t, replay2.xy[:, 1])
+            xy2 = np.array([xy2x, xy2y]).T
+        else:
+            xy2 = np.array(replay2.xy)
+
+            xy1x = np.interp(replay2.t, replay1.t, replay1.xy[:, 0])
+            xy1y = np.interp(replay2.t, replay1.t, replay1.xy[:, 1])
+            xy1 = np.array([xy1x, xy1y]).T
+
+        return (xy1, xy2)
+
+
+    @staticmethod
+    def clean(xy1, xy2):
+        """
+        Cleans the given xy data to only include indices where both coordinates
+        are inside the osu gameplay window (a 512 by 384 osu!pixel window).
+
+        Warnings
+        --------
+        The length of the two passed arrays must be equal.
+        """
+
+        valid = np.all(([0, 0] <= xy1) & (xy1 <= [512, 384]), axis=1) & np.all(([0, 0] <= xy2) & (xy2 <= [512, 384]), axis=1)
+        xy1 = xy1[valid]
+        xy2 = xy2[valid]
+        return (xy1, xy2)
+
 
     def __repr__(self):
         return f"Comparer(replays1={self.replays1},replays2={self.replays2})"
