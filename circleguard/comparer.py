@@ -156,18 +156,18 @@ class Comparer:
         # (eg. cheater inserts replay data during breaks that places them
         # far away from the actual replay)
         horizontal_length = xy1.shape[1] - xy1.shape[1] % num_chunks
-        xy1_sections = np.hsplit(xy1[:,:horizontal_length], num_chunks)
-        xy2_sections = np.hsplit(xy2[:,:horizontal_length], num_chunks)
+        xy1_parts = np.hsplit(xy1[:,:horizontal_length], num_chunks)
+        xy2_parts = np.hsplit(xy2[:,:horizontal_length], num_chunks)
         correlations = []
-        for (xy1_section, xy2_section) in zip(xy1_sections, xy2_sections):
-            xy1_section -= np.mean(xy1_section)
-            xy2_section -= np.mean(xy2_section)
-            norm = np.std(xy1_section) * np.std(xy2_section) * xy1_section.size
-            cross_correlation_matrix = signal.correlate(xy1_section, xy2_section) / norm
+        for (xy1_part, xy2_part) in zip(xy1_parts, xy2_parts):
+            xy1_part -= np.mean(xy1_part)
+            xy2_part -= np.mean(xy2_part)
+            norm = np.std(xy1_part) * np.std(xy2_part) * xy1_part.size
+            cross_corr_matrix = signal.correlate(xy1_part, xy2_part) / norm
             # Pick the lag with the maximum correlation, this likely in
             # most cases is 0 lag
-            max_correlation = np.max(cross_correlation_matrix)
-            correlations.append(max_correlation)
+            max_corr = np.max(cross_corr_matrix)
+            correlations.append(max_corr)
         # take the median of all the chunks to reduce the effect of outliers
         return np.median(correlations)
 
