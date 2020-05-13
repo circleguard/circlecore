@@ -163,9 +163,13 @@ class Comparer:
             xy1_part -= np.mean(xy1_part)
             xy2_part -= np.mean(xy2_part)
             norm = np.std(xy1_part) * np.std(xy2_part) * xy1_part.size
+            # matrix of correlations between xy1 and xy2 at different time
+            # shifts
             cross_corr_matrix = signal.correlate(xy1_part, xy2_part) / norm
-            # Pick the lag with the maximum correlation, this likely in
-            # most cases is 0 lag
+
+            # pick the maximum correlation, which will probably be at 0
+            # time shift, unless the replays have been intentionally shifted in
+            # time
             max_corr = np.max(cross_corr_matrix)
             correlations.append(max_corr)
         # take the median of all the chunks to reduce the effect of outliers
