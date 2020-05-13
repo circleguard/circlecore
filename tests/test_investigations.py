@@ -37,6 +37,8 @@ class TestSteal(CGTestCase):
         cls.stolen2 = ReplayPath(RES / "stolen_replay2.osr")
         cls.legit1 = ReplayPath(RES / "legit_replay1.osr")
         cls.legit2 = ReplayPath(RES / "legit_replay2.osr")
+        cls.time_shifted1 = ReplayPath(RES / "stolen" / "stolen-time-shifted-1.osr")
+        cls.time_shifted2 = ReplayPath(RES / "stolen" / "stolen-time-shifted-2.osr")
 
     @staticmethod
     def add_noise_and_positional_translation_to_replay(replay, pixel_offset, std_deviation):
@@ -50,7 +52,7 @@ class TestSteal(CGTestCase):
         r = list(self.cg.steal_check(replays))
         self.assertEqual(len(r), 1, f"{len(r)} results returned instead of 1")
         r = r[0]
-        self.assertTrue(r.similarity < Detect.SIM_LIMIT, "Cheated replays were not detected as cheated")
+        self.assertLess(r.similarity, Detect.SIM_LIMIT, "Cheated replays were not detected as cheated")
 
         r1 = r.replay1
         r2 = r.replay2
@@ -66,12 +68,27 @@ class TestSteal(CGTestCase):
         self.assertEqual(later.replay_id, 2805164683, "Later replay id was not correct")
         self.assertEqual(r1.username, r2.username, "Replay usernames did not match")
 
+    def test_cheated_time_shift(self):
+        replays = [self.time_shifted1, self.time_shifted2]
+        r = list(self.cg.steal_check(replays, method=Detect.STEAL_SIM))[0]
+        self.assertAlmostEqual(r.similarity, 2.20915, delta=DELTA, msg="Similarity is not correct")
+
+        # STEAL_SIM is currently *not* able to detect time shifts. If this
+        # changes we want to know! :P
+        self.assertGreater(r.similarity, Detect.SIM_LIMIT)
+
+        # STEAL_CORR should be able to, though.
+        r = list(self.cg.steal_check(replays, method=Detect.STEAL_CORR))[0]
+        self.assertGreater(r.correlation, Detect.CORR_LIMIT, "Cheated replays were not detected as cheated")
+        self.assertAlmostEqual(r.correlation, 2.20915, delta=DELTA, msg="Correlation is not correct")
+
+
     def test_legitimate(self):
         replays = [self.legit1, self.legit2]
         r = list(self.cg.steal_check(replays))
         self.assertEqual(len(r), 1, f"{len(r)} results returned instead of 1")
         r = r[0]
-        self.assertFalse(r.similarity < Detect.SIM_LIMIT, "Legitimate replays were detected as stolen")
+        self.assertGreater(r.similarity, Detect.SIM_LIMIT, "Legitimate replays were detected as stolen")
 
         r1 = r.replay1
         r2 = r.replay2
@@ -96,7 +113,7 @@ class TestSteal(CGTestCase):
             results_num = num * (num - 1) / 2 # n choose k formula with k=2
             self.assertEqual(len(r), results_num, f"{len(r)} results returned instead of {results_num}")
             r = r[0]
-            self.assertTrue(r.similarity < Detect.SIM_LIMIT, f"Cheated replays were not detected as cheated at num {num}")
+            self.assertLess(r.similarity, Detect.SIM_LIMIT, f"Cheated replays were not detected as cheated at num {num}")
 
             r1 = r.replay1
             r2 = r.replay2
@@ -112,7 +129,6 @@ class TestSteal(CGTestCase):
             self.assertEqual(later.replay_id, 2805164683, f"Later replay id was not correct at num {num}")
             self.assertEqual(r1.username, r2.username, f"Replay usernames did not match at num {num}")
 
-
     def test_robustness_to_translation(self):
         # copy replay to avoid any missahaps when we mutate the data
         stolen2 = ReplayPath(self.stolen2.path)
@@ -124,6 +140,6 @@ class TestSteal(CGTestCase):
         self.assertEqual(len(results), 2, f"{len(results)} results returned instead of 2")
         for r in results:
             if isinstance(r, StealResultSim):
-                self.assertTrue(r.similarity < Detect.SIM_LIMIT, "Cheated replays were not detected as cheated with sim")
+                self.assertLess(r.similarity, Detect.SIM_LIMIT, "Cheated replays were not detected as cheated with sim")
             if isinstance(r, StealResultCorr):
-                self.assertTrue(r.correlation > Detect.CORR_LIMIT, "Cheated replays were not detected as cheated with corr")
+                self.assertGreater(r.correlation, Detect.CORR_LIMIT, "Cheated replays were not detected as cheated with corr")
