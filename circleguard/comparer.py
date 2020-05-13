@@ -152,7 +152,7 @@ class Comparer:
         xy1 = xy1.T
         xy2 = xy2.T
 
-        # section into chunks, used to reduce the effect of outliers
+        # section into chunks, used to reduce the effect of outlier data
         # (eg. cheater inserts replay data during breaks that places them
         # far away from the actual replay)
         horizontal_length = xy1.shape[1] - xy1.shape[1] % num_chunks
@@ -168,7 +168,7 @@ class Comparer:
             # most cases is 0 lag
             max_correlation = np.max(cross_correlation_matrix)
             correlations.append(max_correlation)
-        # take the median of all the chunks so we throw away any outliers
+        # take the median of all the chunks to reduce the effect of outliers
         return np.median(correlations)
 
 
