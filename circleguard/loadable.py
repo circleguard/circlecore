@@ -548,8 +548,8 @@ class Replay(Loadable):
         xy = np.array([block[1], block[2]], dtype=float).T
         k = np.array(block[3], dtype=int)
 
-        # sort our data by t
-        t_sort = np.argsort(t)
+        # sort our data by t. Stable so we don't reorder frames with equal times
+        t_sort = np.argsort(t, kind="stable")
         t = t[t_sort]
         xy = xy[t_sort]
         k = k[t_sort]
