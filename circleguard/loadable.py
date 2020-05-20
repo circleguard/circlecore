@@ -516,13 +516,30 @@ class Replay(Loadable):
         if replay_data[0].time_since_previous_action == 0:
             replay_data = replay_data[1:]
 
+        ## TODO try to use a peekable iterator to use an iter for above as well
+        # use an iter an an optimization so we don't recreate the list when
+        # taking (and removing) the first element
+        replay_data = iter(replay_data)
+
         # t, x, y, k
         data = [[], [], [], []]
-        running_t = 0
+        # The following is guesswork, but seems to accurately describe replays.
+        # There are two possibilities for osrs:
+        # * for replays with a skip in the beginning, the first frame time is 0,
+        #   then the next frame time is the skip duration. The next frame after
+        #   that will have a negative time, to account for the replay data
+        #   before the skip.
+        # * for replays without a skip in the beginning, the first frame time is
+        #   0, and the next frame time is -1.
+        # Since in the first case the first frame time is positive, it would
+        # cause our loop below to ignore the negative time frame afterwards,
+        # throwing off the replay. To solve this we initiaize the running time
+        # to the first frame's time.
+        running_t = next(replay_data).time_since_previous_action
         # negative frame times are valid when they're at the beginning of a
-        # replay (they're frames from before the first hitobject at t=0).
-        # Count all negative frames until we hit our first positive one, then
-        # don't count negative frames after (eg in the middle of the replay).
+        # replay (they're frames from before the start of the mp3 at t=0).
+        # Count all negative frames until we hit our first positive one, and
+        # ignore any negative frames after (eg in the middle of the replay).
         positive_seen = False
 
         for e in replay_data:
