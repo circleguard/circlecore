@@ -516,13 +516,12 @@ class Replay(Loadable):
         if replay_data[0].time_since_previous_action == 0:
             replay_data = replay_data[1:]
 
+        # t, x, y, k
+        data = [[], [], [], []]
         ## TODO try to use a peekable iterator to use an iter for above as well
         # use an iter an an optimization so we don't recreate the list when
         # taking (and removing) the first element
         replay_data = iter(replay_data)
-
-        # t, x, y, k
-        data = [[], [], [], []]
         # The following is guesswork, but seems to accurately describe replays.
         # This references the "first" frame assuming that we have already
         # removed the truly first zero time frame, if it is present. So
