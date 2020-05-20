@@ -1,3 +1,7 @@
+# v4.1.2
+
+* correctly account for skips in replays
+
 # v4.1.1
 
 * don't reorder frames with the same time
