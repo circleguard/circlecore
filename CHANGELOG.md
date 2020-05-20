@@ -1,4 +1,4 @@
-# Unreleased
+# v4.1.0
 
 * add a new replay stealing detect, `Detect.STEAL_CORR`, using signal processing cross-correlation methods
 * rename `Detect.STEAL` to `Detect.STEAL_SIM`, with `Detect.STEAL` remaining as deprecated
