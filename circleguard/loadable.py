@@ -524,13 +524,15 @@ class Replay(Loadable):
         # t, x, y, k
         data = [[], [], [], []]
         # The following is guesswork, but seems to accurately describe replays.
+        # This references the "first" frame assuming that we have already
+        # removed the truly first zero time frame, if it is present. So
+        # technically the "first" frame below is the second frame.
         # There are two possibilities for osrs:
-        # * for replays with a skip in the beginning, the first frame time is 0,
-        #   then the next frame time is the skip duration. The next frame after
-        #   that will have a negative time, to account for the replay data
-        #   before the skip.
-        # * for replays without a skip in the beginning, the first frame time is
-        #   0, and the next frame time is -1.
+        # * for replays with a skip in the beginning, the first frame time is
+        #   the skip duration. The next frame after that will have a negative
+        #   time, to account for the replay data before the skip.
+        # * for replays without a skip in the beginning, the firstframe time is
+        #   -1.
         # Since in the first case the first frame time is positive, it would
         # cause our loop below to ignore the negative time frame afterwards,
         # throwing off the replay. To solve this we initiaize the running time
