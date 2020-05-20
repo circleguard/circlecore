@@ -98,8 +98,12 @@ class Investigator:
         :meth:`~.aim_correction_sam` for an alternative, unused approach
         involving velocity and jerk.
         """
-        t = replay.t[1:-1]
-        xy = replay.xy
+        # when we leave mutliple frames with the same time values, they
+        # sometimes get detected (falesly) as aim correction.
+        # TODO Worth looking into a bit more to see if we can avoid it without
+        # removing the frames entirely.
+        t, xy = Investigator.remove_unique(replay.t, replay.xy)
+        t = t[1:-1]
 
         # labelling three consecutive points a, b and c
         ab = xy[1:-1] - xy[:-2]
@@ -219,6 +223,15 @@ class Investigator:
                 object_i += 1
 
         return array
+
+    # TODO (some) code duplication with this method and a similar one in
+    # ``Comparer``. Refactor Investigator and Comparer to inherit from a base
+    # class, or move this method to utils. Preferrably the former.
+    @staticmethod
+    def remove_unique(t, k):
+        t, t_sort = np.unique(t, return_index=True)
+        k = k[t_sort]
+        return (t, k)
 
 class Snap():
     """

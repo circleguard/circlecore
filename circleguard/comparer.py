@@ -107,7 +107,12 @@ class Comparer:
         # perform preprocessing here as an optimization, so it is not repeated
         # within different comparison algorithms. This will likely need to
         # become more advanced if we add more (and different) algorithms.
-        xy1, xy2 = Comparer.interpolate(replay1, replay2)
+
+        # interpolation breaks when multiple frames have the same time values
+        # (which occurs semi frequently in replays). So filter them out
+        t1, xy1 = Comparer.remove_unique(replay1.t, replay1.xy)
+        t2, xy2 = Comparer.remove_unique(replay2.t, replay2.xy)
+        xy1, xy2 = Comparer.interpolate(t1, t2, xy1, xy2)
         xy1, xy2 = Comparer.clean(xy1, xy2)
 
         # flip if one but not both has HR
@@ -177,7 +182,14 @@ class Comparer:
 
 
     @staticmethod
-    def interpolate(replay1, replay2):
+    def remove_unique(t, xy):
+        t, t_sort = np.unique(t, return_index=True)
+        xy = xy[t_sort]
+        return (t, xy)
+
+
+    @staticmethod
+    def interpolate(t1, t2, xy1, xy2):
         """
         Interpolates the xy data of the shorter replay to the longer replay.
 
@@ -189,24 +201,17 @@ class Comparer:
 
         Notes
         -----
-        This method does not modify the xy data of the passed replays.
-        Also note that the length of the two returned arrays will be equal.
-        This is a (desired) side effect of interpolating.
+        The length of the two returned arrays will be equal. This is a (desired)
+        side effect of interpolating.
         """
 
-        if len(replay1.t) > len(replay2.t):
-            # copy data. Not necessary for ``replay2.xy`` because ``np.interp``
-            # is not in place, and we use that as xy2
-            xy1 = np.array(replay1.xy)
-
-            xy2x = np.interp(replay1.t, replay2.t, replay2.xy[:, 0])
-            xy2y = np.interp(replay1.t, replay2.t, replay2.xy[:, 1])
+        if len(t1) > len(t2):
+            xy2x = np.interp(t1, t2, xy2[:, 0])
+            xy2y = np.interp(t1, t2, xy2[:, 1])
             xy2 = np.array([xy2x, xy2y]).T
         else:
-            xy2 = np.array(replay2.xy)
-
-            xy1x = np.interp(replay2.t, replay1.t, replay1.xy[:, 0])
-            xy1y = np.interp(replay2.t, replay1.t, replay1.xy[:, 1])
+            xy1x = np.interp(t2, t1, xy1[:, 0])
+            xy1y = np.interp(t2, t1, xy1[:, 1])
             xy1 = np.array([xy1x, xy1y]).T
 
         return (xy1, xy2)

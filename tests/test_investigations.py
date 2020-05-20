@@ -71,7 +71,7 @@ class TestSteal(CGTestCase):
     def test_cheated_time_shift(self):
         replays = [self.time_shifted1, self.time_shifted2]
         r = list(self.cg.steal_check(replays, method=Detect.STEAL_SIM))[0]
-        self.assertAlmostEqual(r.similarity, 17.30112, delta=DELTA, msg="Similarity is not correct")
+        self.assertAlmostEqual(r.similarity, 17.30119, delta=DELTA, msg="Similarity is not correct")
 
         # STEAL_SIM is currently *not* able to detect time shifts. If this
         # changes we want to know! :P
