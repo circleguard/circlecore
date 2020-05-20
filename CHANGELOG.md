@@ -1,3 +1,7 @@
+# v4.1.1
+
+* don't reorder frames with the same time
+
 # v4.1.0
 
 * add a new replay stealing detect, `Detect.STEAL_CORR`, using signal processing cross-correlation methods
