@@ -5,6 +5,7 @@
 * split `StealResult` into `StealResultSim` and `StealResultCorr`
 * correctly order replay frames and remove invalid frames. This changes similarity values slightly
 * add default cutoffs to `Detect` as `SIM_LIMIT` and `UR_LIMIT`. These are values we feel are enough to call a replay cheated. They are not used in our code but are provided as a convenience.
+* don't remove frames with identical time values when processing replay data. This removal still occurrs, but only when the replays are investigated.
 
 # v4.0.2
 
