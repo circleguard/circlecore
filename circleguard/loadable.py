@@ -1,8 +1,13 @@
 import abc
 import logging
+from pathlib import Path
+import os
 
 import circleparse
 import numpy as np
+import sqlite3
+import random
+import wtc
 
 from circleguard.enums import RatelimitWeight
 from circleguard.mod import Mod
@@ -431,6 +436,105 @@ class MapUser(ReplayContainer):
                 and self.span == loadable.span)
 
 
+class ReplayCache(ReplayContainer):
+    """
+    Contains replays represented by a circlecore database. Primarily useful
+    to randomly sample these replays, rather than directly access them.
+
+    Parameters
+    ----------
+    path: string
+        The path to the database to load replays from.
+    num_maps: int
+        How many (randomly chosen) maps to load replays from.
+    limit: int
+        How many replays to load for each map.
+    Notes
+    -----
+    :meth:`~.load_info` is an expensive operation for large databases
+    (likely because of inefficient sql queries). Consider using as few instances
+    of this object as possible.
+    """
+    def __init__(self, path, num_maps, num_replays):
+        super().__init__(False)
+        self.path = path
+        self.num_maps = num_maps
+        self.limit = num_replays * num_maps
+        self.replays = []
+        conn = sqlite3.connect(path)
+        self.cursor = conn.cursor()
+
+    def load_info(self, loader):
+        map_ids = self.cursor.execute(
+            """
+            SELECT DISTINCT map_id
+            FROM replays
+            """
+        ).fetchall()
+        # flatten map_ids, because it's actually a list of lists
+        map_ids = [item[0] for item in map_ids]
+        chosen_maps = random.choices(map_ids, k=self.num_maps)
+
+        subclauses = [f"map_id = {chosen_map}" for chosen_map in chosen_maps]
+        where_clause = " OR ".join(subclauses)
+
+        # TODO LIMIT clause isn't quite right here, some maps will have less
+        # than ``num_replays`` stored
+        infos = self.cursor.execute(
+            f"""
+            SELECT user_id, map_id, replay_data, replay_id, mods
+            FROM replays
+            WHERE {where_clause}
+            LIMIT {self.limit}
+            """
+        )
+
+        for info in infos:
+            r = CachedReplay(info[0], info[1], info[4], info[2], info[3])
+            self.replays.append(r)
+
+    def all_replays(self):
+        return self.replays
+
+    def __eq__(self, other):
+        return self.path == other.path
+
+
+class ReplayDir(ReplayContainer):
+    """
+    A folder with replay files inside it.
+
+    Notes
+    -----
+    Any files not ending in ``.osr`` are ignored.
+
+    Warnings
+    --------
+    Nested directories are not support (yet). Any folders encountered will be
+    ignored.
+    """
+    def __init__(self, dir_path, cache=None):
+        super().__init__(cache)
+        self.dir_path = Path(dir_path)
+        if not self.dir_path.is_dir():
+            raise ValueError(f"Expected path pointing to {self.dir_path} to be "
+                              "a directory")
+        self.replays = []
+
+    def load_info(self, loader):
+        for path in os.listdir(self.dir_path):
+            if not path.endswith(".osr"):
+                continue
+            replay = ReplayPath(self.dir_path / path)
+            self.replays.append(replay)
+
+    def all_replays(self):
+        return self.replays
+
+    def __eq__(self, other):
+        return self.dir_path == other.dir_path
+
+
 class Replay(Loadable):
     """
     A replay played by a player.
@@ -779,3 +883,43 @@ class ReplayPath(Replay):
             return f"Loaded ReplayPath by {self.username} on {self.map_id} at {self.path}"
         else:
             return f"Unloaded ReplayPath at {self.path}"
+
+
+class ReplayID(Replay):
+    def __init__(self, replay_id, cache=None):
+        super().__init__(RatelimitWeight.HEAVY, cache)
+        self.replay_id = replay_id
+
+    def load(self, loader, cache):
+        # TODO file github issue about loading info from replay id,
+        # right now we can literally only load the replay data which
+        # is pretty useless if we don't have a map id or the mods used
+        cache = cache if self.cache is None else self.cache
+        replay_data = loader.replay_data_from_id(self.replay_id, cache)
+        self._process_replay_data(replay_data)
+        self.loaded = True
+
+    def __eq__(self, other):
+        return self.replay_id == other.replay_id
+
+
+class CachedReplay(Replay):
+    def __init__(self, user_id, map_id, mods, replay_data, replay_id):
+        super().__init__(RatelimitWeight.NONE, False)
+        self.user_id = user_id
+        self.map_id = map_id
+        self.mods = Mod(mods)
+        self.replay_data = replay_data
+        self.replay_id = replay_id
+
+    def load(self, loader, cache):
+        if self.loaded:
+            return
+        decompressed = wtc.decompress(self.replay_data)
+        replay_data = circleparse.parse_replay(decompressed, pure_lzma=True).play_data
+        self._process_replay_data(replay_data)
+        self.loaded = True
+
+    def __eq__(self, other):
+        # could check more but replay_id is already a primary key, guaranteed unique
+        return self.replay_id == other.replay_id

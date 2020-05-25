@@ -1,3 +1,7 @@
+# v4.2.0
+
+* add several new ``Loadable`` convenience classes. ``ReplayCache`` for accessing random elements from a circlecore database, ``ReplayDir`` for folders of ``.osr`` files, and ``ReplayID`` for when you only know the replay id.
+
 # v4.1.2
 
 * correctly account for skips in replays
