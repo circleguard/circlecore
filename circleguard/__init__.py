@@ -4,7 +4,8 @@ from circleguard.circleguard import Circleguard, set_options
 from circleguard.loadable import (Check, Replay, ReplayMap, ReplayPath, Map, User,
         MapUser, ReplayDir, ReplayContainer, LoadableContainer, Loadable, ReplayCache,
         CachedReplay, ReplayID)
-from circleguard.enums import Key, Mod, RatelimitWeight, Detect, ResultType
+from circleguard.enums import Key, RatelimitWeight, Detect, ResultType
+from circleguard.mod import Mod
 from circleguard.utils import TRACE, ColoredFormatter
 from circleguard.loader import Loader
 from circleguard.replay_info import ReplayInfo
@@ -13,7 +14,7 @@ from circleguard.exceptions import (CircleguardException, InvalidArgumentsExcept
         InvalidJSONException, ReplayUnavailableException)
 from circleguard.version import __version__
 from circleguard.result import (Result, InvestigationResult, ComparisonResult,
-        StealResult, RelaxResult, CorrectionResult)
+        StealResult, StealResultSim, StealResultCorr, RelaxResult, CorrectionResult)
 from circleguard.span import Span
 
 logging.addLevelName(TRACE, "TRACE")
@@ -30,7 +31,9 @@ __all__ = [
 "ReplayCache", "Replay", "ReplayMap", "ReplayPath", "CachedReplay", "Loadable",
 "ReplayID", "ReplayDir",
 # enums
-"Key", "Mod", "RatelimitWeight", "Detect", "ResultType",
+"Key", "RatelimitWeight", "Detect", "ResultType",
+# mod
+"Mod",
 # utils
 "TRACE",
 # loader
@@ -46,7 +49,7 @@ __all__ = [
 "__version__",
 # results
 "Result", "InvestigationResult", "ComparisonResult", "StealResult",
-"RelaxResult", "CorrectionResult",
+"StealResultSim", "StealResultCorr", "RelaxResult", "CorrectionResult",
 # span
 "Span"
 ]

@@ -1,7 +1,23 @@
-# Unreleased
+# v4.2.0
 
-* correctly order replay frames and remove invalid frames. This changes similarity values slightly
 * add several new ``Loadable`` convenience classes. ``ReplayCache`` for accessing random elements from a circlecore database, ``ReplayDir`` for folders of ``.osr`` files, and ``ReplayID`` for when you only know the replay id.
+
+# v4.1.2
+
+* correctly account for skips in replays
+
+# v4.1.1
+
+* don't reorder frames with the same time
+
+# v4.1.0
+
+* add a new replay stealing detect, `Detect.STEAL_CORR`, using signal processing cross-correlation methods
+* rename `Detect.STEAL` to `Detect.STEAL_SIM`, with `Detect.STEAL` remaining as deprecated
+* split `StealResult` into `StealResultSim` and `StealResultCorr`
+* correctly order replay frames and remove invalid frames. This changes similarity values slightly
+* add default cutoffs to `Detect` as `SIM_LIMIT` and `UR_LIMIT`. These are values we feel are enough to call a replay cheated. They are not used in our code but are provided as a convenience.
+* don't remove frames with identical time values when processing replay data. This removal still occurrs, but only when the replays are investigated.
 
 # v4.0.2
 

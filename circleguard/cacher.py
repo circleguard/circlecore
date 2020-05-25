@@ -150,7 +150,7 @@ class Cacher:
             The id of the map the replay was played on.
         user_id: int
             The id of the user that played the replay.
-        mods: :class:`~circleguard.enums.ModCombination`
+        mods: :class:`~circleguard.mod.ModCombination`
             The mods this replay was played with.
 
         Returns

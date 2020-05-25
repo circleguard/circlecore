@@ -44,6 +44,7 @@ setup(
         "wtc==1.2.1",
         "numpy",
         "requests",
-        "slider==0.2.1"
+        "slider==0.2.1",
+        "scipy"
     ]
 )

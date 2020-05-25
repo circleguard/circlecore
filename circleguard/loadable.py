@@ -9,7 +9,8 @@ import sqlite3
 import random
 import wtc
 
-from circleguard.enums import RatelimitWeight, Mod
+from circleguard.enums import RatelimitWeight
+from circleguard.mod import Mod
 from circleguard.utils import TRACE
 from circleguard.loader import Loader
 from circleguard.span import Span
@@ -621,11 +622,29 @@ class Replay(Loadable):
 
         # t, x, y, k
         data = [[], [], [], []]
-        running_t = 0
+        ## TODO try to use a peekable iterator to use an iter for above as well
+        # use an iter an an optimization so we don't recreate the list when
+        # taking (and removing) the first element
+        replay_data = iter(replay_data)
+        # The following is guesswork, but seems to accurately describe replays.
+        # This references the "first" frame assuming that we have already
+        # removed the truly first zero time frame, if it is present. So
+        # technically the "first" frame below is the second frame.
+        # There are two possibilities for osrs:
+        # * for replays with a skip in the beginning, the first frame time is
+        #   the skip duration. The next frame after that will have a negative
+        #   time, to account for the replay data before the skip.
+        # * for replays without a skip in the beginning, the firstframe time is
+        #   -1.
+        # Since in the first case the first frame time is positive, it would
+        # cause our loop below to ignore the negative time frame afterwards,
+        # throwing off the replay. To solve this we initiaize the running time
+        # to the first frame's time.
+        running_t = next(replay_data).time_since_previous_action
         # negative frame times are valid when they're at the beginning of a
-        # replay (they're frames from before the first hitobject at t=0).
-        # Count all negative frames until we hit our first positive one, then
-        # don't count negative frames after (eg in the middle of the replay).
+        # replay (they're frames from before the start of the mp3 at t=0).
+        # Count all negative frames until we hit our first positive one, and
+        # ignore any negative frames after (eg in the middle of the replay).
         positive_seen = False
 
         for e in replay_data:
@@ -651,7 +670,9 @@ class Replay(Loadable):
         xy = np.array([block[1], block[2]], dtype=float).T
         k = np.array(block[3], dtype=int)
 
-        t, t_sort = np.unique(t, return_index=True)
+        # sort our data by t. Stable so we don't reorder frames with equal times
+        t_sort = np.argsort(t, kind="stable")
+        t = t[t_sort]
         xy = xy[t_sort]
         k = k[t_sort]
 

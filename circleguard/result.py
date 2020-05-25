@@ -76,12 +76,14 @@ class StealResult(ComparisonResult):
         The similarity of the two replays (the lower, the more similar).
         Similarity is, roughly speaking, a measure of the average pixel
         distance between the two replays.
+    correlation: float
+        The median correlation of the two replays (the closer to 1, the more correlated).
+        A value of 1.0 would be perfectly correlated, and a result of 0 would be uncorrelated.
     """
 
-    def __init__(self, replay1: Replay, replay2: Replay, similarity: int,):
+    def __init__(self, replay1: Replay, replay2: Replay):
         super().__init__(replay1, replay2, ResultType.STEAL)
 
-        self.similarity = similarity
         # can't compare ``None`` timestamps
         if not self.replay1.timestamp or not self.replay2.timestamp:
             return
@@ -92,6 +94,60 @@ class StealResult(ComparisonResult):
         else:
             self.earlier_replay: Replay = self.replay2
             self.later_replay: Replay = self.replay1
+
+
+class StealResultSim(StealResult):
+    """
+    The result of a test for replay stealing between two replays, using
+    the similarity algorithm.
+
+    Parameters
+    ----------
+    replay1: :class:`~circleguard.loadable.Replay`
+        One of the replays involved.
+    replay2: :class:`~circleguard.loadable.Replay`
+        The other replay involved.
+    earlier_replay: :class:`~circleguard.loadable.Replay`
+        The earlier of the two replays (when the score was made). This is a
+        reference to either replay1 or replay2.
+    later_replay: :class:`~circleguard.loadable.Replay`
+        The later of the two replays (when the score was made). This is a
+        reference to either replay1 or replay2.
+    similarity: int
+        The similarity of the two replays (the lower, the more similar).
+        Similarity is, roughly speaking, a measure of the average pixel
+        distance between the two replays.
+    """
+    def __init__(self, replay1: Replay, replay2: Replay, similarity: float):
+        super().__init__(replay1, replay2)
+        self.similarity: float = similarity
+
+
+class StealResultCorr(StealResult):
+    """
+    The result of a test for replay stealing between two replays, using
+    the similarity algorithm.
+
+    Parameters
+    ----------
+    replay1: :class:`~circleguard.loadable.Replay`
+        One of the replays involved.
+    replay2: :class:`~circleguard.loadable.Replay`
+        The other replay involved.
+    earlier_replay: :class:`~circleguard.loadable.Replay`
+        The earlier of the two replays (when the score was made). This is a
+        reference to either replay1 or replay2.
+    later_replay: :class:`~circleguard.loadable.Replay`
+        The later of the two replays (when the score was made). This is a
+        reference to either replay1 or replay2.
+    similarity: int
+        The similarity of the two replays (the lower, the more similar).
+        Similarity is, roughly speaking, a measure of the average pixel
+        distance between the two replays.
+    """
+    def __init__(self, replay1: Replay, replay2: Replay, correlation: float):
+        super().__init__(replay1, replay2)
+        self.correlation: float = correlation
 
 
 class RelaxResult(InvestigationResult):
