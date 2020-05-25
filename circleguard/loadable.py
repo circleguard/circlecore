@@ -2,11 +2,11 @@ import abc
 import logging
 from pathlib import Path
 import os
+import sqlite3
+import random
 
 import circleparse
 import numpy as np
-import sqlite3
-import random
 import wtc
 
 from circleguard.enums import RatelimitWeight

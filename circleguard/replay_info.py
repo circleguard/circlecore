@@ -1,6 +1,3 @@
-import circleguard.utils as utils
-from circleguard.mod import Mod
-
 class ReplayInfo():
     """
     A container class representing all the information we get about a replay

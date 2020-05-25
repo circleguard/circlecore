@@ -7,6 +7,8 @@ import logging
 from tempfile import TemporaryDirectory
 from typing import Iterable
 
+from slider import Beatmap, Library
+
 from circleguard.loader import Loader
 from circleguard.comparer import Comparer
 from circleguard.investigator import Investigator
@@ -15,7 +17,6 @@ from circleguard.exceptions import CircleguardException
 from circleguard.loadable import Check, ReplayMap, ReplayPath, Replay, Map
 from circleguard.enums import RatelimitWeight, Detect
 from circleguard.result import Result, StealResult, RelaxResult, CorrectionResult
-from slider import Beatmap, Library
 
 
 class Circleguard:
