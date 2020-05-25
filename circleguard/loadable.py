@@ -1,5 +1,7 @@
 import abc
 import logging
+from pathlib import Path
+import os
 
 import circleparse
 import numpy as np
@@ -495,6 +497,41 @@ class ReplayCache(ReplayContainer):
 
     def __eq__(self, other):
         return self.path == other.path
+
+
+class ReplayDir(ReplayContainer):
+    """
+    A folder with replay files inside it.
+
+    Notes
+    -----
+    Any files not ending in ``.osr`` are ignored.
+
+    Warnings
+    --------
+    Nested directories are not support (yet). Any folders encountered will be
+    ignored.
+    """
+    def __init__(self, dir_path, cache=None):
+        super().__init__(cache)
+        self.dir_path = Path(dir_path)
+        if not self.dir_path.is_dir:
+            raise ValueError(f"Expected path pointing to {self.dir_path} to be "
+                              "a directory")
+        self.replays = []
+
+    def load_info(self, loader):
+        for path in os.listdir(self.dir_path):
+            if not path.endswith(".osr"):
+                continue
+            replay = ReplayPath(self.dir_path / path)
+            self.replays.append(replay)
+
+    def all_replays(self):
+        return self.replays
+
+    def __eq__(self, other):
+        return self.dir_path == other.dir_path
 
 
 class Replay(Loadable):
