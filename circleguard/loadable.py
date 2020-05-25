@@ -515,7 +515,7 @@ class ReplayDir(ReplayContainer):
     def __init__(self, dir_path, cache=None):
         super().__init__(cache)
         self.dir_path = Path(dir_path)
-        if not self.dir_path.is_dir:
+        if not self.dir_path.is_dir():
             raise ValueError(f"Expected path pointing to {self.dir_path} to be "
                               "a directory")
         self.replays = []
