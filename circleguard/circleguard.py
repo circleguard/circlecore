@@ -234,7 +234,8 @@ class Circleguard:
             Whether to cache loaded loadables.
         """
 
-        # remnant code from when we had many options available in set_options. Left in for easy future expansion
+        # remnant code from when we had many options available in set_options.
+        # Left in for easy future expansion
         for k, v in locals().items():
             if v is None or k == "self":
                 continue
