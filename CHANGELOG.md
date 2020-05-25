@@ -1,6 +1,7 @@
 # Unreleased
 
 * correctly order replay frames and remove invalid frames. This changes similarity values slightly
+* add several new ``Loadable`` convenience classes. ``ReplayCache`` for accessing random elements from a circlecore database, ``ReplayDir`` for folders of ``.osr`` files, and ``ReplayID`` for when you only know the replay id.
 
 # v4.0.2
 
