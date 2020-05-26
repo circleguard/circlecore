@@ -465,6 +465,8 @@ class ReplayCache(ReplayContainer):
         self.cursor = conn.cursor()
 
     def load_info(self, loader):
+        if self.info_loaded:
+            return
         map_ids = self.cursor.execute(
             """
             SELECT DISTINCT map_id
@@ -523,6 +525,8 @@ class ReplayDir(ReplayContainer):
         self.replays = []
 
     def load_info(self, loader):
+        if self.info_loaded:
+            return
         for path in os.listdir(self.dir_path):
             if not path.endswith(".osr"):
                 continue

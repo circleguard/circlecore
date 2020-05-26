@@ -1,3 +1,7 @@
+# v4.2.2
+
+* fix ``ReplayCache`` and ``ReplayDir`` double counting replays sometimes (for real this time)
+
 # v4.2.1
 
 * fix ``ReplayCache`` and ``ReplayDir`` double counting replays sometimes
