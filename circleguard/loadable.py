@@ -492,6 +492,7 @@ class ReplayCache(ReplayContainer):
         for info in infos:
             r = CachedReplay(info[0], info[1], info[4], info[2], info[3])
             self.replays.append(r)
+        self.info_loaded = True
 
     def all_replays(self):
         return self.replays
@@ -523,10 +524,12 @@ class ReplayDir(ReplayContainer):
 
     def load_info(self, loader):
         for path in os.listdir(self.dir_path):
+            print(path)
             if not path.endswith(".osr"):
                 continue
             replay = ReplayPath(self.dir_path / path)
             self.replays.append(replay)
+        self.info_loaded = True
 
     def all_replays(self):
         return self.replays
