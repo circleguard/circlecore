@@ -1,3 +1,7 @@
+# v4.2.1
+
+* fix ``ReplayCache`` and ``ReplayDir`` double counting replays sometimes
+
 # v4.2.0
 
 * add several new ``Loadable`` convenience classes. ``ReplayCache`` for accessing random elements from a circlecore database, ``ReplayDir`` for folders of ``.osr`` files, and ``ReplayID`` for when you only know the replay id.
