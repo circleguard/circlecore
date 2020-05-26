@@ -524,7 +524,6 @@ class ReplayDir(ReplayContainer):
 
     def load_info(self, loader):
         for path in os.listdir(self.dir_path):
-            print(path)
             if not path.endswith(".osr"):
                 continue
             replay = ReplayPath(self.dir_path / path)
