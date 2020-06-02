@@ -9,6 +9,7 @@ Circlecore currently supports detection of the following cheats:
 * Replay Stealing
 * Relax
 * Aim Correction
+* Timewarp
 
 Designed for use in [Circleguard](https://github.com/circleguard/circleguard), circlecore is easily integratable into any existing python project and we have worked hard to ensure it is easy to use.
 
