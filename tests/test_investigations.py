@@ -37,8 +37,8 @@ class TestSteal(CGTestCase):
         cls.stolen2 = ReplayPath(RES / "stolen_replay2.osr")
         cls.legit1 = ReplayPath(RES / "legit_replay1.osr")
         cls.legit2 = ReplayPath(RES / "legit_replay2.osr")
-        cls.time_shifted1 = ReplayPath(RES / "stolen" / "stolen-time-shifted-1.osr")
-        cls.time_shifted2 = ReplayPath(RES / "stolen" / "stolen-time-shifted-2.osr")
+        cls.time_shifted1 = ReplayPath(RES / "stealing" / "stolen-time-shifted-1.osr")
+        cls.time_shifted2 = ReplayPath(RES / "stealing" / "stolen-time-shifted-2.osr")
 
     @staticmethod
     def add_noise_and_positional_translation_to_replay(replay, pixel_offset, std_deviation):
