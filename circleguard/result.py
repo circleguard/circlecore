@@ -164,7 +164,7 @@ class RelaxResult(InvestigationResult):
     """
     def __init__(self, replay: Replay, ur: float):
         super().__init__(replay, ResultType.RELAX)
-        self.ur = convert_ur(ur, replay.mods, to="cv")
+        self.ur = convert_statistic(ur, replay.mods, to="cv")
         self.ucv_ur = ur
 
 

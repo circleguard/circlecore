@@ -80,21 +80,28 @@ class ColoredFormatter(Formatter):
 
 ######### UTILS ###########
 
-def convert_ur(ur, mods, *, to):
+def convert_statistic(stat, mods, *, to):
     """
-    Converts an unstable rate to a converted unstable rate, depending on the
-    mods the replay was played with.
+    Converts a game statistic to either its unconverted or converted form,
+    depending on ``to``.
 
     Parameters
     ----------
-    ur: float
-        The unconverted ur of the replay.
+    stat: float
+        The statistic to convert.
     mods: Mod
         The mods the replay was played with. Only ``Mod.DT`` and ``Mod.HT``
-        will affect the unstable rate conversion.
+        will affect the statistic conversion.
     to: string
-        What to convert the ur to. One of ``cv`` (converted) or ``ucv``
-        (unconverted).
+        What form to convert the statistic to. One of ``cv`` (converted) or
+        ``ucv`` (unconverted).
+
+    Notes
+    -----
+    This method is intended for any statistic that is modified from what we
+    expect by ``Mod.DT`` or ``Mod.HT`` being applied (ie changing the game clock
+    speed). This includes ur (unstable rate) and median frametime
+    (time between frames).
     """
     if to not in ["cv", "ucv"]:
         raise ValueError(f"Expected one of cv, ucv. Got {to}")
@@ -107,6 +114,6 @@ def convert_ur(ur, mods, *, to):
         conversion_factor = (1 / 0.75)
 
     if to == "cv":
-        return ur * conversion_factor
+        return stat * conversion_factor
     elif to == "ucv":
-        return ur / conversion_factor
+        return stat / conversion_factor
