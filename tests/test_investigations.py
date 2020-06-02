@@ -143,3 +143,20 @@ class TestSteal(CGTestCase):
                 self.assertLess(r.similarity, Detect.SIM_LIMIT, "Cheated replays were not detected as cheated with sim")
             if isinstance(r, StealResultCorr):
                 self.assertGreater(r.correlation, Detect.CORR_LIMIT, "Cheated replays were not detected as cheated with corr")
+
+
+class TestTimewarp(CGTestCase):
+    @classmethod
+    def setUpClass(cls):
+        super().setUpClass()
+        cls.timewarped1 = ReplayPath(RES / "timewarped" / "timewarped-1.osr")
+        cls.timewarped2 = ReplayPath(RES / "timewarped" / "timewarped-2.osr")
+        cls.timewarped3 = ReplayPath(RES / "timewarped" / "timewarped-3.osr")
+        cls.timewarped4 = ReplayPath(RES / "timewarped" / "timewarped-4.osr")
+
+        cls.legit = ReplayPath(RES / "legit_replay1.osr")
+
+    def test_cheated(self):
+        replays = [self.timewarped1, self.timewarped2, self.timewarped3, self.timewarped4]
+        for r in self.cg.timewarp_check(replays):
+            self.assertLess(r.frametime, Detect.FRAMETIME_LIMIT, "Timewarped replays were not detected as cheated")
