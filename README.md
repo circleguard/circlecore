@@ -36,7 +36,6 @@ Documentation: <https://circleguard.dev/docs/circlecore> <br/>
 Discord: <https://discord.gg/VNnkTjm> <br/>
 Website: <https://circleguard.dev> <br/>
 
-
 ## Usage
 
 We have documentation and a tutorial at <https://circleguard.dev/docs/circlecore>.
