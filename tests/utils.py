@@ -4,7 +4,7 @@ from pathlib import Path
 from circleguard import Circleguard, set_options
 from unittest import TestCase
 
-KEY = os.environ.get('OSU_API_KEY')
+KEY = os.environ.get("OSU_API_KEY")
 if not KEY:
     KEY = input("Enter your api key: ")
 
