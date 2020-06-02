@@ -1,6 +1,6 @@
 from circleguard.loadable import Replay
 from circleguard.enums import ResultType
-from circleguard.utils import convert_ur
+from circleguard.utils import convert_statistic
 
 # Hierarchy
 #                                 Result
@@ -183,3 +183,21 @@ class CorrectionResult(InvestigationResult):
     def __init__(self, replay: Replay, snaps: list):
         super().__init__(replay, ResultType.CORRECTION)
         self.snaps = snaps
+
+
+class TimewarpResult(InvestigationResult):
+    """
+    The result of a test for timewarp cheats.
+
+    Parameters
+    ----------
+    replay: :class:`~circleguard.loadable.Replay`
+        The replay investigated.
+    frametime: float
+        The average (median) time between frames of the replay.
+    """
+
+    def __init__(self, replay: Replay, frametime: float):
+        super().__init__(replay, ResultType.TIMEWARP)
+        self.frametime = convert_statistic(frametime, replay.mods, to="cv")
+        self.ucv_frametime = frametime

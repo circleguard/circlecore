@@ -55,7 +55,12 @@ class Detect(IntFlag):
     STEAL_CORR     = 1 << 3
     RELAX          = 1 << 1
     CORRECTION     = 1 << 2
-    ALL            = STEAL_SIM | STEAL_CORR | RELAX | CORRECTION
+    TIMEWARP       = 1 << 4
+
+    # TODO split ``ALL`` into investigations and comparisons, doesn't
+    # make sense to combine the two when they deal with different numbers of
+    # replays
+    ALL            = STEAL_SIM | STEAL_CORR | RELAX | CORRECTION | TIMEWARP
     # TODO remove in 5.0.0 probably, or figure out a better way to do this
     # (this being specifying different algorithms for the same cheat)
     STEAL          = STEAL_SIM
@@ -64,6 +69,9 @@ class Detect(IntFlag):
     CORR_LIMIT = 0.99
     # unconverted ur threshold
     UR_LIMIT = 50
+    # median frametime limit for timewarp.
+    # Most replays have a median of 15 or 16
+    FRAMETIME_LIMIT = 13
     # no aim correction threshold - any snap is suspicious
 
 class ResultType(Enum):

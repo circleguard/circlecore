@@ -3,8 +3,7 @@ import math
 import numpy as np
 
 from circleguard.enums import Key, Detect
-from circleguard.result import RelaxResult, CorrectionResult
-from circleguard.utils import convert_ur
+from circleguard.result import RelaxResult, CorrectionResult, TimewarpResult
 
 class Investigator:
     """
@@ -44,13 +43,23 @@ class Investigator:
             ur = self.ur(self.replay, self.beatmap)
             yield RelaxResult(self.replay, ur)
         if self.detect & Detect.CORRECTION:
-            suspicious_angles = self.aim_correction(self.replay, self.max_angle, self.min_distance)
-            yield CorrectionResult(self.replay, suspicious_angles)
+            snaps = self.aim_correction(self.replay, self.max_angle, self.min_distance)
+            yield CorrectionResult(self.replay, snaps)
+        if self.detect & Detect.TIMEWARP:
+            frametime = self.median_frametime(self.replay)
+            yield TimewarpResult(self.replay, frametime)
 
     @staticmethod
     def ur(replay, beatmap):
         """
         Calculates the ur of ``replay`` when played against ``beatmap``.
+
+        Parameters
+        ----------
+        replay: :class:`~.Replay`
+            The replay to calculate the ur of.
+        beatmap: :class:`slider.beatmap.Beatmap`
+            The beatmap to calculate ``replay``'s ur with.
         """
 
         hitobjs = Investigator._parse_beatmap(beatmap)
@@ -184,6 +193,24 @@ class Investigator:
         ischeat = anomalous.sum() > num_jerks
 
         return [jerks, ischeat]
+
+    @staticmethod
+    def median_frametime(replay):
+        """
+        Calculates the median time between the frames of ``replay``.
+
+        Parameters
+        ----------
+        replay: :class:`~.Replay`
+            The replay to find the median frametime of.
+
+        Notes
+        -----
+        Median is used instead of mean to lessen the effect of outliers.
+        """
+        # replay.t is cumsum so convert it back to "time since previous frame"
+        t = np.diff(replay.t)
+        return np.median(t)
 
     @staticmethod
     def _parse_beatmap(beatmap):

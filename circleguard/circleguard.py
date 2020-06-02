@@ -16,7 +16,8 @@ from circleguard.cacher import Cacher
 from circleguard.exceptions import CircleguardException
 from circleguard.loadable import Check, ReplayMap, ReplayPath, Replay, Map
 from circleguard.enums import RatelimitWeight, Detect
-from circleguard.result import Result, StealResult, RelaxResult, CorrectionResult
+from circleguard.result import (Result, StealResult, RelaxResult,
+    CorrectionResult, TimewarpResult)
 
 
 class Circleguard:
@@ -112,7 +113,7 @@ class Circleguard:
             yield from comparer.compare()
 
         # investigator investigations
-        if detect & (Detect.RELAX | Detect.CORRECTION):
+        if detect & (Detect.RELAX | Detect.CORRECTION | Detect.TIMEWARP):
             if detect & Detect.RELAX:
                 if not self.library:
                     # connect to library since it's a temporary one
@@ -192,6 +193,23 @@ class Circleguard:
             loadable from ``loadables``.
         """
         yield from self.run(loadables, Detect.CORRECTION, max_angle=max_angle, min_distance=min_distance)
+
+    def timewarp_check(self, loadables) -> Iterable[TimewarpResult]:
+        """
+        Investigates loadables for aim correction.
+
+        Parameters
+        ----------
+        loadables: list[:class:`~.Loadable`]
+            The loadables to investigate.
+
+        Yields
+        ------
+        :class:`~.CorrectionResult`
+            A result representing an aim correction investigation into a
+            loadable from ``loadables``.
+        """
+        yield from self.run(loadables, Detect.TIMEWARP)
 
     def load(self, loadable):
         """
