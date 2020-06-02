@@ -1,3 +1,11 @@
+# v4.3.1
+
+* fix `TimewarpResult` being missing from `__all__`
+
+# v4.3.0
+
+* add basic timewarp detection (just calculates the median of the frametimes)
+
 # v4.2.2
 
 * fix ``ReplayCache`` and ``ReplayDir`` double counting replays sometimes (for real this time)
