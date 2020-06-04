@@ -46,7 +46,7 @@ class Investigator:
             snaps = self.aim_correction(self.replay, self.max_angle, self.min_distance)
             yield CorrectionResult(self.replay, snaps)
         if self.detect & Detect.TIMEWARP:
-            frametime = self.median_frametime(self.replay)
+            frametime = self.average_frametime(self.replay)
             yield TimewarpResult(self.replay, frametime)
 
     @staticmethod
@@ -195,7 +195,7 @@ class Investigator:
         return [jerks, ischeat]
 
     @staticmethod
-    def median_frametime(replay):
+    def _filter_frametime(replay):
         """
         Calculates the median time between the frames of ``replay``.
 
@@ -210,7 +210,45 @@ class Investigator:
         """
         # replay.t is cumsum so convert it back to "time since previous frame"
         t = np.diff(replay.t)
-        return np.median(t)
+        # placeholder 0, so t matches k
+        t = np.concatenate(([0], t))
+
+        filtered_frametimes = []
+        previous_key = 0
+        combine_next = False
+        for i in range(len(t)):
+            k = replay.k[i]
+            if previous_key == replay.k[i]:
+                if combine_next == False:
+                    filtered_frametimes.append(t[i])
+                else:
+                    filtered_frametimes.append(t[i-1] + t[i])
+                combine_next = False
+            else:
+                combine_next = True
+            previous_key = k
+        filtered_frametimes = filtered_frametimes[1:]
+        return np.median(filtered_frametimes), filtered_frametimes
+
+    @staticmethod
+    def average_frametime(replay):
+        """
+        Attempt at a more precise average frametime.
+        """
+        median, frametimes = Investigator._filter_frametime(replay)
+        filtered_frametimes = []
+        combine_next = False
+        for i in range(len(frametimes)):
+            if combine_next:
+                combine_next = False
+                filtered_frametimes.append(frametimes[i-1] + frametimes[i])
+            else:
+                if np.abs(median - frametimes[i]) > 3:
+                    combine_next = True
+                else:
+                    combine_next = False
+                    filtered_frametimes.append(frametimes[i])
+        return np.average(filtered_frametimes)
 
     @staticmethod
     def _parse_beatmap(beatmap):
