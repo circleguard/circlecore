@@ -241,7 +241,8 @@ class Investigator:
         for i in range(len(frametimes)):
             if combine_next:
                 combine_next = False
-                filtered_frametimes.append(frametimes[i-1] + frametimes[i])
+                if np.abs(median-(frametimes[i-1] + frametimes[i])) <= 3:
+                    filtered_frametimes.append(frametimes[i-1] + frametimes[i])
             else:
                 if np.abs(median - frametimes[i]) > 3:
                     combine_next = True
