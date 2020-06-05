@@ -197,7 +197,7 @@ class Investigator:
     @staticmethod
     def _filter_frametime(replay):
         """
-        Calculates the median time between the frames of ``replay``.
+        Re-adjust the frametimes to be more accurate ``replay``.
 
         Parameters
         ----------
@@ -206,49 +206,115 @@ class Investigator:
 
         Notes
         -----
-        Median is used instead of mean to lessen the effect of outliers.
+        Frametimes on keypresses are added to the next frametime to make frametimes more accurate.
+        Frametimes are further adjusted for random low frametimes that appear.
         """
         # replay.t is cumsum so convert it back to "time since previous frame"
         t = np.diff(replay.t)
+
+        unique = np.unique(t)
+        missing_numbers = 0
+        for i in range(1, int(np.median(t))):
+            if i not in unique:
+                missing_numbers += 1
+        if missing_numbers > 2:
+            lowhz_keyboard = True
+        else:
+            lowhz_keyboard = False
+
         # placeholder 0, so t matches k
         t = np.concatenate(([0], t))
+
+        def mode(x):
+            if len(x) == 0:
+                return 0
+            values, counts = np.unique(x, return_counts=True)
+            m = counts.argmax()
+            return values[m]
 
         filtered_frametimes = []
         previous_key = 0
         combine_next = False
+        #for very fast buzz sliders
+        count_lowframes = 0
+        current_mode = 5
         for i in range(len(t)):
+            #update mode only for first 100 for efficiency
+            if i < 100:
+                current_mode = max(5, mode(filtered_frametimes))
+            if t[i] < current_mode - 5:
+                count_lowframes += 1
+            else:
+                if count_lowframes > 8:
+                    filtered_frametimes = filtered_frametimes[:len(filtered_frametimes) - count_lowframes]
+                count_lowframes = 0
             k = replay.k[i]
             if previous_key == replay.k[i]:
                 if combine_next == False:
                     filtered_frametimes.append(t[i])
                 else:
-                    filtered_frametimes.append(t[i-1] + t[i])
+                    #adds times together if they don't go over the mode too much
+                    combined_time = t[i-1] + t[i]
+                    if combined_time > current_mode + 5:
+                        filtered_frametimes.extend([t[i-1], t[i]])
+                    else:
+                        filtered_frametimes.append(combined_time)
                 combine_next = False
             else:
                 combine_next = True
             previous_key = k
         filtered_frametimes = filtered_frametimes[1:]
-        return np.median(filtered_frametimes), filtered_frametimes
+        
+        median = np.median(filtered_frametimes)
+        filtered_frametimes_more = []
+        combine_next = False
+        for i in range(len(filtered_frametimes)):
+            if combine_next:
+                combine_next = False
+                combined_time = filtered_frametimes[i-1] + filtered_frametimes[i]
+                if combined_time > median + 5:
+                    filtered_frametimes_more.extend([filtered_frametimes[i-1], filtered_frametimes[i]])
+                else:
+                    filtered_frametimes_more.append(combined_time)
+            else:
+                if np.abs(median - filtered_frametimes[i]) > 4:
+                    combine_next = True
+                else:
+                    combine_next = False
+                    filtered_frametimes_more.append(filtered_frametimes[i])
+        return np.median(filtered_frametimes_more), np.array(filtered_frametimes_more), lowhz_keyboard
 
     @staticmethod
     def average_frametime(replay):
         """
-        Attempt at a more precise average frametime.
+        Attempt at a more precise and accurate average frametime.
         """
-        median, frametimes = Investigator._filter_frametime(replay)
-        filtered_frametimes = []
-        combine_next = False
-        for i in range(len(frametimes)):
-            if combine_next:
-                combine_next = False
-                if np.abs(median-(frametimes[i-1] + frametimes[i])) <= 3:
-                    filtered_frametimes.append(frametimes[i-1] + frametimes[i])
-            else:
-                if np.abs(median - frametimes[i]) > 3:
-                    combine_next = True
-                else:
-                    combine_next = False
-                    filtered_frametimes.append(frametimes[i])
+        #TODO: split into two types, continous (use current) and 3 chunk one (use average all)
+        median, frametimes, lowhz_keyboard = Investigator._filter_frametime(replay)
+        unique, counts = np.unique(frametimes, return_counts=True)
+
+        #exception for 100hz polling keyboards
+        if lowhz_keyboard:
+            #removes insignificant frametimes
+            counts_cutoff = 5
+            unique = unique[counts > counts_cutoff]
+            counts = counts[counts > counts_cutoff]
+            filtered_frametimes = frametimes[np.isin(frametimes, unique)]
+        else:
+            #filters out low frametimes and grabs frametimes around the peaks
+            counts_cutoff = max(counts)/4
+            frametime_cutoff = 5
+            if replay.mods.value & 1 << 6:
+                frametime_cutoff *= 1.5
+            if replay.mods.value & 1 << 8:
+                frametime_cutoff *= 0.75
+            counts = counts[unique > frametime_cutoff]
+            unique = unique[unique > frametime_cutoff]
+            selection_ranges = []
+            for frametime in unique[counts > counts_cutoff]:
+                selection_ranges.extend(list(range(frametime - 2, frametime + 3)))
+            filtered_frametimes = frametimes[np.isin(frametimes, selection_ranges)]
+            
         return np.average(filtered_frametimes)
 
     @staticmethod
