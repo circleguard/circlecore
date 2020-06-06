@@ -839,28 +839,19 @@ class ReplayPath(Replay):
             self.log.debug("%s already loaded, not loading", self)
             return
 
-        try:
-            self.log.log(TRACE, "Before parsing %s", self)
-            loaded = circleparse.parse_replay_file(self.path)
-            self.log.log(TRACE, "After parsing %s", self)
-        except:
-            self.log.warning("corrupt replay file: " + self.path)
+        loaded = circleparse.parse_replay_file(self.path)
+        self.timestamp = loaded.timestamp
+        self.map_id = loader.map_id(loaded.beatmap_hash)
+        self.username = loaded.player_name
+        # TODO make this lazy loaded so we don't waste an api call
+        self.user_id = loader.user_id(loaded.player_name)
+        self.mods = Mod(loaded.mod_combination)
+        self.replay_id = loaded.replay_id
+        self.hash = loaded.beatmap_hash
 
-        if loaded:
-            # in case a corrupt replay is mixed in
-            loaded = circleparse.parse_replay_file(self.path)
-            self.timestamp = loaded.timestamp
-            self.map_id = loader.map_id(loaded.beatmap_hash)
-            self.username = loaded.player_name
-            # TODO make this lazy loaded so we don't waste an api call
-            self.user_id = loader.user_id(loaded.player_name)
-            self.mods = Mod(loaded.mod_combination)
-            self.replay_id = loaded.replay_id
-            self.hash = loaded.beatmap_hash
-
-            self._process_replay_data(loaded.play_data)
-            self.loaded = True
-            self.log.log(TRACE, "Finished loading %s", self)
+        self._process_replay_data(loaded.play_data)
+        self.loaded = True
+        self.log.log(TRACE, "Finished loading %s", self)
 
     def __eq__(self, loadable):
         """

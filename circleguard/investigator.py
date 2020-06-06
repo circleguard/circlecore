@@ -212,18 +212,15 @@ class Investigator:
         # replay.t is cumsum so convert it back to "time since previous frame"
         t = np.diff(replay.t)
 
-        unique = np.unique(t)
-        missing_numbers = 0
-        for i in range(1, int(np.median(t))):
-            if i not in unique:
-                missing_numbers += 1
-        if missing_numbers > 2:
-            lowhz_keyboard = True
-        else:
-            lowhz_keyboard = False
+        # filters out insignificant frametimes
+        unique, counts = np.unique(t, return_counts=True)
+        unique = unique[counts > 4]
+        counts = counts[counts > 4]
 
         # placeholder 0, so t matches k
         t = np.concatenate(([0], t))
+        replay.k = replay.k[np.isin(t, unique)]
+        t = t[np.isin(t, unique)]
 
         def mode(x):
             if len(x) == 0:
@@ -235,13 +232,17 @@ class Investigator:
         filtered_frametimes = []
         previous_key = 0
         combine_next = False
-        #for very fast buzz sliders
+        # for very fast buzz sliders
         count_lowframes = 0
         current_mode = 5
         for i in range(len(t)):
-            #update mode only for first 100 for efficiency
+            # update mode only for first 100 for efficiency
             if i < 100:
                 current_mode = max(5, mode(filtered_frametimes))
+            else:
+                # unless mode is still less than 5
+                if current_mode < 5:
+                    current_mode = max(5, mode(filtered_frametimes))
             if t[i] < current_mode - 5:
                 count_lowframes += 1
             else:
@@ -253,7 +254,7 @@ class Investigator:
                 if combine_next == False:
                     filtered_frametimes.append(t[i])
                 else:
-                    #adds times together if they don't go over the mode too much
+                    # adds times together if they don't go over the mode too much
                     combined_time = t[i-1] + t[i]
                     if combined_time > current_mode + 5:
                         filtered_frametimes.extend([t[i-1], t[i]])
@@ -265,57 +266,93 @@ class Investigator:
             previous_key = k
         filtered_frametimes = filtered_frametimes[1:]
         
-        median = np.median(filtered_frametimes)
-        filtered_frametimes_more = []
-        combine_next = False
-        for i in range(len(filtered_frametimes)):
-            if combine_next:
-                combine_next = False
-                combined_time = filtered_frametimes[i-1] + filtered_frametimes[i]
-                if combined_time > median + 5:
-                    filtered_frametimes_more.extend([filtered_frametimes[i-1], filtered_frametimes[i]])
-                else:
-                    filtered_frametimes_more.append(combined_time)
-            else:
-                if np.abs(median - filtered_frametimes[i]) > 4:
-                    combine_next = True
-                else:
+        # filters 3 times to filter out more small frametimes
+        for i in range(3):
+            median = np.median(filtered_frametimes)
+            filtered_frametimes_more = []
+            combine_next = False
+            for i in range(len(filtered_frametimes)):
+                if combine_next:
                     combine_next = False
-                    filtered_frametimes_more.append(filtered_frametimes[i])
+                    combined_time = filtered_frametimes[i-1] + filtered_frametimes[i]
+                    if combined_time > median + 5:
+                        filtered_frametimes_more.extend([filtered_frametimes[i-1], filtered_frametimes[i]])
+                    else:
+                        filtered_frametimes_more.append(combined_time)
+                else:
+                    if np.abs(median - filtered_frametimes[i]) > 4:
+                        combine_next = True
+                    else:
+                        combine_next = False
+                        filtered_frametimes_more.append(filtered_frametimes[i])
+            filtered_frametimes = filtered_frametimes_more
+        
+        # use different calculation if player is using low refresh rate keyboard
+        missing_numbers = 0
+        for i in range(max(1, min(unique)), int(np.median(filtered_frametimes_more))):
+            if i not in unique:
+                missing_numbers += 1
+        if missing_numbers > 2:
+            lowhz_keyboard = True
+        else:
+            lowhz_keyboard = False
+
         return np.median(filtered_frametimes_more), np.array(filtered_frametimes_more), lowhz_keyboard
 
     @staticmethod
     def average_frametime(replay):
         """
         Attempt at a more precise and accurate average frametime.
+
+        avg frametime < 16 is slightly suspicious, check other replays from player
+        avg frametime < 15.5 is very suspicious, 90-99% certainty, manually check replay and check other replays from player
+        avg frametime < 15 is ~99.95% sure it's timewarp
+        avg frametime < 14 is ~99.999% sure it's timewarp
+        avg frametime < 13 is 100% timewarp
         """
-        #TODO: split into two types, continous (use current) and 3 chunk one (use average all)
+
         median, frametimes, lowhz_keyboard = Investigator._filter_frametime(replay)
         unique, counts = np.unique(frametimes, return_counts=True)
 
-        #exception for 100hz polling keyboards
+        # exception for 100hz polling keyboards
         if lowhz_keyboard:
-            #removes insignificant frametimes
-            counts_cutoff = 5
-            unique = unique[counts > counts_cutoff]
-            counts = counts[counts > counts_cutoff]
+            # removes some lower frametimes that were likely missed during filtering
+            counts_cutoff = max(counts)/6
+            remove_index = []
+            for i in range(len(counts)):
+                if unique[i] < median - 2 and counts[i] < counts_cutoff:
+                    remove_index.append(i)
+            counts = np.delete(counts, remove_index)
+            unique = np.delete(unique, remove_index)
             filtered_frametimes = frametimes[np.isin(frametimes, unique)]
+            # increase by a bit since replays with low fps tend to be a bit lower (due to shorter frametimes being a bit harder to accurately filter out)
+            return np.average(filtered_frametimes) + 0.1
         else:
-            #filters out low frametimes and grabs frametimes around the peaks
+            # filters out low frametimes and grabs frametimes around the peaks
             counts_cutoff = max(counts)/4
-            frametime_cutoff = 5
+            frametime_cutoff = 6
+            number_a = 7
             if replay.mods.value & 1 << 6:
                 frametime_cutoff *= 1.5
+                number_a *= 1.5
             if replay.mods.value & 1 << 8:
                 frametime_cutoff *= 0.75
+                number_a *= 0.75
             counts = counts[unique > frametime_cutoff]
             unique = unique[unique > frametime_cutoff]
             selection_ranges = []
             for frametime in unique[counts > counts_cutoff]:
                 selection_ranges.extend(list(range(frametime - 2, frametime + 3)))
+
+            # this causes avg to be slightly inflated for some replays, but it's better to have false negatives than false positives
+            another_cutoff = []
+            for i in range(len(counts)):
+                if unique[i] > median - number_a and counts[i] > counts_cutoff * 1.4:
+                    another_cutoff.append(unique[i])
+            final_cutoff = min(another_cutoff) - 2
             filtered_frametimes = frametimes[np.isin(frametimes, selection_ranges)]
-            
-        return np.average(filtered_frametimes)
+            filtered_frametimes = filtered_frametimes[filtered_frametimes > final_cutoff] 
+            return np.average(filtered_frametimes)
 
     @staticmethod
     def _parse_beatmap(beatmap):
