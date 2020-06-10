@@ -19,7 +19,6 @@ class TestLoader(CGTestCase):
     def test_equality_reflexivity(self):
         # reflexivity test
         self.assertEqual(Mod("NC"), Mod("NC"))
-        self.assertEqual(Mod.K2, Mod.K2)
 
     def test_mod_ordering(self):
         self.assertEqual(Mod("DTHDSO"), Mod("SOHDDT"), "Identical mods ordered differently were not equal")
