@@ -1,8 +1,8 @@
 # v4.3.2
 
-* fix Mod instances not being comparable to ModCombination instances (eg Mod("DT") == Mod.DT was False and is now True)
-* fix mod initialization from strings not adding DT (or SD) when parsing NC (PF)
-* add Mod / ModCombination tests
+* fix `Mod` instances not being comparable to `ModCombination` instances (eg `Mod("DT") == Mod.DT` was `False` and is now `True`)
+* fix mod initialization from strings not adding `DT` (or `SD`) when parsing `NC` (`PF`)
+* add `Mod` / `ModCombination` tests
 
 # v4.3.1
 
