@@ -296,6 +296,14 @@ class Mod(ModCombination):
             # there better only be one Mod that has an acronym matching ours,
             # but a comp + 0 index works too
             matching_mods = [mod for mod in Mod.ORDER if mod.short_name() == single_mod]
+            # ``mod.ORDER`` uses ``_NC`` and ``_PF``, and we want to parse
+            # eg "NC" as "DTNC"
+            if Mod._NC in matching_mods:
+                matching_mods.remove(Mod._NC)
+                matching_mods.append(Mod.NC)
+            if Mod._PF in matching_mods:
+                matching_mods.remove(Mod._PF)
+                matching_mods.append(Mod.PF)
             if not matching_mods:
                 raise ValueError(f"Invalid mod string (no matching mod found for {single_mod})")
             mod_value += matching_mods[0].value
