@@ -119,7 +119,7 @@ class ModCombination():
 
     def __eq__(self, other):
         """Compares the ``value`` of each object"""
-        if type(other) is not ModCombination:
+        if not isinstance(other, ModCombination):
             return False
         return self.value == other.value
 
