@@ -13,14 +13,8 @@ class TestLoader(CGTestCase):
         self.assertEqual(Mod("NC"), Mod.NC)
         self.assertEqual(Mod("SOHDDT"), Mod.HD + Mod.DT + Mod.SO)
 
-        # unittest needs a function
-        def raises_odd_length():
-            _ = Mod("DTH")
-        self.assertRaises(ValueError, raises_odd_length)
-
-        def raises_invalid_mod():
-            _ = Mod("DH")
-        self.assertRaises(ValueError, raises_invalid_mod)
+        self.assertRaises(ValueError, lambda: Mod("DTH"))
+        self.assertRaises(ValueError, lambda: Mod("DH"))
 
     def test_equality_reflexivity(self):
         # reflexivity test
