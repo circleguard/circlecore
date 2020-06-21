@@ -195,9 +195,16 @@ class TimewarpResult(InvestigationResult):
         The replay investigated.
     frametime: float
         The average (median) time between frames of the replay.
+    frametimes: list[int]
+        A list of the time between frames of the replay. You should not rely
+        on ``frametime`` being the median of this list, as circlecore may clean
+        or otherwise modify the frametime list before computing its median. This
+        attribute holds the "raw" frametimes, without any modification by
+        circlecore.
     """
 
-    def __init__(self, replay: Replay, frametime: float):
+    def __init__(self, replay: Replay, frametime: float, frametimes: list):
         super().__init__(replay, ResultType.TIMEWARP)
         self.frametime = convert_statistic(frametime, replay.mods, to="cv")
+        self.frametimes = frametimes
         self.ucv_frametime = frametime
