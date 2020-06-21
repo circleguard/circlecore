@@ -1,3 +1,7 @@
+# v4.3.3
+
+* expose full frametime list in `TimewarpResult`
+
 # v4.3.2
 
 * fix `Mod` instances not being comparable to `ModCombination` instances (eg `Mod("DT") == Mod.DT` was `False` and is now `True`)
