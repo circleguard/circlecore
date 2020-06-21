@@ -36,18 +36,20 @@ class Investigator:
         self.detect = detect
 
     def investigate(self):
+        replay = self.replay
         # equivalent of filtering out replays with no replay data from comparer on init
-        if self.replay.replay_data is None:
+        if replay.replay_data is None:
             return
         if self.detect & Detect.RELAX:
-            ur = self.ur(self.replay, self.beatmap)
-            yield RelaxResult(self.replay, ur)
+            ur = self.ur(replay, self.beatmap)
+            yield RelaxResult(replay, ur)
         if self.detect & Detect.CORRECTION:
-            snaps = self.aim_correction(self.replay, self.max_angle, self.min_distance)
-            yield CorrectionResult(self.replay, snaps)
+            snaps = self.aim_correction(replay, self.max_angle, self.min_distance)
+            yield CorrectionResult(replay, snaps)
         if self.detect & Detect.TIMEWARP:
-            frametime = self.median_frametime(self.replay)
-            yield TimewarpResult(self.replay, frametime)
+            frametimes = self.frametimes(replay)
+            frametime = self.median_frametime(frametimes)
+            yield TimewarpResult(replay, frametime, frametimes)
 
     @staticmethod
     def ur(replay, beatmap):
@@ -195,22 +197,33 @@ class Investigator:
         return [jerks, ischeat]
 
     @staticmethod
-    def median_frametime(replay):
+    def frametimes(replay):
         """
-        Calculates the median time between the frames of ``replay``.
+        Returns the time between each pair of consecutive frames in ``replay``.
 
         Parameters
         ----------
         replay: :class:`~.Replay`
-            The replay to find the median frametime of.
+            The replay to get the frametimes of.
+        """
+        # replay.t is cumsum so convert it back to "time since previous frame"
+        return np.diff(replay.t)
+
+    @staticmethod
+    def median_frametime(frametimes):
+        """
+        Calculates the median time between the frames in ``frametimes``.
+
+        Parameters
+        ----------
+        frametimes: list[int]
+            The frametimes to find the median of.
 
         Notes
         -----
         Median is used instead of mean to lessen the effect of outliers.
         """
-        # replay.t is cumsum so convert it back to "time since previous frame"
-        t = np.diff(replay.t)
-        return np.median(t)
+        return np.median(frametimes)
 
     @staticmethod
     def _parse_beatmap(beatmap):
