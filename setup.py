@@ -45,6 +45,6 @@ setup(
         "numpy",
         "requests",
         "slider==0.2.1",
-        "scipy"
+        "scipy==1.4.1"
     ]
 )
