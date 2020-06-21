@@ -45,6 +45,8 @@ setup(
         "numpy",
         "requests",
         "slider==0.2.1",
+        # pyinstaller does not yet have a hook for scipy 1.5.0, so stick with
+        # 1.4.1 for now
         "scipy==1.4.1"
     ]
 )
