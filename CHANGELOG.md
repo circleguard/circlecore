@@ -1,3 +1,7 @@
+# v4.3.4
+
+* pin scipy to 1.4.1 (pyinstaller does not yet have a hook for scipy 1.5.0, which just came out yesterday)
+
 # v4.3.3
 
 * expose full frametime list in `TimewarpResult`
