@@ -270,17 +270,17 @@ class Investigator:
 
     @staticmethod
     def _remove_low_frametimes(frametimes, limit):
-        cnt = 0
-        lowframes = []
-        for i, curr_t in enumerate(frametimes):
-            if curr_t <= limit:
-                cnt += 1
+        num_low_frametimes = 0
+        low_frametimes = []
+        for i, frametime in enumerate(frametimes):
+            if frametime <= limit:
+                num_low_frametimes += 1
             else:
                 # if there's more than 7 short frametimes in a row, add them to the remove list and reset count
-                if cnt > 7:
-                    lowframes.extend(list(range(i - cnt, i)))
-                cnt = 0
-        return np.delete(frametimes, lowframes)
+                if num_low_frametimes > 7:
+                    low_frametimes.extend(list(range(i - num_low_frametimes, i)))
+                num_low_frametimes = 0
+        return np.delete(frametimes, low_frametimes)
 
     # TODO (some) code duplication with this method and a similar one in
     # ``Comparer``. Refactor Investigator and Comparer to inherit from a base
