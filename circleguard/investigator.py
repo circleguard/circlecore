@@ -207,12 +207,7 @@ class Investigator:
             The replay to get the frametimes of.
         """
         # replay.t is cumsum so convert it back to "time since previous frame"
-        t = np.diff(replay.t)
-        # remove low frametimes caused by relax mod and switching desktops during a break
-        t = Investigator._remove_low_frametimes(t, 4)
-        # remove all remaining 0 frametimes as those shouldn't affect average frametimes
-        t = t[t > 0]
-        return t
+        return np.diff(replay.t)
 
     @staticmethod
     def median_frametime(frametimes):
@@ -228,6 +223,10 @@ class Investigator:
         -----
         Median is used instead of mean to lessen the effect of outliers.
         """
+        # remove low frametimes caused by relax mod and switching desktops during a break
+        frametimes = Investigator._remove_low_frametimes(frametimes, 4)
+        # remove all remaining 0 frametimes as those shouldn't affect average frametimes
+        frametimes = frametimes[frametimes > 0]
         return np.median(frametimes)
 
     @staticmethod
