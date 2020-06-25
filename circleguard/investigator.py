@@ -224,7 +224,7 @@ class Investigator:
         mods: :class:`~circleguard.mod.ModCombination`
             The mods the replay which generated ``frametimes`` was played with.
         """
-        if Mod.Relax & mods:
+        if Mod.Relax in mods:
             # remove low frametimes caused by relax mod and switching desktops during a break
             frametimes = Investigator._remove_low_frametimes(frametimes, 4)
             # remove all remaining 0 frametimes as those shouldn't affect average frametimes
