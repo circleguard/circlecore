@@ -3,6 +3,7 @@ import math
 import numpy as np
 
 from circleguard.enums import Key, Detect
+from circleguard.mod import Mod
 from circleguard.result import RelaxResult, CorrectionResult, TimewarpResult
 
 class Investigator:
@@ -48,6 +49,7 @@ class Investigator:
             yield CorrectionResult(replay, snaps)
         if self.detect & Detect.TIMEWARP:
             frametimes = self.frametimes(replay)
+            frametimes = self.clean_frametimes(frametimes, replay.mods)
             frametime = self.median_frametime(frametimes)
             yield TimewarpResult(replay, frametime, frametimes)
 
@@ -210,6 +212,27 @@ class Investigator:
         return np.diff(replay.t)
 
     @staticmethod
+    def clean_frametimes(frametimes, mods):
+        """
+        Cleans the frametimes to remove some artificial frametimes, eg 1-2
+        frametime frames added by relax.
+
+        Parameters
+        ----------
+        frametimes: list[int]
+            The frametimes to clean.
+        mods: :class:`~circleguard.mod.ModCombination`
+            The mods the replay which generated ``frametimes`` was played with.
+        """
+        if Mod.Relax & mods:
+            # remove low frametimes caused by relax mod and switching desktops during a break
+            frametimes = Investigator._remove_low_frametimes(frametimes, 4)
+            # remove all remaining 0 frametimes as those shouldn't affect average frametimes
+            frametimes = frametimes[frametimes > 0]
+        return frametimes
+
+
+    @staticmethod
     def median_frametime(frametimes):
         """
         Calculates the median time between the frames in ``frametimes``.
@@ -223,10 +246,6 @@ class Investigator:
         -----
         Median is used instead of mean to lessen the effect of outliers.
         """
-        # remove low frametimes caused by relax mod and switching desktops during a break
-        frametimes = Investigator._remove_low_frametimes(frametimes, 4)
-        # remove all remaining 0 frametimes as those shouldn't affect average frametimes
-        frametimes = frametimes[frametimes > 0]
         return np.median(frametimes)
 
     @staticmethod
