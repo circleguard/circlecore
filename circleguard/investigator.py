@@ -207,7 +207,12 @@ class Investigator:
             The replay to get the frametimes of.
         """
         # replay.t is cumsum so convert it back to "time since previous frame"
-        return np.diff(replay.t)
+        t = np.diff(replay.t)
+        # remove low frametimes caused by relax mod and switching desktops during a break
+        t = Investigator._remove_low_frametimes(t, 4)
+        # remove all remaining 0 frametimes as those shouldn't affect average frametimes
+        t = t[t > 0]
+        return t
 
     @staticmethod
     def median_frametime(frametimes):
@@ -263,6 +268,20 @@ class Investigator:
                 object_i += 1
 
         return array
+
+    @staticmethod
+    def _remove_low_frametimes(frametimes, limit):
+        cnt = 0
+        lowframes = []
+        for i, curr_t in enumerate(frametimes):
+            if curr_t <= limit:
+                cnt += 1
+            else:
+                # if there's more than 7 short frametimes in a row, add them to the remove list and reset count
+                if cnt > 7:
+                    lowframes.extend(list(range(i - cnt, i)))
+                cnt = 0
+        return np.delete(frametimes, lowframes)
 
     # TODO (some) code duplication with this method and a similar one in
     # ``Comparer``. Refactor Investigator and Comparer to inherit from a base
