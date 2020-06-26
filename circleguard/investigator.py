@@ -49,7 +49,7 @@ class Investigator:
             yield CorrectionResult(replay, snaps)
         if self.detect & Detect.TIMEWARP:
             frametimes = self.frametimes(replay)
-            frametimes = self.clean_frametimes(frametimes, replay.mods)
+            frametimes = self.clean_frametimes(frametimes)
             frametime = self.median_frametime(frametimes)
             yield TimewarpResult(replay, frametime, frametimes)
 
@@ -212,7 +212,7 @@ class Investigator:
         return np.diff(replay.t)
 
     @staticmethod
-    def clean_frametimes(frametimes, mods):
+    def clean_frametimes(frametimes):
         """
         Cleans the frametimes to remove some artificial frametimes, eg 1-2
         frametime frames added by relax.
@@ -221,14 +221,11 @@ class Investigator:
         ----------
         frametimes: list[int]
             The frametimes to clean.
-        mods: :class:`~circleguard.mod.ModCombination`
-            The mods the replay which generated ``frametimes`` was played with.
         """
-        if Mod.Relax in mods:
-            # remove low frametimes caused by relax mod and switching desktops during a break
-            frametimes = Investigator._remove_low_frametimes(frametimes, 4)
-            # remove all remaining 0 frametimes as those shouldn't affect average frametimes
-            frametimes = frametimes[frametimes > 0]
+        # remove low frametimes caused by relax mod and switching desktops during a break
+        frametimes = Investigator._remove_low_frametimes(frametimes, 4)
+        # remove all remaining 0 frametimes as those shouldn't affect average frametimes
+        frametimes = frametimes[frametimes > 0]
         return frametimes
 
 
