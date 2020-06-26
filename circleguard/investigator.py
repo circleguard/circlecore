@@ -222,7 +222,6 @@ class Investigator:
         frametimes: list[int]
             The frametimes to clean.
         """
-        # remove low frametimes caused by relax mod and switching desktops during a break
         frametimes = Investigator._remove_low_frametimes(frametimes, 4)
         # remove all remaining 0 frametimes as those shouldn't affect average frametimes
         frametimes = frametimes[frametimes > 0]
@@ -286,6 +285,24 @@ class Investigator:
 
     @staticmethod
     def _remove_low_frametimes(frametimes, limit):
+        """
+        Removes any long run of consecutive frametimes which are less than
+        ``limit``.
+
+        Parameters
+        ----------
+        frametimes: list[int]
+            The frametimes to remove consecutive low frametimes from.
+        limit: int
+            Consider any frametime less than this to be a "low" frametime,
+            and subject to removal.
+
+        Notes
+        -----
+        These low frametimes are caused by playing with relax, or switching
+        desktops during a break. It is unlikely that consecutive short frames
+        would appear in an otherwise normal replay.
+        """
         num_low_frametimes = 0
         low_frametimes = []
         for i, frametime in enumerate(frametimes):
