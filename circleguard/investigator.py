@@ -294,8 +294,8 @@ class Investigator:
         frametimes: list[int]
             The frametimes to remove consecutive low frametimes from.
         limit: int
-            Consider any frametime less than this to be a "low" frametime,
-            and subject to removal.
+            Consider any frametime less than or equal to this to be a "low"
+            frametime, and subject to removal.
 
         Notes
         -----
