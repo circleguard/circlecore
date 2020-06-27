@@ -647,16 +647,29 @@ class Replay(Loadable):
         # throwing off the replay. To solve this we initiaize the running time
         # to the first frame's time.
         running_t = next(replay_data).time_since_previous_action
-        # negative frame times are valid when they're at the beginning of a
-        # replay (they're frames from before the start of the mp3 at t=0).
-        # Count all negative frames until we hit our first positive one, and
-        # ignore any negative frames after (eg in the middle of the replay).
+        # The following is more guesswork, but is again seemingly accurate.
+        # * We consider negative frames at the very beginning of a replay to be
+        #   valid (they're frames from before the start of the mp3 at t=0),
+        #   but only for the purposes of changing the running time - they are
+        #   not added to the final list of frames. We do this because lazer
+        #   does this. Lazer counts the time towards the running time, but skips
+        #   the frame otherwise. https://github.com/ppy/osu/blob/1587d4b26fbad691242544a62dbf017a78705ae3/osu.Game/Scoring/Legacy/LegacyScoreDecoder.cs#L247-L250.
+        #   There is typically (and potentially always) at most a single large
+        #   negative frame at the beginning of the replay, which occurs when the
+        #   replay has data before the break of a map.
+        # * We consider negative time frames in the middle of a replay to be
+        #   invalid. They are not counted towards the running time nor added
+        #   to the list of frames, but are entirely skipped. This is *not*
+        #   what lazer does (as far as I can tell), but if we respect negative
+        #   frames in the middle of a replay, they can cause frames which are
+        #   obviously next to each other when viewed in game to become entirely
+        #   out of order, as the negative frame puts us "backwards" in time.
+        #   Ignoring negative frames entirely after the beginning seems to
+        #   solve this issue. It may, however, not be the canonical solution.
         positive_seen = False
 
         for e in replay_data:
             e_t = e.time_since_previous_action
-            # lazer ignores frames with negative time, but still adds it to the running time
-            # https://github.com/ppy/osu/blob/1587d4b26fbad691242544a62dbf017a78705ae3/osu.Game/Scoring/Legacy/LegacyScoreDecoder.cs#L247-L250
             if e_t < 0:
                 if not positive_seen:
                     running_t += e_t
