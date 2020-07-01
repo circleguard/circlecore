@@ -1,7 +1,9 @@
+from circleguard import ReplayPath, Mod, Detect, StealResultSim, StealResultCorr
+from circleguard.investigator import Investigator
+from tests.utils import CGTestCase, DELTA, RES
+
 import numpy as np
 
-from circleguard import ReplayPath, Mod, Detect, StealResultSim, StealResultCorr
-from tests.utils import CGTestCase, DELTA, RES
 
 class TestCorrection(CGTestCase):
     @classmethod
@@ -163,3 +165,10 @@ class TestTimewarp(CGTestCase):
             self.assertLess(r.frametime, Detect.FRAMETIME_LIMIT, "Timewarped replays were not detected as cheated")
             self.assertAlmostEqual(r.frametime, frametimes[i], delta=DELTA, msg="Frametime was not correct")
 
+    def test_frametime_cleaning(self):
+        frametimes = np.array([16, 14, 1, 17, 14, 1, 0, 16, 2, 1, 2, 3, 1, 2, 3, 1, 0, 0,
+                               14, 2, 1, 2, 3, 1, 2, 1, 1, 17, 19, 20, 16, 1, 25])
+        expected_frametimes = [16, 14, 1, 17, 14, 1, 0, 16, 14, 17, 19, 20, 16, 1, 25]
+        clean_frametimes = Investigator.clean_frametimes(frametimes)
+
+        self.assertListEqual(list(clean_frametimes), expected_frametimes, "Frametimes were not cleaned as expected")
