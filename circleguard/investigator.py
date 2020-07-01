@@ -222,10 +222,7 @@ class Investigator:
         frametimes: list[int]
             The frametimes to clean.
         """
-        frametimes = Investigator._remove_low_frametimes(frametimes, 4)
-        # remove all remaining 0 frametimes as those shouldn't affect average frametimes
-        frametimes = frametimes[frametimes > 0]
-        return frametimes
+        return Investigator._remove_low_frametimes(frametimes, 4)
 
 
     @staticmethod
@@ -297,23 +294,28 @@ class Investigator:
             Consider any frametime less than or equal to this to be a "low"
             frametime, and subject to removal.
 
+        Returns
+        -------
+        list[int]
+            The passed ``frametimes`` with long runs of low frametimes removed.
+
         Notes
         -----
         These low frametimes are caused by playing with relax, or switching
         desktops during a break. It is unlikely that consecutive short frames
         would appear in an otherwise normal replay.
         """
-        num_low_frametimes = 0
-        low_frametimes = []
+        run_length = 0
+        low_frametime_indices = []
         for i, frametime in enumerate(frametimes):
             if frametime <= limit:
-                num_low_frametimes += 1
-            else:
-                # if there's more than 7 short frametimes in a row, add them to the remove list and reset count
-                if num_low_frametimes > 7:
-                    low_frametimes.extend(list(range(i - num_low_frametimes, i)))
-                num_low_frametimes = 0
-        return np.delete(frametimes, low_frametimes)
+                run_length += 1
+                # don't cut off the run prematurely
+                continue
+            if run_length >= 7:
+                low_frametime_indices.extend(range(i - run_length, i))
+            run_length = 0
+        return np.delete(frametimes, low_frametime_indices)
 
     # TODO (some) code duplication with this method and a similar one in
     # ``Comparer``. Refactor Investigator and Comparer to inherit from a base
