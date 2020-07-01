@@ -222,7 +222,14 @@ class Investigator:
         frametimes: list[int]
             The frametimes to clean.
         """
-        return Investigator._remove_low_frametimes(frametimes, 4)
+        unique, count = np.unique(frametimes, return_counts=True)
+        unique = unique[count > np.mean(count)]
+        # remove low frametimes only if there is a peak in short frames
+        if unique[0] < unique[-1]/2:
+            cutoff = unique[0] + 2
+            return Investigator._remove_low_frametimes(frametimes, cutoff)
+        else:
+            return frametimes
 
 
     @staticmethod
