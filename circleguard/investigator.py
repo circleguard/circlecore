@@ -50,7 +50,7 @@ class Investigator:
         if self.detect & Detect.TIMEWARP:
             frametimes = self.frametimes(replay)
             frametimes = self.clean_frametimes(frametimes)
-            frametime = self.median_frametime(frametimes)
+            frametime = self.average_frametime(frametimes)
             yield TimewarpResult(replay, frametime, frametimes)
 
     @staticmethod
@@ -229,14 +229,14 @@ class Investigator:
 
 
     @staticmethod
-    def median_frametime(frametimes):
+    def average_frametime(frametimes):
         """
-        Calculates the median time between the frames in ``frametimes``.
+        Calculates the average time between the frames in ``frametimes``.
 
         Parameters
         ----------
         frametimes: list[int]
-            The frametimes to find the median of.
+            The frametimes to find the average of.
 
         Notes
         -----
