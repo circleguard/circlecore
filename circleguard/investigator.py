@@ -228,8 +228,9 @@ class Investigator:
         if unique[0] < unique[-1]/2:
             cutoff = unique[0] + 2
             return Investigator._remove_low_frametimes(frametimes, cutoff)
-        else:
-            return frametimes
+        elif unique[-1] <= 4:
+            return Investigator._remove_low_frametimes(frametimes, 4)
+        return frametimes
 
 
     @staticmethod
