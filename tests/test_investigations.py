@@ -158,5 +158,8 @@ class TestTimewarp(CGTestCase):
 
     def test_cheated(self):
         replays = [self.timewarped1, self.timewarped2, self.timewarped3, self.timewarped4]
-        for r in self.cg.timewarp_check(replays):
+        frametimes = [11.33333, 10.66666, 8, 8.66666]
+        for i, r in enumerate(self.cg.timewarp_check(replays)):
             self.assertLess(r.frametime, Detect.FRAMETIME_LIMIT, "Timewarped replays were not detected as cheated")
+            self.assertAlmostEqual(r.frametime, frametimes[i], delta=DELTA, msg="Frametime was not correct")
+
