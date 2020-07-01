@@ -156,6 +156,8 @@ class TestTimewarp(CGTestCase):
         cls.timewarped3 = ReplayPath(RES / "timewarped" / "timewarped-3.osr")
         cls.timewarped4 = ReplayPath(RES / "timewarped" / "timewarped-4.osr")
 
+        cls.relax_legit = ReplayPath(RES / "legit" / "legit_144fps_nmrx.osr")
+
         cls.legit = ReplayPath(RES / "legit_replay1.osr")
 
     def test_cheated(self):
@@ -172,3 +174,10 @@ class TestTimewarp(CGTestCase):
         clean_frametimes = Investigator.clean_frametimes(frametimes)
 
         self.assertListEqual(list(clean_frametimes), expected_frametimes, "Frametimes were not cleaned as expected")
+
+    # make sure we're not detecting (legitimate) +RX replays as timewarped when
+    # they just have a ton of low frametime beacuse that's how the client works
+    # with the relax mod
+    def test_relax_legit(self):
+        frametime = list(self.cg.timewarp_check(self.relax_legit))[0].frametime
+        self.assertAlmostEqual(frametime, 7, delta=DELTA)
