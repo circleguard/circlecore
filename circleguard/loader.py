@@ -344,8 +344,7 @@ class Loader():
 
         lzma_bytes = self.load_replay_data(map_id, user_id, mods)
         if lzma_bytes is None:
-            raise UnknownAPIException("The api guaranteed there would be a replay available, but we did not receive any data. "
-                                     "Please report this to the devs, who will open an issue on osu!api if necessary.")
+            raise UnknownAPIException("The api guaranteed there would be a replay available, but we did not receive any data.")
         try:
             parsed_replay = circleparse.parse_replay(lzma_bytes, pure_lzma=True)
         # see https://github.com/circleguard/circlecore/issues/61

@@ -11,8 +11,7 @@ class Error(Enum):
     RETRIEVAL_FAILED  = ["Replay retrieval failed.", ReplayUnavailableException, "Replay retrieval failed. Skipping"]
     INVALID_KEY       = ["Please provide a valid API key.", InvalidKeyException, "Please provide a valid api key"]
     INVALID_JSON      = ["The api broke.", InvalidJSONException, "The api returned an invalid json response, retrying"]
-    UNKNOWN           = ["Unknown error.", UnknownAPIException, "Unknown error when requesting a replay. Please report this "
-                                                                "to the developers at https://github.com/circleguard/circlecore"]
+    UNKNOWN           = ["Unknown error.", UnknownAPIException, "Unknown error when requesting a replay."]
 
 
 class RatelimitWeight(Enum):
