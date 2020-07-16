@@ -44,6 +44,8 @@ class Circleguard:
     """
     DEFAULT_ANGLE = 10
     DEFAULT_DISTANCE = 8
+    # a healthy balance between speed and accuracy.
+    DEFAULT_CHUNKS = 5
 
     def __init__(self, key, db_path=None, slider_dir=None, loader=None, cache=True):
         self.cache = cache
@@ -51,22 +53,25 @@ class Circleguard:
         if db_path is not None:
             # resolve relative paths
             db_path = Path(db_path).absolute()
-            # they can set cache to False later with:func:`~.circleguard.set_options`
-            # if they want; assume caching is desired if db path is passed
+            # they can set cache to False later with
+            # :func:`~.circleguard.set_options` if they want; assume caching is
+            # desired if db path is passed
             self.cacher = Cacher(self.cache, db_path)
 
         self.log = logging.getLogger(__name__)
         # allow for people to pass their own loader implementation/subclass
         self.loader = Loader(key, cacher=self.cacher) if loader is None else loader(key, self.cacher)
         if slider_dir is None:
-            # have to keep a reference to it or the folder gets deleted and can't be walked by Library
+            # have to keep a reference to it or the folder gets deleted and
+            # can't be walked by Library
             self.slider_dir = TemporaryDirectory()
             self.library = None
         else:
             self.library = Library(slider_dir)
 
 
-    def run(self, loadables, detect, loadables2=None, max_angle=DEFAULT_ANGLE, min_distance=DEFAULT_DISTANCE)\
+    def run(self, loadables, detect, loadables2=None, max_angle=DEFAULT_ANGLE, \
+        min_distance=DEFAULT_DISTANCE, num_chunks=DEFAULT_CHUNKS) \
         -> Iterable[Result]:
         """
         Investigates loadables for cheats.
@@ -87,6 +92,10 @@ class Circleguard:
         min_distance: float
             For :data:`Detect.CORRECTION`, consider only points (a,b,c) where
             ``|ab| > min_distance`` and ``|bc| > min_distance``.
+        num_chunks: int
+            For :data:`detect.STEAL_CORR`, how many chunks to split the replay
+            into when comparing. Note that runtime increases linearly with the
+            number of chunks.
 
         Yields
         ------
@@ -109,7 +118,7 @@ class Circleguard:
         if detect & (Detect.STEAL_SIM | Detect.STEAL_CORR):
             replays1 = c.all_replays1()
             replays2 = c.all_replays2()
-            comparer = Comparer(replays1, replays2, detect)
+            comparer = Comparer(replays1, replays2, detect, num_chunks)
             yield from comparer.compare()
 
         # investigator investigations
@@ -134,7 +143,8 @@ class Circleguard:
                     # disconnect from temporary library
                     library.close()
 
-    def steal_check(self, loadables, loadables2=None, method=Detect.STEAL_SIM) -> Iterable[StealResult]:
+    def steal_check(self, loadables, loadables2=None, method=Detect.STEAL_SIM, \
+        num_chunks=DEFAULT_CHUNKS) -> Iterable[StealResult]:
         """
         Investigates loadables for replay stealing.
 
@@ -150,6 +160,11 @@ class Circleguard:
             What method to use to investigate the loadables for replay stealing.
             This should be one of ``Detect.STEAL_SIM`` or ``Detect.STEAL_CORR``,
             or both (or'd together).
+        num_chunks: int
+            How many chunks to split the replay into when comparing. This
+            parameter only has an affect if ``method`` is
+            ``Detect.STEAL_CORR``. Note that runtime increases linearly with the
+            number of chunks.
 
         Yields
         ------
@@ -157,7 +172,7 @@ class Circleguard:
             A result representing a replay stealing investigtion into a pair of
             loadables from ``loadables`` and/or ``loadables2``.
         """
-        yield from self.run(loadables, method, loadables2)
+        yield from self.run(loadables, method, loadables2, num_chunks=num_chunks)
 
     def relax_check(self, loadables) -> Iterable[RelaxResult]:
         """
@@ -176,8 +191,8 @@ class Circleguard:
         """
         yield from self.run(loadables, Detect.RELAX)
 
-    def correction_check(self, loadables, max_angle=DEFAULT_ANGLE, min_distance=DEFAULT_DISTANCE)\
-        -> Iterable[CorrectionResult]:
+    def correction_check(self, loadables, max_angle=DEFAULT_ANGLE, \
+        min_distance=DEFAULT_DISTANCE) -> Iterable[CorrectionResult]:
         """
         Investigates loadables for aim correction.
 
@@ -185,6 +200,11 @@ class Circleguard:
         ----------
         loadables: list[:class:`~.Loadable`]
             The loadables to investigate.
+        max_angle: float
+            Consider only points (a,b,c) where ``∠abc < max_angle``.
+        min_distance: float
+            Consider only points (a,b,c) where ``|ab| > min_distance`` and
+            ``|bc| > min_distance``.
 
         Yields
         ------
@@ -192,7 +212,8 @@ class Circleguard:
             A result representing an aim correction investigation into a
             loadable from ``loadables``.
         """
-        yield from self.run(loadables, Detect.CORRECTION, max_angle=max_angle, min_distance=min_distance)
+        yield from self.run(loadables, Detect.CORRECTION, max_angle=max_angle, \
+                   min_distance=min_distance)
 
     def timewarp_check(self, loadables) -> Iterable[TimewarpResult]:
         """
