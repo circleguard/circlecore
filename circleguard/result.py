@@ -158,8 +158,8 @@ class RelaxResult(InvestigationResult):
     replay: :class:`~circleguard.loadable.Replay`
         The replay investigated.
     ur: float
-        The (unconverted) unstable rate of the replay. More information on UR
-        available at https://osu.ppy.sh/help/wiki/Accuracy#accuracy
+        The (unconverted) unstable rate of the replay. More information on UR is
+        available at https://osu.ppy.sh/help/wiki/Accuracy#accuracy.
     """
     def __init__(self, replay: Replay, ur: float):
         super().__init__(replay, ResultType.RELAX)
