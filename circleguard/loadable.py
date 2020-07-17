@@ -449,6 +449,7 @@ class ReplayCache(ReplayContainer):
         How many (randomly chosen) maps to load replays from.
     limit: int
         How many replays to load for each map.
+
     Notes
     -----
     :meth:`~.load_info` is an expensive operation for large databases
