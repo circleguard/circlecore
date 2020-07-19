@@ -860,8 +860,10 @@ class ReplayPath(Replay):
         self.timestamp = loaded.timestamp
         self.map_id = loader.map_id(loaded.beatmap_hash)
         self.username = loaded.player_name
-        # TODO make this lazy loaded so we don't waste an api call
-        self.user_id = loader.user_id(loaded.player_name)
+        # our `user_id` attribute is lazy loaded, so we need to retain the
+        # `Loader#user_id` function to use later to load it.
+        self.user_id_func = loader.user_id
+        self._user_id = None
         self.mods = Mod(loaded.mod_combination)
         self.replay_id = loaded.replay_id
         self.hash = loaded.beatmap_hash
@@ -869,6 +871,16 @@ class ReplayPath(Replay):
         self._process_replay_data(loaded.play_data)
         self.loaded = True
         self.log.log(TRACE, "Finished loading %s", self)
+
+    @property
+    def user_id(self):
+        if not self._user_id:
+            self._user_id = self.user_id_func(self.username)
+        return self._user_id
+
+    @user_id.setter
+    def user_id(self, user_id):
+        self._user_id = user_id
 
     def __eq__(self, loadable):
         """
