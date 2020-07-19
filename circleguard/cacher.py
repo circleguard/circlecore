@@ -72,12 +72,8 @@ class Cacher:
         mods = replay_info.mods.value
         replay_id = replay_info.replay_id
 
-        result = self.cursor.execute("SELECT COUNT(1) FROM replays WHERE map_id=? AND user_id=? AND mods=?", [map_id, user_id, mods]).fetchone()[0]
         self.log.log(TRACE, "Writing compressed lzma to db")
-        if result: # already exists so we overwrite (this happens when we call Cacher.revalidate)
-            self._write("UPDATE replays SET replay_data=?, replay_id=? WHERE map_id=? AND user_id=? AND mods=?", [compressed_bytes, replay_id, map_id, user_id, mods])
-        else: # else just insert
-            self._write("INSERT INTO replays VALUES(?, ?, ?, ?, ?)", [map_id, user_id, compressed_bytes, replay_id, mods])
+        self._write("INSERT INTO replays VALUES(?, ?, ?, ?, ?)", [map_id, user_id, compressed_bytes, replay_id, mods])
 
     def revalidate(self, loader, replay_info):
         """
@@ -109,6 +105,12 @@ class Cacher:
         -----
         If the replay is found to be outdated, it will be overwritten
         by the newer replay in the database.
+
+        Warnings
+        --------
+        This function is unused and left for historical purposes. Do not use.
+        In particular, it searches with parameters other than the primary key
+        (``replay_id``), which is orders of magnitude slower without an index.
         """
         self.log.info("Revalidating cache with %d replay_infos", len(replay_info))
 
@@ -139,19 +141,15 @@ class Cacher:
                                                 .format(map_id, user_id, mods, info.replay_available))
                 self.cache(lzma_data, info)
 
-    def check_cache(self, map_id, user_id, mods):
+    def check_cache(self, replay_info):
         """
-        Checks the cache for a replay described by the parameters, and returns
-        its data if the cache contains the replay.
+        Checks the cache for a replay matching ``replay_info``, returning its
+        (uncompressed) replay data if it finds a match, and ``None`` otherwise.
 
         Parameters
         ----------
-        map_id: int
-            The id of the map the replay was played on.
-        user_id: int
-            The id of the user that played the replay.
-        mods: :class:`~circleguard.mod.ModCombination`
-            The mods this replay was played with.
+        replay_info: :class:`~circleguard.replay_info.ReplayInfo`
+            The replay info to search for a matching replay with.
 
         Returns
         -------
@@ -159,11 +157,16 @@ class Cacher:
             The replay data in decompressed lzma form if the cache contains the
             replay, or None if not.
         """
-        mods = mods.value
-        self.log.log(TRACE, "Checking cache for a replay on map %d by user %d with mods %s", map_id, user_id, mods)
-        result = self.cursor.execute("SELECT replay_data FROM replays WHERE map_id=? AND user_id=? AND mods=?", [map_id, user_id, mods]).fetchone()
+
+        map_id = replay_info.map_id
+        user_id = replay_info.user_id
+        mods = replay_info.mods
+        replay_id = replay_info.replay_id
+
+        self.log.log(TRACE, "Checking cache for a replay on map %d by user %d with mods %s with replay id %d", map_id, user_id, mods, replay_id)
+        result = self.cursor.execute("SELECT replay_data FROM replays WHERE replay_id=?", [replay_id]).fetchone()
         if result:
-            self.log.debug("Loading replay on map %d by user %d with mods %s from cache", map_id, user_id, mods)
+            self.log.debug("Loading replay on map %d by user %d with mods %s with replay id %d from cache", map_id, user_id, mods, replay_id)
             return wtc.decompress(result[0], decompressed_lzma=True)
         self.log.log(TRACE, "No replay found in cache")
         return None
