@@ -27,6 +27,7 @@ class Cacher:
     def __init__(self, cache, path):
 
         self.log = logging.getLogger(__name__)
+        self.log.info("Cacher initialized at path %s, should cache? %s ", path, cache)
         self.should_cache = cache
         if not os.path.isfile(str(path)):
             self._create_cache(str(path))
