@@ -134,6 +134,9 @@ class LoadableContainer(Loadable):
         """
         pass
 
+    def __len__(self):
+        return len(self.all_replays())
+
     def __getitem__(self, key):
         replays = self.all_replays()
         if isinstance(key, slice):
