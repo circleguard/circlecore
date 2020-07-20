@@ -639,48 +639,34 @@ class Replay(Loadable):
         # The following is guesswork, but seems to accurately describe replays.
         # This references the "first" frame assuming that we have already
         # removed the truly first zero time frame, if it is present. So
-        # technically the "first" frame below is the second frame.
-        # There are two possibilities for osrs:
+        # technically the "first" frame below may be the second frame.
+        # There are two possibilities for replays:
         # * for replays with a skip in the beginning, the first frame time is
         #   the skip duration. The next frame after that will have a negative
         #   time, to account for the replay data before the skip.
-        # * for replays without a skip in the beginning, the firstframe time is
+        # * for replays without a skip in the beginning, the first frame time is
         #   -1.
-        # Since in the first case the first frame time is positive, it would
-        # cause our loop below to ignore the negative time frame afterwards,
-        # throwing off the replay. To solve this we initiaize the running time
-        # to the first frame's time.
+        # Since in the first case the first frame time is a large positive,
+        # this would make ``highest_running_t`` large and cause all replay data
+        # before the skip to be ignored. To solve this, we initialize
+        # ``running_t`` to the first frame's time.
         running_t = next(replay_data).time_since_previous_action
-        # The following is more guesswork, but is again seemingly accurate.
-        # * We consider negative frames at the very beginning of a replay to be
-        #   valid (they're frames from before the start of the mp3 at t=0),
-        #   but only for the purposes of changing the running time - they are
-        #   not added to the final list of frames. We do this because lazer
-        #   does this. Lazer counts the time towards the running time, but skips
-        #   the frame otherwise. https://github.com/ppy/osu/blob/1587d4b26fbad691242544a62dbf017a78705ae3/osu.Game/Scoring/Legacy/LegacyScoreDecoder.cs#L247-L250.
-        #   There is typically (and potentially always) at most a single large
-        #   negative frame at the beginning of the replay, which occurs when the
-        #   replay has data before the break of a map.
-        # * We consider negative time frames in the middle of a replay to be
-        #   invalid. They are not counted towards the running time nor added
-        #   to the list of frames, but are entirely skipped. This is *not*
-        #   what lazer does (as far as I can tell), but if we respect negative
-        #   frames in the middle of a replay, they can cause frames which are
-        #   obviously next to each other when viewed in game to become entirely
-        #   out of order, as the negative frame puts us "backwards" in time.
-        #   Ignoring negative frames entirely after the beginning seems to
-        #   solve this issue. It may, however, not be the canonical solution.
-        positive_seen = False
-
+        # We consider negative time frames in the middle of replays to be valid,
+        # with a caveat. Their negative time is counted toward ``running_t``
+        # (that is, decreases ``running_t``), but any frames after it are
+        # ignored, until the total time passed of ignored frames is greater than
+        # or equal to the negative frame.
+        # I do not know why stable treats negative time frames in this way.
+        # It is not what lazer does, as far as I can tell. But it is the only
+        # reasonable explanation for stable behavior. This solution may not,
+        # however, be the canonical solution.
+        highest_running_t = np.NINF
         for e in replay_data:
             e_t = e.time_since_previous_action
-            if e_t < 0:
-                if not positive_seen:
-                    running_t += e_t
-                continue
-            else:
-                positive_seen = True
             running_t += e_t
+            highest_running_t = max(highest_running_t, running_t)
+            if running_t < highest_running_t:
+                continue
 
             data[0].append(running_t)
             data[1].append(e.x)
