@@ -636,10 +636,11 @@ class Replay(Loadable):
         # use an iter an an optimization so we don't recreate the list when
         # taking (and removing) the first element
         replay_data = iter(replay_data)
-        # The following is guesswork, but seems to accurately describe replays.
-        # This references the "first" frame assuming that we have already
-        # removed the truly first zero time frame, if it is present. So
-        # technically the "first" frame below may be the second frame.
+        # The following comments in this method are guesswork, but seems to
+        # accurately describe replays. This references the "first" frame
+        # assuming that we have already removed the truly first zero time frame,
+        # if it is present. So technically the "first" frame below may be the
+        # second frame.
         # There are two possibilities for replays:
         # * for replays with a skip in the beginning, the first frame time is
         #   the skip duration. The next frame after that will have a negative
@@ -656,22 +657,75 @@ class Replay(Loadable):
         # (that is, decreases ``running_t``), but any frames after it are
         # ignored, until the total time passed of ignored frames is greater than
         # or equal to the negative frame.
+        # There's one more catch - the frame that brings us *out* of this
+        # "negative time" section where we're ignoring frames will cause a
+        # special frame to be inserted, which has the same time as the frame
+        # that brought us *into* the negative time section, and specially
+        # calculated x and y positions. Details below.
         # I do not know why stable treats negative time frames in this way.
         # It is not what lazer does, as far as I can tell. But it is the only
         # reasonable explanation for stable behavior. This solution may not,
         # however, be the canonical solution.
         highest_running_t = np.NINF
+        # The last positive frame we encountered before entering a negative
+        # section.
+        last_positive_frame = None
+        # the running time when we encountered ``last_positive_fram``. We do not
+        # store this information in each individual frame.
+        last_positive_frame_cum_time = None
+        previous_frame = None
         for e in replay_data:
+            # check if we were in a negative section of the play at the previous
+            # frame (f0) before applying the current frame (f1), so we can
+            # apply special logic if f1 is the frame that gets us out of the
+            # negative section.
+            was_in_negative_section = running_t < highest_running_t
+
             e_t = e.time_since_previous_action
             running_t += e_t
             highest_running_t = max(highest_running_t, running_t)
             if running_t < highest_running_t:
+                # if we weren't in a negative section in f0, f1 is the first
+                # frame to bring us into one, so f0 is the last positive frame.
+                if not was_in_negative_section:
+                    last_positive_frame = previous_frame
+                    # we want to set it to the cumulative time before f1
+                    # was processed, so subtract out the current e_t
+                    last_positive_frame_cum_time = running_t - e_t
+                previous_frame = e
                 continue
+
+            # if we get here, f1 brought us out of the negative section. In this
+            # case, osu! actually inserts a new frame, with:
+            # * t = the cumulative time at the last positive frame (yes, this
+            #   means there are two frames at the same time in the replay
+            #   playback).
+            # * x, y = a weighted average between the positions of f0 and f1,
+            #   weighted by how close the last positive frame's time is to each
+            #   of the two frames' times.
+            # * k = the keypresses of the last positive frame.
+            if was_in_negative_section:
+                data[0].append(last_positive_frame_cum_time)
+
+                # this is [running_t at f0, running_t at f1], to interpolate
+                # the last positive frame's time between.
+                xp = [running_t - e_t, running_t]
+
+                fp = [previous_frame.x, e.x]
+                x = np.interp(last_positive_frame_cum_time, xp, fp)
+                data[1].append(x)
+
+                fp = [previous_frame.y, e.y]
+                y = np.interp(last_positive_frame_cum_time, xp, fp)
+                data[2].append(y)
+
+                data[3].append(last_positive_frame.keys_pressed)
 
             data[0].append(running_t)
             data[1].append(e.x)
             data[2].append(e.y)
             data[3].append(e.keys_pressed)
+            previous_frame = e
 
         block = np.array(data)
 
