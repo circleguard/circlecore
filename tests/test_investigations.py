@@ -23,7 +23,7 @@ class TestCorrection(CGTestCase):
         self.assertAlmostEqual(snaps[8].angle, 6.34890, delta=DELTA)
         self.assertAlmostEqual(snaps[8].distance, 27.59918, delta=DELTA)
         # end
-        self.assertEqual(snaps[14].time, 79053)
+        self.assertEqual(snaps[14].time, 79052)
         self.assertAlmostEqual(snaps[14].angle, 8.77141, delta=DELTA)
         self.assertAlmostEqual(snaps[14].distance, 8.21841, delta=DELTA)
 
@@ -37,8 +37,8 @@ class TestSteal(CGTestCase):
         cls.stolen2 = ReplayPath(RES / "stolen_replay2.osr")
         cls.legit1 = ReplayPath(RES / "legit_replay1.osr")
         cls.legit2 = ReplayPath(RES / "legit_replay2.osr")
-        cls.time_shifted1 = ReplayPath(RES / "stealing" / "stolen-time-shifted-1.osr")
-        cls.time_shifted2 = ReplayPath(RES / "stealing" / "stolen-time-shifted-2.osr")
+        cls.time_shifted1 = ReplayPath(RES / "stealing" / "stolen-time-shifted-1-1.osr")
+        cls.time_shifted2 = ReplayPath(RES / "stealing" / "stolen-time-shifted-1-2.osr")
 
     @staticmethod
     def add_noise_and_positional_translation_to_replay(replay, pixel_offset, std_deviation):
@@ -59,7 +59,7 @@ class TestSteal(CGTestCase):
         earlier = r.earlier_replay
         later = r.later_replay
 
-        self.assertAlmostEqual(r.similarity, 2.20915, delta=DELTA, msg="Similarity is not correct")
+        self.assertAlmostEqual(r.similarity, 2.20867, delta=DELTA, msg="Similarity is not correct")
         self.assertEqual(r1.map_id, r2.map_id, "Replay map ids did not match")
         self.assertEqual(r1.map_id, 1988753, "Replay map id was not correct")
         self.assertEqual(earlier.mods, Mod.HD + Mod.HR, "Earlier replay mods was not correct")
@@ -71,7 +71,7 @@ class TestSteal(CGTestCase):
     def test_cheated_time_shift(self):
         replays = [self.time_shifted1, self.time_shifted2]
         r = list(self.cg.steal_check(replays, method=Detect.STEAL_SIM))[0]
-        self.assertAlmostEqual(r.similarity, 17.30112, delta=DELTA, msg="Similarity is not correct")
+        self.assertAlmostEqual(r.similarity, 17.30254, delta=DELTA, msg="Similarity is not correct")
 
         # STEAL_SIM is currently *not* able to detect time shifts. If this
         # changes we want to know! :P
@@ -80,7 +80,7 @@ class TestSteal(CGTestCase):
         # STEAL_CORR should be able to, though.
         r = list(self.cg.steal_check(replays, method=Detect.STEAL_CORR))[0]
         self.assertGreater(r.correlation, Detect.CORR_LIMIT, "Cheated replays were not detected as cheated")
-        self.assertAlmostEqual(r.correlation, 0.99764, delta=DELTA, msg="Correlation is not correct")
+        self.assertAlmostEqual(r.correlation, 0.99734, delta=DELTA, msg="Correlation is not correct")
 
 
     def test_legitimate(self):
@@ -95,7 +95,7 @@ class TestSteal(CGTestCase):
         earlier = r.earlier_replay
         later = r.later_replay
 
-        self.assertAlmostEqual(r.similarity, 23.11035, delta=DELTA, msg="Similarity is not correct")
+        self.assertAlmostEqual(r.similarity, 23.13951, delta=DELTA, msg="Similarity is not correct")
         self.assertEqual(r1.map_id, r2.map_id, "Replay map ids did not match")
         self.assertEqual(r1.map_id, 722238, "Replay map id was not correct")
         self.assertEqual(earlier.mods, Mod.HD + Mod.NC, "Earlier replay mods was not correct")
@@ -120,7 +120,7 @@ class TestSteal(CGTestCase):
             earlier = r.earlier_replay
             later = r.later_replay
 
-            self.assertAlmostEqual(r.similarity, 2.20915, delta=DELTA, msg=f"Similarity is not correct at num {num}")
+            self.assertAlmostEqual(r.similarity, 2.20867, delta=DELTA, msg=f"Similarity is not correct at num {num}")
             self.assertEqual(r1.map_id, r2.map_id, f"Replay map ids did not match at num {num}")
             self.assertEqual(r1.map_id, 1988753, f"r1 map id was not correct at num {num}")
             self.assertEqual(earlier.mods, Mod.HD + Mod.HR, f"Earlier replay mods was not correct at num {num}")
