@@ -241,12 +241,7 @@ class Investigator:
 
     @staticmethod
     def _parse_beatmap(beatmap, easy, hard_rock):
-        hitobjs = []
-
-        # parse hitobj
-        for hit in beatmap.hit_objects(easy=easy, hard_rock=hard_rock):
-            hitobjs.append(hit)
-        return hitobjs
+        return beatmap.hit_objects(easy=easy, hard_rock=hard_rock)
 
     @staticmethod
     def _parse_replay(replay):
