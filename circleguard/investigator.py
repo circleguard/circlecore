@@ -74,16 +74,16 @@ class Investigator:
 
         # replicate version with timestamp, this is only accurate if the user keeps their game up to date.
         # We don't get the timestamp from `ReplayMap`, only `ReplayPath`
-        if version == None:
+        if version is None:
             version = int(f"{replay.timestamp.year}{replay.timestamp.month:02d}{replay.timestamp.day:02d}")
 
         OD = beatmap.od(easy=easy, hard_rock=hard_rock)
         CS = beatmap.cs(easy=easy, hard_rock=hard_rock)
         replay_data = Investigator._parse_replay(replay)
-        filtered_array = Investigator._filter_hits(hitobjs, replay_data, OD, CS, version)
+        hits = Investigator._filter_hits(hitobjs, replay_data, OD, CS, version)
         diff_array = []
 
-        for hitobj_time, press_time in filtered_array:
+        for hitobj_time, press_time in hits:
             diff_array.append(press_time - hitobj_time)
         return np.std(diff_array) * 10
 
@@ -241,12 +241,7 @@ class Investigator:
 
     @staticmethod
     def _parse_beatmap(beatmap, easy, hard_rock):
-        hitobjs = []
-
-        # parse hitobj
-        for hit in beatmap.hit_objects(easy=easy, hard_rock=hard_rock):
-            hitobjs.append(hit)
-        return hitobjs
+        return beatmap.hit_objects(easy=easy, hard_rock=hard_rock)
 
     @staticmethod
     def _parse_replay(replay):
@@ -367,7 +362,7 @@ class Investigator:
                 # keypress not on object, so we move to the next keypress
                 else:
                     press_i += 1
-        
+
         return array
 
     # TODO (some) code duplication with this method and a similar one in
