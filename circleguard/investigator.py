@@ -80,10 +80,10 @@ class Investigator:
         OD = beatmap.od(easy=easy, hard_rock=hard_rock)
         CS = beatmap.cs(easy=easy, hard_rock=hard_rock)
         replay_data = Investigator._parse_replay(replay)
-        filtered_array = Investigator._filter_hits(hitobjs, replay_data, OD, CS, version)
+        hits = Investigator._filter_hits(hitobjs, replay_data, OD, CS, version)
         diff_array = []
 
-        for hitobj_time, press_time in filtered_array:
+        for hitobj_time, press_time in hits:
             diff_array.append(press_time - hitobj_time)
         return np.std(diff_array) * 10
 
