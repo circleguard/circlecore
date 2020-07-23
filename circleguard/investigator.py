@@ -74,7 +74,7 @@ class Investigator:
 
         # replicate version with timestamp, this is only accurate if the user keeps their game up to date.
         # We don't get the timestamp from `ReplayMap`, only `ReplayPath`
-        if version == None:
+        if version is None:
             version = int(f"{replay.timestamp.year}{replay.timestamp.month:02d}{replay.timestamp.day:02d}")
 
         OD = beatmap.od(easy=easy, hard_rock=hard_rock)
@@ -270,7 +270,7 @@ class Investigator:
         for j in np.where(changes == 3)[0]:
             filtered_replay_data.insert(j + i + 1, filtered_replay_data[j + i])
             i += 1
-        
+
         return np.array(filtered_replay_data, dtype=object)
 
     # TODO add exception for 2b objects (>1 object at the same time) for current version of notelock
@@ -367,7 +367,7 @@ class Investigator:
                 # keypress not on object, so we move to the next keypress
                 else:
                     press_i += 1
-        
+
         return array
 
     # TODO (some) code duplication with this method and a similar one in
