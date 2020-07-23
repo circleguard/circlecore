@@ -4,7 +4,6 @@ import numpy as np
 
 from circleguard.enums import Key, Detect
 from circleguard.result import RelaxResult, CorrectionResult, TimewarpResult
-from circleguard.mod import ModCombination
 
 class Investigator:
     """
