@@ -4,6 +4,7 @@ import numpy as np
 
 from circleguard.enums import Key, Detect
 from circleguard.result import RelaxResult, CorrectionResult, TimewarpResult
+from circleguard.mod import ModCombination
 
 class Investigator:
     """
@@ -64,9 +65,19 @@ class Investigator:
             The beatmap to calculate ``replay``'s ur with.
         """
 
-        hitobjs = Investigator._parse_beatmap(beatmap)
-        keypress_times = Investigator._parse_keypress_times(replay)
-        filtered_array = Investigator._filter_hits(hitobjs, keypress_times, beatmap.overall_difficulty)
+        easy = replay.mods.value & 1 << 1
+        hard_rock = replay.mods.value & 1 << 4
+        hitobjs = Investigator._parse_beatmap(beatmap, easy, hard_rock)
+        version = replay.game_version
+
+        # use the timestamp as the version if it doesn't exist
+        if version == None:
+            version = int(f"{replay.timestamp.year}{replay.timestamp.month:02d}{replay.timestamp.day:02d}")
+
+        OD = beatmap.od(easy=easy, hard_rock=hard_rock)
+        CS = beatmap.cs(easy=easy, hard_rock=hard_rock)
+        replay_data = Investigator._parse_replay(replay)
+        filtered_array = Investigator._filter_hits(hitobjs, replay_data, OD, CS, version)
         diff_array = []
 
         for hitobj_time, press_time in filtered_array:
@@ -226,42 +237,136 @@ class Investigator:
         return np.median(frametimes)
 
     @staticmethod
-    def _parse_beatmap(beatmap):
+    def _parse_beatmap(beatmap, easy, hard_rock):
         hitobjs = []
 
         # parse hitobj
-        for hit in beatmap.hit_objects_no_spinners:
+        for hit in beatmap.hit_objects(easy=easy, hard_rock=hard_rock):
+            time = hit.time.total_seconds() * 1000
+            end_time = time
+            obj_type = 0
+            # object end time is different depending on the type of object
+            # type of hit object is necessary for notelock calculations (0 circle, 1 slider, 2 spinner)
+            if hasattr(hit, "end_time"):
+                end_time = hit.end_time.total_seconds() * 1000
+                if hasattr(hit, "curve"):
+                    obj_type = 1
+                else:
+                    obj_type = 2
             p = hit.position
-            hitobjs.append([hit.time.total_seconds() * 1000, p.x, p.y])
+            hitobjs.append([time, [p.x, p.y], end_time, obj_type])
         return hitobjs
 
     @staticmethod
-    def _parse_keypress_times(replay):
+    def _parse_replay(replay):
+        filtered_replay_data = []
         keypresses = replay.k & Investigator.MASK
         changes = keypresses & ~np.insert(keypresses[:-1], 0, 0)
-        return replay.t[changes != 0]
+        changes_t = np.diff(np.insert(replay.t, 0, 0))
 
+        for i, change in enumerate(changes):
+            if change != 0:
+                # not sure why, but notelock can be reduced by 1ms if the keypress frame has a frametime of 0ms
+                # so we need to keep track of the frames where this happens
+                if changes_t[i] == 0:
+                    filtered_replay_data.append([replay.t[i], replay.xy[i], True])
+                else:
+                    filtered_replay_data.append([replay.t[i], replay.xy[i], False])
+
+        # add a duplicate frame when 2 keys are pressed at the same time
+        changes = changes[changes != 0]
+        i = 0
+        for j in np.where(changes == 3)[0]:
+            filtered_replay_data.insert(j + i + 1, filtered_replay_data[j + i])
+            i += 1
+        
+        return np.array(filtered_replay_data, dtype=object)
+
+    # TODO add exception for 2b objects (>1 object at the same time) for current version of notelock
     @staticmethod
-    def _filter_hits(hitobjs, keypress_times, OD):
+    def _filter_hits(hitobjs, replay_data, OD, CS, version):
         array = []
-        hitwindow = 150 + 50 * (5 - OD) / 5
+
+        # stable converts the OD, which is originally a float32, to a double
+        # and this causes some hitwindows to be messed up when casted to an int
+        # so we replicate this
+        hitwindow = int(150 + 50 * (5 - float(np.float32(OD))) / 5) - 0.5
+
+        # attempting to match stable hitradius
+        hitradius = np.float32(64 * ((1.0 - np.float32(0.7) * (float(np.float32(CS)) - 5) / 5)) / 2) * np.float32(1.00041)
 
         object_i = 0
         press_i = 0
 
-        while object_i < len(hitobjs) and press_i < len(keypress_times):
-            hitobj_time = hitobjs[object_i][0]
-            press_time = keypress_times[press_i]
 
-            if press_time < hitobj_time - hitwindow / 2:
+        while object_i < len(hitobjs) and press_i < len(replay_data):
+            hitobj_time = hitobjs[object_i][0]
+            press_time = replay_data[press_i][0]
+
+            hitobj_xy = hitobjs[object_i][1]
+            press_xy = replay_data[press_i][1]
+
+            hitobj_end_time = hitobjs[object_i][2]
+            hitobj_type = hitobjs[object_i][3]
+
+            # before sliderbug fix, notelock ended right after the hitwindow50
+            if version < 20190513:
+                notelock_end_time = hitobj_time + hitwindow
+                if hitobj_type != 0:
+                    notelock_end_time = min(notelock_end_time, hitobj_end_time)
+            # after sliderbug fix, notelock ends after the hitobject end time
+            else:
+                notelock_end_time = hitobj_end_time
+                # and apparently notelock was increased by 2ms for circles (from testing)
+                if hitobj_type == 0:
+                    notelock_end_time += hitwindow + 2
+                # account for 0 frames that cause notelock to be 1ms shorter
+                if replay_data[press_i][2]:
+                    notelock_end_time -= 1
+
+
+            # can't press on hitobjects before hitwindowmiss
+            if press_time < hitobj_time - 399.5:
                 press_i += 1
-            elif press_time > hitobj_time + hitwindow / 2:
+                continue
+
+            if press_time < hitobj_time - hitwindow:
+                # pressing on a circle or slider during hitwindowmiss will cause a miss
+                if np.linalg.norm(press_xy - hitobj_xy) <= hitradius and hitobj_type != 2:
+
+                    # sliders don't disappear after missing
+                    # so we skip to the press_i that is after notelock_end_time
+                    press_i += 1
+                    if press_i < len(replay_data) and hitobj_type == 1 and version >= 20190513:
+                        while replay_data[press_i][0] <= notelock_end_time:
+                            press_i += 1
+                            if press_i >= len(replay_data):
+                                break
+                    object_i += 1
+                # keypress not on object, so we move to the next keypress
+                else:
+                    press_i += 1
+            elif press_time >= notelock_end_time:
+                # can no longer interact with hitobject after notelock_end_time
+                # so we move onto the next object
                 object_i += 1
             else:
-                array.append([hitobj_time, press_time])
-                press_i += 1
-                object_i += 1
+                if press_time < hitobj_time + hitwindow and np.linalg.norm(press_xy - hitobj_xy) <= hitradius and hitobj_type != 2:
+                    array.append([hitobj_time, press_time])
 
+                    # sliders don't disappear after clicking
+                    # so we skip to the press_i that is after notelock_end_time
+                    press_i += 1
+                    if press_i < len(replay_data) and hitobj_type == 1 and version >= 20190513:
+                        while replay_data[press_i][0] <= notelock_end_time:
+                            press_i += 1
+                            if press_i >= len(replay_data):
+                                break
+                    object_i += 1
+                # keypress not on object, so we move to the next keypress
+                else:
+                    press_i += 1
+        
         return array
 
     # TODO (some) code duplication with this method and a similar one in
