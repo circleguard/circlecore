@@ -309,15 +309,16 @@ class Investigator:
             hitobj_end_time = hitobjs[object_i][2]
             hitobj_type = hitobjs[object_i][3]
 
-            # before sliderbug fix, notelock ended right after the hitwindow50
+            # before sliderbug fix, notelock ended after hitwindow50
             if version < 20190513:
                 notelock_end_time = hitobj_time + hitwindow
+                # exception for sliders/spinners, where notelock ends after hitobject end time if it's earlier
                 if hitobj_type != 0:
                     notelock_end_time = min(notelock_end_time, hitobj_end_time)
-            # after sliderbug fix, notelock ends after the hitobject end time
+            # after sliderbug fix, notelock ends after hitobject end time
             else:
                 notelock_end_time = hitobj_end_time
-                # and apparently notelock was increased by 2ms for circles (from testing)
+                # apparently notelock was increased by 2ms for circles (from testing)
                 if hitobj_type == 0:
                     notelock_end_time += hitwindow + 2
                 # account for 0 frames that cause notelock to be 1ms shorter
