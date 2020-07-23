@@ -271,7 +271,7 @@ class Investigator:
             filtered_replay_data.insert(j + i + 1, filtered_replay_data[j + i])
             i += 1
         
-        return np.array(filtered_replay_data, dtype=object)
+        return filtered_replay_data
 
     # TODO add exception for 2b objects (>1 object at the same time) for current version of notelock
     @staticmethod
