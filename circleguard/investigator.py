@@ -4,6 +4,8 @@ import numpy as np
 
 from circleguard.enums import Key, Detect
 from circleguard.result import RelaxResult, CorrectionResult, TimewarpResult
+from circleguard.mod import Mod
+from slider.beatmap import Circle, Slider, Spinner
 
 class Investigator:
     """
@@ -26,6 +28,7 @@ class Investigator:
     """
 
     MASK = int(Key.M1) | int(Key.M2)
+    VERSION_SLIDERBUG_FIXED = 20190513
 
     def __init__(self, replay, detect, max_angle, min_distance, beatmap=None):
         self.replay = replay
@@ -64,12 +67,13 @@ class Investigator:
             The beatmap to calculate ``replay``'s ur with.
         """
 
-        easy = replay.mods.value & 1 << 1
-        hard_rock = replay.mods.value & 1 << 4
+        easy = Mod.EZ in replay.mods
+        hard_rock = Mod.HR in replay.mods
         hitobjs = Investigator._parse_beatmap(beatmap, easy, hard_rock)
         version = replay.game_version
 
-        # use the timestamp as the version if it doesn't exist
+        # replicate version with timestamp, this is only accurate if the user keeps their game up to date.
+        # We don't get the timestamp from `ReplayMap`, only `ReplayPath`
         if version == None:
             version = int(f"{replay.timestamp.year}{replay.timestamp.month:02d}{replay.timestamp.day:02d}")
 
@@ -241,19 +245,7 @@ class Investigator:
 
         # parse hitobj
         for hit in beatmap.hit_objects(easy=easy, hard_rock=hard_rock):
-            time = hit.time.total_seconds() * 1000
-            end_time = time
-            obj_type = 0
-            # object end time is different depending on the type of object
-            # type of hit object is necessary for notelock calculations (0 circle, 1 slider, 2 spinner)
-            if hasattr(hit, "end_time"):
-                end_time = hit.end_time.total_seconds() * 1000
-                if hasattr(hit, "curve"):
-                    obj_type = 1
-                else:
-                    obj_type = 2
-            p = hit.position
-            hitobjs.append([time, [p.x, p.y], end_time, obj_type])
+            hitobjs.append(hit)
         return hitobjs
 
     @staticmethod
@@ -299,17 +291,26 @@ class Investigator:
 
 
         while object_i < len(hitobjs) and press_i < len(replay_data):
-            hitobj_time = hitobjs[object_i][0]
+            hitobj = hitobjs[object_i]
+
+            hitobj_time = hitobj.time.total_seconds() * 1000
             press_time = replay_data[press_i][0]
 
-            hitobj_xy = hitobjs[object_i][1]
+            hitobj_xy = [hitobj.position.x, hitobj.position.y]
             press_xy = replay_data[press_i][1]
 
-            hitobj_end_time = hitobjs[object_i][2]
-            hitobj_type = hitobjs[object_i][3]
+            if isinstance(hitobj, Circle):
+                hitobj_type = 0
+                hitobj_end_time = hitobj_time
+            elif isinstance(hitobj, Slider):
+                hitobj_type = 1
+                hitobj_end_time = hitobj.end_time.total_seconds() * 1000
+            else:
+                hitobj_type = 2
+                hitobj_end_time = hitobj.end_time.total_seconds() * 1000
 
             # before sliderbug fix, notelock ended after hitwindow50
-            if version < 20190513:
+            if version < Investigator.VERSION_SLIDERBUG_FIXED:
                 notelock_end_time = hitobj_time + hitwindow
                 # exception for sliders/spinners, where notelock ends after hitobject end time if it's earlier
                 if hitobj_type != 0:
@@ -337,7 +338,7 @@ class Investigator:
                     # sliders don't disappear after missing
                     # so we skip to the press_i that is after notelock_end_time
                     press_i += 1
-                    if press_i < len(replay_data) and hitobj_type == 1 and version >= 20190513:
+                    if press_i < len(replay_data) and hitobj_type == 1 and version >= Investigator.VERSION_SLIDERBUG_FIXED:
                         while replay_data[press_i][0] <= notelock_end_time:
                             press_i += 1
                             if press_i >= len(replay_data):
@@ -348,7 +349,7 @@ class Investigator:
                     press_i += 1
             elif press_time >= notelock_end_time:
                 # can no longer interact with hitobject after notelock_end_time
-                # so we move onto the next object
+                # so we move to the next object
                 object_i += 1
             else:
                 if press_time < hitobj_time + hitwindow and np.linalg.norm(press_xy - hitobj_xy) <= hitradius and hitobj_type != 2:
@@ -357,7 +358,7 @@ class Investigator:
                     # sliders don't disappear after clicking
                     # so we skip to the press_i that is after notelock_end_time
                     press_i += 1
-                    if press_i < len(replay_data) and hitobj_type == 1 and version >= 20190513:
+                    if press_i < len(replay_data) and hitobj_type == 1 and version >= Investigator.VERSION_SLIDERBUG_FIXED:
                         while replay_data[press_i][0] <= notelock_end_time:
                             press_i += 1
                             if press_i >= len(replay_data):
