@@ -265,7 +265,7 @@ class Investigator:
         for j in np.where(changes == 3)[0]:
             filtered_replay_data.insert(j + i + 1, filtered_replay_data[j + i])
             i += 1
-        
+
         return filtered_replay_data
 
     # TODO add exception for 2b objects (>1 object at the same time) for current version of notelock
@@ -283,7 +283,6 @@ class Investigator:
 
         object_i = 0
         press_i = 0
-
 
         while object_i < len(hitobjs) and press_i < len(replay_data):
             hitobj = hitobjs[object_i]
