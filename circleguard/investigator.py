@@ -69,13 +69,15 @@ class Investigator:
 
         easy = Mod.EZ in replay.mods
         hard_rock = Mod.HR in replay.mods
-        hitobjs = Investigator._parse_beatmap(beatmap, easy, hard_rock)
-        version = replay.game_version
+        hitobjs = beatmap.hit_objects(easy=easy, hard_rock=hard_rock)
 
-        # replicate version with timestamp, this is only accurate if the user keeps their game up to date.
-        # We don't get the timestamp from `ReplayMap`, only `ReplayPath`
+        version = replay.game_version
+        # replicate version with timestamp, this is only accurate if the user
+        # keeps their game up to date. We don't get the timestamp from
+        # `ReplayMap`, only `ReplayPath`
         if version is None:
-            version = int(f"{replay.timestamp.year}{replay.timestamp.month:02d}{replay.timestamp.day:02d}")
+            version = int(f"{replay.timestamp.year}{replay.timestamp.month:02d}"
+                          f"{replay.timestamp.day:02d}")
 
         OD = beatmap.od(easy=easy, hard_rock=hard_rock)
         CS = beatmap.cs(easy=easy, hard_rock=hard_rock)
@@ -238,10 +240,6 @@ class Investigator:
         Median is used instead of mean to lessen the effect of outliers.
         """
         return np.median(frametimes)
-
-    @staticmethod
-    def _parse_beatmap(beatmap, easy, hard_rock):
-        return beatmap.hit_objects(easy=easy, hard_rock=hard_rock)
 
     @staticmethod
     def _parse_replay(replay):
