@@ -81,8 +81,8 @@ class Investigator:
 
         OD = beatmap.od(easy=easy, hard_rock=hard_rock)
         CS = beatmap.cs(easy=easy, hard_rock=hard_rock)
-        replay_data = Investigator._parse_replay(replay)
-        hits = Investigator._filter_hits(hitobjs, replay_data, OD, CS, version)
+        keydown_frames = Investigator.keydown_frames(replay)
+        hits = Investigator._filter_hits(hitobjs, keydown_frames, OD, CS, version)
         diff_array = []
 
         for hitobj_time, press_time in hits:
@@ -242,29 +242,52 @@ class Investigator:
         return np.median(frametimes)
 
     @staticmethod
-    def _parse_replay(replay):
-        filtered_replay_data = []
-        keypresses = replay.k & Investigator.MASK
-        changes = keypresses & ~np.insert(keypresses[:-1], 0, 0)
-        changes_t = np.diff(np.insert(replay.t, 0, 0))
+    def keydown_frames(replay):
+        """
+        Get the frames of ``replay`` which had a keydown event, and we should
+        consider eligible to hit a hitobject.
 
-        for i, change in enumerate(changes):
-            if change != 0:
+        Parameters
+        ----------
+        replay: :class:`~.Replay`
+            The replay to get the keydown frames of.
+
+        Returns
+        -------
+        ndarray(float, [float, float], bool)
+            The keydown frames for the replay. The first float is the time of
+            that frame, the second and third floats are the x and y position
+            of the cursor at that frame, and the bool is whether this frame was
+            a zero frametime frame.
+        """
+        keydown_frames = []
+        # the keys currently down for each frame
+        keypresses = replay.k & Investigator.MASK
+
+        # the keydowns for each frame. Frames are "keydown" frames if an
+        # additional key was pressed from the previous frame. If keys pressed
+        # remained the same or decreased (a key previously pressed is no longer
+        # pressed) from the previous frame, ``keydowns`` is zero for that frame.
+        keydowns = keypresses & ~np.insert(keypresses[:-1], 0, 0)
+        relative_t = np.diff(np.insert(replay.t, 0, 0))
+
+        for i, keydown in enumerate(keydowns):
+            if keydown != 0:
                 # not sure why, but notelock can be reduced by 1ms if the keypress frame has a frametime of 0ms
                 # so we need to keep track of the frames where this happens
-                if changes_t[i] == 0:
-                    filtered_replay_data.append([replay.t[i], replay.xy[i], True])
+                if relative_t[i] == 0:
+                    keydown_frames.append([replay.t[i], replay.xy[i], True])
                 else:
-                    filtered_replay_data.append([replay.t[i], replay.xy[i], False])
+                    keydown_frames.append([replay.t[i], replay.xy[i], False])
 
         # add a duplicate frame when 2 keys are pressed at the same time
-        changes = changes[changes != 0]
+        keydowns = keydowns[keydowns != 0]
         i = 0
-        for j in np.where(changes == 3)[0]:
-            filtered_replay_data.insert(j + i + 1, filtered_replay_data[j + i])
+        for j in np.where(keydowns == 3)[0]:
+            keydown_frames.insert(j + i + 1, keydown_frames[j + i])
             i += 1
 
-        return filtered_replay_data
+        return keydown_frames
 
     # TODO add exception for 2b objects (>1 object at the same time) for current version of notelock
     @staticmethod
