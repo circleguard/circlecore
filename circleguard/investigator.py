@@ -28,6 +28,7 @@ class Investigator:
     """
 
     MASK = int(Key.M1) | int(Key.M2)
+    # https://osu.ppy.sh/home/changelog/stable40/20190513.2
     VERSION_SLIDERBUG_FIXED = 20190513
 
     def __init__(self, replay, detect, max_angle, min_distance, beatmap=None):
