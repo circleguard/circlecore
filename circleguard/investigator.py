@@ -28,8 +28,10 @@ class Investigator:
     """
 
     MASK = int(Key.M1) | int(Key.M2)
+    # https://osu.ppy.sh/home/changelog/stable40/20190207.2
     # https://osu.ppy.sh/home/changelog/cuttingedge/20190111
-    VERSION_SLIDERBUG_FIXED = 20190111
+    VERSION_SLIDERBUG_FIXED_STABLE = 20190207
+    VERSION_SLIDERBUG_FIXED_CUTTING_EDGE = 20190111
 
     def __init__(self, replay, detect, max_angle, min_distance, beatmap=None):
         self.replay = replay
@@ -76,14 +78,19 @@ class Investigator:
         # replicate version with timestamp, this is only accurate if the user
         # keeps their game up to date. We don't get the timestamp from
         # `ReplayMap`, only `ReplayPath`
+        # we also assume that the player set the score on stable and not cutting edge
+        # when the game_version is not given
         if version is None:
+            concrete_version = False
             version = int(f"{replay.timestamp.year}{replay.timestamp.month:02d}"
                           f"{replay.timestamp.day:02d}")
+        else:
+            concrete_version = True
 
         OD = beatmap.od(easy=easy, hard_rock=hard_rock)
         CS = beatmap.cs(easy=easy, hard_rock=hard_rock)
         keydown_frames = Investigator.keydown_frames(replay)
-        hits = Investigator._filter_hits(hitobjs, keydown_frames, OD, CS, version)
+        hits = Investigator._filter_hits(hitobjs, keydown_frames, OD, CS, version, concrete_version)
         diff_array = []
 
         for hitobj_time, press_time in hits:
@@ -292,7 +299,11 @@ class Investigator:
 
     # TODO add exception for 2b objects (>1 object at the same time) for current version of notelock
     @staticmethod
-    def _filter_hits(hitobjs, replay_data, OD, CS, version):
+    def _filter_hits(hitobjs, replay_data, OD, CS, version, concrete_version):
+        version_sliderbug_fixed = Investigator.VERSION_SLIDERBUG_FIXED_STABLE
+        if concrete_version:
+            version_sliderbug_fixed = Investigator.VERSION_SLIDERBUG_FIXED_CUTTING_EDGE
+
         array = []
 
         # stable converts the OD, which is originally a float32, to a double
@@ -326,7 +337,7 @@ class Investigator:
                 hitobj_end_time = hitobj.end_time.total_seconds() * 1000
 
             # before sliderbug fix, notelock ended after hitwindow50
-            if version < Investigator.VERSION_SLIDERBUG_FIXED:
+            if version < version_sliderbug_fixed:
                 notelock_end_time = hitobj_time + hitwindow
                 # exception for sliders/spinners, where notelock ends after hitobject end time if it's earlier
                 if hitobj_type != 0:
@@ -354,7 +365,7 @@ class Investigator:
                     # sliders don't disappear after missing
                     # so we skip to the press_i that is after notelock_end_time
                     press_i += 1
-                    if press_i < len(replay_data) and hitobj_type == 1 and version >= Investigator.VERSION_SLIDERBUG_FIXED:
+                    if press_i < len(replay_data) and hitobj_type == 1 and version >= version_sliderbug_fixed:
                         while replay_data[press_i][0] <= notelock_end_time:
                             press_i += 1
                             if press_i >= len(replay_data):
@@ -374,7 +385,7 @@ class Investigator:
                     # sliders don't disappear after clicking
                     # so we skip to the press_i that is after notelock_end_time
                     press_i += 1
-                    if press_i < len(replay_data) and hitobj_type == 1 and version >= Investigator.VERSION_SLIDERBUG_FIXED:
+                    if press_i < len(replay_data) and hitobj_type == 1 and version >= version_sliderbug_fixed:
                         while replay_data[press_i][0] <= notelock_end_time:
                             press_i += 1
                             if press_i >= len(replay_data):
