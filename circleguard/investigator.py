@@ -281,8 +281,9 @@ class Investigator:
 
         for i, keydown in enumerate(keydowns):
             if keydown != 0:
-                # not sure why, but notelock can be reduced by 1ms if the keypress frame has a frametime of 0ms
-                # so we need to keep track of the frames where this happens
+                # not sure why, but notelock can be reduced by 1ms if the
+                # keypress frame has a frametime of 0ms so we need to keep track
+                # of the frames where this happens
                 if relative_t[i] == 0:
                     keydown_frames.append([replay.t[i], replay.xy[i], True])
                 else:
@@ -297,7 +298,8 @@ class Investigator:
 
         return keydown_frames
 
-    # TODO add exception for 2b objects (>1 object at the same time) for current version of notelock
+    # TODO add exception for 2b objects (>1 object at the same time) for current
+    #  version of notelock
     @staticmethod
     def hits(hitobjs, keydowns, OD, CS, version, concrete_version):
         version_sliderbug_fixed = Investigator.VERSION_SLIDERBUG_FIXED_STABLE
@@ -306,9 +308,9 @@ class Investigator:
 
         hits = []
 
-        # stable converts OD (and CS), which are originally a float32, to a double
-        # and this causes some hitwindows to be messed up when casted to an int
-        # so we replicate this
+        # stable converts OD (and CS), which are originally a float32, to a
+        # double and this causes some hitwindows to be messed up when casted to
+        # an int so we replicate this
         hitwindow = int(150 + 50 * (5 - float(np.float32(OD))) / 5) - 0.5
 
         # attempting to match stable hitradius
