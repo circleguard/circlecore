@@ -103,3 +103,7 @@ print(len(m[0].replay_data)) # 11100
 # automatically load the Loadables passed to them, which is why we didn't need
 # to force load anything ourselves in the first example.
 ```
+
+## Contributing
+
+Join [our discord](https://discord.gg/VNnkTjm) and ask how you can help, or look around for open issues which interest you and tackle those. PR requests are welcome!
