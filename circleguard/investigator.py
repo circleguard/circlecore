@@ -306,7 +306,7 @@ class Investigator:
 
         hits = []
 
-        # stable converts the OD, which is originally a float32, to a double
+        # stable converts OD (and CS), which are originally a float32, to a double
         # and this causes some hitwindows to be messed up when casted to an int
         # so we replicate this
         hitwindow = int(150 + 50 * (5 - float(np.float32(OD))) / 5) - 0.5
