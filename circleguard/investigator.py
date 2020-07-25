@@ -29,8 +29,8 @@ class Investigator:
 
     MASK = int(Key.M1) | int(Key.M2)
     # https://osu.ppy.sh/home/changelog/stable40/20190207.2
-    # https://osu.ppy.sh/home/changelog/cuttingedge/20190111
     VERSION_SLIDERBUG_FIXED_STABLE = 20190207
+    # https://osu.ppy.sh/home/changelog/cuttingedge/20190111
     VERSION_SLIDERBUG_FIXED_CUTTING_EDGE = 20190111
 
     def __init__(self, replay, detect, max_angle, min_distance, beatmap=None):
@@ -75,15 +75,15 @@ class Investigator:
         hitobjs = beatmap.hit_objects(easy=easy, hard_rock=hard_rock)
 
         version = replay.game_version
-        # replicate version with timestamp, this is only accurate if the user
-        # keeps their game up to date. We don't get the timestamp from
-        # `ReplayMap`, only `ReplayPath`
-        # we also assume that the player set the score on stable and not cutting edge
-        # when the game_version is not given
+
+
         if version is None:
-            concrete_version = False
+            # estimate version with timestamp, this is only accurate if the user
+            #  keeps their game up to date. We don't get the timestamp from
+            # `ReplayMap`, only `ReplayPath`
             version = int(f"{replay.timestamp.year}{replay.timestamp.month:02d}"
                           f"{replay.timestamp.day:02d}")
+            concrete_version = False
         else:
             concrete_version = True
 
@@ -292,7 +292,7 @@ class Investigator:
         # add a duplicate frame when 2 keys are pressed at the same time
         keydowns = keydowns[keydowns != 0]
         i = 0
-        for j in np.where(keydowns == 3)[0]:
+        for j in np.where(keydowns & Investigator.MASK == Investigator.MASK)[0]:
             keydown_frames.insert(j + i + 1, keydown_frames[j + i])
             i += 1
 
@@ -302,9 +302,45 @@ class Investigator:
     #  version of notelock
     @staticmethod
     def hits(hitobjs, keydowns, OD, CS, version, concrete_version):
-        version_sliderbug_fixed = Investigator.VERSION_SLIDERBUG_FIXED_STABLE
+        """
+        Determines the hits (where any hitobject was hit for the first time)
+        when playing the ``keydowns`` against the ``hitobjs``.
+
+        Parameters
+        ----------
+        hitobjs: list[:class:`slider.beatmap.HitObject`]
+            The hitobjects to play ``keydowns`` against.
+        keydowns: ndarray(float, [float, float], bool)
+            The keydown frames to play against ``hitobjs``. The first float is
+            the time of that frame, the second and third floats are the x and y
+            position of the cursor at that frame, and the bool is whether this
+            frame was a zero frametime frame.
+        OD: float
+            The Overall Difficulty of the beatmap ``hitobjs`` comes from.
+        CS: float
+            The Circle Size of the beatmap ``hitobjs`` comes from.
+        version: int
+            The version the replay ``keydowns`` comes from was played on.
+        concrete_version: bool
+            Whether we know for certain ``version`` is accurate. In cases where
+            we don't know the version of the game, we can estimate it by using
+            the time the replay was played, and ``concrete_version`` should be
+            ``False``. Otherwise, if we know the exact version, it should be
+            ``True``.
+        """
         if concrete_version:
             version_sliderbug_fixed = Investigator.VERSION_SLIDERBUG_FIXED_CUTTING_EDGE
+        else:
+            # if we're only estimating the version, assume the replay was played
+            # on stable. if we used the cutting edge version instead, we would
+            # be incorrectly using logic for sliderbug being fixed for all
+            # replays between the cutting edge version and the stable version
+            # which were played on stable.
+            # This is wrong for cutting edge replays between those two versions
+            # which do not have a concrete version, but that's better than being
+            # wrong for stable replays between those two versions.
+            version_sliderbug_fixed = Investigator.VERSION_SLIDERBUG_FIXED_STABLE
+
 
         hits = []
 
