@@ -90,7 +90,7 @@ class Investigator:
         OD = beatmap.od(easy=easy, hard_rock=hard_rock)
         CS = beatmap.cs(easy=easy, hard_rock=hard_rock)
         keydown_frames = Investigator.keydown_frames(replay)
-        hits = Investigator._filter_hits(hitobjs, keydown_frames, OD, CS, version, concrete_version)
+        hits = Investigator.hits(hitobjs, keydown_frames, OD, CS, version, concrete_version)
         diff_array = []
 
         for hitobj_time, press_time in hits:
@@ -299,12 +299,12 @@ class Investigator:
 
     # TODO add exception for 2b objects (>1 object at the same time) for current version of notelock
     @staticmethod
-    def _filter_hits(hitobjs, replay_data, OD, CS, version, concrete_version):
+    def hits(hitobjs, keydowns, OD, CS, version, concrete_version):
         version_sliderbug_fixed = Investigator.VERSION_SLIDERBUG_FIXED_STABLE
         if concrete_version:
             version_sliderbug_fixed = Investigator.VERSION_SLIDERBUG_FIXED_CUTTING_EDGE
 
-        array = []
+        hits = []
 
         # stable converts the OD, which is originally a float32, to a double
         # and this causes some hitwindows to be messed up when casted to an int
@@ -314,21 +314,20 @@ class Investigator:
         # attempting to match stable hitradius
         hitradius = np.float32(64 * ((1.0 - np.float32(0.7) * (float(np.float32(CS)) - 5) / 5)) / 2) * np.float32(1.00041)
 
-        object_i = 0
-        press_i = 0
+        hitobj_i = 0
+        keydown_i = 0
 
-        while object_i < len(hitobjs) and press_i < len(replay_data):
-            hitobj = hitobjs[object_i]
-
-            hitobj_time = hitobj.time.total_seconds() * 1000
-            press_time = replay_data[press_i][0]
-
+        while hitobj_i < len(hitobjs) and keydown_i < len(keydowns):
+            hitobj = hitobjs[hitobj_i]
+            hitobj_t = hitobj.time.total_seconds() * 1000
             hitobj_xy = [hitobj.position.x, hitobj.position.y]
-            press_xy = replay_data[press_i][1]
+
+            keydown_t = keydowns[keydown_i][0]
+            keydown_xy = keydowns[keydown_i][1]
 
             if isinstance(hitobj, Circle):
                 hitobj_type = 0
-                hitobj_end_time = hitobj_time
+                hitobj_end_time = hitobj_t
             elif isinstance(hitobj, Slider):
                 hitobj_type = 1
                 hitobj_end_time = hitobj.end_time.total_seconds() * 1000
@@ -338,64 +337,67 @@ class Investigator:
 
             # before sliderbug fix, notelock ended after hitwindow50
             if version < version_sliderbug_fixed:
-                notelock_end_time = hitobj_time + hitwindow
-                # exception for sliders/spinners, where notelock ends after hitobject end time if it's earlier
+                notelock_end_time = hitobj_t + hitwindow
+                # exception for sliders/spinners, where notelock ends after
+                # hitobject end time if it's earlier
                 if hitobj_type != 0:
                     notelock_end_time = min(notelock_end_time, hitobj_end_time)
             # after sliderbug fix, notelock ends after hitobject end time
             else:
                 notelock_end_time = hitobj_end_time
-                # apparently notelock was increased by 2ms for circles (from testing)
+                # apparently notelock was increased by 2ms for circles
+                # (from testing)
                 if hitobj_type == 0:
                     notelock_end_time += hitwindow + 2
                 # account for 0 frames that cause notelock to be 1ms shorter
-                if replay_data[press_i][2]:
+                if keydowns[keydown_i][2]:
                     notelock_end_time -= 1
 
 
             # can't press on hitobjects before hitwindowmiss
-            if press_time < hitobj_time - 399.5:
-                press_i += 1
+            if keydown_t < hitobj_t - 399.5:
+                keydown_i += 1
                 continue
 
-            if press_time < hitobj_time - hitwindow:
-                # pressing on a circle or slider during hitwindowmiss will cause a miss
-                if np.linalg.norm(press_xy - hitobj_xy) <= hitradius and hitobj_type != 2:
+            if keydown_t < hitobj_t - hitwindow:
+                # pressing on a circle or slider during hitwindowmiss will cause
+                #  a miss
+                if np.linalg.norm(keydown_xy - hitobj_xy) <= hitradius and hitobj_type != 2:
 
                     # sliders don't disappear after missing
                     # so we skip to the press_i that is after notelock_end_time
-                    press_i += 1
-                    if press_i < len(replay_data) and hitobj_type == 1 and version >= version_sliderbug_fixed:
-                        while replay_data[press_i][0] <= notelock_end_time:
-                            press_i += 1
-                            if press_i >= len(replay_data):
+                    keydown_i += 1
+                    if keydown_i < len(keydowns) and hitobj_type == 1 and version >= version_sliderbug_fixed:
+                        while keydowns[keydown_i][0] <= notelock_end_time:
+                            keydown_i += 1
+                            if keydown_i >= len(keydowns):
                                 break
-                    object_i += 1
+                    hitobj_i += 1
                 # keypress not on object, so we move to the next keypress
                 else:
-                    press_i += 1
-            elif press_time >= notelock_end_time:
+                    keydown_i += 1
+            elif keydown_t >= notelock_end_time:
                 # can no longer interact with hitobject after notelock_end_time
                 # so we move to the next object
-                object_i += 1
+                hitobj_i += 1
             else:
-                if press_time < hitobj_time + hitwindow and np.linalg.norm(press_xy - hitobj_xy) <= hitradius and hitobj_type != 2:
-                    array.append([hitobj_time, press_time])
+                if keydown_t < hitobj_t + hitwindow and np.linalg.norm(keydown_xy - hitobj_xy) <= hitradius and hitobj_type != 2:
+                    hits.append([hitobj_t, keydown_t])
 
                     # sliders don't disappear after clicking
                     # so we skip to the press_i that is after notelock_end_time
-                    press_i += 1
-                    if press_i < len(replay_data) and hitobj_type == 1 and version >= version_sliderbug_fixed:
-                        while replay_data[press_i][0] <= notelock_end_time:
-                            press_i += 1
-                            if press_i >= len(replay_data):
+                    keydown_i += 1
+                    if keydown_i < len(keydowns) and hitobj_type == 1 and version >= version_sliderbug_fixed:
+                        while keydowns[keydown_i][0] <= notelock_end_time:
+                            keydown_i += 1
+                            if keydown_i >= len(keydowns):
                                 break
-                    object_i += 1
+                    hitobj_i += 1
                 # keypress not on object, so we move to the next keypress
                 else:
-                    press_i += 1
+                    keydown_i += 1
 
-        return array
+        return hits
 
     # TODO (some) code duplication with this method and a similar one in
     # ``Comparer``. Refactor Investigator and Comparer to inherit from a base
