@@ -292,7 +292,7 @@ class Investigator:
         # add a duplicate frame when 2 keys are pressed at the same time
         keydowns = keydowns[keydowns != 0]
         i = 0
-        for j in np.where(keydowns & Investigator.MASK == Investigator.MASK)[0]:
+        for j in np.where(keydowns == Investigator.MASK)[0]:
             keydown_frames.insert(j + i + 1, keydown_frames[j + i])
             i += 1
 
