@@ -41,12 +41,15 @@ Website: <https://circleguard.dev> <br/>
 We have documentation and a tutorial at <https://circleguard.dev/docs/circlecore>. However, below is a quickstart guide.
 
 ```python
+from circleguard import *
+
 # replace "key" with your api key
 cg = Circleguard("key")
 # replays by http://osu.ppy.sh/u/2757689 and http://osu.ppy.sh/u/4196808 on map
 # http://osu.ppy.sh/b/221777
 r1 = ReplayMap(221777, 2757689)
 r2 = ReplayMap(221777, 4196808)
+
 for result in cg.steal_check([r1, r2]): # r is a StealResult
     r = result
     print(f"{r.replay1.username} +{r.replay1.mods} vs {r.replay2.username} "
@@ -87,10 +90,12 @@ m = Map(221777, span="1-2") # First two replays on 221777
 # ReplayPath, etc) defer loading anything from the api until necessary.
 # We can force the Map to load information about its replays:
 cg.load_info(m)
+
 # Once info loaded, we can iterate over Map, User, and MapUser to get the
 # replays contained by them. Formally, these objects are called "LoadableContainers"
 for replay in m:
     print(f"{replay.username} +{replay.mods} on map {replay.map_id}")
+
 # the map is info loaded, but not yet loaded, so its replays are not yet loaded either
 print(m[0].loaded) # False
 print(m[0].replay_data) # None, unloaded replays don't yet have replay data
