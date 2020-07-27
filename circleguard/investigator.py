@@ -3,6 +3,7 @@ import math
 import numpy as np
 
 from circleguard.enums import Key, Detect
+from circleguard.mod import Mod
 from circleguard.result import RelaxResult, CorrectionResult, TimewarpResult
 
 class Investigator:
@@ -48,7 +49,8 @@ class Investigator:
             yield CorrectionResult(replay, snaps)
         if self.detect & Detect.TIMEWARP:
             frametimes = self.frametimes(replay)
-            frametime = self.median_frametime(frametimes)
+            frametimes = self.clean_frametimes(frametimes)
+            frametime = self.average_frametime(frametimes)
             yield TimewarpResult(replay, frametime, frametimes)
 
     @staticmethod
@@ -210,14 +212,36 @@ class Investigator:
         return np.diff(replay.t)
 
     @staticmethod
-    def median_frametime(frametimes):
+    def clean_frametimes(frametimes):
         """
-        Calculates the median time between the frames in ``frametimes``.
+        Cleans the frametimes to remove some artificial frametimes, eg 1-2
+        frametime frames added by relax.
 
         Parameters
         ----------
         frametimes: list[int]
-            The frametimes to find the median of.
+            The frametimes to clean.
+        """
+        unique, count = np.unique(frametimes, return_counts=True)
+        unique = unique[count > np.mean(count)]
+        # remove low frametimes only if there is a peak in short frames
+        if unique[0] < unique[-1]/2:
+            cutoff = unique[0] + 2
+            return Investigator._remove_low_frametimes(frametimes, cutoff)
+        elif unique[-1] <= 4:
+            return Investigator._remove_low_frametimes(frametimes, 4)
+        return frametimes
+
+
+    @staticmethod
+    def average_frametime(frametimes):
+        """
+        Calculates the average time between the frames in ``frametimes``.
+
+        Parameters
+        ----------
+        frametimes: list[int]
+            The frametimes to find the average of.
 
         Notes
         -----
@@ -263,6 +287,43 @@ class Investigator:
                 object_i += 1
 
         return array
+
+    @staticmethod
+    def _remove_low_frametimes(frametimes, limit):
+        """
+        Removes any long run of consecutive frametimes which are less than
+        ``limit``.
+
+        Parameters
+        ----------
+        frametimes: list[int]
+            The frametimes to remove consecutive low frametimes from.
+        limit: int
+            Consider any frametime less than or equal to this to be a "low"
+            frametime, and subject to removal.
+
+        Returns
+        -------
+        list[int]
+            The passed ``frametimes`` with long runs of low frametimes removed.
+
+        Notes
+        -----
+        These low frametimes are caused by playing with relax, or switching
+        desktops during a break. It is unlikely that consecutive short frames
+        would appear in an otherwise normal replay.
+        """
+        run_length = 0
+        low_frametime_indices = []
+        for i, frametime in enumerate(frametimes):
+            if frametime <= limit:
+                run_length += 1
+                # don't cut off the run prematurely
+                continue
+            if run_length >= 7:
+                low_frametime_indices.extend(range(i - run_length, i))
+            run_length = 0
+        return np.delete(frametimes, low_frametime_indices)
 
     # TODO (some) code duplication with this method and a similar one in
     # ``Comparer``. Refactor Investigator and Comparer to inherit from a base

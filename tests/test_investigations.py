@@ -1,7 +1,9 @@
+from circleguard import ReplayPath, Mod, Detect, StealResultSim, StealResultCorr
+from circleguard.investigator import Investigator
+from tests.utils import CGTestCase, DELTA, RES
+
 import numpy as np
 
-from circleguard import ReplayPath, Mod, Detect, StealResultSim, StealResultCorr
-from tests.utils import CGTestCase, DELTA, RES
 
 class TestCorrection(CGTestCase):
     @classmethod
@@ -154,9 +156,28 @@ class TestTimewarp(CGTestCase):
         cls.timewarped3 = ReplayPath(RES / "timewarped" / "timewarped-3.osr")
         cls.timewarped4 = ReplayPath(RES / "timewarped" / "timewarped-4.osr")
 
+        cls.relax_legit = ReplayPath(RES / "legit" / "legit_144fps_nmrx.osr")
+
         cls.legit = ReplayPath(RES / "legit_replay1.osr")
 
     def test_cheated(self):
         replays = [self.timewarped1, self.timewarped2, self.timewarped3, self.timewarped4]
-        for r in self.cg.timewarp_check(replays):
+        frametimes = [11.33333, 10.66666, 8, 8.66666]
+        for i, r in enumerate(self.cg.timewarp_check(replays)):
             self.assertLess(r.frametime, Detect.FRAMETIME_LIMIT, "Timewarped replays were not detected as cheated")
+            self.assertAlmostEqual(r.frametime, frametimes[i], delta=DELTA, msg="Frametime was not correct")
+
+    def test_frametime_cleaning(self):
+        frametimes = np.array([16, 14, 1, 17, 14, 1, 0, 16, 2, 1, 2, 3, 1, 2, 3, 1, 0, 0,
+                               14, 2, 1, 2, 3, 1, 2, 1, 1, 17, 19, 20, 16, 1, 25])
+        expected_frametimes = [16, 14, 1, 17, 14, 1, 0, 16, 14, 17, 19, 20, 16, 1, 25]
+        clean_frametimes = Investigator.clean_frametimes(frametimes)
+
+        self.assertListEqual(list(clean_frametimes), expected_frametimes, "Frametimes were not cleaned as expected")
+
+    # make sure we're not detecting (legitimate) +RX replays as timewarped when
+    # they just have a ton of low frametime beacuse that's how the client works
+    # with the relax mod
+    def test_relax_legit(self):
+        frametime = list(self.cg.timewarp_check(self.relax_legit))[0].frametime
+        self.assertAlmostEqual(frametime, 7, delta=DELTA)
