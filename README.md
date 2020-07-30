@@ -34,7 +34,6 @@ This documentation refers to the project as `circlecore` to differentiate it fro
 Github: <https://github.com/circleguard/circlecore> <br/>
 Documentation: <https://circleguard.dev/docs/circlecore> <br/>
 Discord: <https://discord.gg/VNnkTjm> <br/>
-Website: <https://circleguard.dev> <br/>
 
 ## Usage
 
