@@ -455,9 +455,11 @@ class ReplayCache(ReplayContainer):
 
     Notes
     -----
-    :meth:`~.load_info` is an expensive operation for large databases
-    (likely because of inefficient sql queries). Consider using as few instances
-    of this object as possible.
+    :meth:`~.load_info` is an expensive operation for large databases created
+    on circlecore version 4.3.5 or earlier, as they do not have the necessary
+    indexes.
+    For databases created in later versions, this is a nonissue and the lookup
+    is fast.
     """
     def __init__(self, path, num_maps, num_replays):
         super().__init__(False)
@@ -477,6 +479,7 @@ class ReplayCache(ReplayContainer):
             FROM replays
             """
         ).fetchall()
+
         # flatten map_ids, because it's actually a list of lists
         map_ids = [item[0] for item in map_ids]
         chosen_maps = random.choices(map_ids, k=self.num_maps)

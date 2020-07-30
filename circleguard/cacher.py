@@ -232,12 +232,23 @@ class Cacher:
             os.makedirs(os.path.split(path)[0])
         conn = sqlite3.connect(str(path))
         c = conn.cursor()
-        c.execute("""CREATE TABLE "REPLAYS"(
-            "MAP_ID" INTEGER NOT NULL,
-            "USER_ID" INTEGER NOT NULL,
-            "REPLAY_DATA" MEDIUMTEXT NOT NULL,
-            "REPLAY_ID" INTEGER NOT NULL,
-            "MODS" INTEGER NOT NULL,
-            PRIMARY KEY("REPLAY_ID")
-        )""")
+        c.execute(
+            """
+            CREATE TABLE "REPLAYS" (
+                `MAP_ID` INTEGER NOT NULL,
+                `USER_ID` INTEGER NOT NULL,
+                `REPLAY_DATA` MEDIUMTEXT NOT NULL,
+                `REPLAY_ID` INTEGER NOT NULL,
+                `MODS` INTEGER NOT NULL,
+                PRIMARY KEY(`REPLAY_ID`)
+            )""")
+        # create our index - this does unfortunately add some size (and
+        # insertion time) to the db, but it's worth it to get fast lookups on
+        # a map, user, or mods, which are all common operations.
+        c.execute(
+            """
+            CREATE INDEX `lookup_index` ON `REPLAYS` (
+                `MAP_ID`, `USER_ID`, `MODS`
+            )
+            """)
         conn.close()
