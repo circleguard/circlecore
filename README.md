@@ -64,7 +64,7 @@ for result in cg.correction_check(r2): # r is a CorrectionResult
 
 # ReplayMap isn't the only way to represent replays; we can also get a user's
 # top 10 plays:
-u = User(12092800, span="1-1")
+u = User(12092800, span="1-10")
 # or a local replay:
 r3 = ReplayPath("/path/to/local/osr/replay.osr")
 # or all of a user's replays on a map:
