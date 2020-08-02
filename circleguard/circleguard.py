@@ -47,7 +47,8 @@ class Circleguard:
     # a healthy balance between speed and accuracy.
     DEFAULT_CHUNKS = 5
 
-    def __init__(self, key, db_path=None, slider_dir=None, loader=None, cache=True):
+    def __init__(self, key, db_path=None, slider_dir=None, loader=None, \
+        cache=True):
         self.cache = cache
         self.cacher = None
         if db_path is not None:
@@ -59,8 +60,11 @@ class Circleguard:
             self.cacher = Cacher(self.cache, db_path)
 
         self.log = logging.getLogger(__name__)
+
         # allow for people to pass their own loader implementation/subclass
-        self.loader = Loader(key, cacher=self.cacher) if loader is None else loader(key, self.cacher)
+        LoaderClass = Loader if loader is None else loader
+        self.loader = LoaderClass(key, self.cacher)
+
         if slider_dir is None:
             # have to keep a reference to it or the folder gets deleted and
             # can't be walked by Library
