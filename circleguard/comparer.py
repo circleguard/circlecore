@@ -125,10 +125,10 @@ class Comparer:
         if (Mod.HR in replay1.mods) ^ (Mod.HR in replay2.mods):
             xy1[:, 1] = 384 - xy1[:, 1]
 
-        if Detect.STEAL_SIM & self.detect:
+        if self.detect & Detect.STEAL_SIM:
             mean = Comparer.compute_similarity(xy1, xy2)
             yield StealResultSim(replay1, replay2, mean)
-        if Detect.STEAL_CORR & self.detect:
+        if self.detect & Detect.STEAL_CORR:
             correlation = Comparer.compute_correlation(xy1, xy2, self.num_chunks)
             yield StealResultCorr(replay1, replay2, correlation)
 
