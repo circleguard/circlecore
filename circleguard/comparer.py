@@ -49,7 +49,7 @@ class Comparer:
     def __init__(self, replays1, replays2, detect, num_chunks):
         self.log = logging.getLogger(__name__)
 
-        # filter beatmaps we had no data for
+        # filter replays we had no data for
         self.replays1 = [replay for replay in replays1 if replay.replay_data is not None]
         self.replays2 = [replay for replay in replays2 if replay.replay_data is not None] if replays2 else None
 
