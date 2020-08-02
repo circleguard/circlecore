@@ -40,7 +40,7 @@ class Circleguard:
     loader: :class:`~circleguard.loader.Loader`
         This loader will be used instead of the base loader if passed.
         This must be the class itself, *not* an instantiation of it. It will be
-        with two args - a key and a cacher.
+        instantiated with two args - a key and a cacher.
     """
     DEFAULT_ANGLE = 10
     DEFAULT_DISTANCE = 8
