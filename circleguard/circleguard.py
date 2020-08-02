@@ -5,7 +5,7 @@ import os
 from os.path import isfile, join
 import logging
 from tempfile import TemporaryDirectory
-from typing import Iterable
+from typing import Iterable, Union
 
 from slider import Beatmap, Library
 
@@ -138,8 +138,10 @@ class Circleguard:
                 bm = None
                 # don't download beatmap unless we need it for relax
                 if detect & Detect.RELAX:
-                    bm = library.lookup_by_id(replay.map_id, download=True, save=True)
-                investigator = Investigator(replay, detect, max_angle, min_distance, beatmap=bm)
+                    bm = library.lookup_by_id(replay.map_id, download=True, \
+                                              save=True)
+                investigator = Investigator(replay, detect, max_angle, \
+                                            min_distance, beatmap=bm)
                 yield from investigator.investigate()
 
             if detect & Detect.RELAX:
@@ -147,15 +149,19 @@ class Circleguard:
                     # disconnect from temporary library
                     library.close()
 
-    def steal_check(self, loadables, loadables2=None, method=Detect.STEAL_SIM, \
-        num_chunks=DEFAULT_CHUNKS) -> Iterable[StealResult]:
+
+    def similarity(self, loadables, loadables2=None, method=Detect.STEAL_SIM, \
+        num_chunks=DEFAULT_CHUNKS, single=False) \
+        -> Union[Iterable[StealResult], StealResult]:
         """
-        Investigates loadables for replay stealing.
+        Calculates the similarity between each pair of replays in ``loadables``,
+        of between each pair of replays with one from ``loadables`` and the
+        other from ``loadables2``.
 
         Parameters
         ----------
         loadables: list[:class:`~.Loadable`]
-            The loadables to investigate.
+            The loadables to calculate the similarity of.
         loadables2: list[:class:`~.Loadable`]
             If passed, compare each loadable in ``loadables``
             against each loadable in ``loadables2`` for replay stealing,
@@ -166,75 +172,144 @@ class Circleguard:
             or both (or'd together).
         num_chunks: int
             How many chunks to split the replay into when comparing. This
-            parameter only has an affect if ``method`` is
-            ``Detect.STEAL_CORR``. Note that runtime increases linearly with the
-            number of chunks.
+            parameter only has an affect if ``method`` is ``Detect.STEAL_CORR``.
+            Note that runtime increases linearly with the number of chunks.
+        single: bool
+            If true, the investigation for snaps is evaluated immediately (as
+            opposed to deferring execution with a generator, the default) and
+            the first ``StealResult`` is returned.
 
         Yields
         ------
         :class:`~.StealResult`
-            A result representing a replay stealing investigtion into a pair of
-            loadables from ``loadables`` and/or ``loadables2``.
-        """
-        yield from self.run(loadables, method, loadables2, num_chunks=num_chunks)
+            A result containing the similarity of a pair of replays from
+            ``loadables`` and/or ``loadables2``. This function only yields (as
+            opposed to returning) if ``single`` is ``False``.
 
-    def relax_check(self, loadables) -> Iterable[RelaxResult]:
+        Returns
+        -------
+        :class:`~.StealResult`
+            A result containing the similarity of a pair of replays
+            ``loadables`` and/or ``loadables2``. This function only returns (as
+            opposed to yielding) if ``single`` is ``True``.
         """
-        Investigates loadables for relax.
+        result = self.run(loadables, method, num_chunks=num_chunks)
+        if single:
+            return list(result)[0]
+        return result
+
+
+    def ur(self, loadables, single=False) \
+        -> Union[Iterable[RelaxResult], RelaxResult]:
+        """
+        Calculates the ur of each replay in ``loadables``.
 
         Parameters
         ----------
-        loadables: list[:class:`~.Loadable`]
-            The loadables to investigate.
+        loadables: list[:class:`~.Loadable`] or :class:`~.Loadable`
+            The loadables to calculate the ur of. For convenience, passing a
+            single loadable is equivalent to passing a list containing only that
+            loadable.
+        single: bool
+            If true, the investigation for snaps is evaluated immediately (as
+            opposed to deferring execution with a generator, the default) and
+            the first ``RelaxResult`` is returned.
 
         Yields
         ------
         :class:`~.RelaxResult`
-            A result representing a relax investigation into a loadable from
-            ``loadables``.
-        """
-        yield from self.run(loadables, Detect.RELAX)
+            A result containing the ur of the replay. This function only yields
+            (as opposed to returning) if ``single`` is ``False``.
 
-    def correction_check(self, loadables, max_angle=DEFAULT_ANGLE, \
-        min_distance=DEFAULT_DISTANCE) -> Iterable[CorrectionResult]:
+        Returns
+        -------
+        :class:`~.RelaxResult`
+            A result containing the ur of the replay. This function only returns
+            (as opposed to yielding) if ``single`` is ``True``.
         """
-        Investigates loadables for aim correction.
+        result = self.run(loadables, Detect.RELAX)
+        if single:
+            return list(result)[0]
+        return result
+
+
+    def snaps(self, loadables, single=False) \
+        -> Union[Iterable[CorrectionResult], CorrectionResult]:
+        """
+        Finds any snaps (sudden, suspicious movement) in each replay in
+        ``loadables``.
 
         Parameters
         ----------
-        loadables: list[:class:`~.Loadable`]
-            The loadables to investigate.
-        max_angle: float
-            Consider only points (a,b,c) where ``∠abc < max_angle``.
-        min_distance: float
-            Consider only points (a,b,c) where ``|ab| > min_distance`` and
-            ``|bc| > min_distance``.
+        loadables: list[:class:`~.Loadable`] or :class:`~.Loadable`
+            The loadables to find snaps in. Passing a single loadable is
+            equivalent to passing a list containing only that loadable; this is
+            provided for convenience.
+        single: bool
+            If true, the investigation for snaps is evaluated immediately (as
+            opposed to deferring execution with a generator, the default) and
+            the first ``CorrectionResult`` is returned.
 
         Yields
         ------
         :class:`~.CorrectionResult`
-            A result representing an aim correction investigation into a
-            loadable from ``loadables``.
-        """
-        yield from self.run(loadables, Detect.CORRECTION, max_angle=max_angle, \
-                   min_distance=min_distance)
+            A result containing the snaps of the replay. This function only
+            yields (as opposed to returning) if ``loadables`` contains more than
+            1 replay.
 
-    def timewarp_check(self, loadables) -> Iterable[TimewarpResult]:
+        Returns
+        -------
+        :class:`~.CorrectionResult`
+            A result containing the snaps of the replay. This function only
+            returns (as opposed to yielding) if ``loadables`` contains exactly 1
+            replay.
         """
-        Investigates loadables for aim correction.
+        result = self.run(loadables, Detect.CORRECTION)
+        if single:
+            return list(result)[0]
+        return result
+
+    def frametime(self, loadables, single=False) \
+        -> Union[Iterable[TimewarpResult], TimewarpResult]:
+        """
+        Calculates the average frametime and other frametime information for
+        each replay in ``loadables``.
 
         Parameters
         ----------
-        loadables: list[:class:`~.Loadable`]
-            The loadables to investigate.
+        loadables: list[:class:`~.Loadable`] or :class:`~.Loadable`
+            The loadables to calculate the frametime of. Passing a single
+            loadable is equivalent to passing a list containing only that
+            loadable; this is provided for convenience.
+        single: bool
+            If true, the investigation for snaps is evaluated immediately (as
+            opposed to deferring execution with a generator, the default) and
+            the first ``TimewarpResult`` is returned.
 
         Yields
         ------
-        :class:`~.CorrectionResult`
-            A result representing an aim correction investigation into a
-            loadable from ``loadables``.
+        :class:`~.TimewarpResult`
+            A result containing the frametimes of the replay. This function only
+            yields (as opposed to returning) if ``single`` is ``False``.
+
+        Returns
+        -------
+        :class:`~.TimewarpResult`
+            A result containing the frametimes of the replay. This function only
+            returns (as opposed to yielding) if ``single`` is ``True``.
         """
-        yield from self.run(loadables, Detect.TIMEWARP)
+        result = self.run(loadables, Detect.TIMEWARP)
+        if single:
+            return list(result)[0]
+        return result
+
+    # TODO remove in core 5.0.0
+    # @deprecated
+    steal_check = similarity
+    relax_check = ur
+    correction_check = snaps
+    timewarp_check = frametime
+
 
     def load(self, loadable):
         """
