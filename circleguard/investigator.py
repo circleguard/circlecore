@@ -76,7 +76,6 @@ class Investigator:
 
         version = replay.game_version
 
-
         if version is None:
             # estimate version with timestamp, this is only accurate if the user
             #  keeps their game up to date. We don't get the timestamp from
