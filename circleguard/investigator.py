@@ -4,6 +4,8 @@ import numpy as np
 
 from circleguard.enums import Key, Detect
 from circleguard.result import RelaxResult, CorrectionResult, TimewarpResult
+from circleguard.mod import Mod
+from slider.beatmap import Circle, Slider, Spinner
 
 class Investigator:
     """
@@ -26,6 +28,10 @@ class Investigator:
     """
 
     MASK = int(Key.M1) | int(Key.M2)
+    # https://osu.ppy.sh/home/changelog/stable40/20190207.2
+    VERSION_SLIDERBUG_FIXED_STABLE = 20190207
+    # https://osu.ppy.sh/home/changelog/cuttingedge/20190111
+    VERSION_SLIDERBUG_FIXED_CUTTING_EDGE = 20190111
 
     def __init__(self, replay, detect, max_angle, min_distance, beatmap=None):
         self.replay = replay
@@ -64,12 +70,29 @@ class Investigator:
             The beatmap to calculate ``replay``'s ur with.
         """
 
-        hitobjs = Investigator._parse_beatmap(beatmap)
-        keypress_times = Investigator._parse_keypress_times(replay)
-        filtered_array = Investigator._filter_hits(hitobjs, keypress_times, beatmap.overall_difficulty)
+        easy = Mod.EZ in replay.mods
+        hard_rock = Mod.HR in replay.mods
+        hitobjs = beatmap.hit_objects(easy=easy, hard_rock=hard_rock)
+
+        version = replay.game_version
+
+        if version is None:
+            # estimate version with timestamp, this is only accurate if the user
+            #  keeps their game up to date. We don't get the timestamp from
+            # `ReplayMap`, only `ReplayPath`
+            version = int(f"{replay.timestamp.year}{replay.timestamp.month:02d}"
+                          f"{replay.timestamp.day:02d}")
+            concrete_version = False
+        else:
+            concrete_version = True
+
+        OD = beatmap.od(easy=easy, hard_rock=hard_rock)
+        CS = beatmap.cs(easy=easy, hard_rock=hard_rock)
+        keydown_frames = Investigator.keydown_frames(replay)
+        hits = Investigator.hits(hitobjs, keydown_frames, OD, CS, version, concrete_version)
         diff_array = []
 
-        for hitobj_time, press_time in filtered_array:
+        for hitobj_time, press_time in hits:
             diff_array.append(press_time - hitobj_time)
         return np.std(diff_array) * 10
 
@@ -226,43 +249,183 @@ class Investigator:
         return np.median(frametimes)
 
     @staticmethod
-    def _parse_beatmap(beatmap):
-        hitobjs = []
+    def keydown_frames(replay):
+        """
+        Get the frames of ``replay`` which had a keydown event, and we should
+        consider eligible to hit a hitobject.
 
-        # parse hitobj
-        for hit in beatmap.hit_objects_no_spinners:
-            p = hit.position
-            hitobjs.append([hit.time.total_seconds() * 1000, p.x, p.y])
-        return hitobjs
+        Parameters
+        ----------
+        replay: :class:`~.Replay`
+            The replay to get the keydown frames of.
 
-    @staticmethod
-    def _parse_keypress_times(replay):
+        Returns
+        -------
+        ndarray(float, [float, float])
+            The keydown frames for the replay. The first float is the time of
+            that frame, the second and third floats are the x and y position
+            of the cursor at that frame.
+        """
+        keydown_frames = []
+        # the keys currently down for each frame
         keypresses = replay.k & Investigator.MASK
-        changes = keypresses & ~np.insert(keypresses[:-1], 0, 0)
-        return replay.t[changes != 0]
 
+        # the keydowns for each frame. Frames are "keydown" frames if an
+        # additional key was pressed from the previous frame. If keys pressed
+        # remained the same or decreased (a key previously pressed is no longer
+        # pressed) from the previous frame, ``keydowns`` is zero for that frame.
+        keydowns = keypresses & ~np.insert(keypresses[:-1], 0, 0)
+
+        for i, keydown in enumerate(keydowns):
+            if keydown != 0:
+                keydown_frames.append([replay.t[i], replay.xy[i]])
+
+        # add a duplicate frame when 2 keys are pressed at the same time
+        keydowns = keydowns[keydowns != 0]
+        i = 0
+        for j in np.where(keydowns == Investigator.MASK)[0]:
+            keydown_frames.insert(j + i + 1, keydown_frames[j + i])
+            i += 1
+
+        return keydown_frames
+
+    # TODO add exception for 2b objects (>1 object at the same time) for current
+    #  version of notelock
     @staticmethod
-    def _filter_hits(hitobjs, keypress_times, OD):
-        array = []
-        hitwindow = 150 + 50 * (5 - OD) / 5
+    def hits(hitobjs, keydowns, OD, CS, version, concrete_version):
+        """
+        Determines the hits (where any hitobject was hit for the first time)
+        when playing the ``keydowns`` against the ``hitobjs``.
 
-        object_i = 0
-        press_i = 0
+        Parameters
+        ----------
+        hitobjs: list[:class:`slider.beatmap.HitObject`]
+            The hitobjects to play ``keydowns`` against.
+        keydowns: ndarray(float, [float, float], bool)
+            The keydown frames to play against ``hitobjs``. The first float is
+            the time of that frame, the second and third floats are the x and y
+            position of the cursor at that frame, and the bool is whether this
+            frame was a zero frametime frame.
+        OD: float
+            The Overall Difficulty of the beatmap ``hitobjs`` comes from.
+        CS: float
+            The Circle Size of the beatmap ``hitobjs`` comes from.
+        version: int
+            The version the replay ``keydowns`` comes from was played on.
+        concrete_version: bool
+            Whether we know for certain ``version`` is accurate. In cases where
+            we don't know the version of the game, we can estimate it by using
+            the time the replay was played, and ``concrete_version`` should be
+            ``False``. Otherwise, if we know the exact version, it should be
+            ``True``.
+        """
+        if concrete_version:
+            version_sliderbug_fixed = Investigator.VERSION_SLIDERBUG_FIXED_CUTTING_EDGE
+        else:
+            # if we're only estimating the version, assume the replay was played
+            # on stable. if we used the cutting edge version instead, we would
+            # be incorrectly using logic for sliderbug being fixed for all
+            # replays between the cutting edge version and the stable version
+            # which were played on stable.
+            # This is wrong for cutting edge replays between those two versions
+            # which do not have a concrete version, but that's better than being
+            # wrong for stable replays between those two versions.
+            version_sliderbug_fixed = Investigator.VERSION_SLIDERBUG_FIXED_STABLE
 
-        while object_i < len(hitobjs) and press_i < len(keypress_times):
-            hitobj_time = hitobjs[object_i][0]
-            press_time = keypress_times[press_i]
 
-            if press_time < hitobj_time - hitwindow / 2:
-                press_i += 1
-            elif press_time > hitobj_time + hitwindow / 2:
-                object_i += 1
+        hits = []
+
+        # stable converts OD (and CS), which are originally a float32, to a
+        # double and this causes some hitwindows to be messed up when casted to
+        # an int so we replicate this
+        hitwindow = int(150 + 50 * (5 - float(np.float32(OD))) / 5)
+
+        # attempting to match stable hitradius
+        hitradius = np.float32(64 * ((1.0 - np.float32(0.7) * (float(np.float32(CS)) - 5) / 5)) / 2) * np.float32(1.00041)
+
+        hitobj_i = 0
+        keydown_i = 0
+
+        while hitobj_i < len(hitobjs) and keydown_i < len(keydowns):
+            hitobj = hitobjs[hitobj_i]
+            hitobj_t = hitobj.time.total_seconds() * 1000
+            hitobj_xy = [hitobj.position.x, hitobj.position.y]
+
+            keydown_t = keydowns[keydown_i][0]
+            keydown_xy = keydowns[keydown_i][1]
+
+            if isinstance(hitobj, Circle):
+                hitobj_type = 0
+                hitobj_end_time = hitobj_t + hitwindow
+            elif isinstance(hitobj, Slider):
+                hitobj_type = 1
+                hitobj_end_time = hitobj.end_time.total_seconds() * 1000
             else:
-                array.append([hitobj_time, press_time])
-                press_i += 1
-                object_i += 1
+                hitobj_type = 2
+                hitobj_end_time = hitobj.end_time.total_seconds() * 1000
 
-        return array
+            # before sliderbug fix, notelock ended after hitwindow50
+            if version < version_sliderbug_fixed:
+                notelock_end_time = hitobj_t + hitwindow
+                # exception for sliders/spinners, where notelock ends after
+                # hitobject end time if it's earlier
+                if hitobj_type != 0:
+                    notelock_end_time = min(notelock_end_time, hitobj_end_time)
+            # after sliderbug fix, notelock ends after hitobject end time
+            else:
+                notelock_end_time = hitobj_end_time
+                # apparently notelock was increased by 1ms for circles
+                # (from testing)
+                if hitobj_type == 0:
+                    notelock_end_time += 1
+
+
+            # can't press on hitobjects before hitwindowmiss
+            if keydown_t < hitobj_t - 400:
+                keydown_i += 1
+                continue
+
+            if keydown_t <= hitobj_t - hitwindow:
+                # pressing on a circle or slider during hitwindowmiss will cause
+                #  a miss
+                if np.linalg.norm(keydown_xy - hitobj_xy) <= hitradius and hitobj_type != 2:
+
+                    # sliders don't disappear after missing
+                    # so we skip to the press_i that is after notelock_end_time
+                    if hitobj_type == 1 and version >= version_sliderbug_fixed:
+                        while keydowns[keydown_i][0] < notelock_end_time:
+                            keydown_i += 1
+                            if keydown_i >= len(keydowns):
+                                break
+                    else:
+                        keydown_i += 1
+                    hitobj_i += 1
+                # keypress not on object, so we move to the next keypress
+                else:
+                    keydown_i += 1
+            elif keydown_t >= notelock_end_time:
+                # can no longer interact with hitobject after notelock_end_time
+                # so we move to the next object
+                hitobj_i += 1
+            else:
+                if keydown_t < hitobj_t + hitwindow and np.linalg.norm(keydown_xy - hitobj_xy) <= hitradius and hitobj_type != 2:
+                    hits.append([hitobj_t, keydown_t])
+
+                    # sliders don't disappear after clicking
+                    # so we skip to the press_i that is after notelock_end_time
+                    if hitobj_type == 1 and version >= version_sliderbug_fixed:
+                        while keydowns[keydown_i][0] < notelock_end_time:
+                            keydown_i += 1
+                            if keydown_i >= len(keydowns):
+                                break
+                    else:
+                        keydown_i += 1
+                    hitobj_i += 1
+                # keypress not on object, so we move to the next keypress
+                else:
+                    keydown_i += 1
+
+        return hits
 
     # TODO (some) code duplication with this method and a similar one in
     # ``Comparer``. Refactor Investigator and Comparer to inherit from a base

@@ -548,6 +548,12 @@ class ReplayDir(ReplayContainer):
         return self.dir_path == other.dir_path
 
 
+# TODO in core 5.0.0  centralize as much logic as possible in ``Replay``.
+# We currently do various attribute checks like
+# ``if replay.replay_data is None``; this should be a `has_data()` method
+# instead. Similarly, ``version`` should be provided by the replay, along
+# with if it's a concrete version or just a guess, or ``None`` if we don't even
+# have a guess.
 class Replay(Loadable):
     """
     A replay played by a player.
@@ -561,6 +567,8 @@ class Replay(Loadable):
 
     Attributes
     ----------
+    game_version: int
+        The version of the game that the play was set on.
     timestamp: :class:`datetime.datetime`
         When this replay was played.
     map_id: int
@@ -593,13 +601,14 @@ class Replay(Loadable):
         self.weight = weight
 
         # remains ``None`` until replay is loaded
-        self.timestamp   = None
-        self.map_id      = None
-        self.username    = None
-        self.user_id     = None
-        self.mods        = None
-        self.replay_id   = None
-        self.replay_data = None
+        self.game_version = None
+        self.timestamp    = None
+        self.map_id       = None
+        self.username     = None
+        self.user_id      = None
+        self.mods         = None
+        self.replay_id    = None
+        self.replay_data  = None
 
         # remains ``None``` when replay is unloaded or loaded but with no data
         self.t = None
@@ -900,6 +909,7 @@ class ReplayPath(Replay):
             return
 
         loaded = circleparse.parse_replay_file(self.path)
+        self.game_version = loaded.game_version
         self.timestamp = loaded.timestamp
         self.map_id = loader.map_id(loaded.beatmap_hash)
         self.username = loaded.player_name
