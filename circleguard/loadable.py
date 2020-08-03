@@ -134,6 +134,9 @@ class LoadableContainer(Loadable):
         """
         pass
 
+    def __len__(self):
+        return len(self.all_replays())
+
     def __getitem__(self, key):
         replays = self.all_replays()
         if isinstance(key, slice):
@@ -449,11 +452,14 @@ class ReplayCache(ReplayContainer):
         How many (randomly chosen) maps to load replays from.
     limit: int
         How many replays to load for each map.
+
     Notes
     -----
-    :meth:`~.load_info` is an expensive operation for large databases
-    (likely because of inefficient sql queries). Consider using as few instances
-    of this object as possible.
+    :meth:`~.load_info` is an expensive operation for large databases created
+    on circlecore version 4.3.5 or earlier, as they do not have the necessary
+    indexes.
+    For databases created in later versions, this is a nonissue and the lookup
+    is fast.
     """
     def __init__(self, path, num_maps, num_replays):
         super().__init__(False)
@@ -473,6 +479,7 @@ class ReplayCache(ReplayContainer):
             FROM replays
             """
         ).fetchall()
+
         # flatten map_ids, because it's actually a list of lists
         map_ids = [item[0] for item in map_ids]
         chosen_maps = random.choices(map_ids, k=self.num_maps)
@@ -632,56 +639,96 @@ class Replay(Loadable):
         # use an iter an an optimization so we don't recreate the list when
         # taking (and removing) the first element
         replay_data = iter(replay_data)
-        # The following is guesswork, but seems to accurately describe replays.
-        # This references the "first" frame assuming that we have already
-        # removed the truly first zero time frame, if it is present. So
-        # technically the "first" frame below is the second frame.
-        # There are two possibilities for osrs:
+        # The following comments in this method are guesswork, but seems to
+        # accurately describe replays. This references the "first" frame
+        # assuming that we have already removed the truly first zero time frame,
+        # if it is present. So technically the "first" frame below may be the
+        # second frame.
+        # There are two possibilities for replays:
         # * for replays with a skip in the beginning, the first frame time is
         #   the skip duration. The next frame after that will have a negative
         #   time, to account for the replay data before the skip.
-        # * for replays without a skip in the beginning, the firstframe time is
+        # * for replays without a skip in the beginning, the first frame time is
         #   -1.
-        # Since in the first case the first frame time is positive, it would
-        # cause our loop below to ignore the negative time frame afterwards,
-        # throwing off the replay. To solve this we initiaize the running time
-        # to the first frame's time.
+        # Since in the first case the first frame time is a large positive,
+        # this would make ``highest_running_t`` large and cause all replay data
+        # before the skip to be ignored. To solve this, we initialize
+        # ``running_t`` to the first frame's time.
         running_t = next(replay_data).time_since_previous_action
-        # The following is more guesswork, but is again seemingly accurate.
-        # * We consider negative frames at the very beginning of a replay to be
-        #   valid (they're frames from before the start of the mp3 at t=0),
-        #   but only for the purposes of changing the running time - they are
-        #   not added to the final list of frames. We do this because lazer
-        #   does this. Lazer counts the time towards the running time, but skips
-        #   the frame otherwise. https://github.com/ppy/osu/blob/1587d4b26fbad691242544a62dbf017a78705ae3/osu.Game/Scoring/Legacy/LegacyScoreDecoder.cs#L247-L250.
-        #   There is typically (and potentially always) at most a single large
-        #   negative frame at the beginning of the replay, which occurs when the
-        #   replay has data before the break of a map.
-        # * We consider negative time frames in the middle of a replay to be
-        #   invalid. They are not counted towards the running time nor added
-        #   to the list of frames, but are entirely skipped. This is *not*
-        #   what lazer does (as far as I can tell), but if we respect negative
-        #   frames in the middle of a replay, they can cause frames which are
-        #   obviously next to each other when viewed in game to become entirely
-        #   out of order, as the negative frame puts us "backwards" in time.
-        #   Ignoring negative frames entirely after the beginning seems to
-        #   solve this issue. It may, however, not be the canonical solution.
-        positive_seen = False
-
+        # We consider negative time frames in the middle of replays to be valid,
+        # with a caveat. Their negative time is counted toward ``running_t``
+        # (that is, decreases ``running_t``), but any frames after it are
+        # ignored, until the total time passed of ignored frames is greater than
+        # or equal to the negative frame.
+        # There's one more catch - the frame that brings us *out* of this
+        # "negative time" section where we're ignoring frames will cause a
+        # special frame to be inserted, which has the same time as the frame
+        # that brought us *into* the negative time section, and specially
+        # calculated x and y positions. Details below.
+        # I do not know why stable treats negative time frames in this way.
+        # It is not what lazer does, as far as I can tell. But it is the only
+        # reasonable explanation for stable behavior. This solution may not,
+        # however, be the canonical solution.
+        highest_running_t = np.NINF
+        # The last positive frame we encountered before entering a negative
+        # section.
+        last_positive_frame = None
+        # the running time when we encountered ``last_positive_fram``. We do not
+        # store this information in each individual frame.
+        last_positive_frame_cum_time = None
+        previous_frame = None
         for e in replay_data:
+            # check if we were in a negative section of the play at the previous
+            # frame (f0) before applying the current frame (f1), so we can
+            # apply special logic if f1 is the frame that gets us out of the
+            # negative section.
+            was_in_negative_section = running_t < highest_running_t
+
             e_t = e.time_since_previous_action
-            if e_t < 0:
-                if not positive_seen:
-                    running_t += e_t
-                continue
-            else:
-                positive_seen = True
             running_t += e_t
+            highest_running_t = max(highest_running_t, running_t)
+            if running_t < highest_running_t:
+                # if we weren't in a negative section in f0, f1 is the first
+                # frame to bring us into one, so f0 is the last positive frame.
+                if not was_in_negative_section:
+                    last_positive_frame = previous_frame
+                    # we want to set it to the cumulative time before f1
+                    # was processed, so subtract out the current e_t
+                    last_positive_frame_cum_time = running_t - e_t
+                previous_frame = e
+                continue
+
+            # if we get here, f1 brought us out of the negative section. In this
+            # case, osu! actually inserts a new frame, with:
+            # * t = the cumulative time at the last positive frame (yes, this
+            #   means there are two frames at the same time in the replay
+            #   playback).
+            # * x, y = a weighted average between the positions of f0 and f1,
+            #   weighted by how close the last positive frame's time is to each
+            #   of the two frames' times.
+            # * k = the keypresses of the last positive frame.
+            if was_in_negative_section:
+                data[0].append(last_positive_frame_cum_time)
+
+                # this is [running_t at f0, running_t at f1], to interpolate
+                # the last positive frame's time between.
+                xp = [running_t - e_t, running_t]
+
+                fp = [previous_frame.x, e.x]
+                x = np.interp(last_positive_frame_cum_time, xp, fp)
+                data[1].append(x)
+
+                fp = [previous_frame.y, e.y]
+                y = np.interp(last_positive_frame_cum_time, xp, fp)
+                data[2].append(y)
+
+                data[3].append(last_positive_frame.keys_pressed)
 
             data[0].append(running_t)
             data[1].append(e.x)
             data[2].append(e.y)
             data[3].append(e.keys_pressed)
+            previous_frame = e
 
         block = np.array(data)
 
@@ -856,8 +903,10 @@ class ReplayPath(Replay):
         self.timestamp = loaded.timestamp
         self.map_id = loader.map_id(loaded.beatmap_hash)
         self.username = loaded.player_name
-        # TODO make this lazy loaded so we don't waste an api call
-        self.user_id = loader.user_id(loaded.player_name)
+        # our `user_id` attribute is lazy loaded, so we need to retain the
+        # `Loader#user_id` function to use later to load it.
+        self.user_id_func = loader.user_id
+        self._user_id = None
         self.mods = Mod(loaded.mod_combination)
         self.replay_id = loaded.replay_id
         self.hash = loaded.beatmap_hash
@@ -865,6 +914,16 @@ class ReplayPath(Replay):
         self._process_replay_data(loaded.play_data)
         self.loaded = True
         self.log.log(TRACE, "Finished loading %s", self)
+
+    @property
+    def user_id(self):
+        if not self._user_id:
+            self._user_id = self.user_id_func(self.username)
+        return self._user_id
+
+    @user_id.setter
+    def user_id(self, user_id):
+        self._user_id = user_id
 
     def __eq__(self, loadable):
         """

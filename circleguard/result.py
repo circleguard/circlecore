@@ -126,7 +126,7 @@ class StealResultSim(StealResult):
 class StealResultCorr(StealResult):
     """
     The result of a test for replay stealing between two replays, using
-    the similarity algorithm.
+    the correlation algorithm.
 
     Parameters
     ----------
@@ -140,10 +140,9 @@ class StealResultCorr(StealResult):
     later_replay: :class:`~circleguard.loadable.Replay`
         The later of the two replays (when the score was made). This is a
         reference to either replay1 or replay2.
-    similarity: int
-        The similarity of the two replays (the lower, the more similar).
-        Similarity is, roughly speaking, a measure of the average pixel
-        distance between the two replays.
+    correlation: int
+        The correlation of the two replays (the higher, the more highly
+        correlated).
     """
     def __init__(self, replay1: Replay, replay2: Replay, correlation: float):
         super().__init__(replay1, replay2)
@@ -159,8 +158,8 @@ class RelaxResult(InvestigationResult):
     replay: :class:`~circleguard.loadable.Replay`
         The replay investigated.
     ur: float
-        The (unconverted) unstable rate of the replay. More information on UR
-        available at https://osu.ppy.sh/help/wiki/Accuracy#accuracy
+        The (unconverted) unstable rate of the replay. More information on UR is
+        available at https://osu.ppy.sh/help/wiki/Accuracy#accuracy.
     """
     def __init__(self, replay: Replay, ur: float):
         super().__init__(replay, ResultType.RELAX)

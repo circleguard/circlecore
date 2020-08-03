@@ -24,6 +24,11 @@ class Comparer:
         not ``None``, or against other replays in ``replays1``.
     replays2: list[:class:`~circleguard.loadable.Replay`]
         The replays to compare against ``replays1``.
+    num_chunks: int
+        How many chunks to split the replay into when comparing. This
+        parameter only has an affect if ``detect`` is ``Detect.STEAL_CORR``.
+        Note that runtime increases linearly with the number of chunks.
+
 
     Notes
     -----
@@ -41,15 +46,16 @@ class Comparer:
     replays.
     """
 
-    def __init__(self, replays1, replays2, detect):
+    def __init__(self, replays1, replays2, detect, num_chunks):
         self.log = logging.getLogger(__name__)
 
-        # filter beatmaps we had no data for
+        # filter replays we had no data for
         self.replays1 = [replay for replay in replays1 if replay.replay_data is not None]
         self.replays2 = [replay for replay in replays2 if replay.replay_data is not None] if replays2 else None
 
         self.mode = "double" if self.replays2 else "single"
         self.detect = detect
+        self.num_chunks = num_chunks
 
     def compare(self):
         """
@@ -119,11 +125,11 @@ class Comparer:
         if (Mod.HR in replay1.mods) ^ (Mod.HR in replay2.mods):
             xy1[:, 1] = 384 - xy1[:, 1]
 
-        if Detect.STEAL_SIM & self.detect:
+        if self.detect & Detect.STEAL_SIM:
             mean = Comparer.compute_similarity(xy1, xy2)
             yield StealResultSim(replay1, replay2, mean)
-        if Detect.STEAL_CORR & self.detect:
-            correlation = Comparer.compute_correlation(xy1, xy2)
+        if self.detect & Detect.STEAL_CORR:
+            correlation = Comparer.compute_correlation(xy1, xy2, self.num_chunks)
             yield StealResultCorr(replay1, replay2, correlation)
 
 
@@ -152,7 +158,7 @@ class Comparer:
         return distance.mean()
 
     @staticmethod
-    def compute_correlation(xy1, xy2, num_chunks=1):
+    def compute_correlation(xy1, xy2, num_chunks):
 
         xy1 = xy1.T
         xy2 = xy2.T
