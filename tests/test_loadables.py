@@ -149,8 +149,8 @@ class TestEquality(CGTestCase):
         cls.r1 = ReplayMap(1754777, 2766034, cache=True)
         cls.r2 = ReplayMap(1754777, 2766034, mods=Mod.NF)
 
-        cls.r3 = ReplayPath(RES / "legit_replay1.osr")
-        cls.r4 = ReplayPath(RES / "legit_replay1.osr", cache=True)
+        cls.r3 = ReplayPath(RES / "legit" / "legit-1.osr")
+        cls.r4 = ReplayPath(RES / "legit" / "legit-1.osr", cache=True)
         cls.r5 = ReplayPath(RES / "stolen_replay1.osr")
 
         cls.cg.load_info(cls.user)

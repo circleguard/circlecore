@@ -35,8 +35,8 @@ class TestSteal(CGTestCase):
         super().setUpClass()
         cls.stolen1 = ReplayPath(RES / "stolen_replay1.osr")
         cls.stolen2 = ReplayPath(RES / "stolen_replay2.osr")
-        cls.legit1 = ReplayPath(RES / "legit_replay1.osr")
-        cls.legit2 = ReplayPath(RES / "legit_replay2.osr")
+        cls.legit1 = ReplayPath(RES / "legit" / "legit-1.osr")
+        cls.legit2 = ReplayPath(RES / "legit" / "legit-2.osr")
         cls.time_shifted1 = ReplayPath(RES / "stealing" / "stolen-time-shifted-1-1.osr")
         cls.time_shifted2 = ReplayPath(RES / "stealing" / "stolen-time-shifted-1-2.osr")
 
@@ -154,7 +154,7 @@ class TestTimewarp(CGTestCase):
         cls.timewarped3 = ReplayPath(RES / "timewarped" / "timewarped-3.osr")
         cls.timewarped4 = ReplayPath(RES / "timewarped" / "timewarped-4.osr")
 
-        cls.legit = ReplayPath(RES / "legit_replay1.osr")
+        cls.legit = ReplayPath(RES / "legit" / "legit-1.osr")
 
     def test_cheated(self):
         replays = [self.timewarped1, self.timewarped2, self.timewarped3, self.timewarped4]
