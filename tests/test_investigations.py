@@ -1,7 +1,7 @@
 import numpy as np
 
 from circleguard import ReplayPath, Mod, Detect, StealResultSim, StealResultCorr
-from tests.utils import CGTestCase, DELTA, RES
+from tests.utils import CGTestCase, DELTA, UR_DELTA, RES
 
 class TestCorrection(CGTestCase):
     @classmethod
@@ -144,6 +144,18 @@ class TestSteal(CGTestCase):
             if isinstance(r, StealResultCorr):
                 self.assertGreater(r.correlation, Detect.CORR_LIMIT, "Cheated replays were not detected as cheated with corr")
 
+class TestRelax(CGTestCase):
+    @classmethod
+    def setUpClass(cls):
+        super().setUpClass()
+        # TODO check `legit-12.osr` as well once ur calc notelock issues are
+        # dealt with, which causes us to be ~3 ur off from the actual for it
+        cls.replays = [ReplayPath(RES / "legit" / f"legit-{i}.osr") for i in range(1, 12)]
+        cls.urs = [66.74, 66.56, 242.73, 115.54, 254.56, 90.88, 121.62, 163.01, 207.31, 198.79, 138.25]
+
+    def test_cheated(self):
+        for i, replay in enumerate(self.replays):
+            self.assertAlmostEqual(self.cg.ur(replay, single=True).ur, self.urs[i], delta=UR_DELTA)
 
 class TestTimewarp(CGTestCase):
     @classmethod
