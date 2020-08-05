@@ -5,7 +5,7 @@ import numpy as np
 from circleguard.enums import Key, Detect
 from circleguard.result import RelaxResult, CorrectionResult, TimewarpResult
 from circleguard.mod import Mod
-from slider.beatmap import Circle, Slider, Spinner
+from slider.beatmap import Circle, Slider
 
 class Investigator:
     """

@@ -5,7 +5,6 @@ import logging
 from lzma import LZMAError
 from functools import lru_cache
 
-import requests
 from requests import RequestException
 import circleparse
 import ossapi
@@ -13,9 +12,9 @@ import ossapi
 from circleguard.replay_info import ReplayInfo
 from circleguard.enums import Error
 from circleguard.mod import Mod
-from circleguard.exceptions import (InvalidArgumentsException, APIException, CircleguardException,
-                        RatelimitException, InvalidKeyException, ReplayUnavailableException, UnknownAPIException,
-                        InvalidJSONException, NoInfoAvailableException)
+from circleguard.exceptions import (InvalidArgumentsException,
+    RatelimitException, ReplayUnavailableException, UnknownAPIException,
+    InvalidJSONException, NoInfoAvailableException)
 from circleguard.utils import TRACE
 from circleguard.span import Span
 

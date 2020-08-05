@@ -4,7 +4,7 @@ import logging
 import math
 
 import numpy as np
-from scipy import signal, stats
+from scipy import signal
 
 from circleguard.loadable import Replay
 from circleguard.enums import Detect

@@ -1,21 +1,16 @@
 from pathlib import Path
-import sys
-import itertools
-import os
-from os.path import isfile, join
 import logging
 from tempfile import TemporaryDirectory
 from typing import Iterable, Union
 
-from slider import Beatmap, Library
+from slider import Library
 
 from circleguard.loader import Loader
 from circleguard.comparer import Comparer
 from circleguard.investigator import Investigator
 from circleguard.cacher import Cacher
-from circleguard.exceptions import CircleguardException
-from circleguard.loadable import Check, ReplayMap, ReplayPath, Replay, Map
-from circleguard.enums import RatelimitWeight, Detect
+from circleguard.loadable import Check
+from circleguard.enums import Detect
 from circleguard.result import (Result, StealResult, RelaxResult,
     CorrectionResult, TimewarpResult)
 

@@ -1,4 +1,4 @@
-from enum import Enum, Flag, IntFlag
+from enum import Enum, IntFlag
 
 from circleguard.exceptions import (UnknownAPIException, RatelimitException,
                 InvalidKeyException, ReplayUnavailableException, InvalidJSONException)
