@@ -977,6 +977,100 @@ class ReplayPath(Replay):
             return f"Unloaded ReplayPath at {self.path}"
 
 
+class ReplayString(Replay):
+    """
+    A :class:`~.Replay` saved locally in a ``.osr`` file, when the file has
+    already been read as a string.
+
+    Parameters
+    ----------
+    replay_data_str: str
+        The contents of the replay file as a string.
+    cache: bool
+        Whether to cache this replay once it is loaded. Note that currently
+        we do not cache :class:`~.ReplayString` regardless of this parameter.
+    """
+
+    def __init__(self, replay_data_str, cache=None):
+        super().__init__(RatelimitWeight.LIGHT, cache)
+        self.log = logging.getLogger(__name__ + ".ReplayString")
+        self.replay_data_str = replay_data_str
+        self.beatmap_hash = None
+
+    def load(self, loader, cache):
+        """
+        Loads the data for this replay from the string replay data.
+
+        Parameters
+        ----------
+        loader: :class:`~.loader.Loader`
+            The :class:`~.loader.Loader` to load this replay with.
+        cache: bool
+            Whether to cache this replay after loading it. This only has an
+            effect if ``self.cache`` is unset (``None``). Note that currently
+            we do not cache :class:`~.ReplayString` regardless of this parameter.
+
+        Notes
+        -----
+        If ``replay.loaded`` is ``True``, this method has no effect.
+        ``replay.loaded`` is set to ``True`` after this method is finished.
+        """
+
+        # we don't cache local replays currently. Ignore cache option for
+        # if/when we need it
+        self.log.debug("Loading ReplayString %r", self)
+        if self.loaded:
+            self.log.debug("%s already loaded, not loading", self)
+            return
+
+        loaded = circleparse.parse_replay(self.replay_data_str, pure_lzma=False)
+        self.game_version = loaded.game_version
+        self.timestamp = loaded.timestamp
+        self.map_id = loader.map_id(loaded.beatmap_hash)
+        self.username = loaded.player_name
+        # our `user_id` attribute is lazy loaded, so we need to retain the
+        # `Loader#user_id` function to use later to load it.
+        self.user_id_func = loader.user_id
+        self._user_id = None
+        self.mods = Mod(loaded.mod_combination)
+        self.replay_id = loaded.replay_id
+        self.beatmap_hash = loaded.beatmap_hash
+
+        self._process_replay_data(loaded.play_data)
+        self.loaded = True
+        self.log.log(TRACE, "Finished loading %s", self)
+
+    @property
+    def user_id(self):
+        if not self._user_id:
+            self._user_id = self.user_id_func(self.username)
+        return self._user_id
+
+    @user_id.setter
+    def user_id(self, user_id):
+        self._user_id = user_id
+
+    def __eq__(self, loadable):
+        if not isinstance(loadable, ReplayString):
+            return False
+        return self.replay_data_str == loadable.replay_data_str
+
+    def __repr__(self):
+        if self.loaded:
+            return (f"ReplayString(len(replay_data_str)={len(self.replay_data_str)},"
+                    f"map_id={self.map_id},user_id={self.user_id},mods={self.mods},"
+                    f"replay_id={self.replay_id},weight={self.weight},"
+                    f"loaded={self.loaded},username={self.username})")
+        else:
+            return f"ReplayString(len(replay_data_str)={len(self.replay_data_str)})"
+
+    def __str__(self):
+        if self.loaded:
+            return f"Loaded ReplayString by {self.username} on {self.map_id}"
+        else:
+            return f"Unloaded ReplayString with {len(self.replay_data_str)} chars of data"
+
+
 class ReplayID(Replay):
     def __init__(self, replay_id, cache=None):
         super().__init__(RatelimitWeight.HEAVY, cache)
