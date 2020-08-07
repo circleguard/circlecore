@@ -923,7 +923,6 @@ class ReplayPath(Replay):
         self.mods = Mod(loaded.mod_combination)
         self.replay_id = loaded.replay_id
         self.beatmap_hash = loaded.beatmap_hash
-        self.hash = loaded.beatmap_hash
 
         self._process_replay_data(loaded.play_data)
         self.loaded = True
