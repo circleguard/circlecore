@@ -881,7 +881,10 @@ class ReplayPath(Replay):
         super().__init__(RatelimitWeight.LIGHT, cache)
         self.log = logging.getLogger(__name__ + ".ReplayPath")
         self.path = path
-        self.hash = None
+        self.beatmap_hash = None
+        # @deprecated
+        # TODO remove in core 5.x.x
+        self.hash = self.beatmap_hash
 
     def load(self, loader, cache):
         """
@@ -919,6 +922,7 @@ class ReplayPath(Replay):
         self._user_id = None
         self.mods = Mod(loaded.mod_combination)
         self.replay_id = loaded.replay_id
+        self.beatmap_hash = loaded.beatmap_hash
         self.hash = loaded.beatmap_hash
 
         self._process_replay_data(loaded.play_data)
