@@ -136,7 +136,7 @@ class Investigator:
         # sometimes get detected (falesly) as aim correction.
         # TODO Worth looking into a bit more to see if we can avoid it without
         # removing the frames entirely.
-        t, xy = Investigator.remove_unique(replay.t, replay.xy)
+        t, xy = Investigator.remove_duplicate_t(replay.t, replay.xy)
         t = t[1:-1]
 
         # labelling three consecutive points a, b and c
@@ -431,10 +431,10 @@ class Investigator:
     # ``Comparer``. Refactor Investigator and Comparer to inherit from a base
     # class, or move this method to utils. Preferrably the former.
     @staticmethod
-    def remove_unique(t, k):
+    def remove_duplicate_t(t, data):
         t, t_sort = np.unique(t, return_index=True)
-        k = k[t_sort]
-        return (t, k)
+        data = data[t_sort]
+        return (t, data)
 
 class Snap():
     """

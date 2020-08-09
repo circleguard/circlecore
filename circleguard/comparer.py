@@ -116,8 +116,8 @@ class Comparer:
 
         # interpolation breaks when multiple frames have the same time values
         # (which occurs semi frequently in replays). So filter them out
-        t1, xy1 = Comparer.remove_unique(replay1.t, replay1.xy)
-        t2, xy2 = Comparer.remove_unique(replay2.t, replay2.xy)
+        t1, xy1 = Comparer.remove_duplicate_t(replay1.t, replay1.xy)
+        t2, xy2 = Comparer.remove_duplicate_t(replay2.t, replay2.xy)
         xy1, xy2 = Comparer.interpolate(t1, t2, xy1, xy2)
         xy1, xy2 = Comparer.clean(xy1, xy2)
 
@@ -188,10 +188,10 @@ class Comparer:
 
 
     @staticmethod
-    def remove_unique(t, xy):
+    def remove_duplicate_t(t, data):
         t, t_sort = np.unique(t, return_index=True)
-        xy = xy[t_sort]
-        return (t, xy)
+        data = data[t_sort]
+        return (t, data)
 
 
     @staticmethod
