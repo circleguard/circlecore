@@ -139,7 +139,8 @@ class Investigator:
         t, xy = Investigator.remove_duplicate_t(replay.t, replay.xy)
         t = t[1:-1]
 
-        # labelling three consecutive points a, b and c
+        # label three consecutive points (a b c) and the vectors between them
+        # (ab, bc, ac)
         ab = xy[1:-1] - xy[:-2]
         bc = xy[2:] - xy[1:-1]
         ac = xy[2:] - xy[:-2]
