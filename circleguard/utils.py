@@ -2,9 +2,11 @@ from logging import Formatter
 from copy import copy
 
 from circleguard.mod import Mod
+from circleguard.enums import Key
+
+KEY_MASK = int(Key.M1) | int(Key.M2)
 
 
-########### LOGGING ##############
 
 TRACE = 5
 

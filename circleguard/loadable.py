@@ -11,7 +11,7 @@ import wtc
 
 from circleguard.enums import RatelimitWeight
 from circleguard.mod import Mod
-from circleguard.utils import TRACE
+from circleguard.utils import TRACE, KEY_MASK
 from circleguard.loader import Loader
 from circleguard.span import Span
 
@@ -614,6 +614,7 @@ class Replay(Loadable):
         self.t = None
         self.xy = None
         self.k = None
+        self._keydowns = None
 
     def _process_replay_data(self, replay_data):
         """
@@ -754,6 +755,24 @@ class Replay(Loadable):
         self.t = t
         self.xy = xy
         self.k = k
+
+    @property
+    def keydowns(self):
+        """
+        Returns a list of the keys pressed for each frame that were not pressed
+        in the previous frame.
+
+        Examples
+        --------
+        If the first frame (``f1``) has keys ``K1`` and ``f2`` has keys
+        ``K1 + K2``, then ``keydowns[1]`` is ``K2``.
+        """
+        if not self.replay_data:
+            return None
+        if not self._keydowns:
+            keypresses = self.k & KEY_MASK
+            self._keydowns = keypresses & ~np.insert(keypresses[:-1], 0, 0)
+        return self._keydowns
 
     def __repr__(self):
         return (f"Replay(timestamp={self.timestamp},map_id={self.map_id},user_id={self.user_id},mods={self.mods},"

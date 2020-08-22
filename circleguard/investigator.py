@@ -5,6 +5,7 @@ import numpy as np
 from circleguard.enums import Key, Detect
 from circleguard.result import RelaxResult, CorrectionResult, TimewarpResult
 from circleguard.mod import Mod
+from circleguard.utils import KEY_MASK
 from slider.beatmap import Circle, Slider
 
 class Investigator:
@@ -27,7 +28,6 @@ class Investigator:
     :class:`~.comparer.Comparer`, for comparing multiple replays.
     """
 
-    MASK = int(Key.M1) | int(Key.M2)
     # https://osu.ppy.sh/home/changelog/stable40/20190207.2
     VERSION_SLIDERBUG_FIXED_STABLE = 20190207
     # https://osu.ppy.sh/home/changelog/cuttingedge/20190111
@@ -268,14 +268,12 @@ class Investigator:
             of the cursor at that frame.
         """
         keydown_frames = []
-        # the keys currently down for each frame
-        keypresses = replay.k & Investigator.MASK
 
         # the keydowns for each frame. Frames are "keydown" frames if an
         # additional key was pressed from the previous frame. If keys pressed
         # remained the same or decreased (a key previously pressed is no longer
         # pressed) from the previous frame, ``keydowns`` is zero for that frame.
-        keydowns = keypresses & ~np.insert(keypresses[:-1], 0, 0)
+        keydowns = replay.keydowns
 
         for i, keydown in enumerate(keydowns):
             if keydown != 0:
@@ -284,14 +282,14 @@ class Investigator:
         # add a duplicate frame when 2 keys are pressed at the same time
         keydowns = keydowns[keydowns != 0]
         i = 0
-        for j in np.where(keydowns == Investigator.MASK)[0]:
+        for j in np.where(keydowns == KEY_MASK)[0]:
             keydown_frames.insert(j + i + 1, keydown_frames[j + i])
             i += 1
 
         return keydown_frames
 
     # TODO add exception for 2b objects (>1 object at the same time) for current
-    #  version of notelock
+    # version of notelock
     @staticmethod
     def hits(hitobjs, keydowns, OD, CS, version, concrete_version):
         """
