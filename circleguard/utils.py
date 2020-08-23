@@ -52,8 +52,8 @@ TRACE = 5
 class ColoredFormatter(Formatter):
     """
     A subclass of :class:`logging.Formatter` that uses ANSI escape codes
-    to color different parts of the :class:`logging.LogRecord` when printed to the
-    console.
+    to color different parts of the :class:`logging.LogRecord` when printed to
+    the console.
 
     Notes
     -----
