@@ -769,7 +769,9 @@ class Replay(Loadable):
         """
         if not self.replay_data:
             return None
-        if not self._keydowns:
+        # can't do `if not self._keydowns` because the truth value of an ndarray
+        # is ambiguous
+        if self._keydowns is None:
             keypresses = self.k & KEY_MASK
             self._keydowns = keypresses & ~np.insert(keypresses[:-1], 0, 0)
         return self._keydowns
