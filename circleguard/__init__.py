@@ -1,6 +1,6 @@
 import logging
 
-from circleguard.circleguard import Circleguard, set_options
+from circleguard.circleguard import Circleguard, KeylessCircleguard, set_options
 from circleguard.loadable import (Check, Replay, ReplayMap, ReplayPath, Map, User,
         MapUser, ReplayDir, ReplayContainer, LoadableContainer, Loadable, ReplayCache,
         CachedReplay, ReplayID, ReplayString)
@@ -26,7 +26,7 @@ logging.getLogger("circleguard").addHandler(handler_stream)
 
 __all__ = [
 # core
-"Circleguard", "set_options",
+"Circleguard", "KeylessCircleguard", "set_options",
 # loadables
 "Check", "ReplayContainer", "LoadableContainer", "Map", "User", "MapUser",
 "ReplayCache", "Replay", "ReplayMap", "ReplayPath", "CachedReplay", "Loadable",
