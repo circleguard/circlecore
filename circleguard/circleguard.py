@@ -358,6 +358,44 @@ class Circleguard:
                 self.cacher.should_cache = cache
                 continue
 
+
+class KeylessCircleguard(Circleguard):
+    """
+    A :class:`~.Circleguard` for when you do not have access to an api key, but
+    have loaded :class:`~circleguard.loadable.Loadable`\s that you want to
+    perform operations on. It should go without saying that instances of this
+    class cannot do anything that requires api access.
+
+    Parameters
+    ----------
+    db_path: str or :class:`os.PathLike`
+        The path to the database file to read and write cached replays. If the
+        path does not exist, a fresh database will be created there.
+        If `None`, no replays will be cached or loaded from cache.
+    slider_dir: str or :class:`os.PathLike`
+        The path to the directory used by :class:`slider.library.Library` to
+        store beatmaps. If `None`, a temporary directory will be created for
+        :class:`slider.library.Library` and subsequently destroyed when this
+        :class:`~Circleguard` object is garbage collected.
+    loader: :class:`~circleguard.loader.Loader`
+        This loader will be used instead of the base loader if passed.
+        This must be the class itself, *not* an instantiation of it. It will be
+        instantiated with two args - a key and a cacher.
+    """
+
+    def __init__(self, db_path=None, slider_dir=None, loader=None, cache=True):
+        super().__init__("INVALID_KEY", db_path, slider_dir, loader, cache)
+
+    # TODO override most (all?) methods from `Circleguard` and either raise an
+    # exception (if they always require api access, like `load` or `load_info`)
+    # or first check that the loadables passed are all loaded, and raise an
+    # exception otherwise.
+    # This exception raising is purely to generate less confusing error
+    # messages, as users would probably otherwise see an `ossapi` exception
+    # complaining about an invalid key. Which is pretty clear, but we can do
+    # better.
+
+
 def set_options(loglevel=None):
     """
     Set global options for circlecore.
