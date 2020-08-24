@@ -477,3 +477,6 @@ class Snap():
     def __eq__(self, other):
         return (self.time == other.time and self.angle == other.angle
                 and self.distance == other.distance)
+
+    def __hash__(self):
+        return hash((self.time, self.angle, self.distance))
