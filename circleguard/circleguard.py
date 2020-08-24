@@ -7,7 +7,7 @@ from slider import Library
 
 from circleguard.loader import Loader
 from circleguard.comparer import Comparer
-from circleguard.investigator import Investigator
+from circleguard.investigator import Investigator, Hit
 from circleguard.cacher import Cacher
 from circleguard.loadable import Check
 from circleguard.enums import Detect
@@ -301,6 +301,22 @@ class Circleguard:
     relax_check = ur
     correction_check = snaps
     timewarp_check = frametime
+
+    # TODO restructure core to get rid of the concept of a "check" and "result"
+    # and instead focus on statistics, implementing new statistics like this one
+    # where it doesn't make sense to add a new Check or Detect or whatever is
+    # harder than it needs to be.
+    # Things should only work with `Replay` subclasses, so no more letting
+    # people pass `LoadableContainers` to `ur` and getting a list back, they
+    # have to iterate over the replays in their container and then call `ur`.
+    # Allows us to have a unified api and get rid of the `single` parameter, and
+    # is just cleaner in general I think.
+    def hits(self, replay) -> Iterable[Hit]:
+        self.load(replay)
+        # fall back to temporary library if necessary
+        library = self.library or Library(self.slider_dir.name)
+        bm = library.lookup_by_id(replay.map_id, download=True, save=True)
+        return Investigator.hits(replay, bm)
 
 
     def load(self, loadable):
