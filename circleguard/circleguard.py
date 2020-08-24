@@ -123,11 +123,8 @@ class Circleguard:
         # investigator investigations
         if detect & (Detect.RELAX | Detect.CORRECTION | Detect.TIMEWARP):
             if detect & Detect.RELAX:
-                if not self.library:
-                    # connect to library since it's a temporary one
-                    library = Library(self.slider_dir.name)
-                else:
-                    library = self.library
+                # fall back to temporary library
+                library = self.library or Library(self.slider_dir.name)
 
             for replay in c.all_replays():
                 bm = None
