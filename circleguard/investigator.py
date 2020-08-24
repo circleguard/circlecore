@@ -89,13 +89,13 @@ class Investigator:
         CS = beatmap.cs(easy=easy, hard_rock=hard_rock)
         keydown_frames = Investigator.keydown_frames(replay)
         hits = Investigator.hits(hitobjs, keydown_frames, OD, CS, version, concrete_version)
-        diff_array = []
 
+        diffs = []
         for hit in hits:
             hitobject_t = hit.hitobject.time.total_seconds() * 1000
             hit_time = hit.t
-            diff_array.append(hit_time - hitobject_t)
-        return np.std(diff_array) * 10
+            diffs.append(hit_time - hitobject_t)
+        return np.std(diffs) * 10
 
     @staticmethod
     def aim_correction_cross(replay):
