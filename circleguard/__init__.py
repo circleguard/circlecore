@@ -16,7 +16,7 @@ from circleguard.version import __version__
 from circleguard.result import (Result, InvestigationResult, ComparisonResult,
         StealResult, StealResultSim, StealResultCorr, RelaxResult,
         CorrectionResult, TimewarpResult)
-from circleguard.investigator import Snap
+from circleguard.investigator import Snap, Hit
 from circleguard.span import Span
 
 logging.addLevelName(TRACE, "TRACE")
@@ -54,7 +54,7 @@ __all__ = [
 "StealResultSim", "StealResultCorr", "RelaxResult", "CorrectionResult",
 "TimewarpResult",
 # results-related classes
-"Snap",
+"Snap", "Hit",
 # span
 "Span"
 ]
