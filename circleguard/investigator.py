@@ -302,7 +302,7 @@ class Investigator:
         """
         version = replay.game_version
 
-        # we only get the version from `ReplayPath`, so we need to estimate for
+        # only `ReplayPath` gives us the version, so we need to estimate for
         # all other replays
         if version is None:
             # estimate version with timestamp, this is only accurate if the user
