@@ -78,8 +78,7 @@ class Investigator:
 
         if version is None:
             # estimate version with timestamp, this is only accurate if the user
-            #  keeps their game up to date. We don't get the timestamp from
-            # `ReplayMap`, only `ReplayPath`
+            # keeps their game up to date
             version = int(f"{replay.timestamp.year}{replay.timestamp.month:02d}"
                           f"{replay.timestamp.day:02d}")
             concrete_version = False
