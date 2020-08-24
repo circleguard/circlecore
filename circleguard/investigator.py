@@ -92,8 +92,10 @@ class Investigator:
         hits = Investigator.hits(hitobjs, keydown_frames, OD, CS, version, concrete_version)
         diff_array = []
 
-        for hitobj_time, press_time in hits:
-            diff_array.append(press_time - hitobj_time)
+        for hit in hits:
+            hitobject_t = hit.hitobject.time.total_seconds() * 1000
+            hit_time = hit.t
+            diff_array.append(hit_time - hitobject_t)
         return np.std(diff_array) * 10
 
     @staticmethod
@@ -421,7 +423,7 @@ class Investigator:
                 hitobj_i += 1
             else:
                 if keydown_t < hitobj_t + hitwindow and np.linalg.norm(keydown_xy - hitobj_xy) <= hitradius and hitobj_type != 2:
-                    hits.append([hitobj_t, keydown_t])
+                    hits.append(Hit(hitobj, keydown_t, keydown_xy))
 
                     # sliders don't disappear after clicking
                     # so we skip to the press_i that is after notelock_end_time
@@ -481,3 +483,31 @@ class Snap():
 
     def __hash__(self):
         return hash((self.time, self.angle, self.distance))
+
+class Hit():
+    """
+    A hit on a hitobject when a replay is played against a beatmap. In osu!lazer
+    terms, this would be a Judgement, though we do not count misses as a
+    ``Hit`` while lazer does count them as judgements.
+
+    Parameters
+    ----------
+    hitobject: :class:`slider.beatmap.HitObject`
+        The hitobject that was hit.
+    t: float
+        The time the hit occured.
+    xy: list[float, float]
+        The x and y position where the hit occured.
+    """
+    def __init__(self, hitobject, t, xy):
+        self.hitobject = hitobject
+        self.t = t
+        self.xy = xy
+
+    # TODO slider hitobjects don't define __eq__, pr that in
+    def __eq__(self, other):
+        return (self.hitobject == other.hitobject and self.t == other.t and
+            self.xy == other.xy)
+
+    def __hash__(self):
+        return hash((self.hitobject, self.t, self.xy))
