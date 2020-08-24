@@ -451,8 +451,9 @@ class Investigator:
 class Snap():
     """
     A suspicious hit in a replay, specifically so because it snaps away from
-    the otherwise normal path. Snaps currently represent the middle datapoint
-    in a set of three replay datapoints.
+    the otherwise normal path. Snaps represent the middle frame in a set of
+    three replay frames (so for example ``time`` is the time of the middle
+    frame).
 
     Parameters
     ----------
