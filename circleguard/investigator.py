@@ -70,25 +70,7 @@ class Investigator:
             The beatmap to calculate ``replay``'s ur with.
         """
 
-        easy = Mod.EZ in replay.mods
-        hard_rock = Mod.HR in replay.mods
-        hitobjs = beatmap.hit_objects(easy=easy, hard_rock=hard_rock)
-
-        version = replay.game_version
-
-        if version is None:
-            # estimate version with timestamp, this is only accurate if the user
-            # keeps their game up to date
-            version = int(f"{replay.timestamp.year}{replay.timestamp.month:02d}"
-                          f"{replay.timestamp.day:02d}")
-            concrete_version = False
-        else:
-            concrete_version = True
-
-        OD = beatmap.od(easy=easy, hard_rock=hard_rock)
-        CS = beatmap.cs(easy=easy, hard_rock=hard_rock)
-        keydown_frames = Investigator.keydown_frames(replay)
-        hits = Investigator.hits(hitobjs, keydown_frames, OD, CS, version, concrete_version)
+        hits = Investigator.hits(replay, beatmap)
 
         diffs = []
         for hit in hits:
@@ -305,36 +287,28 @@ class Investigator:
     # TODO add exception for 2b objects (>1 object at the same time) for current
     # version of notelock
     @staticmethod
-    def hits(hitobjs, keydowns, OD, CS, version, concrete_version):
+    def hits(replay, beatmap):
         """
         Determines the hits (where any hitobject was hit for the first time)
-        when playing the ``keydowns`` against the ``hitobjs``.
+        when playing ``replay`` against ``beatmap``
 
         Parameters
         ----------
-        hitobjs: list[:class:`slider.beatmap.HitObject`]
-            The hitobjects to play ``keydowns`` against.
-        keydowns: ndarray(float, [float, float], bool)
-            The keydown frames to play against ``hitobjs``. The first float is
-            the time of that frame, the second and third floats are the x and y
-            position of the cursor at that frame, and the bool is whether this
-            frame was a zero frametime frame.
-        OD: float
-            The Overall Difficulty of the beatmap ``hitobjs`` comes from.
-        CS: float
-            The Circle Size of the beatmap ``hitobjs`` comes from.
-        version: int
-            The version the replay ``keydowns`` comes from was played on.
-        concrete_version: bool
-            Whether we know for certain ``version`` is accurate. In cases where
-            we don't know the version of the game, we can estimate it by using
-            the time the replay was played, and ``concrete_version`` should be
-            ``False``. Otherwise, if we know the exact version, it should be
-            ``True``.
+        replay: :class:`~.Replay`
+            The replay to determine the hits of when played against ``beatmap``.
+        beatmap: :class:`slider.beatmap.Beatmap`
+            The beatmap to determine the hits of when ``replay`` is played
+            against it.
         """
-        if concrete_version:
-            version_sliderbug_fixed = Investigator.VERSION_SLIDERBUG_FIXED_CUTTING_EDGE
-        else:
+        version = replay.game_version
+
+        # we only get the version from `ReplayPath`, so we need to estimate for
+        # all other replays
+        if version is None:
+            # estimate version with timestamp, this is only accurate if the user
+            # keeps their game up to date
+            version = int(f"{replay.timestamp.year}{replay.timestamp.month:02d}"
+                          f"{replay.timestamp.day:02d}")
             # if we're only estimating the version, assume the replay was played
             # on stable. if we used the cutting edge version instead, we would
             # be incorrectly using logic for sliderbug being fixed for all
@@ -344,6 +318,16 @@ class Investigator:
             # which do not have a concrete version, but that's better than being
             # wrong for stable replays between those two versions.
             version_sliderbug_fixed = Investigator.VERSION_SLIDERBUG_FIXED_STABLE
+        else:
+            version_sliderbug_fixed = Investigator.VERSION_SLIDERBUG_FIXED_CUTTING_EDGE
+
+        easy = Mod.EZ in replay.mods
+        hard_rock = Mod.HR in replay.mods
+        hitobjs = beatmap.hit_objects(easy=easy, hard_rock=hard_rock)
+
+        OD = beatmap.od(easy=easy, hard_rock=hard_rock)
+        CS = beatmap.cs(easy=easy, hard_rock=hard_rock)
+        keydowns = Investigator.keydown_frames(replay)
 
 
         hits = []
