@@ -487,8 +487,8 @@ class Snap():
 class Hit():
     """
     A hit on a hitobject when a replay is played against a beatmap. In osu!lazer
-    terms, this would be a Judgement, though we do not count misses as a
-    ``Hit`` while lazer does count them as judgements.
+    terms, this would be a Judgement, though we do not count misses as a ``Hit``
+    while lazer does count them as judgements.
 
     Parameters
     ----------
