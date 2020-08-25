@@ -1,3 +1,22 @@
+# v4.5.0
+
+* add `KeylessCircleguard` class, which does not require a key to be instantiated and can do everything `Circleguard` can, with the requirement that the passed loadables are already loaded
+* add `Circleguard#hits` method, which returns a list of the hits in the replay (where the user hit a hitobject)
+* add `keydowns` attribute to `Replay` classes, which is a list of the keys pressed for each frame that were not pressed in the previous frame
+* implement `__hash__` for `Snap`
+
+# v4.4.1
+
+* add new `ReplayString` class, which allows instantiation from a byte string that contains the contents of an osr file (#159)
+* rename `ReplayPath.hash` to `ReplayPath.beatmap_hash`
+
+# v4.4.0
+
+* improve ur calculation, which should now usually be exactly correct and sometimes slightly (1-3 ur) off
+* rename `*_Check` methods to better describe their use as a statistic calculation
+* add a `single` argument to `*_Check` methods which will immediately evaluate the investigation and return the first result if `True`
+* add user id, map id, and mods index to newly created caches
+
 # v4.3.4
 
 * pin scipy to 1.4.1 (pyinstaller does not yet have a hook for scipy 1.5.0, which just came out yesterday)
