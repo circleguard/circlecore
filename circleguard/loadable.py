@@ -901,6 +901,7 @@ class ReplayPath(Replay):
     def __init__(self, path, cache=None):
         super().__init__(RatelimitWeight.LIGHT, cache)
         self.log = logging.getLogger(__name__ + ".ReplayPath")
+        # TODO convert path to pathlib.Path and use #absolute
         self.path = path
         self.beatmap_hash = None
         # @deprecated
