@@ -873,6 +873,9 @@ class ReplayMap(Replay):
             return False
         return self.map_id == loadable.map_id and self.user_id == loadable.user_id and self.mods == loadable.mods
 
+    def __hash__(self):
+        return hash((self.map_id, self.user_id, self.mods))
+
     def __repr__(self):
         if self.loaded:
             return (f"ReplayMap(timestamp={self.timestamp},map_id={self.map_id},user_id={self.user_id},mods={self.mods},"
@@ -984,6 +987,9 @@ class ReplayPath(Replay):
             return False
         return self.path == loadable.path
 
+    def __hash__(self):
+        return hash(self.path)
+
     def __repr__(self):
         if self.loaded:
             return (f"ReplayPath(path={self.path},map_id={self.map_id},user_id={self.user_id},mods={self.mods},"
@@ -1076,6 +1082,9 @@ class ReplayString(Replay):
             return False
         return self.replay_data_str == loadable.replay_data_str
 
+    def __hash__(self):
+        return hash(self.replay_data_str)
+
     def __repr__(self):
         if self.loaded:
             return (f"ReplayString(len(replay_data_str)={len(self.replay_data_str)},"
@@ -1109,6 +1118,8 @@ class ReplayID(Replay):
     def __eq__(self, other):
         return self.replay_id == other.replay_id
 
+    def __hash__(self):
+        return hash(self.replay_id)
 
 class CachedReplay(Replay):
     def __init__(self, user_id, map_id, mods, replay_data, replay_id):
@@ -1130,3 +1141,6 @@ class CachedReplay(Replay):
     def __eq__(self, other):
         # could check more but replay_id is already a primary key, guaranteed unique
         return self.replay_id == other.replay_id
+
+    def __hash__(self):
+        return hash((self.user_id, self.map_id, self.mods, self.replay_data, self.replay_id))
