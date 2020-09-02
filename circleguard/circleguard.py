@@ -147,7 +147,7 @@ class Circleguard:
         -> Union[Iterable[StealResult], StealResult]:
         """
         Calculates the similarity between each pair of replays in ``loadables``,
-        of between each pair of replays with one from ``loadables`` and the
+        or between each pair of replays with one from ``loadables`` and the
         other from ``loadables2``.
 
         Parameters
@@ -167,9 +167,9 @@ class Circleguard:
             parameter only has an affect if ``method`` is ``Detect.STEAL_CORR``.
             Note that runtime increases linearly with the number of chunks.
         single: bool
-            If true, the investigation for snaps is evaluated immediately (as
-            opposed to deferring execution with a generator, the default) and
-            the first ``StealResult`` is returned.
+            If true, the similarity is evaluated immediately (as opposed to
+            deferring execution by returning a generator, which is the default
+            behavior) and the first :class:`~.StealResult` is returned.
 
         Yields
         ------
@@ -203,9 +203,9 @@ class Circleguard:
             single loadable is equivalent to passing a list containing only that
             loadable.
         single: bool
-            If true, the investigation for snaps is evaluated immediately (as
-            opposed to deferring execution with a generator, the default) and
-            the first ``RelaxResult`` is returned.
+            If true, the ur is evaluated immediately (as opposed to deferring
+            execution by returning a generator, which is the default behavior)
+            and the first :class:`~.RelaxResult` is returned.
 
         Yields
         ------
@@ -238,9 +238,9 @@ class Circleguard:
             equivalent to passing a list containing only that loadable; this is
             provided for convenience.
         single: bool
-            If true, the investigation for snaps is evaluated immediately (as
-            opposed to deferring execution with a generator, the default) and
-            the first ``CorrectionResult`` is returned.
+            If true, the snaps are evaluated immediately (as opposed to
+            deferring execution by returning a generator, which is the default
+            behavior) and the first :class:`~.CorrectionResult` is returned.
 
         Yields
         ------
@@ -274,9 +274,9 @@ class Circleguard:
             loadable is equivalent to passing a list containing only that
             loadable; this is provided for convenience.
         single: bool
-            If true, the investigation for snaps is evaluated immediately (as
-            opposed to deferring execution with a generator, the default) and
-            the first ``TimewarpResult`` is returned.
+            If true, the frametime is evaluated immediately (as opposed to
+            deferring execution by returning a generator, which is the default
+            behavior) and the first :class:`~.TimewarpResult` is returned.
 
         Yields
         ------
