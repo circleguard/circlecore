@@ -18,6 +18,7 @@ from circleguard.result import (Result, InvestigationResult, ComparisonResult,
         CorrectionResult, TimewarpResult)
 from circleguard.investigator import Snap, Hit
 from circleguard.span import Span
+from circleguard.utils import convert_statistic
 
 logging.addLevelName(TRACE, "TRACE")
 formatter = ColoredFormatter("[%(threadName)s][%(name)s][%(levelname)s]  %(message)s  (%(filename)s:%(lineno)s)")
@@ -56,5 +57,7 @@ __all__ = [
 # results-related classes
 "Snap", "Hit",
 # span
-"Span"
+"Span",
+# utils
+"convert_statistic"
 ]
