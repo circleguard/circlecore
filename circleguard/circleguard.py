@@ -397,6 +397,11 @@ class KeylessCircleguard(Circleguard):
     """
 
     def __init__(self, db_path=None, slider_dir=None, loader=None, cache=True):
+        # it's sufficient but not particularly rigorous to pass an invalid api
+        # key here, and might interfere with future improvements (such as
+        # checking the validity of the api key automatically on init).
+        # TODO potentially improve this with an explicit `keyless` parameter
+        # to `Circleguard` which allows for special `Loader` behavior
         super().__init__("INVALID_KEY", db_path, slider_dir, loader, cache)
 
     # TODO override most (all?) methods from `Circleguard` and either raise an
