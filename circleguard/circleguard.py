@@ -66,7 +66,7 @@ class Circleguard:
 
 
     def similarity(self, replay1, replay2, method="similarity", \
-        num_chunks=DEFAULT_CHUNKS, single=False) -> float:
+        num_chunks=DEFAULT_CHUNKS) -> float:
         """
         Calculates the similarity between ``replay1`` and ``replay2``.
 
@@ -96,8 +96,9 @@ class Circleguard:
             the two replays.
             # TODO explain correlation lol
         """
-        pass
-
+        self.load(replay1)
+        self.load(replay2)
+        return Comparer.similarity(replay1, replay2, method, num_chunks)
 
 
     def ur(self, replay, cv=True) -> float:
@@ -118,10 +119,13 @@ class Circleguard:
             The ur of the replay. This ur is converted if ``cv`` is ``True``,
             and unconverted otherwise.
         """
-        ...
+        self.load(replay)
+        bm = self.library.lookup_by_id(replay.map_id, download=True, save=True)
+        return Investigator.ur(replay, bm)
 
 
-    def snaps(self, replay) -> Iterable[Snap]:
+    def snaps(self, replay, max_angle=DEFAULT_ANGLE, \
+        min_distance=DEFAULT_DISTANCE) -> Iterable[Snap]:
         """
         Finds any snaps (sudden, jerky movement) in ``replay``.
 
@@ -135,23 +139,26 @@ class Circleguard:
         list[Snap]
             The snaps of the replay. This list is empty if no snaps were found.
         """
-        ...
+        self.load(replay)
+        return Investigator.snaps(replay, max_angle, min_distance)
+
 
     def frametime(self, replay) -> float:
         """
-        Calculates the average frametime of ``replay``.
+        Calculates the median frametime of ``replay``.
 
         Parameters
         ----------
         replay: :class:`~circleguard.loadable.Replay`
-            The replay to calculate the average frametime of.
+            The replay to calculate the median frametime of.
 
         Returns
         -------
         float
-            The average frametime of the replay.
+            The median frametime of the replay.
         """
-        ...
+        return Investigator.frametime(replay)
+
 
     def hits(self, replay) -> Iterable[Hit]:
         self.load(replay)
@@ -176,6 +183,7 @@ class Circleguard:
         """
         loadable.load(self.loader, self.cache)
 
+
     def load_info(self, loadable_container):
         """
         Loads the ``loadable_container``.
@@ -192,7 +200,7 @@ class Circleguard:
         """
         loadable_container.load_info(self.loader)
 
-
+    # TODO convert to @property
     def set_options(self, cache=None):
         """
         Sets options for this instance of circlecore.
