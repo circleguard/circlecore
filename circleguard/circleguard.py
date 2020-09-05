@@ -54,14 +54,15 @@ class Circleguard:
         LoaderClass = Loader if loader is None else loader
         self.loader = LoaderClass(key, self.cacher)
 
-        if slider_dir is None:
-            # have to keep a reference to it or the folder gets deleted and
-            # can't be walked by Library
-            self.slider_dir = TemporaryDirectory()
-            self.library = None
-        else:
-            self.library = Library(slider_dir)
 
+        if slider_dir:
+            self.library = Library(slider_dir)
+        else:
+            # If slider dir wasn't passed, use a temporary library which will
+            # effectively cache beatmaps for just this cg instance.
+            # Have to keep a reference to this dir or the folder gets deleted.
+            self.slider_dir = TemporaryDirectory()
+            self.library = Library(self.slider_dir.name)
 
 
     def similarity(self, replay1, replay2, method="similarity", \
