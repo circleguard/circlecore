@@ -39,6 +39,15 @@ class Circleguard:
     # a healthy balance between speed and accuracy.
     DEFAULT_CHUNKS = 5
 
+    # We provide suggested "cheated thresholds" for comparisons, as those
+    # algorithms are our own invention and consumers should not be expected to
+    # know how they work at anything but a high level.
+    # We do not, however, provide thresholds for any other statistic, as they
+    # are usually gameplay statistics that consumers should understand well
+    # enough to define their own threshold.
+    SIM_LIMIT = 17
+    CORR_LIMIT = 0.99
+
     def __init__(self, key, db_path=None, slider_dir=None, loader=None, \
         cache=True):
         self.cache = cache
@@ -210,6 +219,7 @@ class Circleguard:
         """
         loadable_container.load_info(self.loader)
 
+
     def _beatmap(self, map_id):
         return self.library.lookup_by_id(map_id, download=True, \
                 save=True)
@@ -223,6 +233,8 @@ class Circleguard:
             order = tuple(reversed(order))
         return order
 
+
+    # TODO convert to @property with just `cache`, no other options
     def set_options(self, cache=None):
         """
         Sets options for this instance of circlecore.
