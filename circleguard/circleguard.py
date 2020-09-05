@@ -174,6 +174,7 @@ class Circleguard:
         float
             The median frametime of the replay.
         """
+        self.load(replay)
         frametime = Investigator.frametime(replay)
         if cv:
             frametime = convert_statistic(frametime, replay.mods, to="cv")
