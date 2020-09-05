@@ -46,6 +46,14 @@ def convert_statistic(stat, mods, *, to):
         return stat / conversion_factor
 
 
+def order(replay1, replay2):
+    # assume they're passed in order (earliest first); if not, switch them
+    order = (replay1, replay2)
+    if replay2.timestamp < replay1.timestamp:
+        order = tuple(reversed(order))
+    return order
+
+
 
 TRACE = 5
 

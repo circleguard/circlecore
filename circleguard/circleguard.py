@@ -182,7 +182,9 @@ class Circleguard:
         return frametime
 
 
-    def hits(self, replay) -> Iterable[Hit]:
+    def hits(self, replay, within=None) -> Iterable[Hit]:
+        # if `within` is specified, only hits which are that many pixels or less
+        # away from the edge of the circle will be returned
         self.load(replay)
         bm = self._beatmap(replay.map_id)
         return Investigator.hits(replay, bm)
@@ -224,15 +226,6 @@ class Circleguard:
     def _beatmap(self, map_id):
         return self.library.lookup_by_id(map_id, download=True, \
                 save=True)
-
-
-    @staticmethod
-    def order(replay1, replay2):
-        # assume they're passed in order (earliest first); if not, switch them
-        order = (replay1, replay2)
-        if replay2.timestamp < replay1.timestamp:
-            order = tuple(reversed(order))
-        return order
 
 
     # TODO convert to @property with just `cache`, no other options
