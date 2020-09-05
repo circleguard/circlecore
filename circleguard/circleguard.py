@@ -120,7 +120,7 @@ class Circleguard:
             and unconverted otherwise.
         """
         self.load(replay)
-        bm = self.library.lookup_by_id(replay.map_id, download=True, save=True)
+        bm = self._beatmap(replay.map_id)
         return Investigator.ur(replay, bm)
 
 
@@ -162,9 +162,7 @@ class Circleguard:
 
     def hits(self, replay) -> Iterable[Hit]:
         self.load(replay)
-        # fall back to temporary library if necessary
-        library = self.library or Library(self.slider_dir.name)
-        bm = library.lookup_by_id(replay.map_id, download=True, save=True)
+        bm = self._beatmap(replay.map_id)
         return Investigator.hits(replay, bm)
 
 
@@ -199,6 +197,10 @@ class Circleguard:
         ``loadable_container.load_info(cg.loader)``.
         """
         loadable_container.load_info(self.loader)
+
+    def _beatmap(self, map_id):
+        return self.library.lookup_by_id(map_id, download=True, \
+                save=True)
 
     # TODO convert to @property
     def set_options(self, cache=None):
