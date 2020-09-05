@@ -36,7 +36,7 @@ class Investigator:
         return np.std(diffs) * 10
 
     @staticmethod
-    def aim_correction_cross(replay):
+    def snaps_cross(replay):
         """
         An alternative snap detection algorithm using relative cross products
         of vectors.
@@ -49,7 +49,7 @@ class Investigator:
         ac = xy[2:] - xy[:-2]
 
     @staticmethod
-    def aim_correction(replay, max_angle, min_distance):
+    def snaps(replay, max_angle, min_distance):
         """
         Calculates the angle between each set of three points (a,b,c) and finds
         points where this angle is extremely acute and neither ``|ab|`` or
@@ -122,7 +122,7 @@ class Investigator:
         return [Snap(t, b, d) for (t, b, d) in zip(t[mask], beta[mask], min_AB_BC[mask])]
 
     @staticmethod
-    def aim_correction_sam(replay_data, num_jerks, min_jerk):
+    def snaps_sam(replay_data, num_jerks, min_jerk):
         """
         Calculates the jerk at each moment in the Replay, counts the number of times
         it exceeds min_jerk and reports a positive if that number is over num_jerks.
