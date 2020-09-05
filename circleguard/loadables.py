@@ -907,9 +907,6 @@ class ReplayPath(Replay):
         # TODO convert path to pathlib.Path and use #absolute
         self.path = path
         self.beatmap_hash = None
-        # @deprecated
-        # TODO remove in core 5.x.x
-        self.hash = self.beatmap_hash
 
     def load(self, loader, cache):
         """
