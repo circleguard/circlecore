@@ -14,7 +14,7 @@ import circleguard.utils as utils
 class Comparer:
 
     @staticmethod
-    def compare(self, replay1, replay2, method, num_chunks):
+    def similarity(self, replay1, replay2, method, num_chunks):
         """
         Compares two :class:`~.replay.Replay`\s.
 
