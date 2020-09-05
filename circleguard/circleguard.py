@@ -117,8 +117,7 @@ class Circleguard:
         Returns
         -------
         float
-            The ur of the replay. This ur is converted if ``cv`` is ``True``,
-            and unconverted otherwise.
+            The ur of the replay.
         """
         self.load(replay)
         bm = self._beatmap(replay.map_id)
@@ -149,7 +148,7 @@ class Circleguard:
         return Investigator.snaps(replay, max_angle, min_distance)
 
 
-    def frametime(self, replay) -> float:
+    def frametime(self, replay, cv=True) -> float:
         """
         Calculates the median frametime of ``replay``.
 
@@ -157,13 +156,20 @@ class Circleguard:
         ----------
         replay: :class:`~circleguard.loadable.Replay`
             The replay to calculate the median frametime of.
+        cv: bool
+            Whether to return the converted or unconverted frametime. The
+            converted frametime is returned by default.
 
         Returns
         -------
         float
             The median frametime of the replay.
         """
-        return Investigator.frametime(replay)
+        frametime = Investigator.frametime(replay)
+        if cv:
+            frametime = convert_statistic(frametime, replay, to="cv")
+
+        return frametime
 
 
     def hits(self, replay) -> Iterable[Hit]:
