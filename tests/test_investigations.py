@@ -68,11 +68,11 @@ class TestSteal(CGTestCase):
         sim = self.cg.similarity(self.time_shifted1, self.time_shifted2, method="similarity")
         self.assertAlmostEqual(sim, 17.30254, delta=DELTA, msg="Similarity is not correct")
 
-        # STEAL_SIM is currently *not* able to detect time shifts. If this
+        # `similarity` is currently *not* able to detect time shifts. If this
         # changes we want to know! :P
         self.assertGreater(sim, Circleguard.SIM_LIMIT)
 
-        # STEAL_CORR should be able to, though.
+        # `correlation` should be able to, though.
         corr = self.cg.similarity(self.time_shifted1, self.time_shifted2, method="correlation")
         self.assertGreater(corr, Circleguard.CORR_LIMIT, "Cheated replays were not detected as cheated")
         self.assertAlmostEqual(corr, 0.99734, delta=DELTA, msg="Correlation is not correct")
