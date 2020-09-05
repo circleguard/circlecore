@@ -1,15 +1,7 @@
-import itertools
-import sys
-import logging
-import math
-
 import numpy as np
 from scipy import signal
 
-from circleguard.loadables import Replay
 from circleguard.mod import Mod
-from circleguard.exceptions import InvalidArgumentsException, CircleguardException
-import circleguard.utils as utils
 
 class Comparer:
 
