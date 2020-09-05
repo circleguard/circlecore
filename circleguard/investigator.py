@@ -173,20 +173,7 @@ class Investigator:
         return [jerks, ischeat]
 
     @staticmethod
-    def frametimes(replay):
-        """
-        Returns the time between each pair of consecutive frames in ``replay``.
-
-        Parameters
-        ----------
-        replay: :class:`~.Replay`
-            The replay to get the frametimes of.
-        """
-        # replay.t is cumsum so convert it back to "time since previous frame"
-        return np.diff(replay.t)
-
-    @staticmethod
-    def median_frametime(frametimes):
+    def frametime(frametimes):
         """
         Calculates the median time between the frames in ``frametimes``.
 
@@ -200,6 +187,20 @@ class Investigator:
         Median is used instead of mean to lessen the effect of outliers.
         """
         return np.median(frametimes)
+
+    @staticmethod
+    def frametimes(replay):
+        """
+        Returns the time between each pair of consecutive frames in ``replay``.
+
+        Parameters
+        ----------
+        replay: :class:`~.Replay`
+            The replay to get the frametimes of.
+        """
+        # replay.t is cumsum so convert it back to "time since previous frame"
+        return np.diff(replay.t)
+
 
     @staticmethod
     def keydown_frames(replay):
