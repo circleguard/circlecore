@@ -170,25 +170,26 @@ class Investigator:
         return [jerks, ischeat]
 
     @staticmethod
-    def frametime(frametimes):
+    def frametime(replay):
         """
-        Calculates the median time between the frames in ``frametimes``.
+        Calculates the median time between the frames of ``replay``.
 
         Parameters
         ----------
-        frametimes: list[int]
-            The frametimes to find the median of.
+        replay: :class:`~.Replay`
+            The replay to calculate the frametime of.
 
         Notes
         -----
         Median is used instead of mean to lessen the effect of outliers.
         """
+        frametimes = Investigator.frametimes(replay)
         return np.median(frametimes)
 
     @staticmethod
     def frametimes(replay):
         """
-        Returns the time between each pair of consecutive frames in ``replay``.
+        Returns the time between each two consecutive frames in ``replay``.
 
         Parameters
         ----------
