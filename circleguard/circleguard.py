@@ -321,7 +321,7 @@ class Circleguard:
 
     def load(self, loadable):
         """
-        Loads a loadable.
+        Loads the ``loadable``.
 
         Parameters
         ----------
@@ -330,13 +330,13 @@ class Circleguard:
 
         Notes
         -----
-        This is identical to calling ``loadable.load(cg.loader)``.
+        This is identical to calling ``loadable.load(cg.loader, cg.cache)``.
         """
         loadable.load(self.loader, self.cache)
 
     def load_info(self, loadable_container):
         """
-        Loads a loadable container.
+        Loads the ``loadable_container``.
 
         Parameters
         ----------
