@@ -124,7 +124,7 @@ class Circleguard:
 
         ur = Investigator.ur(replay, bm)
         if cv:
-            ur = convert_statistic(ur, replay, to="cv")
+            ur = convert_statistic(ur, replay.mods, to="cv")
 
         return ur
 
@@ -167,7 +167,7 @@ class Circleguard:
         """
         frametime = Investigator.frametime(replay)
         if cv:
-            frametime = convert_statistic(frametime, replay, to="cv")
+            frametime = convert_statistic(frametime, replay.mods, to="cv")
 
         return frametime
 
