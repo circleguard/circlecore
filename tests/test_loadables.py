@@ -1,7 +1,6 @@
 from unittest import skip, TestSuite, TextTestRunner
-from circleguard import (Circleguard, Check, ReplayMap, ReplayPath, Detect,
-                         RatelimitWeight, set_options, Map, User, MapUser, Mod,
-                         Loader, InvalidKeyException)
+from circleguard import (ReplayMap, ReplayPath, RatelimitWeight, Map, User,
+    MapUser, Mod)
 
 from tests.utils import CGTestCase, RES
 
