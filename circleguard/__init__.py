@@ -4,7 +4,7 @@ from circleguard.circleguard import Circleguard, KeylessCircleguard, set_options
 from circleguard.loadable import (Check, Replay, ReplayMap, ReplayPath, Map, User,
         MapUser, ReplayDir, ReplayContainer, LoadableContainer, Loadable, ReplayCache,
         CachedReplay, ReplayID, ReplayString)
-from circleguard.enums import Key, RatelimitWeight, Detect, ResultType
+from circleguard.enums import Key, RatelimitWeight
 from circleguard.mod import Mod
 from circleguard.utils import TRACE, ColoredFormatter
 from circleguard.loader import Loader
@@ -13,9 +13,6 @@ from circleguard.exceptions import (CircleguardException, InvalidArgumentsExcept
         NoInfoAvailableException, UnknownAPIException, InternalAPIException, InvalidKeyException, RatelimitException,
         InvalidJSONException, ReplayUnavailableException)
 from circleguard.version import __version__
-from circleguard.result import (Result, InvestigationResult, ComparisonResult,
-        StealResult, StealResultSim, StealResultCorr, RelaxResult,
-        CorrectionResult, TimewarpResult)
 from circleguard.investigator import Snap, Hit
 from circleguard.span import Span
 from circleguard.utils import convert_statistic
@@ -34,7 +31,7 @@ __all__ = [
 "ReplayCache", "Replay", "ReplayMap", "ReplayPath", "CachedReplay", "Loadable",
 "ReplayID", "ReplayDir", "ReplayString",
 # enums
-"Key", "RatelimitWeight", "Detect", "ResultType",
+"Key", "RatelimitWeight",
 # mod
 "Mod",
 # utils
@@ -50,10 +47,6 @@ __all__ = [
 "ReplayUnavailableException",
 # version
 "__version__",
-# results
-"Result", "InvestigationResult", "ComparisonResult", "StealResult",
-"StealResultSim", "StealResultCorr", "RelaxResult", "CorrectionResult",
-"TimewarpResult",
 # results-related classes
 "Snap", "Hit",
 # span
