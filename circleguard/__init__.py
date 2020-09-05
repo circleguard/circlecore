@@ -1,7 +1,7 @@
 import logging
 
 from circleguard.circleguard import Circleguard, KeylessCircleguard, set_options
-from circleguard.loadable import (Check, Replay, ReplayMap, ReplayPath, Map, User,
+from circleguard.loadables import (Check, Replay, ReplayMap, ReplayPath, Map, User,
         MapUser, ReplayDir, ReplayContainer, LoadableContainer, Loadable, ReplayCache,
         CachedReplay, ReplayID, ReplayString)
 from circleguard.enums import Key, RatelimitWeight
