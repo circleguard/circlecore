@@ -1,7 +1,7 @@
 from pathlib import Path
 import logging
 from tempfile import TemporaryDirectory
-from typing import Iterable, Union
+from typing import Iterable
 
 from slider import Library
 
@@ -9,6 +9,7 @@ from circleguard.loader import Loader
 from circleguard.comparer import Comparer
 from circleguard.investigator import Investigator, Hit, Snap
 from circleguard.cacher import Cacher
+from circleguard.utils import convert_statistic
 
 
 class Circleguard:
@@ -121,7 +122,12 @@ class Circleguard:
         """
         self.load(replay)
         bm = self._beatmap(replay.map_id)
-        return Investigator.ur(replay, bm)
+
+        ur = Investigator.ur(replay, bm)
+        if cv:
+            ur = convert_statistic(ur, replay, to="cv")
+
+        return ur
 
 
     def snaps(self, replay, max_angle=DEFAULT_ANGLE, \
