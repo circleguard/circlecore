@@ -1,7 +1,7 @@
 import numpy as np
 import unittest
 
-from circleguard import ReplayPath, Mod, Circleguard
+from circleguard import ReplayPath, Mod, Circleguard, order
 from tests.utils import CGTestCase, DELTA, UR_DELTA, RES, FRAMETIME_LIMIT
 
 class TestCorrection(CGTestCase):
@@ -53,7 +53,7 @@ class TestSteal(CGTestCase):
 
         r1 = self.stolen1
         r2 = self.stolen2
-        (earlier, later) = Circleguard.order(r1, r2)
+        (earlier, later) = order(r1, r2)
 
         self.assertAlmostEqual(sim, 2.20867, delta=DELTA, msg="Similarity is not correct")
         self.assertEqual(r1.map_id, r2.map_id, "Replay map ids did not match")
@@ -84,7 +84,7 @@ class TestSteal(CGTestCase):
 
         r1 = self.legit1
         r2 = self.legit2
-        (earlier, later) = Circleguard.order(r1, r2)
+        (earlier, later) = order(r1, r2)
 
         self.assertAlmostEqual(sim, 23.13951, delta=DELTA, msg="Similarity is not correct")
         self.assertEqual(r1.map_id, r2.map_id, "Replay map ids did not match")
