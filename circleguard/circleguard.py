@@ -49,14 +49,12 @@ class Circleguard:
         if db_path is not None:
             # resolve relative paths
             db_path = Path(db_path).absolute()
-            # they can set cache to False later with
-            # :func:`~.circleguard.set_options` if they want; assume caching is
-            # desired if db path is passed
             self.cacher = Cacher(self.cache, db_path)
 
         self.log = logging.getLogger(__name__)
 
-        # allow for people to pass their own loader implementation/subclass
+        # allow for people to pass their own loader implementation/subclass.
+        # Mostly exposed for circleguard (the gui).
         LoaderClass = Loader if loader is None else loader
         self.loader = LoaderClass(key, self.cacher)
 
