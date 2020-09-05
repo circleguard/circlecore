@@ -6,93 +6,15 @@ import math
 import numpy as np
 from scipy import signal
 
-from circleguard.loadable import Replay
-from circleguard.enums import Detect
+from circleguard.loadables import Replay
 from circleguard.mod import Mod
 from circleguard.exceptions import InvalidArgumentsException, CircleguardException
 import circleguard.utils as utils
-from circleguard.result import StealResultSim, StealResultCorr
 
 class Comparer:
-    """
-    Manages comparing :class:`~.replay.Replay`\s for replay stealing.
 
-    Parameters
-    ----------
-    replays1: list[:class:`~circleguard.loadable.Replay`]
-        The replays to compare against either ``replays2`` if ``replays2`` is
-        not ``None``, or against other replays in ``replays1``.
-    replays2: list[:class:`~circleguard.loadable.Replay`]
-        The replays to compare against ``replays1``.
-    num_chunks: int
-        How many chunks to split the replay into when comparing. This
-        parameter only has an affect if ``detect`` is ``Detect.STEAL_CORR``.
-        Note that runtime increases linearly with the number of chunks.
-
-
-    Notes
-    -----
-    If ``replays2`` is passed, each replay in ``replays1`` is compared against
-    each replay in ``replays2``. Otherwise, each replay in ``replays1`` is
-    compared against each other replay in ``replays1``
-    (``len(replays1) choose 2`` comparisons).
-
-    The order of ``replays1`` and ``replays2`` has no effect; comparing 1 to 2
-    is the same as comparing 2 to 1.
-
-    See Also
-    --------
-    :class:`~circleguard.investigator.Investigator`, for investigating single
-    replays.
-    """
-
-    def __init__(self, replays1, replays2, detect, num_chunks):
-        self.log = logging.getLogger(__name__)
-
-        # filter replays we had no data for
-        self.replays1 = [replay for replay in replays1 if replay.replay_data is not None]
-        self.replays2 = [replay for replay in replays2 if replay.replay_data is not None] if replays2 else None
-
-        self.mode = "double" if self.replays2 else "single"
-        self.detect = detect
-        self.num_chunks = num_chunks
-
-    def compare(self):
-        """
-        If ``replays2`` is not ``None``, compares all replays in replays1
-        against all replays in replays2. Otherwise, compares all replays in
-        ``replays1`` against all other replays in ``replays1``
-        (``len(replays1) choose 2`` comparisons).
-
-        Yields
-        ------
-        :class:`~.result.ComparisonResult`
-            Results representing the comparison of two replays.
-        """
-
-        self.log.info("Comparing replays with mode: %s", self.mode)
-        self.log.debug("replays1: %r", self.replays1)
-        self.log.debug("replays2: %r", self.replays2)
-
-        # can't make any comparisons
-        if not self.replays1:
-            return
-
-        if self.mode == "double":
-            iterator = itertools.product(self.replays1, self.replays2)
-        elif self.mode == "single":
-            iterator = itertools.combinations(self.replays1, 2)
-        else:
-            raise InvalidArgumentsException("'mode' must be one of 'double' or 'single'")
-
-        for replay1, replay2 in iterator:
-            if replay1.replay_id == replay2.replay_id:
-                self.log.debug("Not comparing %r and %r with the same id", replay1, replay2)
-                continue
-            yield from self.compare_two_replays(replay1, replay2)
-
-
-    def compare_two_replays(self, replay1, replay2):
+    @staticmethod
+    def compare(self, replay1, replay2, method, num_chunks):
         """
         Compares two :class:`~.replay.Replay`\s.
 
@@ -125,12 +47,10 @@ class Comparer:
         if (Mod.HR in replay1.mods) ^ (Mod.HR in replay2.mods):
             xy1[:, 1] = 384 - xy1[:, 1]
 
-        if self.detect & Detect.STEAL_SIM:
-            mean = Comparer.compute_similarity(xy1, xy2)
-            yield StealResultSim(replay1, replay2, mean)
-        if self.detect & Detect.STEAL_CORR:
-            correlation = Comparer.compute_correlation(xy1, xy2, self.num_chunks)
-            yield StealResultCorr(replay1, replay2, correlation)
+        if method == "similarity":
+            return Comparer.compute_similarity(xy1, xy2)
+        if method == "correlation":
+            return Comparer.compute_correlation(xy1, xy2, num_chunks)
 
 
     @staticmethod
@@ -156,6 +76,7 @@ class Comparer:
         distance = xy1 - xy2
         distance = (distance ** 2).sum(axis=1) ** 0.5
         return distance.mean()
+
 
     @staticmethod
     def compute_correlation(xy1, xy2, num_chunks):
@@ -238,10 +159,3 @@ class Comparer:
         xy1 = xy1[valid]
         xy2 = xy2[valid]
         return (xy1, xy2)
-
-
-    def __repr__(self):
-        return f"Comparer(replays1={self.replays1},replays2={self.replays2})"
-
-    def __str__(self):
-        return f"Comparer with {len(self.replays1)} and {len(self.replays2)} replays"

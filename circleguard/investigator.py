@@ -2,60 +2,16 @@ import math
 
 import numpy as np
 
-from circleguard.enums import Key, Detect
-from circleguard.result import RelaxResult, CorrectionResult, TimewarpResult
+from circleguard.enums import Key
 from circleguard.mod import Mod
 from circleguard.utils import KEY_MASK
 from slider.beatmap import Circle, Slider
 
 class Investigator:
-    """
-    Manages the investigation of individual
-    :class:`~.replay.Replay`\s for cheats.
-
-    Parameters
-    ----------
-    replay: :class:`~.replay.Replay`
-        The replay to investigate.
-    detect: :class:`~.Detect`
-        What cheats to investigate the replay for.
-    beatmap: :class:`slider.beatmap.Beatmap`
-        The beatmap to calculate ur from, with the replay. Should be ``None``
-        if ``Detect.RELAX in detect`` is ``False``.
-
-    See Also
-    --------
-    :class:`~.comparer.Comparer`, for comparing multiple replays.
-    """
-
     # https://osu.ppy.sh/home/changelog/stable40/20190207.2
     VERSION_SLIDERBUG_FIXED_STABLE = 20190207
     # https://osu.ppy.sh/home/changelog/cuttingedge/20190111
     VERSION_SLIDERBUG_FIXED_CUTTING_EDGE = 20190111
-
-    def __init__(self, replay, detect, max_angle, min_distance, beatmap=None):
-        self.replay = replay
-        self.detect = detect
-        self.max_angle = max_angle
-        self.min_distance = min_distance
-        self.beatmap = beatmap
-        self.detect = detect
-
-    def investigate(self):
-        replay = self.replay
-        # equivalent of filtering out replays with no replay data from comparer on init
-        if replay.replay_data is None:
-            return
-        if self.detect & Detect.RELAX:
-            ur = self.ur(replay, self.beatmap)
-            yield RelaxResult(replay, ur)
-        if self.detect & Detect.CORRECTION:
-            snaps = self.aim_correction(replay, self.max_angle, self.min_distance)
-            yield CorrectionResult(replay, snaps)
-        if self.detect & Detect.TIMEWARP:
-            frametimes = self.frametimes(replay)
-            frametime = self.median_frametime(frametimes)
-            yield TimewarpResult(replay, frametime, frametimes)
 
     @staticmethod
     def ur(replay, beatmap):
