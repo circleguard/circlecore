@@ -14,7 +14,7 @@ import circleguard.utils as utils
 class Comparer:
 
     @staticmethod
-    def similarity(self, replay1, replay2, method, num_chunks):
+    def similarity(replay1, replay2, method, num_chunks):
         """
         Compares two :class:`~.replay.Replay`\s.
 
@@ -30,8 +30,6 @@ class Comparer:
         :class:`~.result.ComparisonResult`
             The result of comparing ``replay1`` to ``replay2``.
         """
-        self.log.log(utils.TRACE, "comparing %r and %r", replay1, replay2)
-
         # perform preprocessing here as an optimization, so it is not repeated
         # within different comparison algorithms. This will likely need to
         # become more advanced if we add more (and different) algorithms.
