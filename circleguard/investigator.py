@@ -1,8 +1,5 @@
-import math
-
 import numpy as np
 
-from circleguard.enums import Key
 from circleguard.mod import Mod
 from circleguard.utils import KEY_MASK
 from slider.beatmap import Circle, Slider
