@@ -20,6 +20,8 @@ UR_DELTA = 0.01
 # We may want to split tests into "heavy" and "light" where light loads <10 heavy calls and heavy loads as many as we need.
 # light can run locally, heavy can run on prs.
 HEAVY_CALL_COUNT = 9
+# threshold for frametime
+FRAMETIME_LIMIT = 13
 
 class CGTestCase(TestCase):
     @classmethod
