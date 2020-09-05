@@ -214,7 +214,15 @@ class Circleguard:
         return self.library.lookup_by_id(map_id, download=True, \
                 save=True)
 
-    # TODO convert to @property
+
+    @staticmethod
+    def order(replay1, replay2):
+        # assume they're passed in order (earliest first); if not, switch them
+        order = (replay1, replay2)
+        if replay2.timestamp < replay1.timestamp:
+            order = tuple(reversed(order))
+        return order
+
     def set_options(self, cache=None):
         """
         Sets options for this instance of circlecore.
