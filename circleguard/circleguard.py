@@ -414,7 +414,7 @@ class KeylessCircleguard(Circleguard):
     # better.
 
 
-def set_options(loglevel=None):
+def set_options(*, loglevel=None):
     """
     Set global options for circlecore.
 
