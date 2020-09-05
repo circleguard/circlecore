@@ -32,57 +32,9 @@ class RatelimitWeight(Enum):
     This value currently has no effect on the program and is reserved for
     future functionality.
     """
-
     NONE  = "None"
     LIGHT = "Light"
     HEAVY = "Heavy"
-
-
-class Detect(IntFlag):
-    """
-    A cheat, or set of cheats, to investigate for.
-
-    Notes
-    -----
-    Also defines thresholds we feel are reasonable to determine a replay as
-    cheated. These values are more conservative - that is, we try to not give
-    false positives. You should decide where you fall on the scale
-    of "few false positives, many false negatives" to "many false positives,
-    few false negatives" for yourself, if necessary.
-    """
-    STEAL_SIM      = 1 << 0
-    STEAL_CORR     = 1 << 3
-    RELAX          = 1 << 1
-    CORRECTION     = 1 << 2
-    TIMEWARP       = 1 << 4
-
-    # TODO split ``ALL`` into investigations and comparisons, doesn't
-    # make sense to combine the two when they deal with different numbers of
-    # replays
-    ALL            = STEAL_SIM | STEAL_CORR | RELAX | CORRECTION | TIMEWARP
-    # TODO remove in 5.0.0 probably, or figure out a better way to do this
-    # (this being specifying different algorithms for the same cheat)
-    STEAL          = STEAL_SIM
-
-    SIM_LIMIT = 17
-    CORR_LIMIT = 0.99
-    # unconverted ur threshold
-    UR_LIMIT = 50
-    # median frametime limit for timewarp.
-    # Most replays have a median of 15 or 16
-    FRAMETIME_LIMIT = 13
-    # no aim correction threshold - any snap is suspicious
-
-class ResultType(Enum):
-    """
-    What type of cheat test to represent the results for.
-    """
-
-    STEAL = "Replay Stealing"
-    REMOD = "Remodding"
-    RELAX = "Relax"
-    CORRECTION = "Aim Correction"
-    TIMEWARP = "Timewarp"
 
 
 class Key(IntFlag):
