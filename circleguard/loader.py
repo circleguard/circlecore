@@ -191,9 +191,7 @@ class Loader():
 
         # we have to define a new variable to hold locals - otherwise when we
         # call it twice inside the dict comprehension, it rebinds to the comp
-        # scope and takes on different locals which is real bad.
-        # I spent many-a-hour figuring this out,
-        # and if anyone has a more elegant solution I'm all ears.
+        # scope and takes on different locals.
         locals_ = locals()
         self.log.log(TRACE, "Loading replay info on map %d with options %s",
                             map_id, {k: locals_[k] for k in locals_ if k != 'self'})
