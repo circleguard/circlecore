@@ -58,19 +58,32 @@ class Loadable(abc.ABC):
         pass
 
 
-class LoadableContainer(Loadable):
+class ReplayContainer(Loadable):
     """
-    A loadable which contains other loadables. This means that it has three
-    stages - unloaded, info loaded, and loaded.
+    A Loadable that holds Replay subclasses, and which has an additional state
+    between "unloaded" and "loaded" called "info loaded".
 
-    When info loaded, the :class:`~LoadableContainer` has :class:`~Loadable`\s
-    but they are unloaded.
+    ReplayContainer's start unloaded and become info loaded when
+    :meth:`~.load_info` is called. They become fully loaded when
+    :meth:`~.load` is called (and if this is called when the ReplayContainer is
+    in the unloaded state, :meth:`~Loadable.load` will load info first, then
+    load the replays, effectively skipping the info loaded state),
 
-    When loaded, the :class:`~LoadableContainer` has loaded :class:`Loadable`\s.
+    In the unloaded state, the container has no actual Replay objects. It may
+    have limited knowledge about their number or type.
+
+    In the info loaded state, the container has references to Replay objects,
+    but those Replay objects are unloaded.
+
+    In the loaded state, the Replay objects in the container are loaded.
     """
     def __init__(self, cache):
         super().__init__(cache)
         self.info_loaded = False
+
+    @abc.abstractmethod
+    def load_info(self, loader):
+        pass
 
     def load(self, loader, cache=None):
         """
@@ -87,37 +100,9 @@ class LoadableContainer(Loadable):
             return
         cascade_cache = cache if self.cache is None else self.cache
         self.load_info(loader)
-        for loadable in self.all_loadables():
-            loadable.load(loader, cascade_cache)
+        for replay in self.all_replays():
+            replay.load(loader, cascade_cache)
         self.loaded = True
-
-    # TODO in core 5.0.0: don't provide a default implementation of this method.
-    # we currently assume that users will only use LoadableContainer for two
-    # things:
-    # * needs to define ``Replay`` instances on load info and does not hold any
-    #   ``LoadableContainer``s. In which case you should use ReplayContainer,
-    #   which has ``load_info`` as abstract
-    # * does not need to define any ``Replay`` instances on load info, and holds
-    #   ``LoadableContainer``s. In which case you should use ``Check`` or
-    #   subclass LoadableContainer
-    # But there is a third option - needing to define ``Replay`` instances on
-    # load info, *and* holding ``LoadableContainer``s. In which case this
-    # default does not do what we want. It's not worth it to define this method
-    # here, so move this implementation to ``Check`` (or maybe even split into
-    # a further two subclasses, "does not create anything new on load info" which
-    # Check would inherit from, and "does create new Loadables on load info",
-    # which is the third case here).
-    def load_info(self, loader):
-        if self.info_loaded:
-            return
-        for loadable in self.all_loadables():
-            if isinstance(loadable, LoadableContainer):
-                loadable.load_info(loader)
-        self.info_loaded = True
-
-    @abc.abstractmethod
-    def all_loadables(self):
-        pass
 
     @abc.abstractmethod
     def all_replays(self):
@@ -128,7 +113,7 @@ class LoadableContainer(Loadable):
         --------
         If you want an accurate list of :class:`~.Replay`\s in this instance,
         you must call :func:`~circleguard.circleguard.Circleguard.load` on this
-        instance before :func:`~Map.all_replays`. Otherwise, this
+        instance before :func:`~.all_replays`. Otherwise, this
         instance is not info loaded, and does not have a complete list of
         replays it represents.
         """
@@ -146,41 +131,6 @@ class LoadableContainer(Loadable):
 
     def __iter__(self):
         return iter(self.all_replays())
-
-
-class ReplayContainer(LoadableContainer):
-    """
-    A LoadableContainer that only holds Replays and subclasses thereof.
-
-    ReplayContainer's start unloaded and become info loaded when
-    :meth:`~LoadableContainer.load_info` is called. They become fully
-    loaded when :meth:`~Loadable.load`
-    is called (and if this is called when the ReplayContainer is in the
-    unloaded state, :meth:`~Loadable.load` will load info first,
-    then load the replays.)
-
-    In the unloaded state, the container has no actual Replay objects. It may
-    have limited knowledge about their number or type.
-
-    In the info loaded state, the container has references to Replay objects,
-    but those Replay objects are unloaded.
-
-    In the loaded state, the Replay objects are loaded.
-    """
-    def __init__(self, cache):
-        super().__init__(cache)
-
-    # redefine as abstract. The LoadableContainer definition serves as a good
-    # default implementation for other user-defined loadable containers, but not
-    # for ReplayContainers and user-defined subclasses thereof.
-    @abc.abstractmethod
-    def load_info(self, loader):
-        pass
-
-    def all_loadables(self):
-        # ReplayContainers only contain replays, so these two functions
-        # are equivalent
-        return self.all_replays()
 
 
 
