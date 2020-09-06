@@ -51,12 +51,12 @@ class Circleguard:
 
     def __init__(self, key, db_path=None, slider_dir=None, loader=None, \
         cache=True):
-        self.cache = cache
+        self._cache = cache
         self.cacher = None
         if db_path is not None:
             # resolve relative paths
             db_path = Path(db_path).absolute()
-            self.cacher = Cacher(self.cache, db_path)
+            self.cacher = Cacher(self._cache, db_path)
 
         self.log = logging.getLogger(__name__)
 
@@ -243,27 +243,14 @@ class Circleguard:
     def _beatmap(self, map_id):
         return self.library.lookup_by_id(map_id, download=True, save=True)
 
+    @property
+    def cache(self, cache):
+        return self._cache
 
-    # TODO convert to @property with just `cache`, no other options
-    def set_options(self, cache=None):
-        """
-        Sets options for this instance of circlecore.
-
-        Parameters
-        ----------
-        cache: bool
-            Whether to cache loaded loadables.
-        """
-
-        # remnant code from when we had many options available in set_options.
-        # Left in for easy future expansion
-        for k, v in locals().items():
-            if v is None or k == "self":
-                continue
-            if k == "cache":
-                self.cache = cache
-                self.cacher.should_cache = cache
-                continue
+    @cache.setter
+    def cache(self, cache):
+        self._cache = cache
+        self.cacher.should_cache = cache
 
 
 class KeylessCircleguard(Circleguard):
