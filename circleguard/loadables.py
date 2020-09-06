@@ -547,8 +547,9 @@ class Replay(Loadable):
         # The last positive frame we encountered before entering a negative
         # section.
         last_positive_frame = None
-        # the running time when we encountered ``last_positive_fram``. We do not
-        # store this information in each individual frame.
+        # the running time when we encountered ``last_positive_frame``. We need
+        # to save this as we do not store this information in each individual
+        # frame.
         last_positive_frame_cum_time = None
         previous_frame = None
         for e in replay_data:
