@@ -129,6 +129,27 @@ class TestMapUser(CGTestCase):
         self.assertListEqual([r.map_id for r in self.mu[0:2]], [795627, 795627])
 
 
+class TestLoadableFromCG(CGTestCase):
+
+    def test_map_from_cg(self):
+        m = self.cg.Map(221777, "1-2")
+        self.assertTrue(m.info_loaded)
+        self.assertFalse(m.loaded)
+        self.assertEqual(len(m), 2)
+
+    def test_user_from_cg(self):
+        u = self.cg.User(124493, "2, 3-4")
+        self.assertTrue(u.info_loaded)
+        self.assertFalse(u.loaded)
+        self.assertEqual(len(u), 3)
+
+    def test_map_user_from_cg(self):
+        mu = self.cg.MapUser(795627, 6304246, "1")
+        self.assertTrue(mu.info_loaded)
+        self.assertFalse(mu.loaded)
+        self.assertEqual(len(mu), 1)
+
+
 class TestEquality(CGTestCase):
     @classmethod
     def setUpClass(cls):
