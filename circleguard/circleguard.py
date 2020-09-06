@@ -10,6 +10,7 @@ from circleguard.comparer import Comparer
 from circleguard.investigator import Investigator, Hit, Snap
 from circleguard.cacher import Cacher
 from circleguard.utils import convert_statistic
+from circleguard.loadables import Map, User, MapUser
 
 
 class Circleguard:
@@ -222,6 +223,22 @@ class Circleguard:
         """
         replay_container.load_info(self.loader)
 
+
+    def Map(self, map_id, span, mods=None, cache=None):
+        m = Map(map_id, span, mods, cache)
+        self.load_info(m)
+        return m
+
+    def User(self, user_id, span, mods=None, cache=None, available_only=True):
+        u = User(user_id, span, mods, cache, available_only)
+        self.load_info(u)
+        return u
+
+    def MapUser(self, map_id, user_id, span=Loader.MAX_MAP_SPAN, mods=None, \
+        cache=None, available_only=True):
+        mu = MapUser(map_id, user_id, span, cache, available_only)
+        self.load_info(mu)
+        return mu
 
     def _beatmap(self, map_id):
         return self.library.lookup_by_id(map_id, download=True, save=True)
