@@ -79,7 +79,7 @@ class Circleguard:
     def similarity(self, replay1, replay2, method="similarity", \
         num_chunks=DEFAULT_CHUNKS) -> float:
         """
-        Calculates the similarity between ``replay1`` and ``replay2``.
+        The similarity between ``replay1`` and ``replay2``.
 
         Parameters
         ----------
@@ -114,7 +114,7 @@ class Circleguard:
 
     def ur(self, replay, cv=True) -> float:
         """
-        Calculates the unstable rate of ``replay``.
+        The unstable rate of ``replay``.
 
         Parameters
         ----------
@@ -160,7 +160,7 @@ class Circleguard:
 
     def frametime(self, replay, cv=True) -> float:
         """
-        Calculates the median frametime of ``replay``.
+        The median frametime of ``replay``.
 
         Parameters
         ----------
