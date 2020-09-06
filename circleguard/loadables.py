@@ -460,6 +460,26 @@ class Replay(Loadable):
         self.k = None
         self._keydowns = None
 
+    def has_data(self):
+        """
+        Whether this replay has any replay data.
+
+        Returns
+        -------
+        bool
+            Whether this replay has any replay data.
+
+        Notes
+        -----
+        If this replay is unloaded, it is guaranteed to not have any replay
+        data. But if the replay is loaded, it is not guaranteed to have any
+        replay data. Some replays do not have any replay data available from the
+        api, even after being loaded.
+        """
+        if not self.loaded:
+            return False
+        return bool(self.replay_data)
+
     def _process_replay_data(self, replay_data):
         """
         Preprocesses the replay data (turns it into numpy arrays) for fast
@@ -611,7 +631,7 @@ class Replay(Loadable):
         If the first frame (``f1``) has keys ``K1`` and ``f2`` has keys
         ``K1 + K2``, then ``keydowns[1]`` is ``K2``.
         """
-        if not self.replay_data:
+        if not self.has_data():
             return None
         # can't do `if not self._keydowns` because the truth value of an ndarray
         # is ambiguous
