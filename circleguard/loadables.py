@@ -17,8 +17,9 @@ from circleguard.span import Span
 
 class Loadable(abc.ABC):
     """
-    Represents one or multiple replays, which have replay data to be loaded from
-    some additional source - the osu! api, local cache, or some other location.
+    Represents one or multiple replays, which have replay data to be loaded
+    from some additional source - the osu! api, local cache, or some other
+    location.
 
     Parameters
     ----------
@@ -371,8 +372,8 @@ class ReplayDir(ReplayContainer):
         super().__init__(cache)
         self.dir_path = Path(dir_path)
         if not self.dir_path.is_dir():
-            raise ValueError(f"Expected path pointing to {self.dir_path} to be "
-                              "a directory")
+            raise ValueError(f"Expected path pointing to {self.dir_path} to be"
+                " a directory")
         self.replays = []
 
     def load_info(self, loader):
@@ -473,8 +474,8 @@ class Replay(Loadable):
         -----
         If this replay is unloaded, it is guaranteed to not have any replay
         data. But if the replay is loaded, it is not guaranteed to have any
-        replay data. Some replays do not have any replay data available from the
-        api, even after being loaded.
+        replay data. Some replays do not have any replay data available from
+        the api, even after being loaded.
         """
         if not self.loaded:
             return False
@@ -515,25 +516,25 @@ class Replay(Loadable):
         replay_data = iter(replay_data)
         # The following comments in this method are guesswork, but seems to
         # accurately describe replays. This references the "first" frame
-        # assuming that we have already removed the truly first zero time frame,
-        # if it is present. So technically the "first" frame below may be the
-        # second frame.
+        # assuming that we have already removed the truly first zero time
+        # frame, if it is present. So technically the "first" frame below may
+        # be the second frame.
         # There are two possibilities for replays:
         # * for replays with a skip in the beginning, the first frame time is
         #   the skip duration. The next frame after that will have a negative
         #   time, to account for the replay data before the skip.
-        # * for replays without a skip in the beginning, the first frame time is
-        #   -1.
+        # * for replays without a skip in the beginning, the first frame time
+        #   is -1.
         # Since in the first case the first frame time is a large positive,
         # this would make ``highest_running_t`` large and cause all replay data
         # before the skip to be ignored. To solve this, we initialize
         # ``running_t`` to the first frame's time.
         running_t = next(replay_data).time_since_previous_action
-        # We consider negative time frames in the middle of replays to be valid,
-        # with a caveat. Their negative time is counted toward ``running_t``
-        # (that is, decreases ``running_t``), but any frames after it are
-        # ignored, until the total time passed of ignored frames is greater than
-        # or equal to the negative frame.
+        # We consider negative time frames in the middle of replays to be
+        # valid, with a caveat. Their negative time is counted toward
+        # ``running_t`` (that is, decreases ``running_t``), but any frames
+        # after it are ignored, until the total time passed of ignored frames
+        # is greater than or equal to the negative frame.
         # There's one more catch - the frame that brings us *out* of this
         # "negative time" section where we're ignoring frames will cause a
         # special frame to be inserted, which has the same time as the frame
@@ -553,10 +554,10 @@ class Replay(Loadable):
         last_positive_frame_cum_time = None
         previous_frame = None
         for e in replay_data:
-            # check if we were in a negative section of the play at the previous
-            # frame (f0) before applying the current frame (f1), so we can
-            # apply special logic if f1 is the frame that gets us out of the
-            # negative section.
+            # check if we were in a negative section of the play at the
+            # previous frame (f0) before applying the current frame (f1), so we
+            # can apply special logic if f1 is the frame that gets us out of
+            # the negative section.
             was_in_negative_section = running_t < highest_running_t
 
             e_t = e.time_since_previous_action
@@ -573,8 +574,8 @@ class Replay(Loadable):
                 previous_frame = e
                 continue
 
-            # if we get here, f1 brought us out of the negative section. In this
-            # case, osu! actually inserts a new frame, with:
+            # if we get here, f1 brought us out of the negative section. In
+            # this case, osu! actually inserts a new frame, with:
             # * t = the cumulative time at the last positive frame (yes, this
             #   means there are two frames at the same time in the replay
             #   playback).
@@ -611,7 +612,8 @@ class Replay(Loadable):
         xy = np.array([block[1], block[2]], dtype=float).T
         k = np.array(block[3], dtype=int)
 
-        # sort our data by t. Stable so we don't reorder frames with equal times
+        # sort our data by t. Stable so we don't reorder frames with equal
+        # times
         t_sort = np.argsort(t, kind="stable")
         t = t[t_sort]
         xy = xy[t_sort]
@@ -634,8 +636,8 @@ class Replay(Loadable):
         """
         if not self.has_data():
             return None
-        # can't do `if not self._keydowns` because the truth value of an ndarray
-        # is ambiguous
+        # can't do `if not self._keydowns` because the truth value of an
+        # ndarray is ambiguous
         if self._keydowns is None:
             keypresses = self.k & KEY_MASK
             self._keydowns = keypresses & ~np.insert(keypresses[:-1], 0, 0)
@@ -702,7 +704,8 @@ class ReplayMap(Replay):
         If ``replay.loaded`` is ``True``, this method has no effect.
         ``replay.loaded`` is set to ``True`` after this method is finished.
         """
-        # only listen to the parent's cache if ours is not set. Lower takes precedence
+        # only listen to the parent's cache if ours is not set. Lower takes
+        # precedence
         cache = cache if self.cache is None else self.cache
         self.log.debug("Loading %r", self)
         if self.loaded:
@@ -874,8 +877,8 @@ class ReplayPath(Replay):
 
     def __str__(self):
         if self.loaded:
-            return (f"Loaded ReplayPath by {self.username} on {self.map_id} at "
-                f"{self.path}")
+            return (f"Loaded ReplayPath by {self.username} on {self.map_id} at"
+                f" {self.path}")
         return f"Unloaded ReplayPath at {self.path}"
 
 
@@ -910,7 +913,8 @@ class ReplayString(Replay):
         cache: bool
             Whether to cache this replay after loading it. This only has an
             effect if ``self.cache`` is unset (``None``). Note that currently
-            we do not cache :class:`~.ReplayString` regardless of this parameter.
+            we do not cache :class:`~.ReplayString` regardless of this
+            parameter.
 
         Notes
         -----

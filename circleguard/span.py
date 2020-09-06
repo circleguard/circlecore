@@ -28,9 +28,9 @@ class Span(set):
         Parameters
         ----------
         span: str
-            The span of numbers to convert to a set. A number may occur more than
-            once - whether explicitly or in a range - in the span, but will
-            only occur once in the returned set.
+            The span of numbers to convert to a set. A number may occur more
+            than once - whether explicitly or in a range - in the span, but
+            will only occur once in the returned set.
 
         Returns
         -------

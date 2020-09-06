@@ -88,8 +88,8 @@ class Circleguard:
         replay2: :class:`~circleguard.loadable.Replay`
             The replay to compare against ``replay1``.
         method: str
-            What method to use to investigate the loadables for replay stealing.
-            This must be one of ``similarity`` or ``correlation``.
+            What method to use to investigate the loadables for replay
+            stealing. This must be one of ``similarity`` or ``correlation``.
         num_chunks: int
             How many chunks to split the replay into when comparing. This
             parameter only has an affect if ``method`` is ``correlation``.
@@ -184,8 +184,8 @@ class Circleguard:
 
 
     def hits(self, replay, within=None) -> Iterable[Hit]:
-        # if `within` is specified, only hits which are that many pixels or less
-        # away from the edge of the circle will be returned
+        # if `within` is specified, only hits which are that many pixels or
+        # less away from the edge of the circle will be returned
         self.load(replay)
         bm = self._beatmap(replay.map_id)
         return Investigator.hits(replay, bm)
