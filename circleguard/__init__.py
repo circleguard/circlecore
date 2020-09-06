@@ -45,7 +45,7 @@ __all__ = [
 "ReplayUnavailableException",
 # version
 "__version__",
-# results-related classes
+# investigation-related classes
 "Snap", "Hit",
 # span
 "Span",
