@@ -215,8 +215,28 @@ class Circleguard:
 
 
     def hits(self, replay, within=None) -> Iterable[Hit]:
-        # if `within` is specified, only hits which are that many pixels or
-        # less away from the edge of the circle will be returned
+        """
+        The locations in the replay where a hitobject is hit.
+
+        Parameters
+        ----------
+        replay: :class:`~circleguard.loadable.Replay`
+            The replay to calculate the hits of.
+        within: int
+            If passed, only the hits which are ``within`` pixels or less away
+            from the edge of the hitobject which they hit will be returned.
+            Otherwise, all hits are returned.
+
+        Returns
+        -------
+        [:class:`~circleguard.Investigator.Hit`]
+            The hits of the replay.
+
+        Notes
+        -----
+        In osu!lazer terminology, hits are equivalent to judgements, but
+        without considering misses.
+        """
         self.load(replay)
         beatmap = self._beatmap(replay.map_id)
         hits = Investigator.hits(replay, beatmap)
