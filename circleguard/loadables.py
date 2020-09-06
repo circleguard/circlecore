@@ -810,7 +810,7 @@ class ReplayPath(Replay):
         self.username = loaded.player_name
         # our `user_id` attribute is lazy loaded, so we need to retain the
         # `Loader#user_id` function to use later to load it.
-        self.user_id_func = loader.user_id
+        self._user_id_func = loader.user_id
         self._user_id = None
         self.mods = Mod(loaded.mod_combination)
         self.replay_id = loaded.replay_id
@@ -823,7 +823,7 @@ class ReplayPath(Replay):
     @property
     def user_id(self):
         if not self._user_id:
-            self._user_id = self.user_id_func(self.username)
+            self._user_id = self._user_id_func(self.username)
         return self._user_id
 
     @user_id.setter
@@ -930,7 +930,7 @@ class ReplayString(Replay):
         self.username = loaded.player_name
         # our `user_id` attribute is lazy loaded, so we need to retain the
         # `Loader#user_id` function to use later to load it.
-        self.user_id_func = loader.user_id
+        self._user_id_func = loader.user_id
         self._user_id = None
         self.mods = Mod(loaded.mod_combination)
         self.replay_id = loaded.replay_id
@@ -943,7 +943,7 @@ class ReplayString(Replay):
     @property
     def user_id(self):
         if not self._user_id:
-            self._user_id = self.user_id_func(self.username)
+            self._user_id = self._user_id_func(self.username)
         return self._user_id
 
     @user_id.setter
