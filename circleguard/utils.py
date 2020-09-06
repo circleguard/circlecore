@@ -26,8 +26,8 @@ def convert_statistic(stat, mods, *, to):
     Notes
     -----
     This method is intended for any statistic that is modified from what we
-    expect by ``Mod.DT`` or ``Mod.HT`` being applied (ie changing the game clock
-    speed). This includes ur (unstable rate) and median frametime
+    expect by ``Mod.DT`` or ``Mod.HT`` being applied (ie changing the game
+    clock speed). This includes ur (unstable rate) and median frametime
     (time between frames).
     """
     if to not in ["cv", "ucv"]:
@@ -106,7 +106,7 @@ class ColoredFormatter(Formatter):
         color = self.COLOR_MAPPING["NAME"]
         c_name = self.colored_log.format(color=color, msg=name)
 
-        message = c_record.msg # why is this msg, but we format it as %(message)s in the formatter? blame logging
+        message = c_record.msg
         color = self.COLOR_MAPPING["MESSAGE"]
         c_msg = self.colored_log.format(color=color, msg=message)
 
