@@ -244,11 +244,11 @@ class Circleguard:
         if not within:
             return hits
 
-        filtered_hits = []
         hr = Mod.HR in replay.mods
         ez = Mod.EZ in replay.mods
-
         hitcircle_radius = circle_radius(beatmap.cs(hard_rock=hr, easy=ez))
+        filtered_hits = []
+
         for hit in hits:
             hitobj_pos = hit.hitobject.position
             hitobj_xy = np.array([hitobj_pos.x, hitobj_pos.y])
