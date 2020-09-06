@@ -8,7 +8,7 @@ from circleguard.enums import Key, RatelimitWeight
 from circleguard.mod import Mod
 from circleguard.utils import TRACE, ColoredFormatter
 from circleguard.loader import Loader
-from circleguard.replay_info import ReplayInfo
+from circleguard.loader import ReplayInfo
 from circleguard.loader import (APIException, NoInfoAvailableException,
         UnknownAPIException, InternalAPIException, InvalidKeyException,
         RatelimitException, InvalidJSONException, ReplayUnavailableException)
@@ -37,9 +37,7 @@ __all__ = [
 # utils
 "TRACE",
 # loader
-"Loader",
-# replay info
-"ReplayInfo",
+"Loader", "ReplayInfo",
 # exceptions
 "APIException",
 "NoInfoAvailableException", "UnknownAPIException", "InternalAPIException",
