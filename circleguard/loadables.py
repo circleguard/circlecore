@@ -455,10 +455,10 @@ class Replay(Loadable):
         self.replay_data  = None
 
         # remains ``None``` when replay is unloaded or loaded but with no data
-        self.t = None
-        self.xy = None
-        self.k = None
-        self._keydowns = None
+        self.t            = None
+        self.xy           = None
+        self.k            = None
+        self._keydowns    = None
 
     def has_data(self):
         """
