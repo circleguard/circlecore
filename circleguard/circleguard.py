@@ -182,6 +182,34 @@ class Circleguard:
 
         return frametime
 
+    def frametimes(self, replay, cv=True) -> Iterable[float]:
+        """
+        The time (in ms) between each frame in ``replay``.
+
+        Parameters
+        ----------
+        replay: :class:`~circleguard.loadable.Replay`
+            The replay to calculate the time between each frame of.
+        cv: bool
+            Whether to return the converted or unconverted frametimes. The
+            converted frametimes is returned by default.
+
+        Returns
+        -------
+        [float]
+            The time (in ms) between each frame of the replay. <br>
+            The first element of this array corresponds to the time between the
+            first and second frame, the second element to the time between the
+            second and third frame, et.c
+        """
+        self.load(replay)
+        frametimes = Investigator.frametimes(replay)
+        if cv:
+            frametimes = [convert_statistic(frametime, replay.mods, to="cv") \
+                for frametime in frametimes]
+
+        return frametimes
+
 
     def hits(self, replay, within=None) -> Iterable[Hit]:
         # if `within` is specified, only hits which are that many pixels or
