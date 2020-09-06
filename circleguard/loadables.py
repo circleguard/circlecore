@@ -63,7 +63,7 @@ class ReplayContainer(Loadable):
     A Loadable that holds Replay subclasses, and which has an additional state
     between "unloaded" and "loaded" called "info loaded".
 
-    ReplayContainer's start unloaded and become info loaded when
+    ReplayContainers start unloaded and become info loaded when
     :meth:`~.load_info` is called. They become fully loaded when
     :meth:`~.load` is called (and if this is called when the ReplayContainer is
     in the unloaded state, :meth:`~Loadable.load` will load info first, then
@@ -126,8 +126,7 @@ class ReplayContainer(Loadable):
         replays = self.all_replays()
         if isinstance(key, slice):
             return replays[key.start:key.stop:key.step]
-        else:
-            return replays[key]
+        return replays[key]
 
     def __iter__(self):
         return iter(self.all_replays())
@@ -622,8 +621,10 @@ class Replay(Loadable):
         return self._keydowns
 
     def __repr__(self):
-        return (f"Replay(timestamp={self.timestamp},map_id={self.map_id},user_id={self.user_id},mods={self.mods},"
-               f"replay_id={self.replay_id},weight={self.weight},loaded={self.loaded},username={self.username})")
+        return (f"Replay(timestamp={self.timestamp},map_id={self.map_id},"
+            f"user_id={self.user_id},mods={self.mods},"
+            f"replay_id={self.replay_id},weight={self.weight},"
+            f"loaded={self.loaded},username={self.username})")
 
     def __str__(self):
         return f"Replay by {self.username} on {self.map_id}"
@@ -716,21 +717,24 @@ class ReplayMap(Replay):
         """
         if not isinstance(loadable, ReplayMap):
             return False
-        return self.map_id == loadable.map_id and self.user_id == loadable.user_id and self.mods == loadable.mods
+        return (self.map_id == loadable.map_id and
+            self.user_id == loadable.user_id and self.mods == loadable.mods)
 
     def __hash__(self):
         return hash((self.map_id, self.user_id, self.mods))
 
     def __repr__(self):
         if self.loaded:
-            return (f"ReplayMap(timestamp={self.timestamp},map_id={self.map_id},user_id={self.user_id},mods={self.mods},"
-                f"cache={self.cache},replay_id={self.replay_id},loaded={self.loaded},username={self.username})")
-        else:
-            return (f"ReplayMap(map_id={self.map_id},user_id={self.user_id},mods={self.mods},cache={self.cache},"
-                    f"loaded={self.loaded})")
+            return (f"ReplayMap(timestamp={self.timestamp},map_id={self.map_id}"
+            f",user_id={self.user_id},mods={self.mods},cache={self.cache},"
+            f"replay_id={self.replay_id},loaded={self.loaded},"
+            f"username={self.username})")
+        return (f"ReplayMap(map_id={self.map_id},user_id={self.user_id},"
+                f"mods={self.mods},cache={self.cache},loaded={self.loaded})")
 
     def __str__(self):
-        return f"{'Loaded' if self.loaded else 'Unloaded'} ReplayMap by {self.user_id} on {self.map_id}"
+        return (f"{'Loaded' if self.loaded else 'Unloaded'} ReplayMap by "
+            f"{self.user_id} on {self.map_id}")
 
 
 class ReplayPath(Replay):
@@ -772,7 +776,8 @@ class ReplayPath(Replay):
         ``replay.loaded`` is set to ``True`` after this method is finished.
         """
 
-        # we don't cache local replays currently. Ignore cache option for if/when we need it
+        # we don't cache local replays currently. Ignore cache option for
+        # if/when we need it
         self.log.debug("Loading ReplayPath %r", self)
         if self.loaded:
             self.log.debug("%s already loaded, not loading", self)
@@ -834,16 +839,18 @@ class ReplayPath(Replay):
 
     def __repr__(self):
         if self.loaded:
-            return (f"ReplayPath(path={self.path},map_id={self.map_id},user_id={self.user_id},mods={self.mods},"
-                    f"replay_id={self.replay_id},weight={self.weight},loaded={self.loaded},username={self.username})")
-        else:
-            return f"ReplayPath(path={self.path},weight={self.weight},loaded={self.loaded})"
+            return (f"ReplayPath(path={self.path},map_id={self.map_id},"
+                f"user_id={self.user_id},mods={self.mods},"
+                f"replay_id={self.replay_id},weight={self.weight},"
+                f"loaded={self.loaded},username={self.username})")
+        return (f"ReplayPath(path={self.path},weight={self.weight},"
+                f"loaded={self.loaded})")
 
     def __str__(self):
         if self.loaded:
-            return f"Loaded ReplayPath by {self.username} on {self.map_id} at {self.path}"
-        else:
-            return f"Unloaded ReplayPath at {self.path}"
+            return (f"Loaded ReplayPath by {self.username} on {self.map_id} at "
+                f"{self.path}")
+        return f"Unloaded ReplayPath at {self.path}"
 
 
 class ReplayString(Replay):
@@ -933,14 +940,13 @@ class ReplayString(Replay):
                     f"map_id={self.map_id},user_id={self.user_id},mods={self.mods},"
                     f"replay_id={self.replay_id},weight={self.weight},"
                     f"loaded={self.loaded},username={self.username})")
-        else:
-            return f"ReplayString(len(replay_data_str)={len(self.replay_data_str)})"
+        return f"ReplayString(len(replay_data_str)={len(self.replay_data_str)})"
 
     def __str__(self):
         if self.loaded:
             return f"Loaded ReplayString by {self.username} on {self.map_id}"
-        else:
-            return f"Unloaded ReplayString with {len(self.replay_data_str)} chars of data"
+        return (f"Unloaded ReplayString with {len(self.replay_data_str)} "
+            "chars of data")
 
 
 class ReplayID(Replay):
