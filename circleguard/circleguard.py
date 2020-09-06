@@ -160,7 +160,7 @@ class Circleguard:
 
     def frametime(self, replay, cv=True) -> float:
         """
-        The median frametime of ``replay``.
+        The median frametime (in ms) of ``replay``.
 
         Parameters
         ----------
@@ -173,7 +173,7 @@ class Circleguard:
         Returns
         -------
         float
-            The median frametime of the replay.
+            The median frametime (in ms) of the replay.
         """
         self.load(replay)
         frametime = Investigator.frametime(replay)
