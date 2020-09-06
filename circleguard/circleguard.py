@@ -244,7 +244,7 @@ class Circleguard:
         return self.library.lookup_by_id(map_id, download=True, save=True)
 
     @property
-    def cache(self, cache):
+    def cache(self):
         return self._cache
 
     @cache.setter
