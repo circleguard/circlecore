@@ -81,10 +81,6 @@ class ReplayContainer(Loadable):
         super().__init__(cache)
         self.info_loaded = False
 
-    @abc.abstractmethod
-    def load_info(self, loader):
-        pass
-
     def load(self, loader, cache=None):
         """
         Loads all :class:`~circleguard.loadable.Loadable`\s contained by this
@@ -103,6 +99,10 @@ class ReplayContainer(Loadable):
         for replay in self.all_replays():
             replay.load(loader, cascade_cache)
         self.loaded = True
+
+    @abc.abstractmethod
+    def load_info(self, loader):
+        pass
 
     @abc.abstractmethod
     def all_replays(self):
