@@ -1007,8 +1007,7 @@ class CachedReplay(Replay):
         self.loaded = True
 
     def __eq__(self, other):
-        # could check more but replay_id is already a primary key, guaranteed unique
         return self.replay_id == other.replay_id
 
     def __hash__(self):
-        return hash((self.user_id, self.map_id, self.mods, self.replay_data, self.replay_id))
+        return hash(self.replay_id)
