@@ -9,9 +9,9 @@ from circleguard.mod import Mod
 from circleguard.utils import TRACE, ColoredFormatter
 from circleguard.loader import Loader
 from circleguard.replay_info import ReplayInfo
-from circleguard.exceptions import (CircleguardException, InvalidArgumentsException, APIException,
-        NoInfoAvailableException, UnknownAPIException, InternalAPIException, InvalidKeyException, RatelimitException,
-        InvalidJSONException, ReplayUnavailableException)
+from circleguard.loader import (APIException, NoInfoAvailableException,
+        UnknownAPIException, InternalAPIException, InvalidKeyException,
+        RatelimitException, InvalidJSONException, ReplayUnavailableException)
 from circleguard.version import __version__
 from circleguard.investigator import Snap, Hit
 from circleguard.span import Span
@@ -41,7 +41,7 @@ __all__ = [
 # replay info
 "ReplayInfo",
 # exceptions
-"CircleguardException", "InvalidArgumentsException", "APIException",
+"APIException",
 "NoInfoAvailableException", "UnknownAPIException", "InternalAPIException",
 "InvalidKeyException", "RatelimitException", "InvalidJSONException",
 "ReplayUnavailableException",

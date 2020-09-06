@@ -5,7 +5,6 @@ import os
 import wtc
 
 from circleguard.loader import Loader
-from circleguard.exceptions import CircleguardException
 from circleguard.utils import TRACE
 
 class Cacher:
@@ -94,7 +93,7 @@ class Cacher:
 
         Raises
         ------
-        CircleguardException
+        ValueError
             Raised when the redownloaded replay id is lower than the cached
             replay id. This should never happen and is indicative of either a
             fault on our end or the api's end.
@@ -132,13 +131,13 @@ class Cacher:
 
             if db_replay_id != new_replay_id:
                 if db_replay_id > new_replay_id:
-                    raise CircleguardException("The cached replay id of {} is higher than the new replay id of {}. Map id: {}, User id: {}, mods: {}"
+                    raise ValueError("The cached replay id of {} is higher than the new replay id of {}. Map id: {}, User id: {}, mods: {}"
                                                 .format(db_replay_id, new_replay_id, user_id, map_id, mods))
 
                 self.log.info("Cached replay on map %d by user %d with mods %d is outdated, redownloading", map_id, user_id, mods)
                 lzma_data = loader.replay_data(info)
                 if lzma_data is None:
-                    raise CircleguardException("We could not load lzma data for map {}, user {}, mods {}, replay available {} while revalidating."
+                    raise Exception("We could not load lzma data for map {}, user {}, mods {}, replay available {} while revalidating."
                                                 .format(map_id, user_id, mods, info.replay_available))
                 self.cache(lzma_data, info)
 

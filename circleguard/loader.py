@@ -4,17 +4,14 @@ import base64
 import logging
 from lzma import LZMAError
 from functools import lru_cache
+from enum import Enum
 
 from requests import RequestException
 import circleparse
 import ossapi
 
 from circleguard.replay_info import ReplayInfo
-from circleguard.enums import Error
 from circleguard.mod import Mod
-from circleguard.exceptions import (InvalidArgumentsException,
-    RatelimitException, ReplayUnavailableException, UnknownAPIException,
-    InvalidJSONException, NoInfoAvailableException)
 from circleguard.utils import TRACE
 from circleguard.span import Span
 
@@ -197,7 +194,7 @@ class Loader():
                             map_id, {k: locals_[k] for k in locals_ if k != 'self'})
 
         if not (span or user_id):
-            raise InvalidArgumentsException("One of user_id or span must be passed, but not both")
+            raise ValueError("One of user_id or span must be passed, but not both")
         api_limit = None
         if span:
             api_limit = max(span)
@@ -239,12 +236,6 @@ class Loader():
         -------
         list[:class:`~.ReplayInfo`]
             The replay infos representing the user's top plays.
-
-        Raises
-        ------
-        InvalidArgumentsException
-            If any elements in ``span`` are not between ``1`` and ``100``
-            inclusive.
         """
         locals_ = locals()
         self.log.log(TRACE, "Loading user best of %s with options %s",
@@ -527,3 +518,42 @@ class Loader():
         """
         self.log.info("Ratelimited, sleeping for %s seconds.", length)
         time.sleep(length)
+
+
+
+class APIException(Exception):
+    """An error involving the osu! api."""
+
+class NoInfoAvailableException(APIException):
+    """The api returned no information for the given arguments."""
+
+class UnknownAPIException(APIException):
+    """An api error that we were not prepared to handle."""
+
+class InternalAPIException(APIException):
+    """An api error that we know how to handle, and will do so automatically."""
+
+class InvalidKeyException(InternalAPIException):
+    """An api key was rejected by the api."""
+
+class RatelimitException(InternalAPIException):
+    """The api has ratelimit an api key."""
+
+class InvalidJSONException(InternalAPIException):
+    """The api returned an invalid json response."""
+
+class ReplayUnavailableException(InternalAPIException):
+    """
+    We expected a replay from the api but the api was unable to deliver it.
+    """
+
+
+# Strings taken from osu api error responses. Format is
+# [api response, exception class type, details to pass to an exception]
+class Error(Enum):
+    NO_REPLAY         = ["Replay not available.", ReplayUnavailableException, "Could not find any replay data. Skipping"]
+    RATELIMITED       = ["Requesting too fast! Slow your operation, cap'n!", RatelimitException, "We were ratelimited. Waiting it out"]
+    RETRIEVAL_FAILED  = ["Replay retrieval failed.", ReplayUnavailableException, "Replay retrieval failed. Skipping"]
+    INVALID_KEY       = ["Please provide a valid API key.", InvalidKeyException, "Please provide a valid api key"]
+    INVALID_JSON      = ["The api broke.", InvalidJSONException, "The api returned an invalid json response, retrying"]
+    UNKNOWN           = ["Unknown error.", UnknownAPIException, "Unknown error when requesting a replay."]

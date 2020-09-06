@@ -1,18 +1,5 @@
 from enum import Enum, IntFlag
 
-from circleguard.exceptions import (UnknownAPIException, RatelimitException,
-                InvalidKeyException, ReplayUnavailableException, InvalidJSONException)
-
-# strings taken from osu api error responses
-# [api response, exception class type, details to pass to an exception]
-class Error(Enum):
-    NO_REPLAY         = ["Replay not available.", ReplayUnavailableException, "Could not find any replay data. Skipping"]
-    RATELIMITED       = ["Requesting too fast! Slow your operation, cap'n!", RatelimitException, "We were ratelimited. Waiting it out"]
-    RETRIEVAL_FAILED  = ["Replay retrieval failed.", ReplayUnavailableException, "Replay retrieval failed. Skipping"]
-    INVALID_KEY       = ["Please provide a valid API key.", InvalidKeyException, "Please provide a valid api key"]
-    INVALID_JSON      = ["The api broke.", InvalidJSONException, "The api returned an invalid json response, retrying"]
-    UNKNOWN           = ["Unknown error.", UnknownAPIException, "Unknown error when requesting a replay."]
-
 
 class RatelimitWeight(Enum):
     """
