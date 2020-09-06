@@ -822,6 +822,9 @@ class ReplayPath(Replay):
 
     @property
     def user_id(self):
+        # we don't have a user_id_func if we're not loaded, so early return
+        if not self.loaded:
+            return None
         if not self._user_id:
             self._user_id = self._user_id_func(self.username)
         return self._user_id
@@ -942,6 +945,9 @@ class ReplayString(Replay):
 
     @property
     def user_id(self):
+        # we don't have a user_id_func if we're not loaded, so early return
+        if not self.loaded:
+            return None
         if not self._user_id:
             self._user_id = self._user_id_func(self.username)
         return self._user_id
