@@ -252,10 +252,10 @@ class Circleguard:
         for hit in hits:
             hitobj_pos = hit.hitobject.position
             hitobj_xy = np.array([hitobj_pos.x, hitobj_pos.y])
-            # value is negative when we're inside the hitobject, so take abs
-            dist = abs(np.linalg.norm(hit.xy - hitobj_xy) - hitcircle_radius)
+            dist = np.linalg.norm(hit.xy - hitobj_xy) - hitcircle_radius
 
-            if dist < within:
+            # value is negative when we're inside the hitobject, so take abs
+            if abs(dist) < within:
                 filtered_hits.append(hit)
 
         return filtered_hits
