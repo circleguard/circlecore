@@ -44,7 +44,7 @@ class Loadable(abc.ABC):
             instance), a loader is still passed regardless.
         cache: bool
             Whether to cache the replay data once loaded. This argument
-            comes from a parent—either a :class:`~.LoadableContainer` or
+            comes from a parent—either a :class:`~.ReplayContainer` or
             :class:`~circleguard.circleguard.Circleguard` itself. Should the
             loadable already have a set ``cache`` value, that should take
             precedence over the option passed in this method, but if the

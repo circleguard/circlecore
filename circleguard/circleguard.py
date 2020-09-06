@@ -206,21 +206,21 @@ class Circleguard:
         loadable.load(self.loader, self.cache)
 
 
-    def load_info(self, loadable_container):
+    def load_info(self, replay_container):
         """
-        Loads the ``loadable_container``.
+        Loads the ``replay_container``.
 
         Parameters
         ----------
-        loadable: :class:`~circleguard.loadable.LoadableContainer`
-            The loadable container to load.
+        replay_container: :class:`~circleguard.loadable.ReplayContainer`
+            The replay container to load.
 
         Notes
         -----
         This is identical to calling
-        ``loadable_container.load_info(cg.loader)``.
+        ``replay_container.load_info(cg.loader)``.
         """
-        loadable_container.load_info(self.loader)
+        replay_container.load_info(self.loader)
 
 
     def _beatmap(self, map_id):
