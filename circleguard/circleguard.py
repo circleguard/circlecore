@@ -237,7 +237,7 @@ class Circleguard:
 
     def load_info(self, replay_container):
         """
-        Loads the ``replay_container``.
+        Loads the info of the ``replay_container``.
 
         Parameters
         ----------
