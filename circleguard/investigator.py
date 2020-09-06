@@ -388,6 +388,7 @@ class Investigator:
         data = data[t_sort]
         return (t, data)
 
+
 class Snap():
     """
     A suspicious hit in a replay, specifically so because it snaps away from
@@ -421,6 +422,7 @@ class Snap():
 
     def __hash__(self):
         return hash((self.time, self.angle, self.distance))
+
 
 class Hit():
     """
