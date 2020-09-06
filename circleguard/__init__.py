@@ -1,7 +1,7 @@
 import logging
 
 from circleguard.circleguard import Circleguard, KeylessCircleguard, set_options
-from circleguard.loadables import (Check, Replay, ReplayMap, ReplayPath, Map, User,
+from circleguard.loadables import ( Replay, ReplayMap, ReplayPath, Map, User,
         MapUser, ReplayDir, ReplayContainer, LoadableContainer, Loadable, ReplayCache,
         CachedReplay, ReplayID, ReplayString)
 from circleguard.enums import Key, RatelimitWeight
@@ -27,7 +27,7 @@ __all__ = [
 # core
 "Circleguard", "KeylessCircleguard", "set_options",
 # loadables
-"Check", "ReplayContainer", "LoadableContainer", "Map", "User", "MapUser",
+"ReplayContainer", "LoadableContainer", "Map", "User", "MapUser",
 "ReplayCache", "Replay", "ReplayMap", "ReplayPath", "CachedReplay", "Loadable",
 "ReplayID", "ReplayDir", "ReplayString",
 # enums
