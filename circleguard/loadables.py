@@ -724,19 +724,18 @@ class ReplayMap(Replay):
 
     def __eq__(self, loadable):
         """
-        Warning
-        -------
-        This equality check does not take into account attributes such as
-        ``cache``. This is intentional - equality here means "do they represent
-        the same replay".
+        Whether the two maps are equal.
 
-        TODO possible false positive if a user overwrites their score inbetween
-        loading two otherwise identical replay maps. Similar situation to
-        ReplayPath equality. Could equality check replay data instead if both
-        are loaded.
+        Notes
+        -----
+        This does not take into account the
+        ``cache`` attribute, because equality here means "do they represent the
+        same replays".
         """
         if not isinstance(loadable, ReplayMap):
             return False
+        if self.has_data() and loadable.has_data():
+            return self.replay_data == loadable.replay_data
         return (self.map_id == loadable.map_id and
             self.user_id == loadable.user_id and self.mods == loadable.mods)
 
@@ -832,26 +831,30 @@ class ReplayPath(Replay):
 
     def __eq__(self, loadable):
         """
-        Warnings
-        --------
-        XXX replays with the same path but different replay data (because the
-        file at the path got changed for one but not the other) will return
-        True in an equality check when they are not necessarily representing
-        the same replay.
+        Whether these replay paths are equal.
 
-        TODO possible solution - check replay_data equality if both are loaded?
-        might be unexpected behavior to some
+        Notes
+        -----
+        If one or both replay paths don't have replay data, this checks path
+        equality. If both replay paths have replay data, this checks the
+        equality of their replay data.
+        <br>
+        The reason we don't check path after both are loaded is to avoid
+        true in situations like this:
+
         ```
         r1 = ReplayPath("./1.osr")
         cg.load(r1)
         # change the file located at ./1.osr to another osr file
         r2 = ReplayPath("./1.osr")
         cg.load(r2)
-        r1 == r2 # True, but they contain different replay_data
+        r1 == r2 # should be False, as they have differing replay data
         ```
         """
         if not isinstance(loadable, ReplayPath):
             return False
+        if self.has_data() and loadable.has_data():
+            return self.replay_data == loadable.replay_data
         return self.path == loadable.path
 
     def __hash__(self):

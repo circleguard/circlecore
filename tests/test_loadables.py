@@ -198,3 +198,11 @@ class TestEquality(CGTestCase):
     def test_equality_replaypath(self):
         self.assertEqual(self.r3, self.r4)
         self.assertNotEqual(self.r3, self.r5)
+        # loaded == unloaded at the same path is true
+        self.cg.load(self.r3)
+        self.assertEqual(self.r3, self.r4)
+        # loaded == loaded is true regardless of path
+        # TODO add test where replay data in the file changes after only one
+        # ReplayPath is loaded and ensure the ReplayPaths aren't equal anymore
+        self.cg.load(self.r4)
+        self.assertEqual(self.r3, self.r4)
