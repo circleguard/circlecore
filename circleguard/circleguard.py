@@ -285,14 +285,58 @@ class KeylessCircleguard(Circleguard):
         # to `Circleguard` which allows for special `Loader` behavior
         super().__init__("INVALID_KEY", db_path, slider_dir, loader, cache)
 
-    # TODO override most (all?) methods from `Circleguard` and either raise an
-    # exception (if they always require api access, like `load` or `load_info`)
-    # or first check that the loadables passed are all loaded, and raise an
-    # exception otherwise.
-    # This exception raising is purely to generate less confusing error
-    # messages, as users would probably otherwise see an `ossapi` exception
-    # complaining about an invalid key. Which is pretty clear, but we can do
-    # better.
+
+    def similarity(self, replay1, replay2, method="similarity", \
+        num_chunks=Circleguard.DEFAULT_CHUNKS) -> float:
+        if not replay1.loaded or not replay2.loaded:
+            raise ValueError("replays must be loaded before use in a "
+                "KeylessCircleguard")
+        return super().similarity(replay1, replay2, method, num_chunks)
+
+    def ur(self, replay, cv=True) -> float:
+        if not replay.loaded:
+            raise ValueError("replays must be loaded before use in a "
+                "KeylessCircleguard")
+        return super().ur(replay, cv)
+
+    def snaps(self, replay, max_angle=Circleguard.DEFAULT_ANGLE, \
+        min_distance=Circleguard.DEFAULT_DISTANCE) -> Iterable[Snap]:
+        if not replay.loaded:
+            raise ValueError("replays must be loaded before use in a "
+                "KeylessCircleguard")
+        return super().snaps(replay, max_angle, min_distance)
+
+    def frametime(self, replay, cv=True) -> float:
+        if not replay.loaded:
+            raise ValueError("replays must be loaded before use in a "
+                "KeylessCircleguard")
+        return super().frametime(replay, cv)
+
+    def hits(self, replay, within=None) -> Iterable[Hit]:
+        if not replay.loaded:
+            raise ValueError("replays must be loaded before use in a "
+                "KeylessCircleguard")
+        return super().hits(replay, within)
+
+    def load(self, loadable):
+        raise NotImplementedError("Keyless Circleguards cannot load Loadables")
+
+    def load_info(self, replay_container):
+        raise NotImplementedError("Keyless Circleguards cannot load info for "
+            "ReplayContainers")
+
+    def Map(self, map_id, span, mods=None, cache=None):
+        raise NotImplementedError("KeylessCircleguards cannot create "
+            "info-loaded ReplayContainers")
+
+    def User(self, user_id, span, mods=None, cache=None, available_only=True):
+        raise NotImplementedError("KeylessCircleguards cannot create "
+            "info-loaded ReplayContainers")
+
+    def MapUser(self, map_id, user_id, span=Loader.MAX_MAP_SPAN, mods=None, \
+        cache=None, available_only=True):
+        raise NotImplementedError("KeylessCircleguards cannot create "
+            "info-loaded ReplayContainers")
 
 
 def set_options(*, loglevel=None):
