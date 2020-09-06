@@ -224,8 +224,7 @@ class Circleguard:
 
 
     def _beatmap(self, map_id):
-        return self.library.lookup_by_id(map_id, download=True, \
-                save=True)
+        return self.library.lookup_by_id(map_id, download=True, save=True)
 
 
     # TODO convert to @property with just `cache`, no other options
