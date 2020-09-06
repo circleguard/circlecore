@@ -4,6 +4,8 @@ from tempfile import TemporaryDirectory
 from typing import Iterable
 
 from slider import Library
+from slider.mod import circle_radius
+import numpy as np
 
 from circleguard.loader import Loader
 from circleguard.comparer import Comparer
@@ -11,6 +13,7 @@ from circleguard.investigator import Investigator, Hit, Snap
 from circleguard.cacher import Cacher
 from circleguard.utils import convert_statistic
 from circleguard.loadables import Map, User, MapUser
+from circleguard.mod import Mod
 
 
 class Circleguard:
@@ -215,8 +218,27 @@ class Circleguard:
         # if `within` is specified, only hits which are that many pixels or
         # less away from the edge of the circle will be returned
         self.load(replay)
-        bm = self._beatmap(replay.map_id)
-        return Investigator.hits(replay, bm)
+        beatmap = self._beatmap(replay.map_id)
+        hits = Investigator.hits(replay, beatmap)
+
+        if not within:
+            return hits
+
+        filtered_hits = []
+        hr = Mod.HR in replay.mods
+        ez = Mod.EZ in replay.mods
+
+        hitcircle_radius = circle_radius(beatmap.cs(hard_rock=hr, easy=ez))
+        for hit in hits:
+            hitobj_pos = hit.hitobject.position
+            hitobj_xy = np.array([hitobj_pos.x, hitobj_pos.y])
+            # value is negative when we're inside the hitobject, so take abs
+            dist = abs(np.linalg.norm(hit.xy - hitobj_xy) - hitcircle_radius)
+
+            if dist < within:
+                filtered_hits.append(hit)
+
+        return filtered_hits
 
 
     def load(self, loadable):
