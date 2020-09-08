@@ -445,7 +445,17 @@ class Replay(Loadable):
         super().__init__(cache)
         self.weight = weight
 
-        # remains ``None`` until replay is loaded
+        # These attributes might or might not be set once the replay loads.
+        # Ideally, a replay would provide all of these attributes, but there are
+        # some cases when only a subset is available. <br>
+        # If only some of these
+        # attributes are set after the replay is loaded, some ``Circleguard``
+        # methods may reject this replay, as it does not contain the information
+        # necessary to do whatever the method needs to. <br>
+        # For instance, if the replay provides ``replay_data`` but not ``mods``,
+        # ``Circleguard#similarity`` will reject it, as we will not know whether
+        # whether ``Mod.HR`` was enabled on the replay, and thus whether to flip
+        # the replay before comparing it to another one.
         self.game_version = None
         self.timestamp    = None
         self.map_id       = None
