@@ -102,13 +102,22 @@ class Circleguard:
         -------
         float
             If ``method`` is ``similarity``, this is the similarity of the two
-            replays, which is (roughly speaking) the average distance between
-            the two replays in pixels. A replay compared to itself (or an exact
-            copy) has a similarity of 0.
+            replays. Similarity is (roughly speaking) the average distance
+            between the two replays in pixels. A replay compared to itself (or
+            an exact copy) has a similarity of 0. See
+            :data:`~circleguard.Circleguard.SIM_LIMIT` for a suggested number
+            where similarities under this number indicate a stolen replay.
             <br>
             If ``method`` is ``correlation``, this is the correlation between
-            the two replays.
-            # TODO explain correlation lol
+            the two replays. Correlation is a signal-processing metric which
+            measures how similar two signals (or replays, in our case) are.
+            Correlation also takes into account time shifts, so a replay which
+            is a perfect copy of another replay but consistently lags 10 ms
+            behind will still have a perfect correltion of ``1``. The higher
+            correlation, the more correlated (or similar) the two replays are.
+            See :data:`~circleguard.Circleguard.CORR_LIMIT` for a suggested
+            number where correlations above this number indicate a stolen
+            replay.
         """
         self.load(replay1)
         self.load(replay2)
