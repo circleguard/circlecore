@@ -466,7 +466,8 @@ class Replay(Loadable):
         self.replay_id    = None
         self.replay_data  = None
 
-        # remains ``None``` when replay is unloaded or loaded but with no data
+        # These attributes remain ``None``` when replay is unloaded or loaded
+        # but with no data.
         self.t            = None
         self.xy           = None
         self.k            = None
