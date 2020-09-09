@@ -380,8 +380,7 @@ class Investigator:
         return hits
 
     # TODO (some) code duplication with this method and a similar one in
-    # ``Comparer``. Refactor Investigator and Comparer to inherit from a base
-    # class, or move this method to utils. Preferrably the former.
+    # ``Comparer``. Consolidate and move this method to utils?
     @staticmethod
     def remove_duplicate_t(t, data):
         t, t_sort = np.unique(t, return_index=True)
