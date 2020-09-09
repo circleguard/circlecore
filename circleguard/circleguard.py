@@ -18,7 +18,28 @@ from circleguard.mod import Mod
 
 class Circleguard:
     """
-    Circleguard investigates replays for cheats.
+    Circleguard is the main entry point for using circlecore. In particular, we
+    provide methods to calculate various statistics about
+    :class:`~circleguard.loadables.Replay`\s:
+    * :meth:`~.similarity` - the similarity between two replays.
+    * :meth:`~.ur` - the unstable rate of a replay.
+    * :meth:`~.snaps` - any unusual snaps in the cursor movement of a replay.
+    * :meth:`~.frametime` - the average frametime of a replay.
+    * :meth:`~.frametimes` - a list of the time between frames of a replay.
+    * :meth:`~.hits` - the places where a replay hits a hitobject by clicking on
+      it.
+
+    We also provide methods to interact with
+    :class:`~circleguard.loadables.Loadable`\s:
+    * :meth:`~.load` - loads a :class:`~circleguard.loadables.Loadable`.
+    * :meth:`~.load_info` - loads the info of a
+      :class:`~circleguard.loadables.ReplayContainer`.
+    * :meth:`~.Map` - creates a new :class:`~circleguard.loadables.Map` and
+      loads its info.
+    * :meth:`~.User` - creates a new :class:`~circleguard.loadables.User` and
+      loads its info.
+    * :meth:`~.MapUser` - creates a new :class:`~circleguard.loadables.MapUser`
+      and loads its info.
 
     Parameters
     ----------
