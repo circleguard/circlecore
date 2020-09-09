@@ -8,7 +8,6 @@ Appendix
 
 Cacher
 ------
-
 .. automodule:: circleguard.cacher
    :members:
 
@@ -22,15 +21,9 @@ Comparer
 .. automodule:: circleguard.comparer
    :members:
 
-Enums
------
-.. automodule:: circleguard.enums
-   :members:
-   :undoc-members:
-
-Exceptions
-----------
-.. automodule:: circleguard.exceptions
+Game Version
+------------
+.. automodule:: circleguard.game_version
    :members:
 
 Investigator
@@ -38,9 +31,9 @@ Investigator
 .. automodule:: circleguard.investigator
    :members:
 
-Loadable
---------
-.. automodule:: circleguard.loadable
+Loadables
+---------
+.. automodule:: circleguard.loadables
    :members:
 
 Loader
@@ -48,15 +41,9 @@ Loader
 .. automodule:: circleguard.loader
    :members:
 
-
-ReplayInfo
-----------
-.. automodule:: circleguard.replay_info
-   :members:
-
-Result
+Mod
 ------
-.. automodule:: circleguard.result
+.. automodule:: circleguard.mod
    :members:
 
 Span
