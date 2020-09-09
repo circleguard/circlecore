@@ -305,7 +305,7 @@ class Circleguard:
 
     def Map(self, map_id, span, mods=None, cache=None):
         """
-        Instantiates a :class:`~circleguard.loadables.Map`, loads its info,
+        Instantiates a new :class:`~circleguard.loadables.Map`, loads its info,
         and returns the now info-loaded ``Map``.
 
         Notes
@@ -336,7 +336,7 @@ class Circleguard:
 
     def User(self, user_id, span, mods=None, cache=None, available_only=True):
         """
-        Instantiates a :class:`~circleguard.loadables.User`, loads its info,
+        Instantiates a new :class:`~circleguard.loadables.User`, loads its info,
         and returns the now info-loaded ``User``.
 
         Notes
@@ -368,8 +368,8 @@ class Circleguard:
     def MapUser(self, map_id, user_id, span=Loader.MAX_MAP_SPAN, mods=None, \
         cache=None, available_only=True):
         """
-        Instantiates a :class:`~circleguard.loadables.MapUser`, loads its info,
-        and returns the now info-loaded ``MapUser``.
+        Instantiates a new :class:`~circleguard.loadables.MapUser`, loads its
+        info, and returns the now info-loaded ``MapUser``.
 
         Notes
         -----
