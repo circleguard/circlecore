@@ -15,6 +15,7 @@ from circleguard.version import __version__
 from circleguard.investigator import Snap, Hit
 from circleguard.span import Span
 from circleguard.utils import convert_statistic, order
+from circleguard.game_version import GameVersion, NoGameVersion
 
 logging.addLevelName(TRACE, "TRACE")
 formatter = ColoredFormatter("[%(threadName)s][%(name)s][%(levelname)s]  %(message)s  (%(filename)s:%(lineno)s)")
@@ -49,5 +50,7 @@ __all__ = [
 # span
 "Span",
 # utils
-"convert_statistic", "order"
+"convert_statistic", "order",
+# GameVersion
+"GameVersion", "NoGameVersion"
 ]
