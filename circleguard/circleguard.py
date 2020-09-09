@@ -492,6 +492,12 @@ class KeylessCircleguard(Circleguard):
                 "KeylessCircleguard")
         return super().frametime(replay, cv)
 
+    def frametimes(self, replay, cv=True) -> Iterable[float]:
+        if not replay.loaded:
+            raise ValueError("replays must be loaded before use in a "
+                "KeylessCircleguard")
+        return super().frametimes(replay, cv)
+
     def hits(self, replay, within=None) -> Iterable[Hit]:
         if not replay.loaded:
             raise ValueError("replays must be loaded before use in a "
