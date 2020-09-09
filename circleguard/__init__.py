@@ -7,11 +7,10 @@ from circleguard.loadables import (Replay, ReplayMap, ReplayPath, Map, User,
 from circleguard.enums import Key, RatelimitWeight
 from circleguard.mod import Mod
 from circleguard.utils import TRACE, ColoredFormatter
-from circleguard.loader import Loader
-from circleguard.loader import ReplayInfo
-from circleguard.loader import (APIException, NoInfoAvailableException,
-        UnknownAPIException, InternalAPIException, InvalidKeyException,
-        RatelimitException, InvalidJSONException, ReplayUnavailableException)
+from circleguard.loader import (Loader, ReplayInfo, APIException,
+        NoInfoAvailableException, UnknownAPIException, InternalAPIException,
+        InvalidKeyException, RatelimitException, InvalidJSONException,
+        ReplayUnavailableException)
 from circleguard.version import __version__
 from circleguard.investigator import Snap, Hit
 from circleguard.span import Span
