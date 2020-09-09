@@ -638,8 +638,8 @@ class Replay(Loadable):
     @property
     def keydowns(self):
         """
-        Returns a list of the keys pressed for each frame that were not pressed
-        in the previous frame.
+        A list of the keys pressed for each frame that were not pressed in the
+        previous frame.
 
         Examples
         --------
