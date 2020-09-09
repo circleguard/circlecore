@@ -31,7 +31,6 @@ int_to_mod = {
     1 << 28    : ["K2",        "Key2"],
     1 << 29    : ["V2",     "ScoreV2"],
     1 << 30    : ["MR",      "Mirror"]
-
 }
 
 class ModCombination():
