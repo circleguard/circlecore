@@ -444,6 +444,7 @@ class Loader():
         return replay_data
 
     # TODO make this check cache for the replay
+    @request
     def replay_data_from_id(self, replay_id, cache):
         """
         Retrieves replay data from the api, given a replay id.
