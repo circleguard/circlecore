@@ -127,7 +127,7 @@ class Circleguard:
             ``similarity`` and highest of ``method`` is ``correlation``)
             similarity of the two is returned.
             <br>
-            If ``both`` is passed, a tuple with two elements is returned. The
+            If ``both`` is passed, a tuple with two floats is returned. The
             first element is the similarity with no modifications, and the
             second element is the similarity with ``Mod.HR`` applied to
             ``replay1``.
@@ -154,6 +154,12 @@ class Circleguard:
             See :data:`~circleguard.Circleguard.CORR_LIMIT` for a suggested
             number where correlations above this number indicate a stolen
             replay.
+        (float, float)
+            If ``mods_unknown_behavior`` is ``both``, a tuple with two floats
+            is returned. The first element is the similarity with no
+            modifications, and the second element is the similarity with
+            ``Mod.HR`` applied to ``replay1``. See the documentation for the
+            ``mods_unknown_behavior`` parameter for more information.
         """
         self.load(replay1)
         self.load(replay2)
