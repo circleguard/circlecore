@@ -6,7 +6,7 @@ from circleguard.mod import Mod
 class Comparer:
 
     @staticmethod
-    def similarity(replay1, replay2, method, num_chunks):
+    def similarity(replay1, replay2, method, num_chunks, mods_unknown_behavior):
         """
         Compares two :class:`~.replay.Replay`\s.
 
@@ -32,6 +32,33 @@ class Comparer:
         t2, xy2 = Comparer.remove_duplicate_t(replay2.t, replay2.xy)
         xy1, xy2 = Comparer.interpolate(t1, t2, xy1, xy2)
         xy1, xy2 = Comparer.clean(xy1, xy2)
+
+        # kind of a dirty function with all the switching between similarity
+        # and comparison, but I'm not sure I can make it any cleaner
+
+        if not replay1.mods or not replay2.mods:
+            # first compute with no modifications
+            if method == "similarity":
+                sim1 = Comparer.compute_similarity(xy1, xy2)
+            if method == "correlation":
+                sim1 = Comparer.compute_correlation(xy1, xy2, num_chunks)
+
+            # then compute with hr applied to ``replay1``
+            xy1[:, 1] = 384 - xy1[:, 1]
+
+            if method == "similarity":
+                sim2 = Comparer.compute_similarity(xy1, xy2)
+            if method == "correlation":
+                sim2 = Comparer.compute_correlation(xy1, xy2, num_chunks)
+
+            if mods_unknown_behavior == "best":
+                if method == "similarity":
+                    return min(sim1, sim2)
+                if method == "correlation":
+                    return max(sim1, sim2)
+
+            if mods_unknown_behavior == "both":
+                return (sim1, sim2)
 
         # flip if one but not both has HR
         if (Mod.HR in replay1.mods) ^ (Mod.HR in replay2.mods):

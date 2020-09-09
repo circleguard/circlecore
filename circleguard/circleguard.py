@@ -100,7 +100,7 @@ class Circleguard:
 
 
     def similarity(self, replay1, replay2, method="similarity", \
-        num_chunks=DEFAULT_CHUNKS) -> float:
+        num_chunks=DEFAULT_CHUNKS, mods_unknown_behavior="best") -> float:
         """
         The similarity between ``replay1`` and ``replay2``.
 
@@ -117,6 +117,22 @@ class Circleguard:
             How many chunks to split the replay into when comparing. This
             parameter only has an affect if ``method`` is ``correlation``.
             Note that runtime increases linearly with the number of chunks.
+        mods_unknown_behavior: str
+            What to do if one or both of ``replay1`` and ``replay2`` do not
+            know what mods they were played with. The similarity will be
+            computed twice, both with no modifications and with ``Mod.HR``
+            applied to ``replay1``.
+            <br>
+            If ``best`` is passed, the best (that is, lowest if ``method`` is
+            ``similarity`` and highest of ``method`` is ``correlation``)
+            similarity of the two is returned.
+            <br>
+            If ``both`` is passed, a tuple with two elements is returned. The
+            first element is the similarity with no modifications, and the
+            second element is the similarity with ``Mod.HR`` applied to
+            ``replay1``.
+            <br>
+            Must be one of ``best`` or ``both``.
 
         Returns
         -------
@@ -141,7 +157,8 @@ class Circleguard:
         """
         self.load(replay1)
         self.load(replay2)
-        return Comparer.similarity(replay1, replay2, method, num_chunks)
+        return Comparer.similarity(replay1, replay2, method, num_chunks,
+            mods_unknown_behavior)
 
 
     def ur(self, replay, cv=True) -> float:
