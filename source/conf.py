@@ -53,16 +53,16 @@ html_static_path = ["_static"]
 
 # references that we want to use easily in any file
 rst_prolog = """
-.. |Loadable| replace:: :class:`~circleguard.loadable.Loadable`
-.. |Replay| replace:: :class:`~circleguard.loadable.Replay`
-.. |ReplayMap| replace:: :class:`~circleguard.loadable.ReplayMap`
-.. |ReplayPath| replace:: :class:`~circleguard.loadable.ReplayPath`
-.. |ReplayContainer| replace:: :class:`~circleguard.loadable.ReplayContainer`
-.. |Map| replace:: :class:`~circleguard.loadable.Map`
-.. |User| replace:: :class:`~circleguard.loadable.User`
-.. |MapUser| replace:: :class:`~circleguard.loadable.MapUser`
+.. |Loadable| replace:: :class:`~circleguard.loadables.Loadable`
+.. |Replay| replace:: :class:`~circleguard.loadables.Replay`
+.. |ReplayMap| replace:: :class:`~circleguard.loadables.ReplayMap`
+.. |ReplayPath| replace:: :class:`~circleguard.loadables.ReplayPath`
+.. |ReplayContainer| replace:: :class:`~circleguard.loadables.ReplayContainer`
+.. |Map| replace:: :class:`~circleguard.loadables.Map`
+.. |User| replace:: :class:`~circleguard.loadables.User`
+.. |MapUser| replace:: :class:`~circleguard.loadables.MapUser`
 
-.. |Check| replace:: :class:`~circleguard.loadable.Check`
+.. |Check| replace:: :class:`~circleguard.loadables.Check`
 .. |Result| replace:: :class:`~circleguard.result.Result`
 .. |RelaxResult| replace:: :class:`~circleguard.result.RelaxResult`
 .. |StealResult| replace:: :class:`~circleguard.result.StealResult`

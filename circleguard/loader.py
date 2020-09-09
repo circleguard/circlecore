@@ -138,7 +138,7 @@ def check_cache(function):
     """
     A decorator that checks if the passed
     :class:`~circleguard.replay_info.ReplayInfo` has its replay cached. If so,
-    returns a :class:`~circleguard.loadable.Replay` instance from the cached data.
+    returns a :class:`~circleguard.loadables.Replay` instance from the cached data.
     Otherwise, calls and returns the `function` as normal.
 
     Parameters
@@ -153,8 +153,8 @@ def check_cache(function):
 
     Returns
     -------
-    :class:`~circleguard.loadable.Replay` or Unknown:
-        A :class:`~circleguard.loadable.Replay` instance from the cached data
+    :class:`~circleguard.loadables.Replay` or Unknown:
+        A :class:`~circleguard.loadables.Replay` instance from the cached data
         if it was cached, or the return value of the function if not.
     """
 

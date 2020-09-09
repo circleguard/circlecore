@@ -86,9 +86,9 @@ class Circleguard:
 
         Parameters
         ----------
-        replay1: :class:`~circleguard.loadable.Replay`
+        replay1: :class:`~circleguard.loadables.Replay`
             The replay to compare against ``replay2``.
-        replay2: :class:`~circleguard.loadable.Replay`
+        replay2: :class:`~circleguard.loadables.Replay`
             The replay to compare against ``replay1``.
         method: str
             What method to use to investigate the loadables for replay
@@ -121,7 +121,7 @@ class Circleguard:
 
         Parameters
         ----------
-        replay: :class:`~circleguard.loadable.Replay`
+        replay: :class:`~circleguard.loadables.Replay`
             The replay to calculate the ur of.
         cv: bool
             Whether to return the converted or unconverted ur. The converted ur
@@ -149,7 +149,7 @@ class Circleguard:
 
         Parameters
         ----------
-        replay: :class:`~circleguard.loadable.Replay`
+        replay: :class:`~circleguard.loadables.Replay`
             The replay to find snaps in.
 
         Returns
@@ -167,7 +167,7 @@ class Circleguard:
 
         Parameters
         ----------
-        replay: :class:`~circleguard.loadable.Replay`
+        replay: :class:`~circleguard.loadables.Replay`
             The replay to calculate the median frametime of.
         cv: bool
             Whether to return the converted or unconverted frametime. The
@@ -191,7 +191,7 @@ class Circleguard:
 
         Parameters
         ----------
-        replay: :class:`~circleguard.loadable.Replay`
+        replay: :class:`~circleguard.loadables.Replay`
             The replay to calculate the time between each frame of.
         cv: bool
             Whether to return the converted or unconverted frametimes. The
@@ -220,7 +220,7 @@ class Circleguard:
 
         Parameters
         ----------
-        replay: :class:`~circleguard.loadable.Replay`
+        replay: :class:`~circleguard.loadables.Replay`
             The replay to calculate the hits of.
         within: int
             If passed, only the hits which are ``within`` pixels or less away
@@ -267,7 +267,7 @@ class Circleguard:
 
         Parameters
         ----------
-        loadable: :class:`~circleguard.loadable.Loadable`
+        loadable: :class:`~circleguard.loadables.Loadable`
             The loadable to load.
 
         Notes
@@ -283,7 +283,7 @@ class Circleguard:
 
         Parameters
         ----------
-        replay_container: :class:`~circleguard.loadable.ReplayContainer`
+        replay_container: :class:`~circleguard.loadables.ReplayContainer`
             The replay container to load.
 
         Notes
@@ -326,7 +326,7 @@ class Circleguard:
 class KeylessCircleguard(Circleguard):
     """
     A :class:`~.Circleguard` for when you do not have access to an api key, but
-    have loaded :class:`~circleguard.loadable.Loadable`\s that you want to
+    have loaded :class:`~circleguard.loadables.Loadable`\s that you want to
     perform operations on. It should go without saying that instances of this
     class cannot do anything that requires api access.
 

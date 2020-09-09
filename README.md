@@ -69,7 +69,7 @@ r3 = ReplayPath("/path/to/local/osr/replay.osr")
 # or all of a user's replays on a map:
 mu = MapUser(221777, 2757689)
 # and more...you can find them all at
-# https://docs.circleguard.dev/en/v4.3.4/appendix.html#circleguard.loadable.Loadable.
+# https://docs.circleguard.dev/en/v4.3.4/appendix.html#circleguard.loadables.Loadable.
 
 # all of these can be investigated in the same way as ReplayMaps above, eg:
 r = cg.steal_check([r, r3, mu])
