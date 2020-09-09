@@ -394,12 +394,6 @@ class ReplayDir(ReplayContainer):
         return self.dir_path == other.dir_path
 
 
-# TODO in core 5.0.0  centralize as much logic as possible in ``Replay``.
-# We currently do various attribute checks like
-# ``if replay.replay_data is None``; this should be a `has_data()` method
-# instead. Similarly, ``version`` should be provided by the replay, along
-# with if it's a concrete version or just a guess, or ``None`` if we don't even
-# have a guess.
 class Replay(Loadable):
     """
     A replay played by a player.
