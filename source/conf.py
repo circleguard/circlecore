@@ -68,12 +68,7 @@ rst_prolog = """
 .. |StealResult| replace:: :class:`~circleguard.result.StealResult`
 .. |CorrectionResult| replace:: :class:`~circleguard.result.CorrectionResult`
 
-.. |Detect| replace:: :class:`~circleguard.enums.Detect`
-.. |Detect.STEAL| replace:: :class:`~circleguard.enums.Detect.STEAL`
-.. |Detect.RELAX| replace:: :class:`~circleguard.enums.Detect.RELAX`
-.. |Detect.CORRECTION| replace:: :data:`~circleguard.enums.Detect.CORRECTION`
-
-.. |RatelimitWeight| replace:: :class:`~circleguard.enums.RatelimitWeight`
+.. |RatelimitWeight| replace:: :class:`~circleguard.utils.RatelimitWeight`
 
 .. |Circleguard| replace:: :class:`~circleguard.circleguard.Circleguard`
 .. |cg.run| replace:: :func:`cg.run() <circleguard.circleguard.Circleguard.run>`

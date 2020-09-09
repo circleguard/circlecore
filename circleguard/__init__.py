@@ -4,9 +4,7 @@ from circleguard.circleguard import Circleguard, KeylessCircleguard, set_options
 from circleguard.loadables import (Replay, ReplayMap, ReplayPath, Map, User,
         MapUser, ReplayDir, ReplayContainer, Loadable, ReplayCache,
         CachedReplay, ReplayID, ReplayString)
-from circleguard.enums import Key, RatelimitWeight
 from circleguard.mod import Mod
-from circleguard.utils import TRACE, ColoredFormatter
 from circleguard.loader import (Loader, ReplayInfo, APIException,
         NoInfoAvailableException, UnknownAPIException, InternalAPIException,
         InvalidKeyException, RatelimitException, InvalidJSONException,
@@ -14,7 +12,8 @@ from circleguard.loader import (Loader, ReplayInfo, APIException,
 from circleguard.version import __version__
 from circleguard.investigator import Snap, Hit
 from circleguard.span import Span
-from circleguard.utils import convert_statistic, order
+from circleguard.utils import (convert_statistic, order, Key,
+        RatelimitWeight, TRACE, ColoredFormatter)
 from circleguard.game_version import GameVersion, NoGameVersion
 
 logging.addLevelName(TRACE, "TRACE")
@@ -22,6 +21,9 @@ formatter = ColoredFormatter("[%(threadName)s][%(name)s][%(levelname)s]  %(messa
 handler_stream = logging.StreamHandler()
 handler_stream.setFormatter(formatter)
 logging.getLogger("circleguard").addHandler(handler_stream)
+
+# don't expose ColoredFormatter to consumers
+del ColoredFormatter
 
 __all__ = [
 # core
@@ -35,7 +37,7 @@ __all__ = [
 # mod
 "Mod",
 # utils
-"TRACE",
+"convert_statistic", "order", "Key", "RatelimitWeight", "TRACE",
 # loader
 "Loader", "ReplayInfo",
 # exceptions
@@ -49,8 +51,6 @@ __all__ = [
 "Snap", "Hit",
 # span
 "Span",
-# utils
-"convert_statistic", "order",
 # GameVersion
 "GameVersion", "NoGameVersion"
 ]

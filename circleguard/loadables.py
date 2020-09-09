@@ -9,9 +9,8 @@ import circleparse
 import numpy as np
 import wtc
 
-from circleguard.enums import RatelimitWeight
 from circleguard.mod import Mod
-from circleguard.utils import TRACE, KEY_MASK
+from circleguard.utils import TRACE, KEY_MASK, RatelimitWeight
 from circleguard.loader import Loader
 from circleguard.span import Span
 from circleguard.game_version import GameVersion, NoGameVersion
