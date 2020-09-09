@@ -166,7 +166,8 @@ class Map(ReplayContainer):
     def load_info(self, loader):
         if self.info_loaded:
             return
-        for info in loader.replay_info(self.map_id, self.span, self.mods):
+        for info in loader.replay_info(self.map_id, span=self.span,
+            mods=self.mods):
             r = ReplayMap(info.map_id, info.user_id, info.mods,
                 cache=self.cache, info=info)
             self.replays.append(r)
@@ -276,8 +277,8 @@ class MapUser(ReplayContainer):
     def load_info(self, loader):
         if self.info_loaded:
             return
-        for info in loader.replay_info(self.map_id, self.span, self.user_id,
-            limit=False):
+        for info in loader.replay_info(self.map_id, span=self.span,
+            user_id=self.user_id, limit=False):
             if self.available_only and not info.replay_available:
                 continue
             r = ReplayMap(info.map_id, info.user_id, info.mods, self.cache,
@@ -739,7 +740,8 @@ class ReplayMap(Replay):
         if self.info:
             info = self.info
         else:
-            info = loader.replay_info(self.map_id, self.user_id, self.mods)
+            info = loader.replay_info(self.map_id, user_id=self.user_id,
+                mods=self.mods)
 
         self.timestamp = info.timestamp
         # estimate version with timestamp, this is only accurate if the user
