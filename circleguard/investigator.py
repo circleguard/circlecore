@@ -1,14 +1,15 @@
 import numpy as np
+from slider.beatmap import Circle, Slider
 
 from circleguard.mod import Mod
 from circleguard.utils import KEY_MASK
-from slider.beatmap import Circle, Slider
+from circleguard.game_version import GameVersion
 
 class Investigator:
     # https://osu.ppy.sh/home/changelog/stable40/20190207.2
-    VERSION_SLIDERBUG_FIXED_STABLE = 20190207
+    VERSION_SLIDERBUG_FIXED_STABLE = GameVersion(20190207, concrete=True)
     # https://osu.ppy.sh/home/changelog/cuttingedge/20190111
-    VERSION_SLIDERBUG_FIXED_CUTTING_EDGE = 20190111
+    VERSION_SLIDERBUG_FIXED_CUTTING_EDGE = GameVersion(20190111, concrete=True)
 
     @staticmethod
     def ur(replay, beatmap):
@@ -255,15 +256,14 @@ class Investigator:
             The beatmap to determine the hits of when ``replay`` is played
             against it.
         """
-        version = replay.game_version
+        game_version = replay.game_version
 
-        # only `ReplayPath` gives us the version, so we need to estimate for
-        # all other replays
-        if version is None:
-            # estimate version with timestamp, this is only accurate if the user
-            # keeps their game up to date
-            version = int(f"{replay.timestamp.year}{replay.timestamp.month:02d}"
-                          f"{replay.timestamp.day:02d}")
+        if not game_version.available():
+            # if we have no information about the version, assume it was played
+            # after sliderbug was fixed.
+            sliderbug_fixed = True
+
+        if not game_version.concrete:
             # if we're only estimating the version, assume the replay was played
             # on stable. if we used the cutting edge version instead, we would
             # be incorrectly using logic for sliderbug being fixed for all
@@ -272,9 +272,9 @@ class Investigator:
             # This is wrong for cutting edge replays between those two versions
             # which do not have a concrete version, but that's better than being
             # wrong for stable replays between those two versions.
-            version_sliderbug_fixed = Investigator.VERSION_SLIDERBUG_FIXED_STABLE
+            sliderbug_fixed = game_version >= Investigator.VERSION_SLIDERBUG_FIXED_STABLE
         else:
-            version_sliderbug_fixed = Investigator.VERSION_SLIDERBUG_FIXED_CUTTING_EDGE
+            sliderbug_fixed = game_version >= Investigator.VERSION_SLIDERBUG_FIXED_CUTTING_EDGE
 
         easy = Mod.EZ in replay.mods
         hard_rock = Mod.HR in replay.mods
@@ -317,7 +317,7 @@ class Investigator:
                 hitobj_end_time = hitobj.end_time.total_seconds() * 1000
 
             # before sliderbug fix, notelock ended after hitwindow50
-            if version < version_sliderbug_fixed:
+            if not sliderbug_fixed:
                 notelock_end_time = hitobj_t + hitwindow
                 # exception for sliders/spinners, where notelock ends after
                 # hitobject end time if it's earlier
@@ -344,7 +344,7 @@ class Investigator:
 
                     # sliders don't disappear after missing
                     # so we skip to the press_i that is after notelock_end_time
-                    if hitobj_type == 1 and version >= version_sliderbug_fixed:
+                    if hitobj_type == 1 and sliderbug_fixed:
                         while keydowns[keydown_i][0] < notelock_end_time:
                             keydown_i += 1
                             if keydown_i >= len(keydowns):
@@ -365,7 +365,7 @@ class Investigator:
 
                     # sliders don't disappear after clicking
                     # so we skip to the press_i that is after notelock_end_time
-                    if hitobj_type == 1 and version >= version_sliderbug_fixed:
+                    if hitobj_type == 1 and sliderbug_fixed:
                         while keydowns[keydown_i][0] < notelock_end_time:
                             keydown_i += 1
                             if keydown_i >= len(keydowns):
