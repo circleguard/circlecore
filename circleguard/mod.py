@@ -240,7 +240,7 @@ class Mod(ModCombination):
     V2  = ScoreV2      = ModCombination(1 << 29)
     MR  = Mirror       = ModCombination(1 << 30)
 
-    KM  = KeyMod       = K1+K2+K3+K4+K5+K6+K7+K8+K9+KeyCoop
+    KM  = KeyMod       = K1 + K2 + K3 + K4 + K5 + K6 + K7 + K8 + K9 + KeyCoop
 
     # common mod combinations
     HDDT = HD + DT
