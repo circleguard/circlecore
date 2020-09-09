@@ -26,8 +26,7 @@ class Circleguard:
     * :meth:`~.snaps` - any unusual snaps in the cursor movement of a replay.
     * :meth:`~.frametime` - the average frametime of a replay.
     * :meth:`~.frametimes` - a list of the time between frames of a replay.
-    * :meth:`~.hits` - the places where a replay hits a hitobject by clicking on
-      it.
+    * :meth:`~.hits` - the locations in a replay where a hitobject is hit.
 
     We also provide methods to interact with
     :class:`~circleguard.loadables.Loadable`\s:
