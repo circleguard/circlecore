@@ -166,8 +166,10 @@ class Map(ReplayContainer):
     def load_info(self, loader):
         if self.info_loaded:
             return
-        for info in loader.replay_info(self.map_id, self.span, mods=self.mods):
-            self.replays.append(ReplayMap(info.map_id, info.user_id, info.mods, cache=self.cache, info=info))
+        for info in loader.replay_info(self.map_id, self.span, self.mods):
+            r = ReplayMap(info.map_id, info.user_id, info.mods,
+                cache=self.cache, info=info)
+            self.replays.append(r)
         self.info_loaded = True
 
     def all_replays(self):
@@ -181,7 +183,8 @@ class Map(ReplayContainer):
 
     def __repr__(self):
         return (f"Map(map_id={self.map_id},cache={self.cache},mods={self.mods},"
-                f"span={self.span},replays={self.replays},loaded={self.loaded})")
+                f"span={self.span},replays={self.replays},"
+                f"loaded={self.loaded})")
 
     def __str__(self):
         return f"Map {self.map_id}"
@@ -211,7 +214,8 @@ class User(ReplayContainer):
         Replays are filtered on this basis after ``mods`` and ``span``
         are applied. True by default.
     """
-    def __init__(self, user_id, span, mods=None, cache=None, available_only=True):
+    def __init__(self, user_id, span, mods=None, cache=None, \
+        available_only=True):
         super().__init__(cache)
         self.replays = []
         self.user_id = user_id
@@ -222,10 +226,12 @@ class User(ReplayContainer):
     def load_info(self, loader):
         if self.info_loaded:
             return
-        for info in loader.get_user_best(self.user_id, span=self.span, mods=self.mods):
+        for info in loader.get_user_best(self.user_id, self.span, self.mods):
             if self.available_only and not info.replay_available:
                 continue
-            self.replays.append(ReplayMap(info.map_id, info.user_id, info.mods, cache=self.cache, info=info))
+            r = ReplayMap(info.map_id, info.user_id, info.mods, self.cache,
+                info=info)
+            self.replays.append(r)
         self.info_loaded = True
 
     def all_replays(self):
@@ -258,7 +264,8 @@ class MapUser(ReplayContainer):
         Replays are filtered on this basis after ``span`` is applied.
         True by default.
     """
-    def __init__(self, map_id, user_id, span=Loader.MAX_MAP_SPAN, cache=None, available_only=True):
+    def __init__(self, map_id, user_id, span=Loader.MAX_MAP_SPAN, cache=None, \
+        available_only=True):
         super().__init__(cache)
         self.replays = []
         self.map_id = map_id
@@ -269,10 +276,13 @@ class MapUser(ReplayContainer):
     def load_info(self, loader):
         if self.info_loaded:
             return
-        for info in loader.replay_info(self.map_id, span=self.span, user_id=self.user_id, limit=False):
+        for info in loader.replay_info(self.map_id, self.span, self.user_id,
+            limit=False):
             if self.available_only and not info.replay_available:
                 continue
-            self.replays.append(ReplayMap(info.map_id, info.user_id, info.mods, cache=self.cache, info=info))
+            r = ReplayMap(info.map_id, info.user_id, info.mods, self.cache,
+                info=info)
+            self.replays.append(r)
         self.info_loaded = True
 
     def all_replays(self):
@@ -281,8 +291,8 @@ class MapUser(ReplayContainer):
     def __eq__(self, loadable):
         if not isinstance(loadable, MapUser):
             return False
-        return (self.map_id == loadable.map_id and self.user_id == loadable.user_id
-                and self.span == loadable.span)
+        return (self.map_id == loadable.map_id and
+            self.user_id == loadable.user_id and self.span == loadable.span)
 
 
 class ReplayCache(ReplayContainer):
@@ -729,12 +739,13 @@ class ReplayMap(Replay):
         if self.info:
             info = self.info
         else:
-            info = loader.replay_info(self.map_id, user_id=self.user_id, mods=self.mods)
+            info = loader.replay_info(self.map_id, self.user_id, self.mods)
 
         self.timestamp = info.timestamp
         # estimate version with timestamp, this is only accurate if the user
         # keeps their game up to date
-        self.game_version = GameVersion.from_datetime(self.timestamp, concrete=False)
+        self.game_version = GameVersion.from_datetime(self.timestamp,
+            concrete=False)
         self.username = info.username
         self.mods = info.mods
         self.replay_id = info.replay_id
@@ -983,10 +994,11 @@ class ReplayString(Replay):
 
     def __repr__(self):
         if self.loaded:
-            return (f"ReplayString(len(replay_data_str)={len(self.replay_data_str)},"
-                    f"map_id={self.map_id},user_id={self.user_id},mods={self.mods},"
-                    f"replay_id={self.replay_id},weight={self.weight},"
-                    f"loaded={self.loaded},username={self.username})")
+            return (f"ReplayString(len(replay_data_str)="
+                f"{len(self.replay_data_str)},map_id={self.map_id},"
+                f"user_id={self.user_id},mods={self.mods},"
+                f"replay_id={self.replay_id},weight={self.weight},"
+                f"loaded={self.loaded},username={self.username})")
         return f"ReplayString(len(replay_data_str)={len(self.replay_data_str)})"
 
     def __str__(self):
@@ -1029,8 +1041,8 @@ class CachedReplay(Replay):
         if self.loaded:
             return
         decompressed = wtc.decompress(self.replay_data)
-        replay_data = circleparse.parse_replay(decompressed, pure_lzma=True).play_data
-        self._process_replay_data(replay_data)
+        parsed = circleparse.parse_replay(decompressed, pure_lzma=True)
+        self._process_replay_data(parsed.play_data)
         self.loaded = True
 
     def __eq__(self, other):
