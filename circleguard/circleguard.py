@@ -374,12 +374,12 @@ class Circleguard:
         Notes
         -----
         This function is provided as a convenience for when you want to create a
-        ``User`` and load its info immediately. A common occurrence in using
-        ``Circleguard`` is to want to instantiate a ``User`` and immediately
-        iterate over it to operate on its replays. However, this ``User`` must
-        be info loaded before it can be iterated over, so this function removes
-        the need to explicitly call :meth:`~.load_info` on a ``User`` before
-        iterating.
+        ``MapUser`` and load its info immediately. A common occurrence in using
+        ``Circleguard`` is to want to instantiate a ``MapUser`` and immediately
+        iterate over it to operate on its replays. However, this ``MapUser``
+        must be info loaded before it can be iterated over, so this function
+        removes the need to explicitly call :meth:`~.load_info` on a ``MapUser``
+        before iterating.
         >>> # usage without this function (bad)
         >>> cg = Circleguard("key")
         >>> mu = cg.MapUser(124493, 129891)
