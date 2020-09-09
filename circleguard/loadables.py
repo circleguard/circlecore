@@ -14,6 +14,7 @@ from circleguard.mod import Mod
 from circleguard.utils import TRACE, KEY_MASK
 from circleguard.loader import Loader
 from circleguard.span import Span
+from circleguard.game_version import GameVersion, NoGameVersion
 
 class Loadable(abc.ABC):
     """
@@ -410,6 +411,7 @@ class Replay(Loadable):
     cache: bool
         Whether to cache this replay once it is loaded.
 
+    TODO update attributes with eg game_version property and keydowns property
     Attributes
     ----------
     game_version: int
@@ -448,15 +450,20 @@ class Replay(Loadable):
         # These attributes might or might not be set once the replay loads.
         # Ideally, a replay would provide all of these attributes, but there are
         # some cases when only a subset is available. <br>
-        # If only some of these
-        # attributes are set after the replay is loaded, some ``Circleguard``
-        # methods may reject this replay, as it does not contain the information
-        # necessary to do whatever the method needs to. <br>
+        # If only some of these attributes are set after the replay is loaded,
+        # some ``Circleguard`` methods may reject this replay, as it does not
+        # contain the information necessary to do whatever the method needs to.
+        # <br>
         # For instance, if the replay provides ``replay_data`` but not ``mods``,
         # ``Circleguard#similarity`` will reject it, as we will not know whether
         # whether ``Mod.HR`` was enabled on the replay, and thus whether to flip
         # the replay before comparing it to another one.
-        self.game_version = None
+
+        # replays don't have any information about their game version by
+        # default. Subclasses might set this if they have more information to
+        # provide about their version, whether on instantiation or after being
+        # loaded.
+        self.game_version = NoGameVersion()
         self.timestamp    = None
         self.map_id       = None
         self.username     = None
@@ -727,6 +734,9 @@ class ReplayMap(Replay):
             info = loader.replay_info(self.map_id, user_id=self.user_id, mods=self.mods)
 
         self.timestamp = info.timestamp
+        # estimate version with timestamp, this is only accurate if the user
+        # keeps their game up to date
+        self.game_version = GameVersion.from_datetime(self.timestamp, concrete=False)
         self.username = info.username
         self.mods = info.mods
         self.replay_id = info.replay_id
@@ -816,7 +826,7 @@ class ReplayPath(Replay):
             return
 
         loaded = circleparse.parse_replay_file(self.path)
-        self.game_version = loaded.game_version
+        self.game_version = GameVersion(loaded.game_version, concrete=True)
         self.timestamp = loaded.timestamp
         self.map_id = loader.map_id(loaded.beatmap_hash)
         self.username = loaded.player_name
@@ -940,7 +950,7 @@ class ReplayString(Replay):
             return
 
         loaded = circleparse.parse_replay(self.replay_data_str, pure_lzma=False)
-        self.game_version = loaded.game_version
+        self.game_version = GameVersion(loaded.game_version, concrete=True)
         self.timestamp = loaded.timestamp
         self.map_id = loader.map_id(loaded.beatmap_hash)
         self.username = loaded.player_name
