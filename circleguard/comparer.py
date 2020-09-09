@@ -145,7 +145,8 @@ class Comparer:
         The length of the two passed arrays must be equal.
         """
 
-        valid = np.all(([0, 0] <= xy1) & (xy1 <= [512, 384]), axis=1) & np.all(([0, 0] <= xy2) & (xy2 <= [512, 384]), axis=1)
+        valid = np.all(([0, 0] <= xy1) & (xy1 <= [512, 384]), axis=1) & \
+            np.all(([0, 0] <= xy2) & (xy2 <= [512, 384]), axis=1)
         xy1 = xy1[valid]
         xy2 = xy2[valid]
         return (xy1, xy2)
