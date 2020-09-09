@@ -84,13 +84,13 @@ class ReplayContainer(Loadable):
 
     def load(self, loader, cache=None):
         """
-        Loads all :class:`~circleguard.loadable.Loadable`\s contained by this
+        Loads all :class:`~circleguard.loadables.Loadable`\s contained by this
         loadable container.
 
         Parameters
         ----------
         loader: :class:`~circleguard.loader.Loader`
-            The loader to load the :class:`~circleguard.loadable.Loadable`\s
+            The loader to load the :class:`~circleguard.loadables.Loadable`\s
             with.
         """
         if self.loaded:
