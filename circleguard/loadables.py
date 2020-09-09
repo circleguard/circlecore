@@ -405,7 +405,6 @@ class Replay(Loadable):
     cache: bool
         Whether to cache this replay once it is loaded.
 
-    TODO update attributes with eg game_version property and keydowns property
     Attributes
     ----------
     game_version: :class:`~circleguard.game_version.GameVersion`
@@ -426,6 +425,10 @@ class Replay(Loadable):
         The mods the replay was played with.
     replay_id: int
         The id of the replay, or 0 if the replay is unsubmitted.
+    keydowns: ndarray[int]
+        The keydowns for each frame of the replay. Keydowns are the keys pressed
+        in that frame that were not pressed in the previous frame. See
+        :meth:`~.keydowns` for more details.
     t: ndarray[int]
         A 1d array containing the timestamp for each frame. <br>
         This is only nonnull after the replay has been loaded.
