@@ -816,8 +816,6 @@ class ReplayPath(Replay):
         ``replay.loaded`` is set to ``True`` after this method is finished.
         """
 
-        # we don't cache local replays currently. Ignore cache option for
-        # if/when we need it
         self.log.debug("Loading ReplayPath %r", self)
         if self.loaded:
             self.log.debug("%s already loaded, not loading", self)
@@ -940,8 +938,6 @@ class ReplayString(Replay):
         ``replay.loaded`` is set to ``True`` after this method is finished.
         """
 
-        # we don't cache local replays currently. Ignore cache option for
-        # if/when we need it
         self.log.debug("Loading ReplayString %r", self)
         if self.loaded:
             self.log.debug("%s already loaded, not loading", self)
