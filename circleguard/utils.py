@@ -47,6 +47,9 @@ def convert_statistic(stat, mods, *, to):
 
 
 def order(replay1, replay2):
+    if not replay1.timestamp or not replay2.timestamp:
+        raise ValueError("Both replay1 and replay2 must provide a timestamp. "
+            "Replays without a timestamp cannot be ordered.")
     # assume they're passed in order (earliest first); if not, switch them
     order = (replay1, replay2)
     if replay2.timestamp < replay1.timestamp:
