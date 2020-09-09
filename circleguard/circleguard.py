@@ -295,17 +295,95 @@ class Circleguard:
 
 
     def Map(self, map_id, span, mods=None, cache=None):
+        """
+        Instantiates a :class:`~circleguard.loadables.Map`, loads its info,
+        and returns the now info-loaded ``Map``.
+
+        Notes
+        -----
+        This function is provided as a convenience for when you want to create a
+        ``Map`` and load its info immediately. A common occurrence in using
+        ``Circleguard`` is to want to instantiate a ``Map`` and immediately
+        iterate over it to operate on its replays. However, this ``Map`` must
+        be info loaded before it can be iterated over, so this function removes
+        the need to explicitly call :meth:`~.load_info` on a ``Map`` before
+        iterating.
+        >>> # usage without this function (bad)
+        >>> cg = Circleguard("key")
+        >>> m = Map(221777, "1-2")
+        >>> cg.load_info(m)
+        >>> for replay in m:
+        >>>     ...
+        >>>
+        >>> # usage with this function (good)
+        >>> cg = Circleguard("key")
+        >>> m = cg.Map(221777, "1-2")
+        >>> for replay in m:
+        >>>     ...
+        """
         m = Map(map_id, span, mods, cache)
         self.load_info(m)
         return m
 
     def User(self, user_id, span, mods=None, cache=None, available_only=True):
+        """
+        Instantiates a :class:`~circleguard.loadables.User`, loads its info,
+        and returns the now info-loaded ``User``.
+
+        Notes
+        -----
+        This function is provided as a convenience for when you want to create a
+        ``User`` and load its info immediately. A common occurrence in using
+        ``Circleguard`` is to want to instantiate a ``User`` and immediately
+        iterate over it to operate on its replays. However, this ``User`` must
+        be info loaded before it can be iterated over, so this function removes
+        the need to explicitly call :meth:`~.load_info` on a ``User`` before
+        iterating.
+        >>> # usage without this function (bad)
+        >>> cg = Circleguard("key")
+        >>> u = User(124493, "1-2")
+        >>> cg.load_info(u)
+        >>> for replay in u:
+        >>>     ...
+        >>>
+        >>> # usage with this function (good)
+        >>> cg = Circleguard("key")
+        >>> u = cg.User(124493, "1-2")
+        >>> for replay in u:
+        >>>     ...
+        """
         u = User(user_id, span, mods, cache, available_only)
         self.load_info(u)
         return u
 
     def MapUser(self, map_id, user_id, span=Loader.MAX_MAP_SPAN, mods=None, \
         cache=None, available_only=True):
+        """
+        Instantiates a :class:`~circleguard.loadables.MapUser`, loads its info,
+        and returns the now info-loaded ``MapUser``.
+
+        Notes
+        -----
+        This function is provided as a convenience for when you want to create a
+        ``User`` and load its info immediately. A common occurrence in using
+        ``Circleguard`` is to want to instantiate a ``User`` and immediately
+        iterate over it to operate on its replays. However, this ``User`` must
+        be info loaded before it can be iterated over, so this function removes
+        the need to explicitly call :meth:`~.load_info` on a ``User`` before
+        iterating.
+        >>> # usage without this function (bad)
+        >>> cg = Circleguard("key")
+        >>> mu = cg.MapUser(124493, 129891)
+        >>> cg.load_info(mu)
+        >>> for replay in mu:
+        >>>     ...
+        >>>
+        >>> # usage with this function (good)
+        >>> cg = Circleguard("key")
+        >>> mu = cg.MapUser(124493, 129891)
+        >>> for replay in mu:
+        >>>     ...
+        """
         mu = MapUser(map_id, user_id, span, cache, available_only)
         self.load_info(mu)
         return mu
