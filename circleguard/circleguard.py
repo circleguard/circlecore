@@ -229,7 +229,8 @@ class Circleguard:
         Returns
         -------
         [float]
-            The time (in ms) between each frame of the replay. <br>
+            The time (in ms) between each frame of the replay.
+            <br>
             The first element of this array corresponds to the time between the
             first and second frame, the second element to the time between the
             second and third frame, etc.

@@ -148,7 +148,8 @@ class Map(ReplayContainer):
     mods: :class:`~.enums.ModCombination`
         If passed, only represent replays played with this exact mod
         combination. Due to limitations with the api, fuzzy matching is not
-        implemented. <br>
+        implemented.
+        <br>
         This is applied before span``. That is, if ``span="1-2"``
         and ``mods=Mod.HD``, the top two ``HD`` plays on the map are
         represented.
@@ -204,7 +205,8 @@ class User(ReplayContainer):
     mods: :class:`~.enums.ModCombination`
         If passed, only represent replays played with this exact mod
         combination. Due to limitations with the api, fuzzy matching is not
-        implemented. <br>
+        implemented.
+        <br>
         This is applied before ``span``. That is, if ``span="1-2"``
         and ``mods=Mod.HD``, the user's top two ``HD`` plays are represented.
     cache: bool
@@ -440,14 +442,17 @@ class Replay(Loadable):
         in that frame that were not pressed in the previous frame. See
         :meth:`~.keydowns` for more details.
     t: ndarray[int]
-        A 1d array containing the timestamp for each frame. <br>
+        A 1d array containing the timestamp for each frame.
+        <br>
         This is only nonnull after the replay has been loaded.
     xy: ndarray[float]
         A 2d, two column array, containing the ``x`` and ``y`` coordinates of
-        each frame in the first and second column respectively. <br>
+        each frame in the first and second column respectively.
+        <br>
         This is only nonnull after the replay has been loaded.
     k: ndarray[int]
-        A 1d array containing the keys pressed for each frame. <br>
+        A 1d array containing the keys pressed for each frame.
+        <br>
         This is only nonnull after the replay has been loaded.
     """
     def __init__(self, weight, cache):
