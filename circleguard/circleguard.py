@@ -61,7 +61,7 @@ class Circleguard:
     """
     DEFAULT_ANGLE = 10
     DEFAULT_DISTANCE = 8
-    # a healthy balance between speed and accuracy.
+    # A good balance between speed and accuracy when calculating correlation.
     DEFAULT_CHUNKS = 5
 
     # We provide suggested "cheated thresholds" for comparisons, as those
