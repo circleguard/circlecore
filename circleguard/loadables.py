@@ -408,10 +408,10 @@ class Replay(Loadable):
     TODO update attributes with eg game_version property and keydowns property
     Attributes
     ----------
-    game_version: int
-        The version of the game that the play was set on.
+    game_version: :class:`~circleguard.game_version.GameVersion`
+        Information about the version of osu! the replay was played on.
     timestamp: :class:`datetime.datetime`
-        When this replay was played.
+        When the replay was played.
     map_id: int
         The id of the map the replay was played on, or 0 if
         unknown or on an unsubmitted map.
