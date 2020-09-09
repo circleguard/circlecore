@@ -311,6 +311,11 @@ class Circleguard:
         return mu
 
     def _beatmap(self, map_id):
+        """
+        A beatmap corresponding to ``map_id``. If our ``library`` does not
+        already have this beatmap stored, it is downloaded and saved to the
+        ``library``.
+        """
         return self.library.lookup_by_id(map_id, download=True, save=True)
 
     @property
