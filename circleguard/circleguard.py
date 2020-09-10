@@ -275,7 +275,7 @@ class Circleguard:
         ----------
         replay: :class:`~circleguard.loadables.Replay`
             The replay to calculate the hits of.
-        within: int
+        within: float
             If passed, only the hits which are ``within`` pixels or less away
             from the edge of the hitobject which they hit will be returned.
             Otherwise, all hits are returned.
@@ -288,7 +288,7 @@ class Circleguard:
         Notes
         -----
         In osu!lazer terminology, hits are equivalent to judgements, but
-        without considering misses.
+        only when not considering misses.
         """
         self.load(replay)
         beatmap = self._beatmap(replay.map_id)
