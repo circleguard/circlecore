@@ -34,7 +34,7 @@ class Comparer:
         xy1, xy2 = Comparer.clean(xy1, xy2)
 
         # kind of a dirty function with all the switching between similarity
-        # and comparison, but I'm not sure I can make it any cleaner
+        # and correlation, but I'm not sure I can make it any cleaner
 
         if not replay1.mods or not replay2.mods:
             # first compute with no modifications
