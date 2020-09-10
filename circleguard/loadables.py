@@ -145,7 +145,7 @@ class Map(ReplayContainer):
     span: str or Span
         A comma separated list of ranges of top plays to retrieve.
         ``span="1-3,6,2-4"`` -> replays in the range ``[1,2,3,4,6]``.
-    mods: :class:`~.enums.ModCombination`
+    mods: :class:`~circleguard.mod.ModCombination`
         If passed, only represent replays played with this exact mod
         combination. Due to limitations with the api, fuzzy matching is not
         implemented.
@@ -202,7 +202,7 @@ class User(ReplayContainer):
     span: str or Span
         A comma separated list of ranges of top plays to retrieve.
         ``span="1-3,6,2-4"`` -> replays in the range ``[1,2,3,4,6]``.
-    mods: :class:`~.enums.ModCombination`
+    mods: :class:`~circleguard.mod.ModCombination`
         If passed, only represent replays played with this exact mod
         combination. Due to limitations with the api, fuzzy matching is not
         implemented.
@@ -412,7 +412,7 @@ class Replay(Loadable):
 
     Parameters
     ----------
-    weight: :class:`~.enums.RatelimitWeight`
+    weight: :class:`~circleguard.utils.RatelimitWeight`
         How much it 'costs' to load this replay from the api.
     cache: bool
         Whether to cache this replay once it is loaded.
@@ -433,7 +433,7 @@ class Replay(Loadable):
         given instead of 0.
     username: str
         The username of the player who played the replay.
-    mods: :class:`~.enums.ModCombination`
+    mods: :class:`~circleguard.mods.ModCombination`
         The mods the replay was played with.
     replay_id: int
         The id of the replay, or 0 if the replay is unsubmitted.

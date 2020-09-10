@@ -573,7 +573,7 @@ class Loader():
 
         Raises
         ------
-        One of :class:`~.enums.Error`
+        One of :class:`~.Error`
             If an error exists in the response.
         NoInfoAvailable
             If the response is empty.
