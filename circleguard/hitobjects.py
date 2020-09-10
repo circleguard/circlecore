@@ -40,6 +40,9 @@ class Hitobject():
     def __eq__(self, other):
         return self.t == other.t and self.xy == other.xy
 
+    def __hash__(self):
+        return hash((self.t, self.xy))
+
 
 class Circle(Hitobject):
     def __init__(self, time, xy, radius):
@@ -50,6 +53,9 @@ class Circle(Hitobject):
         return (self.t == other.t and self.xy == other.xy and
             self.radius == other.radius)
 
+    def __hash__(self):
+        return hash((self.t, self.xy, self.radius))
+
 
 class Slider(Hitobject):
     def __init__(self, time, xy, radius):
@@ -59,6 +65,9 @@ class Slider(Hitobject):
     def __eq__(self, other):
         return (self.t == other.t and self.xy == other.xy and
             self.radius == other.radius)
+
+    def __hash__(self):
+        return hash((self.t, self.xy, self.radius))
 
 
 class Spinner(Hitobject):
