@@ -477,9 +477,7 @@ class Hit():
         dist = np.linalg.norm(self.xy - hitobj_xy) - self.hitobject.radius
 
         # value is negative since we're inside the hitobject, so take abs
-        if abs(dist) < distance:
-            return True
-        return False
+        return abs(dist) < distance
 
     def __eq__(self, other):
         return (self.hitobject == other.hitobject and self.t == other.t and
