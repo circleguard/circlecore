@@ -297,20 +297,8 @@ class Circleguard:
         if not within:
             return hits
 
-        hr = Mod.HR in replay.mods
-        ez = Mod.EZ in replay.mods
-        hitcircle_radius = circle_radius(beatmap.cs(hard_rock=hr, easy=ez))
-        filtered_hits = []
-
-        for hit in hits:
-            hitobj_xy = hit.hitobject.xy
-            dist = np.linalg.norm(hit.xy - hitobj_xy) - hitcircle_radius
-
-            # value is negative since we're inside the hitobject, so take abs
-            if abs(dist) < within:
-                filtered_hits.append(hit)
-
-        return filtered_hits
+        hits = [hit for hit in hits if hit.within(within)]
+        return hits
 
 
     def load(self, loadable):

@@ -340,7 +340,7 @@ class Investigator:
 
             if keydown_t <= hitobj_t - hitwindow:
                 # pressing on a circle or slider during hitwindowmiss will cause
-                #  a miss
+                # a miss
                 if np.linalg.norm(keydown_xy - hitobj_xy) <= hitradius and hitobj_type != 2:
 
                     # sliders don't disappear after missing
@@ -450,6 +450,36 @@ class Hit():
         self.xy = xy
         self.x = xy[0]
         self.y = xy[1]
+
+    def within(self, distance):
+        """
+        Whether the hit was within ``distance`` of the edge of its hitobject.
+
+        Parameters
+        ----------
+        distance: float
+            How close, in pixels, to the edge of the hitobject the hit has to
+            be.
+
+        Returns
+        -------
+        bool
+            Whether the hit was within ``distance`` of the edge of its
+            hitobject.
+
+        Notes
+        -----
+        The lower the value, the closer to the edge the hit occurred. This value
+        can never be greater than the radius of the hitobject.
+        """
+
+        hitobj_xy = self.hitobject.xy
+        dist = np.linalg.norm(self.xy - hitobj_xy) - self.hitobject.radius
+
+        # value is negative since we're inside the hitobject, so take abs
+        if abs(dist) < distance:
+            return True
+        return False
 
     def __eq__(self, other):
         return (self.hitobject == other.hitobject and self.t == other.t and
