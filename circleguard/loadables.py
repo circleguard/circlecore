@@ -309,9 +309,7 @@ class ReplayCache(ReplayContainer):
     num_maps: int
         How many (randomly chosen) maps to load replays from.
     limit: int
-        How many replays to load for each map. If we have less than ``limit``
-        replays stored for a randomly chosen map, only the replays we have
-        stored will be loaded.
+        How many replays to load for each map.
 
     Notes
     -----
@@ -347,6 +345,8 @@ class ReplayCache(ReplayContainer):
         subclauses = [f"map_id = {chosen_map}" for chosen_map in chosen_maps]
         where_clause = " OR ".join(subclauses)
 
+        # TODO LIMIT clause isn't quite right here, some maps will have less
+        # than ``num_replays`` stored
         infos = self.cursor.execute(
             f"""
             SELECT user_id, map_id, replay_data, replay_id, mods
