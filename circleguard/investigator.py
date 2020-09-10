@@ -4,6 +4,7 @@ from slider.beatmap import Circle, Slider
 from circleguard.mod import Mod
 from circleguard.utils import KEY_MASK
 from circleguard.game_version import GameVersion
+from circleguard.hitobjects import Hitobject
 
 class Investigator:
     # https://osu.ppy.sh/home/changelog/stable40/20190207.2
@@ -28,9 +29,9 @@ class Investigator:
 
         diffs = []
         for hit in hits:
-            hitobject_t = hit.hitobject.time.total_seconds() * 1000
-            hit_time = hit.t
-            diffs.append(hit_time - hitobject_t)
+            hitobj_t = hit.hitobject.t
+            hit_t = hit.t
+            diffs.append(hit_t - hitobj_t)
         return np.std(diffs) * 10
 
     @staticmethod
@@ -361,7 +362,8 @@ class Investigator:
                 hitobj_i += 1
             else:
                 if keydown_t < hitobj_t + hitwindow and np.linalg.norm(keydown_xy - hitobj_xy) <= hitradius and hitobj_type != 2:
-                    hits.append(Hit(hitobj, keydown_t, keydown_xy))
+                    hit = Hit(hitobj, keydown_t, keydown_xy, CS)
+                    hits.append(hit)
 
                     # sliders don't disappear after clicking
                     # so we skip to the press_i that is after notelock_end_time
@@ -431,19 +433,24 @@ class Hit():
 
     Parameters
     ----------
-    hitobject: :class:`slider.beatmap.HitObject`
-        The hitobject that was hit.
+    hitobject: :class:`slider.beatmap.Hitobject`
+        The hitobject that was hit. This is converted to a
+        :class:`circleguard.hitobjects.Hitobject`.
     t: float
         The time the hit occured.
     xy: list[float, float]
         The x and y position where the hit occured.
+    CS: float
+        The circle size of the beatmap (after being modified by the replay's
+        mods, ie ``Mod.HR`` or ``Mod.EZ``) this hit occurred in.
     """
-    def __init__(self, hitobject, t, xy):
-        self.hitobject = hitobject
+    def __init__(self, hitobject, t, xy, CS):
+        self.hitobject = Hitobject.from_slider_hitobj(hitobject, CS)
         self.t = t
         self.xy = xy
+        self.x = xy[0]
+        self.y = xy[1]
 
-    # TODO slider hitobjects don't define __eq__, pr that in
     def __eq__(self, other):
         return (self.hitobject == other.hitobject and self.t == other.t and
             self.xy == other.xy)
