@@ -515,11 +515,17 @@ class KeylessCircleguard(Circleguard):
         return super().hits(replay, within)
 
     def load(self, loadable):
+        # allow this function to be called as a no-op if the loadable is already
+        # loaded
+        if loadable.loaded:
+            return
         raise NotImplementedError("Keyless Circleguards cannot load Loadables")
 
-    def load_info(self, replay_container):
+    def load_info(self, container):
+        if container.info_loaded:
+            return
         raise NotImplementedError("Keyless Circleguards cannot load info for "
-            "ReplayContainers")
+            "Containers")
 
     def Map(self, map_id, span, mods=None, cache=None) -> Map:
         raise NotImplementedError("KeylessCircleguards cannot create "
