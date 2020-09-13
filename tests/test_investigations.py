@@ -4,7 +4,7 @@ import unittest
 from circleguard import ReplayPath, Mod, Circleguard, order
 from tests.utils import CGTestCase, DELTA, UR_DELTA, RES, FRAMETIME_LIMIT
 
-class TestCorrection(CGTestCase):
+class TestSnaps(CGTestCase):
     @classmethod
     def setUpClass(cls):
         super().setUpClass()
@@ -28,7 +28,7 @@ class TestCorrection(CGTestCase):
         self.assertAlmostEqual(snaps[14].distance, 8.21841, delta=DELTA)
 
 
-class TestSteal(CGTestCase):
+class TestSimilarity(CGTestCase):
 
     @classmethod
     def setUpClass(cls):
@@ -102,7 +102,7 @@ class TestSteal(CGTestCase):
         # copy replay to avoid any missahaps when we mutate the data
         stolen2 = ReplayPath(self.stolen2.path)
         self.cg.load(stolen2)
-        TestSteal.add_noise_and_positional_translation_to_replay(stolen2, 10, 3)
+        TestSimilarity.add_noise_and_positional_translation_to_replay(stolen2, 10, 3)
         sim = self.cg.similarity(self.stolen1, stolen2, method="similarity")
         corr = self.cg.similarity(self.stolen1, stolen2, method="correlation")
 
@@ -110,7 +110,7 @@ class TestSteal(CGTestCase):
         self.assertGreater(corr, Circleguard.CORR_LIMIT, "Cheated replays were not detected as cheated with correlation")
 
 
-class TestRelax(CGTestCase):
+class TestUR(CGTestCase):
     @classmethod
     def setUpClass(cls):
         super().setUpClass()
@@ -119,11 +119,11 @@ class TestRelax(CGTestCase):
         cls.replays = [ReplayPath(RES / "legit" / f"legit-{i}.osr") for i in range(1, 12)]
         cls.urs = [66.74, 66.56, 242.73, 115.54, 254.56, 90.88, 121.62, 163.01, 207.31, 198.79, 138.25]
 
-    def test_cheated(self):
+    def test_ur(self):
         for i, replay in enumerate(self.replays):
             self.assertAlmostEqual(self.cg.ur(replay), self.urs[i], delta=UR_DELTA)
 
-class TestTimewarp(CGTestCase):
+class TestFrametime(CGTestCase):
     @classmethod
     def setUpClass(cls):
         super().setUpClass()
