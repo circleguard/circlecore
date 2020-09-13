@@ -59,6 +59,76 @@ class Loadable(abc.ABC):
     def __eq__(self, loadable):
         pass
 
+class LoadableContainer(Loadable):
+    """
+    A Loadable that holds Loadables, which may be ``ReplayContainer``\s or
+    ``Replay``\s.
+
+    Parameters
+    ----------
+    loadables: list[:class:`~.Loadable`]
+        The loadables to hold.
+    cache: bool
+        Whether to cache the loadables once they are loaded. This will be
+        overriden by a ``cache`` option set by a :class:`~Loadable` in
+        ``loadables``. This only affects child loadables when they do not have
+        a ``cache`` option set.
+    """
+
+    def __init__(self, loadables, cache=None):
+        super().__init__(cache)
+        self.loadables = loadables
+
+    def all_replays(self):
+        """
+        All the :class:`~.Replay`\s in this loadable container.
+
+        Returns
+        -------
+        list[:class:`~Replay`]
+            All the replays in this loadable container.
+
+        Warnings
+        --------
+        This list will almost may be incomplete if you do not call
+        :func:`~.load_info` on this loadable container first, as any replay
+        containers held in this container will likely not have references to
+        their replays yet.
+        """
+        replays = []
+        for loadable in self.loadables:
+            if isinstance(loadable, ReplayContainer):
+                replays += loadable.all_replays()
+            else:
+                # loadable is a Replay if it's not a ReplayContainer
+                replays.append(loadable)
+        return replays
+
+    def load(self, loader, cache):
+        cascade_cache = cache if self.cache is None else self.cache
+        for loadable in self.loadables:
+            loadable.load(loader, cascade_cache)
+
+    def load_info(self):
+        for loadable in self.loadables:
+            if isinstance(loadable, ReplayContainer):
+                loadable.load_info()
+
+    def __eq__(self, loadable):
+        if not isinstance(loadable, LoadableContainer):
+            return False
+        return self.all_replays() == loadable.all_replays()
+
+    def __len__(self):
+        return len(self.loadables)
+
+    def __getitem__(self, key):
+        if isinstance(key, slice):
+            return self.loadables[key.start:key.stop:key.step]
+        return self.loadables[key]
+
+    def __iter__(self):
+        return iter(self.loadables)
 
 class ReplayContainer(Loadable):
     """

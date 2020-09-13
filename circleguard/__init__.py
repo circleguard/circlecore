@@ -3,7 +3,7 @@ import logging
 from circleguard.circleguard import Circleguard, KeylessCircleguard, set_options
 from circleguard.loadables import (Replay, ReplayMap, ReplayPath, Map, User,
         MapUser, ReplayDir, ReplayContainer, Loadable, ReplayCache,
-        CachedReplay, ReplayID, ReplayString)
+        CachedReplay, ReplayID, ReplayString, LoadableContainer)
 from circleguard.mod import Mod
 from circleguard.loader import (Loader, ReplayInfo, APIException,
         NoInfoAvailableException, UnknownAPIException, InternalAPIException,
@@ -31,7 +31,7 @@ __all__ = [
 # loadables
 "ReplayContainer", "Map", "User", "MapUser",
 "ReplayCache", "Replay", "ReplayMap", "ReplayPath", "CachedReplay", "Loadable",
-"ReplayID", "ReplayDir", "ReplayString",
+"ReplayID", "ReplayDir", "ReplayString", "LoadableContainer",
 # enums
 "Key", "RatelimitWeight",
 # mod
