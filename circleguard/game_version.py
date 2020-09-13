@@ -1,8 +1,7 @@
 from datetime import datetime
-from functools import total_ordering
 
-@total_ordering
-class GameVersion():
+
+class GameVersion(int):
     """
     Information about the version of osu! a
     :class:`circleguard.loadables.Replay` was played on.
@@ -36,9 +35,10 @@ class GameVersion():
     :class:`datetime.datetime` object representing the day an osu! version was
     released, and want to create a ``GameVersion`` from that.
     """
-    def __init__(self, version, concrete):
-        self.version = version
-        self.concrete = concrete
+    def __new__(self, version, concrete):
+        ret = int.__new__(GameVersion, version)
+        ret.concrete = concrete
+        return ret
 
     @staticmethod
     def from_datetime(datetime, concrete):
@@ -69,12 +69,6 @@ class GameVersion():
         estimate of the version.
         """
         return True
-
-    def __eq__(self, other):
-        return self.version == other.version
-
-    def __lt__(self, other):
-        return self.version < other.version
 
 
 class NoGameVersion(GameVersion):
