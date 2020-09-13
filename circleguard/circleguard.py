@@ -1,7 +1,7 @@
 from pathlib import Path
 import logging
 from tempfile import TemporaryDirectory
-from typing import Iterable
+from typing import Iterable, Union, Tuple
 
 from slider import Library
 from slider.mod import circle_radius
@@ -99,7 +99,8 @@ class Circleguard:
 
 
     def similarity(self, replay1, replay2, method="similarity", \
-        num_chunks=DEFAULT_CHUNKS, mods_unknown_behavior="best") -> float:
+        num_chunks=DEFAULT_CHUNKS, mods_unknown_behavior="best") -> \
+        Union[float, Tuple[float]]:
         """
         The similarity between ``replay1`` and ``replay2``.
 
