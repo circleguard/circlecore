@@ -1144,8 +1144,7 @@ class ReplayID(Replay):
 
     def load(self, loader, cache):
         # TODO file github issue about loading info from replay id, right now we
-        # can literally only load the replay data which is pretty useless if we
-        # don't have a map id or the mods used
+        # can literally only load the replay data which isn't that useful
         cache = cache if self.cache is None else self.cache
         replay_data = loader.replay_data_from_id(self.replay_id, cache)
         self._process_replay_data(replay_data)
