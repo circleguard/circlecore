@@ -68,7 +68,7 @@ class GameVersion(int):
         was played on, whether that is a fully accurate version or just an
         estimate of the version.
         """
-        return True
+        return self != -1
 
 
 class NoGameVersion(GameVersion):
@@ -76,8 +76,5 @@ class NoGameVersion(GameVersion):
     Used when a :class:`~circleguard.loadables.Replay` has no information about
     its version, and cannot even estimate its version.
     """
-    def __init__(self):
-        super().__init__(None, None)
-
-    def available(self):
-        return False
+    def __new__(self):
+        return super().__new__(NoGameVersion, -1, None)
