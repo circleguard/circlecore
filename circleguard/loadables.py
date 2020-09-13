@@ -477,7 +477,9 @@ class Replay(Loadable):
         # about their version, whether on instantiation or after being loaded.
         self.game_version = NoGameVersion()
         self.timestamp    = None
-        self.map_id       = None
+        # declared as a property with a getter and setter so we can set
+        # map_info's map_id attribute automatically
+        self._map_id       = None
         # replays have no information about their map by default.
         self.map_info     = MapInfo()
         self.username     = None
@@ -696,6 +698,15 @@ class Replay(Loadable):
         self.k = k
 
     @property
+    def map_id(self):
+        return self._map_id
+
+    @map_id.setter
+    def map_id(self, map_id):
+        self._map_id = map_id
+        self.map_info.map_id = map_id
+
+    @property
     def keydowns(self):
         """
         A list of the keys pressed for each frame that were not pressed in the
@@ -758,8 +769,6 @@ class ReplayMap(Replay):
             self.username = info.username
             self.replay_id = info.replay_id
             self.mods = info.mods
-
-        self.map_info = MapInfo(map_id=self.map_id)
 
     def load(self, loader, cache):
         """
@@ -886,7 +895,6 @@ class ReplayPath(Replay):
         self.game_version = GameVersion(loaded.game_version, concrete=True)
         self.timestamp = loaded.timestamp
         self.map_id = loader.map_id(loaded.beatmap_hash)
-        self.map_info = MapInfo(map_id=self.map_id)
         self.username = loaded.player_name
         # our `user_id` attribute is lazy loaded, so we need to retain the
         # `Loader#user_id` function to use later to load it.
