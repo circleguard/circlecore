@@ -525,8 +525,8 @@ class KeylessCircleguard(Circleguard):
     def load_info(self, container):
         if container.info_loaded:
             return
-        raise NotImplementedError("Keyless Circleguards cannot load info for "
-            "Containers")
+        raise NotImplementedError("Keyless Circleguards cannot load the info "
+            "of Replay Containers Loadable Containers")
 
     def Map(self, map_id, span, mods=None, cache=None) -> Map:
         raise NotImplementedError("KeylessCircleguards cannot create "
