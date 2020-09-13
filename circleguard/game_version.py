@@ -8,7 +8,7 @@ class GameVersion(int):
 
     Parameters
     ----------
-    version:
+    version: int
         The version of osu! to represent.
 
     concrete: bool
