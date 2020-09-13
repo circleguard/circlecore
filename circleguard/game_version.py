@@ -8,8 +8,8 @@ class GameVersion(int):
 
     Parameters
     ----------
-    version: int or :class:`datetime.datetime`
-        The version
+    version:
+        The version of osu! to represent.
 
     concrete: bool
         Whether ``version`` is the actual version of osu! the replay was played
