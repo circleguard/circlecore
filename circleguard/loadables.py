@@ -73,6 +73,29 @@ class LoadableContainer(Loadable):
         overriden by a ``cache`` option set by a :class:`~Loadable` in
         ``loadables``. This only affects child loadables when they do not have
         a ``cache`` option set.
+
+    Notes
+    -----
+    This class is intended for situations when you have a list of replays and
+    replay containers, but no way to separate or distinguish them. If you want
+    to get, say, all the replays out of that list (whether they come from
+    replay subclasses already in the list, or the replays held by a replay
+    container in the list), this loadable container class has the logic to do
+    that for you:
+
+    >>> lc = LoadableContainer(mixed_loadable_list)
+    >>> replays = lc.all_replays()
+
+    It can also be useful to info load the replay containers in the list,
+    without first filtering the list to remove any replay subclasses:
+
+    >>> cg.load_info(lc)
+    >>> # all loadable containers in the list are now info loaded
+    >>> cg.load(lc)
+    >>> # all loadables in the list are now loaded
+
+    You are very unlikely to want to subclass this class. If you want to add a
+    new loadable that holds replays, subclass ``ReplayContainer``.
     """
 
     def __init__(self, loadables, cache=None):
