@@ -34,6 +34,11 @@ class GameVersion(int):
     We provide :func:`~.from_datetime` as a convenience for when you have a
     :class:`datetime.datetime` object representing the day an osu! version was
     released, and want to create a ``GameVersion`` from that.
+    <br>
+    This class subclasses ``int`` so consumers don't need to know or expect a
+    special class when they access ``replay.game_version``. For instance, to
+    get the numeric value of the game version, they would have to do
+    ``replay.game_version.version`` as opposed to ``replay.game_version`` here.
     """
     def __new__(self, version, concrete):
         ret = int.__new__(GameVersion, version)
