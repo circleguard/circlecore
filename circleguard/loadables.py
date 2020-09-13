@@ -109,10 +109,10 @@ class LoadableContainer(Loadable):
         for loadable in self.loadables:
             loadable.load(loader, cascade_cache)
 
-    def load_info(self):
+    def load_info(self, loader):
         for loadable in self.loadables:
             if isinstance(loadable, ReplayContainer):
-                loadable.load_info()
+                loadable.load_info(loader)
 
     def __eq__(self, loadable):
         if not isinstance(loadable, LoadableContainer):
