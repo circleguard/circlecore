@@ -4,6 +4,7 @@ import unittest
 from circleguard import ReplayPath, Mod, Circleguard, order, ReplayMap
 from tests.utils import CGTestCase, DELTA, UR_DELTA, RES, FRAMETIME_LIMIT
 
+
 class TestSnaps(CGTestCase):
     @classmethod
     def setUpClass(cls):
@@ -77,7 +78,6 @@ class TestSimilarity(CGTestCase):
         self.assertGreater(corr, Circleguard.CORR_LIMIT, "Cheated replays were not detected as cheated")
         self.assertAlmostEqual(corr, 0.99734, delta=DELTA, msg="Correlation is not correct")
 
-
     def test_legitimate(self):
         sim = self.cg.similarity(self.legit1, self.legit2)
         self.assertGreater(sim, Circleguard.SIM_LIMIT, "Legitimate replays were detected as stolen")
@@ -95,8 +95,6 @@ class TestSimilarity(CGTestCase):
         self.assertEqual(later.replay_id, 2309618113, "Later replay id was not correct")
         self.assertEqual(earlier.username, "Crissinop", "Earlier username was not correct")
         self.assertEqual(later.username, "TemaZpro", "Later username was not correct")
-
-
 
     def test_robustness_to_translation(self):
         # copy replay to avoid any missahaps when we mutate the data
