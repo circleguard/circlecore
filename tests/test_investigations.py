@@ -1,7 +1,7 @@
 import numpy as np
 import unittest
 
-from circleguard import ReplayPath, Mod, Circleguard, order
+from circleguard import ReplayPath, Mod, Circleguard, order, ReplayMap
 from tests.utils import CGTestCase, DELTA, UR_DELTA, RES, FRAMETIME_LIMIT
 
 class TestSnaps(CGTestCase):
@@ -10,7 +10,7 @@ class TestSnaps(CGTestCase):
         super().setUpClass()
         cls.r1 = ReplayPath(RES / "corrected_replay1.osr")
 
-    def test_cheated(self):
+    def test_snaps(self):
         snaps = self.cg.snaps(self.r1)
 
         self.assertEqual(len(snaps), 15)
@@ -136,6 +136,46 @@ class TestFrametime(CGTestCase):
 
     def test_cheated(self):
         replays = [self.timewarped1, self.timewarped2, self.timewarped3, self.timewarped4]
-        for replay in replays:
+        frametimes = [11.33333, 10.66666, 8, 8.66666]
+        for i, replay in enumerate(replays):
             frametime = self.cg.frametime(replay)
+            self.assertAlmostEqual(frametime, frametimes[i], delta=DELTA, msg=f"Frametime was wrong for replay {replay}")
             self.assertLess(frametime, FRAMETIME_LIMIT, f"Timewarped replay {replay} was not detected as cheated")
+
+class TestHits(CGTestCase):
+    @classmethod
+    def setUpClass(cls):
+        # don't use cache for this test, it changes xy values slightly
+        super().setUpClass(use_cache=False)
+        cls.replay1 = ReplayMap(221777, 2757689)
+
+    def test_hits(self):
+        hits = self.cg.hits(self.replay1)
+        self.assertEqual(len(hits), 1447)
+
+        # beginning
+        self.assertEqual(hits[0].t, 22109)
+        self.assertSequenceEqual(hits[0].xy.tolist(), [24, 272.8889])
+        self.assertEqual(hits[0].hitobject.t, 22110)
+        self.assertSequenceEqual(hits[0].hitobject.xy.tolist(), [22, 268])
+        self.assertEqual(hits[0].hitobject.radius, 31.104)
+
+        # middle
+        self.assertEqual(hits[524].t, 171421)
+        self.assertSequenceEqual(hits[524].xy.tolist(), [404, 233.7778])
+        self.assertEqual(hits[524].hitobject.t, 171421)
+        self.assertSequenceEqual(hits[524].hitobject.xy.tolist(), [409, 227])
+        self.assertEqual(hits[524].hitobject.radius, 31.104)
+
+        self.assertEqual(hits[1287].t, 336601)
+        self.assertSequenceEqual(hits[1287].xy.tolist(), [233.3333, 241.3333])
+        self.assertEqual(hits[1287].hitobject.t, 336593)
+        self.assertSequenceEqual(hits[1287].hitobject.xy.tolist(), [243, 259])
+        self.assertEqual(hits[1287].hitobject.radius, 31.104)
+
+        # end
+        self.assertEqual(hits[1446].t, 385908)
+        self.assertSequenceEqual(hits[1446].xy.tolist(), [342.6667, 261.3333])
+        self.assertEqual(hits[1446].hitobject.t, 385904)
+        self.assertSequenceEqual(hits[1446].hitobject.xy.tolist(), [340, 266])
+        self.assertEqual(hits[1446].hitobject.radius, 31.104)

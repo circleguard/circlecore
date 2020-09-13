@@ -20,8 +20,11 @@ FRAMETIME_LIMIT = 13
 
 class CGTestCase(TestCase):
     @classmethod
-    def setUpClass(cls):
+    def setUpClass(cls, use_cache=True):
+        # pass use_cache=False when we need super precise coordinates for tests
+        # to work
         cache_path = Path(__file__).parent / "cache.db"
+        cache_path = cache_path if use_cache else None
         cls.cg = Circleguard(KEY, db_path=cache_path)
 
     def setUp(self):
