@@ -88,7 +88,6 @@ class Circleguard:
         LoaderClass = Loader if loader is None else loader
         self.loader = LoaderClass(key, self.cacher)
 
-
         if slider_dir:
             self.library = Library(slider_dir)
         else:
@@ -185,9 +184,12 @@ class Circleguard:
             The ur of the replay.
         """
         self.load(replay)
-        bm = self._beatmap(replay.map_id)
+        if not replay.map_info.available():
+            raise ValueError("a replay must know what map it was set on before "
+                "its ur can be calculated")
 
-        ur = Investigator.ur(replay, bm)
+        beatmap = replay.beatmap(self.library)
+        ur = Investigator.ur(replay, beatmap)
         if cv:
             ur = convert_statistic(ur, replay.mods, to="cv")
 
@@ -291,7 +293,11 @@ class Circleguard:
         only when not considering misses.
         """
         self.load(replay)
-        beatmap = self._beatmap(replay.map_id)
+        if not replay.map_info.available():
+            raise ValueError("a replay must know what map it was set on before "
+                "its hits can be calculated")
+
+        beatmap = replay.beatmap(self.library)
         hits = Investigator.hits(replay, beatmap)
 
         if not within:
@@ -428,14 +434,6 @@ class Circleguard:
         mu = MapUser(map_id, user_id, span, cache, available_only)
         self.load_info(mu)
         return mu
-
-    def _beatmap(self, map_id):
-        """
-        A beatmap corresponding to ``map_id``. If our ``library`` does not
-        already have this beatmap stored, it is downloaded and saved to the
-        ``library``.
-        """
-        return self.library.lookup_by_id(map_id, download=True, save=True)
 
     @property
     def cache(self):

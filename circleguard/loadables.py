@@ -14,6 +14,7 @@ from circleguard.utils import TRACE, KEY_MASK, RatelimitWeight
 from circleguard.loader import Loader
 from circleguard.span import Span
 from circleguard.game_version import GameVersion, NoGameVersion
+from circleguard.map_info import MapInfo
 
 class Loadable(abc.ABC):
     """
@@ -471,13 +472,14 @@ class Replay(Loadable):
         # whether ``Mod.HR`` was enabled on the replay, and thus whether to flip
         # the replay before comparing it to another one.
 
-        # replays don't have any information about their game version by
-        # default. Subclasses might set this if they have more information to
-        # provide about their version, whether on instantiation or after being
-        # loaded.
+        # replays have no information about their game version by default.
+        # Subclasses might set this if they have more information to provide
+        # about their version, whether on instantiation or after being loaded.
         self.game_version = NoGameVersion()
         self.timestamp    = None
         self.map_id       = None
+        # replays have no information about their map by default.
+        self.map_info     = MapInfo()
         self.username     = None
         self.user_id      = None
         self.mods         = None
@@ -510,6 +512,46 @@ class Replay(Loadable):
         if not self.loaded:
             return False
         return bool(self.replay_data)
+
+    def beatmap(self, library):
+        """
+        The beatmap this replay was played on.
+
+        Parameters
+        ----------
+        library: :class:`slider.library.Library`
+            The library used by the calling
+            :class:`circleguard.circleguard.Circleguard` instance. Replays which
+            have already been downloaded and are cached in this library may be
+            returned here instead of redownloading them.
+            <br>
+            Beatmaps which we download or create in this method, but were not
+            previously stored in the library, may also be stored into the
+            library for future use as a result of calling this method.
+
+        Returns
+        -------
+        :class:`slider.beatmap.Beatmap`
+            The beatmap this replay was played on.
+        None
+            If we do not know what beatmap this replay was played on.
+        """
+        if not self.map_info.available():
+            return None
+
+        # prefer loading from disk, it's cheaper than potentially downloading
+        # the beatmap from osu! servers
+
+        if self.map_info.path:
+            # by default we don't save beatmaps that are already saved on disk.
+            # Subclasses should override `#beatmap` and pass `copy=True` here
+            # in their overridden method if they want to copy the beatmap to the
+            # library's directory.
+            return library.beatmap_from_path(self.map_info.path)
+
+        if self.map_info.map_id:
+            return library.lookup_by_id(self.map_info.map_id, download=True,
+                save=True)
 
     def _process_replay_data(self, replay_data):
         """
@@ -717,6 +759,8 @@ class ReplayMap(Replay):
             self.replay_id = info.replay_id
             self.mods = info.mods
 
+        self.map_info = MapInfo(map_id=self.map_id)
+
     def load(self, loader, cache):
         """
         Loads the data for this replay from the api.
@@ -842,6 +886,7 @@ class ReplayPath(Replay):
         self.game_version = GameVersion(loaded.game_version, concrete=True)
         self.timestamp = loaded.timestamp
         self.map_id = loader.map_id(loaded.beatmap_hash)
+        self.map_info = MapInfo(map_id=self.map_id)
         self.username = loaded.player_name
         # our `user_id` attribute is lazy loaded, so we need to retain the
         # `Loader#user_id` function to use later to load it.
