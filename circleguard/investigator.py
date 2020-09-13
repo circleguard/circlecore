@@ -451,6 +451,37 @@ class Hit():
         self.x = xy[0]
         self.y = xy[1]
 
+    def distance(self, *, to):
+        """
+        The distance from this hit to either the center or edge of its
+        hitobject.
+
+        Parameters
+        ----------
+        to: string
+            ``center`` if we should calculate the distance from this hit to the
+            center of its hitobject, or ``edge`` if we should calculate the
+            distance from this hit to the edge of its hitobject.
+
+        Returns
+        -------
+        float
+            The distance from this hit to either the center or edge of its
+            hitobject.
+        """
+        if to not in ["edge", "center"]:
+            raise ValueError(f"Expected one of edge, center. Got {to}")
+
+        hitobj_xy = self.hitobject.xy
+
+        if to == "edge":
+            dist = np.linalg.norm(self.xy - hitobj_xy) - self.hitobject.radius
+            # value is negative since we're inside the hitobject, so take abs
+            return abs(dist)
+
+        if to == "center":
+            return np.linalg.norm(self.xy - hitobj_xy)
+
     def within(self, distance):
         """
         Whether the hit was within ``distance`` of the edge of its hitobject.
@@ -473,11 +504,7 @@ class Hit():
         can never be greater than the radius of the hitobject.
         """
 
-        hitobj_xy = self.hitobject.xy
-        dist = np.linalg.norm(self.xy - hitobj_xy) - self.hitobject.radius
-
-        # value is negative since we're inside the hitobject, so take abs
-        return abs(dist) < distance
+        return self.distance(to="edge") < distance
 
     def __eq__(self, other):
         return (self.hitobject == other.hitobject and self.t == other.t and
