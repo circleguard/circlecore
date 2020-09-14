@@ -26,6 +26,11 @@ Game Version
 .. automodule:: circleguard.game_version
    :members:
 
+Hit Objects
+-----------
+.. automodule:: circleguard.hitobjects
+   :members:
+
 Investigator
 ------------
 .. automodule:: circleguard.investigator
@@ -39,6 +44,11 @@ Loadables
 Loader
 ------
 .. automodule:: circleguard.loader
+   :members:
+
+Map Info
+--------
+.. automodule:: circleguard.map_info
    :members:
 
 Mod
