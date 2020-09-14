@@ -3,6 +3,10 @@ class Span(set):
     A set of numbers represented by a string, which can include ranges or
     single numbers, separated by a comma.
 
+    Notes
+    -----
+    Spans can only range from 1 to 100 inclusive.
+
     Examples
     --------
     >>> Span("1-3,6,2-4")
@@ -21,6 +25,9 @@ class Span(set):
             span_set = self._to_set(data)
             super().__init__(span_set)
 
+        if max(self) > 100:
+            raise ValueError("Spans can only range from 1 to 100 inclusive. "
+                f"The largest element passed was {max(self)}")
 
     def _to_set(self, span):
         """
