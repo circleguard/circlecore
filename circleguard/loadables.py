@@ -1073,6 +1073,13 @@ class ReplayString(Replay):
     cache: bool
         Whether to cache this replay once it is loaded. Note that currently
         we do not cache :class:`~.ReplayString` regardless of this parameter.
+
+    Examples
+    --------
+    >>> replay_data = open("replay.osr", "rb").read()
+    >>> r = ReplayString(replay_data)
+    >>> cg.load(r)
+    >>> print(cg.ur(r))
     """
 
     def __init__(self, replay_data_str, cache=None):
