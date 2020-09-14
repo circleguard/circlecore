@@ -202,10 +202,19 @@ class Circleguard:
         """
         Finds any snaps (sudden, jerky movement) in ``replay``.
 
+        Specifically, this function calculates the angle between each set of
+        three points (a,b,c) and finds points where this angle is extremely
+        acute and neither ``|ab|`` or ``|bc|`` are small.
+
         Parameters
         ----------
         replay: :class:`~circleguard.loadables.Replay`
             The replay to find snaps in.
+        max_angle: float
+            Consider only (a,b,c) where ``∠abc < max_angle``
+        min_distance: float
+            Consider only (a,b,c) where ``|ab| > min_distance`` and
+            ``|ab| > min_distance``.
 
         Returns
         -------
