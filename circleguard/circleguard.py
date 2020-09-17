@@ -280,7 +280,8 @@ class Circleguard:
 
         return frametime
 
-    def frametimes(self, replay, cv=True) -> Iterable[float]:
+    def frametimes(self, replay, cv=True, mods_unknown="raise") \
+        -> Iterable[float]:
         """
         The time (in ms) between each frame in ``replay``.
 
@@ -291,6 +292,20 @@ class Circleguard:
         cv: bool
             Whether to return the converted or unconverted frametimes. The
             converted frametimes is returned by default.
+        mods_unknown: {"raise", "dt", "nm", "ht"}
+            What to do if ``replay`` does not know what mods it was played with,
+            and ``cv`` is ``True``.
+            <br>
+            If ``raise``, a ValueError will be raised.
+            <br>
+            If ``dt``, the frametime swill be converted as if the replay was
+            played with ``Mod.DT``.
+            <br>
+            If ``nm``, the frametimes will be converted as if the replay was
+            played  with ``Mod.NM`` (that is, not converted at all).
+            <br>
+            If ``ht``, the frametimes will be converted as if the replay was
+            played with ``Mod.HT``.
 
         Returns
         -------
@@ -304,7 +319,21 @@ class Circleguard:
         self.load(replay)
         frametimes = Investigator.frametimes(replay)
         if cv:
-            frametimes = [convert_statistic(frametime, replay.mods, to="cv") \
+            if replay.mods:
+                mods = replay.mods
+            elif mods_unknown == "dt":
+                mods = Mod.DT
+            elif mods_unknown == "nm":
+                mods = Mod.NM
+            elif mods_unknown == "ht":
+                mods = Mod.HT
+            else:
+                raise ValueError("The frametimes of a replay that does not "
+                    "know with what mods it was set with cannot be converted. "
+                    "Pass a different option to frametime(..., mods_unknown=) "
+                    "if you would like to provide a default mod for "
+                    "conversion.")
+            frametimes = [convert_statistic(frametime, mods, to="cv") \
                 for frametime in frametimes]
 
         return frametimes
