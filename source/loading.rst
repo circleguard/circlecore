@@ -39,10 +39,10 @@ Let's illustrate this by trying to access these attributes of replays directly a
     print(r_id.replay_id) # 2177560145
     print(r_id.mods) # None
 
-But we can retrieve more information about a replay by "loading" it. A replay is called "unloaded" if it hasn't
+However, we can retrieve more information about a replay by "loading" it. A replay is called "unloaded" if it hasn't
 been loaded yet, and "loaded" if it has.
 
-To load a replay, use |cg.load|. Once the replay is loaded, most of these attributes will be filled with the
+To load a replay, call |cg.load| on it. Once the replay is loaded, most of these attributes will be filled with the
 proper value:
 
 .. code-block:: python
@@ -51,7 +51,7 @@ proper value:
     r_map = ReplayMap(221777, 2757689)
     cg.load(r_map)
 
-    # now we can access the real values of all these attributes
+    # now we can access the real values of these attributes
 
     print(len(r_map.replay_data)) # 26614
     print(r_map.map_id) # 221777

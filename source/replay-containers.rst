@@ -1,9 +1,9 @@
 |ReplayContainer|s
 ==================
 
-|Replay| subclasses work fine for some situations, but what if you wanted to calculate the unstable rate for all replays
-on a map or in a user's top plays? You would have to make some api requests and manually construct |ReplayMap| objects.
-Luckily, we provide classes that do this for you. They are called |ReplayContainer|s.
+|Replay| subclasses work fine for some situations, but what if you wanted to calculate e.g. the unstable rate for all
+replays on a map or in a user's top plays? You would have to make some api requests and manually construct |ReplayMap|
+objects. This is annoying, so we provide classes that do this for you. They are called |ReplayContainer|s.
 
 |Map|
 -----
