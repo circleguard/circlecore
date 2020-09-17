@@ -364,8 +364,8 @@ class Circleguard:
         """
         self.load(replay)
         if not replay.map_info.available():
-            raise ValueError("a replay must know what map it was set on before "
-                "its hits can be calculated")
+            raise ValueError("The hits of a replay that does not know what map "
+                "it was set on cannot be calculated.")
 
         beatmap = replay.beatmap(self.library)
         hits = Investigator.hits(replay, beatmap)
