@@ -188,8 +188,8 @@ class Circleguard:
         """
         self.load(replay)
         if not replay.map_info.available():
-            raise ValueError("a replay must know what map it was set on before "
-                "its ur can be calculated")
+            raise ValueError("The ur of a replay that does not know what map "
+                "it was set on cannot be calculated")
 
         beatmap = replay.beatmap(self.library)
         ur = Investigator.ur(replay, beatmap)
