@@ -110,14 +110,28 @@ class Circleguard:
             The replay to compare against ``replay2``.
         replay2: :class:`~circleguard.loadables.Replay`
             The replay to compare against ``replay1``.
-        method: str
-            What method to use to investigate the loadables for replay
-            stealing. This must be one of ``similarity`` or ``correlation``.
+        method: {"similarity", "correlation"}
+            What method to use to calculate the similarity between the replays.
+            <br>
+            ``similarity` is (roughly speaking) the average distance
+            between the two replays in pixels. A replay compared to itself (or
+            an exact copy) has a similarity of 0. See
+            :data:`~circleguard.Circleguard.SIM_LIMIT` for a suggested number
+            where similarities below this number indicate a stolen replay.
+            <br>
+            ``correlation`` is a signal-processing metric which measures how
+            similar two signals (or replays, in our case) are. Correlation also
+            takes into account time shifts, so a replay which is a perfect copy
+            of another replay but consistently lags 10 ms behind will still have
+            a perfect correltion of ``1``. The higher correlation, the more
+            correlated (or similar) the two replays are. See
+            :data:`~circleguard.Circleguard.CORR_LIMIT` for a suggested number
+            where correlations above this number indicate a stolen replay.
         num_chunks: int
             How many chunks to split the replay into when comparing. This
             parameter only has an affect if ``method`` is ``correlation``.
             Note that runtime increases linearly with the number of chunks.
-        mods_unknown_behavior: str
+        mods_unknown: {"best", "both"}
             What to do if one or both of ``replay1`` and ``replay2`` do not
             know what mods they were played with. The similarity will be
             computed twice, both with no modifications and with ``Mod.HR``
@@ -132,28 +146,13 @@ class Circleguard:
             second element is the similarity with ``Mod.HR`` applied to
             ``replay1``.
             <br>
-            Must be one of ``best`` or ``both``.
 
         Returns
         -------
         float
             If ``method`` is ``similarity``, this is the similarity of the two
-            replays. Similarity is (roughly speaking) the average distance
-            between the two replays in pixels. A replay compared to itself (or
-            an exact copy) has a similarity of 0. See
-            :data:`~circleguard.Circleguard.SIM_LIMIT` for a suggested number
-            where similarities under this number indicate a stolen replay.
-            <br>
-            If ``method`` is ``correlation``, this is the correlation between
-            the two replays. Correlation is a signal-processing metric which
-            measures how similar two signals (or replays, in our case) are.
-            Correlation also takes into account time shifts, so a replay which
-            is a perfect copy of another replay but consistently lags 10 ms
-            behind will still have a perfect correltion of ``1``. The higher
-            correlation, the more correlated (or similar) the two replays are.
-            See :data:`~circleguard.Circleguard.CORR_LIMIT` for a suggested
-            number where correlations above this number indicate a stolen
-            replay.
+            replays. If ``method`` is ``correlation``, this is the correlation
+            between the two replays.
         (float, float)
             If ``mods_unknown`` is ``both``, a tuple with two floats
             is returned. The first element is the similarity with no
