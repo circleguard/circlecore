@@ -133,13 +133,13 @@ class Circleguard:
             Note that runtime increases linearly with the number of chunks.
         mods_unknown: {"best", "both"}
             What to do if one or both of ``replay1`` and ``replay2`` do not
-            know what mods they were played with. The similarity will be
-            computed twice, both with no modifications and with ``Mod.HR``
-            applied to ``replay1``.
+            know what mods they were played with. In this case, the similarity
+            will be computed twice, both with no modifications and with
+            ``Mod.HR`` applied to ``replay1``.
             <br>
             If ``best`` is passed, the best (that is, lowest if ``method`` is
-            ``similarity`` and highest of ``method`` is ``correlation``)
-            similarity of the two is returned.
+            ``similarity`` and highest if ``method`` is ``correlation``)
+            similarity of these two calculations is returned.
             <br>
             If ``both`` is passed, a tuple with two floats is returned. The
             first element is the similarity with no modifications, and the
