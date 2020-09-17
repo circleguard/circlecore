@@ -145,7 +145,6 @@ class Circleguard:
             first element is the similarity with no modifications, and the
             second element is the similarity with ``Mod.HR`` applied to
             ``replay1``.
-            <br>
 
         Returns
         -------
