@@ -420,9 +420,8 @@ class Circleguard:
         ``Map`` and load its info immediately. A common occurrence in using
         ``Circleguard`` is to want to instantiate a ``Map`` and immediately
         iterate over it to operate on its replays. However, this ``Map`` must
-        be info loaded before it can be iterated over, so this function removes
-        the need to explicitly call :meth:`~.load_info` on a ``Map`` before
-        iterating.
+        be info loaded before it can be iterated over, so this function does
+        that info loading for you.
         >>> # usage without this function (bad)
         >>> cg = Circleguard("key")
         >>> m = Map(221777, "1-2")
@@ -452,9 +451,8 @@ class Circleguard:
         ``User`` and load its info immediately. A common occurrence in using
         ``Circleguard`` is to want to instantiate a ``User`` and immediately
         iterate over it to operate on its replays. However, this ``User`` must
-        be info loaded before it can be iterated over, so this function removes
-        the need to explicitly call :meth:`~.load_info` on a ``User`` before
-        iterating.
+        be info loaded before it can be iterated over, so this function does
+        that info loading for you.
         >>> # usage without this function (bad)
         >>> cg = Circleguard("key")
         >>> u = User(124493, "1-2")
@@ -485,8 +483,7 @@ class Circleguard:
         ``Circleguard`` is to want to instantiate a ``MapUser`` and immediately
         iterate over it to operate on its replays. However, this ``MapUser``
         must be info loaded before it can be iterated over, so this function
-        removes the need to explicitly call :meth:`~.load_info` on a ``MapUser``
-        before iterating.
+        does that info loading for you.
         >>> # usage without this function (bad)
         >>> cg = Circleguard("key")
         >>> mu = cg.MapUser(124493, 129891)
