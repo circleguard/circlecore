@@ -47,10 +47,10 @@ class Circleguard:
     db_path: str or :class:`os.PathLike`
         The path to the database file to read and write cached replays. If the
         path does not exist, a fresh database will be created there.
-        If `None`, no replays will be cached or loaded from cache.
+        If ``None``, no replays will be cached or loaded from cache.
     slider_dir: str or :class:`os.PathLike`
         The path to the directory used by :class:`slider.library.Library` to
-        store beatmaps. If `None`, a temporary directory will be created for
+        store beatmaps. If ``None``, a temporary directory will be created for
         :class:`slider.library.Library` and subsequently destroyed when this
         :class:`~Circleguard` object is garbage collected.
     loader: :class:`~circleguard.loader.Loader`
