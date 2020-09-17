@@ -227,7 +227,7 @@ class Circleguard:
         return Investigator.snaps(replay, max_angle, min_distance)
 
 
-    def frametime(self, replay, cv=True) -> float:
+    def frametime(self, replay, cv=True, mods_unknown="raise") -> float:
         """
         The median frametime (in ms) of ``replay``.
 
@@ -238,16 +238,45 @@ class Circleguard:
         cv: bool
             Whether to return the converted or unconverted frametime. The
             converted frametime is returned by default.
+        mods_unknown: {"raise", "dt", "nm", "ht"}
+            What to do if ``replay`` does not know what mods it was played with,
+            and ``cv`` is ``True``.
+            <br>
+            If ``raise``, a ValueError will be raised.
+            <br>
+            If ``dt``, the frametime will be converted as if the replay was
+            played with ``Mod.DT``.
+            <br>
+            If ``nm``, the frametime will be converted as if the replay was
+            played  with ``Mod.NM`` (that is, not converted at all).
+            <br>
+            If ``ht``, the frametime will be converted as if the replay was
+            played with ``Mod.HT``.
 
         Returns
         -------
         float
             The median frametime (in ms) of the replay.
         """
+        check_param(mods_unknown, ["raise", "dt", "nm", "ht"])
+
         self.load(replay)
         frametime = Investigator.frametime(replay)
         if cv:
-            frametime = convert_statistic(frametime, replay.mods, to="cv")
+            if replay.mods:
+                mods = replay.mods
+            elif mods_unknown == "dt":
+                mods = Mod.DT
+            elif mods_unknown == "nm":
+                mods = Mod.NM
+            elif mods_unknown == "ht":
+                mods = Mod.HT
+            else:
+                raise ValueError("The frametime of a replay that does not know "
+                    "with what mods it was set with cannot be converted. Pass "
+                    "a different option to frametime(..., mods_unknown=) if "
+                    "you would like to provide a default mod for conversion.")
+            frametime = convert_statistic(frametime, mods, to="cv")
 
         return frametime
 
