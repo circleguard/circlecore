@@ -2,7 +2,7 @@ import numpy as np
 from slider.beatmap import Circle, Slider
 
 from circleguard.mod import Mod
-from circleguard.utils import KEY_MASK
+from circleguard.utils import KEY_MASK, check_param
 from circleguard.game_version import GameVersion
 from circleguard.hitobjects import Hitobject
 
@@ -468,8 +468,7 @@ class Hit():
             The distance from this hit to either the center or edge of its
             hitobject.
         """
-        if to not in ["center", "edge"]:
-            raise ValueError(f"Expected one of center, edge. Got {to}")
+        check_param(to, ["center", "edge"])
 
         hitobj_xy = self.hitobject.xy
 

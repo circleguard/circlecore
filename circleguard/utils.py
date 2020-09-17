@@ -62,8 +62,7 @@ def convert_statistic(stat, mods, *, to):
     clock speed). This includes ur (unstable rate) and median frametime
     (time between frames).
     """
-    if to not in ["cv", "ucv"]:
-        raise ValueError(f"Expected one of cv, ucv. Got {to}")
+    check_param(to, ["cv", "ucv"])
 
     conversion_factor = 1
 
@@ -93,6 +92,9 @@ def order(replay1, replay2):
     return order
 
 
+def check_param(param, options):
+    if not param in options:
+        raise ValueError(f"Expected one of {','.join(options)}. Got {param}")
 
 
 TRACE = 5
