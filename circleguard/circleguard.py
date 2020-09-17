@@ -11,7 +11,7 @@ from circleguard.loader import Loader
 from circleguard.comparer import Comparer
 from circleguard.investigator import Investigator, Hit, Snap
 from circleguard.cacher import Cacher
-from circleguard.utils import convert_statistic
+from circleguard.utils import convert_statistic, check_param
 from circleguard.loadables import Map, User, MapUser
 from circleguard.mod import Mod
 
@@ -160,6 +160,9 @@ class Circleguard:
             ``Mod.HR`` applied to ``replay1``. See the documentation for the
             ``mods_unknown`` parameter for more information.
         """
+        check_param(method, ["similarity", "correlation"])
+        check_param(mods_unknown, ["best", "both"])
+
         self.load(replay1)
         self.load(replay2)
         return Comparer.similarity(replay1, replay2, method, num_chunks,
