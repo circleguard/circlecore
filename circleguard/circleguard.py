@@ -99,7 +99,7 @@ class Circleguard:
 
 
     def similarity(self, replay1, replay2, method="similarity", \
-        num_chunks=DEFAULT_CHUNKS, mods_unknown_behavior="best") -> \
+        num_chunks=DEFAULT_CHUNKS, mods_unknown="best") -> \
         Union[float, Tuple[float]]:
         """
         The similarity between ``replay1`` and ``replay2``.
@@ -155,16 +155,16 @@ class Circleguard:
             number where correlations above this number indicate a stolen
             replay.
         (float, float)
-            If ``mods_unknown_behavior`` is ``both``, a tuple with two floats
+            If ``mods_unknown`` is ``both``, a tuple with two floats
             is returned. The first element is the similarity with no
             modifications, and the second element is the similarity with
             ``Mod.HR`` applied to ``replay1``. See the documentation for the
-            ``mods_unknown_behavior`` parameter for more information.
+            ``mods_unknown`` parameter for more information.
         """
         self.load(replay1)
         self.load(replay2)
         return Comparer.similarity(replay1, replay2, method, num_chunks,
-            mods_unknown_behavior)
+            mods_unknown)
 
 
     def ur(self, replay, cv=True) -> float:

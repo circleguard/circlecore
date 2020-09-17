@@ -6,7 +6,7 @@ from circleguard.mod import Mod
 class Comparer:
 
     @staticmethod
-    def similarity(replay1, replay2, method, num_chunks, mods_unknown_behavior):
+    def similarity(replay1, replay2, method, num_chunks, mods_unknown):
         """
         Compares two :class:`~.replay.Replay`\s.
 
@@ -51,13 +51,13 @@ class Comparer:
             if method == "correlation":
                 sim2 = Comparer.compute_correlation(xy1, xy2, num_chunks)
 
-            if mods_unknown_behavior == "best":
+            if mods_unknown == "best":
                 if method == "similarity":
                     return min(sim1, sim2)
                 if method == "correlation":
                     return max(sim1, sim2)
 
-            if mods_unknown_behavior == "both":
+            if mods_unknown == "both":
                 return (sim1, sim2)
 
         # flip if one but not both has HR
