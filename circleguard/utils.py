@@ -51,9 +51,9 @@ def convert_statistic(stat, mods, *, to):
     mods: Mod
         The mods the replay was played with. Only ``Mod.DT`` and ``Mod.HT``
         will affect the statistic conversion.
-    to: string
-        What form to convert the statistic to. One of ``cv`` (converted) or
-        ``ucv`` (unconverted).
+    to: {"cv", "ucv"}
+        ``cv`` if the statistic should be converted to its converted form, and
+        ``ucv`` if the statistic should be converted to its unconverted form.
 
     Notes
     -----

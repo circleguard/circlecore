@@ -458,19 +458,18 @@ class Hit():
 
         Parameters
         ----------
-        to: string
-            ``center`` if we should calculate the distance from this hit to the
-            center of its hitobject, or ``edge`` if we should calculate the
-            distance from this hit to the edge of its hitobject.
-
+        to: {"center", "edge"}
+            If ``center``, the distance from this hit to the center of its
+            hitobject is calculated. If ``edge``, the distance from this hit to
+            the edge of its hitobject is calculated.
         Returns
         -------
         float
             The distance from this hit to either the center or edge of its
             hitobject.
         """
-        if to not in ["edge", "center"]:
-            raise ValueError(f"Expected one of edge, center. Got {to}")
+        if to not in ["center", "edge"]:
+            raise ValueError(f"Expected one of center, edge. Got {to}")
 
         hitobj_xy = self.hitobject.xy
 
