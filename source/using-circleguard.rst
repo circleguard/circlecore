@@ -101,7 +101,7 @@ Other Replay Subclasses
 ~~~~~~~~~~~~~~~~~~~~~~~
 
 The examples above have been using |ReplayMap| as their example replay, but you can pass any |Replay| subclass
-to |Circleguard| methods.
+to |Circleguard| methods:
 
 .. code-block:: python
 

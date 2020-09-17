@@ -2,7 +2,7 @@
 ==================
 
 |Replay| subclasses work fine for some situations, but what if you wanted to calculate the unstable rate for all replays
-on a map or in a user's top plays? You would have to make some api queries and manually construct |ReplayMap| objects.
+on a map or in a user's top plays? You would have to make some api requests and manually construct |ReplayMap| objects.
 Luckily, we provide classes that do this for you. They are called |ReplayContainer|s.
 
 |Map|
@@ -64,19 +64,42 @@ of the scores the user has set on the beatmap. You can still optionally specify 
     cg = Circleguard("key")
     # all replays by cookiezi on everything will freeze
     mu = MapUser(555797, 124493)
-    cg.load_info(mu)
-    print(mu.all_replays()) # [ReplayMap(...,mods=NM,...), ReplayMap(...,mods=HDHR,...)]
 
     # only cookiezi's second best replay on everything will freeze
     mu = MapUser(555797, 124493, span="2")
     cg.load_info(mu)
-    print(mu.all_replays()) # [ReplayMap(...,mods=HDHR,...)]
-
 
 Notice that you cannot pass a ``mods`` argument to |MapUser|. This is intentional, because
 ``MapUser(221777, 2757689, mods=Mod.HDHR)`` (should that parameter exist) would return the identical replay as
 ``ReplayMap(221777, 2757689, mods=Mod.HDHR)``. ``ReplayMap`` usage is preferred in all cases.
 
-You may have noticed a call to |cg.load_info| in the above code block. |ReplayContainer|s do not have any knowledge
-about their replays when first instantiated, and must have information about them loaded before you can access their
-replays. We cover this in more detail on the very next page.
+Iterating
+---------
+
+All |ReplayContainer|s are iterable, so you can iterate over them to operate on their replays:
+
+.. code-block:: python
+
+    cg = Circleguard("key")
+    m = Map(221777, "1-2")
+    cg.load_info(m)
+
+    for r in m:
+        print(r)
+
+This means you can also create a list of replays from a |ReplayContainer| (or, equivalently, call |all_replays|):
+
+.. code-block:: python
+
+    cg = Circleguard("key")
+    m = Map(221777, "1-2")
+    cg.load_info(m)
+
+    print(list(m)) # [ReplayMap(...), ReplayMap(...)]
+    print(m.all_replays()) # [ReplayMap(...), ReplayMap(...)]
+
+But what are these mysterious |load_info| methods? When you instantiate a |ReplayContainer|, it doesn't have any
+|Replay| objects you can iterate over, because it hasn't made any api calls to determine which |Replay| objects
+(by who, on what map) it should have. By calling |load_info|, you are telling it to make these api calls and load
+the info about its replays so you can iterate over them. We cover this (and loading in general) in more detail on
+the very next page.
