@@ -1,15 +1,16 @@
-
 Circlecore
 ==========
-Circlecore is a both a cheat detection library and a utilities library for osu!. Features include:
 
-* Replay Stealing / Remodding detection
-* Unstable Rate (ur) calculation, for relax cheats
-* Finding suspicious movements in replays (called Snaps), for aim correction cheats
-* Frametime analysis, for timewarp cheats
-* Hits calculation, which gives you a list of hits (where a replay hits a hitobject). This can be used to find edge hits, for example
+Circlecore is a utilities library for osu!. Features include:
 
-Circleguard is developed and maintained by:
+* Unstable Rate calculation
+* Hits calculation (all places where a player hit a hitobject)
+* Similarity calculation between two replays, for replay stealing detection
+* Frametime calculation, for timewarp detection
+
+Circlecore is used by `Circleguard <https://github.com/circleguard/circleguard>`__, a replay analysis tool.
+
+Circlecore is developed and maintained by:
 
 * `tybug <https://github.com/tybug>`__
 * `samuelhklumpers <https://github.com/samuelhklumpers>`__
@@ -27,8 +28,8 @@ Circlecore can be installed from pip:
 
     This page refers to the project as ``circlecore`` to differentiate it from our organization
     `Circleguard <https://github.com/circleguard>`__ and our gui application Circleguard_. However, ``circlecore`` is installed
-    from pypi with the name ``circleguard``, and is imported as such in python (``import circleguard``) We will refer to it as
-    ``circleguard`` for the remainder of the documentation.
+    from pypi with the name ``circleguard``, and is imported as such in python (``import circleguard``) We will also refer to it
+    as ``circleguard`` for the remainder of the documentation.
 
 Links
 -----
