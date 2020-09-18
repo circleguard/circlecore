@@ -458,7 +458,14 @@ class Loader():
         Loader.check_response(response)
         lzma = base64.b64decode(response["content"])
         replay_data = circleparse.parse_replay(lzma, pure_lzma=True).play_data
-        # TODO cache the replay here if the api ever gives us the info we need
+        # TODO cache the replay here, might require some restructring/double
+        # checking everything will work because we only have its id, not map
+        # or user id. In fact I think our db asserts map and user id are nonull
+        # so insertion into old dbs probably won't work (and we'd have to change
+        # the schema).
+        # TODO include a db version in the db for future scenarios like this?
+        # look into how that's typically done, maybe just a `VERSION` table with
+        # a single row
         return replay_data
 
     @lru_cache()
