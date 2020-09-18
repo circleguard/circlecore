@@ -846,6 +846,22 @@ class ReplayMap(Replay):
         will be loaded.
     cache: bool
         Whether to cache this replay once it is loaded.
+
+    Notes
+    -----
+    The following replay-related attributes are available (not ``None``) when
+    this replay is unloaded:
+      * map_id
+      * user_id
+      * mods (if passed)
+    <br>
+    In addition to the above, the following replay-related attributes are
+    available (not ``None``) when this replay is loaded:
+      * timestamp
+      * username
+      * mods
+      * replay_id
+      * replay_data
     """
 
     def __init__(self, map_id, user_id, mods=None, cache=None, info=None):
@@ -952,6 +968,22 @@ class ReplayPath(Replay):
     cache: bool
         Whether to cache this replay once it is loaded. Note that currently
         we do not cache :class:`~.ReplayPath` regardless of this parameter.
+
+    Notes
+    -----
+    ReplayPaths have no replay-related attributes available (not ``None``) when
+    they are unloaded.
+    <br>
+    The following replay-related attributes are available (not ``None``) when
+    this replay is loaded:
+      * timestamp
+      * map_id
+      * username
+      * user_id
+      * mods
+      * replay_id
+      * beatmap_hash
+      * replay_data
     """
 
     def __init__(self, path, cache=None):
@@ -1074,6 +1106,22 @@ class ReplayString(Replay):
         Whether to cache this replay once it is loaded. Note that currently
         we do not cache :class:`~.ReplayString` regardless of this parameter.
 
+    Notes
+    -----
+    ReplayPaths have no replay-related attributes available (not ``None``) when
+    they are unloaded.
+    <br>
+    The following replay-related attributes are available (not ``None``) when
+    this replay is loaded:
+      * timestamp
+      * map_id
+      * username
+      * user_id
+      * mods
+      * replay_id
+      * beatmap_hash
+      * replay_data
+
     Examples
     --------
     >>> replay_data = open("replay.osr", "rb").read()
@@ -1168,6 +1216,28 @@ class ReplayString(Replay):
 
 
 class ReplayID(Replay):
+    """
+    A :class:`~.Replay` that was submitted online and is represented by a unique
+    replay id.
+
+    Parameters
+    ----------
+    replay_id: int
+        The id of the replay.
+    cache: bool
+        Whether to cache this replay once it is loaded. Note that we currently
+        do not cache ReplayIDs.
+
+    Notes
+    -----
+    The following replay-related attributes are available (not ``None``) when
+    this replay is unloaded:
+      * replay_id
+    <br>
+    In addition to the above, the following replay-related attributes are
+    available (not ``None``) when this replay is loaded:
+      * replay_data
+    """
     def __init__(self, replay_id, cache=None):
         super().__init__(RatelimitWeight.HEAVY, cache)
         self.replay_id = replay_id
@@ -1187,6 +1257,10 @@ class ReplayID(Replay):
         return hash(self.replay_id)
 
 class CachedReplay(Replay):
+    """
+    This class is intended to be instantiated from
+    :func:`~.ReplayCache.load_info` and should not be instantiated manually.
+    """
     def __init__(self, user_id, map_id, mods, replay_data, replay_id):
         super().__init__(RatelimitWeight.NONE, False)
         self.user_id = user_id
