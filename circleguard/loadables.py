@@ -159,10 +159,11 @@ class ReplayContainer(Loadable):
     between "unloaded" and "loaded" called "info loaded".
 
     ReplayContainers start unloaded and become info loaded when
-    :meth:`~.load_info` is called. They become fully loaded when
-    :meth:`~.load` is called (and if this is called when the ReplayContainer is
-    in the unloaded state, :meth:`~Loadable.load` will load info first, then
-    load the replays, effectively skipping the info loaded state),
+    :meth:`~circleguard.circleguard.Circleguard.load_info` is called. They
+    become fully loaded when :meth:`~.circleguard.circleguard.Circleguard.load`
+    is called (and if this is called when the ReplayContainer is in the unloaded
+    state, :meth:`~Loadable.load` will load info first, then load the replays,
+    effectively skipping the info loaded state).
 
     In the unloaded state, the container has no actual Replay objects. It may
     have limited knowledge about their number or type.
@@ -407,9 +408,10 @@ class ReplayCache(ReplayContainer):
 
     Notes
     -----
-    :meth:`~.load_info` is an expensive operation for large databases created
-    on circlecore version 4.3.5 or earlier, as they do not have the necessary
-    indexes.
+    :meth:`~circleguard.circleguard.Circleguard.load_info` is an expensive
+    operation for large databases created on circlecore version 4.3.5 or
+    earlier, as they do not have the necessary indexes.
+    <br>
     For databases created in later versions, this is a nonissue and the lookup
     is fast.
     """
@@ -851,17 +853,19 @@ class ReplayMap(Replay):
     -----
     The following replay-related attributes are available (not ``None``) when
     this replay is unloaded:
-      * map_id
-      * user_id
-      * mods (if passed)
-    <br>
+
+    * map_id
+    * user_id
+    * mods (if passed)
+
     In addition to the above, the following replay-related attributes are
     available (not ``None``) when this replay is loaded:
-      * timestamp
-      * username
-      * mods
-      * replay_id
-      * replay_data
+
+    * timestamp
+    * username
+    * mods
+    * replay_id
+    * replay_data
     """
 
     def __init__(self, map_id, user_id, mods=None, cache=None, info=None):
@@ -973,17 +977,18 @@ class ReplayPath(Replay):
     -----
     ReplayPaths have no replay-related attributes available (not ``None``) when
     they are unloaded.
-    <br>
+
     The following replay-related attributes are available (not ``None``) when
     this replay is loaded:
-      * timestamp
-      * map_id
-      * username
-      * user_id
-      * mods
-      * replay_id
-      * beatmap_hash
-      * replay_data
+
+    * timestamp
+    * map_id
+    * username
+    * user_id
+    * mods
+    * replay_id
+    * beatmap_hash
+    * replay_data
     """
 
     def __init__(self, path, cache=None):
@@ -1110,17 +1115,18 @@ class ReplayString(Replay):
     -----
     ReplayPaths have no replay-related attributes available (not ``None``) when
     they are unloaded.
-    <br>
+
     The following replay-related attributes are available (not ``None``) when
     this replay is loaded:
-      * timestamp
-      * map_id
-      * username
-      * user_id
-      * mods
-      * replay_id
-      * beatmap_hash
-      * replay_data
+
+    * timestamp
+    * map_id
+    * username
+    * user_id
+    * mods
+    * replay_id
+    * beatmap_hash
+    * replay_data
 
     Examples
     --------
@@ -1232,11 +1238,13 @@ class ReplayID(Replay):
     -----
     The following replay-related attributes are available (not ``None``) when
     this replay is unloaded:
-      * replay_id
-    <br>
+
+    * replay_id
+
     In addition to the above, the following replay-related attributes are
     available (not ``None``) when this replay is loaded:
-      * replay_data
+
+    * replay_data
     """
     def __init__(self, replay_id, cache=None):
         super().__init__(RatelimitWeight.HEAVY, cache)

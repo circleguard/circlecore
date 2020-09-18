@@ -21,6 +21,7 @@ class Circleguard:
     Circleguard is the main entry point for using circlecore. In particular, we
     provide methods to calculate various statistics about
     :class:`~circleguard.loadables.Replay`\s:
+
     * :meth:`~.similarity` - the similarity between two replays.
     * :meth:`~.ur` - the unstable rate of a replay.
     * :meth:`~.snaps` - any unusual snaps in the cursor movement of a replay.
@@ -30,6 +31,7 @@ class Circleguard:
 
     We also provide methods to interact with
     :class:`~circleguard.loadables.Loadable`\s:
+
     * :meth:`~.load` - loads a :class:`~circleguard.loadables.Loadable`.
     * :meth:`~.load_info` - loads the info of a
       :class:`~circleguard.loadables.ReplayContainer`.
@@ -113,7 +115,7 @@ class Circleguard:
         method: {"similarity", "correlation"}
             What method to use to calculate the similarity between the replays.
             <br>
-            ``similarity` is (roughly speaking) the average distance
+            ``similarity`` is (roughly speaking) the average distance
             between the two replays in pixels. A replay compared to itself (or
             an exact copy) has a similarity of 0. See
             :data:`~circleguard.Circleguard.SIM_LIMIT` for a suggested number

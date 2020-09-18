@@ -57,12 +57,14 @@ rst_prolog = """
 .. |Replay| replace:: :class:`~circleguard.loadables.Replay`
 .. |ReplayMap| replace:: :class:`~circleguard.loadables.ReplayMap`
 .. |ReplayPath| replace:: :class:`~circleguard.loadables.ReplayPath`
-.. |ReplayString| replace:: :class:`~circleguard.loadables.ReplayPath`
-.. |ReplayID| replace:: :class:`~circleguard.loadables.ReplayPath`
+.. |ReplayString| replace:: :class:`~circleguard.loadables.ReplayString`
+.. |ReplayID| replace:: :class:`~circleguard.loadables.ReplayID`
 .. |ReplayContainer| replace:: :class:`~circleguard.loadables.ReplayContainer`
 .. |Map| replace:: :class:`~circleguard.loadables.Map`
 .. |User| replace:: :class:`~circleguard.loadables.User`
 .. |MapUser| replace:: :class:`~circleguard.loadables.MapUser`
+
+.. |all_replays| replace:: :func:`~circleguard.loadables.ReplayContainer.all_replays`
 
 .. |RatelimitWeight| replace:: :class:`~circleguard.utils.RatelimitWeight`
 
@@ -75,9 +77,12 @@ rst_prolog = """
 .. |cg.hits| replace:: :func:`~circleguard.circleguard.Circleguard.hits`
 .. |cg.load| replace:: :func:`~circleguard.circleguard.Circleguard.load`
 .. |cg.load_info| replace:: :func:`~circleguard.circleguard.Circleguard.load_info`
-.. |cg.Map| replace:: :func:`~circleguard.circleguard.Circleguard.Map`
-.. |cg.User| replace:: :func:`~circleguard.circleguard.Circleguard.User`
-.. |cg.MapUser| replace:: :func:`~circleguard.circleguard.Circleguard.MapUser`
+.. |cg.Map| replace:: :func:`cg.Map() <circleguard.circleguard.Circleguard.Map>`
+.. |cg.User| replace:: :func:`cg.User() <circleguard.circleguard.Circleguard.User>`
+.. |cg.MapUser| replace:: :func:`~cg.MapUser() <circleguard.circleguard.Circleguard.MapUser>`
+
+.. |Snap| replace:: :class:`~circleguard.investigator.Snap`
+.. |Hit| replace:: :class:`~circleguard.investigator.Hit`
 
 .. |Span| replace:: :class:`~circleguard.span.Span`
 
