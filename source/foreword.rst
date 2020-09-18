@@ -1,7 +1,7 @@
 Foreword
 ========
 
-The following pages serve as an introduction to circlecore. Although they would ideally be exhaustive, they are likely not.
+The following pages serve as an introduction to circleguard. Although they would ideally be exhaustive, they are likely not.
 The source code is rather well documented, and you should refer to it whenever possible. You can also browse all classes, methods,
 etc by visiting the :doc:`../appendix`.
 

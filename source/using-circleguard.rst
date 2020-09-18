@@ -1,13 +1,12 @@
 Using Circleguard
 =================
 
-Now you know how to represent replays, but how do we start calculating statistics or
-other information about them? The answer is the |Circleguard| class.
+Now you know how to represent replays, but how do we start calculating statistics or other information about them?
+The answer is the |Circleguard| class.
 
-To instantiate Circleguard|, you will need an api key. If you don't already have one api key,
-visit https://osu.ppy.sh/p/api/ and enter ``Circleguard`` for ``App Name`` and
-``https://github.com/circleguard/circlecore`` for ``App URL``. Circlecore needs this key to
-retrieve replay data and user information, among other things.
+To instantiate |Circleguard|, you will need an api key. If you don't already have one, visit https://osu.ppy.sh/p/api/
+and enter ``Circleguard`` for ``App Name`` and ``https://github.com/circleguard/circlecore`` for ``App URL``.
+Circleguard needs this key to retrieve replay data and user information, among other things.
 
 .. note::
 

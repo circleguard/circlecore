@@ -10,7 +10,7 @@ You can pass a ``db_path`` to |Circleguard| and any replay it loads will be cach
     cg = Circleguard("key", db_path="./cg_cache.db")
 
 If the given path does not exist, circleguard will create fresh a db file there and use it. If the path is a
-pre-existing databse file created by circlecore, that database will be used. Any other file existing at the path
+pre-existing databse file created by circleguard, that database will be used. Any other file existing at the path
 will result in an error.
 
 When loading a replay, we first check if the replay exists in the database, and load it from there if so. If not,

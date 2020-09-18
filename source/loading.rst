@@ -2,16 +2,16 @@ Loading
 =======
 
 |Replay|\s
----------
+----------
 
 When you instantiate a |Replay|, it doesn't have replay data, know the username or user id of who played it,
 know mods it was played with, or have very much information about itself at all.
 
-Some |Replay|\s like |ReplayMap| have a little more information, because you passed it explicitly - a |ReplayMap|
-knows the map id and user id of the replay, as well if the mods, if passed, and a |ReplayID| knows the id of its
-replay.
+Some |Replay|\s like |ReplayMap| have a little more information, because you passed it explicitly - for example, a
+|ReplayMap| knows the map id and user id of the replay (as well as the mods if passed), and a |ReplayID| knows the id of
+its replay.
 
-Let's illustrate this by trying to access these attributes of replays directly after instantiation:
+We can illustrate this by trying to access these attributes of replays directly after instantiation:
 
 .. code-block:: python
 
@@ -38,8 +38,8 @@ Let's illustrate this by trying to access these attributes of replays directly a
     print(r_id.replay_id) # 2177560145
     print(r_id.mods) # None
 
-However, we can retrieve more information about a replay by "loading" it. A replay is called "unloaded" if it hasn't
-been loaded yet, and "loaded" if it has.
+As you can see, not many attributes are available to us. However, we can retrieve more information about a replay by "loading" it.
+A replay is called "unloaded" if it hasn't been loaded yet, and "loaded" if it has.
 
 To load a replay, call |cg.load| on it. Once the replay is loaded, most of these attributes will be filled with the
 proper value:
@@ -79,7 +79,7 @@ data, so almost none of its attributes will be filled, even after loading it:
     print(r_id.replay_id) # 2177560145
     print(r_id.mods) # None
 
-To find exactly what attributes a replay subclass provides before and after it's loaded, look at its class'
+To find exactly what attributes a replay subclass provides before and after it's loaded, see its class'
 documentation.
 
 |ReplayContainer|\s
@@ -92,7 +92,7 @@ When a |ReplayContainer| is first instantiated, it is unloaded, just like a |Rep
 the information you've given it - its map id if it's a |Map|, or its user id if it's a |User|, for instance. It has
 no idea what |Replay| objects it should have.
 
-You can fix this by calling |load_info| on the |ReplayContainer|. After doing so, it becomes info loaded and knows
+You can fix this by calling |cg.load_info| on the |ReplayContainer|. After doing so, it becomes info loaded and knows
 what |Replay| objects it has.
 
 .. code-block:: python
@@ -126,7 +126,7 @@ loaded and loaded stage; the former has unloaded replays, and the latter has loa
         # but we can now
         print(replay.replay_id) # some number
 
-When you call |load| on a completely unloaded |ReplayContainer| (that is, not even info loaded), it info loads
+When you call |cg.load| on a completely unloaded |ReplayContainer| (that is, not even info loaded), it info loads
 the |ReplayContainer|\s for you before loading it. So the following are equivalent:
 
 .. code-block:: python
@@ -146,8 +146,8 @@ the |ReplayContainer|\s for you before loading it. So the following are equivale
 Creating Info Loaded |ReplayContainer|\s
 ----------------------------------------
 
-We provide convenience methods to create info loaded |ReplayContainer|\s with |Circleguard|. They are |cg.Map|,
-|cg.User|, and |cg.MapUser|. For example:
+Creating |ReplayContainer|\s and iterating over them immediately afterwards is so common that we provideconvenience methods to
+create info loaded |ReplayContainer|\s with |Circleguard| - |cg.Map|, |cg.User|, and |cg.MapUser|. For example:
 
 .. code-block:: python
 
@@ -165,7 +165,7 @@ We provide convenience methods to create info loaded |ReplayContainer|\s with |C
         print(r)
 
 
-Each of these methods takes the exact same arguments as instantiating the |ReplayContainer| normally.
+Each of these methods takes the exact same arguments as instantiating the relevant |ReplayContainer| normally.
 
 Checking State
 --------------

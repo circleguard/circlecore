@@ -25,11 +25,10 @@ Circlecore can be installed from pip:
 
 .. note::
 
-    This documentation refers to the project as ``circlecore`` to differentiate
-    it from our organization `Circleguard <https://github.com/circleguard>`__
-    and our gui application Circleguard_. However, ``circlecore`` is installed
-    from pypi with the name ``circleguard``, and is imported as such in python
-    (``import circleguard``).
+    This page refers to the project as ``circlecore`` to differentiate it from our organization
+    `Circleguard <https://github.com/circleguard>`__ and our gui application Circleguard_. However, ``circlecore`` is installed
+    from pypi with the name ``circleguard``, and is imported as such in python (``import circleguard``) We will refer to it as
+    ``circleguard`` for the remainder of the documentation.
 
 Links
 -----

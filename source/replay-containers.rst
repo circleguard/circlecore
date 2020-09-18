@@ -2,15 +2,15 @@
 ===================
 
 |Replay| subclasses work fine for some situations, but what if you wanted to calculate e.g. the unstable rate for all
-replays on a map or in a user's top plays? You would have to make some api requests and manually construct |ReplayMap|
-objects. This is annoying, so we provide classes that do this for you. They are called |ReplayContainer|\s.
+replays on a map or in a user's top plays? You would have to make api requests and manually construct |ReplayMap|
+objects. That would be annoying, so we provide classes that do this for you. They are called |ReplayContainer|\s.
 
 |Map|
 -----
 
 |Map|\s represnt a beatmap's top plays (ie leaderboard), as seen on the osu! website.
 
-When instantiating a |Map|, you must specify which of the scores you want from the map.
+When instantiating a |Map|, you must specify which scores you want from the map.
 
 .. code-block:: python
 
@@ -98,8 +98,8 @@ This means you can also create a list of replays from a |ReplayContainer| (or, e
     print(list(m)) # [ReplayMap(...), ReplayMap(...)]
     print(m.all_replays()) # [ReplayMap(...), ReplayMap(...)]
 
-But what are these mysterious |load_info| methods? When you instantiate a |ReplayContainer|, it doesn't have any
+But what are these mysterious |cg.load_info| methods? When you instantiate a |ReplayContainer|, it doesn't have any
 |Replay| objects you can iterate over, because it hasn't made any api calls to determine which |Replay| objects
-(by who, on what map) it should have. By calling |load_info|, you are telling it to make these api calls and load
+(by who, on what map) it should have. By calling |cg.load_info|, you are telling it to make these api calls and load
 the info about its replays so you can iterate over them. We cover this (and loading in general) in more detail on
 the very next page.
