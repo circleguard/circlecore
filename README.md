@@ -53,8 +53,8 @@ print(cg.frametimes(replay)) # full frametime list
 print(cg.hits(replay)) # where the replay hits hitobjects
 print(cg.snaps(replay)) # any jerky/suspicious movement
 
-r2 = ReplayMap(221777, 4196808)
-print(cg.similarity(r, r2)) # how similar the replays are
+replay2 = ReplayMap(221777, 4196808)
+print(cg.similarity(replay, replay2)) # how similar the replays are
 
 # ReplayMap isn't the only way to represent replays; we can also
 # get a beatmap's top 3 plays
@@ -62,7 +62,7 @@ map_ = cg.Map(221777, span="1-3")
 # or a User's fifteenth and twentieth best plays
 user = cg.User(124493, span="15, 20")
 # or a local replay
-r3 = ReplayPath("/path/to/local/osr/replay.osr")
+replay3 = ReplayPath("/path/to/local/osr/replay.osr")
 # and more. You can find them all at
 # https://docs.circleguard.dev/en/latest/appendix.html#circleguard.loadables.Loadable
 
