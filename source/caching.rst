@@ -2,7 +2,7 @@ Caching
 =======
 
 Because the replay_data api endpoint is heavily ratelimited (10/min), we provide replay caching in |Circleguard|.
-You can pass a ``db_path`` to |Circleguard|, and any replay it loads will be cached there. This cache lives in an
+You can pass a ``db_path`` to |Circleguard| and any replay it loads will be cached there. This cache lives in an
 (sqlite) ``.db`` file and will persist across runs.
 
 .. code-block:: python
