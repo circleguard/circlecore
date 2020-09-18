@@ -1,14 +1,14 @@
-|ReplayContainer|s
-==================
+|ReplayContainer|\s
+===================
 
 |Replay| subclasses work fine for some situations, but what if you wanted to calculate e.g. the unstable rate for all
 replays on a map or in a user's top plays? You would have to make some api requests and manually construct |ReplayMap|
-objects. This is annoying, so we provide classes that do this for you. They are called |ReplayContainer|s.
+objects. This is annoying, so we provide classes that do this for you. They are called |ReplayContainer|\s.
 
 |Map|
 -----
 
-|Map|s represnt a beatmap's top plays (ie leaderboard), as seen on the osu! website.
+|Map|\s represnt a beatmap's top plays (ie leaderboard), as seen on the osu! website.
 
 When instantiating a |Map|, you must specify which of the scores you want from the map.
 
@@ -36,7 +36,7 @@ We can also select replays set with a certain mod combination.
 |User|
 ------
 
-|User|s represent the top plays of a user, as seen on their profile.
+|User|\s represent the top plays of a user, as seen on their profile.
 
 Similar to a |Map|, you must specify which scores of the user you want, and you can optionally
 specify a mod combination to receive scores set with only that mod.
@@ -52,7 +52,7 @@ specify a mod combination to receive scores set with only that mod.
 |MapUser|
 ---------
 
-|MapUser|s represent all of a user's plays on a beatmap. This is often only one score if the user has only ever
+|MapUser|\s represent all of a user's plays on a beatmap. This is often only one score if the user has only ever
 played the map with a single mod combination, but could be more depending on how many times they've played the map
 with different mods.
 
@@ -76,7 +76,7 @@ Notice that you cannot pass a ``mods`` argument to |MapUser|. This is intentiona
 Iterating
 ---------
 
-All |ReplayContainer|s are iterable, so you can iterate over them to operate on their replays:
+All |ReplayContainer|\s are iterable, so you can iterate over them to operate on their replays:
 
 .. code-block:: python
 

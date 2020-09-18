@@ -1,14 +1,13 @@
 Loading
 =======
 
-
-|Replay|s
+|Replay|\s
 ---------
 
 When you instantiate a |Replay|, it doesn't have replay data, know the username or user id of who played it,
 know mods it was played with, or have very much information about itself at all.
 
-Some |Replay|s like |ReplayMap| have a little more information, because you passed it explicitly - a |ReplayMap|
+Some |Replay|\s like |ReplayMap| have a little more information, because you passed it explicitly - a |ReplayMap|
 knows the map id and user id of the replay, as well if the mods, if passed, and a |ReplayID| knows the id of its
 replay.
 
@@ -83,10 +82,10 @@ data, so almost none of its attributes will be filled, even after loading it:
 To find exactly what attributes a replay subclass provides before and after it's loaded, look at its class'
 documentation.
 
-|ReplayContainer|s
-------------------
+|ReplayContainer|\s
+-------------------
 
-We've seen two stages (unloaded and loaded) with |Replay|s, but |ReplayContainer|s introduce a third stage between
+We've seen two stages (unloaded and loaded) with |Replay|\s, but |ReplayContainer|\s introduce a third stage between
 the two, called "info loaded".
 
 When a |ReplayContainer| is first instantiated, it is unloaded, just like a |Replay|. This means that it only knows
@@ -106,7 +105,7 @@ what |Replay| objects it has.
     cg.load_info(m)
     print(list(m)) # [ReplayMap(...), ReplayMap(...)]
 
-But when a |ReplayContainer| is info loaded, its |Replay|s are not loaded. This is the distinction between the info
+But when a |ReplayContainer| is info loaded, its |Replay|\s are not loaded. This is the distinction between the info
 loaded and loaded stage; the former has unloaded replays, and the latter has loaded replays.
 
 .. code-block:: python
@@ -128,7 +127,7 @@ loaded and loaded stage; the former has unloaded replays, and the latter has loa
         print(replay.replay_id) # some number
 
 When you call |load| on a completely unloaded |ReplayContainer| (that is, not even info loaded), it info loads
-the |ReplayContainer|s for you before loading it. So the following are equivalent:
+the |ReplayContainer|\s for you before loading it. So the following are equivalent:
 
 .. code-block:: python
 
@@ -144,10 +143,10 @@ the |ReplayContainer|s for you before loading it. So the following are equivalen
     cg.load(m)
 
 
-Creating Info Loaded |ReplayContainer|s
----------------------------------------
+Creating Info Loaded |ReplayContainer|\s
+----------------------------------------
 
-We provide convenience methods to create info loaded |ReplayContainer|s with |Circleguard|. They are |cg.Map|,
+We provide convenience methods to create info loaded |ReplayContainer|\s with |Circleguard|. They are |cg.Map|,
 |cg.User|, and |cg.MapUser|. For example:
 
 .. code-block:: python

@@ -58,7 +58,7 @@ A |ReplayID| represents a replay which is tied to a replay ID on osu! servers.
     We can only retrieve the replay data associated with a replay id due to limitations with the api.
     This means we do not know with what mods or on what map a |ReplayID| was played on. This limits
     what kinds of functions can be called on it - for instance, |cg.ur| and |cg.hits| both require
-    knowing what beatmap the replay was played on, and will reject |ReplayID|s.
+    knowing what beatmap the replay was played on, and will reject |ReplayID|\s.
 
 
 ReplayString

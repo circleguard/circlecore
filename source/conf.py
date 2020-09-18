@@ -57,34 +57,32 @@ rst_prolog = """
 .. |Replay| replace:: :class:`~circleguard.loadables.Replay`
 .. |ReplayMap| replace:: :class:`~circleguard.loadables.ReplayMap`
 .. |ReplayPath| replace:: :class:`~circleguard.loadables.ReplayPath`
+.. |ReplayString| replace:: :class:`~circleguard.loadables.ReplayPath`
+.. |ReplayID| replace:: :class:`~circleguard.loadables.ReplayPath`
 .. |ReplayContainer| replace:: :class:`~circleguard.loadables.ReplayContainer`
 .. |Map| replace:: :class:`~circleguard.loadables.Map`
 .. |User| replace:: :class:`~circleguard.loadables.User`
 .. |MapUser| replace:: :class:`~circleguard.loadables.MapUser`
 
-.. |Check| replace:: :class:`~circleguard.loadables.Check`
-.. |Result| replace:: :class:`~circleguard.result.Result`
-.. |RelaxResult| replace:: :class:`~circleguard.result.RelaxResult`
-.. |StealResult| replace:: :class:`~circleguard.result.StealResult`
-.. |CorrectionResult| replace:: :class:`~circleguard.result.CorrectionResult`
-
 .. |RatelimitWeight| replace:: :class:`~circleguard.utils.RatelimitWeight`
 
 .. |Circleguard| replace:: :class:`~circleguard.circleguard.Circleguard`
-.. |cg.run| replace:: :func:`cg.run() <circleguard.circleguard.Circleguard.run>`
-.. |cg.steal_check| replace:: :func:`~circleguard.circleguard.Circleguard.steal_check`
-.. |cg.relax_check| replace:: :func:`~circleguard.circleguard.Circleguard.relax_check`
-.. |cg.correction_check| replace:: :func:`~circleguard.circleguard.Circleguard.correction_check`
-.. |cg.load| replace:: :func:`cg.load() <circleguard.circleguard.Circleguard.load>`
-.. |cg.load_info| replace:: :func:`cg.load_info() <circleguard.circleguard.Circleguard.load_info>`
+.. |cg.similarity| replace:: :func:`~circleguard.circleguard.Circleguard.similarity`
+.. |cg.ur| replace:: :func:`~circleguard.circleguard.Circleguard.ur`
+.. |cg.snaps| replace:: :func:`~circleguard.circleguard.Circleguard.snaps`
+.. |cg.frametime| replace:: :func:`~circleguard.circleguard.Circleguard.frametime`
+.. |cg.frametimes| replace:: :func:`~circleguard.circleguard.Circleguard.frametimes`
+.. |cg.hits| replace:: :func:`~circleguard.circleguard.Circleguard.hits`
+.. |cg.load| replace:: :func:`~circleguard.circleguard.Circleguard.load`
+.. |cg.load_info| replace:: :func:`~circleguard.circleguard.Circleguard.load_info`
+.. |cg.Map| replace:: :func:`~circleguard.circleguard.Circleguard.Map`
+.. |cg.User| replace:: :func:`~circleguard.circleguard.Circleguard.User`
+.. |cg.MapUser| replace:: :func:`~circleguard.circleguard.Circleguard.MapUser`
 
 .. |Span| replace:: :class:`~circleguard.span.Span`
 
 .. _Circleguard: https://github.com/circleguard/circleguard
 .. _Circlecore: https://github.com/circleguard/circlecore
-.. _osu!: http://osu.ppy.sh
 .. _tybug: https://github.com/tybug
 .. _samuelhklumpers: https://github.com/samuelhklumpers
-.. _InvisibleSymbol: https://github.com/InvisibleSymbol
-.. _osu api: https://github.com/ppy/osu-api/wiki
 """
