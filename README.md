@@ -11,6 +11,7 @@ Circlecore is a utilities library for osu!. Features include:
 * Hits calculation (all places where a player hit a hitobject)
 * Similarity calculation between two replays, for replay stealing detection
 * Frametime calculation, for timewarp detection
+* Jerky, suspicious movement detection (called Snaps)
 
 Circlecore is used by [Circleguard](https://github.com/circleguard/circleguard), a replay analysis tool.
 
