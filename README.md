@@ -5,10 +5,10 @@
 
 # Circlecore
 
-Circlecore is a utilities library osu!. Features include:
+Circlecore is a utilities library for osu!. Features include:
 
 * Unstable Rate calculation
-* Hits calculation (all places where the player hit a hitobject)
+* Hits calculation (all places where a player hit a hitobject)
 * Similarity calculation between two replays, for replay stealing detection
 * Frametime calculation, for timewarp detection
 
