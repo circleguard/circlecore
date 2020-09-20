@@ -512,6 +512,9 @@ class Circleguard:
         self._cache = cache
         self.cacher.should_cache = cache
 
+    def __del__(self):
+        self.library.close()
+
 
 class KeylessCircleguard(Circleguard):
     """
