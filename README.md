@@ -74,4 +74,4 @@ for r in map_:
 
 ## Contributing
 
-Join [our discord](https://discord.gg/VNnkTjm) and ask how you can help, or look around for open issues which interest you and tackle those. PR requests are welcome!
+Join [our discord](https://discord.gg/VNnkTjm) and ask how you can help, or look around for open issues which interest you and tackle those. Pull requests are welcome!
