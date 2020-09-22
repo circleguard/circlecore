@@ -14,6 +14,9 @@ from slider.mod import circle_radius
 # what mods and on what map the hitobject was played with.
 
 class Hitobject():
+    """
+    A Hitobject in osu! gameplay, with a time and a position.
+    """
     def __init__(self, t, xy):
         self.t = t
         self.xy = xy
@@ -22,6 +25,10 @@ class Hitobject():
 
     @classmethod
     def from_slider_hitobj(self, hitobj, CS):
+        """
+        Instantiates a circleguard hitobject from a
+        :class:`slider.beatmap.HitObject` and a circle size.
+        """
         # convert to ms
         t = hitobj.time.total_seconds() * 1000
 
@@ -45,6 +52,9 @@ class Hitobject():
 
 
 class Circle(Hitobject):
+    """
+    A circle in osu! gameplay, with a time, position, and radius.
+    """
     def __init__(self, time, xy, radius):
         super().__init__(time, xy)
         self.radius = radius
@@ -58,6 +68,9 @@ class Circle(Hitobject):
 
 
 class Slider(Hitobject):
+    """
+    A slider in osu! gameplay, with a time, position, and radius.
+    """
     def __init__(self, time, xy, radius):
         super().__init__(time, xy)
         self.radius = radius
@@ -71,5 +84,8 @@ class Slider(Hitobject):
 
 
 class Spinner(Hitobject):
+    """
+    A spinner in osu! gameplay, with a time and position.
+    """
     def __init__(self, time, xy):
         super().__init__(time, xy)

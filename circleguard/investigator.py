@@ -424,7 +424,7 @@ class Hit():
 
     Parameters
     ----------
-    hitobject: :class:`slider.beatmap.Hitobject`
+    hitobject: :class:`slider.beatmap.HitObject`
         The hitobject that was hit. This is converted to a
         :class:`circleguard.hitobjects.Hitobject`.
     t: float
