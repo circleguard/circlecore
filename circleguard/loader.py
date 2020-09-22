@@ -147,7 +147,7 @@ def request(function):
 def check_cache(function):
     """
     A decorator that checks if the passed
-    :class:`~circleguard.replay_info.ReplayInfo` has its replay cached. If so,
+    :class:`~.ReplayInfo` has its replay cached. If so,
     returns a :class:`~circleguard.loadables.Replay` instance from the cached
     data. Otherwise, calls and returns the `function` as normal.
 

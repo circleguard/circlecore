@@ -44,7 +44,7 @@ class Cacher:
             The map id to insert into the db.
         lzma_bytes: str
             The lzma stream to compress and insert into the db.
-        replay_info: :class:`~circleguard.replay_info.ReplayInfo`
+        replay_info: :class:`~circleguard.loader.ReplayInfo`
             The ReplayInfo object representing this replay.
 
         Notes
@@ -87,7 +87,7 @@ class Cacher:
         loader: :class:`~circleguard.loader.Loader`
             The Loader from the circleguard instance to redownload replays with
             if they are outdated.
-        replay_info: list[:class:`~circleguard.replay_info.ReplayInfo`]
+        replay_info: list[:class:`~circleguard.loader.ReplayInfo`]
             A list of ReplayInfo objects containing the up-to-date information
             of user's replays.
 
@@ -148,7 +148,7 @@ class Cacher:
 
         Parameters
         ----------
-        replay_info: :class:`~circleguard.replay_info.ReplayInfo`
+        replay_info: :class:`~circleguard.loader.ReplayInfo`
             The replay info to search for a matching replay with.
 
         Returns
