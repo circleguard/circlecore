@@ -13,7 +13,7 @@ from circleguard.version import __version__
 from circleguard.investigator import Snap, Hit
 from circleguard.span import Span
 from circleguard.utils import (convert_statistic, order, Key,
-        RatelimitWeight, TRACE, ColoredFormatter)
+        RatelimitWeight, TRACE, ColoredFormatter, replay_pairs)
 from circleguard.game_version import GameVersion, NoGameVersion
 
 logging.addLevelName(TRACE, "TRACE")
@@ -37,7 +37,7 @@ __all__ = [
 # mod
 "Mod",
 # utils
-"convert_statistic", "order", "Key", "RatelimitWeight", "TRACE",
+"convert_statistic", "order", "Key", "RatelimitWeight", "TRACE", "replay_pairs",
 # loader
 "Loader", "ReplayInfo",
 # exceptions

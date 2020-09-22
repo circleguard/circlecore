@@ -1,6 +1,7 @@
 from logging import Formatter
 from copy import copy
 from enum import Enum, IntFlag
+import itertools
 
 from circleguard.mod import Mod
 
@@ -105,9 +106,41 @@ def order(replay1, replay2):
     return order
 
 
+def replay_pairs(replays, replays2=None):
+    """
+    A list of pairs of replays which can be compared against each other to cover
+    all cases of replay stealing in ``replays`` and/or ``replays2``.
+
+    If ``replays2`` is not passed (the default), this is a list of 2-tuples
+    which are pairs of replays in ``replays``, where each replay will be paired
+    with every other replay exactly once.
+
+    If ``replays2`` is passed, this is a list of 2-tuples which are pairs of
+    replays in where one replay is from ``replays``, the other is from
+    ``replays2``, and every replay in ``replays`` is paired against every replay
+    in ``replays2`` (but not against other replays in ``replays``).
+
+    Returns
+    -------
+    (Replay, Replay)
+        The first element is the earlier replay, and the second element is the
+        later replay.
+
+    Notes
+    -----
+    This is equivalent to ``itertools.combinations(replays, 2)`` if ``replays2``
+    is ``None`` or the empty list, and ``itertools.product(replays, replays2)``
+    otherwise.
+    """
+    if not replays2:
+        return itertools.combinations(replays, 2)
+    return itertools.product(replays, replays2)
+
+
 def check_param(param, options):
     if not param in options:
         raise ValueError(f"Expected one of {','.join(options)}. Got {param}")
+
 
 
 TRACE = 5
