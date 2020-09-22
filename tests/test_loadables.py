@@ -1,7 +1,6 @@
 from unittest import skip, TestSuite, TextTestRunner
-from circleguard import (Circleguard, Check, ReplayMap, ReplayPath, Detect,
-                         RatelimitWeight, set_options, Map, User, MapUser, Mod,
-                         Loader, InvalidKeyException)
+from circleguard import (ReplayMap, ReplayPath, RatelimitWeight, Map, User,
+    MapUser, Mod)
 
 from tests.utils import CGTestCase, RES
 
@@ -37,7 +36,7 @@ class TestMap(CGTestCase):
     @classmethod
     def setUpClass(cls):
         super().setUpClass()
-        cls.map = Map(221777, "1-3")
+        cls.map = Map(221777, "2-4")
 
     def test_map_load(self):
         self.assertEqual(len(self.map.all_replays()), 0)
@@ -130,6 +129,27 @@ class TestMapUser(CGTestCase):
         self.assertListEqual([r.map_id for r in self.mu[0:2]], [795627, 795627])
 
 
+class TestLoadableFromCG(CGTestCase):
+
+    def test_map_from_cg(self):
+        m = self.cg.Map(221777, "1-2")
+        self.assertTrue(m.info_loaded)
+        self.assertFalse(m.loaded)
+        self.assertEqual(len(m), 2)
+
+    def test_user_from_cg(self):
+        u = self.cg.User(124493, "2, 3-4")
+        self.assertTrue(u.info_loaded)
+        self.assertFalse(u.loaded)
+        self.assertEqual(len(u), 3)
+
+    def test_map_user_from_cg(self):
+        mu = self.cg.MapUser(795627, 6304246, "1")
+        self.assertTrue(mu.info_loaded)
+        self.assertFalse(mu.loaded)
+        self.assertEqual(len(mu), 1)
+
+
 class TestEquality(CGTestCase):
     @classmethod
     def setUpClass(cls):
@@ -178,3 +198,11 @@ class TestEquality(CGTestCase):
     def test_equality_replaypath(self):
         self.assertEqual(self.r3, self.r4)
         self.assertNotEqual(self.r3, self.r5)
+        # loaded == unloaded at the same path is true
+        self.cg.load(self.r3)
+        self.assertEqual(self.r3, self.r4)
+        # loaded == loaded is true regardless of path
+        # TODO add test where replay data in the file changes after only one
+        # ReplayPath is loaded and ensure the ReplayPaths aren't equal anymore
+        self.cg.load(self.r4)
+        self.assertEqual(self.r3, self.r4)

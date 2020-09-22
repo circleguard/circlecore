@@ -1,61 +1,16 @@
-import math
-
 import numpy as np
-
-from circleguard.enums import Key, Detect
-from circleguard.result import RelaxResult, CorrectionResult, TimewarpResult
-from circleguard.mod import Mod
-from circleguard.utils import KEY_MASK
 from slider.beatmap import Circle, Slider
 
+from circleguard.mod import Mod
+from circleguard.utils import KEY_MASK, check_param
+from circleguard.game_version import GameVersion
+from circleguard.hitobjects import Hitobject
+
 class Investigator:
-    """
-    Manages the investigation of individual
-    :class:`~.replay.Replay`\s for cheats.
-
-    Parameters
-    ----------
-    replay: :class:`~.replay.Replay`
-        The replay to investigate.
-    detect: :class:`~.Detect`
-        What cheats to investigate the replay for.
-    beatmap: :class:`slider.beatmap.Beatmap`
-        The beatmap to calculate ur from, with the replay. Should be ``None``
-        if ``Detect.RELAX in detect`` is ``False``.
-
-    See Also
-    --------
-    :class:`~.comparer.Comparer`, for comparing multiple replays.
-    """
-
     # https://osu.ppy.sh/home/changelog/stable40/20190207.2
-    VERSION_SLIDERBUG_FIXED_STABLE = 20190207
+    VERSION_SLIDERBUG_FIXED_STABLE = GameVersion(20190207, concrete=True)
     # https://osu.ppy.sh/home/changelog/cuttingedge/20190111
-    VERSION_SLIDERBUG_FIXED_CUTTING_EDGE = 20190111
-
-    def __init__(self, replay, detect, max_angle, min_distance, beatmap=None):
-        self.replay = replay
-        self.detect = detect
-        self.max_angle = max_angle
-        self.min_distance = min_distance
-        self.beatmap = beatmap
-        self.detect = detect
-
-    def investigate(self):
-        replay = self.replay
-        # equivalent of filtering out replays with no replay data from comparer on init
-        if replay.replay_data is None:
-            return
-        if self.detect & Detect.RELAX:
-            ur = self.ur(replay, self.beatmap)
-            yield RelaxResult(replay, ur)
-        if self.detect & Detect.CORRECTION:
-            snaps = self.aim_correction(replay, self.max_angle, self.min_distance)
-            yield CorrectionResult(replay, snaps)
-        if self.detect & Detect.TIMEWARP:
-            frametimes = self.frametimes(replay)
-            frametime = self.median_frametime(frametimes)
-            yield TimewarpResult(replay, frametime, frametimes)
+    VERSION_SLIDERBUG_FIXED_CUTTING_EDGE = GameVersion(20190111, concrete=True)
 
     @staticmethod
     def ur(replay, beatmap):
@@ -74,13 +29,13 @@ class Investigator:
 
         diffs = []
         for hit in hits:
-            hitobject_t = hit.hitobject.time.total_seconds() * 1000
-            hit_time = hit.t
-            diffs.append(hit_time - hitobject_t)
+            hitobj_t = hit.hitobject.t
+            hit_t = hit.t
+            diffs.append(hit_t - hitobj_t)
         return np.std(diffs) * 10
 
     @staticmethod
-    def aim_correction_cross(replay):
+    def snaps_cross(replay):
         """
         An alternative snap detection algorithm using relative cross products
         of vectors.
@@ -93,7 +48,7 @@ class Investigator:
         ac = xy[2:] - xy[:-2]
 
     @staticmethod
-    def aim_correction(replay, max_angle, min_distance):
+    def snaps(replay, max_angle, min_distance):
         """
         Calculates the angle between each set of three points (a,b,c) and finds
         points where this angle is extremely acute and neither ``|ab|`` or
@@ -122,11 +77,6 @@ class Investigator:
 
         Another possible method is to look at the ratio between the angle
         and distance.
-
-        See Also
-        --------
-        :meth:`~.aim_correction_sam` for an alternative, unused approach
-        involving velocity and jerk.
         """
         # when we leave mutliple frames with the same time values, they
         # sometimes get detected (falesly) as aim correction.
@@ -166,7 +116,7 @@ class Investigator:
         return [Snap(t, b, d) for (t, b, d) in zip(t[mask], beta[mask], min_AB_BC[mask])]
 
     @staticmethod
-    def aim_correction_sam(replay_data, num_jerks, min_jerk):
+    def snaps_sam(replay_data, num_jerks, min_jerk):
         """
         Calculates the jerk at each moment in the Replay, counts the number of times
         it exceeds min_jerk and reports a positive if that number is over num_jerks.
@@ -217,9 +167,26 @@ class Investigator:
         return [jerks, ischeat]
 
     @staticmethod
+    def frametime(replay):
+        """
+        Calculates the median time between the frames of ``replay``.
+
+        Parameters
+        ----------
+        replay: :class:`~.Replay`
+            The replay to calculate the frametime of.
+
+        Notes
+        -----
+        Median is used instead of mean to lessen the effect of outliers.
+        """
+        frametimes = Investigator.frametimes(replay)
+        return np.median(frametimes)
+
+    @staticmethod
     def frametimes(replay):
         """
-        Returns the time between each pair of consecutive frames in ``replay``.
+        Returns the time between each two consecutive frames in ``replay``.
 
         Parameters
         ----------
@@ -229,21 +196,6 @@ class Investigator:
         # replay.t is cumsum so convert it back to "time since previous frame"
         return np.diff(replay.t)
 
-    @staticmethod
-    def median_frametime(frametimes):
-        """
-        Calculates the median time between the frames in ``frametimes``.
-
-        Parameters
-        ----------
-        frametimes: list[int]
-            The frametimes to find the median of.
-
-        Notes
-        -----
-        Median is used instead of mean to lessen the effect of outliers.
-        """
-        return np.median(frametimes)
 
     @staticmethod
     def keydown_frames(replay):
@@ -300,15 +252,14 @@ class Investigator:
             The beatmap to determine the hits of when ``replay`` is played
             against it.
         """
-        version = replay.game_version
+        game_version = replay.game_version
 
-        # only `ReplayPath` gives us the version, so we need to estimate for
-        # all other replays
-        if version is None:
-            # estimate version with timestamp, this is only accurate if the user
-            # keeps their game up to date
-            version = int(f"{replay.timestamp.year}{replay.timestamp.month:02d}"
-                          f"{replay.timestamp.day:02d}")
+        if not game_version.available():
+            # if we have no information about the version, assume it was played
+            # after sliderbug was fixed.
+            sliderbug_fixed = True
+
+        if not game_version.concrete:
             # if we're only estimating the version, assume the replay was played
             # on stable. if we used the cutting edge version instead, we would
             # be incorrectly using logic for sliderbug being fixed for all
@@ -317,9 +268,9 @@ class Investigator:
             # This is wrong for cutting edge replays between those two versions
             # which do not have a concrete version, but that's better than being
             # wrong for stable replays between those two versions.
-            version_sliderbug_fixed = Investigator.VERSION_SLIDERBUG_FIXED_STABLE
+            sliderbug_fixed = game_version >= Investigator.VERSION_SLIDERBUG_FIXED_STABLE
         else:
-            version_sliderbug_fixed = Investigator.VERSION_SLIDERBUG_FIXED_CUTTING_EDGE
+            sliderbug_fixed = game_version >= Investigator.VERSION_SLIDERBUG_FIXED_CUTTING_EDGE
 
         easy = Mod.EZ in replay.mods
         hard_rock = Mod.HR in replay.mods
@@ -362,7 +313,7 @@ class Investigator:
                 hitobj_end_time = hitobj.end_time.total_seconds() * 1000
 
             # before sliderbug fix, notelock ended after hitwindow50
-            if version < version_sliderbug_fixed:
+            if not sliderbug_fixed:
                 notelock_end_time = hitobj_t + hitwindow
                 # exception for sliders/spinners, where notelock ends after
                 # hitobject end time if it's earlier
@@ -384,12 +335,12 @@ class Investigator:
 
             if keydown_t <= hitobj_t - hitwindow:
                 # pressing on a circle or slider during hitwindowmiss will cause
-                #  a miss
+                # a miss
                 if np.linalg.norm(keydown_xy - hitobj_xy) <= hitradius and hitobj_type != 2:
 
                     # sliders don't disappear after missing
                     # so we skip to the press_i that is after notelock_end_time
-                    if hitobj_type == 1 and version >= version_sliderbug_fixed:
+                    if hitobj_type == 1 and sliderbug_fixed:
                         while keydowns[keydown_i][0] < notelock_end_time:
                             keydown_i += 1
                             if keydown_i >= len(keydowns):
@@ -406,11 +357,12 @@ class Investigator:
                 hitobj_i += 1
             else:
                 if keydown_t < hitobj_t + hitwindow and np.linalg.norm(keydown_xy - hitobj_xy) <= hitradius and hitobj_type != 2:
-                    hits.append(Hit(hitobj, keydown_t, keydown_xy))
+                    hit = Hit(hitobj, keydown_t, keydown_xy, CS)
+                    hits.append(hit)
 
                     # sliders don't disappear after clicking
                     # so we skip to the press_i that is after notelock_end_time
-                    if hitobj_type == 1 and version >= version_sliderbug_fixed:
+                    if hitobj_type == 1 and sliderbug_fixed:
                         while keydowns[keydown_i][0] < notelock_end_time:
                             keydown_i += 1
                             if keydown_i >= len(keydowns):
@@ -425,13 +377,13 @@ class Investigator:
         return hits
 
     # TODO (some) code duplication with this method and a similar one in
-    # ``Comparer``. Refactor Investigator and Comparer to inherit from a base
-    # class, or move this method to utils. Preferrably the former.
+    # ``Comparer``. Consolidate and move this method to utils?
     @staticmethod
     def remove_duplicate_t(t, data):
         t, t_sort = np.unique(t, return_index=True)
         data = data[t_sort]
         return (t, data)
+
 
 class Snap():
     """
@@ -450,10 +402,6 @@ class Snap():
     distance: float
         ``min(dist_a_b, dist_b_c)`` if ``a``, ``b``, and ``c`` are three
         datapoints with ``b`` being the middle one.
-
-    See Also
-    --------
-    :meth:`~.Investigator.aim_correction`
     """
     def __init__(self, time, angle, distance):
         self.time = time
@@ -467,6 +415,7 @@ class Snap():
     def __hash__(self):
         return hash((self.time, self.angle, self.distance))
 
+
 class Hit():
     """
     A hit on a hitobject when a replay is played against a beatmap. In osu!lazer
@@ -476,18 +425,76 @@ class Hit():
     Parameters
     ----------
     hitobject: :class:`slider.beatmap.HitObject`
-        The hitobject that was hit.
+        The hitobject that was hit. This is converted to a
+        :class:`circleguard.hitobjects.Hitobject`.
     t: float
         The time the hit occured.
     xy: list[float, float]
         The x and y position where the hit occured.
+    CS: float
+        The circle size of the beatmap (after being modified by the replay's
+        mods, ie ``Mod.HR`` or ``Mod.EZ``) this hit occurred in.
     """
-    def __init__(self, hitobject, t, xy):
-        self.hitobject = hitobject
+    def __init__(self, hitobject, t, xy, CS):
+        self.hitobject = Hitobject.from_slider_hitobj(hitobject, CS)
         self.t = t
         self.xy = xy
+        self.x = xy[0]
+        self.y = xy[1]
 
-    # TODO slider hitobjects don't define __eq__, pr that in
+    def distance(self, *, to):
+        """
+        The distance from this hit to either the center or edge of its
+        hitobject.
+
+        Parameters
+        ----------
+        to: {"center", "edge"}
+            If ``center``, the distance from this hit to the center of its
+            hitobject is calculated. If ``edge``, the distance from this hit to
+            the edge of its hitobject is calculated.
+        Returns
+        -------
+        float
+            The distance from this hit to either the center or edge of its
+            hitobject.
+        """
+        check_param(to, ["center", "edge"])
+
+        hitobj_xy = self.hitobject.xy
+
+        if to == "edge":
+            dist = np.linalg.norm(self.xy - hitobj_xy) - self.hitobject.radius
+            # value is negative since we're inside the hitobject, so take abs
+            return abs(dist)
+
+        if to == "center":
+            return np.linalg.norm(self.xy - hitobj_xy)
+
+    def within(self, distance):
+        """
+        Whether the hit was within ``distance`` of the edge of its hitobject.
+
+        Parameters
+        ----------
+        distance: float
+            How close, in pixels, to the edge of the hitobject the hit has to
+            be.
+
+        Returns
+        -------
+        bool
+            Whether the hit was within ``distance`` of the edge of its
+            hitobject.
+
+        Notes
+        -----
+        The lower the value, the closer to the edge the hit occurred. This value
+        can never be greater than the radius of the hitobject.
+        """
+
+        return self.distance(to="edge") < distance
+
     def __eq__(self, other):
         return (self.hitobject == other.hitobject and self.t == other.t and
             self.xy == other.xy)

@@ -5,7 +5,6 @@ import os
 import wtc
 
 from circleguard.loader import Loader
-from circleguard.exceptions import CircleguardException
 from circleguard.utils import TRACE
 
 class Cacher:
@@ -45,7 +44,7 @@ class Cacher:
             The map id to insert into the db.
         lzma_bytes: str
             The lzma stream to compress and insert into the db.
-        replay_info: :class:`~circleguard.replay_info.ReplayInfo`
+        replay_info: :class:`~circleguard.loader.ReplayInfo`
             The ReplayInfo object representing this replay.
 
         Notes
@@ -88,13 +87,13 @@ class Cacher:
         loader: :class:`~circleguard.loader.Loader`
             The Loader from the circleguard instance to redownload replays with
             if they are outdated.
-        replay_info: list[:class:`~circleguard.replay_info.ReplayInfo`]
+        replay_info: list[:class:`~circleguard.loader.ReplayInfo`]
             A list of ReplayInfo objects containing the up-to-date information
             of user's replays.
 
         Raises
         ------
-        CircleguardException
+        ValueError
             Raised when the redownloaded replay id is lower than the cached
             replay id. This should never happen and is indicative of either a
             fault on our end or the api's end.
@@ -132,13 +131,13 @@ class Cacher:
 
             if db_replay_id != new_replay_id:
                 if db_replay_id > new_replay_id:
-                    raise CircleguardException("The cached replay id of {} is higher than the new replay id of {}. Map id: {}, User id: {}, mods: {}"
+                    raise ValueError("The cached replay id of {} is higher than the new replay id of {}. Map id: {}, User id: {}, mods: {}"
                                                 .format(db_replay_id, new_replay_id, user_id, map_id, mods))
 
                 self.log.info("Cached replay on map %d by user %d with mods %d is outdated, redownloading", map_id, user_id, mods)
                 lzma_data = loader.replay_data(info)
                 if lzma_data is None:
-                    raise CircleguardException("We could not load lzma data for map {}, user {}, mods {}, replay available {} while revalidating."
+                    raise Exception("We could not load lzma data for map {}, user {}, mods {}, replay available {} while revalidating."
                                                 .format(map_id, user_id, mods, info.replay_available))
                 self.cache(lzma_data, info)
 
@@ -149,7 +148,7 @@ class Cacher:
 
         Parameters
         ----------
-        replay_info: :class:`~circleguard.replay_info.ReplayInfo`
+        replay_info: :class:`~circleguard.loader.ReplayInfo`
             The replay info to search for a matching replay with.
 
         Returns

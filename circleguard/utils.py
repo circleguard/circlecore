@@ -1,8 +1,41 @@
 from logging import Formatter
 from copy import copy
+from enum import Enum, IntFlag
+import itertools
 
 from circleguard.mod import Mod
-from circleguard.enums import Key
+
+
+class RatelimitWeight(Enum):
+    """
+    How much it 'costs' to load a replay from the api.
+
+    :data:`~.RatelimitWeight.NONE` if the load method of a replay makes no api
+    calls.
+
+    :data:`~.RatelimitWeight.LIGHT` if the load method of a replay makes only
+    light api calls (anything but ``get_replay``).
+
+    :data:`~.RatelimitWeight.HEAVY` if the load method of a replay makes any
+    heavy api calls (``get_replay``).
+
+    Notes
+    -----
+    This value currently has no effect on the program and is reserved for
+    future functionality.
+    """
+    NONE  = "None"
+    LIGHT = "Light"
+    HEAVY = "Heavy"
+
+
+class Key(IntFlag):
+    M1    = 1 << 0
+    M2    = 1 << 1
+    K1    = 1 << 2
+    K2    = 1 << 3
+    SMOKE = 1 << 4
+
 
 KEY_MASK = int(Key.M1) | int(Key.M2)
 
@@ -19,19 +52,18 @@ def convert_statistic(stat, mods, *, to):
     mods: Mod
         The mods the replay was played with. Only ``Mod.DT`` and ``Mod.HT``
         will affect the statistic conversion.
-    to: string
-        What form to convert the statistic to. One of ``cv`` (converted) or
-        ``ucv`` (unconverted).
+    to: {"cv", "ucv"}
+        ``cv`` if the statistic should be converted to its converted form, and
+        ``ucv`` if the statistic should be converted to its unconverted form.
 
     Notes
     -----
     This method is intended for any statistic that is modified from what we
-    expect by ``Mod.DT`` or ``Mod.HT`` being applied (ie changing the game clock
-    speed). This includes ur (unstable rate) and median frametime
+    expect by ``Mod.DT`` or ``Mod.HT`` being applied (ie changing the game
+    clock speed). This includes ur (unstable rate) and median frametime
     (time between frames).
     """
-    if to not in ["cv", "ucv"]:
-        raise ValueError(f"Expected one of cv, ucv. Got {to}")
+    check_param(to, ["cv", "ucv"])
 
     conversion_factor = 1
 
@@ -44,6 +76,70 @@ def convert_statistic(stat, mods, *, to):
         return stat * conversion_factor
     elif to == "ucv":
         return stat / conversion_factor
+
+
+def order(replay1, replay2):
+    """
+    An ordered tuple of the given replays. The first element is the earlier
+    replay, and the second element is the later replay.
+
+    Parameters
+    ----------
+    replay1: Replay
+        The first replay to order.
+    replay2: Replay
+        The second replay to order.
+
+    Returns
+    -------
+    (Replay, Replay)
+        The first element is the earlier replay, and the second element is the
+        later replay.
+    """
+    if not replay1.timestamp or not replay2.timestamp:
+        raise ValueError("Both replay1 and replay2 must provide a timestamp. "
+            "Replays without a timestamp cannot be ordered.")
+    # assume they're passed in order (earliest first); if not, switch them
+    order = (replay1, replay2)
+    if replay2.timestamp < replay1.timestamp:
+        order = tuple(reversed(order))
+    return order
+
+
+def replay_pairs(replays, replays2=None):
+    """
+    A list of pairs of replays which can be compared against each other to cover
+    all cases of replay stealing in ``replays`` and/or ``replays2``.
+
+    If ``replays2`` is not passed (the default), this is a list of 2-tuples
+    which are pairs of replays in ``replays``, where each replay will be paired
+    with every other replay exactly once.
+
+    If ``replays2`` is passed, this is a list of 2-tuples which are pairs of
+    replays in where one replay is from ``replays``, the other is from
+    ``replays2``, and every replay in ``replays`` is paired against every replay
+    in ``replays2`` (but not against other replays in ``replays``).
+
+    Returns
+    -------
+    (Replay, Replay)
+        The first element is the earlier replay, and the second element is the
+        later replay.
+
+    Notes
+    -----
+    This is equivalent to ``itertools.combinations(replays, 2)`` if ``replays2``
+    is ``None`` or the empty list, and ``itertools.product(replays, replays2)``
+    otherwise.
+    """
+    if not replays2:
+        return itertools.combinations(replays, 2)
+    return itertools.product(replays, replays2)
+
+
+def check_param(param, options):
+    if not param in options:
+        raise ValueError(f"Expected one of {','.join(options)}. Got {param}")
 
 
 
@@ -98,7 +194,7 @@ class ColoredFormatter(Formatter):
         color = self.COLOR_MAPPING["NAME"]
         c_name = self.colored_log.format(color=color, msg=name)
 
-        message = c_record.msg # why is this msg, but we format it as %(message)s in the formatter? blame logging
+        message = c_record.msg
         color = self.COLOR_MAPPING["MESSAGE"]
         c_msg = self.colored_log.format(color=color, msg=message)
 

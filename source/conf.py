@@ -53,43 +53,41 @@ html_static_path = ["_static"]
 
 # references that we want to use easily in any file
 rst_prolog = """
-.. |Loadable| replace:: :class:`~circleguard.loadable.Loadable`
-.. |Replay| replace:: :class:`~circleguard.loadable.Replay`
-.. |ReplayMap| replace:: :class:`~circleguard.loadable.ReplayMap`
-.. |ReplayPath| replace:: :class:`~circleguard.loadable.ReplayPath`
-.. |ReplayContainer| replace:: :class:`~circleguard.loadable.ReplayContainer`
-.. |Map| replace:: :class:`~circleguard.loadable.Map`
-.. |User| replace:: :class:`~circleguard.loadable.User`
-.. |MapUser| replace:: :class:`~circleguard.loadable.MapUser`
+.. |Loadable| replace:: :class:`~circleguard.loadables.Loadable`
+.. |Replay| replace:: :class:`~circleguard.loadables.Replay`
+.. |ReplayMap| replace:: :class:`~circleguard.loadables.ReplayMap`
+.. |ReplayPath| replace:: :class:`~circleguard.loadables.ReplayPath`
+.. |ReplayString| replace:: :class:`~circleguard.loadables.ReplayString`
+.. |ReplayID| replace:: :class:`~circleguard.loadables.ReplayID`
+.. |ReplayContainer| replace:: :class:`~circleguard.loadables.ReplayContainer`
+.. |Map| replace:: :class:`~circleguard.loadables.Map`
+.. |User| replace:: :class:`~circleguard.loadables.User`
+.. |MapUser| replace:: :class:`~circleguard.loadables.MapUser`
 
-.. |Check| replace:: :class:`~circleguard.loadable.Check`
-.. |Result| replace:: :class:`~circleguard.result.Result`
-.. |RelaxResult| replace:: :class:`~circleguard.result.RelaxResult`
-.. |StealResult| replace:: :class:`~circleguard.result.StealResult`
-.. |CorrectionResult| replace:: :class:`~circleguard.result.CorrectionResult`
+.. |all_replays| replace:: :func:`~circleguard.loadables.ReplayContainer.all_replays`
 
-.. |Detect| replace:: :class:`~circleguard.enums.Detect`
-.. |Detect.STEAL| replace:: :class:`~circleguard.enums.Detect.STEAL`
-.. |Detect.RELAX| replace:: :class:`~circleguard.enums.Detect.RELAX`
-.. |Detect.CORRECTION| replace:: :data:`~circleguard.enums.Detect.CORRECTION`
-
-.. |RatelimitWeight| replace:: :class:`~circleguard.enums.RatelimitWeight`
+.. |RatelimitWeight| replace:: :class:`~circleguard.utils.RatelimitWeight`
 
 .. |Circleguard| replace:: :class:`~circleguard.circleguard.Circleguard`
-.. |cg.run| replace:: :func:`cg.run() <circleguard.circleguard.Circleguard.run>`
-.. |cg.steal_check| replace:: :func:`~circleguard.circleguard.Circleguard.steal_check`
-.. |cg.relax_check| replace:: :func:`~circleguard.circleguard.Circleguard.relax_check`
-.. |cg.correction_check| replace:: :func:`~circleguard.circleguard.Circleguard.correction_check`
-.. |cg.load| replace:: :func:`cg.load() <circleguard.circleguard.Circleguard.load>`
-.. |cg.load_info| replace:: :func:`cg.load_info() <circleguard.circleguard.Circleguard.load_info>`
+.. |cg.similarity| replace:: :func:`~circleguard.circleguard.Circleguard.similarity`
+.. |cg.ur| replace:: :func:`~circleguard.circleguard.Circleguard.ur`
+.. |cg.snaps| replace:: :func:`~circleguard.circleguard.Circleguard.snaps`
+.. |cg.frametime| replace:: :func:`~circleguard.circleguard.Circleguard.frametime`
+.. |cg.frametimes| replace:: :func:`~circleguard.circleguard.Circleguard.frametimes`
+.. |cg.hits| replace:: :func:`~circleguard.circleguard.Circleguard.hits`
+.. |cg.load| replace:: :func:`~circleguard.circleguard.Circleguard.load`
+.. |cg.load_info| replace:: :func:`~circleguard.circleguard.Circleguard.load_info`
+.. |cg.Map| replace:: :func:`cg.Map() <circleguard.circleguard.Circleguard.Map>`
+.. |cg.User| replace:: :func:`cg.User() <circleguard.circleguard.Circleguard.User>`
+.. |cg.MapUser| replace:: :func:`~cg.MapUser() <circleguard.circleguard.Circleguard.MapUser>`
+
+.. |Snap| replace:: :class:`~circleguard.investigator.Snap`
+.. |Hit| replace:: :class:`~circleguard.investigator.Hit`
 
 .. |Span| replace:: :class:`~circleguard.span.Span`
 
 .. _Circleguard: https://github.com/circleguard/circleguard
 .. _Circlecore: https://github.com/circleguard/circlecore
-.. _osu!: http://osu.ppy.sh
 .. _tybug: https://github.com/tybug
 .. _samuelhklumpers: https://github.com/samuelhklumpers
-.. _InvisibleSymbol: https://github.com/InvisibleSymbol
-.. _osu api: https://github.com/ppy/osu-api/wiki
 """

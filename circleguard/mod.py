@@ -31,7 +31,6 @@ int_to_mod = {
     1 << 28    : ["K2",        "Key2"],
     1 << 29    : ["V2",     "ScoreV2"],
     1 << 30    : ["MR",      "Mirror"]
-
 }
 
 class ModCombination():
@@ -165,8 +164,10 @@ class ModCombination():
             ordered according to :const:`~circleguard.mod.Mod.ORDER`.
         """
 
-        mods = [ModCombination(mod) for mod in int_to_mod.keys() if self.value & mod]
-        mods = [mod for mod in Mod.ORDER if mod in mods] # order the mods by Mod.ORDER
+        mods = [ModCombination(mod) for mod in int_to_mod.keys() if \
+            self.value & mod]
+        # order the mods by Mod.ORDER
+        mods = [mod for mod in Mod.ORDER if mod in mods]
         if not clean:
             return mods
 
@@ -241,7 +242,7 @@ class Mod(ModCombination):
     V2  = ScoreV2      = ModCombination(1 << 29)
     MR  = Mirror       = ModCombination(1 << 30)
 
-    KM  = KeyMod       = K1+K2+K3+K4+K5+K6+K7+K8+K9+KeyCoop
+    KM  = KeyMod       = K1 + K2 + K3 + K4 + K5 + K6 + K7 + K8 + K9 + KeyCoop
 
     # common mod combinations
     HDDT = HD + DT
@@ -289,13 +290,15 @@ class Mod(ModCombination):
         if mod_string == "":
             raise ValueError("Invalid mod string (cannot be empty)")
         if len(mod_string) % 2 != 0:
-            raise ValueError(f"Invalid mod string {mod_string} (not of even length)")
+            raise ValueError(f"Invalid mod string {mod_string} (not of even "
+                "length)")
         mod_value = 0
         for i in range(0, len(mod_string) - 1, 2):
             single_mod = mod_string[i: i + 2]
             # there better only be one Mod that has an acronym matching ours,
             # but a comp + 0 index works too
-            matching_mods = [mod for mod in Mod.ORDER if mod.short_name() == single_mod]
+            matching_mods = [mod for mod in Mod.ORDER if \
+                mod.short_name() == single_mod]
             # ``mod.ORDER`` uses ``_NC`` and ``_PF``, and we want to parse
             # eg "NC" as "DTNC"
             if Mod._NC in matching_mods:
@@ -305,6 +308,7 @@ class Mod(ModCombination):
                 matching_mods.remove(Mod._PF)
                 matching_mods.append(Mod.PF)
             if not matching_mods:
-                raise ValueError(f"Invalid mod string (no matching mod found for {single_mod})")
+                raise ValueError("Invalid mod string (no matching mod found "
+                    f"for {single_mod})")
             mod_value += matching_mods[0].value
         return mod_value

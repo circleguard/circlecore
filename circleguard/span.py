@@ -3,6 +3,10 @@ class Span(set):
     A set of numbers represented by a string, which can include ranges or
     single numbers, separated by a comma.
 
+    Notes
+    -----
+    Spans can only range from 1 to 100 inclusive.
+
     Examples
     --------
     >>> Span("1-3,6,2-4")
@@ -12,7 +16,8 @@ class Span(set):
     def __init__(self, data):
         # allow passing both span or string
         if not (isinstance(data, Span) or isinstance(data, str)):
-            raise ValueError(f"Expected data to be a str or Span, got type {type(data)}.")
+            raise ValueError(f"Expected data to be a str or Span, got type "
+                f"{type(data)}.")
         if isinstance(data, Span):
             # python allows initializing a set with a set
             super().__init__(data)
@@ -20,6 +25,9 @@ class Span(set):
             span_set = self._to_set(data)
             super().__init__(span_set)
 
+        if max(self) > 100:
+            raise ValueError("Spans can only range from 1 to 100 inclusive. "
+                f"The largest element passed was {max(self)}")
 
     def _to_set(self, span):
         """
@@ -28,9 +36,9 @@ class Span(set):
         Parameters
         ----------
         span: str
-            The span of numbers to convert to a set. A number may occur more than
-            once - whether explicitly or in a range - in the span, but will
-            only occur once in the returned set.
+            The span of numbers to convert to a set. A number may occur more
+            than once - whether explicitly or in a range - in the span, but
+            will only occur once in the returned set.
 
         Returns
         -------

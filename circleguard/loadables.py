@@ -9,16 +9,18 @@ import circleparse
 import numpy as np
 import wtc
 
-from circleguard.enums import RatelimitWeight
 from circleguard.mod import Mod
-from circleguard.utils import TRACE, KEY_MASK
+from circleguard.utils import TRACE, KEY_MASK, RatelimitWeight
 from circleguard.loader import Loader
 from circleguard.span import Span
+from circleguard.game_version import GameVersion, NoGameVersion
+from circleguard.map_info import MapInfo
 
 class Loadable(abc.ABC):
     """
-    Represents one or multiple replays, which have replay data to be loaded from
-    some additional source - the osu! api, local cache, or some other location.
+    Represents one or multiple replays, which have replay data to be loaded
+    from some additional source - the osu! api, local cache, or some other
+    location.
 
     Parameters
     ----------
@@ -44,7 +46,7 @@ class Loadable(abc.ABC):
             instance), a loader is still passed regardless.
         cache: bool
             Whether to cache the replay data once loaded. This argument
-            comes from a parent—either a :class:`~.LoadableContainer` or
+            comes from a parent—either a :class:`~.ReplayContainer` or
             :class:`~circleguard.circleguard.Circleguard` itself. Should the
             loadable already have a set ``cache`` value, that should take
             precedence over the option passed in this method, but if the
@@ -57,16 +59,119 @@ class Loadable(abc.ABC):
     def __eq__(self, loadable):
         pass
 
-
 class LoadableContainer(Loadable):
     """
-    A loadable which contains other loadables. This means that it has three
-    stages - unloaded, info loaded, and loaded.
+    A Loadable that holds Loadables, which may be ``ReplayContainer``\s or
+    ``Replay``\s.
 
-    When info loaded, the :class:`~LoadableContainer` has :class:`~Loadable`\s
-    but they are unloaded.
+    Parameters
+    ----------
+    loadables: list[:class:`~.Loadable`]
+        The loadables to hold.
+    cache: bool
+        Whether to cache the loadables once they are loaded. This will be
+        overriden by a ``cache`` option set by a :class:`~Loadable` in
+        ``loadables``. This only affects child loadables when they do not have
+        a ``cache`` option set.
 
-    When loaded, the :class:`~LoadableContainer` has loaded :class:`Loadable`\s.
+    Notes
+    -----
+    This class is intended for situations when you have a list of replays and
+    replay containers, but no way to separate or distinguish them. If you want
+    to get, say, all the replays out of that list (whether they come from
+    replay subclasses already in the list, or the replays held by a replay
+    container in the list), this loadable container class has the logic to do
+    that for you:
+
+    >>> lc = LoadableContainer(mixed_loadable_list)
+    >>> replays = lc.all_replays()
+
+    It can also be useful to info load the replay containers in the list,
+    without first filtering the list to remove any replay subclasses:
+
+    >>> cg.load_info(lc)
+    >>> # all loadable containers in the list are now info loaded
+    >>> cg.load(lc)
+    >>> # all loadables in the list are now loaded
+
+    You are very unlikely to want to subclass this class. If you want to add a
+    new loadable that holds replays, subclass ``ReplayContainer``.
+    """
+
+    def __init__(self, loadables, cache=None):
+        super().__init__(cache)
+        self.loadables = loadables
+
+    def all_replays(self):
+        """
+        All the :class:`~.Replay`\s in this loadable container.
+
+        Returns
+        -------
+        list[:class:`~Replay`]
+            All the replays in this loadable container.
+
+        Warnings
+        --------
+        This list will almost may be incomplete if you do not call
+        :func:`~.load_info` on this loadable container first, as any replay
+        containers held in this container will likely not have references to
+        their replays yet.
+        """
+        replays = []
+        for loadable in self.loadables:
+            if isinstance(loadable, ReplayContainer):
+                replays += loadable.all_replays()
+            else:
+                # loadable is a Replay if it's not a ReplayContainer
+                replays.append(loadable)
+        return replays
+
+    def load(self, loader, cache):
+        cascade_cache = cache if self.cache is None else self.cache
+        for loadable in self.loadables:
+            loadable.load(loader, cascade_cache)
+
+    def load_info(self, loader):
+        for loadable in self.loadables:
+            if isinstance(loadable, ReplayContainer):
+                loadable.load_info(loader)
+
+    def __eq__(self, loadable):
+        if not isinstance(loadable, LoadableContainer):
+            return False
+        return self.all_replays() == loadable.all_replays()
+
+    def __len__(self):
+        return len(self.loadables)
+
+    def __getitem__(self, key):
+        if isinstance(key, slice):
+            return self.loadables[key.start:key.stop:key.step]
+        return self.loadables[key]
+
+    def __iter__(self):
+        return iter(self.loadables)
+
+class ReplayContainer(Loadable):
+    """
+    A Loadable that holds Replay subclasses, and which has an additional state
+    between "unloaded" and "loaded" called "info loaded".
+
+    ReplayContainers start unloaded and become info loaded when
+    :meth:`~circleguard.circleguard.Circleguard.load_info` is called. They
+    become fully loaded when :meth:`~.circleguard.circleguard.Circleguard.load`
+    is called (and if this is called when the ReplayContainer is in the unloaded
+    state, :meth:`~Loadable.load` will load info first, then load the replays,
+    effectively skipping the info loaded state).
+
+    In the unloaded state, the container has no actual Replay objects. It may
+    have limited knowledge about their number or type.
+
+    In the info loaded state, the container has references to Replay objects,
+    but those Replay objects are unloaded.
+
+    In the loaded state, the Replay objects in the container are loaded.
     """
     def __init__(self, cache):
         super().__init__(cache)
@@ -74,49 +179,25 @@ class LoadableContainer(Loadable):
 
     def load(self, loader, cache=None):
         """
-        Loads all :class:`~circleguard.loadable.Loadable`\s contained by this
+        Loads all :class:`~circleguard.loadables.Loadable`\s contained by this
         loadable container.
 
         Parameters
         ----------
         loader: :class:`~circleguard.loader.Loader`
-            The loader to load the :class:`~circleguard.loadable.Loadable`\s
+            The loader to load the :class:`~circleguard.loadables.Loadable`\s
             with.
         """
         if self.loaded:
             return
         cascade_cache = cache if self.cache is None else self.cache
         self.load_info(loader)
-        for loadable in self.all_loadables():
-            loadable.load(loader, cascade_cache)
+        for replay in self.all_replays():
+            replay.load(loader, cascade_cache)
         self.loaded = True
 
-    # TODO in core 5.0.0: don't provide a default implementation of this method.
-    # we currently assume that users will only use LoadableContainer for two
-    # things:
-    # * needs to define ``Replay`` instances on load info and does not hold any
-    #   ``LoadableContainer``s. In which case you should use ReplayContainer,
-    #   which has ``load_info`` as abstract
-    # * does not need to define any ``Replay`` instances on load info, and holds
-    #   ``LoadableContainer``s. In which case you should use ``Check`` or
-    #   subclass LoadableContainer
-    # But there is a third option - needing to define ``Replay`` instances on
-    # load info, *and* holding ``LoadableContainer``s. In which case this
-    # default does not do what we want. It's not worth it to define this method
-    # here, so move this implementation to ``Check`` (or maybe even split into
-    # a further two subclasses, "does not create anything new on load info" which
-    # Check would inherit from, and "does create new Loadables on load info",
-    # which is the third case here).
-    def load_info(self, loader):
-        if self.info_loaded:
-            return
-        for loadable in self.all_loadables():
-            if isinstance(loadable, LoadableContainer):
-                loadable.load_info(loader)
-        self.info_loaded = True
-
     @abc.abstractmethod
-    def all_loadables(self):
+    def load_info(self, loader):
         pass
 
     @abc.abstractmethod
@@ -128,7 +209,7 @@ class LoadableContainer(Loadable):
         --------
         If you want an accurate list of :class:`~.Replay`\s in this instance,
         you must call :func:`~circleguard.circleguard.Circleguard.load` on this
-        instance before :func:`~Map.all_replays`. Otherwise, this
+        instance before :func:`~.all_replays`. Otherwise, this
         instance is not info loaded, and does not have a complete list of
         replays it represents.
         """
@@ -141,152 +222,11 @@ class LoadableContainer(Loadable):
         replays = self.all_replays()
         if isinstance(key, slice):
             return replays[key.start:key.stop:key.step]
-        else:
-            return replays[key]
+        return replays[key]
 
     def __iter__(self):
         return iter(self.all_replays())
 
-
-class ReplayContainer(LoadableContainer):
-    """
-    A LoadableContainer that only holds Replays and subclasses thereof.
-
-    ReplayContainer's start unloaded and become info loaded when
-    :meth:`~LoadableContainer.load_info` is called. They become fully
-    loaded when :meth:`~Loadable.load`
-    is called (and if this is called when the ReplayContainer is in the
-    unloaded state, :meth:`~Loadable.load` will load info first,
-    then load the replays.)
-
-    In the unloaded state, the container has no actual Replay objects. It may
-    have limited knowledge about their number or type.
-
-    In the info loaded state, the container has references to Replay objects,
-    but those Replay objects are unloaded.
-
-    In the loaded state, the Replay objects are loaded.
-    """
-    def __init__(self, cache):
-        super().__init__(cache)
-
-    # redefine as abstract. The LoadableContainer definition serves as a good
-    # default implementation for other user-defined loadable containers, but not
-    # for ReplayContainers and user-defined subclasses thereof.
-    @abc.abstractmethod
-    def load_info(self, loader):
-        pass
-
-    def all_loadables(self):
-        # ReplayContainers only contain replays, so these two functions
-        # are equivalent
-        return self.all_replays()
-
-
-class Check(LoadableContainer):
-    """
-    Organizes :class:`~.Loadable`\s and what to investigate them for.
-
-    Parameters
-    ----------
-    loadables: list[:class:`~.Loadable`]
-        The loadables to hold for investigation.
-    cache: bool
-        Whether to cache the loadables once they are loaded. This will be
-        overriden by a ``cache`` option set by a :class:`~Loadable` in
-        ``loadables``. It only affects children loadables when they do not have
-        a ``cache`` option set.
-    loadables2: list[:class:`~.Loadable`]
-        A second set of loadables to hold. Useful for partitioning loadables for
-        a replay stealing investigations.
-    """
-
-    def __init__(self, loadables, cache, loadables2=None):
-        super().__init__(cache)
-        self.log = logging.getLogger(__name__ + ".Check")
-        self.loadables1 = [loadables] if isinstance(loadables, Loadable) else loadables
-        self.loadables2 = [loadables2] if isinstance(loadables2, Loadable) else [] if loadables2 is None else loadables2
-
-    def all_loadables(self):
-        """
-        Returns all the :class:`~circleguard.loadable.Loadable`\s contained by
-        this check.
-
-        Returns
-        -------
-        list[:class:`~Loadable`]
-            All the loadables in this check.
-
-        See Also
-        --------
-        :func:`~Check.all_replays`.
-
-        Notes
-        -----
-        :class:`~circleguard.loadable.Loadable`\s are very different from
-        :class:`~circleguard.loadable.Replay`\s -
-        ``len(check.all_loadables())`` will *not* return the number of
-        replays in the check, for instance.
-        """
-        return self.loadables1 + self.loadables2
-
-    def all_replays(self):
-        """
-        Returns all the :class:`~.Replay`\s in this check. Contrast with
-        :func:`~Check.all_loadables`, which returns all the
-        :class:`~.Loadable`\s in this check.
-
-        Returns
-        -------
-        list[:class:`~Replay`]
-            All the replays in this check.
-        """
-        return self.all_replays1() + self.all_replays2()
-
-    def all_replays1(self):
-        """
-        Returns all the :class:`~.Replay`\s contained by ``loadables1`` of this
-        check.
-
-        Returns
-        -------
-        list[:class:`~Replay`]
-            All the replays contained by ``loadables1`` of this check.
-        """
-        replays = []
-        for loadable in self.loadables1:
-            if isinstance(loadable, LoadableContainer):
-                replays += loadable.all_replays()
-            else:
-                replays.append(loadable) # loadable is a Replay
-        return replays
-
-    def all_replays2(self):
-        """
-        Returns all the :class:`~.Replay`\s contained by ``loadables2`` of this
-        check.
-
-        Returns
-        -------
-        list[:class:`~Replay`]
-            All the replays contained by ``loadables2`` of this check.
-        """
-        replays2 = []
-        for loadable in self.loadables2:
-            if isinstance(loadable, LoadableContainer):
-                replays2 += loadable.all_replays()
-            else:
-                replays2.append(loadable) # loadable is a Replay
-        return replays2
-
-    def __eq__(self, loadable):
-        if not isinstance(loadable, Check):
-            return False
-        return self.all_replays() == loadable.all_replays()
-
-    def __repr__(self):
-        return (f"Check(loadables={self.loadables1},loadables2={self.loadables2},"
-                f"loaded={self.loaded})")
 
 
 class Map(ReplayContainer):
@@ -300,10 +240,11 @@ class Map(ReplayContainer):
     span: str or Span
         A comma separated list of ranges of top plays to retrieve.
         ``span="1-3,6,2-4"`` -> replays in the range ``[1,2,3,4,6]``.
-    mods: :class:`~.enums.ModCombination`
+    mods: :class:`~circleguard.mod.ModCombination`
         If passed, only represent replays played with this exact mod
         combination. Due to limitations with the api, fuzzy matching is not
-        implemented. <br>
+        implemented.
+        <br>
         This is applied before span``. That is, if ``span="1-2"``
         and ``mods=Mod.HD``, the top two ``HD`` plays on the map are
         represented.
@@ -320,8 +261,11 @@ class Map(ReplayContainer):
     def load_info(self, loader):
         if self.info_loaded:
             return
-        for info in loader.replay_info(self.map_id, self.span, mods=self.mods):
-            self.replays.append(ReplayMap(info.map_id, info.user_id, info.mods, cache=self.cache, info=info))
+        for info in loader.replay_info(self.map_id, span=self.span,
+            mods=self.mods):
+            r = ReplayMap(info.map_id, info.user_id, info.mods,
+                cache=self.cache, info=info)
+            self.replays.append(r)
         self.info_loaded = True
 
     def all_replays(self):
@@ -335,7 +279,8 @@ class Map(ReplayContainer):
 
     def __repr__(self):
         return (f"Map(map_id={self.map_id},cache={self.cache},mods={self.mods},"
-                f"span={self.span},replays={self.replays},loaded={self.loaded})")
+                f"span={self.span},replays={self.replays},"
+                f"loaded={self.loaded})")
 
     def __str__(self):
         return f"Map {self.map_id}"
@@ -352,10 +297,11 @@ class User(ReplayContainer):
     span: str or Span
         A comma separated list of ranges of top plays to retrieve.
         ``span="1-3,6,2-4"`` -> replays in the range ``[1,2,3,4,6]``.
-    mods: :class:`~.enums.ModCombination`
+    mods: :class:`~circleguard.mod.ModCombination`
         If passed, only represent replays played with this exact mod
         combination. Due to limitations with the api, fuzzy matching is not
-        implemented. <br>
+        implemented.
+        <br>
         This is applied before ``span``. That is, if ``span="1-2"``
         and ``mods=Mod.HD``, the user's top two ``HD`` plays are represented.
     cache: bool
@@ -365,7 +311,8 @@ class User(ReplayContainer):
         Replays are filtered on this basis after ``mods`` and ``span``
         are applied. True by default.
     """
-    def __init__(self, user_id, span, mods=None, cache=None, available_only=True):
+    def __init__(self, user_id, span, mods=None, cache=None, \
+        available_only=True):
         super().__init__(cache)
         self.replays = []
         self.user_id = user_id
@@ -376,10 +323,12 @@ class User(ReplayContainer):
     def load_info(self, loader):
         if self.info_loaded:
             return
-        for info in loader.get_user_best(self.user_id, span=self.span, mods=self.mods):
+        for info in loader.get_user_best(self.user_id, self.span, self.mods):
             if self.available_only and not info.replay_available:
                 continue
-            self.replays.append(ReplayMap(info.map_id, info.user_id, info.mods, cache=self.cache, info=info))
+            r = ReplayMap(info.map_id, info.user_id, info.mods, self.cache,
+                info=info)
+            self.replays.append(r)
         self.info_loaded = True
 
     def all_replays(self):
@@ -412,7 +361,8 @@ class MapUser(ReplayContainer):
         Replays are filtered on this basis after ``span`` is applied.
         True by default.
     """
-    def __init__(self, map_id, user_id, span=Loader.MAX_MAP_SPAN, cache=None, available_only=True):
+    def __init__(self, map_id, user_id, span=Loader.MAX_MAP_SPAN, cache=None, \
+        available_only=True):
         super().__init__(cache)
         self.replays = []
         self.map_id = map_id
@@ -423,10 +373,13 @@ class MapUser(ReplayContainer):
     def load_info(self, loader):
         if self.info_loaded:
             return
-        for info in loader.replay_info(self.map_id, span=self.span, user_id=self.user_id, limit=False):
+        for info in loader.replay_info(self.map_id, span=self.span,
+            user_id=self.user_id, limit=False):
             if self.available_only and not info.replay_available:
                 continue
-            self.replays.append(ReplayMap(info.map_id, info.user_id, info.mods, cache=self.cache, info=info))
+            r = ReplayMap(info.map_id, info.user_id, info.mods, self.cache,
+                info=info)
+            self.replays.append(r)
         self.info_loaded = True
 
     def all_replays(self):
@@ -435,8 +388,8 @@ class MapUser(ReplayContainer):
     def __eq__(self, loadable):
         if not isinstance(loadable, MapUser):
             return False
-        return (self.map_id == loadable.map_id and self.user_id == loadable.user_id
-                and self.span == loadable.span)
+        return (self.map_id == loadable.map_id and
+            self.user_id == loadable.user_id and self.span == loadable.span)
 
 
 class ReplayCache(ReplayContainer):
@@ -455,9 +408,10 @@ class ReplayCache(ReplayContainer):
 
     Notes
     -----
-    :meth:`~.load_info` is an expensive operation for large databases created
-    on circlecore version 4.3.5 or earlier, as they do not have the necessary
-    indexes.
+    :meth:`~circleguard.circleguard.Circleguard.load_info` is an expensive
+    operation for large databases created on circlecore version 4.3.5 or
+    earlier, as they do not have the necessary indexes.
+    <br>
     For databases created in later versions, this is a nonissue and the lookup
     is fast.
     """
@@ -527,8 +481,8 @@ class ReplayDir(ReplayContainer):
         super().__init__(cache)
         self.dir_path = Path(dir_path)
         if not self.dir_path.is_dir():
-            raise ValueError(f"Expected path pointing to {self.dir_path} to be "
-                              "a directory")
+            raise ValueError(f"Expected path pointing to {self.dir_path} to be"
+                " a directory")
         self.replays = []
 
     def load_info(self, loader):
@@ -548,29 +502,23 @@ class ReplayDir(ReplayContainer):
         return self.dir_path == other.dir_path
 
 
-# TODO in core 5.0.0  centralize as much logic as possible in ``Replay``.
-# We currently do various attribute checks like
-# ``if replay.replay_data is None``; this should be a `has_data()` method
-# instead. Similarly, ``version`` should be provided by the replay, along
-# with if it's a concrete version or just a guess, or ``None`` if we don't even
-# have a guess.
 class Replay(Loadable):
     """
     A replay played by a player.
 
     Parameters
     ----------
-    weight: :class:`~.enums.RatelimitWeight`
+    weight: :class:`~circleguard.utils.RatelimitWeight`
         How much it 'costs' to load this replay from the api.
     cache: bool
         Whether to cache this replay once it is loaded.
 
     Attributes
     ----------
-    game_version: int
-        The version of the game that the play was set on.
+    game_version: :class:`~circleguard.game_version.GameVersion`
+        Information about the version of osu! the replay was played on.
     timestamp: :class:`datetime.datetime`
-        When this replay was played.
+        When the replay was played.
     map_id: int
         The id of the map the replay was played on, or 0 if
         unknown or on an unsubmitted map.
@@ -581,40 +529,126 @@ class Replay(Loadable):
         given instead of 0.
     username: str
         The username of the player who played the replay.
-    mods: :class:`~.enums.ModCombination`
+    mods: :class:`~circleguard.mods.ModCombination`
         The mods the replay was played with.
     replay_id: int
         The id of the replay, or 0 if the replay is unsubmitted.
+    keydowns: ndarray[int]
+        The keydowns for each frame of the replay. Keydowns are the keys pressed
+        in that frame that were not pressed in the previous frame. See
+        :meth:`~.keydowns` for more details.
     t: ndarray[int]
-        A 1d array containing the timestamp for each frame. <br>
+        A 1d array containing the timestamp for each frame.
+        <br>
         This is only nonnull after the replay has been loaded.
     xy: ndarray[float]
         A 2d, two column array, containing the ``x`` and ``y`` coordinates of
-        each frame in the first and second column respectively. <br>
+        each frame in the first and second column respectively.
+        <br>
         This is only nonnull after the replay has been loaded.
     k: ndarray[int]
-        A 1d array containing the keys pressed for each frame. <br>
+        A 1d array containing the keys pressed for each frame.
+        <br>
         This is only nonnull after the replay has been loaded.
     """
     def __init__(self, weight, cache):
         super().__init__(cache)
         self.weight = weight
 
-        # remains ``None`` until replay is loaded
-        self.game_version = None
+        # These attributes might or might not be set once the replay loads.
+        # Ideally, a replay would provide all of these attributes, but there are
+        # some cases when only a subset is available. <br>
+        # If only some of these attributes are set after the replay is loaded,
+        # some ``Circleguard`` methods may reject this replay, as it does not
+        # contain the information necessary to do whatever the method needs to.
+        # <br>
+        # For instance, if the replay provides ``replay_data`` but not ``mods``,
+        # ``Circleguard#similarity`` will reject it, as we will not know whether
+        # whether ``Mod.HR`` was enabled on the replay, and thus whether to flip
+        # the replay before comparing it to another one.
+
+        # replays have no information about their game version by default.
+        # Subclasses might set this if they have more information to provide
+        # about their version, whether on instantiation or after being loaded.
+        self.game_version = NoGameVersion()
         self.timestamp    = None
-        self.map_id       = None
+        # declared as a property with a getter and setter so we can set
+        # map_info's map_id attribute automatically
+        self._map_id       = None
+        # replays have no information about their map by default.
+        self.map_info     = MapInfo()
         self.username     = None
         self.user_id      = None
         self.mods         = None
         self.replay_id    = None
         self.replay_data  = None
 
-        # remains ``None``` when replay is unloaded or loaded but with no data
-        self.t = None
-        self.xy = None
-        self.k = None
-        self._keydowns = None
+        # These attributes remain ``None``` when replay is unloaded or loaded
+        # but with no data.
+        self.t            = None
+        self.xy           = None
+        self.k            = None
+        self._keydowns    = None
+
+    def has_data(self):
+        """
+        Whether this replay has any replay data.
+
+        Returns
+        -------
+        bool
+            Whether this replay has any replay data.
+
+        Notes
+        -----
+        If this replay is unloaded, it is guaranteed to not have any replay
+        data. But if the replay is loaded, it is not guaranteed to have any
+        replay data. Some replays do not have any replay data available from
+        the api, even after being loaded.
+        """
+        if not self.loaded:
+            return False
+        return bool(self.replay_data)
+
+    def beatmap(self, library):
+        """
+        The beatmap this replay was played on.
+
+        Parameters
+        ----------
+        library: :class:`slider.library.Library`
+            The library used by the calling
+            :class:`circleguard.circleguard.Circleguard` instance. Replays which
+            have already been downloaded and are cached in this library may be
+            returned here instead of redownloading them.
+            <br>
+            Beatmaps which we download or create in this method, but were not
+            previously stored in the library, may also be stored into the
+            library for future use as a result of calling this method.
+
+        Returns
+        -------
+        :class:`slider.beatmap.Beatmap`
+            The beatmap this replay was played on.
+        None
+            If we do not know what beatmap this replay was played on.
+        """
+        if not self.map_info.available():
+            return None
+
+        # prefer loading from disk, it's cheaper than potentially downloading
+        # the beatmap from osu! servers
+
+        if self.map_info.path:
+            # by default we don't save beatmaps that are already saved on disk.
+            # Subclasses should override `#beatmap` and pass `copy=True` here
+            # in their overridden method if they want to copy the beatmap to the
+            # library's directory.
+            return library.beatmap_from_path(self.map_info.path)
+
+        if self.map_info.map_id:
+            return library.lookup_by_id(self.map_info.map_id, download=True,
+                save=True)
 
     def _process_replay_data(self, replay_data):
         """
@@ -651,25 +685,25 @@ class Replay(Loadable):
         replay_data = iter(replay_data)
         # The following comments in this method are guesswork, but seems to
         # accurately describe replays. This references the "first" frame
-        # assuming that we have already removed the truly first zero time frame,
-        # if it is present. So technically the "first" frame below may be the
-        # second frame.
+        # assuming that we have already removed the truly first zero time
+        # frame, if it is present. So technically the "first" frame below may
+        # be the second frame.
         # There are two possibilities for replays:
         # * for replays with a skip in the beginning, the first frame time is
         #   the skip duration. The next frame after that will have a negative
         #   time, to account for the replay data before the skip.
-        # * for replays without a skip in the beginning, the first frame time is
-        #   -1.
+        # * for replays without a skip in the beginning, the first frame time
+        #   is -1.
         # Since in the first case the first frame time is a large positive,
         # this would make ``highest_running_t`` large and cause all replay data
         # before the skip to be ignored. To solve this, we initialize
         # ``running_t`` to the first frame's time.
         running_t = next(replay_data).time_since_previous_action
-        # We consider negative time frames in the middle of replays to be valid,
-        # with a caveat. Their negative time is counted toward ``running_t``
-        # (that is, decreases ``running_t``), but any frames after it are
-        # ignored, until the total time passed of ignored frames is greater than
-        # or equal to the negative frame.
+        # We consider negative time frames in the middle of replays to be
+        # valid, with a caveat. Their negative time is counted toward
+        # ``running_t`` (that is, decreases ``running_t``), but any frames
+        # after it are ignored, until the total time passed of ignored frames
+        # is greater than or equal to the negative frame.
         # There's one more catch - the frame that brings us *out* of this
         # "negative time" section where we're ignoring frames will cause a
         # special frame to be inserted, which has the same time as the frame
@@ -683,15 +717,16 @@ class Replay(Loadable):
         # The last positive frame we encountered before entering a negative
         # section.
         last_positive_frame = None
-        # the running time when we encountered ``last_positive_fram``. We do not
-        # store this information in each individual frame.
+        # the running time when we encountered ``last_positive_frame``. We need
+        # to save this as we do not store this information in each individual
+        # frame.
         last_positive_frame_cum_time = None
         previous_frame = None
         for e in replay_data:
-            # check if we were in a negative section of the play at the previous
-            # frame (f0) before applying the current frame (f1), so we can
-            # apply special logic if f1 is the frame that gets us out of the
-            # negative section.
+            # check if we were in a negative section of the play at the
+            # previous frame (f0) before applying the current frame (f1), so we
+            # can apply special logic if f1 is the frame that gets us out of
+            # the negative section.
             was_in_negative_section = running_t < highest_running_t
 
             e_t = e.time_since_previous_action
@@ -708,8 +743,8 @@ class Replay(Loadable):
                 previous_frame = e
                 continue
 
-            # if we get here, f1 brought us out of the negative section. In this
-            # case, osu! actually inserts a new frame, with:
+            # if we get here, f1 brought us out of the negative section. In
+            # this case, osu! actually inserts a new frame, with:
             # * t = the cumulative time at the last positive frame (yes, this
             #   means there are two frames at the same time in the replay
             #   playback).
@@ -746,7 +781,8 @@ class Replay(Loadable):
         xy = np.array([block[1], block[2]], dtype=float).T
         k = np.array(block[3], dtype=int)
 
-        # sort our data by t. Stable so we don't reorder frames with equal times
+        # sort our data by t. Stable so we don't reorder frames with equal
+        # times
         t_sort = np.argsort(t, kind="stable")
         t = t[t_sort]
         xy = xy[t_sort]
@@ -757,28 +793,39 @@ class Replay(Loadable):
         self.k = k
 
     @property
+    def map_id(self):
+        return self._map_id
+
+    @map_id.setter
+    def map_id(self, map_id):
+        self._map_id = map_id
+        self.map_info.map_id = map_id
+
+    @property
     def keydowns(self):
         """
-        Returns a list of the keys pressed for each frame that were not pressed
-        in the previous frame.
+        A list of the keys pressed for each frame that were not pressed in the
+        previous frame.
 
         Examples
         --------
         If the first frame (``f1``) has keys ``K1`` and ``f2`` has keys
         ``K1 + K2``, then ``keydowns[1]`` is ``K2``.
         """
-        if not self.replay_data:
+        if not self.has_data():
             return None
-        # can't do `if not self._keydowns` because the truth value of an ndarray
-        # is ambiguous
+        # can't do `if not self._keydowns` because the truth value of an
+        # ndarray is ambiguous
         if self._keydowns is None:
             keypresses = self.k & KEY_MASK
             self._keydowns = keypresses & ~np.insert(keypresses[:-1], 0, 0)
         return self._keydowns
 
     def __repr__(self):
-        return (f"Replay(timestamp={self.timestamp},map_id={self.map_id},user_id={self.user_id},mods={self.mods},"
-               f"replay_id={self.replay_id},weight={self.weight},loaded={self.loaded},username={self.username})")
+        return (f"Replay(timestamp={self.timestamp},map_id={self.map_id},"
+            f"user_id={self.user_id},mods={self.mods},"
+            f"replay_id={self.replay_id},weight={self.weight},"
+            f"loaded={self.loaded},username={self.username})")
 
     def __str__(self):
         return f"Replay by {self.username} on {self.map_id}"
@@ -801,6 +848,24 @@ class ReplayMap(Replay):
         will be loaded.
     cache: bool
         Whether to cache this replay once it is loaded.
+
+    Notes
+    -----
+    The following replay-related attributes are available (not ``None``) when
+    this replay is unloaded:
+
+    * map_id
+    * user_id
+    * mods (if passed)
+
+    In addition to the above, the following replay-related attributes are
+    available (not ``None``) when this replay is loaded:
+
+    * timestamp
+    * username
+    * mods
+    * replay_id
+    * replay_data
     """
 
     def __init__(self, map_id, user_id, mods=None, cache=None, info=None):
@@ -835,7 +900,8 @@ class ReplayMap(Replay):
         If ``replay.loaded`` is ``True``, this method has no effect.
         ``replay.loaded`` is set to ``True`` after this method is finished.
         """
-        # only listen to the parent's cache if ours is not set. Lower takes precedence
+        # only listen to the parent's cache if ours is not set. Lower takes
+        # precedence
         cache = cache if self.cache is None else self.cache
         self.log.debug("Loading %r", self)
         if self.loaded:
@@ -844,9 +910,14 @@ class ReplayMap(Replay):
         if self.info:
             info = self.info
         else:
-            info = loader.replay_info(self.map_id, user_id=self.user_id, mods=self.mods)
+            info = loader.replay_info(self.map_id, user_id=self.user_id,
+                mods=self.mods)
 
         self.timestamp = info.timestamp
+        # estimate version with timestamp, this is only accurate if the user
+        # keeps their game up to date
+        self.game_version = GameVersion.from_datetime(self.timestamp,
+            concrete=False)
         self.username = info.username
         self.mods = info.mods
         self.replay_id = info.replay_id
@@ -858,34 +929,36 @@ class ReplayMap(Replay):
 
     def __eq__(self, loadable):
         """
-        Warning
-        -------
-        This equality check does not take into account attributes such as
-        ``cache``. This is intentional - equality here means "do they represent
-        the same replay".
+        Whether the two maps are equal.
 
-        TODO possible false positive if a user overwrites their score inbetween
-        loading two otherwise identical replay maps. Similar situation to
-        ReplayPath equality. Could equality check replay data instead if both
-        are loaded.
+        Notes
+        -----
+        This does not take into account the
+        ``cache`` attribute, because equality here means "do they represent the
+        same replays".
         """
         if not isinstance(loadable, ReplayMap):
             return False
-        return self.map_id == loadable.map_id and self.user_id == loadable.user_id and self.mods == loadable.mods
+        if self.has_data() and loadable.has_data():
+            return self.replay_data == loadable.replay_data
+        return (self.map_id == loadable.map_id and
+            self.user_id == loadable.user_id and self.mods == loadable.mods)
 
     def __hash__(self):
         return hash((self.map_id, self.user_id, self.mods))
 
     def __repr__(self):
         if self.loaded:
-            return (f"ReplayMap(timestamp={self.timestamp},map_id={self.map_id},user_id={self.user_id},mods={self.mods},"
-                f"cache={self.cache},replay_id={self.replay_id},loaded={self.loaded},username={self.username})")
-        else:
-            return (f"ReplayMap(map_id={self.map_id},user_id={self.user_id},mods={self.mods},cache={self.cache},"
-                    f"loaded={self.loaded})")
+            return (f"ReplayMap(timestamp={self.timestamp},map_id={self.map_id}"
+            f",user_id={self.user_id},mods={self.mods},cache={self.cache},"
+            f"replay_id={self.replay_id},loaded={self.loaded},"
+            f"username={self.username})")
+        return (f"ReplayMap(map_id={self.map_id},user_id={self.user_id},"
+                f"mods={self.mods},cache={self.cache},loaded={self.loaded})")
 
     def __str__(self):
-        return f"{'Loaded' if self.loaded else 'Unloaded'} ReplayMap by {self.user_id} on {self.map_id}"
+        return (f"{'Loaded' if self.loaded else 'Unloaded'} ReplayMap by "
+            f"{self.user_id} on {self.map_id}")
 
 
 class ReplayPath(Replay):
@@ -899,17 +972,30 @@ class ReplayPath(Replay):
     cache: bool
         Whether to cache this replay once it is loaded. Note that currently
         we do not cache :class:`~.ReplayPath` regardless of this parameter.
+
+    Notes
+    -----
+    ReplayPaths have no replay-related attributes available (not ``None``) when
+    they are unloaded.
+
+    The following replay-related attributes are available (not ``None``) when
+    this replay is loaded:
+
+    * timestamp
+    * map_id
+    * username
+    * user_id
+    * mods
+    * replay_id
+    * beatmap_hash
+    * replay_data
     """
 
     def __init__(self, path, cache=None):
         super().__init__(RatelimitWeight.LIGHT, cache)
         self.log = logging.getLogger(__name__ + ".ReplayPath")
-        # TODO convert path to pathlib.Path and use #absolute
-        self.path = path
+        self.path = Path(path).absolute()
         self.beatmap_hash = None
-        # @deprecated
-        # TODO remove in core 5.x.x
-        self.hash = self.beatmap_hash
 
     def load(self, loader, cache):
         """
@@ -930,20 +1016,19 @@ class ReplayPath(Replay):
         ``replay.loaded`` is set to ``True`` after this method is finished.
         """
 
-        # we don't cache local replays currently. Ignore cache option for if/when we need it
         self.log.debug("Loading ReplayPath %r", self)
         if self.loaded:
             self.log.debug("%s already loaded, not loading", self)
             return
 
         loaded = circleparse.parse_replay_file(self.path)
-        self.game_version = loaded.game_version
+        self.game_version = GameVersion(loaded.game_version, concrete=True)
         self.timestamp = loaded.timestamp
         self.map_id = loader.map_id(loaded.beatmap_hash)
         self.username = loaded.player_name
         # our `user_id` attribute is lazy loaded, so we need to retain the
         # `Loader#user_id` function to use later to load it.
-        self.user_id_func = loader.user_id
+        self._user_id_func = loader.user_id
         self._user_id = None
         self.mods = Mod(loaded.mod_combination)
         self.replay_id = loaded.replay_id
@@ -955,8 +1040,11 @@ class ReplayPath(Replay):
 
     @property
     def user_id(self):
+        # we don't have a user_id_func if we're not loaded, so early return
+        if not self.loaded:
+            return None
         if not self._user_id:
-            self._user_id = self.user_id_func(self.username)
+            self._user_id = self._user_id_func(self.username)
         return self._user_id
 
     @user_id.setter
@@ -965,26 +1053,30 @@ class ReplayPath(Replay):
 
     def __eq__(self, loadable):
         """
-        Warnings
-        --------
-        XXX replays with the same path but different replay data (because the
-        file at the path got changed for one but not the other) will return
-        True in an equality check when they are not necessarily representing
-        the same replay.
+        Whether these replay paths are equal.
 
-        TODO possible solution - check replay_data equality if both are loaded?
-        might be unexpected behavior to some
+        Notes
+        -----
+        If one or both replay paths don't have replay data, this checks path
+        equality. If both replay paths have replay data, this checks the
+        equality of their replay data.
+        <br>
+        The reason we don't check path after both are loaded is to avoid
+        true in situations like this:
+
         ```
         r1 = ReplayPath("./1.osr")
         cg.load(r1)
         # change the file located at ./1.osr to another osr file
         r2 = ReplayPath("./1.osr")
         cg.load(r2)
-        r1 == r2 # True, but they contain different replay_data
+        r1 == r2 # should be False, as they have differing replay data
         ```
         """
         if not isinstance(loadable, ReplayPath):
             return False
+        if self.has_data() and loadable.has_data():
+            return self.replay_data == loadable.replay_data
         return self.path == loadable.path
 
     def __hash__(self):
@@ -992,16 +1084,18 @@ class ReplayPath(Replay):
 
     def __repr__(self):
         if self.loaded:
-            return (f"ReplayPath(path={self.path},map_id={self.map_id},user_id={self.user_id},mods={self.mods},"
-                    f"replay_id={self.replay_id},weight={self.weight},loaded={self.loaded},username={self.username})")
-        else:
-            return f"ReplayPath(path={self.path},weight={self.weight},loaded={self.loaded})"
+            return (f"ReplayPath(path={self.path},map_id={self.map_id},"
+                f"user_id={self.user_id},mods={self.mods},"
+                f"replay_id={self.replay_id},weight={self.weight},"
+                f"loaded={self.loaded},username={self.username})")
+        return (f"ReplayPath(path={self.path},weight={self.weight},"
+                f"loaded={self.loaded})")
 
     def __str__(self):
         if self.loaded:
-            return f"Loaded ReplayPath by {self.username} on {self.map_id} at {self.path}"
-        else:
-            return f"Unloaded ReplayPath at {self.path}"
+            return (f"Loaded ReplayPath by {self.username} on {self.map_id} at"
+                f" {self.path}")
+        return f"Unloaded ReplayPath at {self.path}"
 
 
 class ReplayString(Replay):
@@ -1016,6 +1110,30 @@ class ReplayString(Replay):
     cache: bool
         Whether to cache this replay once it is loaded. Note that currently
         we do not cache :class:`~.ReplayString` regardless of this parameter.
+
+    Notes
+    -----
+    ReplayPaths have no replay-related attributes available (not ``None``) when
+    they are unloaded.
+
+    The following replay-related attributes are available (not ``None``) when
+    this replay is loaded:
+
+    * timestamp
+    * map_id
+    * username
+    * user_id
+    * mods
+    * replay_id
+    * beatmap_hash
+    * replay_data
+
+    Examples
+    --------
+    >>> replay_data = open("replay.osr", "rb").read()
+    >>> r = ReplayString(replay_data)
+    >>> cg.load(r)
+    >>> print(cg.ur(r))
     """
 
     def __init__(self, replay_data_str, cache=None):
@@ -1035,7 +1153,8 @@ class ReplayString(Replay):
         cache: bool
             Whether to cache this replay after loading it. This only has an
             effect if ``self.cache`` is unset (``None``). Note that currently
-            we do not cache :class:`~.ReplayString` regardless of this parameter.
+            we do not cache :class:`~.ReplayString` regardless of this
+            parameter.
 
         Notes
         -----
@@ -1043,21 +1162,19 @@ class ReplayString(Replay):
         ``replay.loaded`` is set to ``True`` after this method is finished.
         """
 
-        # we don't cache local replays currently. Ignore cache option for
-        # if/when we need it
         self.log.debug("Loading ReplayString %r", self)
         if self.loaded:
             self.log.debug("%s already loaded, not loading", self)
             return
 
         loaded = circleparse.parse_replay(self.replay_data_str, pure_lzma=False)
-        self.game_version = loaded.game_version
+        self.game_version = GameVersion(loaded.game_version, concrete=True)
         self.timestamp = loaded.timestamp
         self.map_id = loader.map_id(loaded.beatmap_hash)
         self.username = loaded.player_name
         # our `user_id` attribute is lazy loaded, so we need to retain the
         # `Loader#user_id` function to use later to load it.
-        self.user_id_func = loader.user_id
+        self._user_id_func = loader.user_id
         self._user_id = None
         self.mods = Mod(loaded.mod_combination)
         self.replay_id = loaded.replay_id
@@ -1069,8 +1186,11 @@ class ReplayString(Replay):
 
     @property
     def user_id(self):
+        # we don't have a user_id_func if we're not loaded, so early return
+        if not self.loaded:
+            return None
         if not self._user_id:
-            self._user_id = self.user_id_func(self.username)
+            self._user_id = self._user_id_func(self.username)
         return self._user_id
 
     @user_id.setter
@@ -1087,29 +1207,52 @@ class ReplayString(Replay):
 
     def __repr__(self):
         if self.loaded:
-            return (f"ReplayString(len(replay_data_str)={len(self.replay_data_str)},"
-                    f"map_id={self.map_id},user_id={self.user_id},mods={self.mods},"
-                    f"replay_id={self.replay_id},weight={self.weight},"
-                    f"loaded={self.loaded},username={self.username})")
-        else:
-            return f"ReplayString(len(replay_data_str)={len(self.replay_data_str)})"
+            return (f"ReplayString(len(replay_data_str)="
+                f"{len(self.replay_data_str)},map_id={self.map_id},"
+                f"user_id={self.user_id},mods={self.mods},"
+                f"replay_id={self.replay_id},weight={self.weight},"
+                f"loaded={self.loaded},username={self.username})")
+        return f"ReplayString(len(replay_data_str)={len(self.replay_data_str)})"
 
     def __str__(self):
         if self.loaded:
             return f"Loaded ReplayString by {self.username} on {self.map_id}"
-        else:
-            return f"Unloaded ReplayString with {len(self.replay_data_str)} chars of data"
+        return (f"Unloaded ReplayString with {len(self.replay_data_str)} "
+            "chars of data")
 
 
 class ReplayID(Replay):
+    """
+    A :class:`~.Replay` that was submitted online and is represented by a unique
+    replay id.
+
+    Parameters
+    ----------
+    replay_id: int
+        The id of the replay.
+    cache: bool
+        Whether to cache this replay once it is loaded. Note that we currently
+        do not cache ReplayIDs.
+
+    Notes
+    -----
+    The following replay-related attributes are available (not ``None``) when
+    this replay is unloaded:
+
+    * replay_id
+
+    In addition to the above, the following replay-related attributes are
+    available (not ``None``) when this replay is loaded:
+
+    * replay_data
+    """
     def __init__(self, replay_id, cache=None):
         super().__init__(RatelimitWeight.HEAVY, cache)
         self.replay_id = replay_id
 
     def load(self, loader, cache):
-        # TODO file github issue about loading info from replay id,
-        # right now we can literally only load the replay data which
-        # is pretty useless if we don't have a map id or the mods used
+        # TODO file github issue about loading info from replay id, right now we
+        # can literally only load the replay data which isn't that useful
         cache = cache if self.cache is None else self.cache
         replay_data = loader.replay_data_from_id(self.replay_id, cache)
         self._process_replay_data(replay_data)
@@ -1122,6 +1265,10 @@ class ReplayID(Replay):
         return hash(self.replay_id)
 
 class CachedReplay(Replay):
+    """
+    This class is intended to be instantiated from
+    :func:`~.ReplayCache.load_info` and should not be instantiated manually.
+    """
     def __init__(self, user_id, map_id, mods, replay_data, replay_id):
         super().__init__(RatelimitWeight.NONE, False)
         self.user_id = user_id
@@ -1134,13 +1281,12 @@ class CachedReplay(Replay):
         if self.loaded:
             return
         decompressed = wtc.decompress(self.replay_data)
-        replay_data = circleparse.parse_replay(decompressed, pure_lzma=True).play_data
-        self._process_replay_data(replay_data)
+        parsed = circleparse.parse_replay(decompressed, pure_lzma=True)
+        self._process_replay_data(parsed.play_data)
         self.loaded = True
 
     def __eq__(self, other):
-        # could check more but replay_id is already a primary key, guaranteed unique
         return self.replay_id == other.replay_id
 
     def __hash__(self):
-        return hash((self.user_id, self.map_id, self.mods, self.replay_data, self.replay_id))
+        return hash(self.replay_id)

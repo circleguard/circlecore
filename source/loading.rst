@@ -1,121 +1,190 @@
 Loading
 =======
 
-How |Loadable|\s act before and after being loaded is not immediately obvious.
-This section explains in greater detail how loading works.
+|Replay|\s
+----------
 
-.. _Additional Loading Methods:
+When you instantiate a |Replay|, it doesn't have replay data, know the username or user id of who played it,
+know mods it was played with, or have very much information about itself at all.
 
-Additional Loading Methods
---------------------------
+Some |Replay|\s like |ReplayMap| have a little more information, because you passed it explicitly - for example, a
+|ReplayMap| knows the map id and user id of the replay (as well as the mods if passed), and a |ReplayID| knows the id of
+its replay.
 
-|cg.load| will load a given |Loadable|. This happens naturally when you
-call |cg.run|, but it is possible to need to have a loaded |Loadable| before
-you call |cg.run|, for various reasons.
+We can illustrate this by trying to access these attributes of replays directly after instantiation:
+
+.. code-block:: python
+
+    r_path = ReplayPath("/path/to/your/osr.osr")
+    r_map = ReplayMap(221777, 2757689)
+    r_id = ReplayID(2177560145)
+
+    print(r_path.path) # "/path/to/your/osr.osr"
+    print(r_path.replay_data) # None
+    print(r_path.map_id) # None
+    print(r_path.user_id) # None
+    print(r_path.replay_id) # None
+    print(r_path.mods) # None
+
+    print(r_map.replay_data) # None
+    print(r_map.map_id) # 221777
+    print(r_map.user_id) # 2757689
+    print(r_map.replay_id) # None
+    print(r_map.mods) # None
+
+    print(r_id.replay_data) # None
+    print(r_id.map_id) # None
+    print(r_id.user_id) # None
+    print(r_id.replay_id) # 2177560145
+    print(r_id.mods) # None
+
+As you can see, not many attributes are available to us. However, we can retrieve more information about a replay by "loading" it.
+A replay is called "unloaded" if it hasn't been loaded yet, and "loaded" if it has.
+
+To load a replay, call |cg.load| on it. Once the replay is loaded, most of these attributes will be filled with the
+proper value:
 
 .. code-block:: python
 
     cg = Circleguard("key")
+    r_map = ReplayMap(221777, 2757689)
+    cg.load(r_map)
+
+    # now we can access the real values of these attributes
+
+    print(len(r_map.replay_data)) # 26614
+    print(r_map.map_id) # 221777
+    print(r_map.user_id) # 2757689
+    print(r_map.replay_id) # 2832574010
+    print(r_map.mods) # Mod.HDHR
+
+.. warning::
+
+    Circleguard usually requests information about the replay from the api in order to fill in the gaps,
+    so a call to |cg.load| could take considerable (>100ms) time as it involves network requests.
+
+Depending on the replay subclass, some attributes may never be available because of api limitations or
+other issues. For instance, the api doesn't provide *any* information for a |ReplayID| besides its replay
+data, so almost none of its attributes will be filled, even after loading it:
+
+.. code-block:: python
+
+    cg = Circleguard("key")
+    r_id = ReplayID(2177560145)
+    cg.load(r_id)
+
+    print(len(r_id.replay_data)) # 20611
+    print(r_id.map_id) # None
+    print(r_id.user_id) # None
+    print(r_id.replay_id) # 2177560145
+    print(r_id.mods) # None
+
+To find exactly what attributes a replay subclass provides before and after it's loaded, see its class'
+documentation.
+
+|ReplayContainer|\s
+-------------------
+
+We've seen two stages (unloaded and loaded) with |Replay|\s, but |ReplayContainer|\s introduce a third stage between
+the two, called "info loaded".
+
+When a |ReplayContainer| is first instantiated, it is unloaded, just like a |Replay|. This means that it only knows
+the information you've given it - its map id if it's a |Map|, or its user id if it's a |User|, for instance. It has
+no idea what |Replay| objects it should have.
+
+You can change this by calling |cg.load_info| on the |ReplayContainer|. After doing so, it becomes info loaded and knows
+what |Replay| objects it has:
+
+.. code-block:: python
+
+    cg = Circleguard("key")
+    m = Map(221777, span="1-2")
+
+    print(list(m)) # [] since it's not info loaded!
+
+    cg.load_info(m)
+    print(list(m)) # [ReplayMap(...), ReplayMap(...)]
+
+But when a |ReplayContainer| is info loaded, its |Replay|\s are not loaded. This is the distinction between the info
+loaded and loaded stage - the former has unloaded replays, and the latter has loaded replays.
+
+.. code-block:: python
+
+    cg = Circleguard("key")
+    m = Map(221777, span="1-2")
+
+    cg.load_info(m)
+    for replay in m:
+        print(replay.loaded) # False
+        # because the replay is unloaded, we can't access
+        # very many of its attributes:
+        print(replay.replay_id) # None
+
+    cg.load(m):
+    for replay in m:
+        print(replay.loaded) # True
+        # but we can now
+        print(replay.replay_id) # some number
+
+When you call |cg.load| on a completely unloaded |ReplayContainer| (that is, not even info loaded), it info loads
+the |ReplayContainer|\s for you before loading it. So the following are equivalent:
+
+.. code-block:: python
+
+    # method 1
+    cg = Circleguard("key")
+    m = Map(221777, span="1-2")
+    cg.info_load(m)
+    cg.load(m)
+
+    # method 2 (preferred)
+    cg = Circleguard("key")
+    m = Map(221777, span="1-2")
+    cg.load(m)
+
+
+Creating Info Loaded |ReplayContainer|\s
+----------------------------------------
+
+Creating |ReplayContainer|\s and iterating over them immediately afterwards is so common that we provide convenience
+methods to create info loaded |ReplayContainer|\s with |Circleguard| - |cg.Map|, |cg.User|, and |cg.MapUser|. For example:
+
+.. code-block:: python
+
+    cg = Circleguard("key")
+    m = cg.Map(221777, span="1-2")
+    # since it's info loaded, we can iterate
+    for r in m:
+        print(r)
+
+    # the above is shorthand for
+    cg = Circleguard("key")
+    m = Map(221777, span=("1-2")
+    cg.load_info(m)
+    for r in m:
+        print(r)
+
+
+Each of these methods takes the exact same arguments as instantiating the relevant |ReplayContainer| normally.
+
+Checking State
+--------------
+
+You can check whether a |Replay| or |ReplayContainer| is unloaded, loaded, or info loaded by checking the
+``loaded`` and/or ``info_loaded`` attributes:
+
+.. code-block:: python
+
+    cg = Circleguard("key")
+
+    m = Map(221777, span="1")
+    print(m.info_loaded, m.loaded) # False, False
+    cg.load_info(m)
+    print(m.info_loaded, m.loaded) # True, False
+    cg.load(m)
+    print(m.info_loaded, m.loaded) # True, True
+
     r = ReplayMap(221777, 2757689)
-    print(r.loaded)
+    print(r.loaded) # False
     cg.load(r)
-    print(r.loaded)
-
-|cg.load_info| will load the info of a given |ReplayContainer|. See
-`Replay Containers`_ for exactly what that means. Like |cg.load|, this happens
-naturally during |cg.run|, but you may need an info loaded |ReplayContainer|
-before you call |cg.run|.
-
-.. code-block:: python
-
-    cg = Circleguard("key")
-    m = Map(221777, span="1")
-    print(m.info_loaded, m.loaded)
-    cg.load_info(m)
-    print(m.info_loaded, m.loaded)
-    cg.load(m)
-    print(m.info_loaded, m.loaded)
-
-Stages
-------
-
-Different |Loadable|\s have different stages, where varying amounts of
-information is available to you. Each stage requires loading more information
-from the api, which can be an expensive operation. This is why we defer loading
-until necessary.
-
-Replays
-~~~~~~~
-
-A |Replay| has two stages. Upon instantiation it is unloaded, and when
-either |cg.run| or |cg.load| is called on it, it becomes loaded.
-
-When unloaded, a |Replay| has only the attributes you passed to it—``path``
-for |ReplayPath| and ``user_id`` and ``map_id`` for |ReplayMap|, alongside any
-optional arguments such as ``mods``. Technically, a
-|Replay| has a few more attributes than this (such as |RatelimitWeight|), but
-they are beyond the scope of this discussion.
-
-This means that trying to access, say, the ``replay_data`` or ``replay_id`` of
-an unloaded |Replay| will result in an error. This is usually not a problem,
-since the replays are loaded through |cg.run| and you can access
-``replay_data`` etc. from the yielded |Result|. However, if you need to know
-further information about the replay before you call |cg.run|, use |cg.load|.
-After loading a |Replay|, you can then acess its other attributes without
-issue.
-
-.. todo::
-
-    link to advanced section where we do talk about ratelimitweight/etc
-
-    have replay data be empty by default
-
-Replay Containers
-~~~~~~~~~~~~~~~~~
-
-A |ReplayContainer| is slightly more complicated, and has three stages. It
-starts unloaded, becomes info loaded when |cg.load_info| is called on it,
-and becomes loaded when |cg.load| is called on it.
-
-When unloaded, a |ReplayContainer| only has the attributes you passed to it—
-``user_id`` for |User| and ``map_id`` for |Map|, alongside any optional
-arguments such as ``mods``. This means you can't actually access any of the
-|Replay|\s in the container—it hasn't loaded anything from the api, so it
-only knows what you gave it.
-
-When info loaded, a |ReplayContainer| contains unloaded |Replay|\s. This means
-that their ``user_id``, ``map_id``, and ``mods`` are available, but not
-``replay_data``. You can iterate over its |Replay| list if the data
-in unloaded |Replay|\s is useful to you.
-
-When loaded, a |ReplayContainer| contains loaded |Replay|\s.
-
-Of course, calling |cg.load| on an unloaded |ReplayContainer| will "skip"
-(from your perspective) the info loaded stage and make it loaded. It is not
-required to call |cg.load_info| before |cg.load| on a |ReplayContainer|.
-
-
-Iterating
----------
-
-A |ReplayContainer| can be iterated over or indexed to access its |Replay|\s.
-This will of course only work in its info loaded and loaded stages, with
-different amounts of information available from the |Replay|\s for each stage.
-
-.. code-block:: python
-
-    cg = Circleguard("key")
-    m = Map(221777, span="1")
-    for r in m:
-        print("this will never be printed")
-    cg.load_info(m)
-    for r in m:
-        print("this will be followed by False")
-        print(r.loaded)
-    cg.load(m)
-    for r in m:
-        print("this will be followed by True")
-        print(r.loaded)
-
-This example works identically for a |User|, just with the |Replay|\s
-representing their top plays instead of the leaderboards of a map.
+    print(r.loaded) # True

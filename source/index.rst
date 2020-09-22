@@ -1,26 +1,20 @@
-
 Circlecore
 ==========
 
-Circlecore is a cheat detection library for `osu!`_.
+Circlecore is a utilities library for osu!. Features include:
 
-Currently, we support the detection of the following cheats:
+* Unstable Rate calculation
+* Hits calculation (all places where a player hit a hitobject)
+* Similarity calculation between two replays, for replay stealing detection
+* Frametime calculation, for timewarp detection
+* Jerky, suspicious movement detection (called Snaps)
 
-* Replay Stealing
-* Relax
-* Aim Correction
-
-Designed for use in Circleguard_, circlecore is easily integratable into any
-existing python project and we have worked hard to ensure it is easy to use.
-
-Follow the links below or on the sidebar for an introduction to using
-circlecore!
+Circlecore is used by `Circleguard <https://github.com/circleguard/circleguard>`__, a replay analysis tool.
 
 Circlecore is developed and maintained by:
 
-* tybug_
-* samuelhklumpers_
-* InvisibleSymbol_
+* `tybug <https://github.com/tybug>`__
+* `samuelhklumpers <https://github.com/samuelhklumpers>`__
 
 Installation
 ------------
@@ -33,11 +27,10 @@ Circlecore can be installed from pip:
 
 .. note::
 
-    This documentation refers to the project as ``circlecore`` to differentiate
-    it from our organization `Circleguard <https://github.com/circleguard>`__
-    and the gui application Circleguard_. However, ``circlecore`` is installed
-    from pypi with the name ``circleguard``, and is imported as such in python
-    (``import circleguard``).
+    This page refers to the project as ``circlecore`` to differentiate it from our organization
+    `Circleguard <https://github.com/circleguard>`__ and our gui application Circleguard_. However, ``circlecore`` is installed
+    from pypi with the name ``circleguard``, and is imported as such in python (``import circleguard``) We will also refer to it
+    as ``circleguard`` for the remainder of the documentation.
 
 Links
 -----
@@ -48,14 +41,14 @@ Links
 
 
 ..
-    couple notes about these toctrees - first one is to have a link back to the
-    index page. the ``self`` keyword comes with its share of issues
-    (https://github.com/sphinx-doc/sphinx/issues/2103), but none that matter
+    couple notes about these toctrees - the first toctree is so our sidebar has
+    a link back to the index page. the ``self`` keyword comes with its share of
+    issues (https://github.com/sphinx-doc/sphinx/issues/2103), but none that matter
     that much to us. It's better than using ``index`` which works but generates
     many warnings when building.
 
-    Hidden toctrees appear on the sidebar but not as text on the index page
-    (this file).
+    Hidden toctrees appear on the sidebar but not as text on the table of contents
+    displayed on this page.
 
 .. toctree::
     :hidden:
@@ -68,8 +61,8 @@ Links
 
     foreword
     representing-replays
-    investigating-replays
-    results
+    using-circleguard
+    replay-containers
     loading
     caching
 

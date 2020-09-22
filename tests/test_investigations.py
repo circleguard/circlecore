@@ -1,17 +1,18 @@
 import numpy as np
+import unittest
 
-from circleguard import ReplayPath, Mod, Detect, StealResultSim, StealResultCorr
-from tests.utils import CGTestCase, DELTA, UR_DELTA, RES
+from circleguard import ReplayPath, Mod, Circleguard, order, ReplayMap
+from tests.utils import CGTestCase, DELTA, UR_DELTA, RES, FRAMETIME_LIMIT
 
-class TestCorrection(CGTestCase):
+
+class TestSnaps(CGTestCase):
     @classmethod
     def setUpClass(cls):
         super().setUpClass()
         cls.r1 = ReplayPath(RES / "corrected_replay1.osr")
 
-    def test_cheated(self):
-        r = list(self.cg.correction_check(self.r1))[0]
-        snaps = r.snaps
+    def test_snaps(self):
+        snaps = self.cg.snaps(self.r1)
 
         self.assertEqual(len(snaps), 15)
         # beginning
@@ -28,7 +29,7 @@ class TestCorrection(CGTestCase):
         self.assertAlmostEqual(snaps[14].distance, 8.21841, delta=DELTA)
 
 
-class TestSteal(CGTestCase):
+class TestSimilarity(CGTestCase):
 
     @classmethod
     def setUpClass(cls):
@@ -48,18 +49,14 @@ class TestSteal(CGTestCase):
 
     def test_cheated(self):
         # taken from http://redd.it/bvfv8j, remodded replay by same user (CielXDLP) from HDHR to FLHDHR
-        replays = [self.stolen1, self.stolen2]
-        r = list(self.cg.steal_check(replays))
-        self.assertEqual(len(r), 1, f"{len(r)} results returned instead of 1")
-        r = r[0]
-        self.assertLess(r.similarity, Detect.SIM_LIMIT, "Cheated replays were not detected as cheated")
+        sim = self.cg.similarity(self.stolen1, self.stolen2)
+        self.assertLess(sim, Circleguard.SIM_LIMIT, "Cheated replays were not detected as cheated")
 
-        r1 = r.replay1
-        r2 = r.replay2
-        earlier = r.earlier_replay
-        later = r.later_replay
+        r1 = self.stolen1
+        r2 = self.stolen2
+        (earlier, later) = order(r1, r2)
 
-        self.assertAlmostEqual(r.similarity, 2.20867, delta=DELTA, msg="Similarity is not correct")
+        self.assertAlmostEqual(sim, 2.20867, delta=DELTA, msg="Similarity is not correct")
         self.assertEqual(r1.map_id, r2.map_id, "Replay map ids did not match")
         self.assertEqual(r1.map_id, 1988753, "Replay map id was not correct")
         self.assertEqual(earlier.mods, Mod.HD + Mod.HR, "Earlier replay mods was not correct")
@@ -69,33 +66,27 @@ class TestSteal(CGTestCase):
         self.assertEqual(r1.username, r2.username, "Replay usernames did not match")
 
     def test_cheated_time_shift(self):
-        replays = [self.time_shifted1, self.time_shifted2]
-        r = list(self.cg.steal_check(replays, method=Detect.STEAL_SIM))[0]
-        self.assertAlmostEqual(r.similarity, 17.30254, delta=DELTA, msg="Similarity is not correct")
+        sim = self.cg.similarity(self.time_shifted1, self.time_shifted2, method="similarity")
+        self.assertAlmostEqual(sim, 17.30254, delta=DELTA, msg="Similarity is not correct")
 
-        # STEAL_SIM is currently *not* able to detect time shifts. If this
+        # `similarity` is currently *not* able to detect time shifts. If this
         # changes we want to know! :P
-        self.assertGreater(r.similarity, Detect.SIM_LIMIT)
+        self.assertGreater(sim, Circleguard.SIM_LIMIT)
 
-        # STEAL_CORR should be able to, though.
-        r = list(self.cg.steal_check(replays, method=Detect.STEAL_CORR))[0]
-        self.assertGreater(r.correlation, Detect.CORR_LIMIT, "Cheated replays were not detected as cheated")
-        self.assertAlmostEqual(r.correlation, 0.99734, delta=DELTA, msg="Correlation is not correct")
-
+        # `correlation` should be able to, though.
+        corr = self.cg.similarity(self.time_shifted1, self.time_shifted2, method="correlation")
+        self.assertGreater(corr, Circleguard.CORR_LIMIT, "Cheated replays were not detected as cheated")
+        self.assertAlmostEqual(corr, 0.99734, delta=DELTA, msg="Correlation is not correct")
 
     def test_legitimate(self):
-        replays = [self.legit1, self.legit2]
-        r = list(self.cg.steal_check(replays))
-        self.assertEqual(len(r), 1, f"{len(r)} results returned instead of 1")
-        r = r[0]
-        self.assertGreater(r.similarity, Detect.SIM_LIMIT, "Legitimate replays were detected as stolen")
+        sim = self.cg.similarity(self.legit1, self.legit2)
+        self.assertGreater(sim, Circleguard.SIM_LIMIT, "Legitimate replays were detected as stolen")
 
-        r1 = r.replay1
-        r2 = r.replay2
-        earlier = r.earlier_replay
-        later = r.later_replay
+        r1 = self.legit1
+        r2 = self.legit2
+        (earlier, later) = order(r1, r2)
 
-        self.assertAlmostEqual(r.similarity, 23.13951, delta=DELTA, msg="Similarity is not correct")
+        self.assertAlmostEqual(sim, 23.13951, delta=DELTA, msg="Similarity is not correct")
         self.assertEqual(r1.map_id, r2.map_id, "Replay map ids did not match")
         self.assertEqual(r1.map_id, 722238, "Replay map id was not correct")
         self.assertEqual(earlier.mods, Mod.HD + Mod.NC, "Earlier replay mods was not correct")
@@ -105,46 +96,19 @@ class TestSteal(CGTestCase):
         self.assertEqual(earlier.username, "Crissinop", "Earlier username was not correct")
         self.assertEqual(later.username, "TemaZpro", "Later username was not correct")
 
-    def test_num_invariance(self):
-        replays = [self.stolen1, self.stolen2, self.legit1, self.legit2]
-
-        for num in range(2, 5):
-            r = list(self.cg.steal_check(replays[:num]))
-            results_num = num * (num - 1) / 2 # n choose k formula with k=2
-            self.assertEqual(len(r), results_num, f"{len(r)} results returned instead of {results_num}")
-            r = r[0]
-            self.assertLess(r.similarity, Detect.SIM_LIMIT, f"Cheated replays were not detected as cheated at num {num}")
-
-            r1 = r.replay1
-            r2 = r.replay2
-            earlier = r.earlier_replay
-            later = r.later_replay
-
-            self.assertAlmostEqual(r.similarity, 2.20867, delta=DELTA, msg=f"Similarity is not correct at num {num}")
-            self.assertEqual(r1.map_id, r2.map_id, f"Replay map ids did not match at num {num}")
-            self.assertEqual(r1.map_id, 1988753, f"r1 map id was not correct at num {num}")
-            self.assertEqual(earlier.mods, Mod.HD + Mod.HR, f"Earlier replay mods was not correct at num {num}")
-            self.assertEqual(later.mods, Mod.FL + Mod.HD + Mod.HR, f"Later replay mods was not correct at num {num}")
-            self.assertEqual(earlier.replay_id, 2801164636, f"Earlier replay id was not correct at num {num}")
-            self.assertEqual(later.replay_id, 2805164683, f"Later replay id was not correct at num {num}")
-            self.assertEqual(r1.username, r2.username, f"Replay usernames did not match at num {num}")
-
     def test_robustness_to_translation(self):
         # copy replay to avoid any missahaps when we mutate the data
         stolen2 = ReplayPath(self.stolen2.path)
-        replays = [self.stolen1, stolen2]
         self.cg.load(stolen2)
-        TestSteal.add_noise_and_positional_translation_to_replay(stolen2, 10, 3)
-        results = list(self.cg.steal_check(replays, method=Detect.STEAL_CORR | Detect.STEAL_SIM))
+        TestSimilarity.add_noise_and_positional_translation_to_replay(stolen2, 10, 3)
+        sim = self.cg.similarity(self.stolen1, stolen2, method="similarity")
+        corr = self.cg.similarity(self.stolen1, stolen2, method="correlation")
 
-        self.assertEqual(len(results), 2, f"{len(results)} results returned instead of 2")
-        for r in results:
-            if isinstance(r, StealResultSim):
-                self.assertLess(r.similarity, Detect.SIM_LIMIT, "Cheated replays were not detected as cheated with sim")
-            if isinstance(r, StealResultCorr):
-                self.assertGreater(r.correlation, Detect.CORR_LIMIT, "Cheated replays were not detected as cheated with corr")
+        self.assertLess(sim, Circleguard.SIM_LIMIT, "Cheated replays were not detected as cheated with sim")
+        self.assertGreater(corr, Circleguard.CORR_LIMIT, "Cheated replays were not detected as cheated with correlation")
 
-class TestRelax(CGTestCase):
+
+class TestUR(CGTestCase):
     @classmethod
     def setUpClass(cls):
         super().setUpClass()
@@ -153,11 +117,11 @@ class TestRelax(CGTestCase):
         cls.replays = [ReplayPath(RES / "legit" / f"legit-{i}.osr") for i in range(1, 12)]
         cls.urs = [66.74, 66.56, 242.73, 115.54, 254.56, 90.88, 121.62, 163.01, 207.31, 198.79, 138.25]
 
-    def test_cheated(self):
+    def test_ur(self):
         for i, replay in enumerate(self.replays):
-            self.assertAlmostEqual(self.cg.ur(replay, single=True).ur, self.urs[i], delta=UR_DELTA)
+            self.assertAlmostEqual(self.cg.ur(replay), self.urs[i], delta=UR_DELTA)
 
-class TestTimewarp(CGTestCase):
+class TestFrametime(CGTestCase):
     @classmethod
     def setUpClass(cls):
         super().setUpClass()
@@ -170,5 +134,46 @@ class TestTimewarp(CGTestCase):
 
     def test_cheated(self):
         replays = [self.timewarped1, self.timewarped2, self.timewarped3, self.timewarped4]
-        for r in self.cg.timewarp_check(replays):
-            self.assertLess(r.frametime, Detect.FRAMETIME_LIMIT, "Timewarped replays were not detected as cheated")
+        frametimes = [11.33333, 10.66666, 8, 8.66666]
+        for i, replay in enumerate(replays):
+            frametime = self.cg.frametime(replay)
+            self.assertAlmostEqual(frametime, frametimes[i], delta=DELTA, msg=f"Frametime was wrong for replay {replay}")
+            self.assertLess(frametime, FRAMETIME_LIMIT, f"Timewarped replay {replay} was not detected as cheated")
+
+class TestHits(CGTestCase):
+    @classmethod
+    def setUpClass(cls):
+        # don't use cache for this test, it changes xy values slightly
+        super().setUpClass(use_cache=False)
+        cls.replay1 = ReplayMap(221777, 2757689)
+
+    def test_hits(self):
+        hits = self.cg.hits(self.replay1)
+        self.assertEqual(len(hits), 1447)
+
+        # beginning
+        self.assertEqual(hits[0].t, 22109)
+        self.assertSequenceEqual(hits[0].xy.tolist(), [24, 272.8889])
+        self.assertEqual(hits[0].hitobject.t, 22110)
+        self.assertSequenceEqual(hits[0].hitobject.xy.tolist(), [22, 268])
+        self.assertEqual(hits[0].hitobject.radius, 31.104)
+
+        # middle
+        self.assertEqual(hits[524].t, 171421)
+        self.assertSequenceEqual(hits[524].xy.tolist(), [404, 233.7778])
+        self.assertEqual(hits[524].hitobject.t, 171421)
+        self.assertSequenceEqual(hits[524].hitobject.xy.tolist(), [409, 227])
+        self.assertEqual(hits[524].hitobject.radius, 31.104)
+
+        self.assertEqual(hits[1287].t, 336601)
+        self.assertSequenceEqual(hits[1287].xy.tolist(), [233.3333, 241.3333])
+        self.assertEqual(hits[1287].hitobject.t, 336593)
+        self.assertSequenceEqual(hits[1287].hitobject.xy.tolist(), [243, 259])
+        self.assertEqual(hits[1287].hitobject.radius, 31.104)
+
+        # end
+        self.assertEqual(hits[1446].t, 385908)
+        self.assertSequenceEqual(hits[1446].xy.tolist(), [342.6667, 261.3333])
+        self.assertEqual(hits[1446].hitobject.t, 385904)
+        self.assertSequenceEqual(hits[1446].hitobject.xy.tolist(), [340, 266])
+        self.assertEqual(hits[1446].hitobject.radius, 31.104)

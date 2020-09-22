@@ -15,16 +15,16 @@ set_options(loglevel=20)
 DELTA = 0.00001
 # osu! only shows ur to two decimals, so we only guarantee precision to there
 UR_DELTA = 0.01
-# how many times our test cases hits the get_replay endpoint.
-# Keep this below a multiple of 10 (preferably at most 9) so tests run in a reasonable amount of time.
-# We may want to split tests into "heavy" and "light" where light loads <10 heavy calls and heavy loads as many as we need.
-# light can run locally, heavy can run on prs.
-HEAVY_CALL_COUNT = 9
+# threshold for frametime
+FRAMETIME_LIMIT = 13
 
 class CGTestCase(TestCase):
     @classmethod
-    def setUpClass(cls):
+    def setUpClass(cls, use_cache=True):
+        # pass use_cache=False when we need super precise coordinates for tests
+        # to work
         cache_path = Path(__file__).parent / "cache.db"
+        cache_path = cache_path if use_cache else None
         cls.cg = Circleguard(KEY, db_path=cache_path)
 
     def setUp(self):
