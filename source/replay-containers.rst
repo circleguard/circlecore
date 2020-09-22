@@ -10,7 +10,7 @@ objects. That would be annoying, so we provide classes that do this for you. The
 
 |Map|\s represnt a beatmap's top plays (ie leaderboard), as seen on the osu! website.
 
-When instantiating a |Map|, you must specify which scores you want from the map.
+When instantiating a |Map|, you must specify which scores you want from the map:
 
 .. code-block:: python
 
@@ -23,7 +23,7 @@ When instantiating a |Map|, you must specify which scores you want from the map.
     # 10th, 11th, 20th, and 25th replays on the map
     m3 = Map(221777, spn="10, 11, 20, 25")
 
-We can also select replays set with a certain mod combination.
+We can also select replays set with a certain mod combination:
 
 .. code-block:: python
 
@@ -39,7 +39,7 @@ We can also select replays set with a certain mod combination.
 |User|\s represent the top plays of a user, as seen on their profile.
 
 Similar to a |Map|, you must specify which scores of the user you want, and you can optionally
-specify a mod combination to receive scores set with only that mod.
+specify a mod combination to receive scores set with only that mod:
 
 .. code-block:: python
 
@@ -57,7 +57,7 @@ played the map with a single mod combination, but could be more depending on how
 with different mods.
 
 Unlike |Map| and |User|, you do not have to specify which scores you would like - |MapUser| assumes you want all
-of the scores the user has set on the beatmap. You can still optionally specify which scores you want.
+of the scores the user has set on the beatmap. You can still optionally specify which scores you want:
 
 .. code-block:: python
 
