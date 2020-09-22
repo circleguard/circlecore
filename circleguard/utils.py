@@ -79,8 +79,21 @@ def convert_statistic(stat, mods, *, to):
 
 def order(replay1, replay2):
     """
-    Returns an ordered tuple of the given replays, where the first element is
-    the earlier replay and the second element is the later replay.
+    An ordered tuple of the given replays. The first element is the earlier
+    replay, and the second element is the later replay.
+
+    Parameters
+    ----------
+    replay1: Replay
+        The first replay to order.
+    replay2: Replay
+        The second replay to order.
+
+    Returns
+    -------
+    (Replay, Replay)
+        The first element is the earlier replay, and the second element is the
+        later replay.
     """
     if not replay1.timestamp or not replay2.timestamp:
         raise ValueError("Both replay1 and replay2 must provide a timestamp. "
