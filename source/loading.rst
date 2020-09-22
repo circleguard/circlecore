@@ -146,8 +146,8 @@ the |ReplayContainer|\s for you before loading it. So the following are equivale
 Creating Info Loaded |ReplayContainer|\s
 ----------------------------------------
 
-Creating |ReplayContainer|\s and iterating over them immediately afterwards is so common that we provideconvenience methods to
-create info loaded |ReplayContainer|\s with |Circleguard| - |cg.Map|, |cg.User|, and |cg.MapUser|. For example:
+Creating |ReplayContainer|\s and iterating over them immediately afterwards is so common that we provide convenience
+methods to create info loaded |ReplayContainer|\s with |Circleguard| - |cg.Map|, |cg.User|, and |cg.MapUser|. For example:
 
 .. code-block:: python
 

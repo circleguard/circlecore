@@ -84,7 +84,7 @@ when they're loaded:
     cg.load(r1) # gets cached
     cg.load(r2) # does not get cached
 
-For a |ReplayContainer|, ``cache`` cascades to its |Replay|\s.
+For a |ReplayContainer|, ``cache`` cascades to its |Replay|\s:
 
 .. code-block:: python
 
