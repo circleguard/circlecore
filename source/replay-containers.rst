@@ -30,7 +30,7 @@ We can also select replays set with a certain mod combination.
     # top 2 HR scores (this means ONLY HR, not "HR plus any other mod")
     m1 = Map(221777, span="1-2", mods=Mod.HR)
 
-    # tihrd best HDHR scores
+    # third best HDHR score
     m2 = Map(221777, span="3", mods=Mod.HDHR)
 
 |User|
