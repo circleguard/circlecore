@@ -92,8 +92,8 @@ When a |ReplayContainer| is first instantiated, it is unloaded, just like a |Rep
 the information you've given it - its map id if it's a |Map|, or its user id if it's a |User|, for instance. It has
 no idea what |Replay| objects it should have.
 
-You can fix this by calling |cg.load_info| on the |ReplayContainer|. After doing so, it becomes info loaded and knows
-what |Replay| objects it has.
+You can change this by calling |cg.load_info| on the |ReplayContainer|. After doing so, it becomes info loaded and knows
+what |Replay| objects it has:
 
 .. code-block:: python
 
@@ -106,7 +106,7 @@ what |Replay| objects it has.
     print(list(m)) # [ReplayMap(...), ReplayMap(...)]
 
 But when a |ReplayContainer| is info loaded, its |Replay|\s are not loaded. This is the distinction between the info
-loaded and loaded stage; the former has unloaded replays, and the latter has loaded replays.
+loaded and loaded stage - the former has unloaded replays, and the latter has loaded replays.
 
 .. code-block:: python
 
