@@ -36,7 +36,7 @@ class TestMap(CGTestCase):
     @classmethod
     def setUpClass(cls):
         super().setUpClass()
-        cls.map = Map(221777, "1-3")
+        cls.map = Map(221777, "2-4")
 
     def test_map_load(self):
         self.assertEqual(len(self.map.all_replays()), 0)
