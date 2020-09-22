@@ -66,7 +66,7 @@ Any unusual snaps in the cursor movement of the replay.
     print(cg.snaps(r, max_angle=12, min_distance=6))
     # [<circleguard.investigator.Snap>, <circleguard.investigator.Snap>]
 
-The list returned contains |Snap| objects. See its documentation for details.
+This returns a list of |Snap| objects. See the |Snap| documentation for details.
 
 |cg.frametime|
 ~~~~~~~~~~~~~~
@@ -94,7 +94,7 @@ The locations in a replay where a hitobject is hit.
     r = ReplayMap(221777, 2757689)
     print(cg.hits(r)) # a list with lots of elements
 
-The list returned contains |Hit| objects. See its documentation for details.
+This returns a list of |Hit| objects. See the |Hit| documentation for details.
 
 Other Replay Subclasses
 ~~~~~~~~~~~~~~~~~~~~~~~
