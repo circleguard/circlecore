@@ -77,11 +77,6 @@ class Investigator:
 
         Another possible method is to look at the ratio between the angle
         and distance.
-
-        See Also
-        --------
-        :meth:`~.aim_correction_sam` for an alternative, unused approach
-        involving velocity and jerk.
         """
         # when we leave mutliple frames with the same time values, they
         # sometimes get detected (falesly) as aim correction.
@@ -407,10 +402,6 @@ class Snap():
     distance: float
         ``min(dist_a_b, dist_b_c)`` if ``a``, ``b``, and ``c`` are three
         datapoints with ``b`` being the middle one.
-
-    See Also
-    --------
-    :meth:`~.Investigator.aim_correction`
     """
     def __init__(self, time, angle, distance):
         self.time = time
