@@ -79,7 +79,7 @@ rst_prolog = """
 .. |cg.load_info| replace:: :func:`~circleguard.circleguard.Circleguard.load_info`
 .. |cg.Map| replace:: :func:`cg.Map() <circleguard.circleguard.Circleguard.Map>`
 .. |cg.User| replace:: :func:`cg.User() <circleguard.circleguard.Circleguard.User>`
-.. |cg.MapUser| replace:: :func:`~cg.MapUser() <circleguard.circleguard.Circleguard.MapUser>`
+.. |cg.MapUser| replace:: :func:`cg.MapUser() <circleguard.circleguard.Circleguard.MapUser>`
 
 .. |Snap| replace:: :class:`~circleguard.investigator.Snap`
 .. |Hit| replace:: :class:`~circleguard.investigator.Hit`
