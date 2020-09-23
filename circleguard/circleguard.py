@@ -101,17 +101,17 @@ class Circleguard:
             self.library = Library(self.slider_dir.name)
             # clean up our library (which resides in a temporary dir) or else
             # garbage collection of this cg object (and subsequently the
-            # temp dir and library) will cause an error to be thrown. This 
+            # temp dir and library) will cause an error to be thrown. This
             # happens because the temp dir's finalizer is called first, which
             # tries to remove the directory, but it can't because the library's
             # sql connection to the db file in that dir is still alive, and a
             # PermissionError is thrown. We need to close the library before
             # the temp dir is finalized.
-            # Errors that happen during garbage collection are ignored I 
-            # believe, so this only fixes the error message appearing (which is 
+            # Errors that happen during garbage collection are ignored I
+            # believe, so this only fixes the error message appearing (which is
             # still a good thing to do) rather than actually fixing any programs
             # that broke because of this.
-            self._finalizer = weakref.finalize(self, self._cleanup, 
+            self._finalizer = weakref.finalize(self, self._cleanup,
                 self.library)
 
 
