@@ -529,7 +529,8 @@ class Circleguard:
 
     @classmethod
     def _cleanup(cls, library):
-        # see the call to this method for documentation on reasoning.
+        # see the call to this method for documentation on why this method
+        # exists.
         library.close()
 
 class KeylessCircleguard(Circleguard):
