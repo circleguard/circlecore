@@ -349,9 +349,7 @@ class Circleguard:
                     "Pass a different option to frametime(..., mods_unknown=) "
                     "if you would like to provide a default mod for "
                     "conversion.")
-            frametimes = [convert_statistic(frametime, mods, to="cv") \
-                for frametime in frametimes]
-
+            frametimes = convert_statistic(frametimes, mods, to="cv")
         return frametimes
 
 
