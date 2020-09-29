@@ -24,7 +24,6 @@ class Investigator:
         beatmap: :class:`slider.beatmap.Beatmap`
             The beatmap to calculate ``replay``'s ur with.
         """
-
         hits = Investigator.hits(replay, beatmap)
 
         diffs = []
@@ -501,3 +500,9 @@ class Hit():
 
     def __hash__(self):
         return hash((self.hitobject, self.t, self.xy))
+
+    def __repr__(self):
+        return (f"Hit(hitobject={self.hitobject},t={self.t},xy={self.xy}")
+
+    def __str__(self):
+        return f"({self.x}, {self.y}) at t {self.t}"
