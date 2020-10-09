@@ -244,7 +244,7 @@ class Map(ReplayContainer):
         If passed, only represent replays played with this exact mod
         combination. Due to limitations with the api, fuzzy matching is not
         implemented.
-        <br>
+        |br|
         This is applied before span``. That is, if ``span="1-2"``
         and ``mods=Mod.HD``, the top two ``HD`` plays on the map are
         represented.
@@ -301,7 +301,7 @@ class User(ReplayContainer):
         If passed, only represent replays played with this exact mod
         combination. Due to limitations with the api, fuzzy matching is not
         implemented.
-        <br>
+        |br|
         This is applied before ``span``. That is, if ``span="1-2"``
         and ``mods=Mod.HD``, the user's top two ``HD`` plays are represented.
     cache: bool
@@ -411,7 +411,7 @@ class ReplayCache(ReplayContainer):
     :meth:`~circleguard.circleguard.Circleguard.load_info` is an expensive
     operation for large databases created on circlecore version 4.3.5 or
     earlier, as they do not have the necessary indexes.
-    <br>
+    |br|
     For databases created in later versions, this is a nonissue and the lookup
     is fast.
     """
@@ -539,16 +539,16 @@ class Replay(Loadable):
         :meth:`~.keydowns` for more details.
     t: ndarray[int]
         A 1d array containing the timestamp for each frame.
-        <br>
+        |br|
         This is only nonnull after the replay has been loaded.
     xy: ndarray[float]
         A 2d, two column array, containing the ``x`` and ``y`` coordinates of
         each frame in the first and second column respectively.
-        <br>
+        |br|
         This is only nonnull after the replay has been loaded.
     k: ndarray[int]
         A 1d array containing the keys pressed for each frame.
-        <br>
+        |br|
         This is only nonnull after the replay has been loaded.
     """
     def __init__(self, weight, cache):
@@ -621,7 +621,7 @@ class Replay(Loadable):
             :class:`circleguard.circleguard.Circleguard` instance. Replays which
             have already been downloaded and are cached in this library may be
             returned here instead of redownloading them.
-            <br>
+            |br|
             Beatmaps which we download or create in this method, but were not
             previously stored in the library, may also be stored into the
             library for future use as a result of calling this method.
@@ -1060,7 +1060,7 @@ class ReplayPath(Replay):
         If one or both replay paths don't have replay data, this checks path
         equality. If both replay paths have replay data, this checks the
         equality of their replay data.
-        <br>
+        |br|
         The reason we don't check path after both are loaded is to avoid
         true in situations like this:
 

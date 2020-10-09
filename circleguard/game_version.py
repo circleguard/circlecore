@@ -16,7 +16,7 @@ class GameVersion(int):
         on (in which case ``concrete`` should be ``True``), or just an
         approximation of the version of osu! the replay was played on (in which
         case ``concrete`` should be ``False``).
-        <br>
+        |br|
         If the version is an approximation, you are not restricted to actual
         released versions of the game (for instance, osu! has no 20200908
         version of the game, only 20200831), but may use any day of any month
@@ -30,11 +30,11 @@ class GameVersion(int):
     (https://calver.org/), which means that a release's version is the day that
     release was released. A new version pushed out on 09/08/2020 (MM/DD/YYYY),
     for instance, would have a version of 20200809 (YYYYMMDD).
-    <br>
+    |br|
     We provide :func:`~.from_datetime` as a convenience for when you have a
     :class:`datetime.datetime` object representing the day an osu! version was
     released, and want to create a ``GameVersion`` from that.
-    <br>
+    |br|
     This class subclasses ``int`` so consumers don't need to know or expect a
     special class when they access ``replay.game_version``. For instance, to
     get the numeric value of the game version, they would have to do

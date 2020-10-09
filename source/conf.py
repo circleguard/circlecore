@@ -90,4 +90,10 @@ rst_prolog = """
 .. _Circlecore: https://github.com/circleguard/circlecore
 .. _tybug: https://github.com/tybug
 .. _samuelhklumpers: https://github.com/samuelhklumpers
+.. |br| raw:: html
+
+   <br />
 """
+
+# linebreak workaround documented here
+# https://stackoverflow.com/a/9664844/12164878

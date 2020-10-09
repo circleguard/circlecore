@@ -129,13 +129,13 @@ class Circleguard:
             The replay to compare against ``replay1``.
         method: {"similarity", "correlation"}
             What method to use to calculate the similarity between the replays.
-            <br>
+            |br|
             ``similarity`` is (roughly speaking) the average distance
             between the two replays in pixels. A replay compared to itself (or
             an exact copy) has a similarity of 0. See
             :data:`~circleguard.Circleguard.SIM_LIMIT` for a suggested number
             where similarities below this number indicate a stolen replay.
-            <br>
+            |br|
             ``correlation`` is a signal-processing metric which measures how
             similar two signals (or replays, in our case) are. Correlation also
             takes into account time shifts, so a replay which is a perfect copy
@@ -153,11 +153,11 @@ class Circleguard:
             know what mods they were played with. In this case, the similarity
             will be computed twice, both with no modifications and with
             ``Mod.HR`` applied to ``replay1``.
-            <br>
+            |br|
             If ``best`` is passed, the best (that is, lowest if ``method`` is
             ``similarity`` and highest if ``method`` is ``correlation``)
             similarity of these two calculations is returned.
-            <br>
+            |br|
             If ``both`` is passed, a tuple with two floats is returned. The
             first element is the similarity with no modifications, and the
             second element is the similarity with ``Mod.HR`` applied to
@@ -257,15 +257,15 @@ class Circleguard:
         mods_unknown: {"raise", "dt", "nm", "ht"}
             What to do if ``replay`` does not know what mods it was played with,
             and ``cv`` is ``True``.
-            <br>
+            |br|
             If ``raise``, a ValueError will be raised.
-            <br>
+            |br|
             If ``dt``, the frametime will be converted as if the replay was
             played with ``Mod.DT``.
-            <br>
+            |br|
             If ``nm``, the frametime will be converted as if the replay was
             played  with ``Mod.NM`` (that is, not converted at all).
-            <br>
+            |br|
             If ``ht``, the frametime will be converted as if the replay was
             played with ``Mod.HT``.
 
@@ -311,15 +311,15 @@ class Circleguard:
         mods_unknown: {"raise", "dt", "nm", "ht"}
             What to do if ``replay`` does not know what mods it was played with,
             and ``cv`` is ``True``.
-            <br>
+            |br|
             If ``raise``, a ValueError will be raised.
-            <br>
+            |br|
             If ``dt``, the frametime swill be converted as if the replay was
             played with ``Mod.DT``.
-            <br>
+            |br|
             If ``nm``, the frametimes will be converted as if the replay was
             played  with ``Mod.NM`` (that is, not converted at all).
-            <br>
+            |br|
             If ``ht``, the frametimes will be converted as if the replay was
             played with ``Mod.HT``.
 
@@ -327,7 +327,7 @@ class Circleguard:
         -------
         [float]
             The time (in ms) between each frame of the replay.
-            <br>
+            |br|
             The first element of this array corresponds to the time between the
             first and second frame, the second element to the time between the
             second and third frame, etc.
@@ -437,6 +437,7 @@ class Circleguard:
         iterate over it to operate on its replays. However, this ``Map`` must
         be info loaded before it can be iterated over, so this function does
         that info loading for you.
+
         >>> # usage without this function (bad)
         >>> cg = Circleguard("key")
         >>> m = Map(221777, "1-2")
@@ -468,6 +469,7 @@ class Circleguard:
         iterate over it to operate on its replays. However, this ``User`` must
         be info loaded before it can be iterated over, so this function does
         that info loading for you.
+
         >>> # usage without this function (bad)
         >>> cg = Circleguard("key")
         >>> u = User(124493, "1-2")
@@ -499,6 +501,7 @@ class Circleguard:
         iterate over it to operate on its replays. However, this ``MapUser``
         must be info loaded before it can be iterated over, so this function
         does that info loading for you.
+
         >>> # usage without this function (bad)
         >>> cg = Circleguard("key")
         >>> mu = cg.MapUser(124493, 129891)
