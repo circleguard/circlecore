@@ -61,7 +61,7 @@ class GameVersion(int):
 
         Returns
         -------
-        :class`~.GameVersion`
+        :class:`~.GameVersion`
             The result of converting ``datetime`` to a `GameVersion``.
         """
         version = int(datetime.strftime("%Y%m%d"))
