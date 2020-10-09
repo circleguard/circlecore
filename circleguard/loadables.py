@@ -113,10 +113,10 @@ class LoadableContainer(Loadable):
 
         Warnings
         --------
-        This list will almost may be incomplete if you do not call
-        :func:`~.load_info` on this loadable container first, as any replay
-        containers held in this container will likely not have references to
-        their replays yet.
+        This list may be incomplete if you do not call
+        :meth:`~circleguard.circleguard.Circleguard.load_info` on this loadable
+        container first, as any replay containers held in this container will
+        likely not have references to their replays yet.
         """
         replays = []
         for loadable in self.loadables:
@@ -208,9 +208,10 @@ class ReplayContainer(Loadable):
         Warnings
         --------
         If you want an accurate list of :class:`~.Replay`\s in this instance,
-        you must call :func:`~circleguard.circleguard.Circleguard.load` on this
-        instance before :func:`~.all_replays`. Otherwise, this
-        instance is not info loaded, and does not have a complete list of
+        you must call :func:`~circleguard.circleguard.Circleguard.load_info` on
+        this instance before
+        :func:`~circleguard.loadables.ReplayContainer.all_replays`. Otherwise,
+        this instance is not info loaded, and does not have a complete list of
         replays it represents.
         """
         pass
