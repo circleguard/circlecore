@@ -4,7 +4,7 @@ from datetime import datetime
 class GameVersion(int):
     """
     Information about the version of osu! a
-    :class:`circleguard.loadables.Replay` was played on.
+    :class:`~circleguard.loadables.Replay` was played on.
 
     Parameters
     ----------
