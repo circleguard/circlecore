@@ -618,9 +618,9 @@ class Replay(Loadable):
         ----------
         library: :class:`slider.library.Library`
             The library used by the calling
-            :class:`circleguard.circleguard.Circleguard` instance. Replays which
-            have already been downloaded and are cached in this library may be
-            returned here instead of redownloading them.
+            :class:`~circleguard.circleguard.Circleguard` instance. Beatmaps
+            which have already been downloaded and are cached in this library
+            may be returned here instead of redownloading them.
             |br|
             Beatmaps which we download or create in this method, but were not
             previously stored in the library, may also be stored into the
