@@ -31,9 +31,10 @@ class GameVersion(int):
     release was released. A new version pushed out on 09/08/2020 (MM/DD/YYYY),
     for instance, would have a version of 20200809 (YYYYMMDD).
     |br|
-    We provide :func:`~.from_datetime` as a convenience for when you have a
-    :class:`datetime.datetime` object representing the day an osu! version was
-    released, and want to create a ``GameVersion`` from that.
+    We provide :func:`~circleguard.game_version.GameVersion.from_datetime` as a
+    convenience for when you have a :class:`datetime.datetime` object
+    representing the day an osu! version was released, and want to create a
+    ``GameVersion`` from that.
     |br|
     This class subclasses ``int`` so consumers don't need to know or expect a
     special class when they access ``replay.game_version``. For instance, to
