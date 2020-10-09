@@ -529,14 +529,14 @@ class Replay(Loadable):
         given instead of 0.
     username: str
         The username of the player who played the replay.
-    mods: :class:`~circleguard.mods.ModCombination`
+    mods: :class:`~circleguard.mod.ModCombination`
         The mods the replay was played with.
     replay_id: int
         The id of the replay, or 0 if the replay is unsubmitted.
     keydowns: ndarray[int]
         The keydowns for each frame of the replay. Keydowns are the keys pressed
         in that frame that were not pressed in the previous frame. See
-        :meth:`~.keydowns` for more details.
+        :meth:`~circleguard.loadables.Replay.keydowns` for more details.
     t: ndarray[int]
         A 1d array containing the timestamp for each frame.
         |br|
