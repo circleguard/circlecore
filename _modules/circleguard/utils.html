@@ -1,0 +1,376 @@
+
+
+<!DOCTYPE html>
+<!--[if IE 8]><html class="no-js lt-ie9" lang="en" > <![endif]-->
+<!--[if gt IE 8]><!--> <html class="no-js" lang="en" > <!--<![endif]-->
+<head>
+  <meta charset="utf-8">
+  
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  
+  <title>circleguard.utils &mdash; Circleguard v4.5.1 documentation</title>
+  
+
+  
+  
+  
+  
+
+  
+  <script type="text/javascript" src="../../_static/js/modernizr.min.js"></script>
+  
+    
+      <script type="text/javascript" id="documentation_options" data-url_root="../../" src="../../_static/documentation_options.js"></script>
+        <script type="text/javascript" src="../../_static/jquery.js"></script>
+        <script type="text/javascript" src="../../_static/underscore.js"></script>
+        <script type="text/javascript" src="../../_static/doctools.js"></script>
+        <script type="text/javascript" src="../../_static/language_data.js"></script>
+    
+    <script type="text/javascript" src="../../_static/js/theme.js"></script>
+
+    
+
+  
+  <link rel="stylesheet" href="../../_static/css/theme.css" type="text/css" />
+  <link rel="stylesheet" href="../../_static/pygments.css" type="text/css" />
+    <link rel="index" title="Index" href="../../genindex.html" />
+    <link rel="search" title="Search" href="../../search.html" /> 
+</head>
+
+<body class="wy-body-for-nav">
+
+   
+  <div class="wy-grid-for-nav">
+    
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+          
+
+          
+            <a href="../../index.html" class="icon icon-home"> Circleguard
+          
+
+          
+          </a>
+
+          
+            
+            
+              <div class="version">
+                v4.5.1
+              </div>
+            
+          
+
+          
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+
+          
+        </div>
+
+        <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="main navigation">
+          
+            
+            
+              
+            
+            
+              <ul>
+<li class="toctree-l1"><a class="reference internal" href="../../index.html">Circlecore</a></li>
+</ul>
+<p class="caption"><span class="caption-text">Tutorials</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../foreword.html">Foreword</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../representing-replays.html">Representing Replays</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../using-circleguard.html">Using Circleguard</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../replay-containers.html">|ReplayContainer|s</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../loading.html">Loading</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../caching.html">Caching</a></li>
+</ul>
+<p class="caption"><span class="caption-text">Contributing</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../contributing.html">Contributing</a></li>
+</ul>
+<p class="caption"><span class="caption-text">Appendix</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../appendix.html">Appendix</a></li>
+</ul>
+
+            
+          
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
+
+      
+      <nav class="wy-nav-top" aria-label="top navigation">
+        
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../../index.html">Circleguard</a>
+        
+      </nav>
+
+
+      <div class="wy-nav-content">
+        
+        <div class="rst-content">
+        
+          
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<div role="navigation" aria-label="breadcrumbs navigation">
+
+  <ul class="wy-breadcrumbs">
+    
+      <li><a href="../../index.html">Docs</a> &raquo;</li>
+        
+          <li><a href="../index.html">Module code</a> &raquo;</li>
+        
+      <li>circleguard.utils</li>
+    
+    
+      <li class="wy-breadcrumbs-aside">
+        
+      </li>
+    
+  </ul>
+
+  
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+            
+  <h1>Source code for circleguard.utils</h1><div class="highlight"><pre>
+<span></span><span class="kn">from</span> <span class="nn">logging</span> <span class="k">import</span> <span class="n">Formatter</span>
+<span class="kn">from</span> <span class="nn">copy</span> <span class="k">import</span> <span class="n">copy</span>
+<span class="kn">from</span> <span class="nn">enum</span> <span class="k">import</span> <span class="n">Enum</span><span class="p">,</span> <span class="n">IntFlag</span>
+
+<span class="kn">from</span> <span class="nn">circleguard.mod</span> <span class="k">import</span> <span class="n">Mod</span>
+
+
+<div class="viewcode-block" id="RatelimitWeight"><a class="viewcode-back" href="../../appendix.html#circleguard.utils.RatelimitWeight">[docs]</a><span class="k">class</span> <span class="nc">RatelimitWeight</span><span class="p">(</span><span class="n">Enum</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    How much it &#39;costs&#39; to load a replay from the api.</span>
+
+<span class="sd">    :data:`~.RatelimitWeight.NONE` if the load method of a replay makes no api</span>
+<span class="sd">    calls.</span>
+
+<span class="sd">    :data:`~.RatelimitWeight.LIGHT` if the load method of a replay makes only</span>
+<span class="sd">    light api calls (anything but ``get_replay``).</span>
+
+<span class="sd">    :data:`~.RatelimitWeight.HEAVY` if the load method of a replay makes any</span>
+<span class="sd">    heavy api calls (``get_replay``).</span>
+
+<span class="sd">    Notes</span>
+<span class="sd">    -----</span>
+<span class="sd">    This value currently has no effect on the program and is reserved for</span>
+<span class="sd">    future functionality.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">NONE</span>  <span class="o">=</span> <span class="s2">&quot;None&quot;</span>
+    <span class="n">LIGHT</span> <span class="o">=</span> <span class="s2">&quot;Light&quot;</span>
+    <span class="n">HEAVY</span> <span class="o">=</span> <span class="s2">&quot;Heavy&quot;</span></div>
+
+
+<div class="viewcode-block" id="Key"><a class="viewcode-back" href="../../appendix.html#circleguard.utils.Key">[docs]</a><span class="k">class</span> <span class="nc">Key</span><span class="p">(</span><span class="n">IntFlag</span><span class="p">):</span>
+    <span class="n">M1</span>    <span class="o">=</span> <span class="mi">1</span> <span class="o">&lt;&lt;</span> <span class="mi">0</span>
+    <span class="n">M2</span>    <span class="o">=</span> <span class="mi">1</span> <span class="o">&lt;&lt;</span> <span class="mi">1</span>
+    <span class="n">K1</span>    <span class="o">=</span> <span class="mi">1</span> <span class="o">&lt;&lt;</span> <span class="mi">2</span>
+    <span class="n">K2</span>    <span class="o">=</span> <span class="mi">1</span> <span class="o">&lt;&lt;</span> <span class="mi">3</span>
+    <span class="n">SMOKE</span> <span class="o">=</span> <span class="mi">1</span> <span class="o">&lt;&lt;</span> <span class="mi">4</span></div>
+
+
+<span class="n">KEY_MASK</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">Key</span><span class="o">.</span><span class="n">M1</span><span class="p">)</span> <span class="o">|</span> <span class="nb">int</span><span class="p">(</span><span class="n">Key</span><span class="o">.</span><span class="n">M2</span><span class="p">)</span>
+
+
+<div class="viewcode-block" id="convert_statistic"><a class="viewcode-back" href="../../appendix.html#circleguard.utils.convert_statistic">[docs]</a><span class="k">def</span> <span class="nf">convert_statistic</span><span class="p">(</span><span class="n">stat</span><span class="p">,</span> <span class="n">mods</span><span class="p">,</span> <span class="o">*</span><span class="p">,</span> <span class="n">to</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Converts a game statistic to either its unconverted or converted form,</span>
+<span class="sd">    depending on ``to``.</span>
+
+<span class="sd">    Parameters</span>
+<span class="sd">    ----------</span>
+<span class="sd">    stat: float</span>
+<span class="sd">        The statistic to convert.</span>
+<span class="sd">    mods: Mod</span>
+<span class="sd">        The mods the replay was played with. Only ``Mod.DT`` and ``Mod.HT``</span>
+<span class="sd">        will affect the statistic conversion.</span>
+<span class="sd">    to: {&quot;cv&quot;, &quot;ucv&quot;}</span>
+<span class="sd">        ``cv`` if the statistic should be converted to its converted form, and</span>
+<span class="sd">        ``ucv`` if the statistic should be converted to its unconverted form.</span>
+
+<span class="sd">    Notes</span>
+<span class="sd">    -----</span>
+<span class="sd">    This method is intended for any statistic that is modified from what we</span>
+<span class="sd">    expect by ``Mod.DT`` or ``Mod.HT`` being applied (ie changing the game</span>
+<span class="sd">    clock speed). This includes ur (unstable rate) and median frametime</span>
+<span class="sd">    (time between frames).</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">check_param</span><span class="p">(</span><span class="n">to</span><span class="p">,</span> <span class="p">[</span><span class="s2">&quot;cv&quot;</span><span class="p">,</span> <span class="s2">&quot;ucv&quot;</span><span class="p">])</span>
+
+    <span class="n">conversion_factor</span> <span class="o">=</span> <span class="mi">1</span>
+
+    <span class="k">if</span> <span class="n">Mod</span><span class="o">.</span><span class="n">DT</span> <span class="ow">in</span> <span class="n">mods</span><span class="p">:</span>
+        <span class="n">conversion_factor</span> <span class="o">=</span> <span class="p">(</span><span class="mi">1</span> <span class="o">/</span> <span class="mf">1.5</span><span class="p">)</span>
+    <span class="k">elif</span> <span class="n">Mod</span><span class="o">.</span><span class="n">HT</span> <span class="ow">in</span> <span class="n">mods</span><span class="p">:</span>
+        <span class="n">conversion_factor</span> <span class="o">=</span> <span class="p">(</span><span class="mi">1</span> <span class="o">/</span> <span class="mf">0.75</span><span class="p">)</span>
+
+    <span class="k">if</span> <span class="n">to</span> <span class="o">==</span> <span class="s2">&quot;cv&quot;</span><span class="p">:</span>
+        <span class="k">return</span> <span class="n">stat</span> <span class="o">*</span> <span class="n">conversion_factor</span>
+    <span class="k">elif</span> <span class="n">to</span> <span class="o">==</span> <span class="s2">&quot;ucv&quot;</span><span class="p">:</span>
+        <span class="k">return</span> <span class="n">stat</span> <span class="o">/</span> <span class="n">conversion_factor</span></div>
+
+
+<div class="viewcode-block" id="order"><a class="viewcode-back" href="../../appendix.html#circleguard.utils.order">[docs]</a><span class="k">def</span> <span class="nf">order</span><span class="p">(</span><span class="n">replay1</span><span class="p">,</span> <span class="n">replay2</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Returns an ordered tuple of the given replays, where the first element is</span>
+<span class="sd">    the earlier replay and the second element is the later replay.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">if</span> <span class="ow">not</span> <span class="n">replay1</span><span class="o">.</span><span class="n">timestamp</span> <span class="ow">or</span> <span class="ow">not</span> <span class="n">replay2</span><span class="o">.</span><span class="n">timestamp</span><span class="p">:</span>
+        <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;Both replay1 and replay2 must provide a timestamp. &quot;</span>
+            <span class="s2">&quot;Replays without a timestamp cannot be ordered.&quot;</span><span class="p">)</span>
+    <span class="c1"># assume they&#39;re passed in order (earliest first); if not, switch them</span>
+    <span class="n">order</span> <span class="o">=</span> <span class="p">(</span><span class="n">replay1</span><span class="p">,</span> <span class="n">replay2</span><span class="p">)</span>
+    <span class="k">if</span> <span class="n">replay2</span><span class="o">.</span><span class="n">timestamp</span> <span class="o">&lt;</span> <span class="n">replay1</span><span class="o">.</span><span class="n">timestamp</span><span class="p">:</span>
+        <span class="n">order</span> <span class="o">=</span> <span class="nb">tuple</span><span class="p">(</span><span class="nb">reversed</span><span class="p">(</span><span class="n">order</span><span class="p">))</span>
+    <span class="k">return</span> <span class="n">order</span></div>
+
+
+<span class="k">def</span> <span class="nf">check_param</span><span class="p">(</span><span class="n">param</span><span class="p">,</span> <span class="n">options</span><span class="p">):</span>
+    <span class="k">if</span> <span class="ow">not</span> <span class="n">param</span> <span class="ow">in</span> <span class="n">options</span><span class="p">:</span>
+        <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="n">f</span><span class="s2">&quot;Expected one of {&#39;,&#39;.join(options)}. Got </span><span class="si">{param}</span><span class="s2">&quot;</span><span class="p">)</span>
+
+
+<span class="n">TRACE</span> <span class="o">=</span> <span class="mi">5</span>
+
+<div class="viewcode-block" id="ColoredFormatter"><a class="viewcode-back" href="../../appendix.html#circleguard.utils.ColoredFormatter">[docs]</a><span class="k">class</span> <span class="nc">ColoredFormatter</span><span class="p">(</span><span class="n">Formatter</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    A subclass of :class:`logging.Formatter` that uses ANSI escape codes</span>
+<span class="sd">    to color different parts of the :class:`logging.LogRecord` when printed to</span>
+<span class="sd">    the console.</span>
+
+<span class="sd">    Notes</span>
+<span class="sd">    -----</span>
+<span class="sd">    Adapted from https://stackoverflow.com/a/46482050.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="n">COLOR_PREFIX</span> <span class="o">=</span> <span class="s1">&#39;</span><span class="se">\033</span><span class="s1">[&#39;</span>
+    <span class="n">COLOR_SUFFIX</span> <span class="o">=</span> <span class="s1">&#39;</span><span class="se">\033</span><span class="s1">[0m&#39;</span>
+    <span class="n">COLOR_MAPPING</span> <span class="o">=</span> <span class="p">{</span>
+        <span class="s2">&quot;TRACE&quot;</span>    <span class="p">:</span> <span class="mi">90</span><span class="p">,</span> <span class="c1"># bright black</span>
+        <span class="s2">&quot;DEBUG&quot;</span>    <span class="p">:</span> <span class="mi">94</span><span class="p">,</span> <span class="c1"># bright blue</span>
+        <span class="s2">&quot;INFO&quot;</span>     <span class="p">:</span> <span class="mi">95</span><span class="p">,</span> <span class="c1"># bright magenta</span>
+        <span class="s2">&quot;WARNING&quot;</span>  <span class="p">:</span> <span class="mi">31</span><span class="p">,</span> <span class="c1"># red</span>
+        <span class="s2">&quot;ERROR&quot;</span>    <span class="p">:</span> <span class="mi">91</span><span class="p">,</span> <span class="c1"># bright red</span>
+        <span class="s2">&quot;CRITICAL&quot;</span> <span class="p">:</span> <span class="mi">41</span><span class="p">,</span> <span class="c1"># white on red bg</span>
+
+        <span class="s2">&quot;NAME&quot;</span>     <span class="p">:</span> <span class="mi">32</span><span class="p">,</span> <span class="c1"># green</span>
+        <span class="s2">&quot;MESSAGE&quot;</span>  <span class="p">:</span> <span class="mi">93</span><span class="p">,</span> <span class="c1"># bright yellow</span>
+        <span class="s2">&quot;FILENAME&quot;</span> <span class="p">:</span> <span class="mi">92</span><span class="p">,</span> <span class="c1"># bright green</span>
+        <span class="s2">&quot;LINENO&quot;</span>   <span class="p">:</span> <span class="mi">91</span>  <span class="c1"># bright red</span>
+    <span class="p">}</span>
+
+    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">patern</span><span class="p">):</span>
+        <span class="n">Formatter</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">patern</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">colored_log</span> <span class="o">=</span> <span class="s2">&quot;</span><span class="si">{prefix}</span><span class="s2">{{color}}m{{msg}}</span><span class="si">{suffix}</span><span class="s2">&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span>
+                    <span class="n">prefix</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">COLOR_PREFIX</span><span class="p">,</span> <span class="n">suffix</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">COLOR_SUFFIX</span><span class="p">)</span>
+
+<div class="viewcode-block" id="ColoredFormatter.format"><a class="viewcode-back" href="../../appendix.html#circleguard.utils.ColoredFormatter.format">[docs]</a>    <span class="k">def</span> <span class="nf">format</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">record</span><span class="p">):</span>
+        <span class="c1"># c as in colored, not as in copy</span>
+        <span class="n">c_record</span> <span class="o">=</span> <span class="n">copy</span><span class="p">(</span><span class="n">record</span><span class="p">)</span>
+
+        <span class="c1"># logging&#39;s choice of camelCase, not mine</span>
+        <span class="n">threadName</span> <span class="o">=</span> <span class="n">c_record</span><span class="o">.</span><span class="n">threadName</span>
+        <span class="n">color</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">COLOR_MAPPING</span><span class="p">[</span><span class="s2">&quot;NAME&quot;</span><span class="p">]</span>
+        <span class="n">c_threadName</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">colored_log</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">color</span><span class="o">=</span><span class="n">color</span><span class="p">,</span> <span class="n">msg</span><span class="o">=</span><span class="n">threadName</span><span class="p">)</span>
+
+        <span class="n">levelname</span> <span class="o">=</span> <span class="n">c_record</span><span class="o">.</span><span class="n">levelname</span>
+        <span class="n">color</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">COLOR_MAPPING</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">levelname</span><span class="p">,</span> <span class="mi">37</span><span class="p">)</span> <span class="c1"># default to white</span>
+        <span class="n">c_levelname</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">colored_log</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">color</span><span class="o">=</span><span class="n">color</span><span class="p">,</span> <span class="n">msg</span><span class="o">=</span><span class="n">levelname</span><span class="p">)</span>
+
+        <span class="n">name</span> <span class="o">=</span> <span class="n">c_record</span><span class="o">.</span><span class="n">name</span>
+        <span class="n">color</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">COLOR_MAPPING</span><span class="p">[</span><span class="s2">&quot;NAME&quot;</span><span class="p">]</span>
+        <span class="n">c_name</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">colored_log</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">color</span><span class="o">=</span><span class="n">color</span><span class="p">,</span> <span class="n">msg</span><span class="o">=</span><span class="n">name</span><span class="p">)</span>
+
+        <span class="n">message</span> <span class="o">=</span> <span class="n">c_record</span><span class="o">.</span><span class="n">msg</span>
+        <span class="n">color</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">COLOR_MAPPING</span><span class="p">[</span><span class="s2">&quot;MESSAGE&quot;</span><span class="p">]</span>
+        <span class="n">c_msg</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">colored_log</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">color</span><span class="o">=</span><span class="n">color</span><span class="p">,</span> <span class="n">msg</span><span class="o">=</span><span class="n">message</span><span class="p">)</span>
+
+        <span class="n">filename</span> <span class="o">=</span> <span class="n">c_record</span><span class="o">.</span><span class="n">filename</span>
+        <span class="n">color</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">COLOR_MAPPING</span><span class="p">[</span><span class="s2">&quot;FILENAME&quot;</span><span class="p">]</span>
+        <span class="n">c_filename</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">colored_log</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">color</span><span class="o">=</span><span class="n">color</span><span class="p">,</span> <span class="n">msg</span><span class="o">=</span><span class="n">filename</span><span class="p">)</span>
+
+        <span class="n">lineno</span> <span class="o">=</span> <span class="n">c_record</span><span class="o">.</span><span class="n">lineno</span>
+        <span class="n">color</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">COLOR_MAPPING</span><span class="p">[</span><span class="s2">&quot;LINENO&quot;</span><span class="p">]</span>
+        <span class="n">c_lineno</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">colored_log</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">color</span><span class="o">=</span><span class="n">color</span><span class="p">,</span> <span class="n">msg</span><span class="o">=</span><span class="n">lineno</span><span class="p">)</span>
+
+        <span class="n">c_record</span><span class="o">.</span><span class="n">threadName</span> <span class="o">=</span> <span class="n">c_threadName</span>
+        <span class="n">c_record</span><span class="o">.</span><span class="n">levelname</span> <span class="o">=</span> <span class="n">c_levelname</span>
+        <span class="n">c_record</span><span class="o">.</span><span class="n">name</span> <span class="o">=</span> <span class="n">c_name</span>
+        <span class="n">c_record</span><span class="o">.</span><span class="n">msg</span> <span class="o">=</span> <span class="n">c_msg</span>
+        <span class="n">c_record</span><span class="o">.</span><span class="n">filename</span> <span class="o">=</span> <span class="n">c_filename</span>
+        <span class="n">c_record</span><span class="o">.</span><span class="n">lineno</span> <span class="o">=</span> <span class="n">c_lineno</span>
+
+        <span class="k">return</span> <span class="n">Formatter</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">c_record</span><span class="p">)</span></div></div>
+</pre></div>
+
+           </div>
+           
+          </div>
+          <footer>
+  
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>
+
+    </p>
+  </div> 
+
+</footer>
+
+        </div>
+      </div>
+
+    </section>
+
+  </div>
+  
+
+
+  <script type="text/javascript">
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script>
+
+  
+  
+    
+   
+
+</body>
+</html>

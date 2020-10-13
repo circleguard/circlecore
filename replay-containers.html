@@ -1,0 +1,312 @@
+
+
+<!DOCTYPE html>
+<!--[if IE 8]><html class="no-js lt-ie9" lang="en" > <![endif]-->
+<!--[if gt IE 8]><!--> <html class="no-js" lang="en" > <!--<![endif]-->
+<head>
+  <meta charset="utf-8">
+  
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  
+  <title>|ReplayContainer|s &mdash; Circleguard v4.5.1 documentation</title>
+  
+
+  
+  
+  
+  
+
+  
+  <script type="text/javascript" src="_static/js/modernizr.min.js"></script>
+  
+    
+      <script type="text/javascript" id="documentation_options" data-url_root="./" src="_static/documentation_options.js"></script>
+        <script type="text/javascript" src="_static/jquery.js"></script>
+        <script type="text/javascript" src="_static/underscore.js"></script>
+        <script type="text/javascript" src="_static/doctools.js"></script>
+        <script type="text/javascript" src="_static/language_data.js"></script>
+    
+    <script type="text/javascript" src="_static/js/theme.js"></script>
+
+    
+
+  
+  <link rel="stylesheet" href="_static/css/theme.css" type="text/css" />
+  <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
+    <link rel="index" title="Index" href="genindex.html" />
+    <link rel="search" title="Search" href="search.html" />
+    <link rel="next" title="Loading" href="loading.html" />
+    <link rel="prev" title="Using Circleguard" href="using-circleguard.html" /> 
+</head>
+
+<body class="wy-body-for-nav">
+
+   
+  <div class="wy-grid-for-nav">
+    
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+          
+
+          
+            <a href="index.html" class="icon icon-home"> Circleguard
+          
+
+          
+          </a>
+
+          
+            
+            
+              <div class="version">
+                v4.5.1
+              </div>
+            
+          
+
+          
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+
+          
+        </div>
+
+        <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="main navigation">
+          
+            
+            
+              
+            
+            
+              <ul>
+<li class="toctree-l1"><a class="reference internal" href="index.html">Circlecore</a></li>
+</ul>
+<p class="caption"><span class="caption-text">Tutorials</span></p>
+<ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="foreword.html">Foreword</a></li>
+<li class="toctree-l1"><a class="reference internal" href="representing-replays.html">Representing Replays</a></li>
+<li class="toctree-l1"><a class="reference internal" href="using-circleguard.html">Using Circleguard</a></li>
+<li class="toctree-l1 current"><a class="current reference internal" href="#">|ReplayContainer|s</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="#map"><code class="xref py py-class docutils literal notranslate"><span class="pre">Map</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="#user"><code class="xref py py-class docutils literal notranslate"><span class="pre">User</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="#mapuser"><code class="xref py py-class docutils literal notranslate"><span class="pre">MapUser</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="#iterating">Iterating</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="loading.html">Loading</a></li>
+<li class="toctree-l1"><a class="reference internal" href="caching.html">Caching</a></li>
+</ul>
+<p class="caption"><span class="caption-text">Contributing</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="contributing.html">Contributing</a></li>
+</ul>
+<p class="caption"><span class="caption-text">Appendix</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="appendix.html">Appendix</a></li>
+</ul>
+
+            
+          
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
+
+      
+      <nav class="wy-nav-top" aria-label="top navigation">
+        
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="index.html">Circleguard</a>
+        
+      </nav>
+
+
+      <div class="wy-nav-content">
+        
+        <div class="rst-content">
+        
+          
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<div role="navigation" aria-label="breadcrumbs navigation">
+
+  <ul class="wy-breadcrumbs">
+    
+      <li><a href="index.html">Docs</a> &raquo;</li>
+        
+      <li>|ReplayContainer|s</li>
+    
+    
+      <li class="wy-breadcrumbs-aside">
+        
+            
+            <a href="_sources/replay-containers.rst.txt" rel="nofollow"> View page source</a>
+          
+        
+      </li>
+    
+  </ul>
+
+  
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+            
+  <div class="section" id="replaycontainer-s">
+<h1><a href="#id1"><span class="problematic" id="id2">|</span></a>ReplayContainer|s<a class="headerlink" href="#replaycontainer-s" title="Permalink to this headline">¶</a></h1>
+<p><a class="reference internal" href="appendix.html#circleguard.loadables.Replay" title="circleguard.loadables.Replay"><code class="xref py py-class docutils literal notranslate"><span class="pre">Replay</span></code></a> subclasses work fine for some situations, but what if you wanted to calculate e.g. the unstable rate for all
+replays on a map or in a user’s top plays? You would have to make some api requests and manually construct <a class="reference internal" href="appendix.html#circleguard.loadables.ReplayMap" title="circleguard.loadables.ReplayMap"><code class="xref py py-class docutils literal notranslate"><span class="pre">ReplayMap</span></code></a>
+objects. This is annoying, so we provide classes that do this for you. They are called <a href="#id3"><span class="problematic" id="id4">|</span></a>ReplayContainer|s.</p>
+<div class="section" id="map">
+<h2><a class="reference internal" href="appendix.html#circleguard.loadables.Map" title="circleguard.loadables.Map"><code class="xref py py-class docutils literal notranslate"><span class="pre">Map</span></code></a><a class="headerlink" href="#map" title="Permalink to this headline">¶</a></h2>
+<p><a href="#id5"><span class="problematic" id="id6">|</span></a>Map|s represnt a beatmap’s top plays (ie leaderboard), as seen on the osu! website.</p>
+<p>When instantiating a <a class="reference internal" href="appendix.html#circleguard.loadables.Map" title="circleguard.loadables.Map"><code class="xref py py-class docutils literal notranslate"><span class="pre">Map</span></code></a>, you must specify which of the scores you want from the map.</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="c1"># top 3 replays on the map</span>
+<span class="n">m1</span> <span class="o">=</span> <span class="n">Map</span><span class="p">(</span><span class="mi">221777</span><span class="p">,</span> <span class="n">span</span><span class="o">=</span><span class="s2">&quot;1-3&quot;</span><span class="p">)</span>
+
+<span class="c1"># first, second, and 85th replays on the map</span>
+<span class="n">m2</span> <span class="o">=</span> <span class="n">Map</span><span class="p">(</span><span class="mi">221777</span><span class="p">,</span> <span class="n">span</span><span class="o">=</span><span class="s2">&quot;1-2, 85&quot;</span><span class="p">)</span>
+
+<span class="c1"># 10th, 11th, 20th, and 25th replays on the map</span>
+<span class="n">m3</span> <span class="o">=</span> <span class="n">Map</span><span class="p">(</span><span class="mi">221777</span><span class="p">,</span> <span class="n">spn</span><span class="o">=</span><span class="s2">&quot;10, 11, 20, 25&quot;</span><span class="p">)</span>
+</pre></div>
+</div>
+<p>We can also select replays set with a certain mod combination.</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="c1"># top 2 HR scores (this means ONLY HR, not &quot;HR plus any other mod&quot;)</span>
+<span class="n">m1</span> <span class="o">=</span> <span class="n">Map</span><span class="p">(</span><span class="mi">221777</span><span class="p">,</span> <span class="n">span</span><span class="o">=</span><span class="s2">&quot;1-2&quot;</span><span class="p">,</span> <span class="n">mods</span><span class="o">=</span><span class="n">Mod</span><span class="o">.</span><span class="n">HR</span><span class="p">)</span>
+
+<span class="c1"># tihrd best HDHR scores</span>
+<span class="n">m2</span> <span class="o">=</span> <span class="n">Map</span><span class="p">(</span><span class="mi">221777</span><span class="p">,</span> <span class="n">span</span><span class="o">=</span><span class="s2">&quot;3&quot;</span><span class="p">,</span> <span class="n">mods</span><span class="o">=</span><span class="n">Mod</span><span class="o">.</span><span class="n">HDHR</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+<div class="section" id="user">
+<h2><a class="reference internal" href="appendix.html#circleguard.loadables.User" title="circleguard.loadables.User"><code class="xref py py-class docutils literal notranslate"><span class="pre">User</span></code></a><a class="headerlink" href="#user" title="Permalink to this headline">¶</a></h2>
+<p><a href="#id7"><span class="problematic" id="id8">|</span></a>User|s represent the top plays of a user, as seen on their profile.</p>
+<p>Similar to a <a class="reference internal" href="appendix.html#circleguard.loadables.Map" title="circleguard.loadables.Map"><code class="xref py py-class docutils literal notranslate"><span class="pre">Map</span></code></a>, you must specify which scores of the user you want, and you can optionally
+specify a mod combination to receive scores set with only that mod.</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="c1"># top 2 scores of the user</span>
+<span class="n">u</span> <span class="o">=</span> <span class="n">User</span><span class="p">(</span><span class="mi">2757689</span><span class="p">,</span> <span class="n">span</span><span class="o">=</span><span class="s2">&quot;1-2&quot;</span><span class="p">)</span>
+
+<span class="c1"># second and third best scores with only HD</span>
+<span class="n">u</span> <span class="o">=</span> <span class="n">User</span><span class="p">(</span><span class="mi">2757689</span><span class="p">,</span> <span class="n">span</span><span class="o">=</span><span class="s2">&quot;2-3&quot;</span><span class="p">,</span> <span class="n">mods</span><span class="o">=</span><span class="n">Mod</span><span class="o">.</span><span class="n">HD</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+<div class="section" id="mapuser">
+<h2><a class="reference internal" href="appendix.html#circleguard.loadables.MapUser" title="circleguard.loadables.MapUser"><code class="xref py py-class docutils literal notranslate"><span class="pre">MapUser</span></code></a><a class="headerlink" href="#mapuser" title="Permalink to this headline">¶</a></h2>
+<p><a href="#id9"><span class="problematic" id="id10">|</span></a>MapUser|s represent all of a user’s plays on a beatmap. This is often only one score if the user has only ever
+played the map with a single mod combination, but could be more depending on how many times they’ve played the map
+with different mods.</p>
+<p>Unlike <a class="reference internal" href="appendix.html#circleguard.loadables.Map" title="circleguard.loadables.Map"><code class="xref py py-class docutils literal notranslate"><span class="pre">Map</span></code></a> and <a class="reference internal" href="appendix.html#circleguard.loadables.User" title="circleguard.loadables.User"><code class="xref py py-class docutils literal notranslate"><span class="pre">User</span></code></a>, you do not have to specify which scores you would like - <a class="reference internal" href="appendix.html#circleguard.loadables.MapUser" title="circleguard.loadables.MapUser"><code class="xref py py-class docutils literal notranslate"><span class="pre">MapUser</span></code></a> assumes you want all
+of the scores the user has set on the beatmap. You can still optionally specify which scores you want.</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="n">cg</span> <span class="o">=</span> <span class="n">Circleguard</span><span class="p">(</span><span class="s2">&quot;key&quot;</span><span class="p">)</span>
+<span class="c1"># all replays by cookiezi on everything will freeze</span>
+<span class="n">mu</span> <span class="o">=</span> <span class="n">MapUser</span><span class="p">(</span><span class="mi">555797</span><span class="p">,</span> <span class="mi">124493</span><span class="p">)</span>
+
+<span class="c1"># only cookiezi&#39;s second best replay on everything will freeze</span>
+<span class="n">mu</span> <span class="o">=</span> <span class="n">MapUser</span><span class="p">(</span><span class="mi">555797</span><span class="p">,</span> <span class="mi">124493</span><span class="p">,</span> <span class="n">span</span><span class="o">=</span><span class="s2">&quot;2&quot;</span><span class="p">)</span>
+<span class="n">cg</span><span class="o">.</span><span class="n">load_info</span><span class="p">(</span><span class="n">mu</span><span class="p">)</span>
+</pre></div>
+</div>
+<p>Notice that you cannot pass a <code class="docutils literal notranslate"><span class="pre">mods</span></code> argument to <a class="reference internal" href="appendix.html#circleguard.loadables.MapUser" title="circleguard.loadables.MapUser"><code class="xref py py-class docutils literal notranslate"><span class="pre">MapUser</span></code></a>. This is intentional, because
+<code class="docutils literal notranslate"><span class="pre">MapUser(221777,</span> <span class="pre">2757689,</span> <span class="pre">mods=Mod.HDHR)</span></code> (should that parameter exist) would return the identical replay as
+<code class="docutils literal notranslate"><span class="pre">ReplayMap(221777,</span> <span class="pre">2757689,</span> <span class="pre">mods=Mod.HDHR)</span></code>. <code class="docutils literal notranslate"><span class="pre">ReplayMap</span></code> usage is preferred in all cases.</p>
+</div>
+<div class="section" id="iterating">
+<h2>Iterating<a class="headerlink" href="#iterating" title="Permalink to this headline">¶</a></h2>
+<p>All <a href="#id11"><span class="problematic" id="id12">|</span></a>ReplayContainer|s are iterable, so you can iterate over them to operate on their replays:</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="n">cg</span> <span class="o">=</span> <span class="n">Circleguard</span><span class="p">(</span><span class="s2">&quot;key&quot;</span><span class="p">)</span>
+<span class="n">m</span> <span class="o">=</span> <span class="n">Map</span><span class="p">(</span><span class="mi">221777</span><span class="p">,</span> <span class="s2">&quot;1-2&quot;</span><span class="p">)</span>
+<span class="n">cg</span><span class="o">.</span><span class="n">load_info</span><span class="p">(</span><span class="n">m</span><span class="p">)</span>
+
+<span class="k">for</span> <span class="n">r</span> <span class="ow">in</span> <span class="n">m</span><span class="p">:</span>
+    <span class="k">print</span><span class="p">(</span><span class="n">r</span><span class="p">)</span>
+</pre></div>
+</div>
+<p>This means you can also create a list of replays from a <a class="reference internal" href="appendix.html#circleguard.loadables.ReplayContainer" title="circleguard.loadables.ReplayContainer"><code class="xref py py-class docutils literal notranslate"><span class="pre">ReplayContainer</span></code></a> (or, equivalently, call <a href="#id13"><span class="problematic" id="id14">|all_replays|</span></a>):</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="n">cg</span> <span class="o">=</span> <span class="n">Circleguard</span><span class="p">(</span><span class="s2">&quot;key&quot;</span><span class="p">)</span>
+<span class="n">m</span> <span class="o">=</span> <span class="n">Map</span><span class="p">(</span><span class="mi">221777</span><span class="p">,</span> <span class="s2">&quot;1-2&quot;</span><span class="p">)</span>
+<span class="n">cg</span><span class="o">.</span><span class="n">load_info</span><span class="p">(</span><span class="n">m</span><span class="p">)</span>
+
+<span class="k">print</span><span class="p">(</span><span class="nb">list</span><span class="p">(</span><span class="n">m</span><span class="p">))</span> <span class="c1"># [ReplayMap(...), ReplayMap(...)]</span>
+<span class="k">print</span><span class="p">(</span><span class="n">m</span><span class="o">.</span><span class="n">all_replays</span><span class="p">())</span> <span class="c1"># [ReplayMap(...), ReplayMap(...)]</span>
+</pre></div>
+</div>
+<p>But what are these mysterious <a href="#id15"><span class="problematic" id="id16">|load_info|</span></a> methods? When you instantiate a <a class="reference internal" href="appendix.html#circleguard.loadables.ReplayContainer" title="circleguard.loadables.ReplayContainer"><code class="xref py py-class docutils literal notranslate"><span class="pre">ReplayContainer</span></code></a>, it doesn’t have any
+<a class="reference internal" href="appendix.html#circleguard.loadables.Replay" title="circleguard.loadables.Replay"><code class="xref py py-class docutils literal notranslate"><span class="pre">Replay</span></code></a> objects you can iterate over, because it hasn’t made any api calls to determine which <a class="reference internal" href="appendix.html#circleguard.loadables.Replay" title="circleguard.loadables.Replay"><code class="xref py py-class docutils literal notranslate"><span class="pre">Replay</span></code></a> objects
+(by who, on what map) it should have. By calling <a href="#id17"><span class="problematic" id="id18">|load_info|</span></a>, you are telling it to make these api calls and load
+the info about its replays so you can iterate over them. We cover this (and loading in general) in more detail on
+the very next page.</p>
+</div>
+</div>
+
+
+           </div>
+           
+          </div>
+          <footer>
+  
+    <div class="rst-footer-buttons" role="navigation" aria-label="footer navigation">
+      
+        <a href="loading.html" class="btn btn-neutral float-right" title="Loading" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right"></span></a>
+      
+      
+        <a href="using-circleguard.html" class="btn btn-neutral float-left" title="Using Circleguard" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left"></span> Previous</a>
+      
+    </div>
+  
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>
+
+    </p>
+  </div> 
+
+</footer>
+
+        </div>
+      </div>
+
+    </section>
+
+  </div>
+  
+
+
+  <script type="text/javascript">
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script>
+
+  
+  
+    
+   
+
+</body>
+</html>

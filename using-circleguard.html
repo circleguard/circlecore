@@ -1,0 +1,329 @@
+
+
+<!DOCTYPE html>
+<!--[if IE 8]><html class="no-js lt-ie9" lang="en" > <![endif]-->
+<!--[if gt IE 8]><!--> <html class="no-js" lang="en" > <!--<![endif]-->
+<head>
+  <meta charset="utf-8">
+  
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  
+  <title>Using Circleguard &mdash; Circleguard v4.5.1 documentation</title>
+  
+
+  
+  
+  
+  
+
+  
+  <script type="text/javascript" src="_static/js/modernizr.min.js"></script>
+  
+    
+      <script type="text/javascript" id="documentation_options" data-url_root="./" src="_static/documentation_options.js"></script>
+        <script type="text/javascript" src="_static/jquery.js"></script>
+        <script type="text/javascript" src="_static/underscore.js"></script>
+        <script type="text/javascript" src="_static/doctools.js"></script>
+        <script type="text/javascript" src="_static/language_data.js"></script>
+    
+    <script type="text/javascript" src="_static/js/theme.js"></script>
+
+    
+
+  
+  <link rel="stylesheet" href="_static/css/theme.css" type="text/css" />
+  <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
+    <link rel="index" title="Index" href="genindex.html" />
+    <link rel="search" title="Search" href="search.html" />
+    <link rel="next" title="|ReplayContainer|s" href="replay-containers.html" />
+    <link rel="prev" title="Representing Replays" href="representing-replays.html" /> 
+</head>
+
+<body class="wy-body-for-nav">
+
+   
+  <div class="wy-grid-for-nav">
+    
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+          
+
+          
+            <a href="index.html" class="icon icon-home"> Circleguard
+          
+
+          
+          </a>
+
+          
+            
+            
+              <div class="version">
+                v4.5.1
+              </div>
+            
+          
+
+          
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+
+          
+        </div>
+
+        <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="main navigation">
+          
+            
+            
+              
+            
+            
+              <ul>
+<li class="toctree-l1"><a class="reference internal" href="index.html">Circlecore</a></li>
+</ul>
+<p class="caption"><span class="caption-text">Tutorials</span></p>
+<ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="foreword.html">Foreword</a></li>
+<li class="toctree-l1"><a class="reference internal" href="representing-replays.html">Representing Replays</a></li>
+<li class="toctree-l1 current"><a class="current reference internal" href="#">Using Circleguard</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="#cg-similarity">|cg.similarity|</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#cg-ur">|cg.ur|</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#cg-snaps">|cg.snaps|</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#cg-frametime">|cg.frametime|</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#cg-hits">|cg.hits|</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#other-replay-subclasses">Other Replay Subclasses</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="replay-containers.html">|ReplayContainer|s</a></li>
+<li class="toctree-l1"><a class="reference internal" href="loading.html">Loading</a></li>
+<li class="toctree-l1"><a class="reference internal" href="caching.html">Caching</a></li>
+</ul>
+<p class="caption"><span class="caption-text">Contributing</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="contributing.html">Contributing</a></li>
+</ul>
+<p class="caption"><span class="caption-text">Appendix</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="appendix.html">Appendix</a></li>
+</ul>
+
+            
+          
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
+
+      
+      <nav class="wy-nav-top" aria-label="top navigation">
+        
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="index.html">Circleguard</a>
+        
+      </nav>
+
+
+      <div class="wy-nav-content">
+        
+        <div class="rst-content">
+        
+          
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<div role="navigation" aria-label="breadcrumbs navigation">
+
+  <ul class="wy-breadcrumbs">
+    
+      <li><a href="index.html">Docs</a> &raquo;</li>
+        
+      <li>Using Circleguard</li>
+    
+    
+      <li class="wy-breadcrumbs-aside">
+        
+            
+            <a href="_sources/using-circleguard.rst.txt" rel="nofollow"> View page source</a>
+          
+        
+      </li>
+    
+  </ul>
+
+  
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+            
+  <div class="section" id="using-circleguard">
+<h1>Using Circleguard<a class="headerlink" href="#using-circleguard" title="Permalink to this headline">¶</a></h1>
+<p>Now you know how to represent replays, but how do we start calculating statistics or
+other information about them? The answer is the <a class="reference internal" href="appendix.html#circleguard.circleguard.Circleguard" title="circleguard.circleguard.Circleguard"><code class="xref py py-class docutils literal notranslate"><span class="pre">Circleguard</span></code></a> class.</p>
+<p>To instantiate Circleguard|, you will need an api key. If you don’t already have one api key,
+visit <a class="reference external" href="https://osu.ppy.sh/p/api/">https://osu.ppy.sh/p/api/</a> and enter <code class="docutils literal notranslate"><span class="pre">Circleguard</span></code> for <code class="docutils literal notranslate"><span class="pre">App</span> <span class="pre">Name</span></code> and
+<code class="docutils literal notranslate"><span class="pre">https://github.com/circleguard/circlecore</span></code> for <code class="docutils literal notranslate"><span class="pre">App</span> <span class="pre">URL</span></code>. Circlecore needs this key to
+retrieve replay data and user information, among other things.</p>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<p>Due to a <a class="reference external" href="https://github.com/ppy/osu-web/issues/2867">redirection bug</a>
+on the website, you may need to log in and wait 30 seconds before being
+able to access the api page through the above link.</p>
+</div>
+<p>After you have your api key, circleguard instantion is easy:</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="n">cg</span> <span class="o">=</span> <span class="n">Circleguard</span><span class="p">(</span><span class="s2">&quot;key&quot;</span><span class="p">)</span>
+</pre></div>
+</div>
+<p>Replace <code class="docutils literal notranslate"><span class="pre">key</span></code> in all codeblocks in this documentation with your api key.</p>
+<div class="section" id="cg-similarity">
+<h2><a href="#id1"><span class="problematic" id="id2">|cg.similarity|</span></a><a class="headerlink" href="#cg-similarity" title="Permalink to this headline">¶</a></h2>
+<p>The similarity between two replays. Similarity is, roughly speaking, how
+far apart in pixels the replays are on average.</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">cg</span> <span class="o">=</span> <span class="n">Circleguard</span><span class="p">(</span><span class="s2">&quot;key&quot;</span><span class="p">)</span>
+<span class="n">r1</span> <span class="o">=</span> <span class="n">ReplayMap</span><span class="p">(</span><span class="mi">221777</span><span class="p">,</span> <span class="mi">2757689</span><span class="p">)</span>
+<span class="n">r2</span> <span class="o">=</span> <span class="n">ReplayMap</span><span class="p">(</span><span class="mi">221777</span><span class="p">,</span> <span class="mi">3219026</span><span class="p">)</span>
+<span class="nb">print</span><span class="p">(</span><span class="n">cg</span><span class="o">.</span><span class="n">similarity</span><span class="p">(</span><span class="n">r1</span><span class="p">,</span> <span class="n">r2</span><span class="p">))</span> <span class="c1"># 19.310565461539074</span>
+</pre></div>
+</div>
+</div>
+<div class="section" id="cg-ur">
+<h2><a href="#id3"><span class="problematic" id="id4">|cg.ur|</span></a><a class="headerlink" href="#cg-ur" title="Permalink to this headline">¶</a></h2>
+<p>The unstable rate of the replay.</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">cg</span> <span class="o">=</span> <span class="n">Circleguard</span><span class="p">(</span><span class="s2">&quot;key&quot;</span><span class="p">)</span>
+<span class="n">r</span> <span class="o">=</span> <span class="n">ReplayMap</span><span class="p">(</span><span class="mi">1136506</span><span class="p">,</span> <span class="mi">846038</span><span class="p">)</span>
+<span class="nb">print</span><span class="p">(</span><span class="n">cg</span><span class="o">.</span><span class="n">ur</span><span class="p">(</span><span class="n">r</span><span class="p">))</span> <span class="c1"># 75.45</span>
+
+<span class="c1"># you can also get the unconverted unstable rate</span>
+<span class="nb">print</span><span class="p">(</span><span class="n">cg</span><span class="o">.</span><span class="n">ur</span><span class="p">(</span><span class="n">r</span><span class="p">,</span> <span class="n">cv</span><span class="o">=</span><span class="kc">False</span><span class="p">))</span> <span class="c1"># 113.18</span>
+</pre></div>
+</div>
+</div>
+<div class="section" id="cg-snaps">
+<h2><a href="#id5"><span class="problematic" id="id6">|cg.snaps|</span></a><a class="headerlink" href="#cg-snaps" title="Permalink to this headline">¶</a></h2>
+<p>Any unusual snaps in the cursor movement of the replay.</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="n">cg</span> <span class="o">=</span> <span class="n">Circleguard</span><span class="p">(</span><span class="s2">&quot;key&quot;</span><span class="p">)</span>
+<span class="n">r</span> <span class="o">=</span> <span class="n">ReplayMap</span><span class="p">(</span><span class="mi">1136506</span><span class="p">,</span> <span class="mi">6451401</span><span class="p">)</span>
+<span class="k">print</span><span class="p">(</span><span class="n">cg</span><span class="o">.</span><span class="n">snaps</span><span class="p">(</span><span class="n">r</span><span class="p">))</span> <span class="c1"># [&lt;circleguard.investigator.Snap&gt;]</span>
+
+<span class="c1"># you can adjust what counts as a &quot;snap&quot; by increasing</span>
+<span class="c1"># or decreasing these parameters. See |cg.snap|&#39;s</span>
+<span class="c1"># documentation for details</span>
+<span class="k">print</span><span class="p">(</span><span class="n">cg</span><span class="o">.</span><span class="n">snaps</span><span class="p">(</span><span class="n">r</span><span class="p">,</span> <span class="n">max_angle</span><span class="o">=</span><span class="mi">12</span><span class="p">,</span> <span class="n">min_distance</span><span class="o">=</span><span class="mi">6</span><span class="p">))</span>
+<span class="c1"># [&lt;circleguard.investigator.Snap&gt;, &lt;circleguard.investigator.Snap&gt;]</span>
+</pre></div>
+</div>
+<p>The list returned contains <a href="#id7"><span class="problematic" id="id8">|Snap|</span></a> objects. See its documentation for details.</p>
+</div>
+<div class="section" id="cg-frametime">
+<h2><a href="#id9"><span class="problematic" id="id10">|cg.frametime|</span></a><a class="headerlink" href="#cg-frametime" title="Permalink to this headline">¶</a></h2>
+<p>The average frametime of the replay. Frametime is defined as the time (in ms)
+between each frame and the frame after it.</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="n">cg</span> <span class="o">=</span> <span class="n">Circleguard</span><span class="p">(</span><span class="s2">&quot;key&quot;</span><span class="p">)</span>
+<span class="n">r</span> <span class="o">=</span> <span class="n">ReplayMap</span><span class="p">(</span><span class="mi">1136506</span><span class="p">,</span> <span class="mi">846038</span><span class="p">)</span>
+<span class="k">print</span><span class="p">(</span><span class="n">cg</span><span class="o">.</span><span class="n">frametime</span><span class="p">(</span><span class="n">r</span><span class="p">))</span> <span class="c1"># 15.33</span>
+
+<span class="c1"># you can also get the unconverted frametime</span>
+<span class="k">print</span><span class="p">(</span><span class="n">cg</span><span class="o">.</span><span class="n">frametime</span><span class="p">(</span><span class="n">r</span><span class="p">,</span> <span class="n">cv</span><span class="o">=</span><span class="bp">False</span><span class="p">))</span> <span class="c1"># 23.0</span>
+</pre></div>
+</div>
+</div>
+<div class="section" id="cg-hits">
+<h2><a href="#id11"><span class="problematic" id="id12">|cg.hits|</span></a><a class="headerlink" href="#cg-hits" title="Permalink to this headline">¶</a></h2>
+<p>The locations in a replay where a hitobject is hit.</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="n">cg</span> <span class="o">=</span> <span class="n">Circleguard</span><span class="p">(</span><span class="s2">&quot;key&quot;</span><span class="p">)</span>
+<span class="n">r</span> <span class="o">=</span> <span class="n">ReplayMap</span><span class="p">(</span><span class="mi">221777</span><span class="p">,</span> <span class="mi">2757689</span><span class="p">)</span>
+<span class="k">print</span><span class="p">(</span><span class="n">cg</span><span class="o">.</span><span class="n">hits</span><span class="p">(</span><span class="n">r</span><span class="p">))</span> <span class="c1"># a list with lots of elements</span>
+</pre></div>
+</div>
+<p>The list returned contains <a href="#id13"><span class="problematic" id="id14">|Hit|</span></a> objects. See its documentation for details.</p>
+</div>
+<div class="section" id="other-replay-subclasses">
+<h2>Other Replay Subclasses<a class="headerlink" href="#other-replay-subclasses" title="Permalink to this headline">¶</a></h2>
+<p>The examples above have been using <a class="reference internal" href="appendix.html#circleguard.loadables.ReplayMap" title="circleguard.loadables.ReplayMap"><code class="xref py py-class docutils literal notranslate"><span class="pre">ReplayMap</span></code></a> as their example replay, but you can pass any <a class="reference internal" href="appendix.html#circleguard.loadables.Replay" title="circleguard.loadables.Replay"><code class="xref py py-class docutils literal notranslate"><span class="pre">Replay</span></code></a> subclass
+to <a class="reference internal" href="appendix.html#circleguard.circleguard.Circleguard" title="circleguard.circleguard.Circleguard"><code class="xref py py-class docutils literal notranslate"><span class="pre">Circleguard</span></code></a> methods:</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="n">cg</span> <span class="o">=</span> <span class="n">Circleguard</span><span class="p">(</span><span class="s2">&quot;key&quot;</span><span class="p">)</span>
+
+<span class="n">r1</span> <span class="o">=</span> <span class="n">ReplayPath</span><span class="p">(</span><span class="s2">&quot;/path/to/your/replay.osr&quot;</span><span class="p">)</span>
+<span class="k">print</span><span class="p">(</span><span class="n">cg</span><span class="o">.</span><span class="n">ur</span><span class="p">(</span><span class="n">r1</span><span class="p">))</span>
+
+<span class="n">r2</span> <span class="o">=</span> <span class="n">ReplayMap</span><span class="p">(</span><span class="mi">1754777</span><span class="p">,</span> <span class="mi">2766034</span><span class="p">)</span>
+<span class="k">print</span><span class="p">(</span><span class="n">cg</span><span class="o">.</span><span class="n">frametime</span><span class="p">(</span><span class="n">r2</span><span class="p">))</span>
+
+<span class="n">r3</span> <span class="o">=</span> <span class="n">ReplayID</span><span class="p">(</span><span class="mi">2177560145</span><span class="p">)</span>
+<span class="k">print</span><span class="p">(</span><span class="n">cg</span><span class="o">.</span><span class="n">snaps</span><span class="p">(</span><span class="n">r3</span><span class="p">))</span>
+
+<span class="n">replay_data</span> <span class="o">=</span> <span class="nb">open</span><span class="p">(</span><span class="s2">&quot;/path/to/your/replay.osr&quot;</span><span class="p">,</span> <span class="s2">&quot;rb&quot;</span><span class="p">)</span><span class="o">.</span><span class="n">read</span><span class="p">()</span>
+<span class="n">r4</span> <span class="o">=</span> <span class="n">ReplayString</span><span class="p">(</span><span class="n">replay_data</span><span class="p">)</span>
+<span class="k">print</span><span class="p">(</span><span class="n">cg</span><span class="o">.</span><span class="n">hits</span><span class="p">(</span><span class="n">r4</span><span class="p">))</span>
+</pre></div>
+</div>
+</div>
+</div>
+
+
+           </div>
+           
+          </div>
+          <footer>
+  
+    <div class="rst-footer-buttons" role="navigation" aria-label="footer navigation">
+      
+        <a href="replay-containers.html" class="btn btn-neutral float-right" title="|ReplayContainer|s" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right"></span></a>
+      
+      
+        <a href="representing-replays.html" class="btn btn-neutral float-left" title="Representing Replays" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left"></span> Previous</a>
+      
+    </div>
+  
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>
+
+    </p>
+  </div> 
+
+</footer>
+
+        </div>
+      </div>
+
+    </section>
+
+  </div>
+  
+
+
+  <script type="text/javascript">
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script>
+
+  
+  
+    
+   
+
+</body>
+</html>

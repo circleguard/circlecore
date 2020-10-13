@@ -1,0 +1,459 @@
+
+
+<!DOCTYPE html>
+<!--[if IE 8]><html class="no-js lt-ie9" lang="en" > <![endif]-->
+<!--[if gt IE 8]><!--> <html class="no-js" lang="en" > <!--<![endif]-->
+<head>
+  <meta charset="utf-8">
+  
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  
+  <title>circleguard.cacher &mdash; Circleguard v4.5.1 documentation</title>
+  
+
+  
+  
+  
+  
+
+  
+  <script type="text/javascript" src="../../_static/js/modernizr.min.js"></script>
+  
+    
+      <script type="text/javascript" id="documentation_options" data-url_root="../../" src="../../_static/documentation_options.js"></script>
+        <script type="text/javascript" src="../../_static/jquery.js"></script>
+        <script type="text/javascript" src="../../_static/underscore.js"></script>
+        <script type="text/javascript" src="../../_static/doctools.js"></script>
+        <script type="text/javascript" src="../../_static/language_data.js"></script>
+    
+    <script type="text/javascript" src="../../_static/js/theme.js"></script>
+
+    
+
+  
+  <link rel="stylesheet" href="../../_static/css/theme.css" type="text/css" />
+  <link rel="stylesheet" href="../../_static/pygments.css" type="text/css" />
+    <link rel="index" title="Index" href="../../genindex.html" />
+    <link rel="search" title="Search" href="../../search.html" /> 
+</head>
+
+<body class="wy-body-for-nav">
+
+   
+  <div class="wy-grid-for-nav">
+    
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+          
+
+          
+            <a href="../../index.html" class="icon icon-home"> Circleguard
+          
+
+          
+          </a>
+
+          
+            
+            
+              <div class="version">
+                v4.5.1
+              </div>
+            
+          
+
+          
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+
+          
+        </div>
+
+        <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="main navigation">
+          
+            
+            
+              
+            
+            
+              <ul>
+<li class="toctree-l1"><a class="reference internal" href="../../index.html">Circlecore</a></li>
+</ul>
+<p class="caption"><span class="caption-text">Tutorials</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../foreword.html">Foreword</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../representing-replays.html">Representing Replays</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../using-circleguard.html">Using Circleguard</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../replay-containers.html">|ReplayContainer|s</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../loading.html">Loading</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../caching.html">Caching</a></li>
+</ul>
+<p class="caption"><span class="caption-text">Contributing</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../contributing.html">Contributing</a></li>
+</ul>
+<p class="caption"><span class="caption-text">Appendix</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../appendix.html">Appendix</a></li>
+</ul>
+
+            
+          
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
+
+      
+      <nav class="wy-nav-top" aria-label="top navigation">
+        
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../../index.html">Circleguard</a>
+        
+      </nav>
+
+
+      <div class="wy-nav-content">
+        
+        <div class="rst-content">
+        
+          
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<div role="navigation" aria-label="breadcrumbs navigation">
+
+  <ul class="wy-breadcrumbs">
+    
+      <li><a href="../../index.html">Docs</a> &raquo;</li>
+        
+          <li><a href="../index.html">Module code</a> &raquo;</li>
+        
+      <li>circleguard.cacher</li>
+    
+    
+      <li class="wy-breadcrumbs-aside">
+        
+      </li>
+    
+  </ul>
+
+  
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+            
+  <h1>Source code for circleguard.cacher</h1><div class="highlight"><pre>
+<span></span><span class="kn">import</span> <span class="nn">sqlite3</span>
+<span class="kn">import</span> <span class="nn">logging</span>
+<span class="kn">import</span> <span class="nn">os</span>
+
+<span class="kn">import</span> <span class="nn">wtc</span>
+
+<span class="kn">from</span> <span class="nn">circleguard.loader</span> <span class="k">import</span> <span class="n">Loader</span>
+<span class="kn">from</span> <span class="nn">circleguard.utils</span> <span class="k">import</span> <span class="n">TRACE</span>
+
+<div class="viewcode-block" id="Cacher"><a class="viewcode-back" href="../../appendix.html#circleguard.cacher.Cacher">[docs]</a><span class="k">class</span> <span class="nc">Cacher</span><span class="p">:</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Handles compressing and caching replay data to a database.</span>
+
+<span class="sd">    Parameters</span>
+<span class="sd">    ----------</span>
+<span class="sd">    cache: bool</span>
+<span class="sd">        Whether or not replays should be cached.</span>
+<span class="sd">    path: str or :class:`os.PathLike`</span>
+<span class="sd">        The absolute path to the database. If the path does not exist,</span>
+<span class="sd">        a fresh database will be created there.</span>
+
+<span class="sd">    Notes</span>
+<span class="sd">    -----</span>
+<span class="sd">    Each Cacher instance maintains its own database connection.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">cache</span><span class="p">,</span> <span class="n">path</span><span class="p">):</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">log</span> <span class="o">=</span> <span class="n">logging</span><span class="o">.</span><span class="n">getLogger</span><span class="p">(</span><span class="vm">__name__</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">log</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s2">&quot;Cacher initialized at path </span><span class="si">%s</span><span class="s2">, should cache? </span><span class="si">%s</span><span class="s2"> &quot;</span><span class="p">,</span> <span class="n">path</span><span class="p">,</span> <span class="n">cache</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">should_cache</span> <span class="o">=</span> <span class="n">cache</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">isfile</span><span class="p">(</span><span class="nb">str</span><span class="p">(</span><span class="n">path</span><span class="p">)):</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_create_cache</span><span class="p">(</span><span class="nb">str</span><span class="p">(</span><span class="n">path</span><span class="p">))</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">conn</span> <span class="o">=</span> <span class="n">sqlite3</span><span class="o">.</span><span class="n">connect</span><span class="p">(</span><span class="nb">str</span><span class="p">(</span><span class="n">path</span><span class="p">))</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">cursor</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">conn</span><span class="o">.</span><span class="n">cursor</span><span class="p">()</span>
+
+<div class="viewcode-block" id="Cacher.cache"><a class="viewcode-back" href="../../appendix.html#circleguard.cacher.Cacher.cache">[docs]</a>    <span class="k">def</span> <span class="nf">cache</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">lzma_bytes</span><span class="p">,</span> <span class="n">replay_info</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Caches a replay in the form of a (compressed) lzma stream to the</span>
+<span class="sd">        database, linking it to the replay info.</span>
+
+<span class="sd">        Parameters</span>
+<span class="sd">        ----------</span>
+<span class="sd">        map_id: str</span>
+<span class="sd">            The map id to insert into the db.</span>
+<span class="sd">        lzma_bytes: str</span>
+<span class="sd">            The lzma stream to compress and insert into the db.</span>
+<span class="sd">        replay_info: :class:`~circleguard.replay_info.ReplayInfo`</span>
+<span class="sd">            The ReplayInfo object representing this replay.</span>
+
+<span class="sd">        Notes</span>
+<span class="sd">        -----</span>
+<span class="sd">        If an entry with the given replay info already exists, it is overwritten</span>
+<span class="sd">        by the passed lzma.</span>
+
+<span class="sd">        The lzma string is compressed with wtc compression. See</span>
+<span class="sd">        :func:`~Cacher._compress` and :func:`wtc.compress` for more.</span>
+
+<span class="sd">        A call to this method has no effect if the Cacher&#39;s ``should_cache``</span>
+<span class="sd">        is ``False``.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">log</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="s2">&quot;Caching lzma bytes&quot;</span><span class="p">)</span>
+
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">should_cache</span> <span class="ow">is</span> <span class="kc">False</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">log</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="s2">&quot;Cacher should_cache is False, not caching&quot;</span><span class="p">)</span>
+            <span class="k">return</span>
+
+        <span class="n">compressed_bytes</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_compress</span><span class="p">(</span><span class="n">lzma_bytes</span><span class="p">)</span>
+
+        <span class="n">map_id</span> <span class="o">=</span> <span class="n">replay_info</span><span class="o">.</span><span class="n">map_id</span>
+        <span class="n">user_id</span> <span class="o">=</span> <span class="n">replay_info</span><span class="o">.</span><span class="n">user_id</span>
+        <span class="n">mods</span> <span class="o">=</span> <span class="n">replay_info</span><span class="o">.</span><span class="n">mods</span><span class="o">.</span><span class="n">value</span>
+        <span class="n">replay_id</span> <span class="o">=</span> <span class="n">replay_info</span><span class="o">.</span><span class="n">replay_id</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">log</span><span class="o">.</span><span class="n">log</span><span class="p">(</span><span class="n">TRACE</span><span class="p">,</span> <span class="s2">&quot;Writing compressed lzma to db&quot;</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_write</span><span class="p">(</span><span class="s2">&quot;INSERT INTO replays VALUES(?, ?, ?, ?, ?)&quot;</span><span class="p">,</span> <span class="p">[</span><span class="n">map_id</span><span class="p">,</span> <span class="n">user_id</span><span class="p">,</span> <span class="n">compressed_bytes</span><span class="p">,</span> <span class="n">replay_id</span><span class="p">,</span> <span class="n">mods</span><span class="p">])</span></div>
+
+<div class="viewcode-block" id="Cacher.revalidate"><a class="viewcode-back" href="../../appendix.html#circleguard.cacher.Cacher.revalidate">[docs]</a>    <span class="k">def</span> <span class="nf">revalidate</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">loader</span><span class="p">,</span> <span class="n">replay_info</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Checks entries in ``replay_info`` against their entries in the database</span>
+<span class="sd">        (if any) to look for score id mismatches, indicating an outdated replay.</span>
+<span class="sd">        If there are mismatches, the replay is redownloaded and cached from the</span>
+<span class="sd">        replay info.</span>
+
+<span class="sd">        Parameters</span>
+<span class="sd">        ----------</span>
+<span class="sd">        loader: :class:`~circleguard.loader.Loader`</span>
+<span class="sd">            The Loader from the circleguard instance to redownload replays with</span>
+<span class="sd">            if they are outdated.</span>
+<span class="sd">        replay_info: list[:class:`~circleguard.replay_info.ReplayInfo`]</span>
+<span class="sd">            A list of ReplayInfo objects containing the up-to-date information</span>
+<span class="sd">            of user&#39;s replays.</span>
+
+<span class="sd">        Raises</span>
+<span class="sd">        ------</span>
+<span class="sd">        ValueError</span>
+<span class="sd">            Raised when the redownloaded replay id is lower than the cached</span>
+<span class="sd">            replay id. This should never happen and is indicative of either a</span>
+<span class="sd">            fault on our end or the api&#39;s end.</span>
+
+<span class="sd">            Also raised if the replay data is not available from the api when</span>
+<span class="sd">            redownloaded.</span>
+
+<span class="sd">        Notes</span>
+<span class="sd">        -----</span>
+<span class="sd">        If the replay is found to be outdated, it will be overwritten</span>
+<span class="sd">        by the newer replay in the database.</span>
+
+<span class="sd">        Warnings</span>
+<span class="sd">        --------</span>
+<span class="sd">        This function is unused and left for historical purposes. Do not use.</span>
+<span class="sd">        In particular, it searches with parameters other than the primary key</span>
+<span class="sd">        (``replay_id``), which is orders of magnitude slower without an index.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">log</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s2">&quot;Revalidating cache with </span><span class="si">%d</span><span class="s2"> replay_infos&quot;</span><span class="p">,</span> <span class="nb">len</span><span class="p">(</span><span class="n">replay_info</span><span class="p">))</span>
+
+        <span class="k">for</span> <span class="n">info</span> <span class="ow">in</span> <span class="n">replay_info</span><span class="p">:</span>
+            <span class="n">map_id</span> <span class="o">=</span> <span class="n">info</span><span class="o">.</span><span class="n">map_id</span>
+            <span class="n">user_id</span> <span class="o">=</span> <span class="n">info</span><span class="o">.</span><span class="n">user_id</span>
+            <span class="n">mods</span> <span class="o">=</span> <span class="n">info</span><span class="o">.</span><span class="n">enabled_mods</span><span class="o">.</span><span class="n">value</span>
+
+            <span class="bp">self</span><span class="o">.</span><span class="n">log</span><span class="o">.</span><span class="n">log</span><span class="p">(</span><span class="n">TRACE</span><span class="p">,</span> <span class="s2">&quot;Revalidating entry with map id </span><span class="si">%s</span><span class="s2">, user </span><span class="si">%d</span><span class="s2">, mods </span><span class="si">%s</span><span class="s2">&quot;</span><span class="p">,</span> <span class="n">map_id</span><span class="p">,</span> <span class="n">user_id</span><span class="p">,</span> <span class="n">mods</span><span class="p">)</span>
+
+            <span class="n">result</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">cursor</span><span class="o">.</span><span class="n">execute</span><span class="p">(</span><span class="s2">&quot;SELECT replay_id FROM replays WHERE map_id=? AND user_id=? AND mods=?&quot;</span><span class="p">,</span> <span class="p">[</span><span class="n">map_id</span><span class="p">,</span> <span class="n">user_id</span><span class="p">,</span> <span class="n">mods</span><span class="p">])</span><span class="o">.</span><span class="n">fetchall</span><span class="p">()</span>
+            <span class="k">if</span> <span class="ow">not</span> <span class="n">result</span><span class="p">:</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">log</span><span class="o">.</span><span class="n">trace</span><span class="p">(</span><span class="s2">&quot;Nothing cached with map id </span><span class="si">%s</span><span class="s2">, user </span><span class="si">%d</span><span class="s2">, mods </span><span class="si">%s</span><span class="s2">&quot;</span><span class="p">,</span> <span class="n">map_id</span><span class="p">,</span> <span class="n">user_id</span><span class="p">,</span> <span class="n">mods</span><span class="p">)</span>
+                <span class="k">continue</span> <span class="c1"># nothing cached</span>
+
+            <span class="n">db_replay_id</span> <span class="o">=</span> <span class="n">result</span><span class="p">[</span><span class="mi">0</span><span class="p">][</span><span class="mi">0</span><span class="p">]</span> <span class="c1"># blame sqlite for nesting tuples in lists</span>
+            <span class="n">new_replay_id</span> <span class="o">=</span> <span class="n">info</span><span class="o">.</span><span class="n">replay_id</span>
+
+            <span class="k">if</span> <span class="n">db_replay_id</span> <span class="o">!=</span> <span class="n">new_replay_id</span><span class="p">:</span>
+                <span class="k">if</span> <span class="n">db_replay_id</span> <span class="o">&gt;</span> <span class="n">new_replay_id</span><span class="p">:</span>
+                    <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;The cached replay id of </span><span class="si">{}</span><span class="s2"> is higher than the new replay id of </span><span class="si">{}</span><span class="s2">. Map id: </span><span class="si">{}</span><span class="s2">, User id: </span><span class="si">{}</span><span class="s2">, mods: </span><span class="si">{}</span><span class="s2">&quot;</span>
+                                                <span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">db_replay_id</span><span class="p">,</span> <span class="n">new_replay_id</span><span class="p">,</span> <span class="n">user_id</span><span class="p">,</span> <span class="n">map_id</span><span class="p">,</span> <span class="n">mods</span><span class="p">))</span>
+
+                <span class="bp">self</span><span class="o">.</span><span class="n">log</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s2">&quot;Cached replay on map </span><span class="si">%d</span><span class="s2"> by user </span><span class="si">%d</span><span class="s2"> with mods </span><span class="si">%d</span><span class="s2"> is outdated, redownloading&quot;</span><span class="p">,</span> <span class="n">map_id</span><span class="p">,</span> <span class="n">user_id</span><span class="p">,</span> <span class="n">mods</span><span class="p">)</span>
+                <span class="n">lzma_data</span> <span class="o">=</span> <span class="n">loader</span><span class="o">.</span><span class="n">replay_data</span><span class="p">(</span><span class="n">info</span><span class="p">)</span>
+                <span class="k">if</span> <span class="n">lzma_data</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+                    <span class="k">raise</span> <span class="ne">Exception</span><span class="p">(</span><span class="s2">&quot;We could not load lzma data for map </span><span class="si">{}</span><span class="s2">, user </span><span class="si">{}</span><span class="s2">, mods </span><span class="si">{}</span><span class="s2">, replay available </span><span class="si">{}</span><span class="s2"> while revalidating.&quot;</span>
+                                                <span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">map_id</span><span class="p">,</span> <span class="n">user_id</span><span class="p">,</span> <span class="n">mods</span><span class="p">,</span> <span class="n">info</span><span class="o">.</span><span class="n">replay_available</span><span class="p">))</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">cache</span><span class="p">(</span><span class="n">lzma_data</span><span class="p">,</span> <span class="n">info</span><span class="p">)</span></div>
+
+<div class="viewcode-block" id="Cacher.check_cache"><a class="viewcode-back" href="../../appendix.html#circleguard.cacher.Cacher.check_cache">[docs]</a>    <span class="k">def</span> <span class="nf">check_cache</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">replay_info</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Checks the cache for a replay matching ``replay_info``, returning its</span>
+<span class="sd">        (uncompressed) replay data if it finds a match, and ``None`` otherwise.</span>
+
+<span class="sd">        Parameters</span>
+<span class="sd">        ----------</span>
+<span class="sd">        replay_info: :class:`~circleguard.replay_info.ReplayInfo`</span>
+<span class="sd">            The replay info to search for a matching replay with.</span>
+
+<span class="sd">        Returns</span>
+<span class="sd">        -------</span>
+<span class="sd">        str or None</span>
+<span class="sd">            The replay data in decompressed lzma form if the cache contains the</span>
+<span class="sd">            replay, or None if not.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+
+        <span class="n">map_id</span> <span class="o">=</span> <span class="n">replay_info</span><span class="o">.</span><span class="n">map_id</span>
+        <span class="n">user_id</span> <span class="o">=</span> <span class="n">replay_info</span><span class="o">.</span><span class="n">user_id</span>
+        <span class="n">mods</span> <span class="o">=</span> <span class="n">replay_info</span><span class="o">.</span><span class="n">mods</span>
+        <span class="n">replay_id</span> <span class="o">=</span> <span class="n">replay_info</span><span class="o">.</span><span class="n">replay_id</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">log</span><span class="o">.</span><span class="n">log</span><span class="p">(</span><span class="n">TRACE</span><span class="p">,</span> <span class="s2">&quot;Checking cache for a replay on map </span><span class="si">%d</span><span class="s2"> by user </span><span class="si">%d</span><span class="s2"> with mods </span><span class="si">%s</span><span class="s2"> with replay id </span><span class="si">%d</span><span class="s2">&quot;</span><span class="p">,</span> <span class="n">map_id</span><span class="p">,</span> <span class="n">user_id</span><span class="p">,</span> <span class="n">mods</span><span class="p">,</span> <span class="n">replay_id</span><span class="p">)</span>
+        <span class="n">result</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">cursor</span><span class="o">.</span><span class="n">execute</span><span class="p">(</span><span class="s2">&quot;SELECT replay_data FROM replays WHERE replay_id=?&quot;</span><span class="p">,</span> <span class="p">[</span><span class="n">replay_id</span><span class="p">])</span><span class="o">.</span><span class="n">fetchone</span><span class="p">()</span>
+        <span class="k">if</span> <span class="n">result</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">log</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="s2">&quot;Loading replay on map </span><span class="si">%d</span><span class="s2"> by user </span><span class="si">%d</span><span class="s2"> with mods </span><span class="si">%s</span><span class="s2"> with replay id </span><span class="si">%d</span><span class="s2"> from cache&quot;</span><span class="p">,</span> <span class="n">map_id</span><span class="p">,</span> <span class="n">user_id</span><span class="p">,</span> <span class="n">mods</span><span class="p">,</span> <span class="n">replay_id</span><span class="p">)</span>
+            <span class="k">return</span> <span class="n">wtc</span><span class="o">.</span><span class="n">decompress</span><span class="p">(</span><span class="n">result</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="n">decompressed_lzma</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">log</span><span class="o">.</span><span class="n">log</span><span class="p">(</span><span class="n">TRACE</span><span class="p">,</span> <span class="s2">&quot;No replay found in cache&quot;</span><span class="p">)</span>
+        <span class="k">return</span> <span class="kc">None</span></div>
+
+    <span class="k">def</span> <span class="nf">_write</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">statement</span><span class="p">,</span> <span class="n">args</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        A helper method that writes an sql statement with</span>
+<span class="sd">        the given args, and commits the connection.</span>
+
+<span class="sd">        Parameters</span>
+<span class="sd">        ----------</span>
+<span class="sd">        statement: str</span>
+<span class="sd">            The sql statement to execute.</span>
+<span class="sd">        args: list</span>
+<span class="sd">            The values to insert into the statement.</span>
+<span class="sd">            Must be of length equal to the number of missing values</span>
+<span class="sd">            (question marks) in the statement.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">cursor</span><span class="o">.</span><span class="n">execute</span><span class="p">(</span><span class="n">statement</span><span class="p">,</span> <span class="n">args</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">conn</span><span class="o">.</span><span class="n">commit</span><span class="p">()</span>
+
+    <span class="k">def</span> <span class="nf">_compress</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">lzma_bytes</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Compresses an lzma string with wtc compression</span>
+<span class="sd">        (see :func:`wtc.compress`).</span>
+
+<span class="sd">        Parameters</span>
+<span class="sd">        ----------</span>
+<span class="sd">        lzma_bytes: str</span>
+<span class="sd">            The lzma string representing a replay, to compress.</span>
+
+<span class="sd">        Returns</span>
+<span class="sd">        -------</span>
+<span class="sd">        str</span>
+<span class="sd">            The lzma_bytes string, compressed with wtc compression</span>
+<span class="sd">            (:func:`wtc.compress`).</span>
+
+<span class="sd">        Notes</span>
+<span class="sd">        -----</span>
+<span class="sd">        wtc compression is not lossless, in order to save space. Please see</span>
+<span class="sd">        :func:`wtc.compress` for more details.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">log</span><span class="o">.</span><span class="n">log</span><span class="p">(</span><span class="n">TRACE</span><span class="p">,</span> <span class="s2">&quot;Compressing lzma bytes&quot;</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">wtc</span><span class="o">.</span><span class="n">compress</span><span class="p">(</span><span class="n">lzma_bytes</span><span class="p">)</span>
+
+    <span class="k">def</span> <span class="nf">_create_cache</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">path</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Creates a database with the necessary tables at the given path.</span>
+
+<span class="sd">        Parameters</span>
+<span class="sd">        ----------</span>
+<span class="sd">        path: str</span>
+<span class="sd">            The absolute path to where the database should be created.</span>
+
+<span class="sd">        Notes</span>
+<span class="sd">        -----</span>
+<span class="sd">        This function will create directories specified in the path if they</span>
+<span class="sd">        don&#39;t already exist.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">log</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s2">&quot;Cache not found at path </span><span class="si">%s</span><span class="s2">, creating cache&quot;</span><span class="p">,</span> <span class="n">path</span><span class="p">)</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">exists</span><span class="p">(</span><span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="n">path</span><span class="p">)[</span><span class="mi">0</span><span class="p">]):</span> <span class="c1"># create dir if nonexistent</span>
+            <span class="n">os</span><span class="o">.</span><span class="n">makedirs</span><span class="p">(</span><span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="n">path</span><span class="p">)[</span><span class="mi">0</span><span class="p">])</span>
+        <span class="n">conn</span> <span class="o">=</span> <span class="n">sqlite3</span><span class="o">.</span><span class="n">connect</span><span class="p">(</span><span class="nb">str</span><span class="p">(</span><span class="n">path</span><span class="p">))</span>
+        <span class="n">c</span> <span class="o">=</span> <span class="n">conn</span><span class="o">.</span><span class="n">cursor</span><span class="p">()</span>
+        <span class="n">c</span><span class="o">.</span><span class="n">execute</span><span class="p">(</span>
+            <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">            CREATE TABLE &quot;REPLAYS&quot; (</span>
+<span class="sd">                `MAP_ID` INTEGER NOT NULL,</span>
+<span class="sd">                `USER_ID` INTEGER NOT NULL,</span>
+<span class="sd">                `REPLAY_DATA` MEDIUMTEXT NOT NULL,</span>
+<span class="sd">                `REPLAY_ID` INTEGER NOT NULL,</span>
+<span class="sd">                `MODS` INTEGER NOT NULL,</span>
+<span class="sd">                PRIMARY KEY(`REPLAY_ID`)</span>
+<span class="sd">            )&quot;&quot;&quot;</span><span class="p">)</span>
+        <span class="c1"># create our index - this does unfortunately add some size (and</span>
+        <span class="c1"># insertion time) to the db, but it&#39;s worth it to get fast lookups on</span>
+        <span class="c1"># a map, user, or mods, which are all common operations.</span>
+        <span class="n">c</span><span class="o">.</span><span class="n">execute</span><span class="p">(</span>
+            <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">            CREATE INDEX `lookup_index` ON `REPLAYS` (</span>
+<span class="sd">                `MAP_ID`, `USER_ID`, `MODS`</span>
+<span class="sd">            )</span>
+<span class="sd">            &quot;&quot;&quot;</span><span class="p">)</span>
+        <span class="n">conn</span><span class="o">.</span><span class="n">close</span><span class="p">()</span></div>
+</pre></div>
+
+           </div>
+           
+          </div>
+          <footer>
+  
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>
+
+    </p>
+  </div> 
+
+</footer>
+
+        </div>
+      </div>
+
+    </section>
+
+  </div>
+  
+
+
+  <script type="text/javascript">
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script>
+
+  
+  
+    
+   
+
+</body>
+</html>

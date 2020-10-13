@@ -1,0 +1,282 @@
+
+
+<!DOCTYPE html>
+<!--[if IE 8]><html class="no-js lt-ie9" lang="en" > <![endif]-->
+<!--[if gt IE 8]><!--> <html class="no-js" lang="en" > <!--<![endif]-->
+<head>
+  <meta charset="utf-8">
+  
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  
+  <title>Representing Replays &mdash; Circleguard v4.5.1 documentation</title>
+  
+
+  
+  
+  
+  
+
+  
+  <script type="text/javascript" src="_static/js/modernizr.min.js"></script>
+  
+    
+      <script type="text/javascript" id="documentation_options" data-url_root="./" src="_static/documentation_options.js"></script>
+        <script type="text/javascript" src="_static/jquery.js"></script>
+        <script type="text/javascript" src="_static/underscore.js"></script>
+        <script type="text/javascript" src="_static/doctools.js"></script>
+        <script type="text/javascript" src="_static/language_data.js"></script>
+    
+    <script type="text/javascript" src="_static/js/theme.js"></script>
+
+    
+
+  
+  <link rel="stylesheet" href="_static/css/theme.css" type="text/css" />
+  <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
+    <link rel="index" title="Index" href="genindex.html" />
+    <link rel="search" title="Search" href="search.html" />
+    <link rel="next" title="Using Circleguard" href="using-circleguard.html" />
+    <link rel="prev" title="Foreword" href="foreword.html" /> 
+</head>
+
+<body class="wy-body-for-nav">
+
+   
+  <div class="wy-grid-for-nav">
+    
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+          
+
+          
+            <a href="index.html" class="icon icon-home"> Circleguard
+          
+
+          
+          </a>
+
+          
+            
+            
+              <div class="version">
+                v4.5.1
+              </div>
+            
+          
+
+          
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+
+          
+        </div>
+
+        <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="main navigation">
+          
+            
+            
+              
+            
+            
+              <ul>
+<li class="toctree-l1"><a class="reference internal" href="index.html">Circlecore</a></li>
+</ul>
+<p class="caption"><span class="caption-text">Tutorials</span></p>
+<ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="foreword.html">Foreword</a></li>
+<li class="toctree-l1 current"><a class="current reference internal" href="#">Representing Replays</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="#replaymap">ReplayMap</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#replaypath">ReplayPath</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#lesser-used-replays">Lesser Used Replays</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#replayid">ReplayID</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#replaystring">ReplayString</a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="using-circleguard.html">Using Circleguard</a></li>
+<li class="toctree-l1"><a class="reference internal" href="replay-containers.html">|ReplayContainer|s</a></li>
+<li class="toctree-l1"><a class="reference internal" href="loading.html">Loading</a></li>
+<li class="toctree-l1"><a class="reference internal" href="caching.html">Caching</a></li>
+</ul>
+<p class="caption"><span class="caption-text">Contributing</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="contributing.html">Contributing</a></li>
+</ul>
+<p class="caption"><span class="caption-text">Appendix</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="appendix.html">Appendix</a></li>
+</ul>
+
+            
+          
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
+
+      
+      <nav class="wy-nav-top" aria-label="top navigation">
+        
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="index.html">Circleguard</a>
+        
+      </nav>
+
+
+      <div class="wy-nav-content">
+        
+        <div class="rst-content">
+        
+          
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<div role="navigation" aria-label="breadcrumbs navigation">
+
+  <ul class="wy-breadcrumbs">
+    
+      <li><a href="index.html">Docs</a> &raquo;</li>
+        
+      <li>Representing Replays</li>
+    
+    
+      <li class="wy-breadcrumbs-aside">
+        
+            
+            <a href="_sources/representing-replays.rst.txt" rel="nofollow"> View page source</a>
+          
+        
+      </li>
+    
+  </ul>
+
+  
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+            
+  <div class="section" id="representing-replays">
+<h1>Representing Replays<a class="headerlink" href="#representing-replays" title="Permalink to this headline">¶</a></h1>
+<p>Before you can use circlecore to calculate statistics of replays or do other operations on replays, you need
+to know how to represent replays.</p>
+<p>All replay classes you can instantiate are subclasses of <a class="reference internal" href="appendix.html#circleguard.loadables.Replay" title="circleguard.loadables.Replay"><code class="xref py py-class docutils literal notranslate"><span class="pre">Replay</span></code></a>. We cover each subclass below.</p>
+<div class="section" id="replaymap">
+<h2>ReplayMap<a class="headerlink" href="#replaymap" title="Permalink to this headline">¶</a></h2>
+<p>a <a class="reference internal" href="appendix.html#circleguard.loadables.ReplayMap" title="circleguard.loadables.ReplayMap"><code class="xref py py-class docutils literal notranslate"><span class="pre">ReplayMap</span></code></a> represents a replay by a user on a map. For instance,</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="n">replay</span> <span class="o">=</span> <span class="n">ReplayMap</span><span class="p">(</span><span class="mi">221777</span><span class="p">,</span> <span class="mi">2757689</span><span class="p">)</span>
+</pre></div>
+</div>
+<p>represents the highest scoring replay by user <code class="docutils literal notranslate"><span class="pre">2757689</span></code> on map <code class="docutils literal notranslate"><span class="pre">221777</span></code>.</p>
+<p>To restrict this to a replay with a certain mod combination, specify a mods argument.
+For instance, this represents specifically the <code class="docutils literal notranslate"><span class="pre">HDHR</span></code> play by the same user on the same map.</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="n">replay</span> <span class="o">=</span> <span class="n">ReplayMap</span><span class="p">(</span><span class="mi">221777</span><span class="p">,</span> <span class="mi">2757689</span><span class="p">,</span> <span class="n">mods</span><span class="o">=</span><span class="n">Mod</span><span class="o">.</span><span class="n">HD</span> <span class="o">+</span> <span class="n">Mod</span><span class="o">.</span><span class="n">HR</span><span class="p">)</span>
+</pre></div>
+</div>
+<p>While in this case these are identical replays, there are times a user has two
+available replays on a map, with different mods.</p>
+</div>
+<div class="section" id="replaypath">
+<h2>ReplayPath<a class="headerlink" href="#replaypath" title="Permalink to this headline">¶</a></h2>
+<p><a class="reference internal" href="appendix.html#circleguard.loadables.ReplayPath" title="circleguard.loadables.ReplayPath"><code class="xref py py-class docutils literal notranslate"><span class="pre">ReplayPath</span></code></a> represents a replay stored locally in an <code class="docutils literal notranslate"><span class="pre">osr</span></code> file. For instance,</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="n">replay</span> <span class="o">=</span> <span class="n">ReplayPath</span><span class="p">(</span><span class="s2">&quot;/path/to/your/replay.osr&quot;</span><span class="p">)</span>
+</pre></div>
+</div>
+<p>represents the replay in the file <code class="docutils literal notranslate"><span class="pre">/path/to/your/replay.osr</span></code>.</p>
+</div>
+<div class="section" id="lesser-used-replays">
+<h2>Lesser Used Replays<a class="headerlink" href="#lesser-used-replays" title="Permalink to this headline">¶</a></h2>
+<p>These replay classes are provided for situations that don’t come up in normal usage. They ar documented here for completeness.</p>
+<div class="section" id="replayid">
+<h3>ReplayID<a class="headerlink" href="#replayid" title="Permalink to this headline">¶</a></h3>
+<p>A <a href="#id3"><span class="problematic" id="id4">|ReplayID|</span></a> represents a replay which is tied to a replay ID on osu! servers.</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="n">r</span> <span class="o">=</span> <span class="n">ReplayID</span><span class="p">(</span><span class="mi">2177560145</span><span class="p">)</span> <span class="c1"># cookiezi on freedom dive</span>
+</pre></div>
+</div>
+<div class="admonition warning">
+<p class="admonition-title">Warning</p>
+<p>We can only retrieve the replay data associated with a replay id due to limitations with the api.
+This means we do not know with what mods or on what map a <a href="#id5"><span class="problematic" id="id6">|ReplayID|</span></a> was played on. This limits
+what kinds of functions can be called on it - for instance, <a href="#id7"><span class="problematic" id="id8">|cg.ur|</span></a> and <a href="#id9"><span class="problematic" id="id10">|cg.hits|</span></a> both require
+knowing what beatmap the replay was played on, and will reject <a href="#id1"><span class="problematic" id="id2">|</span></a>ReplayID|s.</p>
+</div>
+</div>
+<div class="section" id="replaystring">
+<h3>ReplayString<a class="headerlink" href="#replaystring" title="Permalink to this headline">¶</a></h3>
+<p>A <a href="#id11"><span class="problematic" id="id12">|ReplayString|</span></a> represents a replay file which has been read into a string object.</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="n">replay_data_str</span> <span class="o">=</span> <span class="nb">open</span><span class="p">(</span><span class="s2">&quot;/path/to/your/replay.osr&quot;</span><span class="p">,</span> <span class="s2">&quot;rb&quot;</span><span class="p">)</span><span class="o">.</span><span class="n">read</span><span class="p">()</span>
+<span class="n">replay</span> <span class="o">=</span> <span class="n">ReplayString</span><span class="p">(</span><span class="n">replay_data_str</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+</div>
+</div>
+
+
+           </div>
+           
+          </div>
+          <footer>
+  
+    <div class="rst-footer-buttons" role="navigation" aria-label="footer navigation">
+      
+        <a href="using-circleguard.html" class="btn btn-neutral float-right" title="Using Circleguard" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right"></span></a>
+      
+      
+        <a href="foreword.html" class="btn btn-neutral float-left" title="Foreword" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left"></span> Previous</a>
+      
+    </div>
+  
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>
+
+    </p>
+  </div> 
+
+</footer>
+
+        </div>
+      </div>
+
+    </section>
+
+  </div>
+  
+
+
+  <script type="text/javascript">
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script>
+
+  
+  
+    
+   
+
+</body>
+</html>

@@ -1,0 +1,718 @@
+
+
+<!DOCTYPE html>
+<!--[if IE 8]><html class="no-js lt-ie9" lang="en" > <![endif]-->
+<!--[if gt IE 8]><!--> <html class="no-js" lang="en" > <!--<![endif]-->
+<head>
+  <meta charset="utf-8">
+  
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  
+  <title>circleguard.investigator &mdash; Circleguard v4.5.1 documentation</title>
+  
+
+  
+  
+  
+  
+
+  
+  <script type="text/javascript" src="../../_static/js/modernizr.min.js"></script>
+  
+    
+      <script type="text/javascript" id="documentation_options" data-url_root="../../" src="../../_static/documentation_options.js"></script>
+        <script type="text/javascript" src="../../_static/jquery.js"></script>
+        <script type="text/javascript" src="../../_static/underscore.js"></script>
+        <script type="text/javascript" src="../../_static/doctools.js"></script>
+        <script type="text/javascript" src="../../_static/language_data.js"></script>
+    
+    <script type="text/javascript" src="../../_static/js/theme.js"></script>
+
+    
+
+  
+  <link rel="stylesheet" href="../../_static/css/theme.css" type="text/css" />
+  <link rel="stylesheet" href="../../_static/pygments.css" type="text/css" />
+    <link rel="index" title="Index" href="../../genindex.html" />
+    <link rel="search" title="Search" href="../../search.html" /> 
+</head>
+
+<body class="wy-body-for-nav">
+
+   
+  <div class="wy-grid-for-nav">
+    
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+          
+
+          
+            <a href="../../index.html" class="icon icon-home"> Circleguard
+          
+
+          
+          </a>
+
+          
+            
+            
+              <div class="version">
+                v4.5.1
+              </div>
+            
+          
+
+          
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+
+          
+        </div>
+
+        <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="main navigation">
+          
+            
+            
+              
+            
+            
+              <ul>
+<li class="toctree-l1"><a class="reference internal" href="../../index.html">Circlecore</a></li>
+</ul>
+<p class="caption"><span class="caption-text">Tutorials</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../foreword.html">Foreword</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../representing-replays.html">Representing Replays</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../using-circleguard.html">Using Circleguard</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../replay-containers.html">|ReplayContainer|s</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../loading.html">Loading</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../caching.html">Caching</a></li>
+</ul>
+<p class="caption"><span class="caption-text">Contributing</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../contributing.html">Contributing</a></li>
+</ul>
+<p class="caption"><span class="caption-text">Appendix</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../appendix.html">Appendix</a></li>
+</ul>
+
+            
+          
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
+
+      
+      <nav class="wy-nav-top" aria-label="top navigation">
+        
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../../index.html">Circleguard</a>
+        
+      </nav>
+
+
+      <div class="wy-nav-content">
+        
+        <div class="rst-content">
+        
+          
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<div role="navigation" aria-label="breadcrumbs navigation">
+
+  <ul class="wy-breadcrumbs">
+    
+      <li><a href="../../index.html">Docs</a> &raquo;</li>
+        
+          <li><a href="../index.html">Module code</a> &raquo;</li>
+        
+      <li>circleguard.investigator</li>
+    
+    
+      <li class="wy-breadcrumbs-aside">
+        
+      </li>
+    
+  </ul>
+
+  
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+            
+  <h1>Source code for circleguard.investigator</h1><div class="highlight"><pre>
+<span></span><span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
+<span class="kn">from</span> <span class="nn">slider.beatmap</span> <span class="k">import</span> <span class="n">Circle</span><span class="p">,</span> <span class="n">Slider</span>
+
+<span class="kn">from</span> <span class="nn">circleguard.mod</span> <span class="k">import</span> <span class="n">Mod</span>
+<span class="kn">from</span> <span class="nn">circleguard.utils</span> <span class="k">import</span> <span class="n">KEY_MASK</span><span class="p">,</span> <span class="n">check_param</span>
+<span class="kn">from</span> <span class="nn">circleguard.game_version</span> <span class="k">import</span> <span class="n">GameVersion</span>
+<span class="kn">from</span> <span class="nn">circleguard.hitobjects</span> <span class="k">import</span> <span class="n">Hitobject</span>
+
+<span class="k">class</span> <span class="nc">Investigator</span><span class="p">:</span>
+    <span class="c1"># https://osu.ppy.sh/home/changelog/stable40/20190207.2</span>
+    <span class="n">VERSION_SLIDERBUG_FIXED_STABLE</span> <span class="o">=</span> <span class="n">GameVersion</span><span class="p">(</span><span class="mi">20190207</span><span class="p">,</span> <span class="n">concrete</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+    <span class="c1"># https://osu.ppy.sh/home/changelog/cuttingedge/20190111</span>
+    <span class="n">VERSION_SLIDERBUG_FIXED_CUTTING_EDGE</span> <span class="o">=</span> <span class="n">GameVersion</span><span class="p">(</span><span class="mi">20190111</span><span class="p">,</span> <span class="n">concrete</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+
+    <span class="nd">@staticmethod</span>
+    <span class="k">def</span> <span class="nf">ur</span><span class="p">(</span><span class="n">replay</span><span class="p">,</span> <span class="n">beatmap</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Calculates the ur of ``replay`` when played against ``beatmap``.</span>
+
+<span class="sd">        Parameters</span>
+<span class="sd">        ----------</span>
+<span class="sd">        replay: :class:`~.Replay`</span>
+<span class="sd">            The replay to calculate the ur of.</span>
+<span class="sd">        beatmap: :class:`slider.beatmap.Beatmap`</span>
+<span class="sd">            The beatmap to calculate ``replay``&#39;s ur with.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+
+        <span class="n">hits</span> <span class="o">=</span> <span class="n">Investigator</span><span class="o">.</span><span class="n">hits</span><span class="p">(</span><span class="n">replay</span><span class="p">,</span> <span class="n">beatmap</span><span class="p">)</span>
+
+        <span class="n">diffs</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="k">for</span> <span class="n">hit</span> <span class="ow">in</span> <span class="n">hits</span><span class="p">:</span>
+            <span class="n">hitobj_t</span> <span class="o">=</span> <span class="n">hit</span><span class="o">.</span><span class="n">hitobject</span><span class="o">.</span><span class="n">t</span>
+            <span class="n">hit_t</span> <span class="o">=</span> <span class="n">hit</span><span class="o">.</span><span class="n">t</span>
+            <span class="n">diffs</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">hit_t</span> <span class="o">-</span> <span class="n">hitobj_t</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">np</span><span class="o">.</span><span class="n">std</span><span class="p">(</span><span class="n">diffs</span><span class="p">)</span> <span class="o">*</span> <span class="mi">10</span>
+
+    <span class="nd">@staticmethod</span>
+    <span class="k">def</span> <span class="nf">snaps_cross</span><span class="p">(</span><span class="n">replay</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        An alternative snap detection algorithm using relative cross products</span>
+<span class="sd">        of vectors.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">t</span><span class="p">,</span> <span class="n">xy</span> <span class="o">=</span> <span class="n">Investigator</span><span class="o">.</span><span class="n">remove_duplicate_t</span><span class="p">(</span><span class="n">replay</span><span class="o">.</span><span class="n">t</span><span class="p">,</span> <span class="n">replay</span><span class="o">.</span><span class="n">xy</span><span class="p">)</span>
+        <span class="c1"># label three consecutive points (a, b, c) and the vectors between them</span>
+        <span class="c1"># (ab, bc, ac)</span>
+        <span class="n">ab</span> <span class="o">=</span> <span class="n">xy</span><span class="p">[</span><span class="mi">1</span><span class="p">:</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span> <span class="o">-</span> <span class="n">xy</span><span class="p">[:</span><span class="o">-</span><span class="mi">2</span><span class="p">]</span>
+        <span class="n">bc</span> <span class="o">=</span> <span class="n">xy</span><span class="p">[</span><span class="mi">2</span><span class="p">:]</span> <span class="o">-</span> <span class="n">xy</span><span class="p">[</span><span class="mi">1</span><span class="p">:</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span>
+        <span class="n">ac</span> <span class="o">=</span> <span class="n">xy</span><span class="p">[</span><span class="mi">2</span><span class="p">:]</span> <span class="o">-</span> <span class="n">xy</span><span class="p">[:</span><span class="o">-</span><span class="mi">2</span><span class="p">]</span>
+
+    <span class="nd">@staticmethod</span>
+    <span class="k">def</span> <span class="nf">snaps</span><span class="p">(</span><span class="n">replay</span><span class="p">,</span> <span class="n">max_angle</span><span class="p">,</span> <span class="n">min_distance</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Calculates the angle between each set of three points (a,b,c) and finds</span>
+<span class="sd">        points where this angle is extremely acute and neither ``|ab|`` or</span>
+<span class="sd">        ``|bc|`` are small.</span>
+
+<span class="sd">        Parameters</span>
+<span class="sd">        ----------</span>
+<span class="sd">        replay: :class:`~.Replay`</span>
+<span class="sd">            The replay to investigate for aim correction.</span>
+<span class="sd">        max_angle: float</span>
+<span class="sd">            Consider only (a,b,c) where ``∠abc &lt; max_angle``</span>
+<span class="sd">        min_distance: float</span>
+<span class="sd">            Consider only (a,b,c) where ``|ab| &gt; min_distance`` and</span>
+<span class="sd">            ``|ab| &gt; min_distance``.</span>
+
+<span class="sd">        Returns</span>
+<span class="sd">        -------</span>
+<span class="sd">        list[:class:`~.Snap`]</span>
+<span class="sd">            Hits where the angle was less than ``max_angle`` and the distance</span>
+<span class="sd">            was more than ``min_distance``.</span>
+
+<span class="sd">        Notes</span>
+<span class="sd">        -----</span>
+<span class="sd">        This does not detect correction where multiple datapoints are placed</span>
+<span class="sd">        at the correction site (which creates a small ``min_distance``).</span>
+
+<span class="sd">        Another possible method is to look at the ratio between the angle</span>
+<span class="sd">        and distance.</span>
+
+<span class="sd">        See Also</span>
+<span class="sd">        --------</span>
+<span class="sd">        :meth:`~.aim_correction_sam` for an alternative, unused approach</span>
+<span class="sd">        involving velocity and jerk.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="c1"># when we leave mutliple frames with the same time values, they</span>
+        <span class="c1"># sometimes get detected (falesly) as aim correction.</span>
+        <span class="c1"># TODO Worth looking into a bit more to see if we can avoid it without</span>
+        <span class="c1"># removing the frames entirely.</span>
+        <span class="n">t</span><span class="p">,</span> <span class="n">xy</span> <span class="o">=</span> <span class="n">Investigator</span><span class="o">.</span><span class="n">remove_duplicate_t</span><span class="p">(</span><span class="n">replay</span><span class="o">.</span><span class="n">t</span><span class="p">,</span> <span class="n">replay</span><span class="o">.</span><span class="n">xy</span><span class="p">)</span>
+        <span class="n">t</span> <span class="o">=</span> <span class="n">t</span><span class="p">[</span><span class="mi">1</span><span class="p">:</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span>
+
+        <span class="c1"># label three consecutive points (a b c) and the vectors between them</span>
+        <span class="c1"># (ab, bc, ac)</span>
+        <span class="n">ab</span> <span class="o">=</span> <span class="n">xy</span><span class="p">[</span><span class="mi">1</span><span class="p">:</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span> <span class="o">-</span> <span class="n">xy</span><span class="p">[:</span><span class="o">-</span><span class="mi">2</span><span class="p">]</span>
+        <span class="n">bc</span> <span class="o">=</span> <span class="n">xy</span><span class="p">[</span><span class="mi">2</span><span class="p">:]</span> <span class="o">-</span> <span class="n">xy</span><span class="p">[</span><span class="mi">1</span><span class="p">:</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span>
+        <span class="n">ac</span> <span class="o">=</span> <span class="n">xy</span><span class="p">[</span><span class="mi">2</span><span class="p">:]</span> <span class="o">-</span> <span class="n">xy</span><span class="p">[:</span><span class="o">-</span><span class="mi">2</span><span class="p">]</span>
+        <span class="c1"># Distance a to b, b to c, and a to c</span>
+        <span class="n">AB</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">linalg</span><span class="o">.</span><span class="n">norm</span><span class="p">(</span><span class="n">ab</span><span class="p">,</span> <span class="n">axis</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span>
+        <span class="n">BC</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">linalg</span><span class="o">.</span><span class="n">norm</span><span class="p">(</span><span class="n">bc</span><span class="p">,</span> <span class="n">axis</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span>
+        <span class="n">AC</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">linalg</span><span class="o">.</span><span class="n">norm</span><span class="p">(</span><span class="n">ac</span><span class="p">,</span> <span class="n">axis</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span>
+        <span class="c1"># Law of cosines, solve for beta</span>
+        <span class="c1"># AC^2 = AB^2 + BC^2 - 2 * AB * BC * cos(beta)</span>
+        <span class="c1"># cos(beta) = -(AC^2 - AB^2 - BC^2) / (2 * AB * BC)</span>
+        <span class="n">num</span> <span class="o">=</span> <span class="o">-</span><span class="p">(</span><span class="n">AC</span> <span class="o">**</span> <span class="mi">2</span> <span class="o">-</span> <span class="n">AB</span> <span class="o">**</span> <span class="mi">2</span> <span class="o">-</span> <span class="n">BC</span> <span class="o">**</span> <span class="mi">2</span><span class="p">)</span>
+        <span class="n">denom</span> <span class="o">=</span> <span class="p">(</span><span class="mi">2</span> <span class="o">*</span> <span class="n">AB</span> <span class="o">*</span> <span class="n">BC</span><span class="p">)</span>
+        <span class="c1"># use true_divide for handling division by zero</span>
+        <span class="n">cos_beta</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">true_divide</span><span class="p">(</span><span class="n">num</span><span class="p">,</span> <span class="n">denom</span><span class="p">,</span> <span class="n">out</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">full_like</span><span class="p">(</span><span class="n">num</span><span class="p">,</span> <span class="n">np</span><span class="o">.</span><span class="n">nan</span><span class="p">),</span> <span class="n">where</span><span class="o">=</span><span class="n">denom</span><span class="o">!=</span><span class="mi">0</span><span class="p">)</span>
+        <span class="c1"># rounding issues makes cos_beta go out of arccos&#39; domain, so restrict it</span>
+        <span class="n">cos_beta</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">clip</span><span class="p">(</span><span class="n">cos_beta</span><span class="p">,</span> <span class="o">-</span><span class="mi">1</span><span class="p">,</span> <span class="mi">1</span><span class="p">)</span>
+
+        <span class="n">beta</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">rad2deg</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">arccos</span><span class="p">(</span><span class="n">cos_beta</span><span class="p">))</span>
+
+        <span class="n">min_AB_BC</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">minimum</span><span class="p">(</span><span class="n">AB</span><span class="p">,</span> <span class="n">BC</span><span class="p">)</span>
+        <span class="n">dist_mask</span> <span class="o">=</span> <span class="n">min_AB_BC</span> <span class="o">&gt;</span> <span class="n">min_distance</span>
+        <span class="c1"># use less to avoid comparing to nan</span>
+        <span class="n">angle_mask</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">less</span><span class="p">(</span><span class="n">beta</span><span class="p">,</span> <span class="n">max_angle</span><span class="p">,</span> <span class="n">where</span><span class="o">=~</span><span class="n">np</span><span class="o">.</span><span class="n">isnan</span><span class="p">(</span><span class="n">beta</span><span class="p">))</span>
+        <span class="c1"># boolean array of datapoints where both distance and angle requirements are met</span>
+        <span class="n">mask</span> <span class="o">=</span> <span class="n">dist_mask</span> <span class="o">&amp;</span> <span class="n">angle_mask</span>
+
+        <span class="k">return</span> <span class="p">[</span><span class="n">Snap</span><span class="p">(</span><span class="n">t</span><span class="p">,</span> <span class="n">b</span><span class="p">,</span> <span class="n">d</span><span class="p">)</span> <span class="k">for</span> <span class="p">(</span><span class="n">t</span><span class="p">,</span> <span class="n">b</span><span class="p">,</span> <span class="n">d</span><span class="p">)</span> <span class="ow">in</span> <span class="nb">zip</span><span class="p">(</span><span class="n">t</span><span class="p">[</span><span class="n">mask</span><span class="p">],</span> <span class="n">beta</span><span class="p">[</span><span class="n">mask</span><span class="p">],</span> <span class="n">min_AB_BC</span><span class="p">[</span><span class="n">mask</span><span class="p">])]</span>
+
+    <span class="nd">@staticmethod</span>
+    <span class="k">def</span> <span class="nf">snaps_sam</span><span class="p">(</span><span class="n">replay_data</span><span class="p">,</span> <span class="n">num_jerks</span><span class="p">,</span> <span class="n">min_jerk</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Calculates the jerk at each moment in the Replay, counts the number of times</span>
+<span class="sd">        it exceeds min_jerk and reports a positive if that number is over num_jerks.</span>
+<span class="sd">        Also reports all suspicious jerks and their timestamps.</span>
+
+<span class="sd">        WARNING</span>
+<span class="sd">        -------</span>
+<span class="sd">        Unused function. Kept for historical purposes and ease of viewing in</span>
+<span class="sd">        case we want to switch to this track of aim correction in the future,</span>
+<span class="sd">        or provide it as an alternative.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+
+        <span class="c1"># get all replay data as an array of type [(t, x, y, k)]</span>
+        <span class="n">txyk</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">replay_data</span><span class="p">)</span>
+
+        <span class="c1"># drop keypresses</span>
+        <span class="n">txy</span> <span class="o">=</span> <span class="n">txyk</span><span class="p">[:,</span> <span class="p">:</span><span class="mi">3</span><span class="p">]</span>
+
+        <span class="c1"># separate time and space</span>
+        <span class="n">t</span> <span class="o">=</span> <span class="n">txy</span><span class="p">[:,</span> <span class="mi">0</span><span class="p">]</span>
+        <span class="n">xy</span> <span class="o">=</span> <span class="n">txy</span><span class="p">[:,</span> <span class="mi">1</span><span class="p">:]</span>
+
+        <span class="c1"># j_x = (d/dt)^3 x</span>
+        <span class="c1"># calculated as (d/dT dT/dt)^3 x = (dT/dt)^3 (d/dT)^3 x</span>
+        <span class="c1"># (d/dT)^3 x = d(d(dx/dT)/dT)/dT</span>
+        <span class="c1"># (dT/dt)^3 = 1/(dt/dT)^3</span>
+        <span class="n">dtdT</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">diff</span><span class="p">(</span><span class="n">t</span><span class="p">)</span>
+        <span class="n">d3xy</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">diff</span><span class="p">(</span><span class="n">xy</span><span class="p">,</span> <span class="n">axis</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span> <span class="n">n</span><span class="o">=</span><span class="mi">3</span><span class="p">)</span>
+        <span class="c1"># safely calculate the division and replace with zero if the divisor is zero</span>
+        <span class="c1"># dtdT is sliced with 2: because differentiating drops one element for each order (slice (n - 1,) to (n - 3,))</span>
+        <span class="c1"># d3xy is of shape (n - 3, 2) so dtdT is also reshaped from (n - 3,) to (n - 3, 1) to align the axes.</span>
+        <span class="n">jerk</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">divide</span><span class="p">(</span><span class="n">d3xy</span><span class="p">,</span> <span class="n">dtdT</span><span class="p">[</span><span class="mi">2</span><span class="p">:,</span> <span class="kc">None</span><span class="p">]</span> <span class="o">**</span> <span class="mi">3</span><span class="p">,</span> <span class="n">out</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">zeros_like</span><span class="p">(</span><span class="n">d3xy</span><span class="p">),</span> <span class="n">where</span><span class="o">=</span><span class="n">dtdT</span><span class="p">[</span><span class="mi">2</span><span class="p">:,</span><span class="kc">None</span><span class="p">]</span><span class="o">!=</span><span class="mi">0</span><span class="p">)</span>
+
+        <span class="c1"># take the absolute value of the jerk</span>
+        <span class="n">jerk</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">linalg</span><span class="o">.</span><span class="n">norm</span><span class="p">(</span><span class="n">jerk</span><span class="p">,</span> <span class="n">axis</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span>
+
+        <span class="c1"># create a mask of where the jerk reaches suspicious values</span>
+        <span class="n">anomalous</span> <span class="o">=</span> <span class="n">jerk</span> <span class="o">&gt;</span> <span class="n">min_jerk</span>
+        <span class="c1"># and retrieve and store the timestamps and the values themself</span>
+        <span class="n">timestamps</span> <span class="o">=</span> <span class="n">t</span><span class="p">[</span><span class="mi">3</span><span class="p">:][</span><span class="n">anomalous</span><span class="p">]</span>
+        <span class="n">values</span> <span class="o">=</span> <span class="n">jerk</span><span class="p">[</span><span class="n">anomalous</span><span class="p">]</span>
+        <span class="c1"># reshape to an array of type [(t, j)]</span>
+        <span class="n">jerks</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">vstack</span><span class="p">((</span><span class="n">timestamps</span><span class="p">,</span> <span class="n">values</span><span class="p">))</span><span class="o">.</span><span class="n">T</span>
+
+        <span class="c1"># count the anomalies</span>
+        <span class="n">ischeat</span> <span class="o">=</span> <span class="n">anomalous</span><span class="o">.</span><span class="n">sum</span><span class="p">()</span> <span class="o">&gt;</span> <span class="n">num_jerks</span>
+
+        <span class="k">return</span> <span class="p">[</span><span class="n">jerks</span><span class="p">,</span> <span class="n">ischeat</span><span class="p">]</span>
+
+    <span class="nd">@staticmethod</span>
+    <span class="k">def</span> <span class="nf">frametime</span><span class="p">(</span><span class="n">replay</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Calculates the median time between the frames of ``replay``.</span>
+
+<span class="sd">        Parameters</span>
+<span class="sd">        ----------</span>
+<span class="sd">        replay: :class:`~.Replay`</span>
+<span class="sd">            The replay to calculate the frametime of.</span>
+
+<span class="sd">        Notes</span>
+<span class="sd">        -----</span>
+<span class="sd">        Median is used instead of mean to lessen the effect of outliers.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">frametimes</span> <span class="o">=</span> <span class="n">Investigator</span><span class="o">.</span><span class="n">frametimes</span><span class="p">(</span><span class="n">replay</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">np</span><span class="o">.</span><span class="n">median</span><span class="p">(</span><span class="n">frametimes</span><span class="p">)</span>
+
+    <span class="nd">@staticmethod</span>
+    <span class="k">def</span> <span class="nf">frametimes</span><span class="p">(</span><span class="n">replay</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Returns the time between each two consecutive frames in ``replay``.</span>
+
+<span class="sd">        Parameters</span>
+<span class="sd">        ----------</span>
+<span class="sd">        replay: :class:`~.Replay`</span>
+<span class="sd">            The replay to get the frametimes of.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="c1"># replay.t is cumsum so convert it back to &quot;time since previous frame&quot;</span>
+        <span class="k">return</span> <span class="n">np</span><span class="o">.</span><span class="n">diff</span><span class="p">(</span><span class="n">replay</span><span class="o">.</span><span class="n">t</span><span class="p">)</span>
+
+
+    <span class="nd">@staticmethod</span>
+    <span class="k">def</span> <span class="nf">keydown_frames</span><span class="p">(</span><span class="n">replay</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Get the frames of ``replay`` which had a keydown event, and we should</span>
+<span class="sd">        consider eligible to hit a hitobject.</span>
+
+<span class="sd">        Parameters</span>
+<span class="sd">        ----------</span>
+<span class="sd">        replay: :class:`~.Replay`</span>
+<span class="sd">            The replay to get the keydown frames of.</span>
+
+<span class="sd">        Returns</span>
+<span class="sd">        -------</span>
+<span class="sd">        ndarray(float, [float, float])</span>
+<span class="sd">            The keydown frames for the replay. The first float is the time of</span>
+<span class="sd">            that frame, the second and third floats are the x and y position</span>
+<span class="sd">            of the cursor at that frame.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">keydown_frames</span> <span class="o">=</span> <span class="p">[]</span>
+
+        <span class="c1"># the keydowns for each frame. Frames are &quot;keydown&quot; frames if an</span>
+        <span class="c1"># additional key was pressed from the previous frame. If keys pressed</span>
+        <span class="c1"># remained the same or decreased (a key previously pressed is no longer</span>
+        <span class="c1"># pressed) from the previous frame, ``keydowns`` is zero for that frame.</span>
+        <span class="n">keydowns</span> <span class="o">=</span> <span class="n">replay</span><span class="o">.</span><span class="n">keydowns</span>
+
+        <span class="k">for</span> <span class="n">i</span><span class="p">,</span> <span class="n">keydown</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">keydowns</span><span class="p">):</span>
+            <span class="k">if</span> <span class="n">keydown</span> <span class="o">!=</span> <span class="mi">0</span><span class="p">:</span>
+                <span class="n">keydown_frames</span><span class="o">.</span><span class="n">append</span><span class="p">([</span><span class="n">replay</span><span class="o">.</span><span class="n">t</span><span class="p">[</span><span class="n">i</span><span class="p">],</span> <span class="n">replay</span><span class="o">.</span><span class="n">xy</span><span class="p">[</span><span class="n">i</span><span class="p">]])</span>
+
+        <span class="c1"># add a duplicate frame when 2 keys are pressed at the same time</span>
+        <span class="n">keydowns</span> <span class="o">=</span> <span class="n">keydowns</span><span class="p">[</span><span class="n">keydowns</span> <span class="o">!=</span> <span class="mi">0</span><span class="p">]</span>
+        <span class="n">i</span> <span class="o">=</span> <span class="mi">0</span>
+        <span class="k">for</span> <span class="n">j</span> <span class="ow">in</span> <span class="n">np</span><span class="o">.</span><span class="n">where</span><span class="p">(</span><span class="n">keydowns</span> <span class="o">==</span> <span class="n">KEY_MASK</span><span class="p">)[</span><span class="mi">0</span><span class="p">]:</span>
+            <span class="n">keydown_frames</span><span class="o">.</span><span class="n">insert</span><span class="p">(</span><span class="n">j</span> <span class="o">+</span> <span class="n">i</span> <span class="o">+</span> <span class="mi">1</span><span class="p">,</span> <span class="n">keydown_frames</span><span class="p">[</span><span class="n">j</span> <span class="o">+</span> <span class="n">i</span><span class="p">])</span>
+            <span class="n">i</span> <span class="o">+=</span> <span class="mi">1</span>
+
+        <span class="k">return</span> <span class="n">keydown_frames</span>
+
+    <span class="c1"># TODO add exception for 2b objects (&gt;1 object at the same time) for current</span>
+    <span class="c1"># version of notelock</span>
+    <span class="nd">@staticmethod</span>
+    <span class="k">def</span> <span class="nf">hits</span><span class="p">(</span><span class="n">replay</span><span class="p">,</span> <span class="n">beatmap</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Determines the hits (where any hitobject was hit for the first time)</span>
+<span class="sd">        when playing ``replay`` against ``beatmap``</span>
+
+<span class="sd">        Parameters</span>
+<span class="sd">        ----------</span>
+<span class="sd">        replay: :class:`~.Replay`</span>
+<span class="sd">            The replay to determine the hits of when played against ``beatmap``.</span>
+<span class="sd">        beatmap: :class:`slider.beatmap.Beatmap`</span>
+<span class="sd">            The beatmap to determine the hits of when ``replay`` is played</span>
+<span class="sd">            against it.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">game_version</span> <span class="o">=</span> <span class="n">replay</span><span class="o">.</span><span class="n">game_version</span>
+
+        <span class="k">if</span> <span class="ow">not</span> <span class="n">game_version</span><span class="o">.</span><span class="n">available</span><span class="p">():</span>
+            <span class="c1"># if we have no information about the version, assume it was played</span>
+            <span class="c1"># after sliderbug was fixed.</span>
+            <span class="n">sliderbug_fixed</span> <span class="o">=</span> <span class="kc">True</span>
+
+        <span class="k">if</span> <span class="ow">not</span> <span class="n">game_version</span><span class="o">.</span><span class="n">concrete</span><span class="p">:</span>
+            <span class="c1"># if we&#39;re only estimating the version, assume the replay was played</span>
+            <span class="c1"># on stable. if we used the cutting edge version instead, we would</span>
+            <span class="c1"># be incorrectly using logic for sliderbug being fixed for all</span>
+            <span class="c1"># replays between the cutting edge version and the stable version</span>
+            <span class="c1"># which were played on stable.</span>
+            <span class="c1"># This is wrong for cutting edge replays between those two versions</span>
+            <span class="c1"># which do not have a concrete version, but that&#39;s better than being</span>
+            <span class="c1"># wrong for stable replays between those two versions.</span>
+            <span class="n">sliderbug_fixed</span> <span class="o">=</span> <span class="n">game_version</span> <span class="o">&gt;=</span> <span class="n">Investigator</span><span class="o">.</span><span class="n">VERSION_SLIDERBUG_FIXED_STABLE</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">sliderbug_fixed</span> <span class="o">=</span> <span class="n">game_version</span> <span class="o">&gt;=</span> <span class="n">Investigator</span><span class="o">.</span><span class="n">VERSION_SLIDERBUG_FIXED_CUTTING_EDGE</span>
+
+        <span class="n">easy</span> <span class="o">=</span> <span class="n">Mod</span><span class="o">.</span><span class="n">EZ</span> <span class="ow">in</span> <span class="n">replay</span><span class="o">.</span><span class="n">mods</span>
+        <span class="n">hard_rock</span> <span class="o">=</span> <span class="n">Mod</span><span class="o">.</span><span class="n">HR</span> <span class="ow">in</span> <span class="n">replay</span><span class="o">.</span><span class="n">mods</span>
+        <span class="n">hitobjs</span> <span class="o">=</span> <span class="n">beatmap</span><span class="o">.</span><span class="n">hit_objects</span><span class="p">(</span><span class="n">easy</span><span class="o">=</span><span class="n">easy</span><span class="p">,</span> <span class="n">hard_rock</span><span class="o">=</span><span class="n">hard_rock</span><span class="p">)</span>
+
+        <span class="n">OD</span> <span class="o">=</span> <span class="n">beatmap</span><span class="o">.</span><span class="n">od</span><span class="p">(</span><span class="n">easy</span><span class="o">=</span><span class="n">easy</span><span class="p">,</span> <span class="n">hard_rock</span><span class="o">=</span><span class="n">hard_rock</span><span class="p">)</span>
+        <span class="n">CS</span> <span class="o">=</span> <span class="n">beatmap</span><span class="o">.</span><span class="n">cs</span><span class="p">(</span><span class="n">easy</span><span class="o">=</span><span class="n">easy</span><span class="p">,</span> <span class="n">hard_rock</span><span class="o">=</span><span class="n">hard_rock</span><span class="p">)</span>
+        <span class="n">keydowns</span> <span class="o">=</span> <span class="n">Investigator</span><span class="o">.</span><span class="n">keydown_frames</span><span class="p">(</span><span class="n">replay</span><span class="p">)</span>
+
+
+        <span class="n">hits</span> <span class="o">=</span> <span class="p">[]</span>
+
+        <span class="c1"># stable converts OD (and CS), which are originally a float32, to a</span>
+        <span class="c1"># double and this causes some hitwindows to be messed up when casted to</span>
+        <span class="c1"># an int so we replicate this</span>
+        <span class="n">hitwindow</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="mi">150</span> <span class="o">+</span> <span class="mi">50</span> <span class="o">*</span> <span class="p">(</span><span class="mi">5</span> <span class="o">-</span> <span class="nb">float</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">float32</span><span class="p">(</span><span class="n">OD</span><span class="p">)))</span> <span class="o">/</span> <span class="mi">5</span><span class="p">)</span>
+
+        <span class="c1"># attempting to match stable hitradius</span>
+        <span class="n">hitradius</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">float32</span><span class="p">(</span><span class="mi">64</span> <span class="o">*</span> <span class="p">((</span><span class="mf">1.0</span> <span class="o">-</span> <span class="n">np</span><span class="o">.</span><span class="n">float32</span><span class="p">(</span><span class="mf">0.7</span><span class="p">)</span> <span class="o">*</span> <span class="p">(</span><span class="nb">float</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">float32</span><span class="p">(</span><span class="n">CS</span><span class="p">))</span> <span class="o">-</span> <span class="mi">5</span><span class="p">)</span> <span class="o">/</span> <span class="mi">5</span><span class="p">))</span> <span class="o">/</span> <span class="mi">2</span><span class="p">)</span> <span class="o">*</span> <span class="n">np</span><span class="o">.</span><span class="n">float32</span><span class="p">(</span><span class="mf">1.00041</span><span class="p">)</span>
+
+        <span class="n">hitobj_i</span> <span class="o">=</span> <span class="mi">0</span>
+        <span class="n">keydown_i</span> <span class="o">=</span> <span class="mi">0</span>
+
+        <span class="k">while</span> <span class="n">hitobj_i</span> <span class="o">&lt;</span> <span class="nb">len</span><span class="p">(</span><span class="n">hitobjs</span><span class="p">)</span> <span class="ow">and</span> <span class="n">keydown_i</span> <span class="o">&lt;</span> <span class="nb">len</span><span class="p">(</span><span class="n">keydowns</span><span class="p">):</span>
+            <span class="n">hitobj</span> <span class="o">=</span> <span class="n">hitobjs</span><span class="p">[</span><span class="n">hitobj_i</span><span class="p">]</span>
+            <span class="n">hitobj_t</span> <span class="o">=</span> <span class="n">hitobj</span><span class="o">.</span><span class="n">time</span><span class="o">.</span><span class="n">total_seconds</span><span class="p">()</span> <span class="o">*</span> <span class="mi">1000</span>
+            <span class="n">hitobj_xy</span> <span class="o">=</span> <span class="p">[</span><span class="n">hitobj</span><span class="o">.</span><span class="n">position</span><span class="o">.</span><span class="n">x</span><span class="p">,</span> <span class="n">hitobj</span><span class="o">.</span><span class="n">position</span><span class="o">.</span><span class="n">y</span><span class="p">]</span>
+
+            <span class="n">keydown_t</span> <span class="o">=</span> <span class="n">keydowns</span><span class="p">[</span><span class="n">keydown_i</span><span class="p">][</span><span class="mi">0</span><span class="p">]</span>
+            <span class="n">keydown_xy</span> <span class="o">=</span> <span class="n">keydowns</span><span class="p">[</span><span class="n">keydown_i</span><span class="p">][</span><span class="mi">1</span><span class="p">]</span>
+
+            <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">hitobj</span><span class="p">,</span> <span class="n">Circle</span><span class="p">):</span>
+                <span class="n">hitobj_type</span> <span class="o">=</span> <span class="mi">0</span>
+                <span class="n">hitobj_end_time</span> <span class="o">=</span> <span class="n">hitobj_t</span> <span class="o">+</span> <span class="n">hitwindow</span>
+            <span class="k">elif</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">hitobj</span><span class="p">,</span> <span class="n">Slider</span><span class="p">):</span>
+                <span class="n">hitobj_type</span> <span class="o">=</span> <span class="mi">1</span>
+                <span class="n">hitobj_end_time</span> <span class="o">=</span> <span class="n">hitobj</span><span class="o">.</span><span class="n">end_time</span><span class="o">.</span><span class="n">total_seconds</span><span class="p">()</span> <span class="o">*</span> <span class="mi">1000</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="n">hitobj_type</span> <span class="o">=</span> <span class="mi">2</span>
+                <span class="n">hitobj_end_time</span> <span class="o">=</span> <span class="n">hitobj</span><span class="o">.</span><span class="n">end_time</span><span class="o">.</span><span class="n">total_seconds</span><span class="p">()</span> <span class="o">*</span> <span class="mi">1000</span>
+
+            <span class="c1"># before sliderbug fix, notelock ended after hitwindow50</span>
+            <span class="k">if</span> <span class="ow">not</span> <span class="n">sliderbug_fixed</span><span class="p">:</span>
+                <span class="n">notelock_end_time</span> <span class="o">=</span> <span class="n">hitobj_t</span> <span class="o">+</span> <span class="n">hitwindow</span>
+                <span class="c1"># exception for sliders/spinners, where notelock ends after</span>
+                <span class="c1"># hitobject end time if it&#39;s earlier</span>
+                <span class="k">if</span> <span class="n">hitobj_type</span> <span class="o">!=</span> <span class="mi">0</span><span class="p">:</span>
+                    <span class="n">notelock_end_time</span> <span class="o">=</span> <span class="nb">min</span><span class="p">(</span><span class="n">notelock_end_time</span><span class="p">,</span> <span class="n">hitobj_end_time</span><span class="p">)</span>
+            <span class="c1"># after sliderbug fix, notelock ends after hitobject end time</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="n">notelock_end_time</span> <span class="o">=</span> <span class="n">hitobj_end_time</span>
+                <span class="c1"># apparently notelock was increased by 1ms for circles</span>
+                <span class="c1"># (from testing)</span>
+                <span class="k">if</span> <span class="n">hitobj_type</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
+                    <span class="n">notelock_end_time</span> <span class="o">+=</span> <span class="mi">1</span>
+
+
+            <span class="c1"># can&#39;t press on hitobjects before hitwindowmiss</span>
+            <span class="k">if</span> <span class="n">keydown_t</span> <span class="o">&lt;</span> <span class="n">hitobj_t</span> <span class="o">-</span> <span class="mi">400</span><span class="p">:</span>
+                <span class="n">keydown_i</span> <span class="o">+=</span> <span class="mi">1</span>
+                <span class="k">continue</span>
+
+            <span class="k">if</span> <span class="n">keydown_t</span> <span class="o">&lt;=</span> <span class="n">hitobj_t</span> <span class="o">-</span> <span class="n">hitwindow</span><span class="p">:</span>
+                <span class="c1"># pressing on a circle or slider during hitwindowmiss will cause</span>
+                <span class="c1"># a miss</span>
+                <span class="k">if</span> <span class="n">np</span><span class="o">.</span><span class="n">linalg</span><span class="o">.</span><span class="n">norm</span><span class="p">(</span><span class="n">keydown_xy</span> <span class="o">-</span> <span class="n">hitobj_xy</span><span class="p">)</span> <span class="o">&lt;=</span> <span class="n">hitradius</span> <span class="ow">and</span> <span class="n">hitobj_type</span> <span class="o">!=</span> <span class="mi">2</span><span class="p">:</span>
+
+                    <span class="c1"># sliders don&#39;t disappear after missing</span>
+                    <span class="c1"># so we skip to the press_i that is after notelock_end_time</span>
+                    <span class="k">if</span> <span class="n">hitobj_type</span> <span class="o">==</span> <span class="mi">1</span> <span class="ow">and</span> <span class="n">sliderbug_fixed</span><span class="p">:</span>
+                        <span class="k">while</span> <span class="n">keydowns</span><span class="p">[</span><span class="n">keydown_i</span><span class="p">][</span><span class="mi">0</span><span class="p">]</span> <span class="o">&lt;</span> <span class="n">notelock_end_time</span><span class="p">:</span>
+                            <span class="n">keydown_i</span> <span class="o">+=</span> <span class="mi">1</span>
+                            <span class="k">if</span> <span class="n">keydown_i</span> <span class="o">&gt;=</span> <span class="nb">len</span><span class="p">(</span><span class="n">keydowns</span><span class="p">):</span>
+                                <span class="k">break</span>
+                    <span class="k">else</span><span class="p">:</span>
+                        <span class="n">keydown_i</span> <span class="o">+=</span> <span class="mi">1</span>
+                    <span class="n">hitobj_i</span> <span class="o">+=</span> <span class="mi">1</span>
+                <span class="c1"># keypress not on object, so we move to the next keypress</span>
+                <span class="k">else</span><span class="p">:</span>
+                    <span class="n">keydown_i</span> <span class="o">+=</span> <span class="mi">1</span>
+            <span class="k">elif</span> <span class="n">keydown_t</span> <span class="o">&gt;=</span> <span class="n">notelock_end_time</span><span class="p">:</span>
+                <span class="c1"># can no longer interact with hitobject after notelock_end_time</span>
+                <span class="c1"># so we move to the next object</span>
+                <span class="n">hitobj_i</span> <span class="o">+=</span> <span class="mi">1</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="k">if</span> <span class="n">keydown_t</span> <span class="o">&lt;</span> <span class="n">hitobj_t</span> <span class="o">+</span> <span class="n">hitwindow</span> <span class="ow">and</span> <span class="n">np</span><span class="o">.</span><span class="n">linalg</span><span class="o">.</span><span class="n">norm</span><span class="p">(</span><span class="n">keydown_xy</span> <span class="o">-</span> <span class="n">hitobj_xy</span><span class="p">)</span> <span class="o">&lt;=</span> <span class="n">hitradius</span> <span class="ow">and</span> <span class="n">hitobj_type</span> <span class="o">!=</span> <span class="mi">2</span><span class="p">:</span>
+                    <span class="n">hit</span> <span class="o">=</span> <span class="n">Hit</span><span class="p">(</span><span class="n">hitobj</span><span class="p">,</span> <span class="n">keydown_t</span><span class="p">,</span> <span class="n">keydown_xy</span><span class="p">,</span> <span class="n">CS</span><span class="p">)</span>
+                    <span class="n">hits</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">hit</span><span class="p">)</span>
+
+                    <span class="c1"># sliders don&#39;t disappear after clicking</span>
+                    <span class="c1"># so we skip to the press_i that is after notelock_end_time</span>
+                    <span class="k">if</span> <span class="n">hitobj_type</span> <span class="o">==</span> <span class="mi">1</span> <span class="ow">and</span> <span class="n">sliderbug_fixed</span><span class="p">:</span>
+                        <span class="k">while</span> <span class="n">keydowns</span><span class="p">[</span><span class="n">keydown_i</span><span class="p">][</span><span class="mi">0</span><span class="p">]</span> <span class="o">&lt;</span> <span class="n">notelock_end_time</span><span class="p">:</span>
+                            <span class="n">keydown_i</span> <span class="o">+=</span> <span class="mi">1</span>
+                            <span class="k">if</span> <span class="n">keydown_i</span> <span class="o">&gt;=</span> <span class="nb">len</span><span class="p">(</span><span class="n">keydowns</span><span class="p">):</span>
+                                <span class="k">break</span>
+                    <span class="k">else</span><span class="p">:</span>
+                        <span class="n">keydown_i</span> <span class="o">+=</span> <span class="mi">1</span>
+                    <span class="n">hitobj_i</span> <span class="o">+=</span> <span class="mi">1</span>
+                <span class="c1"># keypress not on object, so we move to the next keypress</span>
+                <span class="k">else</span><span class="p">:</span>
+                    <span class="n">keydown_i</span> <span class="o">+=</span> <span class="mi">1</span>
+
+        <span class="k">return</span> <span class="n">hits</span>
+
+    <span class="c1"># TODO (some) code duplication with this method and a similar one in</span>
+    <span class="c1"># ``Comparer``. Consolidate and move this method to utils?</span>
+    <span class="nd">@staticmethod</span>
+    <span class="k">def</span> <span class="nf">remove_duplicate_t</span><span class="p">(</span><span class="n">t</span><span class="p">,</span> <span class="n">data</span><span class="p">):</span>
+        <span class="n">t</span><span class="p">,</span> <span class="n">t_sort</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">unique</span><span class="p">(</span><span class="n">t</span><span class="p">,</span> <span class="n">return_index</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+        <span class="n">data</span> <span class="o">=</span> <span class="n">data</span><span class="p">[</span><span class="n">t_sort</span><span class="p">]</span>
+        <span class="k">return</span> <span class="p">(</span><span class="n">t</span><span class="p">,</span> <span class="n">data</span><span class="p">)</span>
+
+
+<div class="viewcode-block" id="Snap"><a class="viewcode-back" href="../../appendix.html#circleguard.investigator.Snap">[docs]</a><span class="k">class</span> <span class="nc">Snap</span><span class="p">():</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    A suspicious hit in a replay, specifically so because it snaps away from</span>
+<span class="sd">    the otherwise normal path. Snaps represent the middle frame in a set of</span>
+<span class="sd">    three replay frames (so for example ``time`` is the time of the middle</span>
+<span class="sd">    frame).</span>
+
+<span class="sd">    Parameters</span>
+<span class="sd">    ----------</span>
+<span class="sd">    time: int</span>
+<span class="sd">        The time value of the middle datapoint, in ms. 0 represents the</span>
+<span class="sd">        beginning of the replay.</span>
+<span class="sd">    angle: float</span>
+<span class="sd">        The angle between the three datapoints.</span>
+<span class="sd">    distance: float</span>
+<span class="sd">        ``min(dist_a_b, dist_b_c)`` if ``a``, ``b``, and ``c`` are three</span>
+<span class="sd">        datapoints with ``b`` being the middle one.</span>
+
+<span class="sd">    See Also</span>
+<span class="sd">    --------</span>
+<span class="sd">    :meth:`~.Investigator.aim_correction`</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">time</span><span class="p">,</span> <span class="n">angle</span><span class="p">,</span> <span class="n">distance</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">time</span> <span class="o">=</span> <span class="n">time</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">angle</span> <span class="o">=</span> <span class="n">angle</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">distance</span> <span class="o">=</span> <span class="n">distance</span>
+
+    <span class="k">def</span> <span class="nf">__eq__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">other</span><span class="p">):</span>
+        <span class="k">return</span> <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">time</span> <span class="o">==</span> <span class="n">other</span><span class="o">.</span><span class="n">time</span> <span class="ow">and</span> <span class="bp">self</span><span class="o">.</span><span class="n">angle</span> <span class="o">==</span> <span class="n">other</span><span class="o">.</span><span class="n">angle</span>
+                <span class="ow">and</span> <span class="bp">self</span><span class="o">.</span><span class="n">distance</span> <span class="o">==</span> <span class="n">other</span><span class="o">.</span><span class="n">distance</span><span class="p">)</span>
+
+    <span class="k">def</span> <span class="nf">__hash__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">return</span> <span class="nb">hash</span><span class="p">((</span><span class="bp">self</span><span class="o">.</span><span class="n">time</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">angle</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">distance</span><span class="p">))</span></div>
+
+
+<div class="viewcode-block" id="Hit"><a class="viewcode-back" href="../../appendix.html#circleguard.investigator.Hit">[docs]</a><span class="k">class</span> <span class="nc">Hit</span><span class="p">():</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    A hit on a hitobject when a replay is played against a beatmap. In osu!lazer</span>
+<span class="sd">    terms, this would be a Judgement, though we do not count misses as a ``Hit``</span>
+<span class="sd">    while lazer does count them as judgements.</span>
+
+<span class="sd">    Parameters</span>
+<span class="sd">    ----------</span>
+<span class="sd">    hitobject: :class:`slider.beatmap.Hitobject`</span>
+<span class="sd">        The hitobject that was hit. This is converted to a</span>
+<span class="sd">        :class:`circleguard.hitobjects.Hitobject`.</span>
+<span class="sd">    t: float</span>
+<span class="sd">        The time the hit occured.</span>
+<span class="sd">    xy: list[float, float]</span>
+<span class="sd">        The x and y position where the hit occured.</span>
+<span class="sd">    CS: float</span>
+<span class="sd">        The circle size of the beatmap (after being modified by the replay&#39;s</span>
+<span class="sd">        mods, ie ``Mod.HR`` or ``Mod.EZ``) this hit occurred in.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">hitobject</span><span class="p">,</span> <span class="n">t</span><span class="p">,</span> <span class="n">xy</span><span class="p">,</span> <span class="n">CS</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">hitobject</span> <span class="o">=</span> <span class="n">Hitobject</span><span class="o">.</span><span class="n">from_slider_hitobj</span><span class="p">(</span><span class="n">hitobject</span><span class="p">,</span> <span class="n">CS</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">t</span> <span class="o">=</span> <span class="n">t</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">xy</span> <span class="o">=</span> <span class="n">xy</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">x</span> <span class="o">=</span> <span class="n">xy</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">y</span> <span class="o">=</span> <span class="n">xy</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span>
+
+<div class="viewcode-block" id="Hit.distance"><a class="viewcode-back" href="../../appendix.html#circleguard.investigator.Hit.distance">[docs]</a>    <span class="k">def</span> <span class="nf">distance</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="o">*</span><span class="p">,</span> <span class="n">to</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        The distance from this hit to either the center or edge of its</span>
+<span class="sd">        hitobject.</span>
+
+<span class="sd">        Parameters</span>
+<span class="sd">        ----------</span>
+<span class="sd">        to: {&quot;center&quot;, &quot;edge&quot;}</span>
+<span class="sd">            If ``center``, the distance from this hit to the center of its</span>
+<span class="sd">            hitobject is calculated. If ``edge``, the distance from this hit to</span>
+<span class="sd">            the edge of its hitobject is calculated.</span>
+<span class="sd">        Returns</span>
+<span class="sd">        -------</span>
+<span class="sd">        float</span>
+<span class="sd">            The distance from this hit to either the center or edge of its</span>
+<span class="sd">            hitobject.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">check_param</span><span class="p">(</span><span class="n">to</span><span class="p">,</span> <span class="p">[</span><span class="s2">&quot;center&quot;</span><span class="p">,</span> <span class="s2">&quot;edge&quot;</span><span class="p">])</span>
+
+        <span class="n">hitobj_xy</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">hitobject</span><span class="o">.</span><span class="n">xy</span>
+
+        <span class="k">if</span> <span class="n">to</span> <span class="o">==</span> <span class="s2">&quot;edge&quot;</span><span class="p">:</span>
+            <span class="n">dist</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">linalg</span><span class="o">.</span><span class="n">norm</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">xy</span> <span class="o">-</span> <span class="n">hitobj_xy</span><span class="p">)</span> <span class="o">-</span> <span class="bp">self</span><span class="o">.</span><span class="n">hitobject</span><span class="o">.</span><span class="n">radius</span>
+            <span class="c1"># value is negative since we&#39;re inside the hitobject, so take abs</span>
+            <span class="k">return</span> <span class="nb">abs</span><span class="p">(</span><span class="n">dist</span><span class="p">)</span>
+
+        <span class="k">if</span> <span class="n">to</span> <span class="o">==</span> <span class="s2">&quot;center&quot;</span><span class="p">:</span>
+            <span class="k">return</span> <span class="n">np</span><span class="o">.</span><span class="n">linalg</span><span class="o">.</span><span class="n">norm</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">xy</span> <span class="o">-</span> <span class="n">hitobj_xy</span><span class="p">)</span></div>
+
+<div class="viewcode-block" id="Hit.within"><a class="viewcode-back" href="../../appendix.html#circleguard.investigator.Hit.within">[docs]</a>    <span class="k">def</span> <span class="nf">within</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">distance</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Whether the hit was within ``distance`` of the edge of its hitobject.</span>
+
+<span class="sd">        Parameters</span>
+<span class="sd">        ----------</span>
+<span class="sd">        distance: float</span>
+<span class="sd">            How close, in pixels, to the edge of the hitobject the hit has to</span>
+<span class="sd">            be.</span>
+
+<span class="sd">        Returns</span>
+<span class="sd">        -------</span>
+<span class="sd">        bool</span>
+<span class="sd">            Whether the hit was within ``distance`` of the edge of its</span>
+<span class="sd">            hitobject.</span>
+
+<span class="sd">        Notes</span>
+<span class="sd">        -----</span>
+<span class="sd">        The lower the value, the closer to the edge the hit occurred. This value</span>
+<span class="sd">        can never be greater than the radius of the hitobject.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">distance</span><span class="p">(</span><span class="n">to</span><span class="o">=</span><span class="s2">&quot;edge&quot;</span><span class="p">)</span> <span class="o">&lt;</span> <span class="n">distance</span></div>
+
+    <span class="k">def</span> <span class="nf">__eq__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">other</span><span class="p">):</span>
+        <span class="k">return</span> <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">hitobject</span> <span class="o">==</span> <span class="n">other</span><span class="o">.</span><span class="n">hitobject</span> <span class="ow">and</span> <span class="bp">self</span><span class="o">.</span><span class="n">t</span> <span class="o">==</span> <span class="n">other</span><span class="o">.</span><span class="n">t</span> <span class="ow">and</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">xy</span> <span class="o">==</span> <span class="n">other</span><span class="o">.</span><span class="n">xy</span><span class="p">)</span>
+
+    <span class="k">def</span> <span class="nf">__hash__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">return</span> <span class="nb">hash</span><span class="p">((</span><span class="bp">self</span><span class="o">.</span><span class="n">hitobject</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">t</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">xy</span><span class="p">))</span></div>
+</pre></div>
+
+           </div>
+           
+          </div>
+          <footer>
+  
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>
+
+    </p>
+  </div> 
+
+</footer>
+
+        </div>
+      </div>
+
+    </section>
+
+  </div>
+  
+
+
+  <script type="text/javascript">
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script>
+
+  
+  
+    
+   
+
+</body>
+</html>

@@ -1,0 +1,291 @@
+
+
+<!DOCTYPE html>
+<!--[if IE 8]><html class="no-js lt-ie9" lang="en" > <![endif]-->
+<!--[if gt IE 8]><!--> <html class="no-js" lang="en" > <!--<![endif]-->
+<head>
+  <meta charset="utf-8">
+  
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  
+  <title>Investigating Replays &mdash; Circleguard v4.5.1 documentation</title>
+  
+
+  
+  
+  
+  
+
+  
+  <script type="text/javascript" src="_static/js/modernizr.min.js"></script>
+  
+    
+      <script type="text/javascript" id="documentation_options" data-url_root="./" src="_static/documentation_options.js"></script>
+        <script type="text/javascript" src="_static/jquery.js"></script>
+        <script type="text/javascript" src="_static/underscore.js"></script>
+        <script type="text/javascript" src="_static/doctools.js"></script>
+        <script type="text/javascript" src="_static/language_data.js"></script>
+    
+    <script type="text/javascript" src="_static/js/theme.js"></script>
+
+    
+
+  
+  <link rel="stylesheet" href="_static/css/theme.css" type="text/css" />
+  <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
+    <link rel="index" title="Index" href="genindex.html" />
+    <link rel="search" title="Search" href="search.html" />
+    <link rel="next" title="Results" href="results.html" />
+    <link rel="prev" title="Representing Replays" href="representing-replays.html" /> 
+</head>
+
+<body class="wy-body-for-nav">
+
+   
+  <div class="wy-grid-for-nav">
+    
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+          
+
+          
+            <a href="index.html" class="icon icon-home"> Circleguard
+          
+
+          
+          </a>
+
+          
+            
+            
+              <div class="version">
+                v4.5.1
+              </div>
+            
+          
+
+          
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+
+          
+        </div>
+
+        <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="main navigation">
+          
+            
+            
+              
+            
+            
+              <ul>
+<li class="toctree-l1"><a class="reference internal" href="index.html">Circlecore</a></li>
+</ul>
+<p class="caption"><span class="caption-text">Tutorials</span></p>
+<ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="foreword.html">Foreword</a></li>
+<li class="toctree-l1"><a class="reference internal" href="representing-replays.html">Representing Replays</a></li>
+<li class="toctree-l1 current"><a class="current reference internal" href="#">Investigating Replays</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="#id1">Circleguard</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#investigation">Investigation</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#multiple-cheats">Multiple Cheats</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="results.html">Results</a></li>
+<li class="toctree-l1"><a class="reference internal" href="loading.html">Loading</a></li>
+<li class="toctree-l1"><a class="reference internal" href="caching.html">Caching</a></li>
+</ul>
+<p class="caption"><span class="caption-text">Contributing</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="contributing.html">Contributing</a></li>
+</ul>
+<p class="caption"><span class="caption-text">Appendix</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="appendix.html">Appendix</a></li>
+</ul>
+
+            
+          
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
+
+      
+      <nav class="wy-nav-top" aria-label="top navigation">
+        
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="index.html">Circleguard</a>
+        
+      </nav>
+
+
+      <div class="wy-nav-content">
+        
+        <div class="rst-content">
+        
+          
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<div role="navigation" aria-label="breadcrumbs navigation">
+
+  <ul class="wy-breadcrumbs">
+    
+      <li><a href="index.html">Docs</a> &raquo;</li>
+        
+      <li>Investigating Replays</li>
+    
+    
+      <li class="wy-breadcrumbs-aside">
+        
+            
+            <a href="_sources/investigating-replays.rst.txt" rel="nofollow"> View page source</a>
+          
+        
+      </li>
+    
+  </ul>
+
+  
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+            
+  <div class="section" id="investigating-replays">
+<h1>Investigating Replays<a class="headerlink" href="#investigating-replays" title="Permalink to this headline">¶</a></h1>
+<div class="section" id="id1">
+<h2>Circleguard<a class="headerlink" href="#id1" title="Permalink to this headline">¶</a></h2>
+<p>To investigate replays, you first need to create a <a class="reference internal" href="appendix.html#circleguard.circleguard.Circleguard" title="circleguard.circleguard.Circleguard"><code class="xref py py-class docutils literal notranslate"><span class="pre">Circleguard</span></code></a> object. To
+do so you will need an api key.</p>
+<p>If you don’t already have an api key, visit <a class="reference external" href="https://osu.ppy.sh/p/api/">https://osu.ppy.sh/p/api/</a> and enter
+<code class="docutils literal notranslate"><span class="pre">Circleguard</span></code> for <code class="docutils literal notranslate"><span class="pre">App</span> <span class="pre">Name</span></code> and
+<code class="docutils literal notranslate"><span class="pre">https://github.com/circleguard/circlecore</span></code> for <code class="docutils literal notranslate"><span class="pre">App</span> <span class="pre">URL</span></code>. Circlecore
+needs this key to retrieve replay data and user information, among other
+things.</p>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<p>Due to a <a class="reference external" href="https://github.com/ppy/osu-web/issues/2867">redirection bug</a>
+on the website, you may need to log in and wait 30 seconds before being
+able to access the api page through the above link.</p>
+</div>
+<p>After that, circleguard instantion is easy:</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="n">cg</span> <span class="o">=</span> <span class="n">Circleguard</span><span class="p">(</span><span class="s2">&quot;key&quot;</span><span class="p">)</span>
+</pre></div>
+</div>
+<p>Replace <code class="docutils literal notranslate"><span class="pre">&quot;key&quot;</span></code> in these examples with your api key.</p>
+</div>
+<div class="section" id="investigation">
+<h2>Investigation<a class="headerlink" href="#investigation" title="Permalink to this headline">¶</a></h2>
+<p>We provide several convenience methods through <a class="reference internal" href="appendix.html#circleguard.circleguard.Circleguard" title="circleguard.circleguard.Circleguard"><code class="xref py py-class docutils literal notranslate"><span class="pre">Circleguard</span></code></a> to investigate
+replays for different cheat types.</p>
+<p>For instance, to investigate replays for replay stealing, use <code class="xref py py-func docutils literal notranslate"><span class="pre">steal_check()</span></code>:</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="n">cg</span> <span class="o">=</span> <span class="n">Circleguard</span><span class="p">(</span><span class="s2">&quot;key&quot;</span><span class="p">)</span>
+<span class="n">r1</span> <span class="o">=</span> <span class="n">ReplayMap</span><span class="p">(</span><span class="mi">221777</span><span class="p">,</span> <span class="mi">2757689</span><span class="p">)</span>
+<span class="n">r2</span> <span class="o">=</span> <span class="n">ReplayMap</span><span class="p">(</span><span class="mi">221777</span><span class="p">,</span> <span class="mi">4196808</span><span class="p">)</span>
+<span class="n">replays</span> <span class="o">=</span> <span class="p">[</span><span class="n">r1</span><span class="p">,</span> <span class="n">r2</span><span class="p">]</span>
+<span class="n">results</span> <span class="o">=</span> <span class="n">cg</span><span class="o">.</span><span class="n">steal_check</span><span class="p">(</span><span class="n">replays</span><span class="p">)</span>
+</pre></div>
+</div>
+<p>and similarly for relax
+(<code class="xref py py-func docutils literal notranslate"><span class="pre">relax_check()</span></code>) and aim correction
+(<code class="xref py py-func docutils literal notranslate"><span class="pre">correction_check()</span></code>).</p>
+<p><code class="xref py py-func docutils literal notranslate"><span class="pre">steal_check()</span></code> (and other similar methods) returns a generator containing
+<code class="xref py py-class docutils literal notranslate"><span class="pre">Result</span></code> objects. We will cover these shortly in <a class="reference internal" href="results.html"><span class="doc">Results</span></a>.</p>
+<p>Also important to note is that <a class="reference internal" href="appendix.html#circleguard.loadables.Loadable" title="circleguard.loadables.Loadable"><code class="xref py py-class docutils literal notranslate"><span class="pre">Loadable</span></code></a>s do not load any information from the
+api on instantiation. <code class="xref py py-func docutils literal notranslate"><span class="pre">cg.run()</span></code> is where this loading occurs, and where you
+should expect api ratelimiting (when investigating 10 or more <a class="reference internal" href="appendix.html#circleguard.loadables.Replay" title="circleguard.loadables.Replay"><code class="xref py py-class docutils literal notranslate"><span class="pre">Replay</span></code></a>s) to
+occur.</p>
+<p>Should you want finer control over when you load replays, see
+<a class="reference internal" href="loading.html"><span class="doc">Loading</span></a>.</p>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<p><a class="reference internal" href="appendix.html#circleguard.loadables.Loadable" title="circleguard.loadables.Loadable"><code class="xref py py-class docutils literal notranslate"><span class="pre">Loadable</span></code></a>s that get loaded stay loaded, so you can reuse the same object
+without fear of doubling (or worse) the loading time.</p>
+</div>
+</div>
+<div class="section" id="multiple-cheats">
+<h2>Multiple Cheats<a class="headerlink" href="#multiple-cheats" title="Permalink to this headline">¶</a></h2>
+<p>Should you want to investigate a replay for multiple cheats, you can always call
+each of the methods we mentioned above on the replay. But we understand that
+isn’t enough for more advanced usage.</p>
+<p>To investigate a replay for multiple cheats in one function call, you should
+call <code class="xref py py-func docutils literal notranslate"><span class="pre">cg.run()</span></code>, passing in a bitwise combination of <a href="#id2"><span class="problematic" id="id3">|Detect|</span></a> values.</p>
+<p>For instance, to investigate a <a class="reference internal" href="appendix.html#circleguard.loadables.Map" title="circleguard.loadables.Map"><code class="xref py py-class docutils literal notranslate"><span class="pre">Map</span></code></a> for both <a href="#id4"><span class="problematic" id="id5">|Detect.RELAX|</span></a> and
+<a href="#id6"><span class="problematic" id="id7">|Detect.CORRECTION|</span></a>:</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="n">cg</span> <span class="o">=</span> <span class="n">Circleguard</span><span class="p">(</span><span class="s2">&quot;key&quot;</span><span class="p">)</span>
+<span class="n">m</span> <span class="o">=</span> <span class="n">Map</span><span class="p">(</span><span class="mi">221777</span><span class="p">,</span> <span class="n">span</span><span class="o">=</span><span class="s2">&quot;1-3&quot;</span><span class="p">)</span>
+<span class="n">results</span> <span class="o">=</span> <span class="n">cg</span><span class="o">.</span><span class="n">run</span><span class="p">(</span><span class="n">m</span><span class="p">,</span> <span class="n">Detect</span><span class="o">.</span><span class="n">RELAX</span> <span class="o">|</span> <span class="n">Detect</span><span class="o">.</span><span class="n">CORRECTION</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+</div>
+
+
+           </div>
+           
+          </div>
+          <footer>
+  
+    <div class="rst-footer-buttons" role="navigation" aria-label="footer navigation">
+      
+        <a href="results.html" class="btn btn-neutral float-right" title="Results" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right"></span></a>
+      
+      
+        <a href="representing-replays.html" class="btn btn-neutral float-left" title="Representing Replays" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left"></span> Previous</a>
+      
+    </div>
+  
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>
+
+    </p>
+  </div> 
+
+</footer>
+
+        </div>
+      </div>
+
+    </section>
+
+  </div>
+  
+
+
+  <script type="text/javascript">
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script>
+
+  
+  
+    
+   
+
+</body>
+</html>

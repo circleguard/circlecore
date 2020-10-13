@@ -1,0 +1,304 @@
+
+
+<!DOCTYPE html>
+<!--[if IE 8]><html class="no-js lt-ie9" lang="en" > <![endif]-->
+<!--[if gt IE 8]><!--> <html class="no-js" lang="en" > <!--<![endif]-->
+<head>
+  <meta charset="utf-8">
+  
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  
+  <title>Circlecore &mdash; Circleguard v4.5.1 documentation</title>
+  
+
+  
+  
+  
+  
+
+  
+  <script type="text/javascript" src="_static/js/modernizr.min.js"></script>
+  
+    
+      <script type="text/javascript" id="documentation_options" data-url_root="./" src="_static/documentation_options.js"></script>
+        <script type="text/javascript" src="_static/jquery.js"></script>
+        <script type="text/javascript" src="_static/underscore.js"></script>
+        <script type="text/javascript" src="_static/doctools.js"></script>
+        <script type="text/javascript" src="_static/language_data.js"></script>
+    
+    <script type="text/javascript" src="_static/js/theme.js"></script>
+
+    
+
+  
+  <link rel="stylesheet" href="_static/css/theme.css" type="text/css" />
+  <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
+    <link rel="index" title="Index" href="genindex.html" />
+    <link rel="search" title="Search" href="search.html" />
+    <link rel="next" title="Foreword" href="foreword.html" /> 
+</head>
+
+<body class="wy-body-for-nav">
+
+   
+  <div class="wy-grid-for-nav">
+    
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+          
+
+          
+            <a href="#" class="icon icon-home"> Circleguard
+          
+
+          
+          </a>
+
+          
+            
+            
+              <div class="version">
+                v4.5.1
+              </div>
+            
+          
+
+          
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+
+          
+        </div>
+
+        <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="main navigation">
+          
+            
+            
+              
+            
+            
+              <ul class="current">
+<li class="toctree-l1 current"><a class="current reference internal" href="#">Circlecore</a></li>
+</ul>
+<p class="caption"><span class="caption-text">Tutorials</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="foreword.html">Foreword</a></li>
+<li class="toctree-l1"><a class="reference internal" href="representing-replays.html">Representing Replays</a></li>
+<li class="toctree-l1"><a class="reference internal" href="using-circleguard.html">Using Circleguard</a></li>
+<li class="toctree-l1"><a class="reference internal" href="replay-containers.html">|ReplayContainer|s</a></li>
+<li class="toctree-l1"><a class="reference internal" href="loading.html">Loading</a></li>
+<li class="toctree-l1"><a class="reference internal" href="caching.html">Caching</a></li>
+</ul>
+<p class="caption"><span class="caption-text">Contributing</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="contributing.html">Contributing</a></li>
+</ul>
+<p class="caption"><span class="caption-text">Appendix</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="appendix.html">Appendix</a></li>
+</ul>
+
+            
+          
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
+
+      
+      <nav class="wy-nav-top" aria-label="top navigation">
+        
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="#">Circleguard</a>
+        
+      </nav>
+
+
+      <div class="wy-nav-content">
+        
+        <div class="rst-content">
+        
+          
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<div role="navigation" aria-label="breadcrumbs navigation">
+
+  <ul class="wy-breadcrumbs">
+    
+      <li><a href="#">Docs</a> &raquo;</li>
+        
+      <li>Circlecore</li>
+    
+    
+      <li class="wy-breadcrumbs-aside">
+        
+            
+            <a href="_sources/index.rst.txt" rel="nofollow"> View page source</a>
+          
+        
+      </li>
+    
+  </ul>
+
+  
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+            
+  <div class="section" id="id1">
+<h1>Circlecore<a class="headerlink" href="#id1" title="Permalink to this headline">¶</a></h1>
+<p>Circlecore is a both a cheat detection library and a utilities library for osu!. Features include:</p>
+<ul class="simple">
+<li><p>Replay Stealing / Remodding detection</p></li>
+<li><p>Unstable Rate (ur) calculation, for relax cheats</p></li>
+<li><p>Finding suspicious movements in replays (called Snaps), for aim correction cheats</p></li>
+<li><p>Frametime analysis, for timewarp cheats</p></li>
+<li><p>Hits calculation, which gives you a list of hits (where a replay hits a hitobject). This can be used to find edge hits, for example</p></li>
+</ul>
+<p>Circleguard is developed and maintained by:</p>
+<ul class="simple">
+<li><p><a class="reference external" href="https://github.com/tybug">tybug</a></p></li>
+<li><p><a class="reference external" href="https://github.com/samuelhklumpers">samuelhklumpers</a></p></li>
+</ul>
+<div class="section" id="installation">
+<h2>Installation<a class="headerlink" href="#installation" title="Permalink to this headline">¶</a></h2>
+<p>Circlecore can be installed from pip:</p>
+<div class="highlight-console notranslate"><div class="highlight"><pre><span></span><span class="gp">$</span> pip install circleguard
+</pre></div>
+</div>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<p>This documentation refers to the project as <code class="docutils literal notranslate"><span class="pre">circlecore</span></code> to differentiate
+it from our organization <a class="reference external" href="https://github.com/circleguard">Circleguard</a>
+and our gui application <a class="reference external" href="https://github.com/circleguard/circleguard">Circleguard</a>. However, <code class="docutils literal notranslate"><span class="pre">circlecore</span></code> is installed
+from pypi with the name <code class="docutils literal notranslate"><span class="pre">circleguard</span></code>, and is imported as such in python
+(<code class="docutils literal notranslate"><span class="pre">import</span> <span class="pre">circleguard</span></code>).</p>
+</div>
+</div>
+<div class="section" id="links">
+<h2>Links<a class="headerlink" href="#links" title="Permalink to this headline">¶</a></h2>
+<div class="line-block">
+<div class="line">Github: <a class="reference external" href="https://github.com/circleguard/circlecore">https://github.com/circleguard/circlecore</a></div>
+<div class="line">Documentation: <a class="reference external" href="https://circleguard.dev/docs/circlecore">https://circleguard.dev/docs/circlecore</a></div>
+<div class="line">Discord: <a class="reference external" href="https://discord.gg/VNnkTjm">https://discord.gg/VNnkTjm</a></div>
+</div>
+<div class="toctree-wrapper compound">
+</div>
+<div class="toctree-wrapper compound">
+<p class="caption"><span class="caption-text">Tutorials</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="foreword.html">Foreword</a></li>
+<li class="toctree-l1"><a class="reference internal" href="representing-replays.html">Representing Replays</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="representing-replays.html#replaymap">ReplayMap</a></li>
+<li class="toctree-l2"><a class="reference internal" href="representing-replays.html#replaypath">ReplayPath</a></li>
+<li class="toctree-l2"><a class="reference internal" href="representing-replays.html#lesser-used-replays">Lesser Used Replays</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="using-circleguard.html">Using Circleguard</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="using-circleguard.html#cg-similarity">|cg.similarity|</a></li>
+<li class="toctree-l2"><a class="reference internal" href="using-circleguard.html#cg-ur">|cg.ur|</a></li>
+<li class="toctree-l2"><a class="reference internal" href="using-circleguard.html#cg-snaps">|cg.snaps|</a></li>
+<li class="toctree-l2"><a class="reference internal" href="using-circleguard.html#cg-frametime">|cg.frametime|</a></li>
+<li class="toctree-l2"><a class="reference internal" href="using-circleguard.html#cg-hits">|cg.hits|</a></li>
+<li class="toctree-l2"><a class="reference internal" href="using-circleguard.html#other-replay-subclasses">Other Replay Subclasses</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="replay-containers.html">|ReplayContainer|s</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="replay-containers.html#map"><code class="xref py py-class docutils literal notranslate"><span class="pre">Map</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="replay-containers.html#user"><code class="xref py py-class docutils literal notranslate"><span class="pre">User</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="replay-containers.html#mapuser"><code class="xref py py-class docutils literal notranslate"><span class="pre">MapUser</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="replay-containers.html#iterating">Iterating</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="loading.html">Loading</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="loading.html#replays"><code class="xref py py-class docutils literal notranslate"><span class="pre">Replay</span></code>s</a></li>
+<li class="toctree-l2"><a class="reference internal" href="loading.html#replaycontainer-s">|ReplayContainer|s</a></li>
+<li class="toctree-l2"><a class="reference internal" href="loading.html#creating-info-loaded-replaycontainer-s">Creating Info Loaded |ReplayContainer|s</a></li>
+<li class="toctree-l2"><a class="reference internal" href="loading.html#checking-state">Checking State</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="caching.html">Caching</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="caching.html#slider-dir">slider_dir</a></li>
+<li class="toctree-l2"><a class="reference internal" href="caching.html#loadables">Loadables</a></li>
+</ul>
+</li>
+</ul>
+</div>
+<div class="toctree-wrapper compound">
+<p class="caption"><span class="caption-text">Contributing</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="contributing.html">Contributing</a></li>
+</ul>
+</div>
+<div class="toctree-wrapper compound">
+</div>
+</div>
+</div>
+
+
+           </div>
+           
+          </div>
+          <footer>
+  
+    <div class="rst-footer-buttons" role="navigation" aria-label="footer navigation">
+      
+        <a href="foreword.html" class="btn btn-neutral float-right" title="Foreword" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right"></span></a>
+      
+      
+    </div>
+  
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>
+
+    </p>
+  </div> 
+
+</footer>
+
+        </div>
+      </div>
+
+    </section>
+
+  </div>
+  
+
+
+  <script type="text/javascript">
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script>
+
+  
+  
+    
+   
+
+</body>
+</html>
