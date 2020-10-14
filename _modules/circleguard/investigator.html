@@ -8,7 +8,7 @@
   
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   
-  <title>circleguard.investigator &mdash; Circleguard v4.5.1 documentation</title>
+  <title>circleguard.investigator &mdash; Circleguard v5.0.0 documentation</title>
   
 
   
@@ -58,7 +58,7 @@
             
             
               <div class="version">
-                v4.5.1
+                v5.0.0
               </div>
             
           
@@ -90,7 +90,7 @@
 <li class="toctree-l1"><a class="reference internal" href="../../foreword.html">Foreword</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../representing-replays.html">Representing Replays</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../using-circleguard.html">Using Circleguard</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../../replay-containers.html">|ReplayContainer|s</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../replay-containers.html"><code class="xref py py-class docutils literal notranslate"><span class="pre">ReplayContainer</span></code>s</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../loading.html">Loading</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../caching.html">Caching</a></li>
 </ul>
@@ -190,7 +190,6 @@
 <span class="sd">        beatmap: :class:`slider.beatmap.Beatmap`</span>
 <span class="sd">            The beatmap to calculate ``replay``&#39;s ur with.</span>
 <span class="sd">        &quot;&quot;&quot;</span>
-
         <span class="n">hits</span> <span class="o">=</span> <span class="n">Investigator</span><span class="o">.</span><span class="n">hits</span><span class="p">(</span><span class="n">replay</span><span class="p">,</span> <span class="n">beatmap</span><span class="p">)</span>
 
         <span class="n">diffs</span> <span class="o">=</span> <span class="p">[]</span>
@@ -243,11 +242,6 @@
 
 <span class="sd">        Another possible method is to look at the ratio between the angle</span>
 <span class="sd">        and distance.</span>
-
-<span class="sd">        See Also</span>
-<span class="sd">        --------</span>
-<span class="sd">        :meth:`~.aim_correction_sam` for an alternative, unused approach</span>
-<span class="sd">        involving velocity and jerk.</span>
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="c1"># when we leave mutliple frames with the same time values, they</span>
         <span class="c1"># sometimes get detected (falesly) as aim correction.</span>
@@ -573,10 +567,6 @@
 <span class="sd">    distance: float</span>
 <span class="sd">        ``min(dist_a_b, dist_b_c)`` if ``a``, ``b``, and ``c`` are three</span>
 <span class="sd">        datapoints with ``b`` being the middle one.</span>
-
-<span class="sd">    See Also</span>
-<span class="sd">    --------</span>
-<span class="sd">    :meth:`~.Investigator.aim_correction`</span>
 <span class="sd">    &quot;&quot;&quot;</span>
     <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">time</span><span class="p">,</span> <span class="n">angle</span><span class="p">,</span> <span class="n">distance</span><span class="p">):</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">time</span> <span class="o">=</span> <span class="n">time</span>
@@ -599,7 +589,7 @@
 
 <span class="sd">    Parameters</span>
 <span class="sd">    ----------</span>
-<span class="sd">    hitobject: :class:`slider.beatmap.Hitobject`</span>
+<span class="sd">    hitobject: :class:`slider.beatmap.HitObject`</span>
 <span class="sd">        The hitobject that was hit. This is converted to a</span>
 <span class="sd">        :class:`circleguard.hitobjects.Hitobject`.</span>
 <span class="sd">    t: float</span>
@@ -675,7 +665,13 @@
             <span class="bp">self</span><span class="o">.</span><span class="n">xy</span> <span class="o">==</span> <span class="n">other</span><span class="o">.</span><span class="n">xy</span><span class="p">)</span>
 
     <span class="k">def</span> <span class="nf">__hash__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-        <span class="k">return</span> <span class="nb">hash</span><span class="p">((</span><span class="bp">self</span><span class="o">.</span><span class="n">hitobject</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">t</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">xy</span><span class="p">))</span></div>
+        <span class="k">return</span> <span class="nb">hash</span><span class="p">((</span><span class="bp">self</span><span class="o">.</span><span class="n">hitobject</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">t</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">xy</span><span class="p">))</span>
+
+    <span class="k">def</span> <span class="nf">__repr__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">return</span> <span class="p">(</span><span class="n">f</span><span class="s2">&quot;Hit(hitobject=</span><span class="si">{self.hitobject}</span><span class="s2">,t=</span><span class="si">{self.t}</span><span class="s2">,xy=</span><span class="si">{self.xy}</span><span class="s2">&quot;</span><span class="p">)</span>
+
+    <span class="k">def</span> <span class="nf">__str__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">return</span> <span class="n">f</span><span class="s2">&quot;(</span><span class="si">{self.x}</span><span class="s2">, </span><span class="si">{self.y}</span><span class="s2">) at t </span><span class="si">{self.t}</span><span class="s2">&quot;</span></div>
 </pre></div>
 
            </div>

@@ -8,7 +8,7 @@
   
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   
-  <title>circleguard.cacher &mdash; Circleguard v4.5.1 documentation</title>
+  <title>circleguard.cacher &mdash; Circleguard v5.0.0 documentation</title>
   
 
   
@@ -58,7 +58,7 @@
             
             
               <div class="version">
-                v4.5.1
+                v5.0.0
               </div>
             
           
@@ -90,7 +90,7 @@
 <li class="toctree-l1"><a class="reference internal" href="../../foreword.html">Foreword</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../representing-replays.html">Representing Replays</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../using-circleguard.html">Using Circleguard</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../../replay-containers.html">|ReplayContainer|s</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../replay-containers.html"><code class="xref py py-class docutils literal notranslate"><span class="pre">ReplayContainer</span></code>s</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../loading.html">Loading</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../caching.html">Caching</a></li>
 </ul>
@@ -210,7 +210,7 @@
 <span class="sd">            The map id to insert into the db.</span>
 <span class="sd">        lzma_bytes: str</span>
 <span class="sd">            The lzma stream to compress and insert into the db.</span>
-<span class="sd">        replay_info: :class:`~circleguard.replay_info.ReplayInfo`</span>
+<span class="sd">        replay_info: :class:`~circleguard.loader.ReplayInfo`</span>
 <span class="sd">            The ReplayInfo object representing this replay.</span>
 
 <span class="sd">        Notes</span>
@@ -253,7 +253,7 @@
 <span class="sd">        loader: :class:`~circleguard.loader.Loader`</span>
 <span class="sd">            The Loader from the circleguard instance to redownload replays with</span>
 <span class="sd">            if they are outdated.</span>
-<span class="sd">        replay_info: list[:class:`~circleguard.replay_info.ReplayInfo`]</span>
+<span class="sd">        replay_info: list[:class:`~circleguard.loader.ReplayInfo`]</span>
 <span class="sd">            A list of ReplayInfo objects containing the up-to-date information</span>
 <span class="sd">            of user&#39;s replays.</span>
 
@@ -314,7 +314,7 @@
 
 <span class="sd">        Parameters</span>
 <span class="sd">        ----------</span>
-<span class="sd">        replay_info: :class:`~circleguard.replay_info.ReplayInfo`</span>
+<span class="sd">        replay_info: :class:`~circleguard.loader.ReplayInfo`</span>
 <span class="sd">            The replay info to search for a matching replay with.</span>
 
 <span class="sd">        Returns</span>

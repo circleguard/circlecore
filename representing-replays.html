@@ -8,7 +8,7 @@
   
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   
-  <title>Representing Replays &mdash; Circleguard v4.5.1 documentation</title>
+  <title>Representing Replays &mdash; Circleguard v5.0.0 documentation</title>
   
 
   
@@ -60,7 +60,7 @@
             
             
               <div class="version">
-                v4.5.1
+                v5.0.0
               </div>
             
           
@@ -101,7 +101,7 @@
 </ul>
 </li>
 <li class="toctree-l1"><a class="reference internal" href="using-circleguard.html">Using Circleguard</a></li>
-<li class="toctree-l1"><a class="reference internal" href="replay-containers.html">|ReplayContainer|s</a></li>
+<li class="toctree-l1"><a class="reference internal" href="replay-containers.html"><code class="xref py py-class docutils literal notranslate"><span class="pre">ReplayContainer</span></code>s</a></li>
 <li class="toctree-l1"><a class="reference internal" href="loading.html">Loading</a></li>
 <li class="toctree-l1"><a class="reference internal" href="caching.html">Caching</a></li>
 </ul>
@@ -178,12 +178,12 @@
             
   <div class="section" id="representing-replays">
 <h1>Representing Replays<a class="headerlink" href="#representing-replays" title="Permalink to this headline">¶</a></h1>
-<p>Before you can use circlecore to calculate statistics of replays or do other operations on replays, you need
+<p>Before you can use circleguard to calculate statistics of replays or do other operations on replays, you need
 to know how to represent replays.</p>
 <p>All replay classes you can instantiate are subclasses of <a class="reference internal" href="appendix.html#circleguard.loadables.Replay" title="circleguard.loadables.Replay"><code class="xref py py-class docutils literal notranslate"><span class="pre">Replay</span></code></a>. We cover each subclass below.</p>
 <div class="section" id="replaymap">
 <h2>ReplayMap<a class="headerlink" href="#replaymap" title="Permalink to this headline">¶</a></h2>
-<p>a <a class="reference internal" href="appendix.html#circleguard.loadables.ReplayMap" title="circleguard.loadables.ReplayMap"><code class="xref py py-class docutils literal notranslate"><span class="pre">ReplayMap</span></code></a> represents a replay by a user on a map. For instance,</p>
+<p>A <a class="reference internal" href="appendix.html#circleguard.loadables.ReplayMap" title="circleguard.loadables.ReplayMap"><code class="xref py py-class docutils literal notranslate"><span class="pre">ReplayMap</span></code></a> represents a replay by a user on a map. For instance,</p>
 <div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="n">replay</span> <span class="o">=</span> <span class="n">ReplayMap</span><span class="p">(</span><span class="mi">221777</span><span class="p">,</span> <span class="mi">2757689</span><span class="p">)</span>
 </pre></div>
 </div>
@@ -206,24 +206,24 @@ available replays on a map, with different mods.</p>
 </div>
 <div class="section" id="lesser-used-replays">
 <h2>Lesser Used Replays<a class="headerlink" href="#lesser-used-replays" title="Permalink to this headline">¶</a></h2>
-<p>These replay classes are provided for situations that don’t come up in normal usage. They ar documented here for completeness.</p>
+<p>These replay classes aren’t used as often, but can still come up. They are documented here for completeness.</p>
 <div class="section" id="replayid">
 <h3>ReplayID<a class="headerlink" href="#replayid" title="Permalink to this headline">¶</a></h3>
-<p>A <a href="#id3"><span class="problematic" id="id4">|ReplayID|</span></a> represents a replay which is tied to a replay ID on osu! servers.</p>
+<p>A <a class="reference internal" href="appendix.html#circleguard.loadables.ReplayID" title="circleguard.loadables.ReplayID"><code class="xref py py-class docutils literal notranslate"><span class="pre">ReplayID</span></code></a> that was submitted online and is represented by a unique replay id.</p>
 <div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="n">r</span> <span class="o">=</span> <span class="n">ReplayID</span><span class="p">(</span><span class="mi">2177560145</span><span class="p">)</span> <span class="c1"># cookiezi on freedom dive</span>
 </pre></div>
 </div>
 <div class="admonition warning">
 <p class="admonition-title">Warning</p>
 <p>We can only retrieve the replay data associated with a replay id due to limitations with the api.
-This means we do not know with what mods or on what map a <a href="#id5"><span class="problematic" id="id6">|ReplayID|</span></a> was played on. This limits
-what kinds of functions can be called on it - for instance, <a href="#id7"><span class="problematic" id="id8">|cg.ur|</span></a> and <a href="#id9"><span class="problematic" id="id10">|cg.hits|</span></a> both require
-knowing what beatmap the replay was played on, and will reject <a href="#id1"><span class="problematic" id="id2">|</span></a>ReplayID|s.</p>
+This means we do not know with what mods or on what map a <a class="reference internal" href="appendix.html#circleguard.loadables.ReplayID" title="circleguard.loadables.ReplayID"><code class="xref py py-class docutils literal notranslate"><span class="pre">ReplayID</span></code></a> was played on. This limits
+what kinds of functions can be called on it - for instance, <a class="reference internal" href="appendix.html#circleguard.circleguard.Circleguard.ur" title="circleguard.circleguard.Circleguard.ur"><code class="xref py py-func docutils literal notranslate"><span class="pre">ur()</span></code></a> and <a class="reference internal" href="appendix.html#circleguard.circleguard.Circleguard.hits" title="circleguard.circleguard.Circleguard.hits"><code class="xref py py-func docutils literal notranslate"><span class="pre">hits()</span></code></a> both require
+knowing what beatmap the replay was played on, and will reject <a class="reference internal" href="appendix.html#circleguard.loadables.ReplayID" title="circleguard.loadables.ReplayID"><code class="xref py py-class docutils literal notranslate"><span class="pre">ReplayID</span></code></a>s.</p>
 </div>
 </div>
 <div class="section" id="replaystring">
 <h3>ReplayString<a class="headerlink" href="#replaystring" title="Permalink to this headline">¶</a></h3>
-<p>A <a href="#id11"><span class="problematic" id="id12">|ReplayString|</span></a> represents a replay file which has been read into a string object.</p>
+<p>A <a class="reference internal" href="appendix.html#circleguard.loadables.ReplayString" title="circleguard.loadables.ReplayString"><code class="xref py py-class docutils literal notranslate"><span class="pre">ReplayString</span></code></a> represents a replay file which has been read into a string object.</p>
 <div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="n">replay_data_str</span> <span class="o">=</span> <span class="nb">open</span><span class="p">(</span><span class="s2">&quot;/path/to/your/replay.osr&quot;</span><span class="p">,</span> <span class="s2">&quot;rb&quot;</span><span class="p">)</span><span class="o">.</span><span class="n">read</span><span class="p">()</span>
 <span class="n">replay</span> <span class="o">=</span> <span class="n">ReplayString</span><span class="p">(</span><span class="n">replay_data_str</span><span class="p">)</span>
 </pre></div>

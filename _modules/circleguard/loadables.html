@@ -8,7 +8,7 @@
   
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   
-  <title>circleguard.loadables &mdash; Circleguard v4.5.1 documentation</title>
+  <title>circleguard.loadables &mdash; Circleguard v5.0.0 documentation</title>
   
 
   
@@ -58,7 +58,7 @@
             
             
               <div class="version">
-                v4.5.1
+                v5.0.0
               </div>
             
           
@@ -90,7 +90,7 @@
 <li class="toctree-l1"><a class="reference internal" href="../../foreword.html">Foreword</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../representing-replays.html">Representing Replays</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../using-circleguard.html">Using Circleguard</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../../replay-containers.html">|ReplayContainer|s</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../replay-containers.html"><code class="xref py py-class docutils literal notranslate"><span class="pre">ReplayContainer</span></code>s</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../loading.html">Loading</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../caching.html">Caching</a></li>
 </ul>
@@ -279,10 +279,10 @@
 
 <span class="sd">        Warnings</span>
 <span class="sd">        --------</span>
-<span class="sd">        This list will almost may be incomplete if you do not call</span>
-<span class="sd">        :func:`~.load_info` on this loadable container first, as any replay</span>
-<span class="sd">        containers held in this container will likely not have references to</span>
-<span class="sd">        their replays yet.</span>
+<span class="sd">        This list may be incomplete if you do not call</span>
+<span class="sd">        :meth:`~circleguard.circleguard.Circleguard.load_info` on this loadable</span>
+<span class="sd">        container first, as any replay containers held in this container will</span>
+<span class="sd">        likely not have references to their replays yet.</span>
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="n">replays</span> <span class="o">=</span> <span class="p">[]</span>
         <span class="k">for</span> <span class="n">loadable</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">loadables</span><span class="p">:</span>
@@ -325,10 +325,11 @@
 <span class="sd">    between &quot;unloaded&quot; and &quot;loaded&quot; called &quot;info loaded&quot;.</span>
 
 <span class="sd">    ReplayContainers start unloaded and become info loaded when</span>
-<span class="sd">    :meth:`~.load_info` is called. They become fully loaded when</span>
-<span class="sd">    :meth:`~.load` is called (and if this is called when the ReplayContainer is</span>
-<span class="sd">    in the unloaded state, :meth:`~Loadable.load` will load info first, then</span>
-<span class="sd">    load the replays, effectively skipping the info loaded state),</span>
+<span class="sd">    :meth:`~circleguard.circleguard.Circleguard.load_info` is called. They</span>
+<span class="sd">    become fully loaded when :meth:`~.circleguard.circleguard.Circleguard.load`</span>
+<span class="sd">    is called (and if this is called when the ReplayContainer is in the unloaded</span>
+<span class="sd">    state, :meth:`~Loadable.load` will load info first, then load the replays,</span>
+<span class="sd">    effectively skipping the info loaded state).</span>
 
 <span class="sd">    In the unloaded state, the container has no actual Replay objects. It may</span>
 <span class="sd">    have limited knowledge about their number or type.</span>
@@ -373,9 +374,10 @@
 <span class="sd">        Warnings</span>
 <span class="sd">        --------</span>
 <span class="sd">        If you want an accurate list of :class:`~.Replay`\s in this instance,</span>
-<span class="sd">        you must call :func:`~circleguard.circleguard.Circleguard.load` on this</span>
-<span class="sd">        instance before :func:`~.all_replays`. Otherwise, this</span>
-<span class="sd">        instance is not info loaded, and does not have a complete list of</span>
+<span class="sd">        you must call :func:`~circleguard.circleguard.Circleguard.load_info` on</span>
+<span class="sd">        this instance before</span>
+<span class="sd">        :func:`~circleguard.loadables.ReplayContainer.all_replays`. Otherwise,</span>
+<span class="sd">        this instance is not info loaded, and does not have a complete list of</span>
 <span class="sd">        replays it represents.</span>
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="k">pass</span></div>
@@ -409,7 +411,7 @@
 <span class="sd">        If passed, only represent replays played with this exact mod</span>
 <span class="sd">        combination. Due to limitations with the api, fuzzy matching is not</span>
 <span class="sd">        implemented.</span>
-<span class="sd">        &lt;br&gt;</span>
+<span class="sd">        |br|</span>
 <span class="sd">        This is applied before span``. That is, if ``span=&quot;1-2&quot;``</span>
 <span class="sd">        and ``mods=Mod.HD``, the top two ``HD`` plays on the map are</span>
 <span class="sd">        represented.</span>
@@ -466,7 +468,7 @@
 <span class="sd">        If passed, only represent replays played with this exact mod</span>
 <span class="sd">        combination. Due to limitations with the api, fuzzy matching is not</span>
 <span class="sd">        implemented.</span>
-<span class="sd">        &lt;br&gt;</span>
+<span class="sd">        |br|</span>
 <span class="sd">        This is applied before ``span``. That is, if ``span=&quot;1-2&quot;``</span>
 <span class="sd">        and ``mods=Mod.HD``, the user&#39;s top two ``HD`` plays are represented.</span>
 <span class="sd">    cache: bool</span>
@@ -573,9 +575,10 @@
 
 <span class="sd">    Notes</span>
 <span class="sd">    -----</span>
-<span class="sd">    :meth:`~.load_info` is an expensive operation for large databases created</span>
-<span class="sd">    on circlecore version 4.3.5 or earlier, as they do not have the necessary</span>
-<span class="sd">    indexes.</span>
+<span class="sd">    :meth:`~circleguard.circleguard.Circleguard.load_info` is an expensive</span>
+<span class="sd">    operation for large databases created on circlecore version 4.3.5 or</span>
+<span class="sd">    earlier, as they do not have the necessary indexes.</span>
+<span class="sd">    |br|</span>
 <span class="sd">    For databases created in later versions, this is a nonissue and the lookup</span>
 <span class="sd">    is fast.</span>
 <span class="sd">    &quot;&quot;&quot;</span>
@@ -693,26 +696,26 @@
 <span class="sd">        given instead of 0.</span>
 <span class="sd">    username: str</span>
 <span class="sd">        The username of the player who played the replay.</span>
-<span class="sd">    mods: :class:`~circleguard.mods.ModCombination`</span>
+<span class="sd">    mods: :class:`~circleguard.mod.ModCombination`</span>
 <span class="sd">        The mods the replay was played with.</span>
 <span class="sd">    replay_id: int</span>
 <span class="sd">        The id of the replay, or 0 if the replay is unsubmitted.</span>
 <span class="sd">    keydowns: ndarray[int]</span>
 <span class="sd">        The keydowns for each frame of the replay. Keydowns are the keys pressed</span>
 <span class="sd">        in that frame that were not pressed in the previous frame. See</span>
-<span class="sd">        :meth:`~.keydowns` for more details.</span>
+<span class="sd">        :meth:`~circleguard.loadables.Replay.keydowns` for more details.</span>
 <span class="sd">    t: ndarray[int]</span>
 <span class="sd">        A 1d array containing the timestamp for each frame.</span>
-<span class="sd">        &lt;br&gt;</span>
+<span class="sd">        |br|</span>
 <span class="sd">        This is only nonnull after the replay has been loaded.</span>
 <span class="sd">    xy: ndarray[float]</span>
 <span class="sd">        A 2d, two column array, containing the ``x`` and ``y`` coordinates of</span>
 <span class="sd">        each frame in the first and second column respectively.</span>
-<span class="sd">        &lt;br&gt;</span>
+<span class="sd">        |br|</span>
 <span class="sd">        This is only nonnull after the replay has been loaded.</span>
 <span class="sd">    k: ndarray[int]</span>
 <span class="sd">        A 1d array containing the keys pressed for each frame.</span>
-<span class="sd">        &lt;br&gt;</span>
+<span class="sd">        |br|</span>
 <span class="sd">        This is only nonnull after the replay has been loaded.</span>
 <span class="sd">    &quot;&quot;&quot;</span>
     <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">weight</span><span class="p">,</span> <span class="n">cache</span><span class="p">):</span>
@@ -782,10 +785,10 @@
 <span class="sd">        ----------</span>
 <span class="sd">        library: :class:`slider.library.Library`</span>
 <span class="sd">            The library used by the calling</span>
-<span class="sd">            :class:`circleguard.circleguard.Circleguard` instance. Replays which</span>
-<span class="sd">            have already been downloaded and are cached in this library may be</span>
-<span class="sd">            returned here instead of redownloading them.</span>
-<span class="sd">            &lt;br&gt;</span>
+<span class="sd">            :class:`~circleguard.circleguard.Circleguard` instance. Beatmaps</span>
+<span class="sd">            which have already been downloaded and are cached in this library</span>
+<span class="sd">            may be returned here instead of redownloading them.</span>
+<span class="sd">            |br|</span>
 <span class="sd">            Beatmaps which we download or create in this method, but were not</span>
 <span class="sd">            previously stored in the library, may also be stored into the</span>
 <span class="sd">            library for future use as a result of calling this method.</span>
@@ -1017,17 +1020,19 @@
 <span class="sd">    -----</span>
 <span class="sd">    The following replay-related attributes are available (not ``None``) when</span>
 <span class="sd">    this replay is unloaded:</span>
-<span class="sd">      * map_id</span>
-<span class="sd">      * user_id</span>
-<span class="sd">      * mods (if passed)</span>
-<span class="sd">    &lt;br&gt;</span>
+
+<span class="sd">    * map_id</span>
+<span class="sd">    * user_id</span>
+<span class="sd">    * mods (if passed)</span>
+
 <span class="sd">    In addition to the above, the following replay-related attributes are</span>
 <span class="sd">    available (not ``None``) when this replay is loaded:</span>
-<span class="sd">      * timestamp</span>
-<span class="sd">      * username</span>
-<span class="sd">      * mods</span>
-<span class="sd">      * replay_id</span>
-<span class="sd">      * replay_data</span>
+
+<span class="sd">    * timestamp</span>
+<span class="sd">    * username</span>
+<span class="sd">    * mods</span>
+<span class="sd">    * replay_id</span>
+<span class="sd">    * replay_data</span>
 <span class="sd">    &quot;&quot;&quot;</span>
 
     <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">map_id</span><span class="p">,</span> <span class="n">user_id</span><span class="p">,</span> <span class="n">mods</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">cache</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">info</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
@@ -1139,17 +1144,18 @@
 <span class="sd">    -----</span>
 <span class="sd">    ReplayPaths have no replay-related attributes available (not ``None``) when</span>
 <span class="sd">    they are unloaded.</span>
-<span class="sd">    &lt;br&gt;</span>
+
 <span class="sd">    The following replay-related attributes are available (not ``None``) when</span>
 <span class="sd">    this replay is loaded:</span>
-<span class="sd">      * timestamp</span>
-<span class="sd">      * map_id</span>
-<span class="sd">      * username</span>
-<span class="sd">      * user_id</span>
-<span class="sd">      * mods</span>
-<span class="sd">      * replay_id</span>
-<span class="sd">      * beatmap_hash</span>
-<span class="sd">      * replay_data</span>
+
+<span class="sd">    * timestamp</span>
+<span class="sd">    * map_id</span>
+<span class="sd">    * username</span>
+<span class="sd">    * user_id</span>
+<span class="sd">    * mods</span>
+<span class="sd">    * replay_id</span>
+<span class="sd">    * beatmap_hash</span>
+<span class="sd">    * replay_data</span>
 <span class="sd">    &quot;&quot;&quot;</span>
 
     <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">path</span><span class="p">,</span> <span class="n">cache</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
@@ -1221,7 +1227,7 @@
 <span class="sd">        If one or both replay paths don&#39;t have replay data, this checks path</span>
 <span class="sd">        equality. If both replay paths have replay data, this checks the</span>
 <span class="sd">        equality of their replay data.</span>
-<span class="sd">        &lt;br&gt;</span>
+<span class="sd">        |br|</span>
 <span class="sd">        The reason we don&#39;t check path after both are loaded is to avoid</span>
 <span class="sd">        true in situations like this:</span>
 
@@ -1276,17 +1282,18 @@
 <span class="sd">    -----</span>
 <span class="sd">    ReplayPaths have no replay-related attributes available (not ``None``) when</span>
 <span class="sd">    they are unloaded.</span>
-<span class="sd">    &lt;br&gt;</span>
+
 <span class="sd">    The following replay-related attributes are available (not ``None``) when</span>
 <span class="sd">    this replay is loaded:</span>
-<span class="sd">      * timestamp</span>
-<span class="sd">      * map_id</span>
-<span class="sd">      * username</span>
-<span class="sd">      * user_id</span>
-<span class="sd">      * mods</span>
-<span class="sd">      * replay_id</span>
-<span class="sd">      * beatmap_hash</span>
-<span class="sd">      * replay_data</span>
+
+<span class="sd">    * timestamp</span>
+<span class="sd">    * map_id</span>
+<span class="sd">    * username</span>
+<span class="sd">    * user_id</span>
+<span class="sd">    * mods</span>
+<span class="sd">    * replay_id</span>
+<span class="sd">    * beatmap_hash</span>
+<span class="sd">    * replay_data</span>
 
 <span class="sd">    Examples</span>
 <span class="sd">    --------</span>
@@ -1398,11 +1405,13 @@
 <span class="sd">    -----</span>
 <span class="sd">    The following replay-related attributes are available (not ``None``) when</span>
 <span class="sd">    this replay is unloaded:</span>
-<span class="sd">      * replay_id</span>
-<span class="sd">    &lt;br&gt;</span>
+
+<span class="sd">    * replay_id</span>
+
 <span class="sd">    In addition to the above, the following replay-related attributes are</span>
 <span class="sd">    available (not ``None``) when this replay is loaded:</span>
-<span class="sd">      * replay_data</span>
+
+<span class="sd">    * replay_data</span>
 <span class="sd">    &quot;&quot;&quot;</span>
     <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">replay_id</span><span class="p">,</span> <span class="n">cache</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
         <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="n">RatelimitWeight</span><span class="o">.</span><span class="n">HEAVY</span><span class="p">,</span> <span class="n">cache</span><span class="p">)</span>

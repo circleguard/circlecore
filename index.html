@@ -8,7 +8,7 @@
   
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   
-  <title>Circlecore &mdash; Circleguard v4.5.1 documentation</title>
+  <title>Circlecore &mdash; Circleguard v5.0.0 documentation</title>
   
 
   
@@ -59,7 +59,7 @@
             
             
               <div class="version">
-                v4.5.1
+                v5.0.0
               </div>
             
           
@@ -91,7 +91,7 @@
 <li class="toctree-l1"><a class="reference internal" href="foreword.html">Foreword</a></li>
 <li class="toctree-l1"><a class="reference internal" href="representing-replays.html">Representing Replays</a></li>
 <li class="toctree-l1"><a class="reference internal" href="using-circleguard.html">Using Circleguard</a></li>
-<li class="toctree-l1"><a class="reference internal" href="replay-containers.html">|ReplayContainer|s</a></li>
+<li class="toctree-l1"><a class="reference internal" href="replay-containers.html"><code class="xref py py-class docutils literal notranslate"><span class="pre">ReplayContainer</span></code>s</a></li>
 <li class="toctree-l1"><a class="reference internal" href="loading.html">Loading</a></li>
 <li class="toctree-l1"><a class="reference internal" href="caching.html">Caching</a></li>
 </ul>
@@ -168,15 +168,16 @@
             
   <div class="section" id="id1">
 <h1>Circlecore<a class="headerlink" href="#id1" title="Permalink to this headline">¶</a></h1>
-<p>Circlecore is a both a cheat detection library and a utilities library for osu!. Features include:</p>
+<p>Circlecore is a utilities library for osu!. Features include:</p>
 <ul class="simple">
-<li><p>Replay Stealing / Remodding detection</p></li>
-<li><p>Unstable Rate (ur) calculation, for relax cheats</p></li>
-<li><p>Finding suspicious movements in replays (called Snaps), for aim correction cheats</p></li>
-<li><p>Frametime analysis, for timewarp cheats</p></li>
-<li><p>Hits calculation, which gives you a list of hits (where a replay hits a hitobject). This can be used to find edge hits, for example</p></li>
+<li><p>Unstable Rate calculation</p></li>
+<li><p>Hits calculation (all places where a player hit a hitobject)</p></li>
+<li><p>Similarity calculation between two replays, for replay stealing detection</p></li>
+<li><p>Frametime calculation, for timewarp detection</p></li>
+<li><p>Jerky, suspicious movement detection (called Snaps)</p></li>
 </ul>
-<p>Circleguard is developed and maintained by:</p>
+<p>Circlecore is used by <a class="reference external" href="https://github.com/circleguard/circleguard">Circleguard</a>, a replay analysis tool.</p>
+<p>Circlecore is developed and maintained by:</p>
 <ul class="simple">
 <li><p><a class="reference external" href="https://github.com/tybug">tybug</a></p></li>
 <li><p><a class="reference external" href="https://github.com/samuelhklumpers">samuelhklumpers</a></p></li>
@@ -189,11 +190,10 @@
 </div>
 <div class="admonition note">
 <p class="admonition-title">Note</p>
-<p>This documentation refers to the project as <code class="docutils literal notranslate"><span class="pre">circlecore</span></code> to differentiate
-it from our organization <a class="reference external" href="https://github.com/circleguard">Circleguard</a>
-and our gui application <a class="reference external" href="https://github.com/circleguard/circleguard">Circleguard</a>. However, <code class="docutils literal notranslate"><span class="pre">circlecore</span></code> is installed
-from pypi with the name <code class="docutils literal notranslate"><span class="pre">circleguard</span></code>, and is imported as such in python
-(<code class="docutils literal notranslate"><span class="pre">import</span> <span class="pre">circleguard</span></code>).</p>
+<p>This page refers to the project as <code class="docutils literal notranslate"><span class="pre">circlecore</span></code> to differentiate it from our organization
+<a class="reference external" href="https://github.com/circleguard">Circleguard</a> and our gui application <a class="reference external" href="https://github.com/circleguard/circleguard">Circleguard</a>. However, <code class="docutils literal notranslate"><span class="pre">circlecore</span></code> is installed
+from pypi with the name <code class="docutils literal notranslate"><span class="pre">circleguard</span></code>, and is imported as such in python (<code class="docutils literal notranslate"><span class="pre">import</span> <span class="pre">circleguard</span></code>) We will also refer to it
+as <code class="docutils literal notranslate"><span class="pre">circleguard</span></code> for the remainder of the documentation.</p>
 </div>
 </div>
 <div class="section" id="links">
@@ -216,15 +216,15 @@ from pypi with the name <code class="docutils literal notranslate"><span class="
 </ul>
 </li>
 <li class="toctree-l1"><a class="reference internal" href="using-circleguard.html">Using Circleguard</a><ul>
-<li class="toctree-l2"><a class="reference internal" href="using-circleguard.html#cg-similarity">|cg.similarity|</a></li>
-<li class="toctree-l2"><a class="reference internal" href="using-circleguard.html#cg-ur">|cg.ur|</a></li>
-<li class="toctree-l2"><a class="reference internal" href="using-circleguard.html#cg-snaps">|cg.snaps|</a></li>
-<li class="toctree-l2"><a class="reference internal" href="using-circleguard.html#cg-frametime">|cg.frametime|</a></li>
-<li class="toctree-l2"><a class="reference internal" href="using-circleguard.html#cg-hits">|cg.hits|</a></li>
+<li class="toctree-l2"><a class="reference internal" href="using-circleguard.html#cg-similarity"><code class="xref py py-func docutils literal notranslate"><span class="pre">similarity()</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="using-circleguard.html#cg-ur"><code class="xref py py-func docutils literal notranslate"><span class="pre">ur()</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="using-circleguard.html#cg-snaps"><code class="xref py py-func docutils literal notranslate"><span class="pre">snaps()</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="using-circleguard.html#cg-frametime"><code class="xref py py-func docutils literal notranslate"><span class="pre">frametime()</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="using-circleguard.html#cg-hits"><code class="xref py py-func docutils literal notranslate"><span class="pre">hits()</span></code></a></li>
 <li class="toctree-l2"><a class="reference internal" href="using-circleguard.html#other-replay-subclasses">Other Replay Subclasses</a></li>
 </ul>
 </li>
-<li class="toctree-l1"><a class="reference internal" href="replay-containers.html">|ReplayContainer|s</a><ul>
+<li class="toctree-l1"><a class="reference internal" href="replay-containers.html"><code class="xref py py-class docutils literal notranslate"><span class="pre">ReplayContainer</span></code>s</a><ul>
 <li class="toctree-l2"><a class="reference internal" href="replay-containers.html#map"><code class="xref py py-class docutils literal notranslate"><span class="pre">Map</span></code></a></li>
 <li class="toctree-l2"><a class="reference internal" href="replay-containers.html#user"><code class="xref py py-class docutils literal notranslate"><span class="pre">User</span></code></a></li>
 <li class="toctree-l2"><a class="reference internal" href="replay-containers.html#mapuser"><code class="xref py py-class docutils literal notranslate"><span class="pre">MapUser</span></code></a></li>
@@ -233,8 +233,8 @@ from pypi with the name <code class="docutils literal notranslate"><span class="
 </li>
 <li class="toctree-l1"><a class="reference internal" href="loading.html">Loading</a><ul>
 <li class="toctree-l2"><a class="reference internal" href="loading.html#replays"><code class="xref py py-class docutils literal notranslate"><span class="pre">Replay</span></code>s</a></li>
-<li class="toctree-l2"><a class="reference internal" href="loading.html#replaycontainer-s">|ReplayContainer|s</a></li>
-<li class="toctree-l2"><a class="reference internal" href="loading.html#creating-info-loaded-replaycontainer-s">Creating Info Loaded |ReplayContainer|s</a></li>
+<li class="toctree-l2"><a class="reference internal" href="loading.html#replaycontainers"><code class="xref py py-class docutils literal notranslate"><span class="pre">ReplayContainer</span></code>s</a></li>
+<li class="toctree-l2"><a class="reference internal" href="loading.html#creating-info-loaded-replaycontainers">Creating Info Loaded <code class="xref py py-class docutils literal notranslate"><span class="pre">ReplayContainer</span></code>s</a></li>
 <li class="toctree-l2"><a class="reference internal" href="loading.html#checking-state">Checking State</a></li>
 </ul>
 </li>

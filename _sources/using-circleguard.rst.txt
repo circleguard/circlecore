@@ -1,13 +1,12 @@
 Using Circleguard
 =================
 
-Now you know how to represent replays, but how do we start calculating statistics or
-other information about them? The answer is the |Circleguard| class.
+Now you know how to represent replays, but how do we start calculating statistics or other information about them?
+The answer is the |Circleguard| class.
 
-To instantiate Circleguard|, you will need an api key. If you don't already have one api key,
-visit https://osu.ppy.sh/p/api/ and enter ``Circleguard`` for ``App Name`` and
-``https://github.com/circleguard/circlecore`` for ``App URL``. Circlecore needs this key to
-retrieve replay data and user information, among other things.
+To instantiate |Circleguard|, you will need an api key. If you don't already have one, visit https://osu.ppy.sh/p/api/
+and enter ``Circleguard`` for ``App Name`` and ``https://github.com/circleguard/circlecore`` for ``App URL``.
+Circleguard needs this key to retrieve replay data and user information, among other things.
 
 .. note::
 
@@ -67,7 +66,7 @@ Any unusual snaps in the cursor movement of the replay.
     print(cg.snaps(r, max_angle=12, min_distance=6))
     # [<circleguard.investigator.Snap>, <circleguard.investigator.Snap>]
 
-The list returned contains |Snap| objects. See its documentation for details.
+This returns a list of |Snap| objects. See the |Snap| documentation for details.
 
 |cg.frametime|
 ~~~~~~~~~~~~~~
@@ -95,7 +94,7 @@ The locations in a replay where a hitobject is hit.
     r = ReplayMap(221777, 2757689)
     print(cg.hits(r)) # a list with lots of elements
 
-The list returned contains |Hit| objects. See its documentation for details.
+This returns a list of |Hit| objects. See the |Hit| documentation for details.
 
 Other Replay Subclasses
 ~~~~~~~~~~~~~~~~~~~~~~~

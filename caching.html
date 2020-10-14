@@ -8,7 +8,7 @@
   
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   
-  <title>Caching &mdash; Circleguard v4.5.1 documentation</title>
+  <title>Caching &mdash; Circleguard v5.0.0 documentation</title>
   
 
   
@@ -60,7 +60,7 @@
             
             
               <div class="version">
-                v4.5.1
+                v5.0.0
               </div>
             
           
@@ -92,7 +92,7 @@
 <li class="toctree-l1"><a class="reference internal" href="foreword.html">Foreword</a></li>
 <li class="toctree-l1"><a class="reference internal" href="representing-replays.html">Representing Replays</a></li>
 <li class="toctree-l1"><a class="reference internal" href="using-circleguard.html">Using Circleguard</a></li>
-<li class="toctree-l1"><a class="reference internal" href="replay-containers.html">|ReplayContainer|s</a></li>
+<li class="toctree-l1"><a class="reference internal" href="replay-containers.html"><code class="xref py py-class docutils literal notranslate"><span class="pre">ReplayContainer</span></code>s</a></li>
 <li class="toctree-l1"><a class="reference internal" href="loading.html">Loading</a></li>
 <li class="toctree-l1 current"><a class="current reference internal" href="#">Caching</a><ul>
 <li class="toctree-l2"><a class="reference internal" href="#slider-dir">slider_dir</a></li>
@@ -180,7 +180,7 @@ You can pass a <code class="docutils literal notranslate"><span class="pre">db_p
 </pre></div>
 </div>
 <p>If the given path does not exist, circleguard will create fresh a db file there and use it. If the path is a
-pre-existing databse file created by circlecore, that database will be used. Any other file existing at the path
+pre-existing databse file created by circleguard, that database will be used. Any other file existing at the path
 will result in an error.</p>
 <p>When loading a replay, we first check if the replay exists in the database, and load it from there if so. If not,
 we load it from the api (or local file in the case of <a class="reference internal" href="appendix.html#circleguard.loadables.ReplayPath" title="circleguard.loadables.ReplayPath"><code class="xref py py-class docutils literal notranslate"><span class="pre">ReplayPath</span></code></a>), compress the replays using
@@ -213,7 +213,7 @@ the average use case, but could make a difference in some scenarios.</p>
 <div class="section" id="slider-dir">
 <h2>slider_dir<a class="headerlink" href="#slider-dir" title="Permalink to this headline">¶</a></h2>
 <p>We use <a class="reference external" href="https://github.com/llllllllll/slider">slider</a> to manage the download and parsing of beatmaps. We download beatmaps
-when certain functions are called, such as <a href="#id1"><span class="problematic" id="id2">|cg.hits|</span></a>, that require the beatmap the replay was played on to work.</p>
+when certain functions are called, such as <a class="reference internal" href="appendix.html#circleguard.circleguard.Circleguard.hits" title="circleguard.circleguard.Circleguard.hits"><code class="xref py py-func docutils literal notranslate"><span class="pre">hits()</span></code></a>, that require the beatmap the replay was played on to work.</p>
 <p>If <code class="docutils literal notranslate"><span class="pre">slider_dir</span></code> is passed, downloaded beatmaps will be cached to that directory (which must exist). You can use the same
 directory the <a class="reference internal" href="appendix.html#circleguard.circleguard.Circleguard" title="circleguard.circleguard.Circleguard"><code class="xref py py-class docutils literal notranslate"><span class="pre">Circleguard</span></code></a> cache db file is in if you’d like.</p>
 <div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="n">cg</span> <span class="o">=</span> <span class="n">Circleguard</span><span class="p">(</span><span class="s2">&quot;key&quot;</span><span class="p">,</span> <span class="n">db_path</span><span class="o">=</span><span class="s2">&quot;./dbs/db.db&quot;</span><span class="p">,</span> <span class="n">slider_dir</span><span class="o">=</span><span class="s2">&quot;./dbs/&quot;</span><span class="p">)</span>
@@ -241,7 +241,7 @@ when they’re loaded:</p>
 <span class="n">cg</span><span class="o">.</span><span class="n">load</span><span class="p">(</span><span class="n">r2</span><span class="p">)</span> <span class="c1"># does not get cached</span>
 </pre></div>
 </div>
-<p>For a <a class="reference internal" href="appendix.html#circleguard.loadables.ReplayContainer" title="circleguard.loadables.ReplayContainer"><code class="xref py py-class docutils literal notranslate"><span class="pre">ReplayContainer</span></code></a>, <code class="docutils literal notranslate"><span class="pre">cache</span></code> cascades to its <a class="reference internal" href="appendix.html#circleguard.loadables.Replay" title="circleguard.loadables.Replay"><code class="xref py py-class docutils literal notranslate"><span class="pre">Replay</span></code></a>s.</p>
+<p>For a <a class="reference internal" href="appendix.html#circleguard.loadables.ReplayContainer" title="circleguard.loadables.ReplayContainer"><code class="xref py py-class docutils literal notranslate"><span class="pre">ReplayContainer</span></code></a>, <code class="docutils literal notranslate"><span class="pre">cache</span></code> cascades to its <a class="reference internal" href="appendix.html#circleguard.loadables.Replay" title="circleguard.loadables.Replay"><code class="xref py py-class docutils literal notranslate"><span class="pre">Replay</span></code></a>s:</p>
 <div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="n">cg</span> <span class="o">=</span> <span class="n">Circleguard</span><span class="p">(</span><span class="s2">&quot;key&quot;</span><span class="p">,</span> <span class="n">db_path</span><span class="o">=</span><span class="s2">&quot;./db.db&quot;</span><span class="p">)</span>
 <span class="n">m</span> <span class="o">=</span> <span class="n">Map</span><span class="p">(</span><span class="mi">221777</span><span class="p">,</span> <span class="n">span</span><span class="o">=</span><span class="s2">&quot;1-2&quot;</span><span class="p">,</span> <span class="n">cache</span><span class="o">=</span><span class="bp">False</span><span class="p">)</span>
 <span class="n">cg</span><span class="o">.</span><span class="n">load</span><span class="p">(</span><span class="n">m</span><span class="p">)</span> <span class="c1"># neither replay in `m` cached</span>

@@ -1,16 +1,16 @@
-|ReplayContainer|s
-==================
+|ReplayContainer|\s
+===================
 
 |Replay| subclasses work fine for some situations, but what if you wanted to calculate e.g. the unstable rate for all
-replays on a map or in a user's top plays? You would have to make some api requests and manually construct |ReplayMap|
-objects. This is annoying, so we provide classes that do this for you. They are called |ReplayContainer|s.
+replays on a map or in a user's top plays? You would have to make api requests and manually construct |ReplayMap|
+objects. That would be annoying, so we provide classes that do this for you. They are called |ReplayContainer|\s.
 
 |Map|
 -----
 
-|Map|s represnt a beatmap's top plays (ie leaderboard), as seen on the osu! website.
+|Map|\s represnt a beatmap's top plays (ie leaderboard), as seen on the osu! website.
 
-When instantiating a |Map|, you must specify which of the scores you want from the map.
+When instantiating a |Map|, you must specify which scores you want from the map:
 
 .. code-block:: python
 
@@ -23,23 +23,23 @@ When instantiating a |Map|, you must specify which of the scores you want from t
     # 10th, 11th, 20th, and 25th replays on the map
     m3 = Map(221777, spn="10, 11, 20, 25")
 
-We can also select replays set with a certain mod combination.
+We can also select replays set with a certain mod combination:
 
 .. code-block:: python
 
     # top 2 HR scores (this means ONLY HR, not "HR plus any other mod")
     m1 = Map(221777, span="1-2", mods=Mod.HR)
 
-    # tihrd best HDHR scores
+    # third best HDHR score
     m2 = Map(221777, span="3", mods=Mod.HDHR)
 
 |User|
 ------
 
-|User|s represent the top plays of a user, as seen on their profile.
+|User|\s represent the top plays of a user, as seen on their profile.
 
 Similar to a |Map|, you must specify which scores of the user you want, and you can optionally
-specify a mod combination to receive scores set with only that mod.
+specify a mod combination to receive scores set with only that mod:
 
 .. code-block:: python
 
@@ -52,12 +52,12 @@ specify a mod combination to receive scores set with only that mod.
 |MapUser|
 ---------
 
-|MapUser|s represent all of a user's plays on a beatmap. This is often only one score if the user has only ever
+|MapUser|\s represent all of a user's plays on a beatmap. This is often only one score if the user has only ever
 played the map with a single mod combination, but could be more depending on how many times they've played the map
 with different mods.
 
 Unlike |Map| and |User|, you do not have to specify which scores you would like - |MapUser| assumes you want all
-of the scores the user has set on the beatmap. You can still optionally specify which scores you want.
+of the scores the user has set on the beatmap. You can still optionally specify which scores you want:
 
 .. code-block:: python
 
@@ -76,7 +76,7 @@ Notice that you cannot pass a ``mods`` argument to |MapUser|. This is intentiona
 Iterating
 ---------
 
-All |ReplayContainer|s are iterable, so you can iterate over them to operate on their replays:
+All |ReplayContainer|\s are iterable, so you can iterate over them to operate on their replays:
 
 .. code-block:: python
 
@@ -98,8 +98,8 @@ This means you can also create a list of replays from a |ReplayContainer| (or, e
     print(list(m)) # [ReplayMap(...), ReplayMap(...)]
     print(m.all_replays()) # [ReplayMap(...), ReplayMap(...)]
 
-But what are these mysterious |load_info| methods? When you instantiate a |ReplayContainer|, it doesn't have any
+But what are these mysterious |cg.load_info| methods? When you instantiate a |ReplayContainer|, it doesn't have any
 |Replay| objects you can iterate over, because it hasn't made any api calls to determine which |Replay| objects
-(by who, on what map) it should have. By calling |load_info|, you are telling it to make these api calls and load
+(by who, on what map) it should have. By calling |cg.load_info|, you are telling it to make these api calls and load
 the info about its replays so you can iterate over them. We cover this (and loading in general) in more detail on
 the very next page.

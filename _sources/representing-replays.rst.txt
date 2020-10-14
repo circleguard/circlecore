@@ -1,7 +1,7 @@
 Representing Replays
 ====================
 
-Before you can use circlecore to calculate statistics of replays or do other operations on replays, you need
+Before you can use circleguard to calculate statistics of replays or do other operations on replays, you need
 to know how to represent replays.
 
 All replay classes you can instantiate are subclasses of |Replay|. We cover each subclass below.
@@ -9,7 +9,7 @@ All replay classes you can instantiate are subclasses of |Replay|. We cover each
 ReplayMap
 ---------
 
-a |ReplayMap| represents a replay by a user on a map. For instance,
+A |ReplayMap| represents a replay by a user on a map. For instance,
 
 .. code-block:: python
 
@@ -42,12 +42,12 @@ represents the replay in the file ``/path/to/your/replay.osr``.
 Lesser Used Replays
 -------------------
 
-These replay classes are provided for situations that don't come up in normal usage. They ar documented here for completeness.
+These replay classes aren't used as often, but can still come up. They are documented here for completeness.
 
 ReplayID
 ~~~~~~~~
 
-A |ReplayID| represents a replay which is tied to a replay ID on osu! servers.
+A |ReplayID| that was submitted online and is represented by a unique replay id.
 
 .. code-block:: python
 
@@ -58,7 +58,7 @@ A |ReplayID| represents a replay which is tied to a replay ID on osu! servers.
     We can only retrieve the replay data associated with a replay id due to limitations with the api.
     This means we do not know with what mods or on what map a |ReplayID| was played on. This limits
     what kinds of functions can be called on it - for instance, |cg.ur| and |cg.hits| both require
-    knowing what beatmap the replay was played on, and will reject |ReplayID|s.
+    knowing what beatmap the replay was played on, and will reject |ReplayID|\s.
 
 
 ReplayString

@@ -8,7 +8,7 @@
   
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   
-  <title>circleguard.circleguard &mdash; Circleguard v4.5.1 documentation</title>
+  <title>circleguard.circleguard &mdash; Circleguard v5.0.0 documentation</title>
   
 
   
@@ -58,7 +58,7 @@
             
             
               <div class="version">
-                v4.5.1
+                v5.0.0
               </div>
             
           
@@ -90,7 +90,7 @@
 <li class="toctree-l1"><a class="reference internal" href="../../foreword.html">Foreword</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../representing-replays.html">Representing Replays</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../using-circleguard.html">Using Circleguard</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../../replay-containers.html">|ReplayContainer|s</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../replay-containers.html"><code class="xref py py-class docutils literal notranslate"><span class="pre">ReplayContainer</span></code>s</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../loading.html">Loading</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../caching.html">Caching</a></li>
 </ul>
@@ -168,6 +168,7 @@
 <span class="kn">import</span> <span class="nn">logging</span>
 <span class="kn">from</span> <span class="nn">tempfile</span> <span class="k">import</span> <span class="n">TemporaryDirectory</span>
 <span class="kn">from</span> <span class="nn">typing</span> <span class="k">import</span> <span class="n">Iterable</span><span class="p">,</span> <span class="n">Union</span><span class="p">,</span> <span class="n">Tuple</span>
+<span class="kn">import</span> <span class="nn">weakref</span>
 
 <span class="kn">from</span> <span class="nn">slider</span> <span class="k">import</span> <span class="n">Library</span>
 <span class="kn">from</span> <span class="nn">slider.mod</span> <span class="k">import</span> <span class="n">circle_radius</span>
@@ -187,6 +188,7 @@
 <span class="sd">    Circleguard is the main entry point for using circlecore. In particular, we</span>
 <span class="sd">    provide methods to calculate various statistics about</span>
 <span class="sd">    :class:`~circleguard.loadables.Replay`\s:</span>
+
 <span class="sd">    * :meth:`~.similarity` - the similarity between two replays.</span>
 <span class="sd">    * :meth:`~.ur` - the unstable rate of a replay.</span>
 <span class="sd">    * :meth:`~.snaps` - any unusual snaps in the cursor movement of a replay.</span>
@@ -196,6 +198,7 @@
 
 <span class="sd">    We also provide methods to interact with</span>
 <span class="sd">    :class:`~circleguard.loadables.Loadable`\s:</span>
+
 <span class="sd">    * :meth:`~.load` - loads a :class:`~circleguard.loadables.Loadable`.</span>
 <span class="sd">    * :meth:`~.load_info` - loads the info of a</span>
 <span class="sd">      :class:`~circleguard.loadables.ReplayContainer`.</span>
@@ -262,6 +265,20 @@
             <span class="c1"># Have to keep a reference to this dir or the folder gets deleted.</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">slider_dir</span> <span class="o">=</span> <span class="n">TemporaryDirectory</span><span class="p">()</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">library</span> <span class="o">=</span> <span class="n">Library</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">slider_dir</span><span class="o">.</span><span class="n">name</span><span class="p">)</span>
+            <span class="c1"># clean up our library (which resides in a temporary dir) or else</span>
+            <span class="c1"># garbage collection of this cg object (and subsequently the</span>
+            <span class="c1"># temp dir and library) will cause an error to be thrown. This</span>
+            <span class="c1"># happens because the temp dir&#39;s finalizer is called first, which</span>
+            <span class="c1"># tries to remove the directory, but it can&#39;t because the library&#39;s</span>
+            <span class="c1"># sql connection to the db file in that dir is still alive, and a</span>
+            <span class="c1"># PermissionError is thrown. We need to close the library before</span>
+            <span class="c1"># the temp dir is finalized.</span>
+            <span class="c1"># Errors that happen during garbage collection are ignored I</span>
+            <span class="c1"># believe, so this only fixes the error message appearing (which is</span>
+            <span class="c1"># still a good thing to do) rather than actually fixing any programs</span>
+            <span class="c1"># that broke because of this.</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_finalizer</span> <span class="o">=</span> <span class="n">weakref</span><span class="o">.</span><span class="n">finalize</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">_cleanup</span><span class="p">,</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">library</span><span class="p">)</span>
 
 
 <div class="viewcode-block" id="Circleguard.similarity"><a class="viewcode-back" href="../../appendix.html#circleguard.circleguard.Circleguard.similarity">[docs]</a>    <span class="k">def</span> <span class="nf">similarity</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">replay1</span><span class="p">,</span> <span class="n">replay2</span><span class="p">,</span> <span class="n">method</span><span class="o">=</span><span class="s2">&quot;similarity&quot;</span><span class="p">,</span> \
@@ -278,13 +295,13 @@
 <span class="sd">            The replay to compare against ``replay1``.</span>
 <span class="sd">        method: {&quot;similarity&quot;, &quot;correlation&quot;}</span>
 <span class="sd">            What method to use to calculate the similarity between the replays.</span>
-<span class="sd">            &lt;br&gt;</span>
-<span class="sd">            ``similarity` is (roughly speaking) the average distance</span>
+<span class="sd">            |br|</span>
+<span class="sd">            ``similarity`` is (roughly speaking) the average distance</span>
 <span class="sd">            between the two replays in pixels. A replay compared to itself (or</span>
 <span class="sd">            an exact copy) has a similarity of 0. See</span>
 <span class="sd">            :data:`~circleguard.Circleguard.SIM_LIMIT` for a suggested number</span>
 <span class="sd">            where similarities below this number indicate a stolen replay.</span>
-<span class="sd">            &lt;br&gt;</span>
+<span class="sd">            |br|</span>
 <span class="sd">            ``correlation`` is a signal-processing metric which measures how</span>
 <span class="sd">            similar two signals (or replays, in our case) are. Correlation also</span>
 <span class="sd">            takes into account time shifts, so a replay which is a perfect copy</span>
@@ -302,11 +319,11 @@
 <span class="sd">            know what mods they were played with. In this case, the similarity</span>
 <span class="sd">            will be computed twice, both with no modifications and with</span>
 <span class="sd">            ``Mod.HR`` applied to ``replay1``.</span>
-<span class="sd">            &lt;br&gt;</span>
+<span class="sd">            |br|</span>
 <span class="sd">            If ``best`` is passed, the best (that is, lowest if ``method`` is</span>
 <span class="sd">            ``similarity`` and highest if ``method`` is ``correlation``)</span>
 <span class="sd">            similarity of these two calculations is returned.</span>
-<span class="sd">            &lt;br&gt;</span>
+<span class="sd">            |br|</span>
 <span class="sd">            If ``both`` is passed, a tuple with two floats is returned. The</span>
 <span class="sd">            first element is the similarity with no modifications, and the</span>
 <span class="sd">            second element is the similarity with ``Mod.HR`` applied to</span>
@@ -406,15 +423,15 @@
 <span class="sd">        mods_unknown: {&quot;raise&quot;, &quot;dt&quot;, &quot;nm&quot;, &quot;ht&quot;}</span>
 <span class="sd">            What to do if ``replay`` does not know what mods it was played with,</span>
 <span class="sd">            and ``cv`` is ``True``.</span>
-<span class="sd">            &lt;br&gt;</span>
+<span class="sd">            |br|</span>
 <span class="sd">            If ``raise``, a ValueError will be raised.</span>
-<span class="sd">            &lt;br&gt;</span>
+<span class="sd">            |br|</span>
 <span class="sd">            If ``dt``, the frametime will be converted as if the replay was</span>
 <span class="sd">            played with ``Mod.DT``.</span>
-<span class="sd">            &lt;br&gt;</span>
+<span class="sd">            |br|</span>
 <span class="sd">            If ``nm``, the frametime will be converted as if the replay was</span>
 <span class="sd">            played  with ``Mod.NM`` (that is, not converted at all).</span>
-<span class="sd">            &lt;br&gt;</span>
+<span class="sd">            |br|</span>
 <span class="sd">            If ``ht``, the frametime will be converted as if the replay was</span>
 <span class="sd">            played with ``Mod.HT``.</span>
 
@@ -460,15 +477,15 @@
 <span class="sd">        mods_unknown: {&quot;raise&quot;, &quot;dt&quot;, &quot;nm&quot;, &quot;ht&quot;}</span>
 <span class="sd">            What to do if ``replay`` does not know what mods it was played with,</span>
 <span class="sd">            and ``cv`` is ``True``.</span>
-<span class="sd">            &lt;br&gt;</span>
+<span class="sd">            |br|</span>
 <span class="sd">            If ``raise``, a ValueError will be raised.</span>
-<span class="sd">            &lt;br&gt;</span>
+<span class="sd">            |br|</span>
 <span class="sd">            If ``dt``, the frametime swill be converted as if the replay was</span>
 <span class="sd">            played with ``Mod.DT``.</span>
-<span class="sd">            &lt;br&gt;</span>
+<span class="sd">            |br|</span>
 <span class="sd">            If ``nm``, the frametimes will be converted as if the replay was</span>
 <span class="sd">            played  with ``Mod.NM`` (that is, not converted at all).</span>
-<span class="sd">            &lt;br&gt;</span>
+<span class="sd">            |br|</span>
 <span class="sd">            If ``ht``, the frametimes will be converted as if the replay was</span>
 <span class="sd">            played with ``Mod.HT``.</span>
 
@@ -476,7 +493,7 @@
 <span class="sd">        -------</span>
 <span class="sd">        [float]</span>
 <span class="sd">            The time (in ms) between each frame of the replay.</span>
-<span class="sd">            &lt;br&gt;</span>
+<span class="sd">            |br|</span>
 <span class="sd">            The first element of this array corresponds to the time between the</span>
 <span class="sd">            first and second frame, the second element to the time between the</span>
 <span class="sd">            second and third frame, etc.</span>
@@ -498,9 +515,7 @@
                     <span class="s2">&quot;Pass a different option to frametime(..., mods_unknown=) &quot;</span>
                     <span class="s2">&quot;if you would like to provide a default mod for &quot;</span>
                     <span class="s2">&quot;conversion.&quot;</span><span class="p">)</span>
-            <span class="n">frametimes</span> <span class="o">=</span> <span class="p">[</span><span class="n">convert_statistic</span><span class="p">(</span><span class="n">frametime</span><span class="p">,</span> <span class="n">mods</span><span class="p">,</span> <span class="n">to</span><span class="o">=</span><span class="s2">&quot;cv&quot;</span><span class="p">)</span> \
-                <span class="k">for</span> <span class="n">frametime</span> <span class="ow">in</span> <span class="n">frametimes</span><span class="p">]</span>
-
+            <span class="n">frametimes</span> <span class="o">=</span> <span class="n">convert_statistic</span><span class="p">(</span><span class="n">frametimes</span><span class="p">,</span> <span class="n">mods</span><span class="p">,</span> <span class="n">to</span><span class="o">=</span><span class="s2">&quot;cv&quot;</span><span class="p">)</span>
         <span class="k">return</span> <span class="n">frametimes</span></div>
 
 
@@ -588,6 +603,7 @@
 <span class="sd">        iterate over it to operate on its replays. However, this ``Map`` must</span>
 <span class="sd">        be info loaded before it can be iterated over, so this function does</span>
 <span class="sd">        that info loading for you.</span>
+
 <span class="sd">        &gt;&gt;&gt; # usage without this function (bad)</span>
 <span class="sd">        &gt;&gt;&gt; cg = Circleguard(&quot;key&quot;)</span>
 <span class="sd">        &gt;&gt;&gt; m = Map(221777, &quot;1-2&quot;)</span>
@@ -619,6 +635,7 @@
 <span class="sd">        iterate over it to operate on its replays. However, this ``User`` must</span>
 <span class="sd">        be info loaded before it can be iterated over, so this function does</span>
 <span class="sd">        that info loading for you.</span>
+
 <span class="sd">        &gt;&gt;&gt; # usage without this function (bad)</span>
 <span class="sd">        &gt;&gt;&gt; cg = Circleguard(&quot;key&quot;)</span>
 <span class="sd">        &gt;&gt;&gt; u = User(124493, &quot;1-2&quot;)</span>
@@ -650,6 +667,7 @@
 <span class="sd">        iterate over it to operate on its replays. However, this ``MapUser``</span>
 <span class="sd">        must be info loaded before it can be iterated over, so this function</span>
 <span class="sd">        does that info loading for you.</span>
+
 <span class="sd">        &gt;&gt;&gt; # usage without this function (bad)</span>
 <span class="sd">        &gt;&gt;&gt; cg = Circleguard(&quot;key&quot;)</span>
 <span class="sd">        &gt;&gt;&gt; mu = cg.MapUser(124493, 129891)</span>
@@ -674,8 +692,13 @@
     <span class="nd">@cache</span><span class="o">.</span><span class="n">setter</span>
     <span class="k">def</span> <span class="nf">cache</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">cache</span><span class="p">):</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_cache</span> <span class="o">=</span> <span class="n">cache</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">cacher</span><span class="o">.</span><span class="n">should_cache</span> <span class="o">=</span> <span class="n">cache</span></div>
+        <span class="bp">self</span><span class="o">.</span><span class="n">cacher</span><span class="o">.</span><span class="n">should_cache</span> <span class="o">=</span> <span class="n">cache</span>
 
+    <span class="nd">@classmethod</span>
+    <span class="k">def</span> <span class="nf">_cleanup</span><span class="p">(</span><span class="bp">cls</span><span class="p">,</span> <span class="n">library</span><span class="p">):</span>
+        <span class="c1"># see the call to this method for documentation on why this method</span>
+        <span class="c1"># exists.</span>
+        <span class="n">library</span><span class="o">.</span><span class="n">close</span><span class="p">()</span></div>
 
 <div class="viewcode-block" id="KeylessCircleguard"><a class="viewcode-back" href="../../appendix.html#circleguard.circleguard.KeylessCircleguard">[docs]</a><span class="k">class</span> <span class="nc">KeylessCircleguard</span><span class="p">(</span><span class="n">Circleguard</span><span class="p">):</span>
     <span class="sd">&quot;&quot;&quot;</span>

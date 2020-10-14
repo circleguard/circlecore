@@ -8,7 +8,7 @@
   
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   
-  <title>Appendix &mdash; Circleguard v4.5.1 documentation</title>
+  <title>Appendix &mdash; Circleguard v5.0.0 documentation</title>
   
 
   
@@ -59,7 +59,7 @@
             
             
               <div class="version">
-                v4.5.1
+                v5.0.0
               </div>
             
           
@@ -91,7 +91,7 @@
 <li class="toctree-l1"><a class="reference internal" href="foreword.html">Foreword</a></li>
 <li class="toctree-l1"><a class="reference internal" href="representing-replays.html">Representing Replays</a></li>
 <li class="toctree-l1"><a class="reference internal" href="using-circleguard.html">Using Circleguard</a></li>
-<li class="toctree-l1"><a class="reference internal" href="replay-containers.html">|ReplayContainer|s</a></li>
+<li class="toctree-l1"><a class="reference internal" href="replay-containers.html"><code class="xref py py-class docutils literal notranslate"><span class="pre">ReplayContainer</span></code>s</a></li>
 <li class="toctree-l1"><a class="reference internal" href="loading.html">Loading</a></li>
 <li class="toctree-l1"><a class="reference internal" href="caching.html">Caching</a></li>
 </ul>
@@ -191,8 +191,8 @@
 <dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
 <dd class="field-odd"><ul class="simple">
-<li><p><strong>cache</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.8)"><em>bool</em></a>) – Whether or not replays should be cached.</p></li>
-<li><p><strong>path</strong> (str or <a class="reference external" href="https://docs.python.org/3/library/os.html#os.PathLike" title="(in Python v3.8)"><code class="xref py py-class docutils literal notranslate"><span class="pre">os.PathLike</span></code></a>) – The absolute path to the database. If the path does not exist,
+<li><p><strong>cache</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.9)"><em>bool</em></a>) – Whether or not replays should be cached.</p></li>
+<li><p><strong>path</strong> (str or <a class="reference external" href="https://docs.python.org/3/library/os.html#os.PathLike" title="(in Python v3.9)"><code class="xref py py-class docutils literal notranslate"><span class="pre">os.PathLike</span></code></a>) – The absolute path to the database. If the path does not exist,
 a fresh database will be created there.</p></li>
 </ul>
 </dd>
@@ -207,9 +207,9 @@ database, linking it to the replay info.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
 <dd class="field-odd"><ul class="simple">
-<li><p><strong>map_id</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.8)"><em>str</em></a>) – The map id to insert into the db.</p></li>
-<li><p><strong>lzma_bytes</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.8)"><em>str</em></a>) – The lzma stream to compress and insert into the db.</p></li>
-<li><p><strong>replay_info</strong> (<code class="xref py py-class docutils literal notranslate"><span class="pre">ReplayInfo</span></code>) – The ReplayInfo object representing this replay.</p></li>
+<li><p><strong>map_id</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.9)"><em>str</em></a>) – The map id to insert into the db.</p></li>
+<li><p><strong>lzma_bytes</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.9)"><em>str</em></a>) – The lzma stream to compress and insert into the db.</p></li>
+<li><p><strong>replay_info</strong> (<a class="reference internal" href="#circleguard.loader.ReplayInfo" title="circleguard.loader.ReplayInfo"><code class="xref py py-class docutils literal notranslate"><span class="pre">ReplayInfo</span></code></a>) – The ReplayInfo object representing this replay.</p></li>
 </ul>
 </dd>
 </dl>
@@ -234,12 +234,12 @@ replay info.</p>
 <dd class="field-odd"><ul class="simple">
 <li><p><strong>loader</strong> (<a class="reference internal" href="#circleguard.loader.Loader" title="circleguard.loader.Loader"><code class="xref py py-class docutils literal notranslate"><span class="pre">Loader</span></code></a>) – The Loader from the circleguard instance to redownload replays with
 if they are outdated.</p></li>
-<li><p><strong>replay_info</strong> (list[<code class="xref py py-class docutils literal notranslate"><span class="pre">ReplayInfo</span></code>]) – A list of ReplayInfo objects containing the up-to-date information
+<li><p><strong>replay_info</strong> (list[<a class="reference internal" href="#circleguard.loader.ReplayInfo" title="circleguard.loader.ReplayInfo"><code class="xref py py-class docutils literal notranslate"><span class="pre">ReplayInfo</span></code></a>]) – A list of ReplayInfo objects containing the up-to-date information
 of user’s replays.</p></li>
 </ul>
 </dd>
 <dt class="field-even">Raises</dt>
-<dd class="field-even"><p><a class="reference external" href="https://docs.python.org/3/library/exceptions.html#ValueError" title="(in Python v3.8)"><strong>ValueError</strong></a> – Raised when the redownloaded replay id is lower than the cached
+<dd class="field-even"><p><a class="reference external" href="https://docs.python.org/3/library/exceptions.html#ValueError" title="(in Python v3.9)"><strong>ValueError</strong></a> – Raised when the redownloaded replay id is lower than the cached
     replay id. This should never happen and is indicative of either a
     fault on our end or the api’s end.
     
@@ -265,14 +265,14 @@ In particular, it searches with parameters other than the primary key
 (uncompressed) replay data if it finds a match, and <code class="docutils literal notranslate"><span class="pre">None</span></code> otherwise.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
-<dd class="field-odd"><p><strong>replay_info</strong> (<code class="xref py py-class docutils literal notranslate"><span class="pre">ReplayInfo</span></code>) – The replay info to search for a matching replay with.</p>
+<dd class="field-odd"><p><strong>replay_info</strong> (<a class="reference internal" href="#circleguard.loader.ReplayInfo" title="circleguard.loader.ReplayInfo"><code class="xref py py-class docutils literal notranslate"><span class="pre">ReplayInfo</span></code></a>) – The replay info to search for a matching replay with.</p>
 </dd>
 <dt class="field-even">Returns</dt>
 <dd class="field-even"><p>The replay data in decompressed lzma form if the cache contains the
 replay, or None if not.</p>
 </dd>
 <dt class="field-odd">Return type</dt>
-<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.8)">str</a> or <a class="reference external" href="https://docs.python.org/3/library/constants.html#None" title="(in Python v3.8)">None</a></p>
+<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.9)">str</a> or <a class="reference external" href="https://docs.python.org/3/library/constants.html#None" title="(in Python v3.9)">None</a></p>
 </dd>
 </dl>
 </dd></dl>
@@ -287,21 +287,21 @@ replay, or None if not.</p>
 <em class="property">class </em><code class="sig-prename descclassname">circleguard.circleguard.</code><code class="sig-name descname">Circleguard</code><span class="sig-paren">(</span><em class="sig-param">key</em>, <em class="sig-param">db_path=None</em>, <em class="sig-param">slider_dir=None</em>, <em class="sig-param">loader=None</em>, <em class="sig-param">cache=True</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/circleguard/circleguard.html#Circleguard"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#circleguard.circleguard.Circleguard" title="Permalink to this definition">¶</a></dt>
 <dd><p>Circleguard is the main entry point for using circlecore. In particular, we
 provide methods to calculate various statistics about
-<a class="reference internal" href="#circleguard.loadables.Replay" title="circleguard.loadables.Replay"><code class="xref py py-class docutils literal notranslate"><span class="pre">Replay</span></code></a>s:
-* <a class="reference internal" href="#circleguard.circleguard.Circleguard.similarity" title="circleguard.circleguard.Circleguard.similarity"><code class="xref py py-meth docutils literal notranslate"><span class="pre">similarity()</span></code></a> - the similarity between two replays.
-* <a class="reference internal" href="#circleguard.circleguard.Circleguard.ur" title="circleguard.circleguard.Circleguard.ur"><code class="xref py py-meth docutils literal notranslate"><span class="pre">ur()</span></code></a> - the unstable rate of a replay.
-* <a class="reference internal" href="#circleguard.circleguard.Circleguard.snaps" title="circleguard.circleguard.Circleguard.snaps"><code class="xref py py-meth docutils literal notranslate"><span class="pre">snaps()</span></code></a> - any unusual snaps in the cursor movement of a replay.
-* <a class="reference internal" href="#circleguard.circleguard.Circleguard.frametime" title="circleguard.circleguard.Circleguard.frametime"><code class="xref py py-meth docutils literal notranslate"><span class="pre">frametime()</span></code></a> - the average frametime of a replay.
-* <a class="reference internal" href="#circleguard.circleguard.Circleguard.frametimes" title="circleguard.circleguard.Circleguard.frametimes"><code class="xref py py-meth docutils literal notranslate"><span class="pre">frametimes()</span></code></a> - a list of the time between frames of a replay.
-* <a class="reference internal" href="#circleguard.circleguard.Circleguard.hits" title="circleguard.circleguard.Circleguard.hits"><code class="xref py py-meth docutils literal notranslate"><span class="pre">hits()</span></code></a> - the locations in a replay where a hitobject is hit.</p>
-<p>We also provide methods to interact with
-<a class="reference internal" href="#circleguard.loadables.Loadable" title="circleguard.loadables.Loadable"><code class="xref py py-class docutils literal notranslate"><span class="pre">Loadable</span></code></a>s:
-* <a class="reference internal" href="#circleguard.circleguard.Circleguard.load" title="circleguard.circleguard.Circleguard.load"><code class="xref py py-meth docutils literal notranslate"><span class="pre">load()</span></code></a> - loads a <a class="reference internal" href="#circleguard.loadables.Loadable" title="circleguard.loadables.Loadable"><code class="xref py py-class docutils literal notranslate"><span class="pre">Loadable</span></code></a>.
-* <a class="reference internal" href="#circleguard.circleguard.Circleguard.load_info" title="circleguard.circleguard.Circleguard.load_info"><code class="xref py py-meth docutils literal notranslate"><span class="pre">load_info()</span></code></a> - loads the info of a</p>
-<blockquote>
-<div><p><a class="reference internal" href="#circleguard.loadables.ReplayContainer" title="circleguard.loadables.ReplayContainer"><code class="xref py py-class docutils literal notranslate"><span class="pre">ReplayContainer</span></code></a>.</p>
-</div></blockquote>
+<a class="reference internal" href="#circleguard.loadables.Replay" title="circleguard.loadables.Replay"><code class="xref py py-class docutils literal notranslate"><span class="pre">Replay</span></code></a>s:</p>
 <ul class="simple">
+<li><p><a class="reference internal" href="#circleguard.circleguard.Circleguard.similarity" title="circleguard.circleguard.Circleguard.similarity"><code class="xref py py-meth docutils literal notranslate"><span class="pre">similarity()</span></code></a> - the similarity between two replays.</p></li>
+<li><p><a class="reference internal" href="#circleguard.circleguard.Circleguard.ur" title="circleguard.circleguard.Circleguard.ur"><code class="xref py py-meth docutils literal notranslate"><span class="pre">ur()</span></code></a> - the unstable rate of a replay.</p></li>
+<li><p><a class="reference internal" href="#circleguard.circleguard.Circleguard.snaps" title="circleguard.circleguard.Circleguard.snaps"><code class="xref py py-meth docutils literal notranslate"><span class="pre">snaps()</span></code></a> - any unusual snaps in the cursor movement of a replay.</p></li>
+<li><p><a class="reference internal" href="#circleguard.circleguard.Circleguard.frametime" title="circleguard.circleguard.Circleguard.frametime"><code class="xref py py-meth docutils literal notranslate"><span class="pre">frametime()</span></code></a> - the average frametime of a replay.</p></li>
+<li><p><a class="reference internal" href="#circleguard.circleguard.Circleguard.frametimes" title="circleguard.circleguard.Circleguard.frametimes"><code class="xref py py-meth docutils literal notranslate"><span class="pre">frametimes()</span></code></a> - a list of the time between frames of a replay.</p></li>
+<li><p><a class="reference internal" href="#circleguard.circleguard.Circleguard.hits" title="circleguard.circleguard.Circleguard.hits"><code class="xref py py-meth docutils literal notranslate"><span class="pre">hits()</span></code></a> - the locations in a replay where a hitobject is hit.</p></li>
+</ul>
+<p>We also provide methods to interact with
+<a class="reference internal" href="#circleguard.loadables.Loadable" title="circleguard.loadables.Loadable"><code class="xref py py-class docutils literal notranslate"><span class="pre">Loadable</span></code></a>s:</p>
+<ul class="simple">
+<li><p><a class="reference internal" href="#circleguard.circleguard.Circleguard.load" title="circleguard.circleguard.Circleguard.load"><code class="xref py py-meth docutils literal notranslate"><span class="pre">load()</span></code></a> - loads a <a class="reference internal" href="#circleguard.loadables.Loadable" title="circleguard.loadables.Loadable"><code class="xref py py-class docutils literal notranslate"><span class="pre">Loadable</span></code></a>.</p></li>
+<li><p><a class="reference internal" href="#circleguard.circleguard.Circleguard.load_info" title="circleguard.circleguard.Circleguard.load_info"><code class="xref py py-meth docutils literal notranslate"><span class="pre">load_info()</span></code></a> - loads the info of a
+<a class="reference internal" href="#circleguard.loadables.ReplayContainer" title="circleguard.loadables.ReplayContainer"><code class="xref py py-class docutils literal notranslate"><span class="pre">ReplayContainer</span></code></a>.</p></li>
 <li><p><a class="reference internal" href="#circleguard.circleguard.Circleguard.Map" title="circleguard.circleguard.Circleguard.Map"><code class="xref py py-meth docutils literal notranslate"><span class="pre">Map()</span></code></a> - creates a new <a class="reference internal" href="#circleguard.loadables.Map" title="circleguard.loadables.Map"><code class="xref py py-class docutils literal notranslate"><span class="pre">Map</span></code></a> and
 loads its info.</p></li>
 <li><p><a class="reference internal" href="#circleguard.circleguard.Circleguard.User" title="circleguard.circleguard.Circleguard.User"><code class="xref py py-meth docutils literal notranslate"><span class="pre">User()</span></code></a> - creates a new <a class="reference internal" href="#circleguard.loadables.User" title="circleguard.loadables.User"><code class="xref py py-class docutils literal notranslate"><span class="pre">User</span></code></a> and
@@ -312,11 +312,11 @@ and loads its info.</p></li>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
 <dd class="field-odd"><ul class="simple">
-<li><p><strong>key</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.8)"><em>str</em></a>) – A valid api key. Can be retrieved from <a class="reference external" href="https://osu.ppy.sh/p/api/">https://osu.ppy.sh/p/api/</a>.</p></li>
-<li><p><strong>db_path</strong> (str or <a class="reference external" href="https://docs.python.org/3/library/os.html#os.PathLike" title="(in Python v3.8)"><code class="xref py py-class docutils literal notranslate"><span class="pre">os.PathLike</span></code></a>) – The path to the database file to read and write cached replays. If the
+<li><p><strong>key</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.9)"><em>str</em></a>) – A valid api key. Can be retrieved from <a class="reference external" href="https://osu.ppy.sh/p/api/">https://osu.ppy.sh/p/api/</a>.</p></li>
+<li><p><strong>db_path</strong> (str or <a class="reference external" href="https://docs.python.org/3/library/os.html#os.PathLike" title="(in Python v3.9)"><code class="xref py py-class docutils literal notranslate"><span class="pre">os.PathLike</span></code></a>) – The path to the database file to read and write cached replays. If the
 path does not exist, a fresh database will be created there.
 If <code class="docutils literal notranslate"><span class="pre">None</span></code>, no replays will be cached or loaded from cache.</p></li>
-<li><p><strong>slider_dir</strong> (str or <a class="reference external" href="https://docs.python.org/3/library/os.html#os.PathLike" title="(in Python v3.8)"><code class="xref py py-class docutils literal notranslate"><span class="pre">os.PathLike</span></code></a>) – The path to the directory used by <a class="reference external" href="https://llllllllll.github.io/slider/appendix.html#slider.library.Library" title="(in slider v0.2.1)"><code class="xref py py-class docutils literal notranslate"><span class="pre">slider.library.Library</span></code></a> to
+<li><p><strong>slider_dir</strong> (str or <a class="reference external" href="https://docs.python.org/3/library/os.html#os.PathLike" title="(in Python v3.9)"><code class="xref py py-class docutils literal notranslate"><span class="pre">os.PathLike</span></code></a>) – The path to the directory used by <a class="reference external" href="https://llllllllll.github.io/slider/appendix.html#slider.library.Library" title="(in slider v0.2.1)"><code class="xref py py-class docutils literal notranslate"><span class="pre">slider.library.Library</span></code></a> to
 store beatmaps. If <code class="docutils literal notranslate"><span class="pre">None</span></code>, a temporary directory will be created for
 <a class="reference external" href="https://llllllllll.github.io/slider/appendix.html#slider.library.Library" title="(in slider v0.2.1)"><code class="xref py py-class docutils literal notranslate"><span class="pre">slider.library.Library</span></code></a> and subsequently destroyed when this
 <a class="reference internal" href="#circleguard.circleguard.Circleguard" title="circleguard.circleguard.Circleguard"><code class="xref py py-class docutils literal notranslate"><span class="pre">Circleguard</span></code></a> object is garbage collected.</p></li>
@@ -336,14 +336,14 @@ instantiated with two args - a key and a cacher.</p></li>
 <li><p><strong>replay1</strong> (<a class="reference internal" href="#circleguard.loadables.Replay" title="circleguard.loadables.Replay"><code class="xref py py-class docutils literal notranslate"><span class="pre">Replay</span></code></a>) – The replay to compare against <code class="docutils literal notranslate"><span class="pre">replay2</span></code>.</p></li>
 <li><p><strong>replay2</strong> (<a class="reference internal" href="#circleguard.loadables.Replay" title="circleguard.loadables.Replay"><code class="xref py py-class docutils literal notranslate"><span class="pre">Replay</span></code></a>) – The replay to compare against <code class="docutils literal notranslate"><span class="pre">replay1</span></code>.</p></li>
 <li><p><strong>method</strong> (<em>{&quot;similarity&quot;</em><em>, </em><em>&quot;correlation&quot;}</em>) – What method to use to calculate the similarity between the replays.
-&lt;br&gt;
-<code class="docutils literal notranslate"><span class="pre">similarity`</span> <span class="pre">is</span> <span class="pre">(roughly</span> <span class="pre">speaking)</span> <span class="pre">the</span> <span class="pre">average</span> <span class="pre">distance</span>
-<span class="pre">between</span> <span class="pre">the</span> <span class="pre">two</span> <span class="pre">replays</span> <span class="pre">in</span> <span class="pre">pixels.</span> <span class="pre">A</span> <span class="pre">replay</span> <span class="pre">compared</span> <span class="pre">to</span> <span class="pre">itself</span> <span class="pre">(or</span>
-<span class="pre">an</span> <span class="pre">exact</span> <span class="pre">copy)</span> <span class="pre">has</span> <span class="pre">a</span> <span class="pre">similarity</span> <span class="pre">of</span> <span class="pre">0.</span> <span class="pre">See</span>
-<span class="pre">:data:`~circleguard.Circleguard.SIM_LIMIT`</span> <span class="pre">for</span> <span class="pre">a</span> <span class="pre">suggested</span> <span class="pre">number</span>
-<span class="pre">where</span> <span class="pre">similarities</span> <span class="pre">below</span> <span class="pre">this</span> <span class="pre">number</span> <span class="pre">indicate</span> <span class="pre">a</span> <span class="pre">stolen</span> <span class="pre">replay.</span>
-<span class="pre">&lt;br&gt;</span>
-<span class="pre">``correlation</span></code> is a signal-processing metric which measures how
+<br />
+<code class="docutils literal notranslate"><span class="pre">similarity</span></code> is (roughly speaking) the average distance
+between the two replays in pixels. A replay compared to itself (or
+an exact copy) has a similarity of 0. See
+<code class="xref py py-data docutils literal notranslate"><span class="pre">SIM_LIMIT</span></code> for a suggested number
+where similarities below this number indicate a stolen replay.
+<br />
+<code class="docutils literal notranslate"><span class="pre">correlation</span></code> is a signal-processing metric which measures how
 similar two signals (or replays, in our case) are. Correlation also
 takes into account time shifts, so a replay which is a perfect copy
 of another replay but consistently lags 10 ms behind will still have
@@ -351,18 +351,18 @@ a perfect correltion of <code class="docutils literal notranslate"><span class="
 correlated (or similar) the two replays are. See
 <code class="xref py py-data docutils literal notranslate"><span class="pre">CORR_LIMIT</span></code> for a suggested number
 where correlations above this number indicate a stolen replay.</p></li>
-<li><p><strong>num_chunks</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.8)"><em>int</em></a>) – How many chunks to split the replay into when comparing. This
+<li><p><strong>num_chunks</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.9)"><em>int</em></a>) – How many chunks to split the replay into when comparing. This
 parameter only has an affect if <code class="docutils literal notranslate"><span class="pre">method</span></code> is <code class="docutils literal notranslate"><span class="pre">correlation</span></code>.
 Note that runtime increases linearly with the number of chunks.</p></li>
 <li><p><strong>mods_unknown</strong> (<em>{&quot;best&quot;</em><em>, </em><em>&quot;both&quot;}</em>) – What to do if one or both of <code class="docutils literal notranslate"><span class="pre">replay1</span></code> and <code class="docutils literal notranslate"><span class="pre">replay2</span></code> do not
 know what mods they were played with. In this case, the similarity
 will be computed twice, both with no modifications and with
 <code class="docutils literal notranslate"><span class="pre">Mod.HR</span></code> applied to <code class="docutils literal notranslate"><span class="pre">replay1</span></code>.
-&lt;br&gt;
+<br />
 If <code class="docutils literal notranslate"><span class="pre">best</span></code> is passed, the best (that is, lowest if <code class="docutils literal notranslate"><span class="pre">method</span></code> is
 <code class="docutils literal notranslate"><span class="pre">similarity</span></code> and highest if <code class="docutils literal notranslate"><span class="pre">method</span></code> is <code class="docutils literal notranslate"><span class="pre">correlation</span></code>)
 similarity of these two calculations is returned.
-&lt;br&gt;
+<br />
 If <code class="docutils literal notranslate"><span class="pre">both</span></code> is passed, a tuple with two floats is returned. The
 first element is the similarity with no modifications, and the
 second element is the similarity with <code class="docutils literal notranslate"><span class="pre">Mod.HR</span></code> applied to
@@ -393,7 +393,7 @@ modifications, and the second element is the similarity with
 <dt class="field-odd">Parameters</dt>
 <dd class="field-odd"><ul class="simple">
 <li><p><strong>replay</strong> (<a class="reference internal" href="#circleguard.loadables.Replay" title="circleguard.loadables.Replay"><code class="xref py py-class docutils literal notranslate"><span class="pre">Replay</span></code></a>) – The replay to calculate the ur of.</p></li>
-<li><p><strong>cv</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.8)"><em>bool</em></a>) – Whether to return the converted or unconverted ur. The converted ur
+<li><p><strong>cv</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.9)"><em>bool</em></a>) – Whether to return the converted or unconverted ur. The converted ur
 is returned by default.</p></li>
 </ul>
 </dd>
@@ -401,7 +401,7 @@ is returned by default.</p></li>
 <dd class="field-even"><p>The ur of the replay.</p>
 </dd>
 <dt class="field-odd">Return type</dt>
-<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.8)">float</a></p>
+<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.9)">float</a></p>
 </dd>
 </dl>
 </dd></dl>
@@ -417,8 +417,8 @@ acute and neither <code class="docutils literal notranslate"><span class="pre">|
 <dt class="field-odd">Parameters</dt>
 <dd class="field-odd"><ul class="simple">
 <li><p><strong>replay</strong> (<a class="reference internal" href="#circleguard.loadables.Replay" title="circleguard.loadables.Replay"><code class="xref py py-class docutils literal notranslate"><span class="pre">Replay</span></code></a>) – The replay to find snaps in.</p></li>
-<li><p><strong>max_angle</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.8)"><em>float</em></a>) – Consider only (a,b,c) where <code class="docutils literal notranslate"><span class="pre">∠abc</span> <span class="pre">&lt;</span> <span class="pre">max_angle</span></code></p></li>
-<li><p><strong>min_distance</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.8)"><em>float</em></a>) – Consider only (a,b,c) where <code class="docutils literal notranslate"><span class="pre">|ab|</span> <span class="pre">&gt;</span> <span class="pre">min_distance</span></code> and
+<li><p><strong>max_angle</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.9)"><em>float</em></a>) – Consider only (a,b,c) where <code class="docutils literal notranslate"><span class="pre">∠abc</span> <span class="pre">&lt;</span> <span class="pre">max_angle</span></code></p></li>
+<li><p><strong>min_distance</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.9)"><em>float</em></a>) – Consider only (a,b,c) where <code class="docutils literal notranslate"><span class="pre">|ab|</span> <span class="pre">&gt;</span> <span class="pre">min_distance</span></code> and
 <code class="docutils literal notranslate"><span class="pre">|ab|</span> <span class="pre">&gt;</span> <span class="pre">min_distance</span></code>.</p></li>
 </ul>
 </dd>
@@ -426,7 +426,7 @@ acute and neither <code class="docutils literal notranslate"><span class="pre">|
 <dd class="field-even"><p>The snaps of the replay. This list is empty if no snaps were found.</p>
 </dd>
 <dt class="field-odd">Return type</dt>
-<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#list" title="(in Python v3.8)">list</a>[<a class="reference internal" href="#circleguard.investigator.Snap" title="circleguard.investigator.Snap">Snap</a>]</p>
+<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#list" title="(in Python v3.9)">list</a>[<a class="reference internal" href="#circleguard.investigator.Snap" title="circleguard.investigator.Snap">Snap</a>]</p>
 </dd>
 </dl>
 </dd></dl>
@@ -439,19 +439,19 @@ acute and neither <code class="docutils literal notranslate"><span class="pre">|
 <dt class="field-odd">Parameters</dt>
 <dd class="field-odd"><ul class="simple">
 <li><p><strong>replay</strong> (<a class="reference internal" href="#circleguard.loadables.Replay" title="circleguard.loadables.Replay"><code class="xref py py-class docutils literal notranslate"><span class="pre">Replay</span></code></a>) – The replay to calculate the median frametime of.</p></li>
-<li><p><strong>cv</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.8)"><em>bool</em></a>) – Whether to return the converted or unconverted frametime. The
+<li><p><strong>cv</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.9)"><em>bool</em></a>) – Whether to return the converted or unconverted frametime. The
 converted frametime is returned by default.</p></li>
 <li><p><strong>mods_unknown</strong> (<em>{&quot;raise&quot;</em><em>, </em><em>&quot;dt&quot;</em><em>, </em><em>&quot;nm&quot;</em><em>, </em><em>&quot;ht&quot;}</em>) – What to do if <code class="docutils literal notranslate"><span class="pre">replay</span></code> does not know what mods it was played with,
 and <code class="docutils literal notranslate"><span class="pre">cv</span></code> is <code class="docutils literal notranslate"><span class="pre">True</span></code>.
-&lt;br&gt;
+<br />
 If <code class="docutils literal notranslate"><span class="pre">raise</span></code>, a ValueError will be raised.
-&lt;br&gt;
+<br />
 If <code class="docutils literal notranslate"><span class="pre">dt</span></code>, the frametime will be converted as if the replay was
 played with <code class="docutils literal notranslate"><span class="pre">Mod.DT</span></code>.
-&lt;br&gt;
+<br />
 If <code class="docutils literal notranslate"><span class="pre">nm</span></code>, the frametime will be converted as if the replay was
 played  with <code class="docutils literal notranslate"><span class="pre">Mod.NM</span></code> (that is, not converted at all).
-&lt;br&gt;
+<br />
 If <code class="docutils literal notranslate"><span class="pre">ht</span></code>, the frametime will be converted as if the replay was
 played with <code class="docutils literal notranslate"><span class="pre">Mod.HT</span></code>.</p></li>
 </ul>
@@ -460,7 +460,7 @@ played with <code class="docutils literal notranslate"><span class="pre">Mod.HT<
 <dd class="field-even"><p>The median frametime (in ms) of the replay.</p>
 </dd>
 <dt class="field-odd">Return type</dt>
-<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.8)">float</a></p>
+<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.9)">float</a></p>
 </dd>
 </dl>
 </dd></dl>
@@ -473,32 +473,32 @@ played with <code class="docutils literal notranslate"><span class="pre">Mod.HT<
 <dt class="field-odd">Parameters</dt>
 <dd class="field-odd"><ul class="simple">
 <li><p><strong>replay</strong> (<a class="reference internal" href="#circleguard.loadables.Replay" title="circleguard.loadables.Replay"><code class="xref py py-class docutils literal notranslate"><span class="pre">Replay</span></code></a>) – The replay to calculate the time between each frame of.</p></li>
-<li><p><strong>cv</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.8)"><em>bool</em></a>) – Whether to return the converted or unconverted frametimes. The
+<li><p><strong>cv</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.9)"><em>bool</em></a>) – Whether to return the converted or unconverted frametimes. The
 converted frametimes is returned by default.</p></li>
 <li><p><strong>mods_unknown</strong> (<em>{&quot;raise&quot;</em><em>, </em><em>&quot;dt&quot;</em><em>, </em><em>&quot;nm&quot;</em><em>, </em><em>&quot;ht&quot;}</em>) – What to do if <code class="docutils literal notranslate"><span class="pre">replay</span></code> does not know what mods it was played with,
 and <code class="docutils literal notranslate"><span class="pre">cv</span></code> is <code class="docutils literal notranslate"><span class="pre">True</span></code>.
-&lt;br&gt;
+<br />
 If <code class="docutils literal notranslate"><span class="pre">raise</span></code>, a ValueError will be raised.
-&lt;br&gt;
+<br />
 If <code class="docutils literal notranslate"><span class="pre">dt</span></code>, the frametime swill be converted as if the replay was
 played with <code class="docutils literal notranslate"><span class="pre">Mod.DT</span></code>.
-&lt;br&gt;
+<br />
 If <code class="docutils literal notranslate"><span class="pre">nm</span></code>, the frametimes will be converted as if the replay was
 played  with <code class="docutils literal notranslate"><span class="pre">Mod.NM</span></code> (that is, not converted at all).
-&lt;br&gt;
+<br />
 If <code class="docutils literal notranslate"><span class="pre">ht</span></code>, the frametimes will be converted as if the replay was
 played with <code class="docutils literal notranslate"><span class="pre">Mod.HT</span></code>.</p></li>
 </ul>
 </dd>
 <dt class="field-even">Returns</dt>
 <dd class="field-even"><p>The time (in ms) between each frame of the replay.
-&lt;br&gt;
+<br />
 The first element of this array corresponds to the time between the
 first and second frame, the second element to the time between the
 second and third frame, etc.</p>
 </dd>
 <dt class="field-odd">Return type</dt>
-<dd class="field-odd"><p>[<a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.8)">float</a>]</p>
+<dd class="field-odd"><p>[<a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.9)">float</a>]</p>
 </dd>
 </dl>
 </dd></dl>
@@ -511,7 +511,7 @@ second and third frame, etc.</p>
 <dt class="field-odd">Parameters</dt>
 <dd class="field-odd"><ul class="simple">
 <li><p><strong>replay</strong> (<a class="reference internal" href="#circleguard.loadables.Replay" title="circleguard.loadables.Replay"><code class="xref py py-class docutils literal notranslate"><span class="pre">Replay</span></code></a>) – The replay to calculate the hits of.</p></li>
-<li><p><strong>within</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.8)"><em>float</em></a>) – If passed, only the hits which are <code class="docutils literal notranslate"><span class="pre">within</span></code> pixels or less away
+<li><p><strong>within</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.9)"><em>float</em></a>) – If passed, only the hits which are <code class="docutils literal notranslate"><span class="pre">within</span></code> pixels or less away
 from the edge of the hitobject which they hit will be returned.
 Otherwise, all hits are returned.</p></li>
 </ul>
@@ -566,19 +566,21 @@ and returns the now info-loaded <code class="docutils literal notranslate"><span
 <code class="docutils literal notranslate"><span class="pre">Circleguard</span></code> is to want to instantiate a <code class="docutils literal notranslate"><span class="pre">Map</span></code> and immediately
 iterate over it to operate on its replays. However, this <code class="docutils literal notranslate"><span class="pre">Map</span></code> must
 be info loaded before it can be iterated over, so this function does
-that info loading for you.
-&gt;&gt;&gt; # usage without this function (bad)
-&gt;&gt;&gt; cg = Circleguard(“key”)
-&gt;&gt;&gt; m = Map(221777, “1-2”)
-&gt;&gt;&gt; cg.load_info(m)
-&gt;&gt;&gt; for replay in m:
-&gt;&gt;&gt;     …
-&gt;&gt;&gt;
-&gt;&gt;&gt; # usage with this function (good)
-&gt;&gt;&gt; cg = Circleguard(“key”)
-&gt;&gt;&gt; m = cg.Map(221777, “1-2”)
-&gt;&gt;&gt; for replay in m:
-&gt;&gt;&gt;     …</p>
+that info loading for you.</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="c1"># usage without this function (bad)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">cg</span> <span class="o">=</span> <span class="n">Circleguard</span><span class="p">(</span><span class="s2">&quot;key&quot;</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">m</span> <span class="o">=</span> <span class="n">Map</span><span class="p">(</span><span class="mi">221777</span><span class="p">,</span> <span class="s2">&quot;1-2&quot;</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">cg</span><span class="o">.</span><span class="n">load_info</span><span class="p">(</span><span class="n">m</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="k">for</span> <span class="n">replay</span> <span class="ow">in</span> <span class="n">m</span><span class="p">:</span>
+<span class="gp">&gt;&gt;&gt; </span>    <span class="o">...</span>
+<span class="go">&gt;&gt;&gt;</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="c1"># usage with this function (good)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">cg</span> <span class="o">=</span> <span class="n">Circleguard</span><span class="p">(</span><span class="s2">&quot;key&quot;</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">m</span> <span class="o">=</span> <span class="n">cg</span><span class="o">.</span><span class="n">Map</span><span class="p">(</span><span class="mi">221777</span><span class="p">,</span> <span class="s2">&quot;1-2&quot;</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="k">for</span> <span class="n">replay</span> <span class="ow">in</span> <span class="n">m</span><span class="p">:</span>
+<span class="gp">&gt;&gt;&gt; </span>    <span class="o">...</span>
+</pre></div>
+</div>
 </dd></dl>
 
 <dl class="method">
@@ -592,19 +594,21 @@ and returns the now info-loaded <code class="docutils literal notranslate"><span
 <code class="docutils literal notranslate"><span class="pre">Circleguard</span></code> is to want to instantiate a <code class="docutils literal notranslate"><span class="pre">User</span></code> and immediately
 iterate over it to operate on its replays. However, this <code class="docutils literal notranslate"><span class="pre">User</span></code> must
 be info loaded before it can be iterated over, so this function does
-that info loading for you.
-&gt;&gt;&gt; # usage without this function (bad)
-&gt;&gt;&gt; cg = Circleguard(“key”)
-&gt;&gt;&gt; u = User(124493, “1-2”)
-&gt;&gt;&gt; cg.load_info(u)
-&gt;&gt;&gt; for replay in u:
-&gt;&gt;&gt;     …
-&gt;&gt;&gt;
-&gt;&gt;&gt; # usage with this function (good)
-&gt;&gt;&gt; cg = Circleguard(“key”)
-&gt;&gt;&gt; u = cg.User(124493, “1-2”)
-&gt;&gt;&gt; for replay in u:
-&gt;&gt;&gt;     …</p>
+that info loading for you.</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="c1"># usage without this function (bad)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">cg</span> <span class="o">=</span> <span class="n">Circleguard</span><span class="p">(</span><span class="s2">&quot;key&quot;</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">u</span> <span class="o">=</span> <span class="n">User</span><span class="p">(</span><span class="mi">124493</span><span class="p">,</span> <span class="s2">&quot;1-2&quot;</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">cg</span><span class="o">.</span><span class="n">load_info</span><span class="p">(</span><span class="n">u</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="k">for</span> <span class="n">replay</span> <span class="ow">in</span> <span class="n">u</span><span class="p">:</span>
+<span class="gp">&gt;&gt;&gt; </span>    <span class="o">...</span>
+<span class="go">&gt;&gt;&gt;</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="c1"># usage with this function (good)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">cg</span> <span class="o">=</span> <span class="n">Circleguard</span><span class="p">(</span><span class="s2">&quot;key&quot;</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">u</span> <span class="o">=</span> <span class="n">cg</span><span class="o">.</span><span class="n">User</span><span class="p">(</span><span class="mi">124493</span><span class="p">,</span> <span class="s2">&quot;1-2&quot;</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="k">for</span> <span class="n">replay</span> <span class="ow">in</span> <span class="n">u</span><span class="p">:</span>
+<span class="gp">&gt;&gt;&gt; </span>    <span class="o">...</span>
+</pre></div>
+</div>
 </dd></dl>
 
 <dl class="method">
@@ -618,19 +622,21 @@ info, and returns the now info-loaded <code class="docutils literal notranslate"
 <code class="docutils literal notranslate"><span class="pre">Circleguard</span></code> is to want to instantiate a <code class="docutils literal notranslate"><span class="pre">MapUser</span></code> and immediately
 iterate over it to operate on its replays. However, this <code class="docutils literal notranslate"><span class="pre">MapUser</span></code>
 must be info loaded before it can be iterated over, so this function
-does that info loading for you.
-&gt;&gt;&gt; # usage without this function (bad)
-&gt;&gt;&gt; cg = Circleguard(“key”)
-&gt;&gt;&gt; mu = cg.MapUser(124493, 129891)
-&gt;&gt;&gt; cg.load_info(mu)
-&gt;&gt;&gt; for replay in mu:
-&gt;&gt;&gt;     …
-&gt;&gt;&gt;
-&gt;&gt;&gt; # usage with this function (good)
-&gt;&gt;&gt; cg = Circleguard(“key”)
-&gt;&gt;&gt; mu = cg.MapUser(124493, 129891)
-&gt;&gt;&gt; for replay in mu:
-&gt;&gt;&gt;     …</p>
+does that info loading for you.</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="c1"># usage without this function (bad)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">cg</span> <span class="o">=</span> <span class="n">Circleguard</span><span class="p">(</span><span class="s2">&quot;key&quot;</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">mu</span> <span class="o">=</span> <span class="n">cg</span><span class="o">.</span><span class="n">MapUser</span><span class="p">(</span><span class="mi">124493</span><span class="p">,</span> <span class="mi">129891</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">cg</span><span class="o">.</span><span class="n">load_info</span><span class="p">(</span><span class="n">mu</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="k">for</span> <span class="n">replay</span> <span class="ow">in</span> <span class="n">mu</span><span class="p">:</span>
+<span class="gp">&gt;&gt;&gt; </span>    <span class="o">...</span>
+<span class="go">&gt;&gt;&gt;</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="c1"># usage with this function (good)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">cg</span> <span class="o">=</span> <span class="n">Circleguard</span><span class="p">(</span><span class="s2">&quot;key&quot;</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">mu</span> <span class="o">=</span> <span class="n">cg</span><span class="o">.</span><span class="n">MapUser</span><span class="p">(</span><span class="mi">124493</span><span class="p">,</span> <span class="mi">129891</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="k">for</span> <span class="n">replay</span> <span class="ow">in</span> <span class="n">mu</span><span class="p">:</span>
+<span class="gp">&gt;&gt;&gt; </span>    <span class="o">...</span>
+</pre></div>
+</div>
 </dd></dl>
 
 </dd></dl>
@@ -645,10 +651,10 @@ class cannot do anything that requires api access.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
 <dd class="field-odd"><ul class="simple">
-<li><p><strong>db_path</strong> (str or <a class="reference external" href="https://docs.python.org/3/library/os.html#os.PathLike" title="(in Python v3.8)"><code class="xref py py-class docutils literal notranslate"><span class="pre">os.PathLike</span></code></a>) – The path to the database file to read and write cached replays. If the
+<li><p><strong>db_path</strong> (str or <a class="reference external" href="https://docs.python.org/3/library/os.html#os.PathLike" title="(in Python v3.9)"><code class="xref py py-class docutils literal notranslate"><span class="pre">os.PathLike</span></code></a>) – The path to the database file to read and write cached replays. If the
 path does not exist, a fresh database will be created there.
 If <cite>None</cite>, no replays will be cached or loaded from cache.</p></li>
-<li><p><strong>slider_dir</strong> (str or <a class="reference external" href="https://docs.python.org/3/library/os.html#os.PathLike" title="(in Python v3.8)"><code class="xref py py-class docutils literal notranslate"><span class="pre">os.PathLike</span></code></a>) – The path to the directory used by <a class="reference external" href="https://llllllllll.github.io/slider/appendix.html#slider.library.Library" title="(in slider v0.2.1)"><code class="xref py py-class docutils literal notranslate"><span class="pre">slider.library.Library</span></code></a> to
+<li><p><strong>slider_dir</strong> (str or <a class="reference external" href="https://docs.python.org/3/library/os.html#os.PathLike" title="(in Python v3.9)"><code class="xref py py-class docutils literal notranslate"><span class="pre">os.PathLike</span></code></a>) – The path to the directory used by <a class="reference external" href="https://llllllllll.github.io/slider/appendix.html#slider.library.Library" title="(in slider v0.2.1)"><code class="xref py py-class docutils literal notranslate"><span class="pre">slider.library.Library</span></code></a> to
 store beatmaps. If <cite>None</cite>, a temporary directory will be created for
 <a class="reference external" href="https://llllllllll.github.io/slider/appendix.html#slider.library.Library" title="(in slider v0.2.1)"><code class="xref py py-class docutils literal notranslate"><span class="pre">slider.library.Library</span></code></a> and subsequently destroyed when this
 <a class="reference internal" href="#circleguard.circleguard.Circleguard" title="circleguard.circleguard.Circleguard"><code class="xref py py-class docutils literal notranslate"><span class="pre">Circleguard</span></code></a> object is garbage collected.</p></li>
@@ -668,14 +674,14 @@ instantiated with two args - a key and a cacher.</p></li>
 <li><p><strong>replay1</strong> (<a class="reference internal" href="#circleguard.loadables.Replay" title="circleguard.loadables.Replay"><code class="xref py py-class docutils literal notranslate"><span class="pre">Replay</span></code></a>) – The replay to compare against <code class="docutils literal notranslate"><span class="pre">replay2</span></code>.</p></li>
 <li><p><strong>replay2</strong> (<a class="reference internal" href="#circleguard.loadables.Replay" title="circleguard.loadables.Replay"><code class="xref py py-class docutils literal notranslate"><span class="pre">Replay</span></code></a>) – The replay to compare against <code class="docutils literal notranslate"><span class="pre">replay1</span></code>.</p></li>
 <li><p><strong>method</strong> (<em>{&quot;similarity&quot;</em><em>, </em><em>&quot;correlation&quot;}</em>) – What method to use to calculate the similarity between the replays.
-&lt;br&gt;
-<code class="docutils literal notranslate"><span class="pre">similarity`</span> <span class="pre">is</span> <span class="pre">(roughly</span> <span class="pre">speaking)</span> <span class="pre">the</span> <span class="pre">average</span> <span class="pre">distance</span>
-<span class="pre">between</span> <span class="pre">the</span> <span class="pre">two</span> <span class="pre">replays</span> <span class="pre">in</span> <span class="pre">pixels.</span> <span class="pre">A</span> <span class="pre">replay</span> <span class="pre">compared</span> <span class="pre">to</span> <span class="pre">itself</span> <span class="pre">(or</span>
-<span class="pre">an</span> <span class="pre">exact</span> <span class="pre">copy)</span> <span class="pre">has</span> <span class="pre">a</span> <span class="pre">similarity</span> <span class="pre">of</span> <span class="pre">0.</span> <span class="pre">See</span>
-<span class="pre">:data:`~circleguard.Circleguard.SIM_LIMIT`</span> <span class="pre">for</span> <span class="pre">a</span> <span class="pre">suggested</span> <span class="pre">number</span>
-<span class="pre">where</span> <span class="pre">similarities</span> <span class="pre">below</span> <span class="pre">this</span> <span class="pre">number</span> <span class="pre">indicate</span> <span class="pre">a</span> <span class="pre">stolen</span> <span class="pre">replay.</span>
-<span class="pre">&lt;br&gt;</span>
-<span class="pre">``correlation</span></code> is a signal-processing metric which measures how
+<br />
+<code class="docutils literal notranslate"><span class="pre">similarity</span></code> is (roughly speaking) the average distance
+between the two replays in pixels. A replay compared to itself (or
+an exact copy) has a similarity of 0. See
+<code class="xref py py-data docutils literal notranslate"><span class="pre">SIM_LIMIT</span></code> for a suggested number
+where similarities below this number indicate a stolen replay.
+<br />
+<code class="docutils literal notranslate"><span class="pre">correlation</span></code> is a signal-processing metric which measures how
 similar two signals (or replays, in our case) are. Correlation also
 takes into account time shifts, so a replay which is a perfect copy
 of another replay but consistently lags 10 ms behind will still have
@@ -683,18 +689,18 @@ a perfect correltion of <code class="docutils literal notranslate"><span class="
 correlated (or similar) the two replays are. See
 <code class="xref py py-data docutils literal notranslate"><span class="pre">CORR_LIMIT</span></code> for a suggested number
 where correlations above this number indicate a stolen replay.</p></li>
-<li><p><strong>num_chunks</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.8)"><em>int</em></a>) – How many chunks to split the replay into when comparing. This
+<li><p><strong>num_chunks</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.9)"><em>int</em></a>) – How many chunks to split the replay into when comparing. This
 parameter only has an affect if <code class="docutils literal notranslate"><span class="pre">method</span></code> is <code class="docutils literal notranslate"><span class="pre">correlation</span></code>.
 Note that runtime increases linearly with the number of chunks.</p></li>
 <li><p><strong>mods_unknown</strong> (<em>{&quot;best&quot;</em><em>, </em><em>&quot;both&quot;}</em>) – What to do if one or both of <code class="docutils literal notranslate"><span class="pre">replay1</span></code> and <code class="docutils literal notranslate"><span class="pre">replay2</span></code> do not
 know what mods they were played with. In this case, the similarity
 will be computed twice, both with no modifications and with
 <code class="docutils literal notranslate"><span class="pre">Mod.HR</span></code> applied to <code class="docutils literal notranslate"><span class="pre">replay1</span></code>.
-&lt;br&gt;
+<br />
 If <code class="docutils literal notranslate"><span class="pre">best</span></code> is passed, the best (that is, lowest if <code class="docutils literal notranslate"><span class="pre">method</span></code> is
 <code class="docutils literal notranslate"><span class="pre">similarity</span></code> and highest if <code class="docutils literal notranslate"><span class="pre">method</span></code> is <code class="docutils literal notranslate"><span class="pre">correlation</span></code>)
 similarity of these two calculations is returned.
-&lt;br&gt;
+<br />
 If <code class="docutils literal notranslate"><span class="pre">both</span></code> is passed, a tuple with two floats is returned. The
 first element is the similarity with no modifications, and the
 second element is the similarity with <code class="docutils literal notranslate"><span class="pre">Mod.HR</span></code> applied to
@@ -725,7 +731,7 @@ modifications, and the second element is the similarity with
 <dt class="field-odd">Parameters</dt>
 <dd class="field-odd"><ul class="simple">
 <li><p><strong>replay</strong> (<a class="reference internal" href="#circleguard.loadables.Replay" title="circleguard.loadables.Replay"><code class="xref py py-class docutils literal notranslate"><span class="pre">Replay</span></code></a>) – The replay to calculate the ur of.</p></li>
-<li><p><strong>cv</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.8)"><em>bool</em></a>) – Whether to return the converted or unconverted ur. The converted ur
+<li><p><strong>cv</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.9)"><em>bool</em></a>) – Whether to return the converted or unconverted ur. The converted ur
 is returned by default.</p></li>
 </ul>
 </dd>
@@ -733,7 +739,7 @@ is returned by default.</p></li>
 <dd class="field-even"><p>The ur of the replay.</p>
 </dd>
 <dt class="field-odd">Return type</dt>
-<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.8)">float</a></p>
+<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.9)">float</a></p>
 </dd>
 </dl>
 </dd></dl>
@@ -749,8 +755,8 @@ acute and neither <code class="docutils literal notranslate"><span class="pre">|
 <dt class="field-odd">Parameters</dt>
 <dd class="field-odd"><ul class="simple">
 <li><p><strong>replay</strong> (<a class="reference internal" href="#circleguard.loadables.Replay" title="circleguard.loadables.Replay"><code class="xref py py-class docutils literal notranslate"><span class="pre">Replay</span></code></a>) – The replay to find snaps in.</p></li>
-<li><p><strong>max_angle</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.8)"><em>float</em></a>) – Consider only (a,b,c) where <code class="docutils literal notranslate"><span class="pre">∠abc</span> <span class="pre">&lt;</span> <span class="pre">max_angle</span></code></p></li>
-<li><p><strong>min_distance</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.8)"><em>float</em></a>) – Consider only (a,b,c) where <code class="docutils literal notranslate"><span class="pre">|ab|</span> <span class="pre">&gt;</span> <span class="pre">min_distance</span></code> and
+<li><p><strong>max_angle</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.9)"><em>float</em></a>) – Consider only (a,b,c) where <code class="docutils literal notranslate"><span class="pre">∠abc</span> <span class="pre">&lt;</span> <span class="pre">max_angle</span></code></p></li>
+<li><p><strong>min_distance</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.9)"><em>float</em></a>) – Consider only (a,b,c) where <code class="docutils literal notranslate"><span class="pre">|ab|</span> <span class="pre">&gt;</span> <span class="pre">min_distance</span></code> and
 <code class="docutils literal notranslate"><span class="pre">|ab|</span> <span class="pre">&gt;</span> <span class="pre">min_distance</span></code>.</p></li>
 </ul>
 </dd>
@@ -758,7 +764,7 @@ acute and neither <code class="docutils literal notranslate"><span class="pre">|
 <dd class="field-even"><p>The snaps of the replay. This list is empty if no snaps were found.</p>
 </dd>
 <dt class="field-odd">Return type</dt>
-<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#list" title="(in Python v3.8)">list</a>[<a class="reference internal" href="#circleguard.investigator.Snap" title="circleguard.investigator.Snap">Snap</a>]</p>
+<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#list" title="(in Python v3.9)">list</a>[<a class="reference internal" href="#circleguard.investigator.Snap" title="circleguard.investigator.Snap">Snap</a>]</p>
 </dd>
 </dl>
 </dd></dl>
@@ -771,19 +777,19 @@ acute and neither <code class="docutils literal notranslate"><span class="pre">|
 <dt class="field-odd">Parameters</dt>
 <dd class="field-odd"><ul class="simple">
 <li><p><strong>replay</strong> (<a class="reference internal" href="#circleguard.loadables.Replay" title="circleguard.loadables.Replay"><code class="xref py py-class docutils literal notranslate"><span class="pre">Replay</span></code></a>) – The replay to calculate the median frametime of.</p></li>
-<li><p><strong>cv</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.8)"><em>bool</em></a>) – Whether to return the converted or unconverted frametime. The
+<li><p><strong>cv</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.9)"><em>bool</em></a>) – Whether to return the converted or unconverted frametime. The
 converted frametime is returned by default.</p></li>
 <li><p><strong>mods_unknown</strong> (<em>{&quot;raise&quot;</em><em>, </em><em>&quot;dt&quot;</em><em>, </em><em>&quot;nm&quot;</em><em>, </em><em>&quot;ht&quot;}</em>) – What to do if <code class="docutils literal notranslate"><span class="pre">replay</span></code> does not know what mods it was played with,
 and <code class="docutils literal notranslate"><span class="pre">cv</span></code> is <code class="docutils literal notranslate"><span class="pre">True</span></code>.
-&lt;br&gt;
+<br />
 If <code class="docutils literal notranslate"><span class="pre">raise</span></code>, a ValueError will be raised.
-&lt;br&gt;
+<br />
 If <code class="docutils literal notranslate"><span class="pre">dt</span></code>, the frametime will be converted as if the replay was
 played with <code class="docutils literal notranslate"><span class="pre">Mod.DT</span></code>.
-&lt;br&gt;
+<br />
 If <code class="docutils literal notranslate"><span class="pre">nm</span></code>, the frametime will be converted as if the replay was
 played  with <code class="docutils literal notranslate"><span class="pre">Mod.NM</span></code> (that is, not converted at all).
-&lt;br&gt;
+<br />
 If <code class="docutils literal notranslate"><span class="pre">ht</span></code>, the frametime will be converted as if the replay was
 played with <code class="docutils literal notranslate"><span class="pre">Mod.HT</span></code>.</p></li>
 </ul>
@@ -792,7 +798,7 @@ played with <code class="docutils literal notranslate"><span class="pre">Mod.HT<
 <dd class="field-even"><p>The median frametime (in ms) of the replay.</p>
 </dd>
 <dt class="field-odd">Return type</dt>
-<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.8)">float</a></p>
+<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.9)">float</a></p>
 </dd>
 </dl>
 </dd></dl>
@@ -805,32 +811,32 @@ played with <code class="docutils literal notranslate"><span class="pre">Mod.HT<
 <dt class="field-odd">Parameters</dt>
 <dd class="field-odd"><ul class="simple">
 <li><p><strong>replay</strong> (<a class="reference internal" href="#circleguard.loadables.Replay" title="circleguard.loadables.Replay"><code class="xref py py-class docutils literal notranslate"><span class="pre">Replay</span></code></a>) – The replay to calculate the time between each frame of.</p></li>
-<li><p><strong>cv</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.8)"><em>bool</em></a>) – Whether to return the converted or unconverted frametimes. The
+<li><p><strong>cv</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.9)"><em>bool</em></a>) – Whether to return the converted or unconverted frametimes. The
 converted frametimes is returned by default.</p></li>
 <li><p><strong>mods_unknown</strong> (<em>{&quot;raise&quot;</em><em>, </em><em>&quot;dt&quot;</em><em>, </em><em>&quot;nm&quot;</em><em>, </em><em>&quot;ht&quot;}</em>) – What to do if <code class="docutils literal notranslate"><span class="pre">replay</span></code> does not know what mods it was played with,
 and <code class="docutils literal notranslate"><span class="pre">cv</span></code> is <code class="docutils literal notranslate"><span class="pre">True</span></code>.
-&lt;br&gt;
+<br />
 If <code class="docutils literal notranslate"><span class="pre">raise</span></code>, a ValueError will be raised.
-&lt;br&gt;
+<br />
 If <code class="docutils literal notranslate"><span class="pre">dt</span></code>, the frametime swill be converted as if the replay was
 played with <code class="docutils literal notranslate"><span class="pre">Mod.DT</span></code>.
-&lt;br&gt;
+<br />
 If <code class="docutils literal notranslate"><span class="pre">nm</span></code>, the frametimes will be converted as if the replay was
 played  with <code class="docutils literal notranslate"><span class="pre">Mod.NM</span></code> (that is, not converted at all).
-&lt;br&gt;
+<br />
 If <code class="docutils literal notranslate"><span class="pre">ht</span></code>, the frametimes will be converted as if the replay was
 played with <code class="docutils literal notranslate"><span class="pre">Mod.HT</span></code>.</p></li>
 </ul>
 </dd>
 <dt class="field-even">Returns</dt>
 <dd class="field-even"><p>The time (in ms) between each frame of the replay.
-&lt;br&gt;
+<br />
 The first element of this array corresponds to the time between the
 first and second frame, the second element to the time between the
 second and third frame, etc.</p>
 </dd>
 <dt class="field-odd">Return type</dt>
-<dd class="field-odd"><p>[<a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.8)">float</a>]</p>
+<dd class="field-odd"><p>[<a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.9)">float</a>]</p>
 </dd>
 </dl>
 </dd></dl>
@@ -843,7 +849,7 @@ second and third frame, etc.</p>
 <dt class="field-odd">Parameters</dt>
 <dd class="field-odd"><ul class="simple">
 <li><p><strong>replay</strong> (<a class="reference internal" href="#circleguard.loadables.Replay" title="circleguard.loadables.Replay"><code class="xref py py-class docutils literal notranslate"><span class="pre">Replay</span></code></a>) – The replay to calculate the hits of.</p></li>
-<li><p><strong>within</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.8)"><em>float</em></a>) – If passed, only the hits which are <code class="docutils literal notranslate"><span class="pre">within</span></code> pixels or less away
+<li><p><strong>within</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.9)"><em>float</em></a>) – If passed, only the hits which are <code class="docutils literal notranslate"><span class="pre">within</span></code> pixels or less away
 from the edge of the hitobject which they hit will be returned.
 Otherwise, all hits are returned.</p></li>
 </ul>
@@ -898,19 +904,21 @@ and returns the now info-loaded <code class="docutils literal notranslate"><span
 <code class="docutils literal notranslate"><span class="pre">Circleguard</span></code> is to want to instantiate a <code class="docutils literal notranslate"><span class="pre">Map</span></code> and immediately
 iterate over it to operate on its replays. However, this <code class="docutils literal notranslate"><span class="pre">Map</span></code> must
 be info loaded before it can be iterated over, so this function does
-that info loading for you.
-&gt;&gt;&gt; # usage without this function (bad)
-&gt;&gt;&gt; cg = Circleguard(“key”)
-&gt;&gt;&gt; m = Map(221777, “1-2”)
-&gt;&gt;&gt; cg.load_info(m)
-&gt;&gt;&gt; for replay in m:
-&gt;&gt;&gt;     …
-&gt;&gt;&gt;
-&gt;&gt;&gt; # usage with this function (good)
-&gt;&gt;&gt; cg = Circleguard(“key”)
-&gt;&gt;&gt; m = cg.Map(221777, “1-2”)
-&gt;&gt;&gt; for replay in m:
-&gt;&gt;&gt;     …</p>
+that info loading for you.</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="c1"># usage without this function (bad)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">cg</span> <span class="o">=</span> <span class="n">Circleguard</span><span class="p">(</span><span class="s2">&quot;key&quot;</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">m</span> <span class="o">=</span> <span class="n">Map</span><span class="p">(</span><span class="mi">221777</span><span class="p">,</span> <span class="s2">&quot;1-2&quot;</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">cg</span><span class="o">.</span><span class="n">load_info</span><span class="p">(</span><span class="n">m</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="k">for</span> <span class="n">replay</span> <span class="ow">in</span> <span class="n">m</span><span class="p">:</span>
+<span class="gp">&gt;&gt;&gt; </span>    <span class="o">...</span>
+<span class="go">&gt;&gt;&gt;</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="c1"># usage with this function (good)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">cg</span> <span class="o">=</span> <span class="n">Circleguard</span><span class="p">(</span><span class="s2">&quot;key&quot;</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">m</span> <span class="o">=</span> <span class="n">cg</span><span class="o">.</span><span class="n">Map</span><span class="p">(</span><span class="mi">221777</span><span class="p">,</span> <span class="s2">&quot;1-2&quot;</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="k">for</span> <span class="n">replay</span> <span class="ow">in</span> <span class="n">m</span><span class="p">:</span>
+<span class="gp">&gt;&gt;&gt; </span>    <span class="o">...</span>
+</pre></div>
+</div>
 </dd></dl>
 
 <dl class="method">
@@ -924,19 +932,21 @@ and returns the now info-loaded <code class="docutils literal notranslate"><span
 <code class="docutils literal notranslate"><span class="pre">Circleguard</span></code> is to want to instantiate a <code class="docutils literal notranslate"><span class="pre">User</span></code> and immediately
 iterate over it to operate on its replays. However, this <code class="docutils literal notranslate"><span class="pre">User</span></code> must
 be info loaded before it can be iterated over, so this function does
-that info loading for you.
-&gt;&gt;&gt; # usage without this function (bad)
-&gt;&gt;&gt; cg = Circleguard(“key”)
-&gt;&gt;&gt; u = User(124493, “1-2”)
-&gt;&gt;&gt; cg.load_info(u)
-&gt;&gt;&gt; for replay in u:
-&gt;&gt;&gt;     …
-&gt;&gt;&gt;
-&gt;&gt;&gt; # usage with this function (good)
-&gt;&gt;&gt; cg = Circleguard(“key”)
-&gt;&gt;&gt; u = cg.User(124493, “1-2”)
-&gt;&gt;&gt; for replay in u:
-&gt;&gt;&gt;     …</p>
+that info loading for you.</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="c1"># usage without this function (bad)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">cg</span> <span class="o">=</span> <span class="n">Circleguard</span><span class="p">(</span><span class="s2">&quot;key&quot;</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">u</span> <span class="o">=</span> <span class="n">User</span><span class="p">(</span><span class="mi">124493</span><span class="p">,</span> <span class="s2">&quot;1-2&quot;</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">cg</span><span class="o">.</span><span class="n">load_info</span><span class="p">(</span><span class="n">u</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="k">for</span> <span class="n">replay</span> <span class="ow">in</span> <span class="n">u</span><span class="p">:</span>
+<span class="gp">&gt;&gt;&gt; </span>    <span class="o">...</span>
+<span class="go">&gt;&gt;&gt;</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="c1"># usage with this function (good)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">cg</span> <span class="o">=</span> <span class="n">Circleguard</span><span class="p">(</span><span class="s2">&quot;key&quot;</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">u</span> <span class="o">=</span> <span class="n">cg</span><span class="o">.</span><span class="n">User</span><span class="p">(</span><span class="mi">124493</span><span class="p">,</span> <span class="s2">&quot;1-2&quot;</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="k">for</span> <span class="n">replay</span> <span class="ow">in</span> <span class="n">u</span><span class="p">:</span>
+<span class="gp">&gt;&gt;&gt; </span>    <span class="o">...</span>
+</pre></div>
+</div>
 </dd></dl>
 
 <dl class="method">
@@ -950,19 +960,21 @@ info, and returns the now info-loaded <code class="docutils literal notranslate"
 <code class="docutils literal notranslate"><span class="pre">Circleguard</span></code> is to want to instantiate a <code class="docutils literal notranslate"><span class="pre">MapUser</span></code> and immediately
 iterate over it to operate on its replays. However, this <code class="docutils literal notranslate"><span class="pre">MapUser</span></code>
 must be info loaded before it can be iterated over, so this function
-does that info loading for you.
-&gt;&gt;&gt; # usage without this function (bad)
-&gt;&gt;&gt; cg = Circleguard(“key”)
-&gt;&gt;&gt; mu = cg.MapUser(124493, 129891)
-&gt;&gt;&gt; cg.load_info(mu)
-&gt;&gt;&gt; for replay in mu:
-&gt;&gt;&gt;     …
-&gt;&gt;&gt;
-&gt;&gt;&gt; # usage with this function (good)
-&gt;&gt;&gt; cg = Circleguard(“key”)
-&gt;&gt;&gt; mu = cg.MapUser(124493, 129891)
-&gt;&gt;&gt; for replay in mu:
-&gt;&gt;&gt;     …</p>
+does that info loading for you.</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="c1"># usage without this function (bad)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">cg</span> <span class="o">=</span> <span class="n">Circleguard</span><span class="p">(</span><span class="s2">&quot;key&quot;</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">mu</span> <span class="o">=</span> <span class="n">cg</span><span class="o">.</span><span class="n">MapUser</span><span class="p">(</span><span class="mi">124493</span><span class="p">,</span> <span class="mi">129891</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">cg</span><span class="o">.</span><span class="n">load_info</span><span class="p">(</span><span class="n">mu</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="k">for</span> <span class="n">replay</span> <span class="ow">in</span> <span class="n">mu</span><span class="p">:</span>
+<span class="gp">&gt;&gt;&gt; </span>    <span class="o">...</span>
+<span class="go">&gt;&gt;&gt;</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="c1"># usage with this function (good)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">cg</span> <span class="o">=</span> <span class="n">Circleguard</span><span class="p">(</span><span class="s2">&quot;key&quot;</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">mu</span> <span class="o">=</span> <span class="n">cg</span><span class="o">.</span><span class="n">MapUser</span><span class="p">(</span><span class="mi">124493</span><span class="p">,</span> <span class="mi">129891</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="k">for</span> <span class="n">replay</span> <span class="ow">in</span> <span class="n">mu</span><span class="p">:</span>
+<span class="gp">&gt;&gt;&gt; </span>    <span class="o">...</span>
+</pre></div>
+</div>
 </dd></dl>
 
 </dd></dl>
@@ -973,7 +985,7 @@ does that info loading for you.
 <dd><p>Set global options for circlecore.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
-<dd class="field-odd"><p><strong>logevel</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.8)"><em>int</em></a>) – What level to log at. Circlecore follows standard python logging
+<dd class="field-odd"><p><strong>logevel</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.9)"><em>int</em></a>) – What level to log at. Circlecore follows standard python logging
 levels, with an added level of TRACE with a value of 5 (lower than
 debug, which is 10). The value passed to loglevel is passed directly to
 the setLevel function of the circleguard root logger. WARNING by
@@ -993,16 +1005,16 @@ logging lib.</p>
 <dt id="circleguard.game_version.GameVersion">
 <em class="property">class </em><code class="sig-prename descclassname">circleguard.game_version.</code><code class="sig-name descname">GameVersion</code><a class="reference internal" href="_modules/circleguard/game_version.html#GameVersion"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#circleguard.game_version.GameVersion" title="Permalink to this definition">¶</a></dt>
 <dd><p>Information about the version of osu! a
-<a class="reference internal" href="#circleguard.loadables.Replay" title="circleguard.loadables.Replay"><code class="xref py py-class docutils literal notranslate"><span class="pre">circleguard.loadables.Replay</span></code></a> was played on.</p>
+<a class="reference internal" href="#circleguard.loadables.Replay" title="circleguard.loadables.Replay"><code class="xref py py-class docutils literal notranslate"><span class="pre">Replay</span></code></a> was played on.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
 <dd class="field-odd"><ul class="simple">
-<li><p><strong>version</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.8)"><em>int</em></a>) – The version of osu! to represent.</p></li>
-<li><p><strong>concrete</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.8)"><em>bool</em></a>) – Whether <code class="docutils literal notranslate"><span class="pre">version</span></code> is the actual version of osu! the replay was played
+<li><p><strong>version</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.9)"><em>int</em></a>) – The version of osu! to represent.</p></li>
+<li><p><strong>concrete</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.9)"><em>bool</em></a>) – Whether <code class="docutils literal notranslate"><span class="pre">version</span></code> is the actual version of osu! the replay was played
 on (in which case <code class="docutils literal notranslate"><span class="pre">concrete</span></code> should be <code class="docutils literal notranslate"><span class="pre">True</span></code>), or just an
 approximation of the version of osu! the replay was played on (in which
 case <code class="docutils literal notranslate"><span class="pre">concrete</span></code> should be <code class="docutils literal notranslate"><span class="pre">False</span></code>).
-&lt;br&gt;
+<br />
 If the version is an approximation, you are not restricted to actual
 released versions of the game (for instance, osu! has no 20200908
 version of the game, only 20200831), but may use any day of any month
@@ -1017,11 +1029,12 @@ accordingly.</p></li>
 (<a class="reference external" href="https://calver.org/">https://calver.org/</a>), which means that a release’s version is the day that
 release was released. A new version pushed out on 09/08/2020 (MM/DD/YYYY),
 for instance, would have a version of 20200809 (YYYYMMDD).
-&lt;br&gt;
-We provide <code class="xref py py-func docutils literal notranslate"><span class="pre">from_datetime()</span></code> as a convenience for when you have a
-<a class="reference external" href="https://docs.python.org/3/library/datetime.html#datetime.datetime" title="(in Python v3.8)"><code class="xref py py-class docutils literal notranslate"><span class="pre">datetime.datetime</span></code></a> object representing the day an osu! version was
-released, and want to create a <code class="docutils literal notranslate"><span class="pre">GameVersion</span></code> from that.
-&lt;br&gt;
+<br />
+We provide <a class="reference internal" href="#circleguard.game_version.GameVersion.from_datetime" title="circleguard.game_version.GameVersion.from_datetime"><code class="xref py py-func docutils literal notranslate"><span class="pre">from_datetime()</span></code></a> as a
+convenience for when you have a <a class="reference external" href="https://docs.python.org/3/library/datetime.html#datetime.datetime" title="(in Python v3.9)"><code class="xref py py-class docutils literal notranslate"><span class="pre">datetime.datetime</span></code></a> object
+representing the day an osu! version was released, and want to create a
+<code class="docutils literal notranslate"><span class="pre">GameVersion</span></code> from that.
+<br />
 This class subclasses <code class="docutils literal notranslate"><span class="pre">int</span></code> so consumers don’t need to know or expect a
 special class when they access <code class="docutils literal notranslate"><span class="pre">replay.game_version</span></code>. For instance, to
 get the numeric value of the game version, they would have to do
@@ -1029,21 +1042,21 @@ get the numeric value of the game version, they would have to do
 <dl class="method">
 <dt id="circleguard.game_version.GameVersion.from_datetime">
 <em class="property">static </em><code class="sig-name descname">from_datetime</code><span class="sig-paren">(</span><em class="sig-param">datetime</em>, <em class="sig-param">concrete</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/circleguard/game_version.html#GameVersion.from_datetime"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#circleguard.game_version.GameVersion.from_datetime" title="Permalink to this definition">¶</a></dt>
-<dd><p>Provided as a convenience for converting a <a class="reference external" href="https://docs.python.org/3/library/datetime.html#datetime.datetime" title="(in Python v3.8)"><code class="xref py py-class docutils literal notranslate"><span class="pre">datetime.datetime</span></code></a>
+<dd><p>Provided as a convenience for converting a <a class="reference external" href="https://docs.python.org/3/library/datetime.html#datetime.datetime" title="(in Python v3.9)"><code class="xref py py-class docutils literal notranslate"><span class="pre">datetime.datetime</span></code></a>
 object to a <code class="docutils literal notranslate"><span class="pre">GameVersion</span></code> object.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
 <dd class="field-odd"><ul class="simple">
-<li><p><strong>datetime</strong> (<a class="reference external" href="https://docs.python.org/3/library/datetime.html#datetime.datetime" title="(in Python v3.8)"><code class="xref py py-class docutils literal notranslate"><span class="pre">datetime.datetime</span></code></a>) – The datetime to convert to a <code class="docutils literal notranslate"><span class="pre">GameVersion</span></code> object.</p></li>
-<li><p><strong>concrete</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.8)"><em>bool</em></a>) – Whether this version is concrete (ie, fully accurate) or not (ie,
+<li><p><strong>datetime</strong> (<a class="reference external" href="https://docs.python.org/3/library/datetime.html#datetime.datetime" title="(in Python v3.9)"><code class="xref py py-class docutils literal notranslate"><span class="pre">datetime.datetime</span></code></a>) – The datetime to convert to a <code class="docutils literal notranslate"><span class="pre">GameVersion</span></code> object.</p></li>
+<li><p><strong>concrete</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.9)"><em>bool</em></a>) – Whether this version is concrete (ie, fully accurate) or not (ie,
 just an estimate of the replay’s actual version).</p></li>
 </ul>
 </dd>
 <dt class="field-even">Returns</dt>
-<dd class="field-even"><p>The result of converting <code class="docutils literal notranslate"><span class="pre">datetime</span></code> to a <cite>GameVersion`</cite>.</p>
+<dd class="field-even"><p>The result of converting <code class="docutils literal notranslate"><span class="pre">datetime</span></code> to a <code class="docutils literal notranslate"><span class="pre">GameVersion</span></code>.</p>
 </dd>
 <dt class="field-odd">Return type</dt>
-<dd class="field-odd"><p>class`~.GameVersion`</p>
+<dd class="field-odd"><p><a class="reference internal" href="#circleguard.game_version.GameVersion" title="circleguard.game_version.GameVersion"><code class="xref py py-class docutils literal notranslate"><span class="pre">GameVersion</span></code></a></p>
 </dd>
 </dl>
 </dd></dl>
@@ -1068,6 +1081,37 @@ its version, and cannot even estimate its version.</p>
 </div>
 <div class="section" id="module-circleguard.hitobjects">
 <span id="hit-objects"></span><h2>Hit Objects<a class="headerlink" href="#module-circleguard.hitobjects" title="Permalink to this headline">¶</a></h2>
+<dl class="class">
+<dt id="circleguard.hitobjects.Hitobject">
+<em class="property">class </em><code class="sig-prename descclassname">circleguard.hitobjects.</code><code class="sig-name descname">Hitobject</code><span class="sig-paren">(</span><em class="sig-param">t</em>, <em class="sig-param">xy</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/circleguard/hitobjects.html#Hitobject"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#circleguard.hitobjects.Hitobject" title="Permalink to this definition">¶</a></dt>
+<dd><p>A Hitobject in osu! gameplay, with a time and a position.</p>
+<dl class="method">
+<dt id="circleguard.hitobjects.Hitobject.from_slider_hitobj">
+<em class="property">classmethod </em><code class="sig-name descname">from_slider_hitobj</code><span class="sig-paren">(</span><em class="sig-param">hitobj</em>, <em class="sig-param">CS</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/circleguard/hitobjects.html#Hitobject.from_slider_hitobj"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#circleguard.hitobjects.Hitobject.from_slider_hitobj" title="Permalink to this definition">¶</a></dt>
+<dd><p>Instantiates a circleguard hitobject from a
+<a class="reference external" href="https://llllllllll.github.io/slider/appendix.html#slider.beatmap.HitObject" title="(in slider v0.2.1)"><code class="xref py py-class docutils literal notranslate"><span class="pre">slider.beatmap.HitObject</span></code></a> and a circle size.</p>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="class">
+<dt id="circleguard.hitobjects.Circle">
+<em class="property">class </em><code class="sig-prename descclassname">circleguard.hitobjects.</code><code class="sig-name descname">Circle</code><span class="sig-paren">(</span><em class="sig-param">time</em>, <em class="sig-param">xy</em>, <em class="sig-param">radius</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/circleguard/hitobjects.html#Circle"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#circleguard.hitobjects.Circle" title="Permalink to this definition">¶</a></dt>
+<dd><p>A circle in osu! gameplay, with a time, position, and radius.</p>
+</dd></dl>
+
+<dl class="class">
+<dt id="circleguard.hitobjects.Slider">
+<em class="property">class </em><code class="sig-prename descclassname">circleguard.hitobjects.</code><code class="sig-name descname">Slider</code><span class="sig-paren">(</span><em class="sig-param">time</em>, <em class="sig-param">xy</em>, <em class="sig-param">radius</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/circleguard/hitobjects.html#Slider"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#circleguard.hitobjects.Slider" title="Permalink to this definition">¶</a></dt>
+<dd><p>A slider in osu! gameplay, with a time, position, and radius.</p>
+</dd></dl>
+
+<dl class="class">
+<dt id="circleguard.hitobjects.Spinner">
+<em class="property">class </em><code class="sig-prename descclassname">circleguard.hitobjects.</code><code class="sig-name descname">Spinner</code><span class="sig-paren">(</span><em class="sig-param">time</em>, <em class="sig-param">xy</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/circleguard/hitobjects.html#Spinner"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#circleguard.hitobjects.Spinner" title="Permalink to this definition">¶</a></dt>
+<dd><p>A spinner in osu! gameplay, with a time and position.</p>
+</dd></dl>
+
 </div>
 <div class="section" id="module-circleguard.investigator">
 <span id="investigator"></span><h2>Investigator<a class="headerlink" href="#module-circleguard.investigator" title="Permalink to this headline">¶</a></h2>
@@ -1081,18 +1125,14 @@ frame).</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
 <dd class="field-odd"><ul class="simple">
-<li><p><strong>time</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.8)"><em>int</em></a>) – The time value of the middle datapoint, in ms. 0 represents the
+<li><p><strong>time</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.9)"><em>int</em></a>) – The time value of the middle datapoint, in ms. 0 represents the
 beginning of the replay.</p></li>
-<li><p><strong>angle</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.8)"><em>float</em></a>) – The angle between the three datapoints.</p></li>
-<li><p><strong>distance</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.8)"><em>float</em></a>) – <code class="docutils literal notranslate"><span class="pre">min(dist_a_b,</span> <span class="pre">dist_b_c)</span></code> if <code class="docutils literal notranslate"><span class="pre">a</span></code>, <code class="docutils literal notranslate"><span class="pre">b</span></code>, and <code class="docutils literal notranslate"><span class="pre">c</span></code> are three
+<li><p><strong>angle</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.9)"><em>float</em></a>) – The angle between the three datapoints.</p></li>
+<li><p><strong>distance</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.9)"><em>float</em></a>) – <code class="docutils literal notranslate"><span class="pre">min(dist_a_b,</span> <span class="pre">dist_b_c)</span></code> if <code class="docutils literal notranslate"><span class="pre">a</span></code>, <code class="docutils literal notranslate"><span class="pre">b</span></code>, and <code class="docutils literal notranslate"><span class="pre">c</span></code> are three
 datapoints with <code class="docutils literal notranslate"><span class="pre">b</span></code> being the middle one.</p></li>
 </ul>
 </dd>
 </dl>
-<div class="admonition seealso">
-<p class="admonition-title">See also</p>
-<p><code class="xref py py-meth docutils literal notranslate"><span class="pre">aim_correction()</span></code></p>
-</div>
 </dd></dl>
 
 <dl class="class">
@@ -1104,11 +1144,11 @@ while lazer does count them as judgements.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
 <dd class="field-odd"><ul class="simple">
-<li><p><strong>hitobject</strong> (<code class="xref py py-class docutils literal notranslate"><span class="pre">slider.beatmap.Hitobject</span></code>) – The hitobject that was hit. This is converted to a
-<code class="xref py py-class docutils literal notranslate"><span class="pre">circleguard.hitobjects.Hitobject</span></code>.</p></li>
-<li><p><strong>t</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.8)"><em>float</em></a>) – The time the hit occured.</p></li>
-<li><p><strong>xy</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#list" title="(in Python v3.8)"><em>list</em></a><em>[</em><a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.8)"><em>float</em></a><em>, </em><a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.8)"><em>float</em></a><em>]</em>) – The x and y position where the hit occured.</p></li>
-<li><p><strong>CS</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.8)"><em>float</em></a>) – The circle size of the beatmap (after being modified by the replay’s
+<li><p><strong>hitobject</strong> (<a class="reference external" href="https://llllllllll.github.io/slider/appendix.html#slider.beatmap.HitObject" title="(in slider v0.2.1)"><code class="xref py py-class docutils literal notranslate"><span class="pre">slider.beatmap.HitObject</span></code></a>) – The hitobject that was hit. This is converted to a
+<a class="reference internal" href="#circleguard.hitobjects.Hitobject" title="circleguard.hitobjects.Hitobject"><code class="xref py py-class docutils literal notranslate"><span class="pre">circleguard.hitobjects.Hitobject</span></code></a>.</p></li>
+<li><p><strong>t</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.9)"><em>float</em></a>) – The time the hit occured.</p></li>
+<li><p><strong>xy</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#list" title="(in Python v3.9)"><em>list</em></a><em>[</em><a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.9)"><em>float</em></a><em>, </em><a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.9)"><em>float</em></a><em>]</em>) – The x and y position where the hit occured.</p></li>
+<li><p><strong>CS</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.9)"><em>float</em></a>) – The circle size of the beatmap (after being modified by the replay’s
 mods, ie <code class="docutils literal notranslate"><span class="pre">Mod.HR</span></code> or <code class="docutils literal notranslate"><span class="pre">Mod.EZ</span></code>) this hit occurred in.</p></li>
 </ul>
 </dd>
@@ -1129,7 +1169,7 @@ the edge of its hitobject is calculated.</p>
 hitobject.</p>
 </dd>
 <dt class="field-odd">Return type</dt>
-<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.8)">float</a></p>
+<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.9)">float</a></p>
 </dd>
 </dl>
 </dd></dl>
@@ -1140,7 +1180,7 @@ hitobject.</p>
 <dd><p>Whether the hit was within <code class="docutils literal notranslate"><span class="pre">distance</span></code> of the edge of its hitobject.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
-<dd class="field-odd"><p><strong>distance</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.8)"><em>float</em></a>) – How close, in pixels, to the edge of the hitobject the hit has to
+<dd class="field-odd"><p><strong>distance</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.9)"><em>float</em></a>) – How close, in pixels, to the edge of the hitobject the hit has to
 be.</p>
 </dd>
 <dt class="field-even">Returns</dt>
@@ -1148,7 +1188,7 @@ be.</p>
 hitobject.</p>
 </dd>
 <dt class="field-odd">Return type</dt>
-<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.8)">bool</a></p>
+<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.9)">bool</a></p>
 </dd>
 </dl>
 <p class="rubric">Notes</p>
@@ -1169,7 +1209,7 @@ from some additional source - the osu! api, local cache, or some other
 location.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
-<dd class="field-odd"><p><strong>cache</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.8)"><em>bool</em></a>) – Whether to cache the replay data once loaded.</p>
+<dd class="field-odd"><p><strong>cache</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.9)"><em>bool</em></a>) – Whether to cache the replay data once loaded.</p>
 </dd>
 </dl>
 <dl class="method">
@@ -1184,7 +1224,7 @@ Details left to the subclass implementation.</p>
 end up using a <a class="reference internal" href="#circleguard.loader.Loader" title="circleguard.loader.Loader"><code class="xref py py-class docutils literal notranslate"><span class="pre">Loader</span></code></a> to load
 themselves (if they don’t load anything from the osu api, for
 instance), a loader is still passed regardless.</p></li>
-<li><p><strong>cache</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.8)"><em>bool</em></a>) – Whether to cache the replay data once loaded. This argument
+<li><p><strong>cache</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.9)"><em>bool</em></a>) – Whether to cache the replay data once loaded. This argument
 comes from a parent—either a <a class="reference internal" href="#circleguard.loadables.ReplayContainer" title="circleguard.loadables.ReplayContainer"><code class="xref py py-class docutils literal notranslate"><span class="pre">ReplayContainer</span></code></a> or
 <a class="reference internal" href="#circleguard.circleguard.Circleguard" title="circleguard.circleguard.Circleguard"><code class="xref py py-class docutils literal notranslate"><span class="pre">Circleguard</span></code></a> itself. Should the
 loadable already have a set <code class="docutils literal notranslate"><span class="pre">cache</span></code> value, that should take
@@ -1207,7 +1247,7 @@ here.</p></li>
 <dt class="field-odd">Parameters</dt>
 <dd class="field-odd"><ul class="simple">
 <li><p><strong>loadables</strong> (list[<a class="reference internal" href="#circleguard.loadables.Loadable" title="circleguard.loadables.Loadable"><code class="xref py py-class docutils literal notranslate"><span class="pre">Loadable</span></code></a>]) – The loadables to hold.</p></li>
-<li><p><strong>cache</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.8)"><em>bool</em></a>) – Whether to cache the loadables once they are loaded. This will be
+<li><p><strong>cache</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.9)"><em>bool</em></a>) – Whether to cache the loadables once they are loaded. This will be
 overriden by a <code class="docutils literal notranslate"><span class="pre">cache</span></code> option set by a <a class="reference internal" href="#circleguard.loadables.Loadable" title="circleguard.loadables.Loadable"><code class="xref py py-class docutils literal notranslate"><span class="pre">Loadable</span></code></a> in
 <code class="docutils literal notranslate"><span class="pre">loadables</span></code>. This only affects child loadables when they do not have
 a <code class="docutils literal notranslate"><span class="pre">cache</span></code> option set.</p></li>
@@ -1249,10 +1289,10 @@ new loadable that holds replays, subclass <code class="docutils literal notransl
 </dl>
 <div class="admonition warning">
 <p class="admonition-title">Warning</p>
-<p>This list will almost may be incomplete if you do not call
-<code class="xref py py-func docutils literal notranslate"><span class="pre">load_info()</span></code> on this loadable container first, as any replay
-containers held in this container will likely not have references to
-their replays yet.</p>
+<p>This list may be incomplete if you do not call
+<a class="reference internal" href="#circleguard.circleguard.Circleguard.load_info" title="circleguard.circleguard.Circleguard.load_info"><code class="xref py py-meth docutils literal notranslate"><span class="pre">load_info()</span></code></a> on this loadable
+container first, as any replay containers held in this container will
+likely not have references to their replays yet.</p>
 </div>
 </dd></dl>
 
@@ -1268,7 +1308,7 @@ Details left to the subclass implementation.</p>
 end up using a <a class="reference internal" href="#circleguard.loader.Loader" title="circleguard.loader.Loader"><code class="xref py py-class docutils literal notranslate"><span class="pre">Loader</span></code></a> to load
 themselves (if they don’t load anything from the osu api, for
 instance), a loader is still passed regardless.</p></li>
-<li><p><strong>cache</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.8)"><em>bool</em></a>) – Whether to cache the replay data once loaded. This argument
+<li><p><strong>cache</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.9)"><em>bool</em></a>) – Whether to cache the replay data once loaded. This argument
 comes from a parent—either a <a class="reference internal" href="#circleguard.loadables.ReplayContainer" title="circleguard.loadables.ReplayContainer"><code class="xref py py-class docutils literal notranslate"><span class="pre">ReplayContainer</span></code></a> or
 <a class="reference internal" href="#circleguard.circleguard.Circleguard" title="circleguard.circleguard.Circleguard"><code class="xref py py-class docutils literal notranslate"><span class="pre">Circleguard</span></code></a> itself. Should the
 loadable already have a set <code class="docutils literal notranslate"><span class="pre">cache</span></code> value, that should take
@@ -1288,10 +1328,11 @@ here.</p></li>
 <dd><p>A Loadable that holds Replay subclasses, and which has an additional state
 between “unloaded” and “loaded” called “info loaded”.</p>
 <p>ReplayContainers start unloaded and become info loaded when
-<a class="reference internal" href="#circleguard.circleguard.Circleguard.load_info" title="circleguard.circleguard.Circleguard.load_info"><code class="xref py py-meth docutils literal notranslate"><span class="pre">load_info()</span></code></a> is called. They become fully loaded when
-<a class="reference internal" href="#circleguard.loadables.ReplayContainer.load" title="circleguard.loadables.ReplayContainer.load"><code class="xref py py-meth docutils literal notranslate"><span class="pre">load()</span></code></a> is called (and if this is called when the ReplayContainer is
-in the unloaded state, <a class="reference internal" href="#circleguard.loadables.Loadable.load" title="circleguard.loadables.Loadable.load"><code class="xref py py-meth docutils literal notranslate"><span class="pre">load()</span></code></a> will load info first, then
-load the replays, effectively skipping the info loaded state),</p>
+<a class="reference internal" href="#circleguard.circleguard.Circleguard.load_info" title="circleguard.circleguard.Circleguard.load_info"><code class="xref py py-meth docutils literal notranslate"><span class="pre">load_info()</span></code></a> is called. They
+become fully loaded when <a class="reference internal" href="#circleguard.circleguard.Circleguard.load" title="circleguard.circleguard.Circleguard.load"><code class="xref py py-meth docutils literal notranslate"><span class="pre">load()</span></code></a>
+is called (and if this is called when the ReplayContainer is in the unloaded
+state, <a class="reference internal" href="#circleguard.loadables.Loadable.load" title="circleguard.loadables.Loadable.load"><code class="xref py py-meth docutils literal notranslate"><span class="pre">load()</span></code></a> will load info first, then load the replays,
+effectively skipping the info loaded state).</p>
 <p>In the unloaded state, the container has no actual Replay objects. It may
 have limited knowledge about their number or type.</p>
 <p>In the info loaded state, the container has references to Replay objects,
@@ -1317,9 +1358,10 @@ with.</p>
 <div class="admonition warning">
 <p class="admonition-title">Warning</p>
 <p>If you want an accurate list of <a class="reference internal" href="#circleguard.loadables.Replay" title="circleguard.loadables.Replay"><code class="xref py py-class docutils literal notranslate"><span class="pre">Replay</span></code></a>s in this instance,
-you must call <a class="reference internal" href="#circleguard.circleguard.Circleguard.load" title="circleguard.circleguard.Circleguard.load"><code class="xref py py-func docutils literal notranslate"><span class="pre">load()</span></code></a> on this
-instance before <code class="xref py py-func docutils literal notranslate"><span class="pre">all_replays()</span></code>. Otherwise, this
-instance is not info loaded, and does not have a complete list of
+you must call <a class="reference internal" href="#circleguard.circleguard.Circleguard.load_info" title="circleguard.circleguard.Circleguard.load_info"><code class="xref py py-func docutils literal notranslate"><span class="pre">load_info()</span></code></a> on
+this instance before
+<a class="reference internal" href="#circleguard.loadables.ReplayContainer.all_replays" title="circleguard.loadables.ReplayContainer.all_replays"><code class="xref py py-func docutils literal notranslate"><span class="pre">all_replays()</span></code></a>. Otherwise,
+this instance is not info loaded, and does not have a complete list of
 replays it represents.</p>
 </div>
 </dd></dl>
@@ -1333,17 +1375,17 @@ replays it represents.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
 <dd class="field-odd"><ul class="simple">
-<li><p><strong>map_id</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.8)"><em>int</em></a>) – The map to represent the top plays for.</p></li>
-<li><p><strong>span</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.8)"><em>str</em></a><em> or </em><a class="reference internal" href="#circleguard.span.Span" title="circleguard.span.Span"><em>Span</em></a>) – A comma separated list of ranges of top plays to retrieve.
+<li><p><strong>map_id</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.9)"><em>int</em></a>) – The map to represent the top plays for.</p></li>
+<li><p><strong>span</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.9)"><em>str</em></a><em> or </em><a class="reference internal" href="#circleguard.span.Span" title="circleguard.span.Span"><em>Span</em></a>) – A comma separated list of ranges of top plays to retrieve.
 <code class="docutils literal notranslate"><span class="pre">span=&quot;1-3,6,2-4&quot;</span></code> -&gt; replays in the range <code class="docutils literal notranslate"><span class="pre">[1,2,3,4,6]</span></code>.</p></li>
 <li><p><strong>mods</strong> (<a class="reference internal" href="#circleguard.mod.ModCombination" title="circleguard.mod.ModCombination"><code class="xref py py-class docutils literal notranslate"><span class="pre">ModCombination</span></code></a>) – If passed, only represent replays played with this exact mod
 combination. Due to limitations with the api, fuzzy matching is not
 implemented.
-&lt;br&gt;
+<br />
 This is applied before span``. That is, if <code class="docutils literal notranslate"><span class="pre">span=&quot;1-2&quot;</span></code>
 and <code class="docutils literal notranslate"><span class="pre">mods=Mod.HD</span></code>, the top two <code class="docutils literal notranslate"><span class="pre">HD</span></code> plays on the map are
 represented.</p></li>
-<li><p><strong>cache</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.8)"><em>bool</em></a>) – Whether to cache the replays once they are loaded.</p></li>
+<li><p><strong>cache</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.9)"><em>bool</em></a>) – Whether to cache the replays once they are loaded.</p></li>
 </ul>
 </dd>
 </dl>
@@ -1354,9 +1396,10 @@ represented.</p></li>
 <div class="admonition warning">
 <p class="admonition-title">Warning</p>
 <p>If you want an accurate list of <a class="reference internal" href="#circleguard.loadables.Replay" title="circleguard.loadables.Replay"><code class="xref py py-class docutils literal notranslate"><span class="pre">Replay</span></code></a>s in this instance,
-you must call <a class="reference internal" href="#circleguard.circleguard.Circleguard.load" title="circleguard.circleguard.Circleguard.load"><code class="xref py py-func docutils literal notranslate"><span class="pre">load()</span></code></a> on this
-instance before <code class="xref py py-func docutils literal notranslate"><span class="pre">all_replays()</span></code>. Otherwise, this
-instance is not info loaded, and does not have a complete list of
+you must call <a class="reference internal" href="#circleguard.circleguard.Circleguard.load_info" title="circleguard.circleguard.Circleguard.load_info"><code class="xref py py-func docutils literal notranslate"><span class="pre">load_info()</span></code></a> on
+this instance before
+<a class="reference internal" href="#circleguard.loadables.ReplayContainer.all_replays" title="circleguard.loadables.ReplayContainer.all_replays"><code class="xref py py-func docutils literal notranslate"><span class="pre">all_replays()</span></code></a>. Otherwise,
+this instance is not info loaded, and does not have a complete list of
 replays it represents.</p>
 </div>
 </dd></dl>
@@ -1370,17 +1413,17 @@ replays it represents.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
 <dd class="field-odd"><ul class="simple">
-<li><p><strong>user_id</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.8)"><em>int</em></a>) – The user to represent the top plays for.</p></li>
-<li><p><strong>span</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.8)"><em>str</em></a><em> or </em><a class="reference internal" href="#circleguard.span.Span" title="circleguard.span.Span"><em>Span</em></a>) – A comma separated list of ranges of top plays to retrieve.
+<li><p><strong>user_id</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.9)"><em>int</em></a>) – The user to represent the top plays for.</p></li>
+<li><p><strong>span</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.9)"><em>str</em></a><em> or </em><a class="reference internal" href="#circleguard.span.Span" title="circleguard.span.Span"><em>Span</em></a>) – A comma separated list of ranges of top plays to retrieve.
 <code class="docutils literal notranslate"><span class="pre">span=&quot;1-3,6,2-4&quot;</span></code> -&gt; replays in the range <code class="docutils literal notranslate"><span class="pre">[1,2,3,4,6]</span></code>.</p></li>
 <li><p><strong>mods</strong> (<a class="reference internal" href="#circleguard.mod.ModCombination" title="circleguard.mod.ModCombination"><code class="xref py py-class docutils literal notranslate"><span class="pre">ModCombination</span></code></a>) – If passed, only represent replays played with this exact mod
 combination. Due to limitations with the api, fuzzy matching is not
 implemented.
-&lt;br&gt;
+<br />
 This is applied before <code class="docutils literal notranslate"><span class="pre">span</span></code>. That is, if <code class="docutils literal notranslate"><span class="pre">span=&quot;1-2&quot;</span></code>
 and <code class="docutils literal notranslate"><span class="pre">mods=Mod.HD</span></code>, the user’s top two <code class="docutils literal notranslate"><span class="pre">HD</span></code> plays are represented.</p></li>
-<li><p><strong>cache</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.8)"><em>bool</em></a>) – Whether to cache the replays once they are loaded.</p></li>
-<li><p><strong>available_only</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.8)"><em>bool</em></a>) – Whether to represent only replays that have replay data available.
+<li><p><strong>cache</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.9)"><em>bool</em></a>) – Whether to cache the replays once they are loaded.</p></li>
+<li><p><strong>available_only</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.9)"><em>bool</em></a>) – Whether to represent only replays that have replay data available.
 Replays are filtered on this basis after <code class="docutils literal notranslate"><span class="pre">mods</span></code> and <code class="docutils literal notranslate"><span class="pre">span</span></code>
 are applied. True by default.</p></li>
 </ul>
@@ -1393,9 +1436,10 @@ are applied. True by default.</p></li>
 <div class="admonition warning">
 <p class="admonition-title">Warning</p>
 <p>If you want an accurate list of <a class="reference internal" href="#circleguard.loadables.Replay" title="circleguard.loadables.Replay"><code class="xref py py-class docutils literal notranslate"><span class="pre">Replay</span></code></a>s in this instance,
-you must call <a class="reference internal" href="#circleguard.circleguard.Circleguard.load" title="circleguard.circleguard.Circleguard.load"><code class="xref py py-func docutils literal notranslate"><span class="pre">load()</span></code></a> on this
-instance before <code class="xref py py-func docutils literal notranslate"><span class="pre">all_replays()</span></code>. Otherwise, this
-instance is not info loaded, and does not have a complete list of
+you must call <a class="reference internal" href="#circleguard.circleguard.Circleguard.load_info" title="circleguard.circleguard.Circleguard.load_info"><code class="xref py py-func docutils literal notranslate"><span class="pre">load_info()</span></code></a> on
+this instance before
+<a class="reference internal" href="#circleguard.loadables.ReplayContainer.all_replays" title="circleguard.loadables.ReplayContainer.all_replays"><code class="xref py py-func docutils literal notranslate"><span class="pre">all_replays()</span></code></a>. Otherwise,
+this instance is not info loaded, and does not have a complete list of
 replays it represents.</p>
 </div>
 </dd></dl>
@@ -1409,12 +1453,12 @@ replays it represents.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
 <dd class="field-odd"><ul class="simple">
-<li><p><strong>map_id</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.8)"><em>int</em></a>) – The map to represent scores by <cite>user_id</cite> on.</p></li>
-<li><p><strong>user_id</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.8)"><em>int</em></a>) – The user to represent scores on <cite>map_id</cite> for.</p></li>
-<li><p><strong>span</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.8)"><em>str</em></a><em> or </em><a class="reference internal" href="#circleguard.span.Span" title="circleguard.span.Span"><em>Span</em></a>) – A comma separated list of ranges of plays to retrieve.
+<li><p><strong>map_id</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.9)"><em>int</em></a>) – The map to represent scores by <cite>user_id</cite> on.</p></li>
+<li><p><strong>user_id</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.9)"><em>int</em></a>) – The user to represent scores on <cite>map_id</cite> for.</p></li>
+<li><p><strong>span</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.9)"><em>str</em></a><em> or </em><a class="reference internal" href="#circleguard.span.Span" title="circleguard.span.Span"><em>Span</em></a>) – A comma separated list of ranges of plays to retrieve.
 <code class="docutils literal notranslate"><span class="pre">span=&quot;1-3,6,2-4&quot;</span></code> -&gt; replays in the range <code class="docutils literal notranslate"><span class="pre">[1,2,3,4,6]</span></code>.</p></li>
-<li><p><strong>cache</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.8)"><em>bool</em></a>) – Whether to cache the replays once they are loaded.</p></li>
-<li><p><strong>available_only</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.8)"><em>bool</em></a>) – Whether to represent only replays that have replay data available.
+<li><p><strong>cache</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.9)"><em>bool</em></a>) – Whether to cache the replays once they are loaded.</p></li>
+<li><p><strong>available_only</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.9)"><em>bool</em></a>) – Whether to represent only replays that have replay data available.
 Replays are filtered on this basis after <code class="docutils literal notranslate"><span class="pre">span</span></code> is applied.
 True by default.</p></li>
 </ul>
@@ -1427,9 +1471,10 @@ True by default.</p></li>
 <div class="admonition warning">
 <p class="admonition-title">Warning</p>
 <p>If you want an accurate list of <a class="reference internal" href="#circleguard.loadables.Replay" title="circleguard.loadables.Replay"><code class="xref py py-class docutils literal notranslate"><span class="pre">Replay</span></code></a>s in this instance,
-you must call <a class="reference internal" href="#circleguard.circleguard.Circleguard.load" title="circleguard.circleguard.Circleguard.load"><code class="xref py py-func docutils literal notranslate"><span class="pre">load()</span></code></a> on this
-instance before <code class="xref py py-func docutils literal notranslate"><span class="pre">all_replays()</span></code>. Otherwise, this
-instance is not info loaded, and does not have a complete list of
+you must call <a class="reference internal" href="#circleguard.circleguard.Circleguard.load_info" title="circleguard.circleguard.Circleguard.load_info"><code class="xref py py-func docutils literal notranslate"><span class="pre">load_info()</span></code></a> on
+this instance before
+<a class="reference internal" href="#circleguard.loadables.ReplayContainer.all_replays" title="circleguard.loadables.ReplayContainer.all_replays"><code class="xref py py-func docutils literal notranslate"><span class="pre">all_replays()</span></code></a>. Otherwise,
+this instance is not info loaded, and does not have a complete list of
 replays it represents.</p>
 </div>
 </dd></dl>
@@ -1445,15 +1490,16 @@ to randomly sample these replays, rather than directly access them.</p>
 <dt class="field-odd">Parameters</dt>
 <dd class="field-odd"><ul class="simple">
 <li><p><strong>path</strong> (<em>string</em>) – The path to the database to load replays from.</p></li>
-<li><p><strong>num_maps</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.8)"><em>int</em></a>) – How many (randomly chosen) maps to load replays from.</p></li>
-<li><p><strong>limit</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.8)"><em>int</em></a>) – How many replays to load for each map.</p></li>
+<li><p><strong>num_maps</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.9)"><em>int</em></a>) – How many (randomly chosen) maps to load replays from.</p></li>
+<li><p><strong>limit</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.9)"><em>int</em></a>) – How many replays to load for each map.</p></li>
 </ul>
 </dd>
 </dl>
 <p class="rubric">Notes</p>
-<p><a class="reference internal" href="#circleguard.circleguard.Circleguard.load_info" title="circleguard.circleguard.Circleguard.load_info"><code class="xref py py-meth docutils literal notranslate"><span class="pre">load_info()</span></code></a> is an expensive operation for large databases created
-on circlecore version 4.3.5 or earlier, as they do not have the necessary
-indexes.
+<p><a class="reference internal" href="#circleguard.circleguard.Circleguard.load_info" title="circleguard.circleguard.Circleguard.load_info"><code class="xref py py-meth docutils literal notranslate"><span class="pre">load_info()</span></code></a> is an expensive
+operation for large databases created on circlecore version 4.3.5 or
+earlier, as they do not have the necessary indexes.
+<br />
 For databases created in later versions, this is a nonissue and the lookup
 is fast.</p>
 <dl class="method">
@@ -1463,9 +1509,10 @@ is fast.</p>
 <div class="admonition warning">
 <p class="admonition-title">Warning</p>
 <p>If you want an accurate list of <a class="reference internal" href="#circleguard.loadables.Replay" title="circleguard.loadables.Replay"><code class="xref py py-class docutils literal notranslate"><span class="pre">Replay</span></code></a>s in this instance,
-you must call <a class="reference internal" href="#circleguard.circleguard.Circleguard.load" title="circleguard.circleguard.Circleguard.load"><code class="xref py py-func docutils literal notranslate"><span class="pre">load()</span></code></a> on this
-instance before <code class="xref py py-func docutils literal notranslate"><span class="pre">all_replays()</span></code>. Otherwise, this
-instance is not info loaded, and does not have a complete list of
+you must call <a class="reference internal" href="#circleguard.circleguard.Circleguard.load_info" title="circleguard.circleguard.Circleguard.load_info"><code class="xref py py-func docutils literal notranslate"><span class="pre">load_info()</span></code></a> on
+this instance before
+<a class="reference internal" href="#circleguard.loadables.ReplayContainer.all_replays" title="circleguard.loadables.ReplayContainer.all_replays"><code class="xref py py-func docutils literal notranslate"><span class="pre">all_replays()</span></code></a>. Otherwise,
+this instance is not info loaded, and does not have a complete list of
 replays it represents.</p>
 </div>
 </dd></dl>
@@ -1490,9 +1537,10 @@ ignored.</p>
 <div class="admonition warning">
 <p class="admonition-title">Warning</p>
 <p>If you want an accurate list of <a class="reference internal" href="#circleguard.loadables.Replay" title="circleguard.loadables.Replay"><code class="xref py py-class docutils literal notranslate"><span class="pre">Replay</span></code></a>s in this instance,
-you must call <a class="reference internal" href="#circleguard.circleguard.Circleguard.load" title="circleguard.circleguard.Circleguard.load"><code class="xref py py-func docutils literal notranslate"><span class="pre">load()</span></code></a> on this
-instance before <code class="xref py py-func docutils literal notranslate"><span class="pre">all_replays()</span></code>. Otherwise, this
-instance is not info loaded, and does not have a complete list of
+you must call <a class="reference internal" href="#circleguard.circleguard.Circleguard.load_info" title="circleguard.circleguard.Circleguard.load_info"><code class="xref py py-func docutils literal notranslate"><span class="pre">load_info()</span></code></a> on
+this instance before
+<a class="reference internal" href="#circleguard.loadables.ReplayContainer.all_replays" title="circleguard.loadables.ReplayContainer.all_replays"><code class="xref py py-func docutils literal notranslate"><span class="pre">all_replays()</span></code></a>. Otherwise,
+this instance is not info loaded, and does not have a complete list of
 replays it represents.</p>
 </div>
 </dd></dl>
@@ -1507,7 +1555,7 @@ replays it represents.</p>
 <dt class="field-odd">Parameters</dt>
 <dd class="field-odd"><ul class="simple">
 <li><p><strong>weight</strong> (<a class="reference internal" href="#circleguard.utils.RatelimitWeight" title="circleguard.utils.RatelimitWeight"><code class="xref py py-class docutils literal notranslate"><span class="pre">RatelimitWeight</span></code></a>) – How much it ‘costs’ to load this replay from the api.</p></li>
-<li><p><strong>cache</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.8)"><em>bool</em></a>) – Whether to cache this replay once it is loaded.</p></li>
+<li><p><strong>cache</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.9)"><em>bool</em></a>) – Whether to cache this replay once it is loaded.</p></li>
 </ul>
 </dd>
 </dl>
@@ -1528,7 +1576,7 @@ replays it represents.</p>
 <dd><p>When the replay was played.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Type</dt>
-<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/datetime.html#datetime.datetime" title="(in Python v3.8)"><code class="xref py py-class docutils literal notranslate"><span class="pre">datetime.datetime</span></code></a></p>
+<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/datetime.html#datetime.datetime" title="(in Python v3.9)"><code class="xref py py-class docutils literal notranslate"><span class="pre">datetime.datetime</span></code></a></p>
 </dd>
 </dl>
 </dd></dl>
@@ -1540,7 +1588,7 @@ replays it represents.</p>
 unknown or on an unsubmitted map.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Type</dt>
-<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.8)">int</a></p>
+<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.9)">int</a></p>
 </dd>
 </dl>
 </dd></dl>
@@ -1554,7 +1602,7 @@ user id is known, even if the user is restricted, it should still be
 given instead of 0.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Type</dt>
-<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.8)">int</a></p>
+<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.9)">int</a></p>
 </dd>
 </dl>
 </dd></dl>
@@ -1565,7 +1613,7 @@ given instead of 0.</p>
 <dd><p>The username of the player who played the replay.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Type</dt>
-<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.8)">str</a></p>
+<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.9)">str</a></p>
 </dd>
 </dl>
 </dd></dl>
@@ -1576,7 +1624,7 @@ given instead of 0.</p>
 <dd><p>The mods the replay was played with.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Type</dt>
-<dd class="field-odd"><p><code class="xref py py-class docutils literal notranslate"><span class="pre">ModCombination</span></code></p>
+<dd class="field-odd"><p><a class="reference internal" href="#circleguard.mod.ModCombination" title="circleguard.mod.ModCombination"><code class="xref py py-class docutils literal notranslate"><span class="pre">ModCombination</span></code></a></p>
 </dd>
 </dl>
 </dd></dl>
@@ -1587,7 +1635,7 @@ given instead of 0.</p>
 <dd><p>The id of the replay, or 0 if the replay is unsubmitted.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Type</dt>
-<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.8)">int</a></p>
+<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.9)">int</a></p>
 </dd>
 </dl>
 </dd></dl>
@@ -1597,10 +1645,10 @@ given instead of 0.</p>
 <code class="sig-name descname">keydowns</code><a class="headerlink" href="#circleguard.loadables.Replay.keydowns" title="Permalink to this definition">¶</a></dt>
 <dd><p>The keydowns for each frame of the replay. Keydowns are the keys pressed
 in that frame that were not pressed in the previous frame. See
-<code class="xref py py-meth docutils literal notranslate"><span class="pre">keydowns()</span></code> for more details.</p>
+<a class="reference internal" href="#circleguard.loadables.Replay.keydowns" title="circleguard.loadables.Replay.keydowns"><code class="xref py py-meth docutils literal notranslate"><span class="pre">keydowns()</span></code></a> for more details.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Type</dt>
-<dd class="field-odd"><p>ndarray[<a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.8)">int</a>]</p>
+<dd class="field-odd"><p>ndarray[<a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.9)">int</a>]</p>
 </dd>
 </dl>
 </dd></dl>
@@ -1609,11 +1657,11 @@ in that frame that were not pressed in the previous frame. See
 <dt id="circleguard.loadables.Replay.t">
 <code class="sig-name descname">t</code><a class="headerlink" href="#circleguard.loadables.Replay.t" title="Permalink to this definition">¶</a></dt>
 <dd><p>A 1d array containing the timestamp for each frame.
-&lt;br&gt;
+<br />
 This is only nonnull after the replay has been loaded.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Type</dt>
-<dd class="field-odd"><p>ndarray[<a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.8)">int</a>]</p>
+<dd class="field-odd"><p>ndarray[<a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.9)">int</a>]</p>
 </dd>
 </dl>
 </dd></dl>
@@ -1623,11 +1671,11 @@ This is only nonnull after the replay has been loaded.</p>
 <code class="sig-name descname">xy</code><a class="headerlink" href="#circleguard.loadables.Replay.xy" title="Permalink to this definition">¶</a></dt>
 <dd><p>A 2d, two column array, containing the <code class="docutils literal notranslate"><span class="pre">x</span></code> and <code class="docutils literal notranslate"><span class="pre">y</span></code> coordinates of
 each frame in the first and second column respectively.
-&lt;br&gt;
+<br />
 This is only nonnull after the replay has been loaded.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Type</dt>
-<dd class="field-odd"><p>ndarray[<a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.8)">float</a>]</p>
+<dd class="field-odd"><p>ndarray[<a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.9)">float</a>]</p>
 </dd>
 </dl>
 </dd></dl>
@@ -1636,11 +1684,11 @@ This is only nonnull after the replay has been loaded.</p>
 <dt id="circleguard.loadables.Replay.k">
 <code class="sig-name descname">k</code><a class="headerlink" href="#circleguard.loadables.Replay.k" title="Permalink to this definition">¶</a></dt>
 <dd><p>A 1d array containing the keys pressed for each frame.
-&lt;br&gt;
+<br />
 This is only nonnull after the replay has been loaded.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Type</dt>
-<dd class="field-odd"><p>ndarray[<a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.8)">int</a>]</p>
+<dd class="field-odd"><p>ndarray[<a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.9)">int</a>]</p>
 </dd>
 </dl>
 </dd></dl>
@@ -1654,7 +1702,7 @@ This is only nonnull after the replay has been loaded.</p>
 <dd class="field-odd"><p>Whether this replay has any replay data.</p>
 </dd>
 <dt class="field-even">Return type</dt>
-<dd class="field-even"><p><a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.8)">bool</a></p>
+<dd class="field-even"><p><a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.9)">bool</a></p>
 </dd>
 </dl>
 <p class="rubric">Notes</p>
@@ -1671,10 +1719,10 @@ the api, even after being loaded.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
 <dd class="field-odd"><p><strong>library</strong> (<a class="reference external" href="https://llllllllll.github.io/slider/appendix.html#slider.library.Library" title="(in slider v0.2.1)"><code class="xref py py-class docutils literal notranslate"><span class="pre">slider.library.Library</span></code></a>) – The library used by the calling
-<a class="reference internal" href="#circleguard.circleguard.Circleguard" title="circleguard.circleguard.Circleguard"><code class="xref py py-class docutils literal notranslate"><span class="pre">circleguard.circleguard.Circleguard</span></code></a> instance. Replays which
-have already been downloaded and are cached in this library may be
-returned here instead of redownloading them.
-&lt;br&gt;
+<a class="reference internal" href="#circleguard.circleguard.Circleguard" title="circleguard.circleguard.Circleguard"><code class="xref py py-class docutils literal notranslate"><span class="pre">Circleguard</span></code></a> instance. Beatmaps
+which have already been downloaded and are cached in this library
+may be returned here instead of redownloading them.
+<br />
 Beatmaps which we download or create in this method, but were not
 previously stored in the library, may also be stored into the
 library for future use as a result of calling this method.</p>
@@ -1708,38 +1756,33 @@ previous frame.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
 <dd class="field-odd"><ul class="simple">
-<li><p><strong>map_id</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.8)"><em>int</em></a>) – The id of the map the replay was played on.</p></li>
-<li><p><strong>user_id</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.8)"><em>int</em></a>) – The id of the player who played the replay.</p></li>
+<li><p><strong>map_id</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.9)"><em>int</em></a>) – The id of the map the replay was played on.</p></li>
+<li><p><strong>user_id</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.9)"><em>int</em></a>) – The id of the player who played the replay.</p></li>
 <li><p><strong>mods</strong> (<a class="reference internal" href="#circleguard.mod.ModCombination" title="circleguard.mod.ModCombination"><em>ModCombination</em></a>) – The mods the replay was played with. If <code class="docutils literal notranslate"><span class="pre">None</span></code>, the
 highest scoring replay of <code class="docutils literal notranslate"><span class="pre">user_id</span></code> on <code class="docutils literal notranslate"><span class="pre">map_id</span></code> will be loaded,
 regardless of mod combination. Otherwise, the replay with <code class="docutils literal notranslate"><span class="pre">mods</span></code>
 will be loaded.</p></li>
-<li><p><strong>cache</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.8)"><em>bool</em></a>) – Whether to cache this replay once it is loaded.</p></li>
+<li><p><strong>cache</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.9)"><em>bool</em></a>) – Whether to cache this replay once it is loaded.</p></li>
 </ul>
 </dd>
 </dl>
 <p class="rubric">Notes</p>
 <p>The following replay-related attributes are available (not <code class="docutils literal notranslate"><span class="pre">None</span></code>) when
 this replay is unloaded:</p>
-<blockquote>
-<div><ul class="simple">
+<ul class="simple">
 <li><p>map_id</p></li>
 <li><p>user_id</p></li>
 <li><p>mods (if passed)</p></li>
 </ul>
-</div></blockquote>
-<p>&lt;br&gt;
-In addition to the above, the following replay-related attributes are
+<p>In addition to the above, the following replay-related attributes are
 available (not <code class="docutils literal notranslate"><span class="pre">None</span></code>) when this replay is loaded:</p>
-<blockquote>
-<div><ul class="simple">
+<ul class="simple">
 <li><p>timestamp</p></li>
 <li><p>username</p></li>
 <li><p>mods</p></li>
 <li><p>replay_id</p></li>
 <li><p>replay_data</p></li>
 </ul>
-</div></blockquote>
 <dl class="method">
 <dt id="circleguard.loadables.ReplayMap.load">
 <code class="sig-name descname">load</code><span class="sig-paren">(</span><em class="sig-param">loader</em>, <em class="sig-param">cache</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/circleguard/loadables.html#ReplayMap.load"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#circleguard.loadables.ReplayMap.load" title="Permalink to this definition">¶</a></dt>
@@ -1748,7 +1791,7 @@ available (not <code class="docutils literal notranslate"><span class="pre">None
 <dt class="field-odd">Parameters</dt>
 <dd class="field-odd"><ul class="simple">
 <li><p><strong>loader</strong> (<a class="reference internal" href="#circleguard.loader.Loader" title="circleguard.loader.Loader"><code class="xref py py-class docutils literal notranslate"><span class="pre">Loader</span></code></a>) – The <a class="reference internal" href="#circleguard.loader.Loader" title="circleguard.loader.Loader"><code class="xref py py-class docutils literal notranslate"><span class="pre">Loader</span></code></a> to load this replay with.</p></li>
-<li><p><strong>cache</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.8)"><em>bool</em></a>) – Whether to cache this replay after loading it. This only has an
+<li><p><strong>cache</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.9)"><em>bool</em></a>) – Whether to cache this replay after loading it. This only has an
 effect if <code class="docutils literal notranslate"><span class="pre">self.cache</span></code> is unset (<code class="docutils literal notranslate"><span class="pre">None</span></code>).</p></li>
 </ul>
 </dd>
@@ -1767,20 +1810,18 @@ effect if <code class="docutils literal notranslate"><span class="pre">self.cach
 <dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
 <dd class="field-odd"><ul class="simple">
-<li><p><strong>path</strong> (str or <a class="reference external" href="https://docs.python.org/3/library/os.html#os.PathLike" title="(in Python v3.8)"><code class="xref py py-class docutils literal notranslate"><span class="pre">os.PathLike</span></code></a>) – The path to the replay file.</p></li>
-<li><p><strong>cache</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.8)"><em>bool</em></a>) – Whether to cache this replay once it is loaded. Note that currently
+<li><p><strong>path</strong> (str or <a class="reference external" href="https://docs.python.org/3/library/os.html#os.PathLike" title="(in Python v3.9)"><code class="xref py py-class docutils literal notranslate"><span class="pre">os.PathLike</span></code></a>) – The path to the replay file.</p></li>
+<li><p><strong>cache</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.9)"><em>bool</em></a>) – Whether to cache this replay once it is loaded. Note that currently
 we do not cache <a class="reference internal" href="#circleguard.loadables.ReplayPath" title="circleguard.loadables.ReplayPath"><code class="xref py py-class docutils literal notranslate"><span class="pre">ReplayPath</span></code></a> regardless of this parameter.</p></li>
 </ul>
 </dd>
 </dl>
 <p class="rubric">Notes</p>
 <p>ReplayPaths have no replay-related attributes available (not <code class="docutils literal notranslate"><span class="pre">None</span></code>) when
-they are unloaded.
-&lt;br&gt;
-The following replay-related attributes are available (not <code class="docutils literal notranslate"><span class="pre">None</span></code>) when
+they are unloaded.</p>
+<p>The following replay-related attributes are available (not <code class="docutils literal notranslate"><span class="pre">None</span></code>) when
 this replay is loaded:</p>
-<blockquote>
-<div><ul class="simple">
+<ul class="simple">
 <li><p>timestamp</p></li>
 <li><p>map_id</p></li>
 <li><p>username</p></li>
@@ -1790,7 +1831,6 @@ this replay is loaded:</p>
 <li><p>beatmap_hash</p></li>
 <li><p>replay_data</p></li>
 </ul>
-</div></blockquote>
 <dl class="method">
 <dt id="circleguard.loadables.ReplayPath.load">
 <code class="sig-name descname">load</code><span class="sig-paren">(</span><em class="sig-param">loader</em>, <em class="sig-param">cache</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/circleguard/loadables.html#ReplayPath.load"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#circleguard.loadables.ReplayPath.load" title="Permalink to this definition">¶</a></dt>
@@ -1799,7 +1839,7 @@ this replay is loaded:</p>
 <dt class="field-odd">Parameters</dt>
 <dd class="field-odd"><ul class="simple">
 <li><p><strong>loader</strong> (<a class="reference internal" href="#circleguard.loader.Loader" title="circleguard.loader.Loader"><code class="xref py py-class docutils literal notranslate"><span class="pre">Loader</span></code></a>) – The <a class="reference internal" href="#circleguard.loader.Loader" title="circleguard.loader.Loader"><code class="xref py py-class docutils literal notranslate"><span class="pre">Loader</span></code></a> to load this replay with.</p></li>
-<li><p><strong>cache</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.8)"><em>bool</em></a>) – Whether to cache this replay after loading it. This only has an
+<li><p><strong>cache</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.9)"><em>bool</em></a>) – Whether to cache this replay after loading it. This only has an
 effect if <code class="docutils literal notranslate"><span class="pre">self.cache</span></code> is unset (<code class="docutils literal notranslate"><span class="pre">None</span></code>). Note that currently
 we do not cache <a class="reference internal" href="#circleguard.loadables.ReplayPath" title="circleguard.loadables.ReplayPath"><code class="xref py py-class docutils literal notranslate"><span class="pre">ReplayPath</span></code></a> regardless of this parameter.</p></li>
 </ul>
@@ -1820,20 +1860,18 @@ already been read as a string.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
 <dd class="field-odd"><ul class="simple">
-<li><p><strong>replay_data_str</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.8)"><em>str</em></a>) – The contents of the replay file as a string.</p></li>
-<li><p><strong>cache</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.8)"><em>bool</em></a>) – Whether to cache this replay once it is loaded. Note that currently
+<li><p><strong>replay_data_str</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.9)"><em>str</em></a>) – The contents of the replay file as a string.</p></li>
+<li><p><strong>cache</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.9)"><em>bool</em></a>) – Whether to cache this replay once it is loaded. Note that currently
 we do not cache <a class="reference internal" href="#circleguard.loadables.ReplayString" title="circleguard.loadables.ReplayString"><code class="xref py py-class docutils literal notranslate"><span class="pre">ReplayString</span></code></a> regardless of this parameter.</p></li>
 </ul>
 </dd>
 </dl>
 <p class="rubric">Notes</p>
 <p>ReplayPaths have no replay-related attributes available (not <code class="docutils literal notranslate"><span class="pre">None</span></code>) when
-they are unloaded.
-&lt;br&gt;
-The following replay-related attributes are available (not <code class="docutils literal notranslate"><span class="pre">None</span></code>) when
+they are unloaded.</p>
+<p>The following replay-related attributes are available (not <code class="docutils literal notranslate"><span class="pre">None</span></code>) when
 this replay is loaded:</p>
-<blockquote>
-<div><ul class="simple">
+<ul class="simple">
 <li><p>timestamp</p></li>
 <li><p>map_id</p></li>
 <li><p>username</p></li>
@@ -1843,7 +1881,6 @@ this replay is loaded:</p>
 <li><p>beatmap_hash</p></li>
 <li><p>replay_data</p></li>
 </ul>
-</div></blockquote>
 <p class="rubric">Examples</p>
 <div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">replay_data</span> <span class="o">=</span> <span class="nb">open</span><span class="p">(</span><span class="s2">&quot;replay.osr&quot;</span><span class="p">,</span> <span class="s2">&quot;rb&quot;</span><span class="p">)</span><span class="o">.</span><span class="n">read</span><span class="p">()</span>
 <span class="gp">&gt;&gt;&gt; </span><span class="n">r</span> <span class="o">=</span> <span class="n">ReplayString</span><span class="p">(</span><span class="n">replay_data</span><span class="p">)</span>
@@ -1859,7 +1896,7 @@ this replay is loaded:</p>
 <dt class="field-odd">Parameters</dt>
 <dd class="field-odd"><ul class="simple">
 <li><p><strong>loader</strong> (<a class="reference internal" href="#circleguard.loader.Loader" title="circleguard.loader.Loader"><code class="xref py py-class docutils literal notranslate"><span class="pre">Loader</span></code></a>) – The <a class="reference internal" href="#circleguard.loader.Loader" title="circleguard.loader.Loader"><code class="xref py py-class docutils literal notranslate"><span class="pre">Loader</span></code></a> to load this replay with.</p></li>
-<li><p><strong>cache</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.8)"><em>bool</em></a>) – Whether to cache this replay after loading it. This only has an
+<li><p><strong>cache</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.9)"><em>bool</em></a>) – Whether to cache this replay after loading it. This only has an
 effect if <code class="docutils literal notranslate"><span class="pre">self.cache</span></code> is unset (<code class="docutils literal notranslate"><span class="pre">None</span></code>). Note that currently
 we do not cache <a class="reference internal" href="#circleguard.loadables.ReplayString" title="circleguard.loadables.ReplayString"><code class="xref py py-class docutils literal notranslate"><span class="pre">ReplayString</span></code></a> regardless of this
 parameter.</p></li>
@@ -1881,8 +1918,8 @@ replay id.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
 <dd class="field-odd"><ul class="simple">
-<li><p><strong>replay_id</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.8)"><em>int</em></a>) – The id of the replay.</p></li>
-<li><p><strong>cache</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.8)"><em>bool</em></a>) – Whether to cache this replay once it is loaded. Note that we currently
+<li><p><strong>replay_id</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.9)"><em>int</em></a>) – The id of the replay.</p></li>
+<li><p><strong>cache</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.9)"><em>bool</em></a>) – Whether to cache this replay once it is loaded. Note that we currently
 do not cache ReplayIDs.</p></li>
 </ul>
 </dd>
@@ -1890,19 +1927,14 @@ do not cache ReplayIDs.</p></li>
 <p class="rubric">Notes</p>
 <p>The following replay-related attributes are available (not <code class="docutils literal notranslate"><span class="pre">None</span></code>) when
 this replay is unloaded:</p>
-<blockquote>
-<div><ul class="simple">
+<ul class="simple">
 <li><p>replay_id</p></li>
 </ul>
-</div></blockquote>
-<p>&lt;br&gt;
-In addition to the above, the following replay-related attributes are
+<p>In addition to the above, the following replay-related attributes are
 available (not <code class="docutils literal notranslate"><span class="pre">None</span></code>) when this replay is loaded:</p>
-<blockquote>
-<div><ul class="simple">
+<ul class="simple">
 <li><p>replay_data</p></li>
 </ul>
-</div></blockquote>
 <dl class="method">
 <dt id="circleguard.loadables.ReplayID.load">
 <code class="sig-name descname">load</code><span class="sig-paren">(</span><em class="sig-param">loader</em>, <em class="sig-param">cache</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/circleguard/loadables.html#ReplayID.load"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#circleguard.loadables.ReplayID.load" title="Permalink to this definition">¶</a></dt>
@@ -1915,7 +1947,7 @@ Details left to the subclass implementation.</p>
 end up using a <a class="reference internal" href="#circleguard.loader.Loader" title="circleguard.loader.Loader"><code class="xref py py-class docutils literal notranslate"><span class="pre">Loader</span></code></a> to load
 themselves (if they don’t load anything from the osu api, for
 instance), a loader is still passed regardless.</p></li>
-<li><p><strong>cache</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.8)"><em>bool</em></a>) – Whether to cache the replay data once loaded. This argument
+<li><p><strong>cache</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.9)"><em>bool</em></a>) – Whether to cache the replay data once loaded. This argument
 comes from a parent—either a <a class="reference internal" href="#circleguard.loadables.ReplayContainer" title="circleguard.loadables.ReplayContainer"><code class="xref py py-class docutils literal notranslate"><span class="pre">ReplayContainer</span></code></a> or
 <a class="reference internal" href="#circleguard.circleguard.Circleguard" title="circleguard.circleguard.Circleguard"><code class="xref py py-class docutils literal notranslate"><span class="pre">Circleguard</span></code></a> itself. Should the
 loadable already have a set <code class="docutils literal notranslate"><span class="pre">cache</span></code> value, that should take
@@ -1946,7 +1978,7 @@ Details left to the subclass implementation.</p>
 end up using a <a class="reference internal" href="#circleguard.loader.Loader" title="circleguard.loader.Loader"><code class="xref py py-class docutils literal notranslate"><span class="pre">Loader</span></code></a> to load
 themselves (if they don’t load anything from the osu api, for
 instance), a loader is still passed regardless.</p></li>
-<li><p><strong>cache</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.8)"><em>bool</em></a>) – Whether to cache the replay data once loaded. This argument
+<li><p><strong>cache</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.9)"><em>bool</em></a>) – Whether to cache the replay data once loaded. This argument
 comes from a parent—either a <a class="reference internal" href="#circleguard.loadables.ReplayContainer" title="circleguard.loadables.ReplayContainer"><code class="xref py py-class docutils literal notranslate"><span class="pre">ReplayContainer</span></code></a> or
 <a class="reference internal" href="#circleguard.circleguard.Circleguard" title="circleguard.circleguard.Circleguard"><code class="xref py py-class docutils literal notranslate"><span class="pre">Circleguard</span></code></a> itself. Should the
 loadable already have a set <code class="docutils literal notranslate"><span class="pre">cache</span></code> value, that should take
@@ -2025,13 +2057,13 @@ from the api.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
 <dd class="field-odd"><ul class="simple">
-<li><p><strong>timestamp</strong> (<a class="reference external" href="https://docs.python.org/3/library/datetime.html#datetime.datetime" title="(in Python v3.8)"><code class="xref py py-class docutils literal notranslate"><span class="pre">datetime.datetime</span></code></a>) – When this replay was set.</p></li>
-<li><p><strong>map_id</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.8)"><em>int</em></a>) – The id of the map the replay was played on.</p></li>
-<li><p><strong>user_id</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.8)"><em>int</em></a>) – The id of the player who played the replay.</p></li>
-<li><p><strong>username</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.8)"><em>str</em></a>) – The username of the player who played the replay.</p></li>
-<li><p><strong>replay_id</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.8)"><em>int</em></a>) – The id of the replay.</p></li>
+<li><p><strong>timestamp</strong> (<a class="reference external" href="https://docs.python.org/3/library/datetime.html#datetime.datetime" title="(in Python v3.9)"><code class="xref py py-class docutils literal notranslate"><span class="pre">datetime.datetime</span></code></a>) – When this replay was set.</p></li>
+<li><p><strong>map_id</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.9)"><em>int</em></a>) – The id of the map the replay was played on.</p></li>
+<li><p><strong>user_id</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.9)"><em>int</em></a>) – The id of the player who played the replay.</p></li>
+<li><p><strong>username</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.9)"><em>str</em></a>) – The username of the player who played the replay.</p></li>
+<li><p><strong>replay_id</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.9)"><em>int</em></a>) – The id of the replay.</p></li>
 <li><p><strong>mods</strong> (<a class="reference internal" href="#circleguard.mod.ModCombination" title="circleguard.mod.ModCombination"><code class="xref py py-class docutils literal notranslate"><span class="pre">ModCombination</span></code></a>) – The mods the replay was played with.</p></li>
-<li><p><strong>replay_available</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.8)"><em>bool</em></a>) – Whether this replay is available from the api or not.</p></li>
+<li><p><strong>replay_available</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.9)"><em>bool</em></a>) – Whether this replay is available from the api or not.</p></li>
 </ul>
 </dd>
 </dl>
@@ -2059,7 +2091,7 @@ otherwise.</p>
 <dt id="circleguard.loader.check_cache">
 <code class="sig-prename descclassname">circleguard.loader.</code><code class="sig-name descname">check_cache</code><span class="sig-paren">(</span><em class="sig-param">function</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/circleguard/loader.html#check_cache"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#circleguard.loader.check_cache" title="Permalink to this definition">¶</a></dt>
 <dd><p>A decorator that checks if the passed
-<code class="xref py py-class docutils literal notranslate"><span class="pre">ReplayInfo</span></code> has its replay cached. If so,
+<a class="reference internal" href="#circleguard.loader.ReplayInfo" title="circleguard.loader.ReplayInfo"><code class="xref py py-class docutils literal notranslate"><span class="pre">ReplayInfo</span></code></a> has its replay cached. If so,
 returns a <a class="reference internal" href="#circleguard.loadables.Replay" title="circleguard.loadables.Replay"><code class="xref py py-class docutils literal notranslate"><span class="pre">Replay</span></code></a> instance from the cached
 data. Otherwise, calls and returns the <cite>function</cite> as normal.</p>
 <dl class="field-list simple">
@@ -2088,7 +2120,7 @@ if it was cached, or the return value of the function if not.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
 <dd class="field-odd"><ul class="simple">
-<li><p><strong>key</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.8)"><em>str</em></a>) – A valid api key. Can be retrieved from <a class="reference external" href="https://osu.ppy.sh/p/api/">https://osu.ppy.sh/p/api/</a>.</p></li>
+<li><p><strong>key</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.9)"><em>str</em></a>) – A valid api key. Can be retrieved from <a class="reference external" href="https://osu.ppy.sh/p/api/">https://osu.ppy.sh/p/api/</a>.</p></li>
 <li><p><strong>cacher</strong> (<a class="reference internal" href="#circleguard.cacher.Cacher" title="circleguard.cacher.Cacher"><code class="xref py py-class docutils literal notranslate"><span class="pre">Cacher</span></code></a>) – A <a class="reference internal" href="#circleguard.cacher.Cacher" title="circleguard.cacher.Cacher"><code class="xref py py-class docutils literal notranslate"><span class="pre">Cacher</span></code></a> instance to manage
 replay loading/caching. If <cite>None</cite>, replays will not be loaded from
 the cache or cached to the database.</p></li>
@@ -2108,7 +2140,7 @@ refresh.</p>
 <dd><p>Checks a response from the api for an error or empty response.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
-<dd class="field-odd"><p><strong>response</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#list" title="(in Python v3.8)"><em>list</em></a><em> or </em><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#dict" title="(in Python v3.8)"><em>dict</em></a>) – The response returned by the api.</p>
+<dd class="field-odd"><p><strong>response</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#list" title="(in Python v3.9)"><em>list</em></a><em> or </em><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#dict" title="(in Python v3.9)"><em>dict</em></a>) – The response returned by the api.</p>
 </dd>
 </dl>
 <p>:raises One of <a class="reference internal" href="#circleguard.loader.Error" title="circleguard.loader.Error"><code class="xref py py-class docutils literal notranslate"><span class="pre">Error</span></code></a>: If an error exists in the response.
@@ -2158,7 +2190,7 @@ them as necessary instead.</p>
 <dd class="field-odd"><p>The short name of this ModCombination.</p>
 </dd>
 <dt class="field-even">Return type</dt>
-<dd class="field-even"><p><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.8)">str</a></p>
+<dd class="field-even"><p><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.9)">str</a></p>
 </dd>
 </dl>
 <p class="rubric">Examples</p>
@@ -2186,7 +2218,7 @@ rather than “DTNC”.</p>
 <dd class="field-odd"><p>The long name of this ModCombination.</p>
 </dd>
 <dt class="field-even">Return type</dt>
-<dd class="field-even"><p><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.8)">str</a></p>
+<dd class="field-even"><p><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.9)">str</a></p>
 </dd>
 </dl>
 <p class="rubric">Examples</p>
@@ -2212,7 +2244,7 @@ rather than “DoubleTime Nightcore”.</p>
 <a class="reference internal" href="#circleguard.mod.ModCombination" title="circleguard.mod.ModCombination"><code class="xref py py-class docutils literal notranslate"><span class="pre">ModCombination</span></code></a>s with a <code class="docutils literal notranslate"><span class="pre">value</span></code> of a power of two.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
-<dd class="field-odd"><p><strong>clean</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.8)"><em>bool</em></a>) – If true, removes mods that we would think of as duplicate - if both
+<dd class="field-odd"><p><strong>clean</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.9)"><em>bool</em></a>) – If true, removes mods that we would think of as duplicate - if both
 NC and DT are component mods, remove DT. If both PF and SD are
 component mods, remove SD.</p>
 </dd>
@@ -2309,7 +2341,7 @@ depending on <code class="docutils literal notranslate"><span class="pre">to</sp
 <dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
 <dd class="field-odd"><ul class="simple">
-<li><p><strong>stat</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.8)"><em>float</em></a>) – The statistic to convert.</p></li>
+<li><p><strong>stat</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.9)"><em>float</em></a>) – The statistic to convert.</p></li>
 <li><p><strong>mods</strong> (<a class="reference internal" href="#circleguard.mod.Mod" title="circleguard.mod.Mod"><em>Mod</em></a>) – The mods the replay was played with. Only <code class="docutils literal notranslate"><span class="pre">Mod.DT</span></code> and <code class="docutils literal notranslate"><span class="pre">Mod.HT</span></code>
 will affect the statistic conversion.</p></li>
 <li><p><strong>to</strong> (<em>{&quot;cv&quot;</em><em>, </em><em>&quot;ucv&quot;}</em>) – <code class="docutils literal notranslate"><span class="pre">cv</span></code> if the statistic should be converted to its converted form, and
@@ -2327,15 +2359,57 @@ clock speed). This includes ur (unstable rate) and median frametime
 <dl class="function">
 <dt id="circleguard.utils.order">
 <code class="sig-prename descclassname">circleguard.utils.</code><code class="sig-name descname">order</code><span class="sig-paren">(</span><em class="sig-param">replay1</em>, <em class="sig-param">replay2</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/circleguard/utils.html#order"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#circleguard.utils.order" title="Permalink to this definition">¶</a></dt>
-<dd><p>Returns an ordered tuple of the given replays, where the first element is
-the earlier replay and the second element is the later replay.</p>
+<dd><p>An ordered tuple of the given replays. The first element is the earlier
+replay, and the second element is the later replay.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>replay1</strong> (<a class="reference internal" href="#circleguard.loadables.Replay" title="circleguard.loadables.Replay"><em>Replay</em></a>) – The first replay to order.</p></li>
+<li><p><strong>replay2</strong> (<a class="reference internal" href="#circleguard.loadables.Replay" title="circleguard.loadables.Replay"><em>Replay</em></a>) – The second replay to order.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>The first element is the earlier replay, and the second element is the
+later replay.</p>
+</dd>
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p>(<a class="reference internal" href="#circleguard.loadables.Replay" title="circleguard.loadables.Replay">Replay</a>, <a class="reference internal" href="#circleguard.loadables.Replay" title="circleguard.loadables.Replay">Replay</a>)</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="function">
+<dt id="circleguard.utils.replay_pairs">
+<code class="sig-prename descclassname">circleguard.utils.</code><code class="sig-name descname">replay_pairs</code><span class="sig-paren">(</span><em class="sig-param">replays</em>, <em class="sig-param">replays2=None</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/circleguard/utils.html#replay_pairs"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#circleguard.utils.replay_pairs" title="Permalink to this definition">¶</a></dt>
+<dd><p>A list of pairs of replays which can be compared against each other to cover
+all cases of replay stealing in <code class="docutils literal notranslate"><span class="pre">replays</span></code> and/or <code class="docutils literal notranslate"><span class="pre">replays2</span></code>.</p>
+<p>If <code class="docutils literal notranslate"><span class="pre">replays2</span></code> is not passed (the default), this is a list of 2-tuples
+which are pairs of replays in <code class="docutils literal notranslate"><span class="pre">replays</span></code>, where each replay will be paired
+with every other replay exactly once.</p>
+<p>If <code class="docutils literal notranslate"><span class="pre">replays2</span></code> is passed, this is a list of 2-tuples which are pairs of
+replays in where one replay is from <code class="docutils literal notranslate"><span class="pre">replays</span></code>, the other is from
+<code class="docutils literal notranslate"><span class="pre">replays2</span></code>, and every replay in <code class="docutils literal notranslate"><span class="pre">replays</span></code> is paired against every replay
+in <code class="docutils literal notranslate"><span class="pre">replays2</span></code> (but not against other replays in <code class="docutils literal notranslate"><span class="pre">replays</span></code>).</p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns</dt>
+<dd class="field-odd"><p>The first element is the earlier replay, and the second element is the
+later replay.</p>
+</dd>
+<dt class="field-even">Return type</dt>
+<dd class="field-even"><p>(<a class="reference internal" href="#circleguard.loadables.Replay" title="circleguard.loadables.Replay">Replay</a>, <a class="reference internal" href="#circleguard.loadables.Replay" title="circleguard.loadables.Replay">Replay</a>)</p>
+</dd>
+</dl>
+<p class="rubric">Notes</p>
+<p>This is equivalent to <code class="docutils literal notranslate"><span class="pre">itertools.combinations(replays,</span> <span class="pre">2)</span></code> if <code class="docutils literal notranslate"><span class="pre">replays2</span></code>
+is <code class="docutils literal notranslate"><span class="pre">None</span></code> or the empty list, and <code class="docutils literal notranslate"><span class="pre">itertools.product(replays,</span> <span class="pre">replays2)</span></code>
+otherwise.</p>
 </dd></dl>
 
 <dl class="class">
 <dt id="circleguard.utils.ColoredFormatter">
 <em class="property">class </em><code class="sig-prename descclassname">circleguard.utils.</code><code class="sig-name descname">ColoredFormatter</code><span class="sig-paren">(</span><em class="sig-param">patern</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/circleguard/utils.html#ColoredFormatter"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#circleguard.utils.ColoredFormatter" title="Permalink to this definition">¶</a></dt>
-<dd><p>A subclass of <a class="reference external" href="https://docs.python.org/3/library/logging.html#logging.Formatter" title="(in Python v3.8)"><code class="xref py py-class docutils literal notranslate"><span class="pre">logging.Formatter</span></code></a> that uses ANSI escape codes
-to color different parts of the <a class="reference external" href="https://docs.python.org/3/library/logging.html#logging.LogRecord" title="(in Python v3.8)"><code class="xref py py-class docutils literal notranslate"><span class="pre">logging.LogRecord</span></code></a> when printed to
+<dd><p>A subclass of <a class="reference external" href="https://docs.python.org/3/library/logging.html#logging.Formatter" title="(in Python v3.9)"><code class="xref py py-class docutils literal notranslate"><span class="pre">logging.Formatter</span></code></a> that uses ANSI escape codes
+to color different parts of the <a class="reference external" href="https://docs.python.org/3/library/logging.html#logging.LogRecord" title="(in Python v3.9)"><code class="xref py py-class docutils literal notranslate"><span class="pre">logging.LogRecord</span></code></a> when printed to
 the console.</p>
 <p class="rubric">Notes</p>
 <p>Adapted from <a class="reference external" href="https://stackoverflow.com/a/46482050">https://stackoverflow.com/a/46482050</a>.</p>
