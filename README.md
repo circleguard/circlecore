@@ -33,12 +33,12 @@ This documentation refers to the project as `circlecore` to differentiate it fro
 ## Links
 
 Github: <https://github.com/circleguard/circlecore> <br/>
-Documentation: <https://circleguard.dev/docs/circlecore> <br/>
+Documentation: <https://circleguard.github.io/circlecore/> <br/>
 Discord: <https://discord.gg/VNnkTjm> <br/>
 
 ## Usage
 
-We have a full tutorial and documentation at <https://circleguard.dev/docs/circlecore>. If you really want to jump right in, below is a quickstart guide:
+We have a full tutorial and documentation at <https://circleguard.github.io/circlecore/>. If you really want to jump right in, below is a quickstart guide:
 
 ```python
 from circleguard import *
@@ -65,7 +65,7 @@ user = cg.User(124493, span="15, 20")
 # or a local replay
 replay3 = ReplayPath("/path/to/local/osr/replay.osr")
 # and more. You can find them all at
-# https://docs.circleguard.dev/en/latest/appendix.html#circleguard.loadables.Loadable
+# https://circleguard.github.io/circlecore/appendix.html#circleguard.loadables.Loadable
 
 # maps and users can be iterated over
 for r in map_:
