@@ -10,8 +10,8 @@
 from circleguard import __version__
 
 project = "Circleguard"
-copyright = "2019, Liam DeVoe, samuelhklumpers, InvisibleSymbol"
-author = "Liam DeVoe, samuelhklumpers, InvisibleSymbol"
+copyright = "2020, Liam DeVoe, samuelhklumpers"
+author = "Liam DeVoe, samuelhklumpers"
 release = "v" + __version__
 version = "v" + __version__
 master_doc = 'index'
