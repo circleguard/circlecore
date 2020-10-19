@@ -4,6 +4,7 @@ try:
 except ImportError:
     raise ImportError("matplotlib must be installed to create frametime graphs")
 
+from circleguard.mod import Mod
 from circleguard.circleguard import KeylessCircleguard
 
 # classes that import optional modules have to be in their own file, or else
@@ -24,6 +25,9 @@ class FrametimeGraph():
         self.conversion_factor = self._conversion_factor(replay)
         # replay is guaranteed to be loaded when we get it
         cg = KeylessCircleguard()
+        # we convert the frametimes manually if necessary later on instead of
+        # relying on our conversion in this method, since there are a few
+        # oddities about the frametime graph which make it easier this way.
         frametimes = cg.frametimes(replay, cv=False)
 
         # figsize is in inches for whatever reason lol
@@ -76,7 +80,6 @@ class FrametimeGraph():
         ax2.hist(high_frametimes, bins)
 
     def _conversion_factor(self, replay):
-        from circleguard import Mod
         if not self.cv:
             return 1
         if Mod.DT in replay.mods:
