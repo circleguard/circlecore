@@ -15,6 +15,7 @@ from circleguard.cacher import Cacher
 from circleguard.utils import convert_statistic, check_param
 from circleguard.loadables import Map, User, MapUser
 from circleguard.mod import Mod
+# from circleguard.frametime_graph import FrametimeGraph
 
 
 class Circleguard:
@@ -389,6 +390,16 @@ class Circleguard:
 
         hits = [hit for hit in hits if hit.within(within)]
         return hits
+
+    def frametime_graph(self, replay, cv=True):
+        # we raise an ImportError if the consumer doesn't have matplotlib
+        # installed, which is why we have to import it only when this function
+        # is called.
+        from circleguard.frametime_graph import FrametimeGraph
+        from matplotlib import pyplot
+        self.load(replay)
+        _ = FrametimeGraph(replay, cv)
+        return pyplot
 
 
     def load(self, loadable):
