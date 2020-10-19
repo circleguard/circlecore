@@ -391,15 +391,45 @@ class Circleguard:
         hits = [hit for hit in hits if hit.within(within)]
         return hits
 
-    def frametime_graph(self, replay, cv=True):
+    def frametime_graph(self, replay, cv=True, figure=None):
+        """
+        Uses matplotlib to create a graph of the frametimes of the replay.
+
+        Parameters
+        ----------
+        replay: :class:`~circleguard.loadables.Replay`
+            The replay to graph the frametimes of.
+        cv: bool
+            Whether the frametimes should be converted before being graphed.
+        figure: :class:`matplotlib.figure.Figure`
+            If passed, this figure will be used instead of creating a new one
+            with pyplot. Using this parameter is not recommended for normal
+            usage. It is exposed to allow circleguard (the gui) to use this
+            method, as matplotlib's pyqt compatability layer adds some
+            complications which this works around.
+
+        Returns
+        -------
+        :module:`matplotlib.pyplot` or :class:`matplotlib.figure.Figure`
+            Matplotlib's pyplot module for ease of use, so you can call
+            :meth:`matplotlib.pyplot.show` on the return value of this function
+            to display the graph.
+            |br|
+            If ``figure`` is passed, the return value is instead the passed
+            figure after being modified by the frametime graph.
+        """
         # we raise an ImportError if the consumer doesn't have matplotlib
         # installed, which is why we have to import it only when this function
         # is called.
         from circleguard.frametime_graph import FrametimeGraph
         from matplotlib import pyplot
         self.load(replay)
-        _ = FrametimeGraph(replay, cv)
-        return pyplot
+        frametime_graph = FrametimeGraph(replay, cv, figure)
+        # strictly speaking, I don't think this return is necessary -
+        # ``FrametimeGraph`` modifies the passed figure on instantiation,
+        # so consumers could just use the figure they passed in instead of the
+        # return value here. Returning it anyway feels better though.
+        return frametime_graph.figure if figure else pyplot
 
 
     def load(self, loadable):

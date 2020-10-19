@@ -18,8 +18,8 @@ class FrametimeGraph():
     # matplotlib can't really handle that many bins otherwise
     MAX_FRAMETIME = 50
 
-    def __init__(self, replay, cv=True):
-        self.figure = pyplot.figure(figsize=(5, 5))
+    def __init__(self, replay, cv, figure):
+        self.figure = figure or pyplot.figure(figsize=(5, 5))
         self.cv = cv
         self.conversion_factor = self._conversion_factor(replay)
         # replay is guaranteed to be loaded when we get it
