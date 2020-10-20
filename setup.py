@@ -50,5 +50,10 @@ setup(
         # TODO remove this restriction? pyinstaller 4.0 adds the necessary scipy
         # hook so it should be good with scipy 1.5.0 now
         "scipy==1.4.1"
-    ]
+    ],
+    extras_require={
+        "graphing": [
+            "matplotlib"
+        ]
+    }
 )
