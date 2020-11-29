@@ -122,10 +122,6 @@ class ModCombination():
             return False
         return self.value == other.value
 
-    def __ne__(self, other):
-        """Compares the ``value`` of each object"""
-        return self.value != other.value
-
     def __add__(self, other):
         """Returns a Mod representing the bitwise OR of the two Mods"""
         return ModCombination(self.value | other.value)
