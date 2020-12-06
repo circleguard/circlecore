@@ -64,6 +64,14 @@ class TestMap(CGTestCase):
         # 1st and 3rd (toy and epiphany)
         self.assertListEqual([r.user_id for r in self.map[0:3:2]], [2757689, 3256299])
 
+    def test_no_replays_does_not_raise(self):
+        # previously, loading the info of a map or user with no scores on the
+        # specified mod combination would result in a NoInfoAvailableException
+        # being thrown. We want to make sure this doesn't happen.
+        m = Map(2245774, "1-2", Mod.NC + Mod.HR)
+        self.cg.load_info(m)
+        self.assertEqual(len(m), 0)
+
 
 class TestUser(CGTestCase):
     @classmethod
@@ -95,6 +103,11 @@ class TestUser(CGTestCase):
         self.assertListEqual([r.map_id for r in self.user[0:3]], [129891, 555797, 774965])
         # 1st and 3rd (FDFD and Remote Control)
         self.assertListEqual([r.map_id for r in self.user[0:3:2]], [129891, 774965])
+
+    def test_no_replays_does_not_raise(self):
+        u = User(12092800, "1-2", Mod.FL + Mod.EZ)
+        self.cg.load_info(u)
+        self.assertEqual(len(u), 0)
 
 
 class TestMapUser(CGTestCase):

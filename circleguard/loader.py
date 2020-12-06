@@ -287,7 +287,20 @@ class Loader():
         request_data = {"m": "0", "b": map_id, "limit": api_limit, "u": user_id,
             "mods": mods}
         response = self.api.get_scores(request_data)
-        Loader.check_response(response)
+        try:
+            Loader.check_response(response)
+        except NoInfoAvailableException:
+            # the osu! api doesn't distinguish between a map not existing, and
+            # no scores having been set on that map for a particular mod
+            # combination - both are empty responses which will trigger a no
+            # info available exception. We need to figure out which case has
+            # occurred here to determine if we should raise or not.
+            beatmap_response = self.api.get_beatmaps({"b": map_id})
+            # If the beatmap does not exist, this response will be empty.
+            if not beatmap_response:
+                raise
+            # else, ignore the exception.
+
         if span:
             # Remove indices that would error when indexing ``response``.
             # we index at [i-1], so use <= instead of <
