@@ -99,8 +99,10 @@ class Investigator:
         num = -(AC ** 2 - AB ** 2 - BC ** 2)
         denom = (2 * AB * BC)
         # use true_divide for handling division by zero
-        cos_beta = np.true_divide(num, denom, out=np.full_like(num, np.nan), where=denom!=0)
-        # rounding issues makes cos_beta go out of arccos' domain, so restrict it
+        cos_beta = np.true_divide(num, denom, out=np.full_like(num, np.nan),
+            where=denom!=0)
+        # rounding issues makes cos_beta go out of arccos' domain, so restrict
+        # it
         cos_beta = np.clip(cos_beta, -1, 1)
 
         beta = np.rad2deg(np.arccos(cos_beta))
@@ -109,7 +111,7 @@ class Investigator:
         dist_mask = min_AB_BC > min_distance
         # use less to avoid comparing to nan
         angle_mask = np.less(beta, max_angle, where=~np.isnan(beta))
-        # boolean array of datapoints where both distance and angle requirements are met
+        # datapoints where both distance and angle requirements are met
         mask = dist_mask & angle_mask
 
         return [Snap(t, b, d) for (t, b, d) in zip(t[mask], beta[mask], min_AB_BC[mask])]
@@ -117,9 +119,9 @@ class Investigator:
     @staticmethod
     def snaps_sam(replay_data, num_jerks, min_jerk):
         """
-        Calculates the jerk at each moment in the Replay, counts the number of times
-        it exceeds min_jerk and reports a positive if that number is over num_jerks.
-        Also reports all suspicious jerks and their timestamps.
+        Calculates the jerk at each moment in the Replay, counts the number of
+        times it exceeds min_jerk and reports a positive if that number is over
+        num_jerks. Also reports all suspicious jerks and their timestamps.
 
         WARNING
         -------
