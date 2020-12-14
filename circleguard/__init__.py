@@ -15,6 +15,7 @@ from circleguard.span import Span
 from circleguard.utils import (convert_statistic, order, Key,
         RatelimitWeight, TRACE, ColoredFormatter, replay_pairs)
 from circleguard.game_version import GameVersion, NoGameVersion
+from circleguard.hitobjects import Hitobject, Circle, Slider, Spinner
 
 logging.addLevelName(TRACE, "TRACE")
 formatter = ColoredFormatter("[%(threadName)s][%(name)s][%(levelname)s]  %(message)s  (%(filename)s:%(lineno)s)")
@@ -52,5 +53,7 @@ __all__ = [
 # span
 "Span",
 # GameVersion
-"GameVersion", "NoGameVersion"
+"GameVersion", "NoGameVersion",
+# hitobjects
+"Hitobject", "Circle", "Slider", "Spinner"
 ]
