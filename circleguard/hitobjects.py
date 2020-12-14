@@ -4,14 +4,17 @@ from slider.beatmap import Slider as SliderSlider
 from slider.beatmap import Spinner as SliderSpinner
 from slider.mod import circle_radius
 
+from circleguard.mod import Mod
+
 # We define our own hitobjects as the slider library's hitobjects have too many
 # attributes and methods we don't care about, and they also lock position
 # behind an extra attribute access (``hitobj.position.x``` vs ``hitobj.x``)
 # which I'm not a fan of.
 # Another necessary change is our hitobjects are "replay/map aware", which means
 # they know how large they are (or potentially how difficult they are to hit
-# as a result of OD if that is necessary in the future) because we know with
-# what mods and on what map the hitobject was played with.
+# as a result of OD if that is necessary in the future) and where they are (for
+# HR) because we know with what mods and on what map the hitobject was played
+# with.
 
 class Hitobject():
     """
@@ -24,13 +27,22 @@ class Hitobject():
         self.y = xy[1]
 
     @classmethod
-    def from_slider_hitobj(self, hitobj, CS):
+    def from_slider_hitobj(self, hitobj, replay, beatmap):
         """
         Instantiates a circleguard hitobject from a
-        :class:`slider.beatmap.HitObject` and a circle size.
+        :class:`slider.beatmap.HitObject`, a
+        :class:`circleguard.loadables.Replay`, that the hitobject was hit on,
+        and a :class:`slider.beatmap.Beatmap` that the hitobject is found in.
         """
+        easy = Mod.EZ in replay.mods
+        hard_rock = Mod.HR in replay.mods
+        CS = beatmap.cs(easy=easy, hard_rock=hard_rock)
+
         # convert to ms
         t = hitobj.time.total_seconds() * 1000
+
+        if hard_rock:
+            hitobj = hitobj.hard_rock
 
         xy = [hitobj.position.x, hitobj.position.y]
         xy = np.array(xy)

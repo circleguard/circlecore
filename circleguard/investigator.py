@@ -358,7 +358,7 @@ class Investigator:
                 hitobj_i += 1
             else:
                 if keydown_t < hitobj_t + hitwindow and np.linalg.norm(keydown_xy - hitobj_xy) <= hitradius and hitobj_type != 2:
-                    hit = Hit(hitobj, keydown_t, keydown_xy, CS)
+                    hit = Hit(hitobj, keydown_t, keydown_xy, replay, beatmap)
                     hits.append(hit)
 
                     # sliders don't disappear after clicking
@@ -432,12 +432,13 @@ class Hit():
         The time the hit occured.
     xy: list[float, float]
         The x and y position where the hit occured.
-    CS: float
-        The circle size of the beatmap (after being modified by the replay's
-        mods, ie ``Mod.HR`` or ``Mod.EZ``) this hit occurred in.
+    replay: :class:`circleguard.loadables.Replay`
+        The replay this hit was made on.
+    beatmap: :class:`slider.beatmap.Beatmap`
+        The beatmap this hit was made on.
     """
-    def __init__(self, hitobject, t, xy, CS):
-        self.hitobject = Hitobject.from_slider_hitobj(hitobject, CS)
+    def __init__(self, hitobject, t, xy, replay, beatmap):
+        self.hitobject = Hitobject.from_slider_hitobj(hitobject, replay, beatmap)
         self.t = t
         self.xy = xy
         self.x = xy[0]
