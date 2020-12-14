@@ -217,13 +217,9 @@ class Circleguard:
 
 
     def snaps(self, replay, max_angle=DEFAULT_ANGLE, \
-        min_distance=DEFAULT_DISTANCE) -> Iterable[Snap]:
+        min_distance=DEFAULT_DISTANCE, only_on_hitobjs=True) -> Iterable[Snap]:
         """
         Finds any snaps (sudden, jerky movement) in ``replay``.
-
-        Specifically, this function calculates the angle between each set of
-        three points (a,b,c) and finds points where this angle is extremely
-        acute and neither ``|ab|`` or ``|bc|`` are small.
 
         Parameters
         ----------
@@ -234,14 +230,31 @@ class Circleguard:
         min_distance: float
             Consider only (a,b,c) where ``|ab| > min_distance`` and
             ``|ab| > min_distance``.
+        only_on_hitobjs: bool
+            Whether to only return snaps that occur on a hitobject.
 
         Returns
         -------
         list[Snap]
             The snaps of the replay. This list is empty if no snaps were found.
+
+        Notes
+        -----
+        Specifically, this function calculates the angle between each set of
+        three points (a,b,c) and finds points where this angle is extremely
+        acute and neither ``|ab|`` or ``|bc|`` are small.
+
+        By default, only snaps which occur on a hitobject are returned. This is
+        to reduce false positives from spinners, driver issues, or lifting the
+        pen off the tablet and back on again.
         """
         self.load(replay)
-        return Investigator.snaps(replay, max_angle, min_distance)
+
+        beatmap = None
+        if only_on_hitobjs:
+            beatmap = replay.beatmap(self.library)
+
+        return Investigator.snaps(replay, max_angle, min_distance, beatmap)
 
 
     def frametime(self, replay, cv=True, mods_unknown="raise") -> float:

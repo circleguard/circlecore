@@ -4,7 +4,7 @@ from slider.beatmap import Circle, Slider
 from circleguard.mod import Mod
 from circleguard.utils import KEY_MASK, check_param
 from circleguard.game_version import GameVersion
-from circleguard.hitobjects import Hitobject
+from circleguard.hitobjects import Hitobject, Spinner
 
 class Investigator:
     # https://osu.ppy.sh/home/changelog/stable40/20190207.2
@@ -47,7 +47,7 @@ class Investigator:
         ac = xy[2:] - xy[:-2]
 
     @staticmethod
-    def snaps(replay, max_angle, min_distance):
+    def snaps(replay, max_angle, min_distance, beatmap):
         """
         Calculates the angle between each set of three points (a,b,c) and finds
         points where this angle is extremely acute and neither ``|ab|`` or
@@ -62,6 +62,9 @@ class Investigator:
         min_distance: float
             Consider only (a,b,c) where ``|ab| > min_distance`` and
             ``|ab| > min_distance``.
+        beatmap: :class:`slider.beatmap.Beatmap`
+            If passed, only the snaps that occur on a hitobject in this beatmap
+            will be returned.
 
         Returns
         -------
@@ -86,9 +89,14 @@ class Investigator:
 
         # label three consecutive points (a b c) and the vectors between them
         # (ab, bc, ac)
-        ab = xy[1:-1] - xy[:-2]
-        bc = xy[2:] - xy[1:-1]
-        ac = xy[2:] - xy[:-2]
+        a = xy[:-2]
+        b = xy[1:-1]
+        c = xy[2:]
+
+        ab = b - a
+        bc = c - b
+        ac = c - a
+
         # Distance a to b, b to c, and a to c
         AB = np.linalg.norm(ab, axis=1)
         BC = np.linalg.norm(bc, axis=1)
@@ -114,7 +122,26 @@ class Investigator:
         # datapoints where both distance and angle requirements are met
         mask = dist_mask & angle_mask
 
-        return [Snap(t, b, d) for (t, b, d) in zip(t[mask], beta[mask], min_AB_BC[mask])]
+        snaps = []
+        for (t, xy, b, d) in zip(t[mask], b[mask], beta[mask], min_AB_BC[mask]):
+            # can't disacrd any snaps if we don't know the beatmap, so count all
+            # of them
+            if not beatmap:
+                snaps.append(Snap(t, b, d))
+                continue
+
+            hitobj = beatmap.closest_hitobject(t)
+            hitobj = Hitobject.from_slider_hitobj(hitobj, replay, beatmap)
+
+            # ignore snaps on spinners
+            if isinstance(hitobj, Spinner):
+                continue
+
+            # count snaps that occur inside hitobjects
+            if np.linalg.norm(xy - hitobj.xy) <= hitobj.radius:
+                snaps.append(Snap(t, b, d))
+
+        return snaps
 
     @staticmethod
     def snaps_sam(replay_data, num_jerks, min_jerk):
