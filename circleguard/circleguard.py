@@ -5,7 +5,6 @@ from typing import Iterable, Union, Tuple
 import weakref
 
 from slider import Library
-from slider.mod import circle_radius
 import numpy as np
 
 from circleguard.loader import Loader
