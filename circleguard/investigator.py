@@ -1,3 +1,5 @@
+from datetime import timedelta
+
 import numpy as np
 from slider.beatmap import Circle, Slider
 
@@ -130,7 +132,7 @@ class Investigator:
                 snaps.append(Snap(t, b, d))
                 continue
 
-            hitobj = beatmap.closest_hitobject(t)
+            hitobj = beatmap.closest_hitobject(timedelta(milliseconds=int(t)))
             hitobj = Hitobject.from_slider_hitobj(hitobj, replay, beatmap)
 
             # ignore snaps on spinners
