@@ -14,7 +14,7 @@ class TestSnaps(CGTestCase):
     def test_snaps(self):
         snaps = self.cg.snaps(self.r1)
 
-        self.assertEqual(len(snaps), 15)
+        self.assertEqual(len(snaps), 14)
         # beginning
         self.assertEqual(snaps[0].time, 5103)
         self.assertAlmostEqual(snaps[0].angle, 7.38491, delta=DELTA)
@@ -24,9 +24,9 @@ class TestSnaps(CGTestCase):
         self.assertAlmostEqual(snaps[8].angle, 6.34890, delta=DELTA)
         self.assertAlmostEqual(snaps[8].distance, 27.59918, delta=DELTA)
         # end
-        self.assertEqual(snaps[14].time, 79052)
-        self.assertAlmostEqual(snaps[14].angle, 8.77141, delta=DELTA)
-        self.assertAlmostEqual(snaps[14].distance, 8.21841, delta=DELTA)
+        self.assertEqual(snaps[13].time, 76502)
+        self.assertAlmostEqual(snaps[13].angle, 3.04130, delta=DELTA)
+        self.assertAlmostEqual(snaps[13].distance, 21.76919, delta=DELTA)
 
 
 class TestSimilarity(CGTestCase):
