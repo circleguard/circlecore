@@ -1,7 +1,7 @@
 from logging import Formatter
 from copy import copy
 from enum import Enum, IntFlag
-import itertools
+from itertools import product, chain, combinations
 
 from circleguard.mod import Mod
 
@@ -133,14 +133,30 @@ def replay_pairs(replays, replays2=None):
     otherwise.
     """
     if not replays2:
-        return itertools.combinations(replays, 2)
-    return itertools.product(replays, replays2)
+        return combinations(replays, 2)
+    return product(replays, replays2)
 
 
 def check_param(param, options):
     if not param in options:
         raise ValueError(f"Expected one of {','.join(options)}. Got {param}")
 
+
+def powerset(iterable):
+    """
+    Returns the powerset of an iterable.
+
+    Examples
+    --------
+    >>> powerset([1,2,3])
+    [(), (1,), (2,), (3,), (1, 2), (1, 3), (2, 3), (1, 2, 3)]
+
+    Notes
+    -----
+    https://stackoverflow.com/a/1482316
+    """
+    s = list(iterable)
+    return chain.from_iterable(combinations(s, r) for r in range(len(s) + 1))
 
 
 TRACE = 5
