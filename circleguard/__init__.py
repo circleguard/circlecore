@@ -4,7 +4,7 @@ from circleguard.circleguard import Circleguard, KeylessCircleguard, set_options
 from circleguard.loadables import (Replay, ReplayMap, ReplayPath, Map, User,
         MapUser, ReplayDir, ReplayContainer, Loadable, ReplayCache,
         CachedReplay, ReplayID, ReplayString, LoadableContainer)
-from circleguard.mod import Mod
+from circleguard.mod import Mod, FuzzyMod, _Mod
 from circleguard.loader import (Loader, ReplayInfo, APIException,
         NoInfoAvailableException, UnknownAPIException, InternalAPIException,
         InvalidKeyException, RatelimitException, InvalidJSONException,
@@ -36,7 +36,7 @@ __all__ = [
 # enums
 "Key", "RatelimitWeight",
 # mod
-"Mod",
+"Mod", "FuzzyMod", "_Mod",
 # utils
 "convert_statistic", "order", "Key", "RatelimitWeight", "TRACE", "replay_pairs",
 # loader

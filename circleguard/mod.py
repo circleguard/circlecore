@@ -333,3 +333,72 @@ class Mod(_Mod):
         if isinstance(value, str):
             value = _Mod._parse_mod_string(value)
         super().__init__(value)
+
+
+class FuzzyMod(ModCombination):
+    """
+    A ``~.ModCombination`` that performs fuzzy matching based on a list of
+    required and optional mods.
+
+    Parameters
+    ----------
+    required_mod: :class:`~.Mod`
+        What mods are requireed to be present.
+    optional_mods: [:class:`~.Mod`]
+        What mods are optionally allowed to be present. The mods in this list
+        must be single mods. That is, ``DT`` and ``EZ`` are allowed, but
+        ``HDDT`` and ``EZNFDT`` (which are made up of more than one mod) are
+        not.
+        |br|
+        The mods that this FuzzyMod matches are those which have the
+        ``required_mod``, and if they have any additional mods, those mods
+        must be contained in ``optional_mods``.
+
+    Examples
+    --------
+    Matches mods with HD, and optionally HR or DT:
+    >>> fuzzy_mod = FuzzyMod(Mod.HD, [Mod.HR, Mod.DT])
+    >>> Mod.HD in fuzzy_mod
+    True
+    >>> (Mod.HD + Mod.HR) in fuzzy_mod
+    True
+    >>> (Mod.HD + Mod.DT) in fuzzy_mod
+    True
+    >>> (Mod.HD + Mod.HR + Mod.DT) in fuzzy_mod
+    True
+    >>> Mod.HR in fuzzy_mod
+    False
+    >>> Mod.DT in fuzzy_mod
+    False
+    >>> (Mod.HR + Mod.DT) in fuzzy_mod
+    False
+    """
+    def __init__(self, required_mod, optional_mods):
+        super().__init__()
+        self.required_mod = required_mod
+        self.optional_mods = optional_mods
+
+        # avoid circular import
+        from circleguard.utils import powerset
+
+        self.all_mods = []
+        for mods in powerset(self.optional_mods):
+            final_mod = self.required_mod
+            for mod in mods:
+                final_mod = final_mod + mod
+            self.all_mods.append(final_mod)
+
+    @abc.abstractmethod
+    def __eq__(self, other):
+        pass
+
+    @abc.abstractmethod
+    def __hash__(self):
+        return hash((self.required_mod, self.optional_mods))
+
+    @abc.abstractmethod
+    def __contains__(self, other):
+        if not isinstance(other, _Mod):
+            raise TypeError(f"Expected a subclass of `_Mod`, got {type(other)}")
+
+        return other in self.all_mods
