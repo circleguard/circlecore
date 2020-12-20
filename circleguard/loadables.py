@@ -16,6 +16,7 @@ from circleguard.span import Span
 from circleguard.game_version import GameVersion, NoGameVersion
 from circleguard.map_info import MapInfo
 
+
 class Loadable(abc.ABC):
     """
     Represents one or multiple replays, which have replay data to be loaded
@@ -58,6 +59,7 @@ class Loadable(abc.ABC):
     @abc.abstractmethod
     def __eq__(self, loadable):
         pass
+
 
 class LoadableContainer(Loadable):
     """
@@ -153,6 +155,7 @@ class LoadableContainer(Loadable):
     def __iter__(self):
         return iter(self.loadables)
 
+
 class ReplayContainer(Loadable):
     """
     A Loadable that holds Replay subclasses, and which has an additional state
@@ -229,7 +232,6 @@ class ReplayContainer(Loadable):
         return iter(self.all_replays())
 
 
-
 class Map(ReplayContainer):
     """
     A map's top plays (leaderboard), as seen on the website.
@@ -246,7 +248,7 @@ class Map(ReplayContainer):
         combination. Due to limitations with the api, fuzzy matching is not
         implemented.
         |br|
-        This is applied before span``. That is, if ``span="1-2"``
+        This is applied before ``span``. That is, if ``span="1-2"``
         and ``mods=Mod.HD``, the top two ``HD`` plays on the map are
         represented.
     cache: bool
@@ -1264,6 +1266,7 @@ class ReplayID(Replay):
 
     def __hash__(self):
         return hash(self.replay_id)
+
 
 class CachedReplay(Replay):
     """
