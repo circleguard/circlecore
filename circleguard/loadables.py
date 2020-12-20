@@ -532,7 +532,7 @@ class Replay(Loadable):
         given instead of 0.
     username: str
         The username of the player who played the replay.
-    mods: :class:`~circleguard.mod.ModCombination`
+    mods: :class:`~circleguard.mod.Mod`
         The mods the replay was played with.
     replay_id: int
         The id of the replay, or 0 if the replay is unsubmitted.
@@ -844,7 +844,7 @@ class ReplayMap(Replay):
         The id of the map the replay was played on.
     user_id: int
         The id of the player who played the replay.
-    mods: ModCombination
+    mods: :class:`~circleguard.mod.Mod`
         The mods the replay was played with. If ``None``, the
         highest scoring replay of ``user_id`` on ``map_id`` will be loaded,
         regardless of mod combination. Otherwise, the replay with ``mods``
