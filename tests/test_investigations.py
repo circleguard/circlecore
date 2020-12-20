@@ -28,6 +28,34 @@ class TestSnaps(CGTestCase):
         self.assertAlmostEqual(snaps[13].angle, 3.04130, delta=DELTA)
         self.assertAlmostEqual(snaps[13].distance, 21.76919, delta=DELTA)
 
+    def test_snaps_only_on_hitobjs(self):
+        r = ReplayMap(221777, 39828)
+        snaps = self.cg.snaps(r, only_on_hitobjs=False)
+        self.assertEqual(len(snaps), 6)
+
+        # beginning
+        self.assertEqual(snaps[0].time, 3410)
+        self.assertAlmostEqual(snaps[0].angle, 0.19259, delta=DELTA)
+        self.assertAlmostEqual(snaps[0].distance, 44.61642, delta=DELTA)
+        # middle
+        self.assertEqual(snaps[2].time, 19622)
+        self.assertAlmostEqual(snaps[2].angle, 1.87673, delta=DELTA)
+        self.assertAlmostEqual(snaps[2].distance, 76.04480, delta=DELTA)
+        # end
+        self.assertEqual(snaps[5].time, 68833)
+        self.assertAlmostEqual(snaps[5].angle, 4.39870, delta=DELTA)
+        self.assertAlmostEqual(snaps[5].distance, 8.14900, delta=DELTA)
+
+        snaps = self.cg.snaps(r, only_on_hitobjs=True)
+        self.assertEqual(len(snaps), 2)
+
+        self.assertEqual(snaps[0].time, 68822)
+        self.assertAlmostEqual(snaps[0].angle, 3.92694, delta=DELTA)
+        self.assertAlmostEqual(snaps[0].distance, 8.14900, delta=DELTA)
+
+        self.assertEqual(snaps[1].time, 68833)
+        self.assertAlmostEqual(snaps[1].angle, 4.39870, delta=DELTA)
+        self.assertAlmostEqual(snaps[1].distance, 8.14900, delta=DELTA)
 
 class TestSimilarity(CGTestCase):
 
