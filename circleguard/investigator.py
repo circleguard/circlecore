@@ -139,7 +139,7 @@ class Investigator:
             if isinstance(hitobj, Spinner):
                 continue
 
-            # count snaps that occur inside hitobjects
+            # only count snaps that occur inside hitobjects
             if np.linalg.norm(xy - hitobj.xy) <= hitobj.radius:
                 snaps.append(Snap(t, b, d))
 
