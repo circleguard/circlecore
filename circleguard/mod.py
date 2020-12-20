@@ -76,8 +76,8 @@ class _Mod(ModCombination):
         Creates an integer representation of a mod string made up of two letter
         mod names ("HDHR", for example).
 
-        Arguments
-        ---------
+        Parameters
+        ----------
         mod_string: str
             The mod string to represent as an int.
 
@@ -137,7 +137,7 @@ class _Mod(ModCombination):
         Notes
         -----
         This is a function instead of an attribute set at initialization time
-        because otherwise we couldn't refer to  :class:`~.Mod`\s as its class
+        because otherwise we couldn't refer to a :class:`~.Mod`\s as its class
         body isn't loaded while it's instantiating :class:`~._Mod`\s.
 
         Although technically mods such as NC are represented with two bits -
@@ -215,8 +215,8 @@ class _Mod(ModCombination):
         Decomposes this mod into its base component mods, which are
         :class:`~._Mod`\s with a ``value`` of a power of two.
 
-        Arguments
-        ---------
+        Parameters
+        ----------
         clean: bool
             If true, removes mods that we would think of as duplicate - if both
             NC and DT are component mods, remove DT. If both PF and SD are
@@ -247,6 +247,17 @@ class Mod(_Mod):
     An ingame osu! mod.
 
     Common combinations are available as ``HDDT``, ``HDHR``, and ``HDDTHR``.
+
+    Parameters
+    ----------
+    value: int or str
+        A representation of the desired mod. This can either be its integer
+        representation such as ``64`` for ``DT`` and ``72`` (``64`` + ``8``) for
+        ``HDDT``, or a string such as ``"DT"`` for ``DT`` and ``"HDDT"`` (or
+        ``DTHD``) for ``HDDT``.
+        |br|
+        If used, the string must be composed of two-letter acronyms for mods,
+        in any order.
 
     Notes
     -----
