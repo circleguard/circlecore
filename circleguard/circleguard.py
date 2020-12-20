@@ -207,7 +207,7 @@ class Circleguard:
             raise ValueError("The ur of a replay that does not know what map "
                 "it was set on cannot be calculated")
 
-        beatmap = replay.beatmap(self.library)
+        beatmap = self.beatmap(replay)
         ur = Investigator.ur(replay, beatmap)
         if cv:
             ur = convert_statistic(ur, replay.mods, to="cv")
@@ -251,7 +251,7 @@ class Circleguard:
 
         beatmap = None
         if only_on_hitobjs:
-            beatmap = replay.beatmap(self.library)
+            beatmap = self.beatmap(replay)
 
         return Investigator.snaps(replay, max_angle, min_distance, beatmap)
 
@@ -394,7 +394,7 @@ class Circleguard:
             raise ValueError("The hits of a replay that does not know what map "
                 "it was set on cannot be calculated.")
 
-        beatmap = replay.beatmap(self.library)
+        beatmap = self.beatmap(replay)
         hits = Investigator.hits(replay, beatmap)
 
         if not within:
@@ -571,6 +571,10 @@ class Circleguard:
         mu = MapUser(map_id, user_id, span, cache, available_only)
         self.load_info(mu)
         return mu
+
+    def beatmap(self, replay):
+        self.load(replay)
+        return replay.beatmap(self.library)
 
     @property
     def cache(self):
