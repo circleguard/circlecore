@@ -354,6 +354,11 @@ class FuzzyMod(ModCombination):
         ``required_mod``, and if they have any additional mods, those mods
         must be contained in ``optional_mods``.
 
+    Notes
+    -----
+    If you don't want *any* mods to be required, pass ``Mod.NM`` as your
+    ``required_mod``.
+
     Examples
     --------
     Matches mods with HD, and optionally HR or DT:
