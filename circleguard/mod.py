@@ -393,15 +393,15 @@ class FuzzyMod(ModCombination):
                 final_mod = final_mod + mod
             self.all_mods.append(final_mod)
 
-    @abc.abstractmethod
     def __eq__(self, other):
-        pass
+        if not isinstance(other, FuzzyMod):
+            return False
+        return (self.required_mod == other.required_mod and
+                self.optional_mods == other.optional_mods)
 
-    @abc.abstractmethod
     def __hash__(self):
         return hash((self.required_mod, self.optional_mods))
 
-    @abc.abstractmethod
     def __contains__(self, other):
         if not isinstance(other, _Mod):
             raise TypeError(f"Expected a subclass of `_Mod`, got {type(other)}")
