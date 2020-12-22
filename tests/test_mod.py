@@ -34,3 +34,9 @@ class TestLoader(CGTestCase):
         mods = fuzzy_mods(Mod.HD, [Mod.DT, Mod.EZ])
         self.assertListEqual(mods,
             [Mod.HD, Mod.HDDT, Mod.HD + Mod.EZ, Mod.HD + Mod.EZ + Mod.DT])
+
+        mods = fuzzy_mods(Mod.HD, [Mod.DT])
+        self.assertListEqual(mods, [Mod.HD, Mod.HD + Mod.DT])
+
+        mods = fuzzy_mods(Mod.NM, [Mod.DT, Mod.EZ])
+        self.assertListEqual(mods, [Mod.NM, Mod.DT, Mod.EZ, Mod.DT + Mod.EZ])
