@@ -1,5 +1,3 @@
-import abc
-
 int_to_mod = {
     0          : ["NM",       "NoMod"],
     1 << 0     : ["NF",      "NoFail"],
@@ -255,6 +253,12 @@ class Mod(ModCombination):
     A full list of mods and their specification can be found at
     https://osu.ppy.sh/help/wiki/Game_Modifiers, or a more technical list at
     https://github.com/ppy/osu-api/wiki#mods.
+
+    Warnings
+    --------
+    The fact that this class subclasses ModCombination is slightly misleading.
+    This is only done so that this class can be instantiated directly, backed
+    by an internal ModCombination, instead of exposing ModCombination to users.
     """
 
     NM  = NoMod        = ModCombination(0)
