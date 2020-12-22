@@ -142,9 +142,44 @@ def check_param(param, options):
         raise ValueError(f"Expected one of {','.join(options)}. Got {param}")
 
 
+def fuzzy_mods(required_mod, optional_mods):
+    """
+    All mod combinations where each mod in ``optional_mods`` is allowed to be
+    present or absent.
+
+    If you don't want any mods to be required, pass ``Mod.NM`` as your
+    ``required_mod``.
+
+    Parameters
+    ----------
+    required_mod: class:`~circleguard.mod.ModCombination`
+        What mod to require be present for all mods.
+    optional_mods = [class:`~circleguard.mod.ModCombination`]
+        What mods are allowed, but not required, to be present.
+
+    Examples
+    --------
+    >>> fuzzy_mods(Mod.HD, [Mod.DT])
+    [HD, HDDT]
+    >>> fuzzy_mods(Mod.HD, [Mod.EZ, Mod.DT])
+    [HD, HDDT, HDEZ, HDDTEZ]
+    >>> fuzzy_mods(Mod.NM, [Mod.EZ, Mod.DT])
+    [NM, DT, EZ, DTEZ]
+    """
+
+    all_mods = []
+    for mods in powerset(optional_mods):
+        final_mod = required_mod
+        for mod in mods:
+            final_mod = final_mod + mod
+        all_mods.append(final_mod)
+
+    return all_mods
+
+
 def powerset(iterable):
     """
-    Returns the powerset of an iterable.
+    The powerset of an iterable.
 
     Examples
     --------
