@@ -38,36 +38,16 @@ int_to_mod = {
 
 class ModCombination():
     """
-    An ingame osu! mod, or combination of mods.
+    An osu! mod combination.
 
     Notes
     -----
-    A full list of mods and their specification can be found at
-    https://osu.ppy.sh/help/wiki/Game_Modifiers.
-    """
-
-    @abc.abstractmethod
-    def __eq__(self, other):
-        pass
-
-    @abc.abstractmethod
-    def __hash__(self):
-        pass
-
-    @abc.abstractmethod
-    def __contains__(self, other):
-        pass
-
-
-class _Mod(ModCombination):
-    """
-    This class only exists to allow ``Mod`` to have class ``_Mod`` objects as
-    class attributes, as you can't instantiate instances of your own class in a
-    class definition.
+    This class only exists to allow ``Mod`` to have ``ModCombination`` objects
+    as class attributes, as you can't instantiate instances of your own class in
+    a class definition.
     """
 
     def __init__(self, value):
-        super().__init__()
         self.value = value
 
     @staticmethod
@@ -90,7 +70,7 @@ class _Mod(ModCombination):
         ------
         ValueError
             If mod_string is empty, not of even length, or any of its 2-length
-            substrings do not correspond to a _Mod in Mod.ORDER.
+            substrings do not correspond to a Mod in Mod.ORDER.
         """
         if mod_string == "":
             raise ValueError("Invalid mod string (cannot be empty)")
@@ -129,16 +109,16 @@ class _Mod(ModCombination):
 
         Examples
         --------
-        >>> _Mod(576).short_name()
+        >>> Mod(576).short_name()
         "NC"
-        >>> _Mod(24).short_name()
+        >>> Mod(24).short_name()
         "HDHR"
 
         Notes
         -----
         This is a function instead of an attribute set at initialization time
         because otherwise we couldn't refer to a :class:`~.Mod`\s as its class
-        body isn't loaded while it's instantiating :class:`~._Mod`\s.
+        body isn't loaded while it's instantiating :class:`~.Mod`\s.
 
         Although technically mods such as NC are represented with two bits -
         DT and NC - being set, short_name removes DT and so returns "NC"
@@ -163,16 +143,16 @@ class _Mod(ModCombination):
 
         Examples
         --------
-        >>> _Mod(576).long_name()
+        >>> ModCombination(576).long_name()
         "Nightcore"
-        >>> _Mod(24).long_name()
+        >>> ModCombination(24).long_name()
         "Hidden HardRock"
 
         Notes
         -----
         This is a function instead of an attribute set at initialization time
         because otherwise we couldn't refer to  :class:`~.Mod`\s as its class
-        body isn't loaded while it's instantiating :class:`~._Mod`\s.
+        body isn't loaded while it's instantiating :class:`~.Mod`\s.
 
         Although technically mods such as NC are represented with two bits -
         DT and NC - being set, long_name removes DT and so returns "Nightcore"
@@ -187,22 +167,22 @@ class _Mod(ModCombination):
 
     def __eq__(self, other):
         """Compares the ``value`` of each object"""
-        if not isinstance(other, _Mod):
+        if not isinstance(other, ModCombination):
             return False
         return self.value == other.value
 
     def __add__(self, other):
         """Returns a Mod representing the bitwise OR of the two Mods"""
-        return _Mod(self.value | other.value)
+        return ModCombination(self.value | other.value)
 
     def __sub__(self, other):
-        return _Mod(self.value & ~other.value)
+        return ModCombination(self.value & ~other.value)
 
     def __hash__(self):
         return hash(self.value)
 
     def __repr__(self):
-        return f"_Mod(value={self.value})"
+        return f"ModCombination(value={self.value})"
 
     def __str__(self):
         return self.short_name()
@@ -213,7 +193,7 @@ class _Mod(ModCombination):
     def decompose(self, clean=False):
         """
         Decomposes this mod into its base component mods, which are
-        :class:`~._Mod`\s with a ``value`` of a power of two.
+        :class:`~.ModCombination`\s with a ``value`` of a power of two.
 
         Parameters
         ----------
@@ -224,12 +204,13 @@ class _Mod(ModCombination):
 
         Returns
         -------
-        list[:class:`~._Mod`]
-            A list of the component :class:`~._Mod`\s of this mod,
-            ordered according to :const:`~circleguard.mod.Mod.ORDER`.
+        list[:class:`~.ModCombination`]
+            A list of the component :class:`~.ModCombination`\s of this mod,
+            ordered according to :const:`~circleguard.mod.ModCombination.ORDER`.
         """
 
-        mods = [_Mod(mod) for mod in int_to_mod.keys() if self.value & mod]
+        mods = [ModCombination(mod) for mod in int_to_mod.keys() if
+                self.value & mod]
         # order the mods by Mod.ORDER
         mods = [mod for mod in Mod.ORDER if mod in mods]
         if not clean:
@@ -242,7 +223,7 @@ class _Mod(ModCombination):
         return mods
 
 
-class Mod(_Mod):
+class Mod(ModCombination):
     """
     An ingame osu! mod.
 
@@ -276,41 +257,41 @@ class Mod(_Mod):
     https://github.com/ppy/osu-api/wiki#mods.
     """
 
-    NM  = NoMod        = _Mod(0)
-    NF  = NoFail       = _Mod(1 << 0)
-    EZ  = Easy         = _Mod(1 << 1)
-    TD  = TouchDevice  = _Mod(1 << 2)
-    HD  = Hidden       = _Mod(1 << 3)
-    HR  = HardRock     = _Mod(1 << 4)
-    SD  = SuddenDeath  = _Mod(1 << 5)
-    DT  = DoubleTime   = _Mod(1 << 6)
-    RX  = Relax        = _Mod(1 << 7)
-    HT  = HalfTime     = _Mod(1 << 8)
-    _NC = _Nightcore   = _Mod(1 << 9)
+    NM  = NoMod        = ModCombination(0)
+    NF  = NoFail       = ModCombination(1 << 0)
+    EZ  = Easy         = ModCombination(1 << 1)
+    TD  = TouchDevice  = ModCombination(1 << 2)
+    HD  = Hidden       = ModCombination(1 << 3)
+    HR  = HardRock     = ModCombination(1 << 4)
+    SD  = SuddenDeath  = ModCombination(1 << 5)
+    DT  = DoubleTime   = ModCombination(1 << 6)
+    RX  = Relax        = ModCombination(1 << 7)
+    HT  = HalfTime     = ModCombination(1 << 8)
+    _NC = _Nightcore   = ModCombination(1 << 9)
     # most people will find it more useful for NC to be defined as it is ingame
     NC  = Nightcore    = _NC + DT
-    FL  = Flashlight   = _Mod(1 << 10)
-    AT  = Autoplay     = _Mod(1 << 11)
-    SO  = SpunOut      = _Mod(1 << 12)
-    AP  = Autopilot    = _Mod(1 << 13)
-    _PF = _Perfect     = _Mod(1 << 14)
+    FL  = Flashlight   = ModCombination(1 << 10)
+    AT  = Autoplay     = ModCombination(1 << 11)
+    SO  = SpunOut      = ModCombination(1 << 12)
+    AP  = Autopilot    = ModCombination(1 << 13)
+    _PF = _Perfect     = ModCombination(1 << 14)
     PF  = Perfect      = _PF + SD
-    K4  = Key4         = _Mod(1 << 15)
-    K5  = Key5         = _Mod(1 << 16)
-    K6  = Key6         = _Mod(1 << 17)
-    K7  = Key7         = _Mod(1 << 18)
-    K8  = Key8         = _Mod(1 << 19)
-    FI  = FadeIn       = _Mod(1 << 20)
-    RD  = Random       = _Mod(1 << 21)
-    CN  = Cinema       = _Mod(1 << 22)
-    TP  = Target       = _Mod(1 << 23)
-    K9  = Key9         = _Mod(1 << 24)
-    CO  = KeyCoop      = _Mod(1 << 25)
-    K1  = Key1         = _Mod(1 << 26)
-    K3  = Key3         = _Mod(1 << 27)
-    K2  = Key2         = _Mod(1 << 28)
-    V2  = ScoreV2      = _Mod(1 << 29)
-    MR  = Mirror       = _Mod(1 << 30)
+    K4  = Key4         = ModCombination(1 << 15)
+    K5  = Key5         = ModCombination(1 << 16)
+    K6  = Key6         = ModCombination(1 << 17)
+    K7  = Key7         = ModCombination(1 << 18)
+    K8  = Key8         = ModCombination(1 << 19)
+    FI  = FadeIn       = ModCombination(1 << 20)
+    RD  = Random       = ModCombination(1 << 21)
+    CN  = Cinema       = ModCombination(1 << 22)
+    TP  = Target       = ModCombination(1 << 23)
+    K9  = Key9         = ModCombination(1 << 24)
+    CO  = KeyCoop      = ModCombination(1 << 25)
+    K1  = Key1         = ModCombination(1 << 26)
+    K3  = Key3         = ModCombination(1 << 27)
+    K2  = Key2         = ModCombination(1 << 28)
+    V2  = ScoreV2      = ModCombination(1 << 29)
+    MR  = Mirror       = ModCombination(1 << 30)
 
     KM  = KeyMod       = K1 + K2 + K3 + K4 + K5 + K6 + K7 + K8 + K9 + KeyCoop
 
@@ -331,79 +312,5 @@ class Mod(_Mod):
 
     def __init__(self, value):
         if isinstance(value, str):
-            value = _Mod._parse_mod_string(value)
+            value = ModCombination._parse_mod_string(value)
         super().__init__(value)
-
-
-class FuzzyMod(ModCombination):
-    """
-    A ``~.ModCombination`` that performs fuzzy matching based on a list of
-    required and optional mods.
-
-    Parameters
-    ----------
-    required_mod: :class:`~.Mod`
-        What mods are requireed to be present.
-    optional_mods: [:class:`~.Mod`]
-        What mods are optionally allowed to be present. The mods in this list
-        must be single mods. That is, ``DT`` and ``EZ`` are allowed, but
-        ``HDDT`` and ``EZNFDT`` (which are made up of more than one mod) are
-        not.
-        |br|
-        The mods that this FuzzyMod matches are those which have the
-        ``required_mod``, and if they have any additional mods, those mods
-        must be contained in ``optional_mods``.
-
-    Notes
-    -----
-    If you don't want *any* mods to be required, pass ``Mod.NM`` as your
-    ``required_mod``.
-
-    Examples
-    --------
-    Matches mods with HD, and optionally HR or DT:
-    >>> fuzzy_mod = FuzzyMod(Mod.HD, [Mod.HR, Mod.DT])
-    >>> Mod.HD in fuzzy_mod
-    True
-    >>> (Mod.HD + Mod.HR) in fuzzy_mod
-    True
-    >>> (Mod.HD + Mod.DT) in fuzzy_mod
-    True
-    >>> (Mod.HD + Mod.HR + Mod.DT) in fuzzy_mod
-    True
-    >>> Mod.HR in fuzzy_mod
-    False
-    >>> Mod.DT in fuzzy_mod
-    False
-    >>> (Mod.HR + Mod.DT) in fuzzy_mod
-    False
-    """
-    def __init__(self, required_mod, optional_mods):
-        super().__init__()
-        self.required_mod = required_mod
-        self.optional_mods = optional_mods
-
-        # avoid circular import
-        from circleguard.utils import powerset
-
-        self.all_mods = []
-        for mods in powerset(self.optional_mods):
-            final_mod = self.required_mod
-            for mod in mods:
-                final_mod = final_mod + mod
-            self.all_mods.append(final_mod)
-
-    def __eq__(self, other):
-        if not isinstance(other, FuzzyMod):
-            return False
-        return (self.required_mod == other.required_mod and
-                self.optional_mods == other.optional_mods)
-
-    def __hash__(self):
-        return hash((self.required_mod, self.optional_mods))
-
-    def __contains__(self, other):
-        if not isinstance(other, _Mod):
-            raise TypeError(f"Expected a subclass of `_Mod`, got {type(other)}")
-
-        return other in self.all_mods
