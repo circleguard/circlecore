@@ -467,7 +467,9 @@ class Hit():
         The beatmap this hit was made on.
     """
     def __init__(self, hitobject, t, xy, replay, beatmap):
-        self.hitobject = Hitobject.from_slider_hitobj(hitobject, replay, beatmap)
+        # TODO remove `already_converted=True` when
+        # https://github.com/llllllllll/slider/issues/80 is fixed
+        self.hitobject = Hitobject.from_slider_hitobj(hitobject, replay, beatmap, True)
         self.t = t
         self.xy = xy
         self.x = xy[0]
