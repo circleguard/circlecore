@@ -636,11 +636,12 @@ class KeylessCircleguard(Circleguard):
         return super().ur(replay, cv)
 
     def snaps(self, replay, max_angle=Circleguard.DEFAULT_ANGLE, \
-        min_distance=Circleguard.DEFAULT_DISTANCE) -> Iterable[Snap]:
+        min_distance=Circleguard.DEFAULT_DISTANCE, only_on_hitobjs=True) \
+        -> Iterable[Snap]:
         if not replay.loaded:
             raise ValueError("replays must be loaded before use in a "
                 "KeylessCircleguard")
-        return super().snaps(replay, max_angle, min_distance)
+        return super().snaps(replay, max_angle, min_distance, only_on_hitobjs)
 
     def frametime(self, replay, cv=True) -> float:
         if not replay.loaded:
