@@ -109,7 +109,7 @@ class ModCombination():
         --------
         >>> ModCombination(576).short_name()
         "NC"
-        >>> MoModCombinationd(24).short_name()
+        >>> ModCombination(24).short_name()
         "HDHR"
 
         Notes
