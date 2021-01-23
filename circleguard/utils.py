@@ -1,7 +1,7 @@
 from logging import Formatter
 from copy import copy
 from enum import Enum, IntFlag
-import itertools
+from itertools import product, chain, combinations
 
 from circleguard.mod import Mod
 
@@ -133,14 +133,65 @@ def replay_pairs(replays, replays2=None):
     otherwise.
     """
     if not replays2:
-        return itertools.combinations(replays, 2)
-    return itertools.product(replays, replays2)
+        return combinations(replays, 2)
+    return product(replays, replays2)
 
 
 def check_param(param, options):
     if not param in options:
         raise ValueError(f"Expected one of {','.join(options)}. Got {param}")
 
+
+def fuzzy_mods(required_mod, optional_mods):
+    """
+    All mod combinations where each mod in ``optional_mods`` is allowed to be
+    present or absent.
+
+    If you don't want any mods to be required, pass ``Mod.NM`` as your
+    ``required_mod``.
+
+    Parameters
+    ----------
+    required_mod: class:`~circleguard.mod.ModCombination`
+        What mod to require be present for all mods.
+    optional_mods = [class:`~circleguard.mod.ModCombination`]
+        What mods are allowed, but not required, to be present.
+
+    Examples
+    --------
+    >>> fuzzy_mods(Mod.HD, [Mod.DT])
+    [HD, HDDT]
+    >>> fuzzy_mods(Mod.HD, [Mod.EZ, Mod.DT])
+    [HD, HDDT, HDEZ, HDDTEZ]
+    >>> fuzzy_mods(Mod.NM, [Mod.EZ, Mod.DT])
+    [NM, DT, EZ, DTEZ]
+    """
+
+    all_mods = []
+    for mods in powerset(optional_mods):
+        final_mod = required_mod
+        for mod in mods:
+            final_mod = final_mod + mod
+        all_mods.append(final_mod)
+
+    return all_mods
+
+
+def powerset(iterable):
+    """
+    The powerset of an iterable.
+
+    Examples
+    --------
+    >>> powerset([1,2,3])
+    [(), (1,), (2,), (3,), (1, 2), (1, 3), (2, 3), (1, 2, 3)]
+
+    Notes
+    -----
+    https://stackoverflow.com/a/1482316
+    """
+    s = list(iterable)
+    return chain.from_iterable(combinations(s, r) for r in range(len(s) + 1))
 
 
 TRACE = 5

@@ -1,6 +1,6 @@
 from tests.utils import CGTestCase
 
-from circleguard import Mod
+from circleguard import Mod, fuzzy_mods
 
 class TestLoader(CGTestCase):
     @classmethod
@@ -29,3 +29,14 @@ class TestLoader(CGTestCase):
         self.assertEqual(Mod("HR").long_name(), "HardRock")
         self.assertEqual(Mod("DTHR").long_name(), "DoubleTime HardRock")
         self.assertEqual(Mod("HRDT").long_name(), "DoubleTime HardRock")
+
+    def test_fuzzy_mod(self):
+        mods = fuzzy_mods(Mod.HD, [Mod.DT, Mod.EZ])
+        self.assertListEqual(mods,
+            [Mod.HD, Mod.HDDT, Mod.HD + Mod.EZ, Mod.HD + Mod.EZ + Mod.DT])
+
+        mods = fuzzy_mods(Mod.HD, [Mod.DT])
+        self.assertListEqual(mods, [Mod.HD, Mod.HD + Mod.DT])
+
+        mods = fuzzy_mods(Mod.NM, [Mod.DT, Mod.EZ])
+        self.assertListEqual(mods, [Mod.NM, Mod.DT, Mod.EZ, Mod.DT + Mod.EZ])
