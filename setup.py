@@ -39,12 +39,12 @@ setup(
     license = "MIT",
     packages=find_packages(),
     install_requires=[
-        "circleparse==6.4.0",
+        "circleparse~=6.4.0",
         "ossapi==1.3.0",
         "wtc==1.2.1",
         "numpy",
         "requests",
-        "slider~=0.3.1",
+        "slider>=0.4.0",
         # pyinstaller does not yet have a hook for scipy 1.5.0, so stick with
         # 1.4.1 for now
         # TODO remove this restriction? pyinstaller 4.0 adds the necessary scipy
