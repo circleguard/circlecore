@@ -27,12 +27,16 @@ class Hitobject():
         self.y = xy[1]
 
     @classmethod
-    def from_slider_hitobj(self, hitobj, replay, beatmap):
+    def from_slider_hitobj(self, hitobj, replay, beatmap, already_converted=False):
         """
         Instantiates a circleguard hitobject from a
         :class:`slider.beatmap.HitObject`, a
         :class:`circleguard.loadables.Replay`, that the hitobject was hit on,
         and a :class:`slider.beatmap.Beatmap` that the hitobject is found in.
+
+        The `already_converted` parameter is only to work around
+        https://github.com/llllllllll/slider/issues/80 and will be removed when
+        it is fixed.
         """
         easy = Mod.EZ in replay.mods
         hard_rock = Mod.HR in replay.mods
@@ -41,7 +45,7 @@ class Hitobject():
         # convert to ms
         t = hitobj.time.total_seconds() * 1000
 
-        if hard_rock:
+        if hard_rock and not already_converted:
             hitobj = hitobj.hard_rock
 
         xy = [hitobj.position.x, hitobj.position.y]
