@@ -20,6 +20,7 @@ class FrametimeGraph():
     MAX_FRAMETIME = 50
 
     def __init__(self, replay, cv, figure):
+        # figsize is in inches for whatever reason lol
         self.figure = figure or pyplot.figure(figsize=(5, 5))
         self.cv = cv
         self.conversion_factor = self._conversion_factor(replay)
@@ -30,7 +31,6 @@ class FrametimeGraph():
         # oddities about the frametime graph which make it easier this way.
         frametimes = cg.frametimes(replay, cv=False)
 
-        # figsize is in inches for whatever reason lol
         self.figure.suptitle(f"({'cv' if self.cv else 'ucv'}) "
             "Frametime Histogram")
 
