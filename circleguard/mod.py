@@ -103,13 +103,13 @@ class ModCombination():
         Returns
         -------
         str
-            The short name of this mod.
+            The short name of this ModCombination.
 
         Examples
         --------
-        >>> Mod(576).short_name()
+        >>> ModCombination(576).short_name()
         "NC"
-        >>> Mod(24).short_name()
+        >>> MoModCombinationd(24).short_name()
         "HDHR"
 
         Notes
@@ -137,7 +137,7 @@ class ModCombination():
         Returns
         -------
         str
-            The long name of this mod.
+            The long name of this ModCombination.
 
         Examples
         --------
