@@ -313,13 +313,9 @@ class Investigator:
 
         hits = []
 
-        # stable converts OD (and CS), which are originally a float32, to a
-        # double and this causes some hitwindows to be messed up when casted to
-        # an int so we replicate this
-        hitwindow = int(150 + 50 * (5 - float(np.float32(OD))) / 5)
+        hitwindow = utils.hitwindow(OD)
+        hitradius = utils.hitradius(CS)
 
-        # attempting to match stable hitradius
-        hitradius = np.float32(64 * ((1.0 - np.float32(0.7) * (float(np.float32(CS)) - 5) / 5)) / 2) * np.float32(1.00041)
 
         hitobj_i = 0
         keydown_i = 0

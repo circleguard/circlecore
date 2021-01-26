@@ -3,6 +3,8 @@ from copy import copy
 from enum import Enum, IntFlag
 from itertools import product, chain, combinations
 
+import numpy as np
+
 from circleguard.mod import Mod
 
 
@@ -192,6 +194,24 @@ def powerset(iterable):
     """
     s = list(iterable)
     return chain.from_iterable(combinations(s, r) for r in range(len(s) + 1))
+
+
+def hitwindow(OD):
+    """
+    The number of milliseconds before and after a hitobject's time where that
+    hitobject can be hit.
+    """
+    # stable converts OD (and CS), which are originally a float32, to a
+    # double and this causes some hitwindows to be messed up when casted to
+    # an int so we replicate this
+    return int(150 + 50 * (5 - float(np.float32(OD))) / 5)
+
+def hitradius(CS):
+    """
+    The radius, in osu!pixels (?) of where a hitobject can be hit.s
+    """
+    # attempting to match stable hitradius
+    return np.float32(64 * ((1.0 - np.float32(0.7) * (float(np.float32(CS)) - 5) / 5)) / 2) * np.float32(1.00041)
 
 
 TRACE = 5
