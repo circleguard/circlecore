@@ -9,6 +9,7 @@ import circleguard.utils as utils
 from circleguard.game_version import GameVersion
 from circleguard.hitobjects import Hitobject, Spinner
 
+
 class Investigator:
     # https://osu.ppy.sh/home/changelog/stable40/20190207.2
     VERSION_SLIDERBUG_FIXED_STABLE = GameVersion(20190207, concrete=True)
@@ -140,8 +141,16 @@ class Investigator:
             if isinstance(hitobj, Spinner):
                 continue
 
+            easy = Mod.EZ in replay.mods
+            hard_rock = Mod.HR in replay.mods
+            OD = beatmap.od(easy=easy, hard_rock=hard_rock)
+
+            hitwindow = utils.hitwindow(OD)
+
             # only count snaps that occur inside hitobjects
-            if np.linalg.norm(xy - hitobj.xy) <= hitobj.radius:
+            inside_hitobj_pos = np.linalg.norm(xy - hitobj.xy) <= hitobj.radius
+            inside_hitobj_t = (hitobj.t - hitwindow) < t < (hitobj.t + hitwindow)
+            if inside_hitobj_pos and inside_hitobj_t:
                 snaps.append(Snap(t, b, d))
 
         return snaps
