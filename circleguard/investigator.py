@@ -126,7 +126,7 @@ class Investigator:
 
         snaps = []
         for (t, xy, b, d) in zip(t[mask], b[mask], beta[mask], min_AB_BC[mask]):
-            # can't disacrd any snaps if we don't know the beatmap, so count all
+            # can't discard any snaps if we don't know the beatmap, so count all
             # of them
             if not beatmap:
                 snaps.append(Snap(t, b, d))
