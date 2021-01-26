@@ -5,8 +5,10 @@ from slider.beatmap import Circle, Slider
 
 from circleguard.mod import Mod
 from circleguard.utils import KEY_MASK, check_param
+import circleguard.utils as utils
 from circleguard.game_version import GameVersion
 from circleguard.hitobjects import Hitobject, Spinner
+
 
 class Investigator:
     # https://osu.ppy.sh/home/changelog/stable40/20190207.2
@@ -126,7 +128,7 @@ class Investigator:
 
         snaps = []
         for (t, xy, b, d) in zip(t[mask], b[mask], beta[mask], min_AB_BC[mask]):
-            # can't disacrd any snaps if we don't know the beatmap, so count all
+            # can't discard any snaps if we don't know the beatmap, so count all
             # of them
             if not beatmap:
                 snaps.append(Snap(t, b, d))
@@ -139,8 +141,16 @@ class Investigator:
             if isinstance(hitobj, Spinner):
                 continue
 
+            easy = Mod.EZ in replay.mods
+            hard_rock = Mod.HR in replay.mods
+            OD = beatmap.od(easy=easy, hard_rock=hard_rock)
+
+            hitwindow = utils.hitwindow(OD)
+
             # only count snaps that occur inside hitobjects
-            if np.linalg.norm(xy - hitobj.xy) <= hitobj.radius:
+            inside_hitobj_pos = np.linalg.norm(xy - hitobj.xy) <= hitobj.radius
+            inside_hitobj_t = (hitobj.t - hitwindow) < t < (hitobj.t + hitwindow)
+            if inside_hitobj_pos and inside_hitobj_t:
                 snaps.append(Snap(t, b, d))
 
         return snaps
@@ -313,13 +323,9 @@ class Investigator:
 
         hits = []
 
-        # stable converts OD (and CS), which are originally a float32, to a
-        # double and this causes some hitwindows to be messed up when casted to
-        # an int so we replicate this
-        hitwindow = int(150 + 50 * (5 - float(np.float32(OD))) / 5)
+        hitwindow = utils.hitwindow(OD)
+        hitradius = utils.hitradius(CS)
 
-        # attempting to match stable hitradius
-        hitradius = np.float32(64 * ((1.0 - np.float32(0.7) * (float(np.float32(CS)) - 5) / 5)) / 2) * np.float32(1.00041)
 
         hitobj_i = 0
         keydown_i = 0
