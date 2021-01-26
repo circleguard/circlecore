@@ -5,6 +5,7 @@ from slider.beatmap import Circle, Slider
 
 from circleguard.mod import Mod
 from circleguard.utils import KEY_MASK, check_param
+import circleguard.utils as utils
 from circleguard.game_version import GameVersion
 from circleguard.hitobjects import Hitobject, Spinner
 
