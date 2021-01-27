@@ -5,7 +5,7 @@ import os
 import sqlite3
 import random
 
-import circleparse
+import osrparse
 import numpy as np
 import wtc
 
@@ -660,8 +660,8 @@ class Replay(Loadable):
 
         Paramters
         ---------
-        replay_data: list[:class:`~circleparse.Replay.ReplayEvent`]
-            A list of :class:`~circleparse.Replay.ReplayEvent` objects,
+        replay_data: list[:class:`~osrparse.Replay.ReplayEvent`]
+            A list of :class:`~osrparse.Replay.ReplayEvent` objects,
             representing the actual data of the replay. If the replay could not
             be loaded, this should be ``None``.
 
@@ -1024,7 +1024,7 @@ class ReplayPath(Replay):
             self.log.debug("%s already loaded, not loading", self)
             return
 
-        loaded = circleparse.parse_replay_file(self.path)
+        loaded = osrparse.parse_replay_file(self.path)
         self.game_version = GameVersion(loaded.game_version, concrete=True)
         self.timestamp = loaded.timestamp
         self.map_id = loader.map_id(loaded.beatmap_hash)
@@ -1033,7 +1033,7 @@ class ReplayPath(Replay):
         # `Loader#user_id` function to use later to load it.
         self._user_id_func = loader.user_id
         self._user_id = None
-        self.mods = Mod(loaded.mod_combination)
+        self.mods = Mod(int(loaded.mod_combination))
         self.replay_id = loaded.replay_id
         self.beatmap_hash = loaded.beatmap_hash
 
@@ -1170,7 +1170,7 @@ class ReplayString(Replay):
             self.log.debug("%s already loaded, not loading", self)
             return
 
-        loaded = circleparse.parse_replay(self.replay_data_str, pure_lzma=False)
+        loaded = osrparse.parse_replay(self.replay_data_str, pure_lzma=False)
         self.game_version = GameVersion(loaded.game_version, concrete=True)
         self.timestamp = loaded.timestamp
         self.map_id = loader.map_id(loaded.beatmap_hash)
@@ -1285,7 +1285,7 @@ class CachedReplay(Replay):
         if self.loaded:
             return
         decompressed = wtc.decompress(self.replay_data)
-        parsed = circleparse.parse_replay(decompressed, pure_lzma=True)
+        parsed = osrparse.parse_replay(decompressed, pure_lzma=True)
         self._process_replay_data(parsed.play_data)
         self.loaded = True
 

@@ -7,7 +7,7 @@ from functools import lru_cache
 from enum import Enum
 
 from requests import RequestException
-import circleparse
+import osrparse
 import ossapi
 
 from circleguard.mod import Mod
@@ -177,7 +177,7 @@ def check_cache(function):
 
         decompressed_lzma = self.cacher.check_cache(replay_info)
         if decompressed_lzma:
-            parsed = circleparse.parse_replay(decompressed_lzma, \
+            parsed = osrparse.parse_replay(decompressed_lzma, \
                 pure_lzma=True, decompressed_lzma=True)
             return parsed.play_data
         else:
@@ -418,7 +418,7 @@ class Loader():
 
         Returns
         -------
-        list[:class:`circleparse.replay.ReplayEvent`]
+        list[:class:`osrparse.replay.ReplayEvent`]
             The replay events with attributes ``x``, ``y``,
             ``time_since_previous_action``, and ``keys_pressed``.
         None
@@ -444,7 +444,7 @@ class Loader():
             raise UnknownAPIException("The api guaranteed there would be a "
                 "replay available, but we did not receive any data.")
         try:
-            parsed_replay = circleparse.parse_replay(lzma_bytes, pure_lzma=True)
+            parsed_replay = osrparse.parse_replay(lzma_bytes, pure_lzma=True)
         # see https://github.com/circleguard/circlecore/issues/61
         # api sometimes returns corrupt replays
         except LZMAError:
@@ -470,7 +470,7 @@ class Loader():
         response = self.api.get_replay({"s": replay_id})
         Loader.check_response(response)
         lzma = base64.b64decode(response["content"])
-        replay_data = circleparse.parse_replay(lzma, pure_lzma=True).play_data
+        replay_data = osrparse.parse_replay(lzma, pure_lzma=True).play_data
         # TODO cache the replay here, might require some restructring/double
         # checking everything will work because we only have its id, not map
         # or user id. In fact I think our db asserts map and user id are nonull
