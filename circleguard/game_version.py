@@ -1,6 +1,3 @@
-from datetime import datetime
-
-
 class GameVersion(int):
     """
     Information about the version of osu! a

@@ -1,4 +1,3 @@
-from unittest import skip, TestSuite, TextTestRunner
 from circleguard import (ReplayMap, ReplayPath, RatelimitWeight, Map, User,
     MapUser, Mod)
 

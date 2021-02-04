@@ -5,7 +5,6 @@ from typing import Iterable, Union, Tuple
 import weakref
 
 from slider import Library
-import numpy as np
 
 from circleguard.loader import Loader
 from circleguard.comparer import Comparer

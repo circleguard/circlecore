@@ -1,5 +1,4 @@
 import numpy as np
-import unittest
 
 from circleguard import ReplayPath, Mod, Circleguard, order, ReplayMap
 from tests.utils import CGTestCase, DELTA, UR_DELTA, RES, FRAMETIME_LIMIT

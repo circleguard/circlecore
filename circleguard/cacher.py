@@ -4,7 +4,6 @@ import os
 
 import wtc
 
-from circleguard.loader import Loader
 from circleguard.utils import TRACE
 
 class Cacher:
