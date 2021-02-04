@@ -602,10 +602,9 @@ class Loader():
             for error in Error:
                 if response["error"] == error.value[0]:
                     raise error.value[1](error.value[2])
-            else:
-                # don't know why pylint is throwing hands but this is definitely
-                # legal
-                raise Error.UNKNOWN.value[1](Error.UNKNOWN.value[2]) # pylint: disable=unsubscriptable-object
+            # don't know why pylint is throwing hands but this is definitely
+            # legit
+            raise Error.UNKNOWN.value[1](Error.UNKNOWN.value[2]) # pylint: disable=unsubscriptable-object
         if not response: # response is empty, list or dict case
             raise NoInfoAvailableException("No info was available from the api "
                 "for the given arguments.")
