@@ -67,7 +67,7 @@ class TestMap(CGTestCase):
         # previously, loading the info of a map or user with no scores on the
         # specified mod combination would result in a NoInfoAvailableException
         # being thrown. We want to make sure this doesn't happen.
-        m = Map(2245774, "1-2", Mod.NC + Mod.HR)
+        m = Map(2245774, "1-2", Mod.NC + Mod.HR + Mod.SO)
         self.cg.load_info(m)
         self.assertEqual(len(m), 0)
 
