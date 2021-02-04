@@ -76,8 +76,7 @@ def convert_statistic(stat, mods, *, to):
 
     if to == "cv":
         return stat * conversion_factor
-    elif to == "ucv":
-        return stat / conversion_factor
+    return stat / conversion_factor
 
 
 def order(replay1, replay2):

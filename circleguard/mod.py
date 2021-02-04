@@ -126,9 +126,9 @@ class ModCombination():
             # avoid infinite recursion with every mod decomposing into itself
             # ad infinitum
             return int_to_mod[self.value][0]
-        else:
-            component_mods = self.decompose(clean=True)
-            return "".join(mod.short_name() for mod in component_mods)
+
+        component_mods = self.decompose(clean=True)
+        return "".join(mod.short_name() for mod in component_mods)
 
     def long_name(self):
         """
@@ -156,12 +156,11 @@ class ModCombination():
         DT and NC - being set, long_name removes DT and so returns "Nightcore"
         rather than "DoubleTime Nightcore".
         """
-
         if self.value in int_to_mod:
             return int_to_mod[self.value][1]
-        else:
-            component_mods = self.decompose(clean=True)
-            return " ".join(mod.long_name() for mod in component_mods)
+
+        component_mods = self.decompose(clean=True)
+        return " ".join(mod.long_name() for mod in component_mods)
 
     def __eq__(self, other):
         """Compares the ``value`` of each object"""
