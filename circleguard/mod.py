@@ -315,5 +315,5 @@ class Mod(ModCombination):
 
     def __init__(self, value):
         if isinstance(value, str):
-            value = ModCombination._parse_mod_string(value)
+            value = ModCombination._parse_mod_string(value.upper())
         super().__init__(value)
