@@ -542,7 +542,7 @@ class Hit():
         return hash((self.hitobject, self.t, self.xy))
 
     def __repr__(self):
-        return (f"Hit(hitobject={self.hitobject},t={self.t},xy={self.xy}")
+        return f"Hit(hitobject={self.hitobject},t={self.t},xy={self.xy}"
 
     def __str__(self):
         return f"({self.x}, {self.y}) at t {self.t}"

@@ -27,7 +27,7 @@ class Hitobject():
         self.y = xy[1]
 
     @classmethod
-    def from_slider_hitobj(self, hitobj, replay, beatmap, already_converted=False):
+    def from_slider_hitobj(cls, hitobj, replay, beatmap, already_converted=False):
         """
         Instantiates a circleguard hitobject from a
         :class:`slider.beatmap.HitObject`, a

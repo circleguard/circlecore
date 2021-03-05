@@ -206,8 +206,8 @@ class ModCombination():
             ordered according to :const:`~circleguard.mod.ModCombination.ORDER`.
         """
 
-        mods = [ModCombination(mod) for mod in int_to_mod.keys() if
-                self.value & mod]
+        mods = [ModCombination(mod_int) for mod_int in int_to_mod if
+                self.value & mod_int]
         # order the mods by Mod.ORDER
         mods = [mod for mod in Mod.ORDER if mod in mods]
         if not clean:
