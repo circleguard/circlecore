@@ -38,7 +38,7 @@ class GameVersion(int):
     get the numeric value of the game version, they would have to do
     ``replay.game_version.version`` as opposed to ``replay.game_version`` here.
     """
-    def __new__(self, version, concrete):
+    def __new__(cls, version, concrete):
         ret = int.__new__(GameVersion, version)
         ret.concrete = concrete
         return ret
@@ -79,5 +79,5 @@ class NoGameVersion(GameVersion):
     Used when a :class:`~circleguard.loadables.Replay` has no information about
     its version, and cannot even estimate its version.
     """
-    def __new__(self):
+    def __new__(cls):
         return super().__new__(NoGameVersion, -1, None)
