@@ -539,8 +539,8 @@ class Circleguard:
         self.load_info(u)
         return u
 
-    def MapUser(self, map_id, user_id, span=Loader.MAX_MAP_SPAN, mods=None, \
-        cache=None, available_only=True) -> MapUser:
+    def MapUser(self, map_id, user_id, span=Loader.MAX_MAP_SPAN, cache=None,
+        available_only=True) -> MapUser:
         """
         Instantiates a new :class:`~circleguard.loadables.MapUser`, loads its
         info, and returns the now info-loaded ``MapUser``.
@@ -682,8 +682,8 @@ class KeylessCircleguard(Circleguard):
         raise NotImplementedError("KeylessCircleguards cannot create "
             "info-loaded ReplayContainers")
 
-    def MapUser(self, map_id, user_id, span=Loader.MAX_MAP_SPAN, mods=None, \
-        cache=None, available_only=True) -> MapUser:
+    def MapUser(self, map_id, user_id, span=Loader.MAX_MAP_SPAN, cache=None,
+        available_only=True) -> MapUser:
         raise NotImplementedError("KeylessCircleguards cannot create "
             "info-loaded ReplayContainers")
 
