@@ -290,6 +290,16 @@ class Loader():
         try:
             Loader.check_response(response)
         except NoInfoAvailableException:
+            # The logic below allows us to load eg
+            # ``Map(221777, mods=Mod.SO + Mod.PF + Mod.HT)`` or some equally
+            # absurd mod combination for which there are no replays, and have
+            # that loading not throw ``NoInfoAvailableException``. Instead,
+            # the map's replays list will just be empty.
+            # However, we only want to apply this if we're loading a map, ie
+            # ``span`` has been passed. If ``user_id`` was passed instead, raise
+            # the exception as usual.
+            if user_id:
+                raise
             # the osu! api doesn't distinguish between a map not existing, and
             # no scores having been set on that map for a particular mod
             # combination - both are empty responses which will trigger a no

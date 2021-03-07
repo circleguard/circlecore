@@ -1,5 +1,5 @@
 from circleguard import (ReplayMap, ReplayPath, RatelimitWeight, Map, User,
-    MapUser, Mod)
+    MapUser, Mod, NoInfoAvailableException)
 
 from tests.utils import CGTestCase, RES
 
@@ -29,6 +29,13 @@ class TestReplays(CGTestCase):
         self.assertEqual(r.weight, RatelimitWeight.HEAVY, "RatelimitWeight was not correct")
         self.assertEqual(r.username, "Toy", "Username was not correct")
         self.assertTrue(r.loaded, "Loaded status was not correct")
+
+    def test_no_replay_raises(self):
+        # contrary to loading a Map, where we don't want to raise if the map
+        # exists but no scores with the given mod combo exists, we do want to
+        # raise if a replay is not available.
+        r = ReplayMap(234378, 13947937)
+        self.assertRaises(NoInfoAvailableException, lambda: self.cg.load(r))
 
 
 class TestMap(CGTestCase):
