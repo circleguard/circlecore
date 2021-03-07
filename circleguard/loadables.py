@@ -932,7 +932,7 @@ class ReplayMap(Replay):
 
     def __eq__(self, loadable):
         """
-        Whether the two maps are equal.
+        Whether the two replay maps are equal.
 
         Notes
         -----
