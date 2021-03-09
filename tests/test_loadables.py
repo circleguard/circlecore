@@ -37,6 +37,10 @@ class TestReplays(CGTestCase):
         r = ReplayMap(234378, 13947937)
         self.assertRaises(NoInfoAvailableException, lambda: self.cg.load(r))
 
+    def test_no_replay_data_raises(self):
+        r = ReplayPath(RES / "other" / "empty_replay_data.osr")
+        self.assertRaises(ValueError, lambda: self.cg.load(r))
+
 
 class TestMap(CGTestCase):
     @classmethod

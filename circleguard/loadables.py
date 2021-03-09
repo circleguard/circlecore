@@ -675,6 +675,26 @@ class Replay(Loadable):
         if replay_data is None:
             return
 
+        # In rare cases (I'm not quite sure how to reproduce), a replay's replay
+        # data can be empty. We check this here to throw a clearer error
+        # message than the IndexError we will get shortly after with
+        # ``replay_data[0]``.
+        #
+        # Note that there's an important distinction between ``replay_data``
+        # being ``None`` and being the empty list ``[]`` - the former means the
+        # api (or osr, or some other source) had no replay data for this replay,
+        # and the latter means it *had* replay data, it was just empty replay
+        # data.
+        #
+        # It might be okay to just return as with the ``replay_data is None``
+        # case, but I'm erring on the side of caution and throwing for now.
+        #
+        # See https://github.com/circleguard/circleguard/issues/133 for examples
+        # of replays exhibiting this behavior.
+        if replay_data == []:
+            raise ValueError("This replay's replay data was empty. This should "
+                "not happen and is indicative of a misbehaved replay.")
+
         # remove invalid zero time frame at beginning of replay
         # https://github.com/ppy/osu/blob/1587d4b26fbad691242544a62dbf017a78705ae3/osu.Game/Scoring/Legacy/LegacyScoreDecoder.cs#L242-L245
         if replay_data[0].time_since_previous_action == 0:
