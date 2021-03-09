@@ -1019,6 +1019,7 @@ class ReplayPath(Replay):
         self.log = logging.getLogger(__name__ + ".ReplayPath")
         self.path = Path(path).absolute()
         self.beatmap_hash = None
+        self._user_id_func = None
 
     def load(self, loader, cache):
         """
@@ -1164,6 +1165,7 @@ class ReplayString(Replay):
         self.log = logging.getLogger(__name__ + ".ReplayString")
         self.replay_data_str = replay_data_str
         self.beatmap_hash = None
+        self._user_id_func = None
 
     def load(self, loader, cache):
         """
