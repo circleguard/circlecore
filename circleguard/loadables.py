@@ -696,7 +696,8 @@ class Replay(Loadable):
                 "not happen and is indicative of a misbehaved replay.")
 
         # remove invalid zero time frame at beginning of replay
-        # https://github.com/ppy/osu/blob/1587d4b26fbad691242544a62dbf017a78705ae3/osu.Game/Scoring/Legacy/LegacyScoreDecoder.cs#L242-L245
+        # https://github.com/ppy/osu/blob/1587d4b26fbad691242544a62dbf017a78705
+        # ae3/osu.Game/Scoring/Legacy/LegacyScoreDecoder.cs#L242-L245
         if replay_data[0].time_since_previous_action == 0:
             replay_data = replay_data[1:]
 
