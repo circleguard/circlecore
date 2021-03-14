@@ -139,7 +139,7 @@ def replay_pairs(replays, replays2=None):
 
 
 def check_param(param, options):
-    if not param in options:
+    if param not in options:
         raise ValueError(f"Expected one of {','.join(options)}. Got {param}")
 
 
