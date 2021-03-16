@@ -20,6 +20,9 @@ class TestLoader(CGTestCase):
         self.assertEqual(Mod(["HD"]), Mod.HD)
         self.assertEqual(Mod(["NC"]), Mod.NC)
         self.assertEqual(Mod(["SO", "HD", "DT"]), Mod.HD + Mod.DT + Mod.SO)
+        self.assertEqual(Mod(["SOHD", "DT"]), Mod.HD + Mod.DT + Mod.SO)
+        self.assertEqual(Mod(["SOHDDT"]), Mod.HD + Mod.DT + Mod.SO)
+        self.assertEqual(Mod(["HD", "SODT"]), Mod.HD + Mod.DT + Mod.SO)
 
         self.assertRaises(ValueError, lambda: Mod(["DTH"]))
         self.assertRaises(ValueError, lambda: Mod(["DH"]))
