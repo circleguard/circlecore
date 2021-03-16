@@ -16,8 +16,16 @@ class TestLoader(CGTestCase):
         self.assertRaises(ValueError, lambda: Mod("DTH"))
         self.assertRaises(ValueError, lambda: Mod("DH"))
 
+    def test_mod_str_list_parsing(self):
+        self.assertEqual(Mod(["HD"]), Mod.HD)
+        self.assertEqual(Mod(["NC"]), Mod.NC)
+        self.assertEqual(Mod(["SO", "HD", "DT"]), Mod.HD + Mod.DT + Mod.SO)
+
+        self.assertRaises(ValueError, lambda: Mod(["DTH"]))
+        self.assertRaises(ValueError, lambda: Mod(["DH"]))
+        self.assertRaises(ValueError, lambda: Mod(["DH", int()]))
+
     def test_equality_reflexivity(self):
-        # reflexivity test
         self.assertEqual(Mod("NC"), Mod("NC"))
 
     def test_mod_ordering(self):
