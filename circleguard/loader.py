@@ -8,7 +8,7 @@ from enum import Enum
 
 from requests import RequestException
 import osrparse
-import ossapi
+from ossapi import Ossapi
 
 from circleguard.mod import Mod
 from circleguard.utils import TRACE
@@ -223,7 +223,7 @@ class Loader():
 
     def __init__(self, key, cacher=None):
         self.log = logging.getLogger(__name__)
-        self.api = ossapi.ossapi(key)
+        self.api = Ossapi(key)
         self.cacher = cacher
 
     @request
