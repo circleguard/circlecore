@@ -4,7 +4,7 @@ from slider.beatmap import Slider as SliderSlider
 from slider.beatmap import Spinner as SliderSpinner
 from slider.mod import circle_radius
 
-from circleguard.mod import Mod
+from circleguard import Mod
 
 # We define our own hitobjects as the slider library's hitobjects have too many
 # attributes and methods we don't care about, and they also lock position

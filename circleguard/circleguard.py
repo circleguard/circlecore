@@ -12,7 +12,7 @@ from circleguard.investigator import Investigator, Hit, Snap
 from circleguard.cacher import Cacher
 from circleguard.utils import convert_statistic, check_param
 from circleguard.loadables import Map, User, MapUser
-from circleguard.mod import Mod
+from circleguard import Mod
 # from circleguard.frametime_graph import FrametimeGraph
 
 

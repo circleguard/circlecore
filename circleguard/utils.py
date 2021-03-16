@@ -5,7 +5,7 @@ from itertools import product, chain, combinations
 
 import numpy as np
 
-from circleguard.mod import Mod
+from circleguard import Mod
 
 
 class RatelimitWeight(Enum):
