@@ -11,7 +11,8 @@ from circleguard.comparer import Comparer
 from circleguard.investigator import Investigator, Hit, Snap
 from circleguard.cacher import Cacher
 from circleguard.utils import convert_statistic, check_param
-from circleguard.loadables import Map, User, MapUser
+from circleguard.loadables import (Map, User, MapUser, ReplayMap, ReplayID,
+    ReplayPath, ReplayString)
 from circleguard import Mod
 # from circleguard.frametime_graph import FrametimeGraph
 
@@ -568,6 +569,63 @@ class Circleguard:
         self.load_info(mu)
         return mu
 
+    def ReplayMap(self, map_id, user_id, mods=None, cache=None, info=None) \
+        -> ReplayMap:
+        """
+        Returns a new, loaded :class:`~circleguard.loadables.ReplayMap`.
+
+        Notes
+        -----
+        This function is provided as a convenience for when you want to create a
+        ``ReplayMap`` and load it immediately. Loading can be an expensive
+        operation which is why this does not occur by default.
+        """
+        r = ReplayMap(map_id, user_id, mods, cache, info)
+        self.load(r)
+        return r
+
+    def ReplayPath(self, path, cache=None) -> ReplayPath:
+        """
+        Returns a new, loaded :class:`~circleguard.loadables.ReplayPath`.
+
+        Notes
+        -----
+        This function is provided as a convenience for when you want to create a
+        ``ReplayPath`` and load it immediately. Loading can be an expensive
+        operation which is why this does not occur by default.
+        """
+        r = ReplayPath(path, cache)
+        self.load(r)
+        return r
+
+    def ReplayString(self, replay_data_str, cache=None) -> ReplayString:
+        """
+        Returns a new, loaded :class:`~circleguard.loadables.ReplayString`.
+
+        Notes
+        -----
+        This function is provided as a convenience for when you want to create a
+        ``ReplayString`` and load it immediately. Loading can be an expensive
+        operation which is why this does not occur by default.
+        """
+        r = ReplayString(replay_data_str, cache)
+        self.load(r)
+        return r
+
+    def ReplayID(self, replay_id, cache=None) -> ReplayID:
+        """
+        Returns a new, loaded :class:`~circleguard.loadables.ReplayID`.
+
+        Notes
+        -----
+        This function is provided as a convenience for when you want to create a
+        ``ReplayID`` and load it immediately. Loading can be an expensive
+        operation which is why this does not occur by default.
+        """
+        r = ReplayID(replay_id, cache)
+        self.load(r)
+        return r
+
     def beatmap(self, replay):
         self.load(replay)
         return replay.beatmap(self.library)
@@ -684,6 +742,22 @@ class KeylessCircleguard(Circleguard):
         raise NotImplementedError("KeylessCircleguards cannot create "
             "info-loaded ReplayContainers")
 
+    def ReplayMap(self, map_id, user_id, mods=None, cache=None, info=None) \
+        -> ReplayMap:
+        raise NotImplementedError("KeylessCircleguards cannot create "
+            "loaded Replays")
+
+    def ReplayPath(self, path, cache=None) -> ReplayPath:
+        raise NotImplementedError("KeylessCircleguards cannot create "
+            "loaded Replays")
+
+    def ReplayString(self, replay_data_str, cache=None) -> ReplayString:
+        raise NotImplementedError("KeylessCircleguards cannot create "
+            "loaded Replays")
+
+    def ReplayID(self, replay_id, cache=None) -> ReplayID:
+        raise NotImplementedError("KeylessCircleguards cannot create "
+            "loaded Replays")
 
 def set_options(*, loglevel=None):
     """
