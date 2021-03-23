@@ -478,8 +478,7 @@ class Circleguard:
 
     def Map(self, map_id, span, mods=None, cache=None) -> Map:
         """
-        Instantiates a new :class:`~circleguard.loadables.Map`, loads its info,
-        and returns the now info-loaded ``Map``.
+        Returns a new, info-loaded :class:`~circleguard.loadables.Map`.
 
         Notes
         -----
@@ -510,8 +509,7 @@ class Circleguard:
     def User(self, user_id, span, mods=None, cache=None, available_only=True) \
         -> User:
         """
-        Instantiates a new :class:`~circleguard.loadables.User`, loads its info,
-        and returns the now info-loaded ``User``.
+        Returns a new, info-loaded :class:`~circleguard.loadables.User`.
 
         Notes
         -----
@@ -542,8 +540,7 @@ class Circleguard:
     def MapUser(self, map_id, user_id, span=Loader.MAX_MAP_SPAN, cache=None,
         available_only=True) -> MapUser:
         """
-        Instantiates a new :class:`~circleguard.loadables.MapUser`, loads its
-        info, and returns the now info-loaded ``MapUser``.
+        Returns a new, info-loaded :class:`~circleguard.loadables.MapUser`.
 
         Notes
         -----
@@ -556,7 +553,7 @@ class Circleguard:
 
         >>> # usage without this function (bad)
         >>> cg = Circleguard("key")
-        >>> mu = cg.MapUser(124493, 129891)
+        >>> mu = MapUser(124493, 129891)
         >>> cg.load_info(mu)
         >>> for replay in mu:
         >>>     ...
