@@ -19,10 +19,9 @@ with open("circleguard/version.py") as f:
 setup(
     name="circleguard",
     version=VERSION,
-    description="A player made and maintained cheat detection tool for osu!. "
-                "Provides support for detecting replay stealing, remodding, "
-                "relax, and aim correction from a profile, map, or set of osr "
-                "files.",
+    description="A utilities library for osu!. Provides support for parsing "
+        "replays from a file or from the api, as well as support for unstable "
+        "rate, hits, similarity, and frametime calculations.",
     long_description=long_description,
     long_description_content_type="text/markdown",
     classifiers=[
