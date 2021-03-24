@@ -34,7 +34,7 @@ intersphinx_mapping = {"python": ("https://docs.python.org/3", None),
 # https://stackoverflow.com/a/37210251
 autodoc_member_order = "bysource"
 
-html_theme = "sphinx_rtd_theme"
+html_theme = "furo"
 # html_theme_options = {"display_version": False}
 
 # Add any paths that contain templates here, relative to this directory.
