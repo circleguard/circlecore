@@ -8,7 +8,7 @@ objects. That would be annoying, so we provide classes that do this for you. The
 |Map|
 -----
 
-|Map|\s represnt a beatmap's top plays (ie leaderboard), as seen on the osu! website.
+|Map|\s represent a beatmap's top plays (ie leaderboard), as seen on the osu! website.
 
 When instantiating a |Map|, you must specify which scores you want from the map:
 
