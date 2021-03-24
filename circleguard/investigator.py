@@ -1,10 +1,14 @@
+from datetime import timedelta
+
 import numpy as np
 from slider.beatmap import Circle, Slider
 
-from circleguard.mod import Mod
+from circleguard import Mod
 from circleguard.utils import KEY_MASK, check_param
+import circleguard.utils as utils
 from circleguard.game_version import GameVersion
-from circleguard.hitobjects import Hitobject
+from circleguard.hitobjects import Hitobject, Spinner
+
 
 class Investigator:
     # https://osu.ppy.sh/home/changelog/stable40/20190207.2
@@ -47,7 +51,7 @@ class Investigator:
         ac = xy[2:] - xy[:-2]
 
     @staticmethod
-    def snaps(replay, max_angle, min_distance):
+    def snaps(replay, max_angle, min_distance, beatmap):
         """
         Calculates the angle between each set of three points (a,b,c) and finds
         points where this angle is extremely acute and neither ``|ab|`` or
@@ -62,6 +66,9 @@ class Investigator:
         min_distance: float
             Consider only (a,b,c) where ``|ab| > min_distance`` and
             ``|ab| > min_distance``.
+        beatmap: :class:`slider.beatmap.Beatmap`
+            If passed, only the snaps that occur on a hitobject in this beatmap
+            will be returned.
 
         Returns
         -------
@@ -86,9 +93,14 @@ class Investigator:
 
         # label three consecutive points (a b c) and the vectors between them
         # (ab, bc, ac)
-        ab = xy[1:-1] - xy[:-2]
-        bc = xy[2:] - xy[1:-1]
-        ac = xy[2:] - xy[:-2]
+        a = xy[:-2]
+        b = xy[1:-1]
+        c = xy[2:]
+
+        ab = b - a
+        bc = c - b
+        ac = c - a
+
         # Distance a to b, b to c, and a to c
         AB = np.linalg.norm(ab, axis=1)
         BC = np.linalg.norm(bc, axis=1)
@@ -99,8 +111,10 @@ class Investigator:
         num = -(AC ** 2 - AB ** 2 - BC ** 2)
         denom = (2 * AB * BC)
         # use true_divide for handling division by zero
-        cos_beta = np.true_divide(num, denom, out=np.full_like(num, np.nan), where=denom!=0)
-        # rounding issues makes cos_beta go out of arccos' domain, so restrict it
+        cos_beta = np.true_divide(num, denom, out=np.full_like(num, np.nan),
+            where=denom!=0)
+        # rounding issues makes cos_beta go out of arccos' domain, so restrict
+        # it
         cos_beta = np.clip(cos_beta, -1, 1)
 
         beta = np.rad2deg(np.arccos(cos_beta))
@@ -109,17 +123,44 @@ class Investigator:
         dist_mask = min_AB_BC > min_distance
         # use less to avoid comparing to nan
         angle_mask = np.less(beta, max_angle, where=~np.isnan(beta))
-        # boolean array of datapoints where both distance and angle requirements are met
+        # datapoints where both distance and angle requirements are met
         mask = dist_mask & angle_mask
 
-        return [Snap(t, b, d) for (t, b, d) in zip(t[mask], beta[mask], min_AB_BC[mask])]
+        snaps = []
+        for (t, xy, b, d) in zip(t[mask], b[mask], beta[mask], min_AB_BC[mask]):
+            # can't discard any snaps if we don't know the beatmap, so count all
+            # of them
+            if not beatmap:
+                snaps.append(Snap(t, b, d))
+                continue
+
+            hitobj = beatmap.closest_hitobject(timedelta(milliseconds=int(t)))
+            hitobj = Hitobject.from_slider_hitobj(hitobj, replay, beatmap)
+
+            # ignore snaps on spinners
+            if isinstance(hitobj, Spinner):
+                continue
+
+            easy = Mod.EZ in replay.mods
+            hard_rock = Mod.HR in replay.mods
+            OD = beatmap.od(easy=easy, hard_rock=hard_rock)
+
+            hitwindow = utils.hitwindow(OD)
+
+            # only count snaps that occur inside hitobjects
+            inside_hitobj_pos = np.linalg.norm(xy - hitobj.xy) <= hitobj.radius
+            inside_hitobj_t = (hitobj.t - hitwindow) < t < (hitobj.t + hitwindow)
+            if inside_hitobj_pos and inside_hitobj_t:
+                snaps.append(Snap(t, b, d))
+
+        return snaps
 
     @staticmethod
     def snaps_sam(replay_data, num_jerks, min_jerk):
         """
-        Calculates the jerk at each moment in the Replay, counts the number of times
-        it exceeds min_jerk and reports a positive if that number is over num_jerks.
-        Also reports all suspicious jerks and their timestamps.
+        Calculates the jerk at each moment in the Replay, counts the number of
+        times it exceeds min_jerk and reports a positive if that number is over
+        num_jerks. Also reports all suspicious jerks and their timestamps.
 
         WARNING
         -------
@@ -282,13 +323,9 @@ class Investigator:
 
         hits = []
 
-        # stable converts OD (and CS), which are originally a float32, to a
-        # double and this causes some hitwindows to be messed up when casted to
-        # an int so we replicate this
-        hitwindow = int(150 + 50 * (5 - float(np.float32(OD))) / 5)
+        hitwindow = utils.hitwindow(OD)
+        hitradius = utils.hitradius(CS)
 
-        # attempting to match stable hitradius
-        hitradius = np.float32(64 * ((1.0 - np.float32(0.7) * (float(np.float32(CS)) - 5) / 5)) / 2) * np.float32(1.00041)
 
         hitobj_i = 0
         keydown_i = 0
@@ -356,7 +393,7 @@ class Investigator:
                 hitobj_i += 1
             else:
                 if keydown_t < hitobj_t + hitwindow and np.linalg.norm(keydown_xy - hitobj_xy) <= hitradius and hitobj_type != 2:
-                    hit = Hit(hitobj, keydown_t, keydown_xy, CS)
+                    hit = Hit(hitobj, keydown_t, keydown_xy, replay, beatmap)
                     hits.append(hit)
 
                     # sliders don't disappear after clicking
@@ -430,12 +467,15 @@ class Hit():
         The time the hit occured.
     xy: list[float, float]
         The x and y position where the hit occured.
-    CS: float
-        The circle size of the beatmap (after being modified by the replay's
-        mods, ie ``Mod.HR`` or ``Mod.EZ``) this hit occurred in.
+    replay: :class:`circleguard.loadables.Replay`
+        The replay this hit was made on.
+    beatmap: :class:`slider.beatmap.Beatmap`
+        The beatmap this hit was made on.
     """
-    def __init__(self, hitobject, t, xy, CS):
-        self.hitobject = Hitobject.from_slider_hitobj(hitobject, CS)
+    def __init__(self, hitobject, t, xy, replay, beatmap):
+        # TODO remove `already_converted=True` when
+        # https://github.com/llllllllll/slider/issues/80 is fixed
+        self.hitobject = Hitobject.from_slider_hitobj(hitobject, replay, beatmap, True)
         self.t = t
         self.xy = xy
         self.x = xy[0]
@@ -502,7 +542,7 @@ class Hit():
         return hash((self.hitobject, self.t, self.xy))
 
     def __repr__(self):
-        return (f"Hit(hitobject={self.hitobject},t={self.t},xy={self.xy}")
+        return f"Hit(hitobject={self.hitobject},t={self.t},xy={self.xy}"
 
     def __str__(self):
         return f"({self.x}, {self.y}) at t {self.t}"

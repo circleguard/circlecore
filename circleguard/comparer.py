@@ -1,7 +1,7 @@
 import numpy as np
 from scipy import signal
 
-from circleguard.mod import Mod
+from circleguard import Mod
 
 class Comparer:
 
@@ -88,7 +88,6 @@ class Comparer:
         float
             The mean distance between the two datasets.
         """
-
         # euclidean distance
         distance = xy1 - xy2
         distance = (distance ** 2).sum(axis=1) ** 0.5
@@ -97,7 +96,6 @@ class Comparer:
 
     @staticmethod
     def compute_correlation(xy1, xy2, num_chunks):
-
         xy1 = xy1.T
         xy2 = xy2.T
 
@@ -145,10 +143,9 @@ class Comparer:
 
         Notes
         -----
-        The length of the two returned arrays will be equal. This is a (desired)
-        side effect of interpolating.
+        The length of the two returned arrays will be equal. This is a
+        (desirous) side effect of interpolating.
         """
-
         if len(t1) > len(t2):
             xy2x = np.interp(t1, t2, xy2[:, 0])
             xy2y = np.interp(t1, t2, xy2[:, 1])
@@ -171,7 +168,6 @@ class Comparer:
         --------
         The length of the two passed arrays must be equal.
         """
-
         valid = np.all(([0, 0] <= xy1) & (xy1 <= [512, 384]), axis=1) & \
             np.all(([0, 0] <= xy2) & (xy2 <= [512, 384]), axis=1)
         xy1 = xy1[valid]

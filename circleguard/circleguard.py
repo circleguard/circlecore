@@ -5,16 +5,16 @@ from typing import Iterable, Union, Tuple
 import weakref
 
 from slider import Library
-from slider.mod import circle_radius
-import numpy as np
 
 from circleguard.loader import Loader
 from circleguard.comparer import Comparer
 from circleguard.investigator import Investigator, Hit, Snap
 from circleguard.cacher import Cacher
 from circleguard.utils import convert_statistic, check_param
-from circleguard.loadables import Map, User, MapUser
-from circleguard.mod import Mod
+from circleguard.loadables import (Map, User, MapUser, ReplayMap, ReplayID,
+    ReplayPath, ReplayString)
+from circleguard import Mod
+# from circleguard.frametime_graph import FrametimeGraph
 
 
 class Circleguard:
@@ -207,7 +207,7 @@ class Circleguard:
             raise ValueError("The ur of a replay that does not know what map "
                 "it was set on cannot be calculated")
 
-        beatmap = replay.beatmap(self.library)
+        beatmap = self.beatmap(replay)
         ur = Investigator.ur(replay, beatmap)
         if cv:
             ur = convert_statistic(ur, replay.mods, to="cv")
@@ -216,13 +216,9 @@ class Circleguard:
 
 
     def snaps(self, replay, max_angle=DEFAULT_ANGLE, \
-        min_distance=DEFAULT_DISTANCE) -> Iterable[Snap]:
+        min_distance=DEFAULT_DISTANCE, only_on_hitobjs=True) -> Iterable[Snap]:
         """
         Finds any snaps (sudden, jerky movement) in ``replay``.
-
-        Specifically, this function calculates the angle between each set of
-        three points (a,b,c) and finds points where this angle is extremely
-        acute and neither ``|ab|`` or ``|bc|`` are small.
 
         Parameters
         ----------
@@ -233,14 +229,31 @@ class Circleguard:
         min_distance: float
             Consider only (a,b,c) where ``|ab| > min_distance`` and
             ``|ab| > min_distance``.
+        only_on_hitobjs: bool
+            Whether to only return snaps that occur on a hitobject.
 
         Returns
         -------
         list[Snap]
             The snaps of the replay. This list is empty if no snaps were found.
+
+        Notes
+        -----
+        Specifically, this function calculates the angle between each set of
+        three points (a,b,c) and finds points where this angle is extremely
+        acute and neither ``|ab|`` or ``|bc|`` are small.
+
+        By default, only snaps which occur on a hitobject are returned. This is
+        to reduce false positives from spinners, driver issues, or lifting the
+        pen off the tablet and back on again.
         """
         self.load(replay)
-        return Investigator.snaps(replay, max_angle, min_distance)
+
+        beatmap = None
+        if only_on_hitobjs:
+            beatmap = self.beatmap(replay)
+
+        return Investigator.snaps(replay, max_angle, min_distance, beatmap)
 
 
     def frametime(self, replay, cv=True, mods_unknown="raise") -> float:
@@ -381,7 +394,7 @@ class Circleguard:
             raise ValueError("The hits of a replay that does not know what map "
                 "it was set on cannot be calculated.")
 
-        beatmap = replay.beatmap(self.library)
+        beatmap = self.beatmap(replay)
         hits = Investigator.hits(replay, beatmap)
 
         if not within:
@@ -389,6 +402,46 @@ class Circleguard:
 
         hits = [hit for hit in hits if hit.within(within)]
         return hits
+
+    def frametime_graph(self, replay, cv=True, figure=None):
+        """
+        Uses matplotlib to create a graph of the frametimes of the replay.
+
+        Parameters
+        ----------
+        replay: :class:`~circleguard.loadables.Replay`
+            The replay to graph the frametimes of.
+        cv: bool
+            Whether the frametimes should be converted before being graphed.
+        figure: :class:`matplotlib.figure.Figure`
+            If passed, this figure will be used instead of creating a new one
+            with pyplot. Using this parameter is not recommended for normal
+            usage. It is exposed to allow circleguard (the gui) to use this
+            method, as matplotlib's pyqt compatability layer adds some
+            complications which this works around.
+
+        Returns
+        -------
+        :module:`matplotlib.pyplot` or :class:`matplotlib.figure.Figure`
+            Matplotlib's pyplot module for ease of use, so you can call
+            :meth:`matplotlib.pyplot.show` on the return value of this function
+            to display the graph.
+            |br|
+            If ``figure`` is passed, the return value is instead the passed
+            figure after being modified by the frametime graph.
+        """
+        # we raise an ImportError if the consumer doesn't have matplotlib
+        # installed, which is why we have to import it only when this function
+        # is called.
+        from circleguard.frametime_graph import FrametimeGraph
+        from matplotlib import pyplot
+        self.load(replay)
+        frametime_graph = FrametimeGraph(replay, cv, figure)
+        # strictly speaking, I don't think this return is necessary -
+        # ``FrametimeGraph`` modifies the passed figure on instantiation,
+        # so consumers could just use the figure they passed in instead of the
+        # return value here. Returning it anyway feels better though.
+        return frametime_graph.figure if figure else pyplot
 
 
     def load(self, loadable):
@@ -426,8 +479,7 @@ class Circleguard:
 
     def Map(self, map_id, span, mods=None, cache=None) -> Map:
         """
-        Instantiates a new :class:`~circleguard.loadables.Map`, loads its info,
-        and returns the now info-loaded ``Map``.
+        Returns a new, info-loaded :class:`~circleguard.loadables.Map`.
 
         Notes
         -----
@@ -458,8 +510,7 @@ class Circleguard:
     def User(self, user_id, span, mods=None, cache=None, available_only=True) \
         -> User:
         """
-        Instantiates a new :class:`~circleguard.loadables.User`, loads its info,
-        and returns the now info-loaded ``User``.
+        Returns a new, info-loaded :class:`~circleguard.loadables.User`.
 
         Notes
         -----
@@ -487,11 +538,10 @@ class Circleguard:
         self.load_info(u)
         return u
 
-    def MapUser(self, map_id, user_id, span=Loader.MAX_MAP_SPAN, mods=None, \
-        cache=None, available_only=True) -> MapUser:
+    def MapUser(self, map_id, user_id, span=Loader.MAX_MAP_SPAN, cache=None,
+        available_only=True) -> MapUser:
         """
-        Instantiates a new :class:`~circleguard.loadables.MapUser`, loads its
-        info, and returns the now info-loaded ``MapUser``.
+        Returns a new, info-loaded :class:`~circleguard.loadables.MapUser`.
 
         Notes
         -----
@@ -504,7 +554,7 @@ class Circleguard:
 
         >>> # usage without this function (bad)
         >>> cg = Circleguard("key")
-        >>> mu = cg.MapUser(124493, 129891)
+        >>> mu = MapUser(124493, 129891)
         >>> cg.load_info(mu)
         >>> for replay in mu:
         >>>     ...
@@ -518,6 +568,67 @@ class Circleguard:
         mu = MapUser(map_id, user_id, span, cache, available_only)
         self.load_info(mu)
         return mu
+
+    def ReplayMap(self, map_id, user_id, mods=None, cache=None, info=None) \
+        -> ReplayMap:
+        """
+        Returns a new, loaded :class:`~circleguard.loadables.ReplayMap`.
+
+        Notes
+        -----
+        This function is provided as a convenience for when you want to create a
+        ``ReplayMap`` and load it immediately. Loading can be an expensive
+        operation which is why this does not occur by default.
+        """
+        r = ReplayMap(map_id, user_id, mods, cache, info)
+        self.load(r)
+        return r
+
+    def ReplayPath(self, path, cache=None) -> ReplayPath:
+        """
+        Returns a new, loaded :class:`~circleguard.loadables.ReplayPath`.
+
+        Notes
+        -----
+        This function is provided as a convenience for when you want to create a
+        ``ReplayPath`` and load it immediately. Loading can be an expensive
+        operation which is why this does not occur by default.
+        """
+        r = ReplayPath(path, cache)
+        self.load(r)
+        return r
+
+    def ReplayString(self, replay_data_str, cache=None) -> ReplayString:
+        """
+        Returns a new, loaded :class:`~circleguard.loadables.ReplayString`.
+
+        Notes
+        -----
+        This function is provided as a convenience for when you want to create a
+        ``ReplayString`` and load it immediately. Loading can be an expensive
+        operation which is why this does not occur by default.
+        """
+        r = ReplayString(replay_data_str, cache)
+        self.load(r)
+        return r
+
+    def ReplayID(self, replay_id, cache=None) -> ReplayID:
+        """
+        Returns a new, loaded :class:`~circleguard.loadables.ReplayID`.
+
+        Notes
+        -----
+        This function is provided as a convenience for when you want to create a
+        ``ReplayID`` and load it immediately. Loading can be an expensive
+        operation which is why this does not occur by default.
+        """
+        r = ReplayID(replay_id, cache)
+        self.load(r)
+        return r
+
+    def beatmap(self, replay):
+        self.load(replay)
+        return replay.beatmap(self.library)
 
     @property
     def cache(self):
@@ -579,11 +690,12 @@ class KeylessCircleguard(Circleguard):
         return super().ur(replay, cv)
 
     def snaps(self, replay, max_angle=Circleguard.DEFAULT_ANGLE, \
-        min_distance=Circleguard.DEFAULT_DISTANCE) -> Iterable[Snap]:
+        min_distance=Circleguard.DEFAULT_DISTANCE, only_on_hitobjs=True) \
+        -> Iterable[Snap]:
         if not replay.loaded:
             raise ValueError("replays must be loaded before use in a "
                 "KeylessCircleguard")
-        return super().snaps(replay, max_angle, min_distance)
+        return super().snaps(replay, max_angle, min_distance, only_on_hitobjs)
 
     def frametime(self, replay, cv=True) -> float:
         if not replay.loaded:
@@ -625,11 +737,27 @@ class KeylessCircleguard(Circleguard):
         raise NotImplementedError("KeylessCircleguards cannot create "
             "info-loaded ReplayContainers")
 
-    def MapUser(self, map_id, user_id, span=Loader.MAX_MAP_SPAN, mods=None, \
-        cache=None, available_only=True) -> MapUser:
+    def MapUser(self, map_id, user_id, span=Loader.MAX_MAP_SPAN, cache=None,
+        available_only=True) -> MapUser:
         raise NotImplementedError("KeylessCircleguards cannot create "
             "info-loaded ReplayContainers")
 
+    def ReplayMap(self, map_id, user_id, mods=None, cache=None, info=None) \
+        -> ReplayMap:
+        raise NotImplementedError("KeylessCircleguards cannot create "
+            "loaded Replays")
+
+    def ReplayPath(self, path, cache=None) -> ReplayPath:
+        raise NotImplementedError("KeylessCircleguards cannot create "
+            "loaded Replays")
+
+    def ReplayString(self, replay_data_str, cache=None) -> ReplayString:
+        raise NotImplementedError("KeylessCircleguards cannot create "
+            "loaded Replays")
+
+    def ReplayID(self, replay_id, cache=None) -> ReplayID:
+        raise NotImplementedError("KeylessCircleguards cannot create "
+            "loaded Replays")
 
 def set_options(*, loglevel=None):
     """

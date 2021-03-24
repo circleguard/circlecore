@@ -1,5 +1,4 @@
 import numpy as np
-import unittest
 
 from circleguard import ReplayPath, Mod, Circleguard, order, ReplayMap
 from tests.utils import CGTestCase, DELTA, UR_DELTA, RES, FRAMETIME_LIMIT
@@ -14,7 +13,7 @@ class TestSnaps(CGTestCase):
     def test_snaps(self):
         snaps = self.cg.snaps(self.r1)
 
-        self.assertEqual(len(snaps), 15)
+        self.assertEqual(len(snaps), 14)
         # beginning
         self.assertEqual(snaps[0].time, 5103)
         self.assertAlmostEqual(snaps[0].angle, 7.38491, delta=DELTA)
@@ -24,10 +23,48 @@ class TestSnaps(CGTestCase):
         self.assertAlmostEqual(snaps[8].angle, 6.34890, delta=DELTA)
         self.assertAlmostEqual(snaps[8].distance, 27.59918, delta=DELTA)
         # end
-        self.assertEqual(snaps[14].time, 79052)
-        self.assertAlmostEqual(snaps[14].angle, 8.77141, delta=DELTA)
-        self.assertAlmostEqual(snaps[14].distance, 8.21841, delta=DELTA)
+        self.assertEqual(snaps[13].time, 76502)
+        self.assertAlmostEqual(snaps[13].angle, 3.04130, delta=DELTA)
+        self.assertAlmostEqual(snaps[13].distance, 21.76919, delta=DELTA)
 
+    def test_snaps_only_on_hitobjs(self):
+        r = ReplayMap(221777, 39828)
+        snaps = self.cg.snaps(r, only_on_hitobjs=False)
+        self.assertEqual(len(snaps), 6)
+
+        # beginning
+        self.assertEqual(snaps[0].time, 3410)
+        self.assertAlmostEqual(snaps[0].angle, 0.19259, delta=DELTA)
+        self.assertAlmostEqual(snaps[0].distance, 44.61642, delta=DELTA)
+        # middle
+        self.assertEqual(snaps[2].time, 19622)
+        self.assertAlmostEqual(snaps[2].angle, 1.87673, delta=DELTA)
+        self.assertAlmostEqual(snaps[2].distance, 76.04480, delta=DELTA)
+        # end
+        self.assertEqual(snaps[5].time, 68833)
+        self.assertAlmostEqual(snaps[5].angle, 4.39870, delta=DELTA)
+        self.assertAlmostEqual(snaps[5].distance, 8.14900, delta=DELTA)
+
+        snaps = self.cg.snaps(r, only_on_hitobjs=True)
+        self.assertEqual(len(snaps), 2)
+
+        self.assertEqual(snaps[0].time, 68822)
+        self.assertAlmostEqual(snaps[0].angle, 3.92694, delta=DELTA)
+        self.assertAlmostEqual(snaps[0].distance, 8.14900, delta=DELTA)
+
+        self.assertEqual(snaps[1].time, 68833)
+        self.assertAlmostEqual(snaps[1].angle, 4.39870, delta=DELTA)
+        self.assertAlmostEqual(snaps[1].distance, 8.14900, delta=DELTA)
+
+    def test_snaps_only_on_hitobjs_accounts_for_time(self):
+        # checking that a frame that's in the radius of the nearest hitobj,
+        # but isn't within the hitobj's hitwindow and so can't hit the note,
+        # is not counted as a snap.
+        # This replay previously had 1 snap in it. See
+        # https://github.com/circleguard/circleguard/issues/123
+        r = ReplayMap(2769844, 448316, mods=Mod.HDHR)
+        snaps = self.cg.snaps(r)
+        self.assertEqual(len(snaps), 0)
 
 class TestSimilarity(CGTestCase):
 

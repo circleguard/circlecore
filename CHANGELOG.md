@@ -1,3 +1,65 @@
+# v5.0.2
+
+* remove `Mod.__ne__` as it's the inverse of `Mod.__eq__` by default if ne doesn't exist
+
+# v5.0.1
+
+* return ndarray instead of list in `Circleguard#frametimes`
+* add `Circleguard#frametime_graph` to generate a frametime graph from a replay. This requires that you have `matplotlib` installed
+* add `__str__` and `__repr__` to `Hit`
+* fix ur and hits erroring on maps that have catmull sliders
+
+
+# v5.0.0
+
+* `steal_check`, `relax_check`, `correction_check`, `timewarp_check` have been removed as deprecated, and `run` has been removed. Use `similarity`, `ur`, `snaps`, `frametime`, or a combination thereof instead
+* the `single` parameter has been removed from `similarity`, `ur`, `snaps`, `frametime`. These functions now only accept a replay (or pair of replays, in `similarity`'s case) instead of a `LoadableContainer`. Instead of passing a `LoadableConatainer` to these functions, you should iterate over the container and call the function with single replays
+* new `cv` parameter for `ur`, `frametime`, `frametimes`, which allows you to choose if you want the return value to be converted or unconverted
+* new `within` parameter for `hits`, which returns only hits within a certain distance from the edge of the hitobject
+* new functions `cg.Map`, `cg.User`, `cg.MapUser` which create the corresponding `ReplayContainer` and loads its info. This is shorthand for writing (for example):
+
+```python
+u = User(...)
+cg.load_info(u)
+```
+
+* new `mods_unknown` parameter to `similarity`, `frametime`, `frametimes`, which allows replays with unknown mods to still be processed, with the behavior specified by `mods_unknown`. This is useful e.g. for finding the similarity of two `ReplayID`s, as `ReplayIDs` do not provide mods due to api limitations
+* `Detect` has been removed entirely. If you were using `Detect.SIM_LIMIT` or `Detect.CORR_LIMIT`, see `Circleguard.SIM_LIMIT` and `Circleguard.CORR_LIMIT` as a replacement. Any other members have been permanently removed
+* `Result` and all subclasses have been removed. `Circleguard` methods now return the important result (such as a number or list) directly instead of wrapping it behind a `Result`
+* `ResultType` has been removed
+* circleguard-specific exceptions have been replaced by base python exceptions where possible
+* the `version` attribute of `Replay`s has been renamed to `game_version` and is now a new class, `GameVersion`, which subclasses int and provides additional functionality
+* `x` and `y` attributes have been added to `Hit`
+* the `hitobject` attribute of `Hit` is now a circleguard `Hitobject` object instead of a slider `Hitobject` object
+* new `Hit#distance` function which calculates the distance of the hit to either the edge or center of the hitobject
+* new `Hit#within` function which returns true if the hit was within a certain distance of the edge of the hitobject
+* for all intents and purposes, `LoadableContainer` has been removed. It is still available under the same name, but nothing inherits from it any more and it provides different functionality (acting as a true container and providing convenience operations on a list of `Loadable`s)
+* `Check` has been removed
+* `Replay`s have a new `map_info` attribute, which provides information about where their map can be found, either online or locally
+* new `Replay#beatmap` method, which loads the beatmap tied to the replay. This allows replay subclasses to have complete control over how they load their beatmap and which beatmap gets loaded
+* new `Replay#has_data()` method, which should be preferred instead of checking `replay.replay_data is not None`
+* `ReplayMap` and `ReplayPath` equality now checks replay data explicitly if both replays being compared are loaded
+* new `order` utils method which takes two replays and returns a 2-tuple where the earlier replay is first and the later replay is second. This is intended to be used to replace `steal_result.earlier_replay` and `steal_result.later_replay`. Example usage:
+
+```python
+(earlier_replay, later_replay) = order(r1, r2)
+```
+
+* new `replay_pairs` method which takes two lists of replays and returns a list of pairs of replays that should be compared against each other to cover all cases of replay stealing in the two lists. This is intended to be used in place of passing a `ReplayContainer` to `cg.similarity`, which no longer accepts iterables. Example usage:
+
+```python
+m = cg.Map(221777, span="1-2")
+for (replay1, replay2) in replay_pairs(m):
+    print(cg.similarity(replay1, replay2))
+```
+
+* KeylessCircleguard now has better error messages if you misuse it
+* tutorial has been rewritten
+
+# v4.5.1
+
+* implement `__hash__` for Replay subclasses
+
 # v4.5.0
 
 * add `KeylessCircleguard` class, which does not require a key to be instantiated and can do everything `Circleguard` can, with the requirement that the passed loadables are already loaded

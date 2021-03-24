@@ -10,8 +10,8 @@
 from circleguard import __version__
 
 project = "Circleguard"
-copyright = "2019, Liam DeVoe, samuelhklumpers, InvisibleSymbol"
-author = "Liam DeVoe, samuelhklumpers, InvisibleSymbol"
+copyright = "2020, Liam DeVoe, samuelhklumpers"
+author = "Liam DeVoe, samuelhklumpers"
 release = "v" + __version__
 version = "v" + __version__
 master_doc = 'index'
@@ -49,7 +49,7 @@ exclude_patterns = []
 # Add any paths that contain custom static files (such as style sheets) here,
 # relative to this directory. They are copied after the builtin static files,
 # so a file named "default.css" will overwrite the builtin "default.css".
-html_static_path = ["_static"]
+# html_static_path = ["_static"]
 
 # references that we want to use easily in any file
 rst_prolog = """

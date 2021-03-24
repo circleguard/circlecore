@@ -1,6 +1,5 @@
-from unittest import skip, TestSuite, TextTestRunner
 from circleguard import (ReplayMap, ReplayPath, RatelimitWeight, Map, User,
-    MapUser, Mod)
+    MapUser, Mod, NoInfoAvailableException)
 
 from tests.utils import CGTestCase, RES
 
@@ -30,6 +29,17 @@ class TestReplays(CGTestCase):
         self.assertEqual(r.weight, RatelimitWeight.HEAVY, "RatelimitWeight was not correct")
         self.assertEqual(r.username, "Toy", "Username was not correct")
         self.assertTrue(r.loaded, "Loaded status was not correct")
+
+    def test_no_replay_raises(self):
+        # contrary to loading a Map, where we don't want to raise if the map
+        # exists but no scores with the given mod combo exists, we do want to
+        # raise if a replay is not available.
+        r = ReplayMap(234378, 13947937)
+        self.assertRaises(NoInfoAvailableException, lambda: self.cg.load(r))
+
+    def test_no_replay_data_raises(self):
+        r = ReplayPath(RES / "other" / "empty_replay_data.osr")
+        self.assertRaises(ValueError, lambda: self.cg.load(r))
 
 
 class TestMap(CGTestCase):
@@ -64,6 +74,14 @@ class TestMap(CGTestCase):
         # 1st and 3rd (toy and epiphany)
         self.assertListEqual([r.user_id for r in self.map[0:3:2]], [2757689, 3256299])
 
+    def test_no_replays_does_not_raise(self):
+        # previously, loading the info of a map or user with no scores on the
+        # specified mod combination would result in a NoInfoAvailableException
+        # being thrown. We want to make sure this doesn't happen.
+        m = Map(2245774, "1-2", Mod.NC + Mod.HR + Mod.SO)
+        self.cg.load_info(m)
+        self.assertEqual(len(m), 0)
+
 
 class TestUser(CGTestCase):
     @classmethod
@@ -95,6 +113,11 @@ class TestUser(CGTestCase):
         self.assertListEqual([r.map_id for r in self.user[0:3]], [129891, 555797, 774965])
         # 1st and 3rd (FDFD and Remote Control)
         self.assertListEqual([r.map_id for r in self.user[0:3:2]], [129891, 774965])
+
+    def test_no_replays_does_not_raise(self):
+        u = User(12092800, "1-2", Mod.FL + Mod.EZ)
+        self.cg.load_info(u)
+        self.assertEqual(len(u), 0)
 
 
 class TestMapUser(CGTestCase):
