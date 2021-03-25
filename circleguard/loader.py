@@ -33,7 +33,7 @@ class InvalidKeyException(InternalAPIException):
     """An api key was rejected by the api."""
 
 class RatelimitException(InternalAPIException):
-    """The api has ratelimit an api key."""
+    """The api has ratelimited an api key."""
 
 class InvalidJSONException(InternalAPIException):
     """The api returned an invalid json response."""
