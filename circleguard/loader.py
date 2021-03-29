@@ -10,7 +10,7 @@ from requests import RequestException
 import osrparse
 from ossapi import Ossapi
 
-from circleguard import Mod
+from circleguard.mod import Mod
 from circleguard.utils import TRACE
 from circleguard.span import Span
 

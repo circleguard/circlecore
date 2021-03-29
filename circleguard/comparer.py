@@ -1,7 +1,7 @@
 import numpy as np
 from scipy import signal
 
-from circleguard import Mod
+from circleguard.mod import Mod
 
 class Comparer:
 

@@ -4,7 +4,7 @@ try:
 except ImportError:
     raise ImportError("matplotlib must be installed to create frametime graphs")
 
-from circleguard import Mod
+from circleguard.mod import Mod
 from circleguard.circleguard import KeylessCircleguard
 
 # classes that import optional modules have to be in their own file, or else

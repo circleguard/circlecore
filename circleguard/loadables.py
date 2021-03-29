@@ -9,7 +9,7 @@ import osrparse
 import numpy as np
 import wtc
 
-from circleguard import Mod
+from circleguard.mod import Mod
 from circleguard.utils import TRACE, KEY_MASK, RatelimitWeight
 from circleguard.loader import Loader
 from circleguard.span import Span
