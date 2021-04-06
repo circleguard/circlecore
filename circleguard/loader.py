@@ -7,8 +7,8 @@ from functools import lru_cache
 from enum import Enum
 
 from requests import RequestException
-import circleparse
-import ossapi
+import osrparse
+from ossapi import Ossapi
 
 from circleguard.mod import Mod
 from circleguard.utils import TRACE
@@ -33,7 +33,7 @@ class InvalidKeyException(InternalAPIException):
     """An api key was rejected by the api."""
 
 class RatelimitException(InternalAPIException):
-    """The api has ratelimit an api key."""
+    """The api has ratelimited an api key."""
 
 class InvalidJSONException(InternalAPIException):
     """The api returned an invalid json response."""
@@ -177,7 +177,7 @@ def check_cache(function):
 
         decompressed_lzma = self.cacher.check_cache(replay_info)
         if decompressed_lzma:
-            parsed = circleparse.parse_replay(decompressed_lzma, \
+            parsed = osrparse.parse_replay(decompressed_lzma, \
                 pure_lzma=True, decompressed_lzma=True)
             return parsed.play_data
         else:
@@ -223,7 +223,7 @@ class Loader():
 
     def __init__(self, key, cacher=None):
         self.log = logging.getLogger(__name__)
-        self.api = ossapi.ossapi(key)
+        self.api = Ossapi(key)
         self.cacher = cacher
 
     @request
@@ -290,6 +290,16 @@ class Loader():
         try:
             Loader.check_response(response)
         except NoInfoAvailableException:
+            # The logic below allows us to load eg
+            # ``Map(221777, mods=Mod.SO + Mod.PF + Mod.HT)`` or some equally
+            # absurd mod combination for which there are no replays, and have
+            # that loading not throw ``NoInfoAvailableException``. Instead,
+            # the map's replays list will just be empty.
+            # However, we only want to apply this if we're loading a map, ie
+            # ``span`` has been passed. If ``user_id`` was passed instead, raise
+            # the exception as usual.
+            if user_id:
+                raise
             # the osu! api doesn't distinguish between a map not existing, and
             # no scores having been set on that map for a particular mod
             # combination - both are empty responses which will trigger a no
@@ -418,7 +428,7 @@ class Loader():
 
         Returns
         -------
-        list[:class:`circleparse.replay.ReplayEvent`]
+        list[:class:`osrparse.replay.ReplayEvent`]
             The replay events with attributes ``x``, ``y``,
             ``time_since_previous_action``, and ``keys_pressed``.
         None
@@ -444,7 +454,7 @@ class Loader():
             raise UnknownAPIException("The api guaranteed there would be a "
                 "replay available, but we did not receive any data.")
         try:
-            parsed_replay = circleparse.parse_replay(lzma_bytes, pure_lzma=True)
+            parsed_replay = osrparse.parse_replay(lzma_bytes, pure_lzma=True)
         # see https://github.com/circleguard/circlecore/issues/61
         # api sometimes returns corrupt replays
         except LZMAError:
@@ -470,7 +480,7 @@ class Loader():
         response = self.api.get_replay({"s": replay_id})
         Loader.check_response(response)
         lzma = base64.b64decode(response["content"])
-        replay_data = circleparse.parse_replay(lzma, pure_lzma=True).play_data
+        replay_data = osrparse.parse_replay(lzma, pure_lzma=True).play_data
         # TODO cache the replay here, might require some restructring/double
         # checking everything will work because we only have its id, not map
         # or user id. In fact I think our db asserts map and user id are nonull
@@ -602,10 +612,9 @@ class Loader():
             for error in Error:
                 if response["error"] == error.value[0]:
                     raise error.value[1](error.value[2])
-            else:
-                # don't know why pylint is throwing hands but this is definitely
-                # legal
-                raise Error.UNKNOWN.value[1](Error.UNKNOWN.value[2]) # pylint: disable=unsubscriptable-object
+            # don't know why pylint is throwing hands but this is definitely
+            # legit
+            raise Error.UNKNOWN.value[1](Error.UNKNOWN.value[2]) # pylint: disable=unsubscriptable-object
         if not response: # response is empty, list or dict case
             raise NoInfoAvailableException("No info was available from the api "
                 "for the given arguments.")

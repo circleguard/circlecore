@@ -33,21 +33,68 @@ int_to_mod = {
     1 << 30    : ["MR",      "Mirror"]
 }
 
+
 class ModCombination():
     """
-    An ingame osu! mod, or combination of mods.
+    An osu! mod combination.
 
     Notes
     -----
-    This class is not meant to be instantiated. Use :class:`~.Mod` and combine
-    them as necessary instead.
-
-    A full list of mods and their specification can be found at
-    https://osu.ppy.sh/help/wiki/Game_Modifiers.
+    This class only exists to allow ``Mod`` to have ``ModCombination`` objects
+    as class attributes, as you can't instantiate instances of your own class in
+    a class definition.
     """
 
     def __init__(self, value):
         self.value = value
+
+    @staticmethod
+    def _parse_mod_string(mod_string):
+        """
+        Creates an integer representation of a mod string made up of two letter
+        mod names ("HDHR", for example).
+
+        Parameters
+        ----------
+        mod_string: str
+            The mod string to represent as an int.
+
+        Returns
+        -------
+        int
+            The integer representation of the mod string.
+
+        Raises
+        ------
+        ValueError
+            If mod_string is empty, not of even length, or any of its 2-length
+            substrings do not correspond to a Mod in Mod.ORDER.
+        """
+        if mod_string == "":
+            raise ValueError("Invalid mod string (cannot be empty)")
+        if len(mod_string) % 2 != 0:
+            raise ValueError(f"Invalid mod string {mod_string} (not of even "
+                "length)")
+        mod_value = 0
+        for i in range(0, len(mod_string) - 1, 2):
+            single_mod = mod_string[i: i + 2]
+            # there better only be one Mod that has an acronym matching ours,
+            # but a comp + 0 index works too
+            matching_mods = [mod for mod in Mod.ORDER if \
+                mod.short_name() == single_mod]
+            # ``mod.ORDER`` uses ``_NC`` and ``_PF``, and we want to parse
+            # eg "NC" as "DTNC"
+            if Mod._NC in matching_mods:
+                matching_mods.remove(Mod._NC)
+                matching_mods.append(Mod.NC)
+            if Mod._PF in matching_mods:
+                matching_mods.remove(Mod._PF)
+                matching_mods.append(Mod.PF)
+            if not matching_mods:
+                raise ValueError("Invalid mod string (no matching mod found "
+                    f"for {single_mod})")
+            mod_value += matching_mods[0].value
+        return mod_value
 
     def short_name(self):
         """
@@ -68,8 +115,8 @@ class ModCombination():
         Notes
         -----
         This is a function instead of an attribute set at initialization time
-        because otherwise we couldn't refer to  :class:`~.Mod`\s as its class
-        body isn't loaded while it's instantiating :class:`~.ModCombination`\s.
+        because otherwise we couldn't refer to a :class:`~.Mod`\s as its class
+        body isn't loaded while it's instantiating :class:`~.Mod`\s.
 
         Although technically mods such as NC are represented with two bits -
         DT and NC - being set, short_name removes DT and so returns "NC"
@@ -79,9 +126,9 @@ class ModCombination():
             # avoid infinite recursion with every mod decomposing into itself
             # ad infinitum
             return int_to_mod[self.value][0]
-        else:
-            component_mods = self.decompose(clean=True)
-            return "".join(mod.short_name() for mod in component_mods)
+
+        component_mods = self.decompose(clean=True)
+        return "".join(mod.short_name() for mod in component_mods)
 
     def long_name(self):
         """
@@ -103,18 +150,17 @@ class ModCombination():
         -----
         This is a function instead of an attribute set at initialization time
         because otherwise we couldn't refer to  :class:`~.Mod`\s as its class
-        body isn't loaded while it's instantiating :class:`~.ModCombination`\s.
+        body isn't loaded while it's instantiating :class:`~.Mod`\s.
 
         Although technically mods such as NC are represented with two bits -
         DT and NC - being set, long_name removes DT and so returns "Nightcore"
         rather than "DoubleTime Nightcore".
         """
-
         if self.value in int_to_mod:
             return int_to_mod[self.value][1]
-        else:
-            component_mods = self.decompose(clean=True)
-            return " ".join(mod.long_name() for mod in component_mods)
+
+        component_mods = self.decompose(clean=True)
+        return " ".join(mod.long_name() for mod in component_mods)
 
     def __eq__(self, other):
         """Compares the ``value`` of each object"""
@@ -146,8 +192,8 @@ class ModCombination():
         Decomposes this mod into its base component mods, which are
         :class:`~.ModCombination`\s with a ``value`` of a power of two.
 
-        Arguments
-        ---------
+        Parameters
+        ----------
         clean: bool
             If true, removes mods that we would think of as duplicate - if both
             NC and DT are component mods, remove DT. If both PF and SD are
@@ -157,11 +203,11 @@ class ModCombination():
         -------
         list[:class:`~.ModCombination`]
             A list of the component :class:`~.ModCombination`\s of this mod,
-            ordered according to :const:`~circleguard.mod.Mod.ORDER`.
+            ordered according to :const:`~circleguard.mod.ModCombination.ORDER`.
         """
 
-        mods = [ModCombination(mod) for mod in int_to_mod.keys() if \
-            self.value & mod]
+        mods = [ModCombination(mod_int) for mod_int in int_to_mod if
+                self.value & mod_int]
         # order the mods by Mod.ORDER
         mods = [mod for mod in Mod.ORDER if mod in mods]
         if not clean:
@@ -173,11 +219,23 @@ class ModCombination():
             mods.remove(Mod.SD)
         return mods
 
+
 class Mod(ModCombination):
     """
     An ingame osu! mod.
 
     Common combinations are available as ``HDDT``, ``HDHR``, and ``HDDTHR``.
+
+    Parameters
+    ----------
+    value: int or str
+        A representation of the desired mod. This can either be its integer
+        representation such as ``64`` for ``DT`` and ``72`` (``64`` + ``8``) for
+        ``HDDT``, or a string such as ``"DT"`` for ``DT`` and ``"HDDT"`` (or
+        ``DTHD``) for ``HDDT``.
+        |br|
+        If used, the string must be composed of two-letter acronyms for mods,
+        in any order.
 
     Notes
     -----
@@ -256,55 +314,6 @@ class Mod(ModCombination):
              FI, RD, CN, TP, K1, K2, K3, K4, K5, K6, K7, K8, K9, CO, MR]
 
     def __init__(self, value):
-        if isinstance(value, int):
-            super().__init__(value)
         if isinstance(value, str):
-            super().__init__(Mod._parse_mod_string(value))
-
-    @staticmethod
-    def _parse_mod_string(mod_string):
-        """
-        Creates an integer representation of a mod string made up of two letter
-        mod names ("HDHR", for example).
-
-        Arguments
-        ---------
-        mod_string: str
-            The mod string to represent as an int.
-
-        Returns
-        -------
-        int
-            The integer representation of the mod string.
-
-        Raises
-        ------
-        ValueError
-            If mod_string is empty, not of even length, or any of its 2-length
-            substrings do not correspond to a ModCombination in Mod.ORDER.
-        """
-        if mod_string == "":
-            raise ValueError("Invalid mod string (cannot be empty)")
-        if len(mod_string) % 2 != 0:
-            raise ValueError(f"Invalid mod string {mod_string} (not of even "
-                "length)")
-        mod_value = 0
-        for i in range(0, len(mod_string) - 1, 2):
-            single_mod = mod_string[i: i + 2]
-            # there better only be one Mod that has an acronym matching ours,
-            # but a comp + 0 index works too
-            matching_mods = [mod for mod in Mod.ORDER if \
-                mod.short_name() == single_mod]
-            # ``mod.ORDER`` uses ``_NC`` and ``_PF``, and we want to parse
-            # eg "NC" as "DTNC"
-            if Mod._NC in matching_mods:
-                matching_mods.remove(Mod._NC)
-                matching_mods.append(Mod.NC)
-            if Mod._PF in matching_mods:
-                matching_mods.remove(Mod._PF)
-                matching_mods.append(Mod.PF)
-            if not matching_mods:
-                raise ValueError("Invalid mod string (no matching mod found "
-                    f"for {single_mod})")
-            mod_value += matching_mods[0].value
-        return mod_value
+            value = ModCombination._parse_mod_string(value)
+        super().__init__(value)

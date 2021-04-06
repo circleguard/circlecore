@@ -19,10 +19,9 @@ with open("circleguard/version.py") as f:
 setup(
     name="circleguard",
     version=VERSION,
-    description="A player made and maintained cheat detection tool for osu!. "
-                "Provides support for detecting replay stealing, remodding, "
-                "relax, and aim correction from a profile, map, or set of osr "
-                "files.",
+    description="A utilities library for osu!. Provides support for parsing "
+        "replays from a file or from the api, as well as support for unstable "
+        "rate, hits, similarity, and frametime calculations.",
     long_description=long_description,
     long_description_content_type="text/markdown",
     classifiers=[
@@ -39,17 +38,13 @@ setup(
     license = "MIT",
     packages=find_packages(),
     install_requires=[
-        "circleparse~=6.4.0",
+        "osrparse~=4.0.0",
         "ossapi==1.3.0",
         "wtc==1.2.1",
         "numpy",
         "requests",
         "slider>=0.4.0",
-        # pyinstaller does not yet have a hook for scipy 1.5.0, so stick with
-        # 1.4.1 for now
-        # TODO remove this restriction? pyinstaller 4.0 adds the necessary scipy
-        # hook so it should be good with scipy 1.5.0 now
-        "scipy==1.4.1"
+        "scipy"
     ],
     extras_require={
         "graphing": [

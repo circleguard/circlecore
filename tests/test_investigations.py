@@ -1,5 +1,4 @@
 import numpy as np
-import unittest
 
 from circleguard import ReplayPath, Mod, Circleguard, order, ReplayMap
 from tests.utils import CGTestCase, DELTA, UR_DELTA, RES, FRAMETIME_LIMIT
@@ -63,7 +62,6 @@ class TestSnaps(CGTestCase):
         self.assertAlmostEqual(snaps[1].angle, 4.39870, delta=DELTA)
         self.assertAlmostEqual(snaps[1].distance, 8.14900, delta=DELTA)
 
-
     def test_legit_snaps(self):
         # these replays have snaps that are picked up when we don't filter for
         # those on hitobjects. Some of them also have snaps that get through
@@ -80,6 +78,15 @@ class TestSnaps(CGTestCase):
         self.assertEqual(len(snaps), 3)
         self.assertEqual(len(filtered_snaps), 1)
 
+    def test_snaps_only_on_hitobjs_accounts_for_time(self):
+        # checking that a frame that's in the radius of the nearest hitobj,
+        # but isn't within the hitobj's hitwindow and so can't hit the note,
+        # is not counted as a snap.
+        # This replay previously had 1 snap in it. See
+        # https://github.com/circleguard/circleguard/issues/123
+        r = ReplayMap(2769844, 448316, mods=Mod.HDHR)
+        snaps = self.cg.snaps(r)
+        self.assertEqual(len(snaps), 0)
 
 class TestSimilarity(CGTestCase):
 

@@ -5,7 +5,7 @@ import os
 import sqlite3
 import random
 
-import circleparse
+import osrparse
 import numpy as np
 import wtc
 
@@ -660,8 +660,8 @@ class Replay(Loadable):
 
         Paramters
         ---------
-        replay_data: list[:class:`~circleparse.Replay.ReplayEvent`]
-            A list of :class:`~circleparse.Replay.ReplayEvent` objects,
+        replay_data: list[:class:`~osrparse.Replay.ReplayEvent`]
+            A list of :class:`~osrparse.Replay.ReplayEvent` objects,
             representing the actual data of the replay. If the replay could not
             be loaded, this should be ``None``.
 
@@ -675,8 +675,29 @@ class Replay(Loadable):
         if replay_data is None:
             return
 
+        # In rare cases (I'm not quite sure how to reproduce), a replay's replay
+        # data can be empty. We check this here to throw a clearer error
+        # message than the IndexError we will get shortly after with
+        # ``replay_data[0]``.
+        #
+        # Note that there's an important distinction between ``replay_data``
+        # being ``None`` and being the empty list ``[]`` - the former means the
+        # api (or osr, or some other source) had no replay data for this replay,
+        # and the latter means it *had* replay data, it was just empty replay
+        # data.
+        #
+        # It might be okay to just return as with the ``replay_data is None``
+        # case, but I'm erring on the side of caution and throwing for now.
+        #
+        # See https://github.com/circleguard/circleguard/issues/133 for examples
+        # of replays exhibiting this behavior.
+        if replay_data == []:
+            raise ValueError("This replay's replay data was empty. This should "
+                "not happen and is indicative of a misbehaved replay.")
+
         # remove invalid zero time frame at beginning of replay
-        # https://github.com/ppy/osu/blob/1587d4b26fbad691242544a62dbf017a78705ae3/osu.Game/Scoring/Legacy/LegacyScoreDecoder.cs#L242-L245
+        # https://github.com/ppy/osu/blob/1587d4b26fbad691242544a62dbf017a78705
+        # ae3/osu.Game/Scoring/Legacy/LegacyScoreDecoder.cs#L242-L245
         if replay_data[0].time_since_previous_action == 0:
             replay_data = replay_data[1:]
 
@@ -844,7 +865,7 @@ class ReplayMap(Replay):
         The id of the map the replay was played on.
     user_id: int
         The id of the player who played the replay.
-    mods: ModCombination
+    mods: :class:`~circleguard.mod.ModCombination`
         The mods the replay was played with. If ``None``, the
         highest scoring replay of ``user_id`` on ``map_id`` will be loaded,
         regardless of mod combination. Otherwise, the replay with ``mods``
@@ -932,7 +953,7 @@ class ReplayMap(Replay):
 
     def __eq__(self, loadable):
         """
-        Whether the two maps are equal.
+        Whether the two replay maps are equal.
 
         Notes
         -----
@@ -999,6 +1020,7 @@ class ReplayPath(Replay):
         self.log = logging.getLogger(__name__ + ".ReplayPath")
         self.path = Path(path).absolute()
         self.beatmap_hash = None
+        self._user_id_func = None
 
     def load(self, loader, cache):
         """
@@ -1024,7 +1046,7 @@ class ReplayPath(Replay):
             self.log.debug("%s already loaded, not loading", self)
             return
 
-        loaded = circleparse.parse_replay_file(self.path)
+        loaded = osrparse.parse_replay_file(self.path)
         self.game_version = GameVersion(loaded.game_version, concrete=True)
         self.timestamp = loaded.timestamp
         self.map_id = loader.map_id(loaded.beatmap_hash)
@@ -1033,7 +1055,7 @@ class ReplayPath(Replay):
         # `Loader#user_id` function to use later to load it.
         self._user_id_func = loader.user_id
         self._user_id = None
-        self.mods = Mod(loaded.mod_combination)
+        self.mods = Mod(int(loaded.mod_combination))
         self.replay_id = loaded.replay_id
         self.beatmap_hash = loaded.beatmap_hash
 
@@ -1144,6 +1166,7 @@ class ReplayString(Replay):
         self.log = logging.getLogger(__name__ + ".ReplayString")
         self.replay_data_str = replay_data_str
         self.beatmap_hash = None
+        self._user_id_func = None
 
     def load(self, loader, cache):
         """
@@ -1170,7 +1193,7 @@ class ReplayString(Replay):
             self.log.debug("%s already loaded, not loading", self)
             return
 
-        loaded = circleparse.parse_replay(self.replay_data_str, pure_lzma=False)
+        loaded = osrparse.parse_replay(self.replay_data_str, pure_lzma=False)
         self.game_version = GameVersion(loaded.game_version, concrete=True)
         self.timestamp = loaded.timestamp
         self.map_id = loader.map_id(loaded.beatmap_hash)
@@ -1285,7 +1308,7 @@ class CachedReplay(Replay):
         if self.loaded:
             return
         decompressed = wtc.decompress(self.replay_data)
-        parsed = circleparse.parse_replay(decompressed, pure_lzma=True)
+        parsed = osrparse.parse_replay(decompressed, pure_lzma=True)
         self._process_replay_data(parsed.play_data)
         self.loaded = True
 

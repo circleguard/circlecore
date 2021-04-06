@@ -14,13 +14,15 @@ def add(a, b):
     """
     Adds `a` and `b`.
 
-    Arguments:
+    Parameters
+    ----------
     a: int
         The first number to add.
     b: int
         The second number to add.
 
-    Returns:
+    Returns
+    -------
     int
         The sum of `a` and `b`.
     """
@@ -34,7 +36,8 @@ def add(a, b):
     """
     Adds ``a`` and ``b``.
 
-    Arguments:
+    Parameters
+    ----------
     a: int
         The first number to add.
     b: int
@@ -58,13 +61,15 @@ def add(a, b):
     """
     Adds ``a`` and ``b``.
 
-    Arguments:
+    Parameters
+    ----------
     a : int
         The first number to add.
     b : int
         The second number to add.
 
-    Returns:
+    Returns
+    -------
     int
         The sum of ``a`` and ``b``.
     """
@@ -78,13 +83,15 @@ def add(a, b):
     """
     Adds ``a`` and ``b``.
 
-    Arguments:
+    Parameters
+    ----------
     a: int
         The first number to add.
     b: int
         The second number to add.
 
-    Returns:
+    Returns
+    -------
     int
         The sum of ``a`` and ``b``.
     """
