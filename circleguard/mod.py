@@ -75,7 +75,7 @@ class ModCombination():
         if len(mod_string) % 2 != 0:
             raise ValueError(f"Invalid mod string {mod_string} (not of even "
                 "length)")
-        mod_value = 0
+        mod = Mod.NM
         for i in range(0, len(mod_string) - 1, 2):
             single_mod = mod_string[i: i + 2]
             # there better only be one Mod that has an acronym matching ours,
@@ -93,8 +93,8 @@ class ModCombination():
             if not matching_mods:
                 raise ValueError("Invalid mod string (no matching mod found "
                     f"for {single_mod})")
-            mod_value += matching_mods[0].value
-        return mod_value
+            mod += matching_mods[0]
+        return mod.value
 
     def short_name(self):
         """
@@ -228,11 +228,12 @@ class Mod(ModCombination):
 
     Parameters
     ----------
-    value: int or str
+    value: int or str or list
         A representation of the desired mod. This can either be its integer
         representation such as ``64`` for ``DT`` and ``72`` (``64`` + ``8``) for
         ``HDDT``, or a string such as ``"DT"`` for ``DT`` and ``"HDDT"`` (or
-        ``DTHD``) for ``HDDT``.
+        ``DTHD``) for ``HDDT``, or a list of strings such as ``["HD", "DT"]``
+        for ``HDDT``.
         |br|
         If used, the string must be composed of two-letter acronyms for mods,
         in any order.
@@ -316,4 +317,11 @@ class Mod(ModCombination):
     def __init__(self, value):
         if isinstance(value, str):
             value = ModCombination._parse_mod_string(value)
+        if isinstance(value, list):
+            mod = Mod.NM
+            for mod_str in value:
+                mod += Mod(mod_str)
+            value = mod.value
+        if isinstance(value, ModCombination):
+            value = value.value
         super().__init__(value)
