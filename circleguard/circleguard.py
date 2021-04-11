@@ -403,7 +403,8 @@ class Circleguard:
         hits = [hit for hit in hits if hit.within(within)]
         return hits
 
-    def frametime_graph(self, replay, cv=True, figure=None):
+    def frametime_graph(self, replay, cv=True, figure=None,
+        show_expected_frametime=True):
         """
         Uses matplotlib to create a graph of the frametimes of the replay.
 
@@ -419,6 +420,9 @@ class Circleguard:
             usage. It is exposed to allow circleguard (the gui) to use this
             method, as matplotlib's pyqt compatability layer adds some
             complications which this works around.
+        show_expected_frametime: bool
+            Whether to show a vertical line where we expect the average
+            frametime to be.
 
         Returns
         -------
@@ -436,7 +440,8 @@ class Circleguard:
         from circleguard.frametime_graph import FrametimeGraph
         from matplotlib import pyplot
         self.load(replay)
-        frametime_graph = FrametimeGraph(replay, cv, figure)
+        frametime_graph = FrametimeGraph(replay, cv,
+            figure, show_expected_frametime)
         # strictly speaking, I don't think this return is necessary -
         # ``FrametimeGraph`` modifies the passed figure on instantiation,
         # so consumers could just use the figure they passed in instead of the
