@@ -188,10 +188,13 @@ class Investigator:
         # (dT/dt)^3 = 1/(dt/dT)^3
         dtdT = np.diff(t)
         d3xy = np.diff(xy, axis=0, n=3)
-        # safely calculate the division and replace with zero if the divisor is zero
-        # dtdT is sliced with 2: because differentiating drops one element for each order (slice (n - 1,) to (n - 3,))
-        # d3xy is of shape (n - 3, 2) so dtdT is also reshaped from (n - 3,) to (n - 3, 1) to align the axes.
-        jerk = np.divide(d3xy, dtdT[2:, None] ** 3, out=np.zeros_like(d3xy), where=dtdT[2:,None]!=0)
+        # safely calculate the division and replace with zero if the divisor is
+        # zero. dtdT is sliced with 2: because differentiating drops one element
+        # for each order (slice (n - 1,) to (n - 3,)).
+        # d3xy is of shape (n - 3, 2) so dtdT is also reshaped from (n - 3,) to
+        # (n - 3, 1) to align the axes.
+        jerk = np.divide(d3xy, dtdT[2:, None] ** 3, out=np.zeros_like(d3xy),
+            where=dtdT[2:,None]!=0)
 
         # take the absolute value of the jerk
         jerk = np.linalg.norm(jerk, axis=1)
@@ -383,7 +386,6 @@ class Investigator:
                 # pressing on a circle or slider during hitwindowmiss will cause
                 # a miss
                 if np.linalg.norm(keydown_xy - hitobj_xy) <= hitradius and hitobj_type != 2:
-
                     # sliders don't disappear after missing
                     # so we skip to the press_i that is after notelock_end_time
                     if hitobj_type == 1 and sliderbug_fixed:
