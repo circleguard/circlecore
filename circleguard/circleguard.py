@@ -8,7 +8,7 @@ from slider import Library
 
 from circleguard.loader import Loader
 from circleguard.comparer import Comparer
-from circleguard.investigator import Investigator, Hit, Snap
+from circleguard.investigator import Investigator, Judgment, Snap
 from circleguard.cacher import Cacher
 from circleguard.utils import convert_statistic, check_param
 from circleguard.loadables import (Map, User, MapUser, ReplayMap, ReplayID,
@@ -366,7 +366,7 @@ class Circleguard:
         return frametimes
 
 
-    def hits(self, replay, within=None) -> Iterable[Hit]:
+    def hits(self, replay, within=None) -> Iterable[Judgment]:
         """
         The locations in the replay where a hitobject is hit.
 
@@ -402,6 +402,15 @@ class Circleguard:
 
         hits = [hit for hit in hits if hit.within(within)]
         return hits
+
+    def judgments(self, replay):
+        self.load(replay)
+        if not replay.map_info.available():
+            raise ValueError("The judgments of a replay that does not know "
+                "what map it was set on cannot be calculated.")
+
+        beatmap = self.beatmap(replay)
+        return Investigator.judgments(replay, beatmap)
 
     def frametime_graph(self, replay, cv=True, figure=None,
         show_expected_frametime=True):
@@ -714,7 +723,7 @@ class KeylessCircleguard(Circleguard):
                 "KeylessCircleguard")
         return super().frametimes(replay, cv)
 
-    def hits(self, replay, within=None) -> Iterable[Hit]:
+    def hits(self, replay, within=None) -> Iterable[Judgment]:
         if not replay.loaded:
             raise ValueError("replays must be loaded before use in a "
                 "KeylessCircleguard")

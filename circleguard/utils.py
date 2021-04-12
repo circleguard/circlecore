@@ -205,9 +205,16 @@ def hitwindow(OD):
     # an int so we replicate this
     return int(150 + 50 * (5 - float(np.float32(OD))) / 5)
 
+def hitwindows(OD):
+    hitwindow_50 = hitwindow(OD)
+    hitwindow_100 = (280 - 16 * OD) / 2
+    hitwindow_300 = (160 - 12 * OD) / 2
+
+    return (hitwindow_50, hitwindow_100, hitwindow_300)
+
 def hitradius(CS):
     """
-    The radius, in osu!pixels (?) of where a hitobject can be hit.s
+    The radius, in osu!pixels (?) of where a hitobject can be hit.
     """
     # attempting to match stable hitradius
     return np.float32(64 * ((1.0 - np.float32(0.7) * (float(np.float32(CS)) - 5) / 5)) / 2) * np.float32(1.00041)
