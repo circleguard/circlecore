@@ -486,7 +486,7 @@ class JudgmentType(Enum):
 
 hit_types = [JudgmentType.Hit300, JudgmentType.Hit100, JudgmentType.Hit50]
 
-class Judgment():
+class Judgment:
     """
     A hit on a hitobject when a replay is played against a beatmap. In osu!lazer
     terms, this would be a Judgement, though we do not count misses as a ``Hit``
