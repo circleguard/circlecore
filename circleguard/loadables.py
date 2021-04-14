@@ -579,7 +579,7 @@ class Replay(Loadable):
         # map_info's map_id attribute automatically
         self._map_id       = None
         # replays have no information about their map by default.
-        self._map_info     = MapInfo()
+        self.map_info     = MapInfo()
         self.username     = None
         self.user_id      = None
         self.mods         = None
@@ -592,6 +592,9 @@ class Replay(Loadable):
         self.xy           = None
         self.k            = None
         self._keydowns    = None
+
+    def map_available(self, library):
+        return bool(self.map_id)
 
     def has_data(self):
         """
@@ -636,22 +639,10 @@ class Replay(Loadable):
         None
             If we do not know what beatmap this replay was played on.
         """
-        if not self.map_info.available():
+        if not self.map_available(library):
             return None
 
-        # prefer loading from disk, it's cheaper than potentially downloading
-        # the beatmap from osu! servers
-
-        if self.map_info.path:
-            # by default we don't save beatmaps that are already saved on disk.
-            # Subclasses should override `#beatmap` and pass `copy=True` here
-            # in their overridden method if they want to copy the beatmap to the
-            # library's directory.
-            return library.beatmap_from_path(self.map_info.path)
-
-        if self.map_info.map_id:
-            return library.lookup_by_id(self.map_info.map_id, download=True,
-                save=True)
+        return library.lookup_by_id(self.map_id, download=True, save=True)
 
     def _process_replay_data(self, replay_data):
         """
@@ -825,13 +816,6 @@ class Replay(Loadable):
         self._map_id = map_id
         self.map_info.map_id = map_id
 
-    # some subclasses might require map_info to be a property to deal with
-    # lazy-loading issues properly (see: ReplayPath, which needs to update its
-    # map id whenever map_info is accessed).
-    @property
-    def map_info(self):
-        return self._map_info
-
     @property
     def keydowns(self):
         """
@@ -925,11 +909,6 @@ class ReplayMap(Replay):
         cache: bool
             Whether to cache this replay after loading it. This only has an
             effect if ``self.cache`` is unset (``None``).
-
-        Notes
-        -----
-        If ``replay.loaded`` is ``True``, this method has no effect.
-        ``replay.loaded`` is set to ``True`` after this method is finished.
         """
         # only listen to the parent's cache if ours is not set. Lower takes
         # precedence
@@ -1029,7 +1008,37 @@ class ReplayDataOSR(Replay):
         self._user_id = None
         self._map_id_func = None
 
+    def beatmap(self, library):
+        if not self.map_available(library):
+            return None
+        # if we can't load our map_id, fall back to loading from slider.
+        if not self.can_load_api_attributes() and self.beatmap_hash:
+            return library.lookup_by_md5(self.beatmap_hash)
+        return super().beatmap(library)
+
+    def map_available(self, library):
+        beatmap_cached = library and library.beatmap_cached(
+            beatmap_md5=self.beatmap_hash)
+        if self.beatmap_hash and beatmap_cached:
+            return True
+        return super().map_available(library)
+
     def load_from_osrparse_replay(self, replay, loader, cache):
+        """
+        Loads the data for this replay from the already loaded osrparse replay.
+
+        Parameters
+        ----------
+        loader: :class:`~.loader.Loader`
+            The :class:`~.loader.Loader` to load this replay with.
+            |br|
+            If ``None``, this replay will be unable to retrieve its ``map_id``
+            or ``user_id``, but everything else will still be loaded.
+        cache: bool
+            Whether to cache this replay after loading it. This only has an
+            effect if ``self.cache`` is unset (``None``). Note that currently
+            we do not cache :class:`~.ReplayPath` regardless of this parameter.
+        """
         self.game_version = GameVersion(replay.game_version, concrete=True)
         self.timestamp = replay.timestamp
         self.username = replay.player_name
@@ -1071,7 +1080,7 @@ class ReplayDataOSR(Replay):
         if not self.loaded:
             return None
         if not self._map_id_func:
-            raise ValueError("The map if of a replay which has been loaded "
+            raise ValueError("The map id of a replay which has been loaded "
                 "without a ``Loader`` cannot be retrieved. This can happen if "
                 "the replay was loaded with a ``KeylessCircleguard``.")
         # property inheritence is a bit nasty. See
@@ -1081,16 +1090,23 @@ class ReplayDataOSR(Replay):
             super(ReplayDataOSR, self.__class__).map_id.fset(self, map_id)
         return super().map_id
 
+    def can_load_api_attributes(self):
+        """
+        Whether we can load attributes that are lazy loaded and require api
+        calls, such as ``map_id`` or ``user_id``, if requested.
+        """
+        return bool(self._map_id_func) and bool(self._user_id_func)
+
+    def api_attributes_loaded(self):
+        """
+        Whether attributes that are lazy loaded and require api calls, such as
+        ``map_id`` or ``user_id``, have already been loaded.
+        """
+        return bool(self._map_id) and bool(self._user_id)
+
     @map_id.setter
     def map_id(self, map_id):
         super(ReplayDataOSR, self.__class__).map_id.fset(self, map_id)
-
-    @property
-    def map_info(self):
-        # force load our map_id since our map_info will change if it hasn't been
-        # loaded yet
-        _ = self.map_id
-        return super().map_info
 
     @user_id.setter
     def user_id(self, user_id):
@@ -1138,26 +1154,6 @@ class ReplayPath(ReplayDataOSR):
         self._map_id_func = None
 
     def load(self, loader, cache):
-        """
-        Loads the data for this replay from the osr file.
-
-        Parameters
-        ----------
-        loader: :class:`~.loader.Loader`
-            The :class:`~.loader.Loader` to load this replay with.
-            |br|
-            If ``None``, this replay will be unable to retrieve its ``map_id``
-            or ``user_id``, but everything else will still be loaded.
-        cache: bool
-            Whether to cache this replay after loading it. This only has an
-            effect if ``self.cache`` is unset (``None``). Note that currently
-            we do not cache :class:`~.ReplayPath` regardless of this parameter.
-
-        Notes
-        -----
-        If ``replay.loaded`` is ``True``, this method has no effect.
-        ``replay.loaded`` is set to ``True`` after this method is finished.
-        """
         self.log.debug("Loading ReplayPath %r", self)
         if self.loaded:
             self.log.debug("%s already loaded, not loading", self)
@@ -1198,10 +1194,14 @@ class ReplayPath(ReplayDataOSR):
 
     def __repr__(self):
         if self.loaded:
-            return (f"ReplayPath(path={self.path},map_id={self.map_id},"
-                f"user_id={self.user_id},mods={self.mods},"
-                f"replay_id={self.replay_id},weight={self.weight},"
-                f"loaded={self.loaded},username={self.username})")
+            api_attrs_string = ","
+            if self.api_attributes_loaded():
+                api_attrs_string = (f"map_id={self.map_id},"
+                    f"user_id={self.user_id},")
+            return (f"ReplayPath(path={self.path},{api_attrs_string}"
+                f"mods={self.mods},replay_id={self.replay_id},"
+                f"weight={self.weight},loaded={self.loaded},"
+                f"username={self.username})")
         return (f"ReplayPath(path={self.path},weight={self.weight},"
                 f"loaded={self.loaded})")
 
@@ -1270,9 +1270,13 @@ class ReplayString(ReplayDataOSR):
 
     def __repr__(self):
         if self.loaded:
+            api_attrs_string = ","
+            if self.api_attributes_loaded():
+                api_attrs_string = (f"map_id={self.map_id},"
+                    f"user_id={self.user_id},")
             return (f"ReplayString(len(replay_data_str)="
-                f"{len(self.replay_data_str)},map_id={self.map_id},"
-                f"user_id={self.user_id},mods={self.mods},"
+                f"{len(self.replay_data_str)},{api_attrs_string}"
+                f"mods={self.mods},"
                 f"replay_id={self.replay_id},weight={self.weight},"
                 f"loaded={self.loaded},username={self.username})")
         return f"ReplayString(len(replay_data_str)={len(self.replay_data_str)})"

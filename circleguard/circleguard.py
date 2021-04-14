@@ -203,7 +203,7 @@ class Circleguard:
             The ur of the replay.
         """
         self.load(replay)
-        if not replay.map_info.available():
+        if not self.map_available(replay):
             raise ValueError("The ur of a replay that does not know what map "
                 "it was set on cannot be calculated")
 
@@ -390,7 +390,7 @@ class Circleguard:
         only when not considering misses.
         """
         self.load(replay)
-        if not replay.map_info.available():
+        if not self.map_available(replay):
             raise ValueError("The hits of a replay that does not know what map "
                 "it was set on cannot be calculated.")
 
@@ -405,7 +405,7 @@ class Circleguard:
 
     def judgments(self, replay):
         self.load(replay)
-        if not replay.map_info.available():
+        if not self.map_available(replay):
             raise ValueError("The judgments of a replay that does not know "
                 "what map it was set on cannot be calculated.")
 
@@ -490,6 +490,8 @@ class Circleguard:
         """
         replay_container.load_info(self.loader)
 
+    def map_available(self, replay):
+        return replay.map_available(self.library)
 
     def Map(self, map_id, span, mods=None, cache=None) -> Map:
         """
