@@ -1,7 +1,7 @@
 import os
 import warnings
 from pathlib import Path
-from circleguard import Circleguard, set_options
+from circleguard import Circleguard
 from unittest import TestCase
 
 KEY = os.environ.get("OSU_API_KEY")
@@ -9,7 +9,8 @@ if not KEY:
     KEY = input("Enter your api key: ")
 
 RES = Path(__file__).parent / "resources"
-set_options(loglevel=20)
+# disabled for now
+# set_options(loglevel=20)
 
 # what precision we want to guarantee for our tests
 DELTA = 0.00001
@@ -29,11 +30,14 @@ class CGTestCase(TestCase):
 
     def setUp(self):
         # prints TestClassName.testMethodName.
-        # See https://stackoverflow.com/a/28745033
-        print(self.id())
+        # See https://stackoverflow.com/a/28745033.
+        # later edit: disabled this for now, was getting annoying
+        # print(self.id())
         # some weird requests warnings about sockets not getting closed;
         # see https://github.com/psf/requests/issues/3912 for more context and
-        # https://github.com/biomadeira/pyPDBeREST/commit/71dfe75859a9086b7e415379702cd61ab61fd6e5 for implementation
+        # https://github.com/biomadeira/pyPDBeREST/commit/71dfe75859a9086
+        # b7e415379702cd61ab61fd6e5
+        # for implementation
         warnings.filterwarnings(action="ignore",
                 message="unclosed",
                 category=ResourceWarning)

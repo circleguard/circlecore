@@ -666,6 +666,10 @@ class KeylessCircleguard(Circleguard):
     perform operations on. It should go without saying that instances of this
     class cannot do anything that requires api access.
 
+    ``KeylessCircleguard``s may also load ``ReplayPath``s and ``ReplayString``s,
+    but some attributes of these replays will not be able to be accessed, as
+    they require api access (such as user id or map id).
+
     Parameters
     ----------
     db_path: str or :class:`os.PathLike`
@@ -692,29 +696,22 @@ class KeylessCircleguard(Circleguard):
 
     def similarity(self, replay1, replay2, method="similarity", \
         num_chunks=Circleguard.DEFAULT_CHUNKS) -> float:
-        if not replay1.loaded or not replay2.loaded:
-            raise ValueError("replays must be loaded before use in a "
-                "KeylessCircleguard")
+        self._load(replay1)
+        self._load(replay2)
         return super().similarity(replay1, replay2, method, num_chunks)
 
     def ur(self, replay, cv=True) -> float:
-        if not replay.loaded:
-            raise ValueError("replays must be loaded before use in a "
-                "KeylessCircleguard")
+        self._load(replay)
         return super().ur(replay, cv)
 
     def snaps(self, replay, max_angle=Circleguard.DEFAULT_ANGLE, \
         min_distance=Circleguard.DEFAULT_DISTANCE, only_on_hitobjs=True) \
         -> Iterable[Snap]:
-        if not replay.loaded:
-            raise ValueError("replays must be loaded before use in a "
-                "KeylessCircleguard")
+        self._load(replay)
         return super().snaps(replay, max_angle, min_distance, only_on_hitobjs)
 
     def frametime(self, replay, cv=True) -> float:
-        if not replay.loaded:
-            raise ValueError("replays must be loaded before use in a "
-                "KeylessCircleguard")
+        self._load(replay)
         return super().frametime(replay, cv)
 
     def frametimes(self, replay, cv=True) -> Iterable[float]:
@@ -724,17 +721,26 @@ class KeylessCircleguard(Circleguard):
         return super().frametimes(replay, cv)
 
     def hits(self, replay, within=None) -> Iterable[Judgment]:
-        if not replay.loaded:
+        self._load(replay)
+        return super().hits(replay, within)
+
+    def _load(self, loadable):
+        if isinstance(loadable, (ReplayPath, ReplayString)):
+            loadable.load(None, self.cache)
+
+        if not loadable.loaded:
             raise ValueError("replays must be loaded before use in a "
                 "KeylessCircleguard")
-        return super().hits(replay, within)
 
     def load(self, loadable):
         # allow this function to be called as a no-op if the loadable is already
         # loaded
         if loadable.loaded:
             return
-        raise NotImplementedError("Keyless Circleguards cannot load Loadables")
+        if not isinstance(loadable, (ReplayPath, ReplayString)):
+            raise NotImplementedError("Keyless Circleguards cannot load "
+                "Loadables, except for ReplayPaths (or ReplayStrings)")
+        self._load(loadable)
 
     def load_info(self, container):
         if container.info_loaded:
@@ -759,19 +765,21 @@ class KeylessCircleguard(Circleguard):
     def ReplayMap(self, map_id, user_id, mods=None, cache=None, info=None) \
         -> ReplayMap:
         raise NotImplementedError("KeylessCircleguards cannot create "
-            "loaded Replays")
+            "loaded ReplayMaps")
 
     def ReplayPath(self, path, cache=None) -> ReplayPath:
-        raise NotImplementedError("KeylessCircleguards cannot create "
-            "loaded Replays")
+        r = ReplayPath(path, cache)
+        r.load(None, cache)
+        return r
 
     def ReplayString(self, replay_data_str, cache=None) -> ReplayString:
-        raise NotImplementedError("KeylessCircleguards cannot create "
-            "loaded Replays")
+        r = ReplayString(replay_data_str, cache)
+        r.load(None, cache)
+        return r
 
     def ReplayID(self, replay_id, cache=None) -> ReplayID:
         raise NotImplementedError("KeylessCircleguards cannot create "
-            "loaded Replays")
+            "loaded ReplayIDs")
 
 def set_options(*, loglevel=None):
     """

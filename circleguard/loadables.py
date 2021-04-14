@@ -579,7 +579,7 @@ class Replay(Loadable):
         # map_info's map_id attribute automatically
         self._map_id       = None
         # replays have no information about their map by default.
-        self.map_info     = MapInfo()
+        self._map_info     = MapInfo()
         self.username     = None
         self.user_id      = None
         self.mods         = None
@@ -825,6 +825,13 @@ class Replay(Loadable):
         self._map_id = map_id
         self.map_info.map_id = map_id
 
+    # some subclasses might require map_info to be a property to deal with
+    # lazy-loading issues properly (see: ReplayPath, which needs to update its
+    # map id whenever map_info is accessed).
+    @property
+    def map_info(self):
+        return self._map_info
+
     @property
     def keydowns(self):
         """
@@ -1020,7 +1027,10 @@ class ReplayPath(Replay):
         self.log = logging.getLogger(__name__ + ".ReplayPath")
         self.path = Path(path).absolute()
         self.beatmap_hash = None
+
         self._user_id_func = None
+        self._user_id = None
+        self._map_id_func = None
 
     def load(self, loader, cache):
         """
@@ -1030,6 +1040,9 @@ class ReplayPath(Replay):
         ----------
         loader: :class:`~.loader.Loader`
             The :class:`~.loader.Loader` to load this replay with.
+            |br|
+            If ``None``, this replay will be unable to retrieve its ``map_id``
+            or ``user_id``, but everything else will still be loaded.
         cache: bool
             Whether to cache this replay after loading it. This only has an
             effect if ``self.cache`` is unset (``None``). Note that currently
@@ -1049,15 +1062,14 @@ class ReplayPath(Replay):
         loaded = osrparse.parse_replay_file(self.path)
         self.game_version = GameVersion(loaded.game_version, concrete=True)
         self.timestamp = loaded.timestamp
-        self.map_id = loader.map_id(loaded.beatmap_hash)
         self.username = loaded.player_name
-        # our `user_id` attribute is lazy loaded, so we need to retain the
-        # `Loader#user_id` function to use later to load it.
-        self._user_id_func = loader.user_id
-        self._user_id = None
         self.mods = Mod(int(loaded.mod_combination))
         self.replay_id = loaded.replay_id
         self.beatmap_hash = loaded.beatmap_hash
+
+        if loader:
+            self._user_id_func = loader.user_id
+            self._map_id_func = loader.map_id
 
         self._process_replay_data(loaded.play_data)
         self.loaded = True
@@ -1065,12 +1077,40 @@ class ReplayPath(Replay):
 
     @property
     def user_id(self):
-        # we don't have a user_id_func if we're not loaded, so early return
         if not self.loaded:
             return None
+        if not self._user_id_func:
+            raise ValueError("The map if of a replay which has been loaded "
+                "without a ``Loader`` cannot be retrieved.")
         if not self._user_id:
             self._user_id = self._user_id_func(self.username)
         return self._user_id
+
+    @property
+    def map_id(self):
+        if not self.loaded:
+            return None
+        if not self._map_id_func:
+            raise ValueError("The map if of a replay which has been loaded "
+                "without a ``Loader`` cannot be retrieved. This can happen if "
+                "the replay was loaded with a ``KeylessCircleguard``.")
+        # property inheritence is a bit nasty. See
+        # https://stackoverflow.com/a/37663266 for reference
+        if not super().map_id:
+            map_id = self._map_id_func(self.beatmap_hash)
+            super(ReplayPath, self.__class__).map_id.fset(self, map_id)
+        return super().map_id
+
+    @map_id.setter
+    def map_id(self, map_id):
+        super(ReplayPath, self.__class__).map_id.fset(self, map_id)
+
+    @property
+    def map_info(self):
+        # force load our map_id since our map_info will change if it hasn't been
+        # loaded yet
+        _ = self.map_id
+        return super().map_info
 
     @user_id.setter
     def user_id(self, user_id):

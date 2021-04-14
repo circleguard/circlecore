@@ -1,5 +1,5 @@
 from circleguard import (ReplayMap, ReplayPath, RatelimitWeight, Map, User,
-    MapUser, Mod, NoInfoAvailableException)
+    MapUser, Mod, NoInfoAvailableException, KeylessCircleguard)
 
 from tests.utils import CGTestCase, RES
 
