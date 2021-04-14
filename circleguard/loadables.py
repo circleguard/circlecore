@@ -992,7 +992,112 @@ class ReplayMap(Replay):
             f"{self.user_id} on {self.map_id}")
 
 
-class ReplayPath(Replay):
+class ReplayDataOSR(Replay):
+    """
+    A :class:`~.Replay` which has been saved in the osr format.
+
+    Parameters
+    ----------
+    weight: :class:`~circleguard.utils.RatelimitWeight`
+        How much it 'costs' to load this replay from the api.
+    cache: bool
+        Whether to cache this replay once it is loaded.
+
+    Notes
+    -----
+    ReplayDataStrings have no replay-related attributes available (not ``None``)
+    when they are unloaded.
+
+    The following replay-related attributes are available (not ``None``) when
+    this replay is loaded:
+
+    * timestamp
+    * map_id
+    * username
+    * user_id
+    * mods
+    * replay_id
+    * beatmap_hash
+    * replay_data
+    """
+    def __init__(self, ratelimit_weight, cache=None):
+        super().__init__(ratelimit_weight, cache)
+        self.log = logging.getLogger(__name__ + ".ReplayPath")
+        self.beatmap_hash = None
+
+        self._user_id_func = None
+        self._user_id = None
+        self._map_id_func = None
+
+    def load_from_osrparse_replay(self, replay, loader, cache):
+        self.game_version = GameVersion(replay.game_version, concrete=True)
+        self.timestamp = replay.timestamp
+        self.username = replay.player_name
+        self.mods = Mod(int(replay.mod_combination))
+        self.replay_id = replay.replay_id
+        self.beatmap_hash = replay.beatmap_hash
+
+        if loader:
+            self._user_id_func = loader.user_id
+            self._map_id_func = loader.map_id
+
+        self._process_replay_data(replay.play_data)
+        self.loaded = True
+        self.log.log(TRACE, "Finished loading %s", self)
+
+    def load_from_file(self, path, loader, cache):
+        replay = osrparse.parse_replay_file(path)
+        self.load_from_osrparse_replay(replay, loader, cache)
+
+    def load_from_string(self, replay_data_str, loader, cache):
+        replay = osrparse.parse_replay(replay_data_str,
+            pure_lzma=False)
+        self.load_from_osrparse_replay(replay, loader, cache)
+
+
+    @property
+    def user_id(self):
+        if not self.loaded:
+            return None
+        if not self._user_id_func:
+            raise ValueError("The map if of a replay which has been loaded "
+                "without a ``Loader`` cannot be retrieved.")
+        if not self._user_id:
+            self._user_id = self._user_id_func(self.username)
+        return self._user_id
+
+    @property
+    def map_id(self):
+        if not self.loaded:
+            return None
+        if not self._map_id_func:
+            raise ValueError("The map if of a replay which has been loaded "
+                "without a ``Loader`` cannot be retrieved. This can happen if "
+                "the replay was loaded with a ``KeylessCircleguard``.")
+        # property inheritence is a bit nasty. See
+        # https://stackoverflow.com/a/37663266 for reference
+        if not super().map_id:
+            map_id = self._map_id_func(self.beatmap_hash)
+            super(ReplayDataOSR, self.__class__).map_id.fset(self, map_id)
+        return super().map_id
+
+    @map_id.setter
+    def map_id(self, map_id):
+        super(ReplayDataOSR, self.__class__).map_id.fset(self, map_id)
+
+    @property
+    def map_info(self):
+        # force load our map_id since our map_info will change if it hasn't been
+        # loaded yet
+        _ = self.map_id
+        return super().map_info
+
+    @user_id.setter
+    def user_id(self, user_id):
+        self._user_id = user_id
+
+
+class ReplayPath(ReplayDataOSR):
     """
     A :class:`~.Replay` saved locally in a ``.osr`` file.
 
@@ -1053,68 +1158,12 @@ class ReplayPath(Replay):
         If ``replay.loaded`` is ``True``, this method has no effect.
         ``replay.loaded`` is set to ``True`` after this method is finished.
         """
-
         self.log.debug("Loading ReplayPath %r", self)
         if self.loaded:
             self.log.debug("%s already loaded, not loading", self)
             return
 
-        loaded = osrparse.parse_replay_file(self.path)
-        self.game_version = GameVersion(loaded.game_version, concrete=True)
-        self.timestamp = loaded.timestamp
-        self.username = loaded.player_name
-        self.mods = Mod(int(loaded.mod_combination))
-        self.replay_id = loaded.replay_id
-        self.beatmap_hash = loaded.beatmap_hash
-
-        if loader:
-            self._user_id_func = loader.user_id
-            self._map_id_func = loader.map_id
-
-        self._process_replay_data(loaded.play_data)
-        self.loaded = True
-        self.log.log(TRACE, "Finished loading %s", self)
-
-    @property
-    def user_id(self):
-        if not self.loaded:
-            return None
-        if not self._user_id_func:
-            raise ValueError("The map if of a replay which has been loaded "
-                "without a ``Loader`` cannot be retrieved.")
-        if not self._user_id:
-            self._user_id = self._user_id_func(self.username)
-        return self._user_id
-
-    @property
-    def map_id(self):
-        if not self.loaded:
-            return None
-        if not self._map_id_func:
-            raise ValueError("The map if of a replay which has been loaded "
-                "without a ``Loader`` cannot be retrieved. This can happen if "
-                "the replay was loaded with a ``KeylessCircleguard``.")
-        # property inheritence is a bit nasty. See
-        # https://stackoverflow.com/a/37663266 for reference
-        if not super().map_id:
-            map_id = self._map_id_func(self.beatmap_hash)
-            super(ReplayPath, self.__class__).map_id.fset(self, map_id)
-        return super().map_id
-
-    @map_id.setter
-    def map_id(self, map_id):
-        super(ReplayPath, self.__class__).map_id.fset(self, map_id)
-
-    @property
-    def map_info(self):
-        # force load our map_id since our map_info will change if it hasn't been
-        # loaded yet
-        _ = self.map_id
-        return super().map_info
-
-    @user_id.setter
-    def user_id(self, user_id):
-        self._user_id = user_id
+        self.load_from_file(self.path, loader, cache)
 
     def __eq__(self, loadable):
         """
@@ -1163,7 +1212,7 @@ class ReplayPath(Replay):
         return f"Unloaded ReplayPath at {self.path}"
 
 
-class ReplayString(Replay):
+class ReplayString(ReplayDataOSR):
     """
     A :class:`~.Replay` saved locally in a ``.osr`` file, when the file has
     already been read as a string.
@@ -1205,63 +1254,11 @@ class ReplayString(Replay):
         super().__init__(RatelimitWeight.LIGHT, cache)
         self.log = logging.getLogger(__name__ + ".ReplayString")
         self.replay_data_str = replay_data_str
-        self.beatmap_hash = None
-        self._user_id_func = None
 
     def load(self, loader, cache):
-        """
-        Loads the data for this replay from the string replay data.
-
-        Parameters
-        ----------
-        loader: :class:`~.loader.Loader`
-            The :class:`~.loader.Loader` to load this replay with.
-        cache: bool
-            Whether to cache this replay after loading it. This only has an
-            effect if ``self.cache`` is unset (``None``). Note that currently
-            we do not cache :class:`~.ReplayString` regardless of this
-            parameter.
-
-        Notes
-        -----
-        If ``replay.loaded`` is ``True``, this method has no effect.
-        ``replay.loaded`` is set to ``True`` after this method is finished.
-        """
-
-        self.log.debug("Loading ReplayString %r", self)
         if self.loaded:
-            self.log.debug("%s already loaded, not loading", self)
             return
-
-        loaded = osrparse.parse_replay(self.replay_data_str, pure_lzma=False)
-        self.game_version = GameVersion(loaded.game_version, concrete=True)
-        self.timestamp = loaded.timestamp
-        self.map_id = loader.map_id(loaded.beatmap_hash)
-        self.username = loaded.player_name
-        # our `user_id` attribute is lazy loaded, so we need to retain the
-        # `Loader#user_id` function to use later to load it.
-        self._user_id_func = loader.user_id
-        self._user_id = None
-        self.mods = Mod(loaded.mod_combination)
-        self.replay_id = loaded.replay_id
-        self.beatmap_hash = loaded.beatmap_hash
-
-        self._process_replay_data(loaded.play_data)
-        self.loaded = True
-        self.log.log(TRACE, "Finished loading %s", self)
-
-    @property
-    def user_id(self):
-        # we don't have a user_id_func if we're not loaded, so early return
-        if not self.loaded:
-            return None
-        if not self._user_id:
-            self._user_id = self._user_id_func(self.username)
-        return self._user_id
-
-    @user_id.setter
-    def user_id(self, user_id):
-        self._user_id = user_id
+        self.load_from_string(self.replay_data_str, loader, cache)
 
     def __eq__(self, loadable):
         if not isinstance(loadable, ReplayString):

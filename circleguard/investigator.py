@@ -490,6 +490,7 @@ hit_types = [JudgmentType.Hit300, JudgmentType.Hit100, JudgmentType.Hit50]
 
 class Judgment:
     """
+    # TODO: update this documentation
     A hit on a hitobject when a replay is played against a beatmap. In osu!lazer
     terms, this would be a Judgement, though we do not count misses as a ``Hit``
     while lazer does count them as judgements.
