@@ -1195,6 +1195,8 @@ class ReplayPath(ReplayDataOSR):
     def __repr__(self):
         if self.loaded:
             api_attrs_string = ","
+            # avoid loading these lazy-loaded attributes by accessing them here,
+            # unless they're already loaded
             if self.api_attributes_loaded():
                 api_attrs_string = (f"map_id={self.map_id},"
                     f"user_id={self.user_id},")
