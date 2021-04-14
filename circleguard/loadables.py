@@ -1017,8 +1017,7 @@ class ReplayDataOSR(Replay):
         return super().beatmap(library)
 
     def map_available(self, library):
-        beatmap_cached = library and library.beatmap_cached(
-            beatmap_md5=self.beatmap_hash)
+        beatmap_cached = library.beatmap_cached(beatmap_md5=self.beatmap_hash)
         if self.beatmap_hash and beatmap_cached:
             return True
         return super().map_available(library)
