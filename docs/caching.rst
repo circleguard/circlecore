@@ -38,7 +38,7 @@ we load it from the api (or local file in the case of |ReplayPath|), compress th
     The loss is on the order of 0.1 precision in the xy coordinate of frames, which is not enough to impact
     the average use case, but could make a difference in some scenarios.
 
-If you want to use a cache in read only mode (use previously cached replays, but don't cache new replays), pass
+If you want to use a cache in "read only" mode (use previously cached replays, but don't cache new replays), pass
 ``cache=False`` to |Circleguard|:
 
 .. code-block:: python
