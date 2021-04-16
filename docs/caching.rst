@@ -25,8 +25,8 @@ we load it from the api (or local file in the case of |ReplayPath|), compress th
     cg.load(r1) # replay gets loaded from the api and cached
     print("loading from cache")
     cg.load(r2) # loaded from our cache, not the api
-    # we can keep doing this if we want...we won't ever hit the api
-    # atelimit since we're loading from the cache
+    # we can do this as many times as we want - we won't ever
+    # hit the api ratelimit since we're loading from the cache
     for i in range(0, 5):
         print("loading from cache")
         r = ReplayMap(221777, 2757689)
