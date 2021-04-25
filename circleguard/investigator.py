@@ -285,7 +285,7 @@ class Investigator:
     @staticmethod
     def hits(replay, beatmap):
         judgment = Investigator.judgments(replay, beatmap)
-        judgments = [j for j in judgment if j.type in hit_types]
+        judgments = [j for j in judgment if isinstance(j, Hit)]
         return judgments
 
     # TODO add exception for 2b objects (>1 object at the same time) for current
@@ -339,6 +339,11 @@ class Investigator:
 
         (hw_50, hw_100, hw_300) = utils.hitwindows(OD)
         hitradius = utils.hitradius(CS)
+
+        # keep track of the indices of which hitobjs have been hit so far (none
+        # have been hit to start). At the end we'll look through this array and
+        # if any index is still ``False``, we'll mark that as a miss.
+        hitobj_hit = np.zeros(len(hitobjs), dtype=bool)
 
         hitobj_i = 0
         keydown_i = 0
@@ -411,18 +416,19 @@ class Investigator:
                     # sliderheads are always 300s even if you click early or
                     # late
                     if hitobj_type == 1:
-                        judgment_type = JudgmentType.Hit300
+                        hit_type = HitType.Hit300
                     # TODO: should these ranges be inclusive?
                     elif abs(keydown_t - hitobj_t) < hw_300:
-                        judgment_type = JudgmentType.Hit300
+                        hit_type = HitType.Hit300
                     elif abs(keydown_t - hitobj_t) < hw_100:
-                        judgment_type = JudgmentType.Hit100
+                        hit_type = HitType.Hit100
                     elif abs(keydown_t - hitobj_t) < hw_50:
-                        judgment_type = JudgmentType.Hit50
+                        hit_type = HitType.Hit50
 
-                    judgment = Judgment(judgment_type, hitobj, keydown_t,
-                        keydown_xy, replay, beatmap)
+                    judgment = Hit(hit_type, hitobj, keydown_t, keydown_xy,
+                        replay, beatmap)
                     judgments.append(judgment)
+                    hitobj_hit[hitobj_i] = True
 
                     # sliders don't disappear after clicking
                     # so we skip to the press_i that is after notelock_end_time
@@ -438,6 +444,12 @@ class Investigator:
                 else:
                     keydown_i += 1
 
+        # add a Miss for each hitobj that was never hit
+        for i, hitobj_hit_ in enumerate(hitobj_hit):
+            if not hitobj_hit_:
+                judgment = Miss(hitobjs[i], replay, beatmap)
+                judgments.append(judgment)
+
         return judgments
 
     # TODO (some) code duplication with this method and a similar one in
@@ -449,7 +461,7 @@ class Investigator:
         return (t, data)
 
 
-class Snap():
+class Snap:
     """
     A suspicious hit in a replay, specifically so because it snaps away from
     the otherwise normal path. Snaps represent the middle frame in a set of
@@ -480,15 +492,24 @@ class Snap():
         return hash((self.time, self.angle, self.distance))
 
 
-class JudgmentType(Enum):
+class HitType(Enum):
     Hit300 = auto()
     Hit100 = auto()
     Hit50 = auto()
-    Miss = auto()
 
-hit_types = [JudgmentType.Hit300, JudgmentType.Hit100, JudgmentType.Hit50]
 
 class Judgment:
+    def __init__(self, hitobject, replay, beatmap):
+        # TODO remove `already_converted=True` when
+        # https://github.com/llllllllll/slider/issues/80 is fixed
+        self.hitobject = Hitobject.from_slider_hitobj(hitobject, replay,
+            beatmap, True)
+
+class Miss(Judgment):
+    def __init__(self, hitobject, replay, beatmap):
+        super().__init__(hitobject, replay, beatmap)
+
+class Hit(Judgment):
     """
     # TODO: update this documentation
     A hit on a hitobject when a replay is played against a beatmap. In osu!lazer
@@ -511,11 +532,11 @@ class Judgment:
     type: :class:`JudgmentType`
     """
     def __init__(self, type_, hitobject, t, xy, replay, beatmap):
-        # TODO remove `already_converted=True` when
-        # https://github.com/llllllllll/slider/issues/80 is fixed
-        self.hitobject = Hitobject.from_slider_hitobj(hitobject, replay,
-            beatmap, True)
+        super().__init__(hitobject, replay, beatmap)
+        # TODO remove ``t`` in core 6.0.0, ``time`` is more intuitive. ``x`` and
+        # ``y`` are fine as is though since there's no longer name for them.
         self.t = t
+        self.time = t
         self.xy = xy
         self.x = xy[0]
         self.y = xy[1]
@@ -586,6 +607,3 @@ class Judgment:
 
     def __str__(self):
         return f"({self.x}, {self.y}) at t {self.t}"
-
-# TODO: remove in core 6.0.0
-Hit = Judgment
