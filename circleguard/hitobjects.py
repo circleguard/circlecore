@@ -16,12 +16,14 @@ from circleguard.mod import Mod
 # HR) because we know with what mods and on what map the hitobject was played
 # with.
 
-class Hitobject():
+class Hitobject:
     """
     A Hitobject in osu! gameplay, with a time and a position.
     """
-    def __init__(self, t, xy):
-        self.t = t
+    def __init__(self, time, xy):
+        # TODO remove ``t`` in core 6.0.0, ``time`` should be preferred
+        self.t = time
+        self.time = time
         self.xy = xy
         self.x = xy[0]
         self.y = xy[1]
@@ -61,10 +63,10 @@ class Hitobject():
             return Spinner(t, xy)
 
     def __eq__(self, other):
-        return self.t == other.t and self.xy == other.xy
+        return self.time == other.time and self.xy == other.xy
 
     def __hash__(self):
-        return hash((self.t, self.xy))
+        return hash((self.time, self.xy))
 
 
 class Circle(Hitobject):
@@ -76,11 +78,11 @@ class Circle(Hitobject):
         self.radius = radius
 
     def __eq__(self, other):
-        return (self.t == other.t and self.xy == other.xy and
+        return (self.time == other.time and self.xy == other.xy and
             self.radius == other.radius)
 
     def __hash__(self):
-        return hash((self.t, self.xy, self.radius))
+        return hash((self.time, self.xy, self.radius))
 
 
 class Slider(Hitobject):
@@ -92,11 +94,11 @@ class Slider(Hitobject):
         self.radius = radius
 
     def __eq__(self, other):
-        return (self.t == other.t and self.xy == other.xy and
+        return (self.time == other.time and self.xy == other.xy and
             self.radius == other.radius)
 
     def __hash__(self):
-        return hash((self.t, self.xy, self.radius))
+        return hash((self.time, self.xy, self.radius))
 
 
 class Spinner(Hitobject):
