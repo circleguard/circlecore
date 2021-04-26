@@ -32,12 +32,7 @@ class Investigator:
         # TODO cache hits in replay so we don't recalculate hits for both ur
         # and hits / judgments?
         hits = Investigator.hits(replay, beatmap)
-
-        diffs = []
-        for hit in hits:
-            hitobj_t = hit.hitobject.t
-            hit_t = hit.t
-            diffs.append(hit_t - hitobj_t)
+        diffs = [hit.error() for hit in hits]
         return np.std(diffs) * 10
 
     @staticmethod
@@ -594,6 +589,19 @@ class Hit(Judgment):
         """
 
         return self.distance(to="edge") < distance
+
+    def error(self):
+        """
+        How many milliseconds off this hit was from being a perfectly on time
+        hit. If negative, this was an early hit. If positive, this was a late
+        hit. If 0, this was a perfect hit.
+
+        Returns
+        -------
+        float
+            How many milliseconds off this hit was from being perfectly on time.
+        """
+        return self.time - self.hitobject.time
 
     def __eq__(self, other):
         return (self.hitobject == other.hitobject and self.t == other.t and
