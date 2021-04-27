@@ -172,7 +172,7 @@ class TestUR(CGTestCase):
     def setUpClass(cls):
         super().setUpClass()
         # TODO check `legit-12.osr` as well once ur calc notelock issues are
-        # dealt with, which causes us to be ~3 ur off from the actual for it
+        # dealt with, which causes us to be ~3 ur off from its actual ur
         cls.replays = [ReplayPath(RES / "legit" / f"legit-{i}.osr") for i in range(1, 12)]
         cls.urs = [66.74, 66.56, 242.73, 115.54, 254.56, 90.88, 121.62, 163.01, 207.31, 198.79, 138.25]
 
