@@ -45,6 +45,12 @@ class Loadable(abc.ABC):
             end up using a :class:`~circleguard.loader.Loader` to load
             themselves (if they don't load anything from the osu api, for
             instance), a loader is still passed regardless.
+            Note: ``loader`` may be ``None``. This means that whatever is
+            loading the loadable does not have api access and cannot provide a
+            loader. If your loadable requires a loader to properly load itself,
+            raise an error on a null ``loader``. If your loadable can load
+            itself without a ``loader``, proceed as planned and ignore the null
+            ``loader``.
         cache: bool
             Whether to cache the replay data once loaded. This argument
             comes from a parent—either a :class:`~.ReplayContainer` or
@@ -264,6 +270,9 @@ class Map(ReplayContainer):
     def load_info(self, loader):
         if self.info_loaded:
             return
+        if not loader:
+            raise ValueError("A Map cannot be info loaded loaded without api "
+                "access")
         for info in loader.replay_info(self.map_id, span=self.span,
             mods=self.mods):
             r = ReplayMap(info.map_id, info.user_id, info.mods,
@@ -326,6 +335,9 @@ class User(ReplayContainer):
     def load_info(self, loader):
         if self.info_loaded:
             return
+        if not loader:
+            raise ValueError("A User cannot be info loaded loaded without api "
+                "access")
         for info in loader.get_user_best(self.user_id, self.span, self.mods):
             if self.available_only and not info.replay_available:
                 continue
@@ -376,6 +388,9 @@ class MapUser(ReplayContainer):
     def load_info(self, loader):
         if self.info_loaded:
             return
+        if not loader:
+            raise ValueError("A MapUser cannot be info loaded loaded without "
+                "api access")
         for info in loader.replay_info(self.map_id, span=self.span,
             user_id=self.user_id, limit=False):
             if self.available_only and not info.replay_available:
@@ -917,6 +932,10 @@ class ReplayMap(Replay):
         if self.loaded:
             self.log.debug("%s already loaded, not loading", self)
             return
+
+        if not loader:
+            raise ValueError("A ReplayMap cannot be loaded without api access")
+
         if self.info:
             info = self.info
         else:
@@ -1319,6 +1338,10 @@ class ReplayID(Replay):
         self.replay_id = replay_id
 
     def load(self, loader, cache):
+        if self.loaded:
+            return
+        if not loader:
+            raise ValueError("A ReplayID cannot be loaded without api access")
         # TODO file github issue about loading info from replay id, right now we
         # can literally only load the replay data which isn't that useful
         cache = cache if self.cache is None else self.cache

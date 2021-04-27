@@ -694,92 +694,13 @@ class KeylessCircleguard(Circleguard):
         # key here, and might interfere with future improvements (such as
         # checking the validity of the api key automatically on init).
         super().__init__("INVALID_KEY", db_path, slider_dir, loader, cache)
-
-
-    def similarity(self, replay1, replay2, method="similarity", \
-        num_chunks=Circleguard.DEFAULT_CHUNKS) -> float:
-        self._load(replay1)
-        self._load(replay2)
-        return super().similarity(replay1, replay2, method, num_chunks)
-
-    def ur(self, replay, cv=True) -> float:
-        self._load(replay)
-        return super().ur(replay, cv)
-
-    def snaps(self, replay, max_angle=Circleguard.DEFAULT_ANGLE, \
-        min_distance=Circleguard.DEFAULT_DISTANCE, only_on_hitobjs=True) \
-        -> Iterable[Snap]:
-        self._load(replay)
-        return super().snaps(replay, max_angle, min_distance, only_on_hitobjs)
-
-    def frametime(self, replay, cv=True) -> float:
-        self._load(replay)
-        return super().frametime(replay, cv)
-
-    def frametimes(self, replay, cv=True) -> Iterable[float]:
-        self._load(replay)
-        return super().frametimes(replay, cv)
-
-    def hits(self, replay, within=None) -> Iterable[Judgment]:
-        self._load(replay)
-        return super().hits(replay, within)
-
-    def _load(self, loadable):
-        if isinstance(loadable, (ReplayPath, ReplayString)):
-            loadable.load(None, self.cache)
-
-        if not loadable.loaded:
-            raise ValueError("replays must be loaded before use in a "
-                "KeylessCircleguard")
-
-    def load(self, loadable):
-        # allow this function to be called as a no-op if the loadable is already
-        # loaded
-        if loadable.loaded:
-            return
-        if not isinstance(loadable, (ReplayPath, ReplayString)):
-            raise NotImplementedError("Keyless Circleguards cannot load "
-                "Loadables, except for ReplayPaths (or ReplayStrings)")
-        self._load(loadable)
-
-    def load_info(self, container):
-        if container.info_loaded:
-            return
-        raise NotImplementedError("Keyless Circleguards cannot load the info "
-            "of Replay Containers Loadable Containers")
-
-    def Map(self, map_id, span, mods=None, cache=None) -> Map:
-        raise NotImplementedError("KeylessCircleguards cannot create "
-            "info-loaded ReplayContainers")
-
-    def User(self, user_id, span, mods=None, cache=None, available_only=True) \
-        -> User:
-        raise NotImplementedError("KeylessCircleguards cannot create "
-            "info-loaded ReplayContainers")
-
-    def MapUser(self, map_id, user_id, span=Loader.MAX_MAP_SPAN, cache=None,
-        available_only=True) -> MapUser:
-        raise NotImplementedError("KeylessCircleguards cannot create "
-            "info-loaded ReplayContainers")
-
-    def ReplayMap(self, map_id, user_id, mods=None, cache=None, info=None) \
-        -> ReplayMap:
-        raise NotImplementedError("KeylessCircleguards cannot create "
-            "loaded ReplayMaps")
-
-    def ReplayPath(self, path, cache=None) -> ReplayPath:
-        r = ReplayPath(path, cache)
-        r.load(None, cache)
-        return r
-
-    def ReplayString(self, replay_data_str, cache=None) -> ReplayString:
-        r = ReplayString(replay_data_str, cache)
-        r.load(None, cache)
-        return r
-
-    def ReplayID(self, replay_id, cache=None) -> ReplayID:
-        raise NotImplementedError("KeylessCircleguards cannot create "
-            "loaded ReplayIDs")
+        # TODO this is a really terrible way of doing this, we have no way to
+        # influence the creation of a loader in Circleguard.__init__ (related
+        # to the above comment), but we need our loader to be null in this
+        # class. Not sure how to make it more flexible. Getting rid of the
+        # cacher-loader relationship might be a start, so we can then pass
+        # entire loader instances to Circleguard instead of just a class.
+        self.loader = None
 
 def set_options(*, loglevel=None):
     """
