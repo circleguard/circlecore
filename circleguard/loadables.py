@@ -593,7 +593,7 @@ class Replay(Loadable):
         self.k            = None
         self._keydowns    = None
 
-    def map_available(self, library):
+    def map_available(self, _library):
         return bool(self.map_id)
 
     def has_data(self):
@@ -1022,7 +1022,7 @@ class ReplayDataOSR(Replay):
             return True
         return super().map_available(library)
 
-    def load_from_osrparse_replay(self, replay, loader, cache):
+    def load_from_osrparse_replay(self, replay, loader, _cache):
         """
         Loads the data for this replay from the already loaded osrparse replay.
 
