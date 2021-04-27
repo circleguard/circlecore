@@ -45,7 +45,7 @@ class Hitobject:
         CS = beatmap.cs(easy=easy, hard_rock=hard_rock)
 
         # convert to ms
-        t = hitobj.time.total_seconds() * 1000
+        t = int(hitobj.time.total_seconds() * 1000)
 
         if hard_rock and not already_converted:
             hitobj = hitobj.hard_rock
