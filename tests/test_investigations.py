@@ -178,7 +178,8 @@ class TestUR(CGTestCase):
 
     def test_ur(self):
         for i, replay in enumerate(self.replays):
-            self.assertAlmostEqual(self.cg.ur(replay), self.urs[i], delta=UR_DELTA)
+            self.assertAlmostEqual(self.cg.ur(replay), self.urs[i],
+                delta=UR_DELTA, msg=f"ur differs for replay {i} ({replay})")
 
 class TestFrametime(CGTestCase):
     @classmethod
