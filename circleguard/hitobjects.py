@@ -44,8 +44,12 @@ class Hitobject:
         hard_rock = Mod.HR in replay.mods
         CS = beatmap.cs(easy=easy, hard_rock=hard_rock)
 
-        # convert to ms
-        t = int(hitobj.time.total_seconds() * 1000)
+        # Convert to ms.
+        t = hitobj.time.total_seconds() * 1000
+        # Due to floating point errors, ``t`` could actually be something
+        # like ``129824.99999999999`` or ``128705.00000000001``, so round to the
+        # nearest int.
+        t = int(round(t))
 
         if hard_rock and not already_converted:
             hitobj = hitobj.hard_rock
