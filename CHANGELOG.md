@@ -1,3 +1,32 @@
+# v5.1.3
+
+* add convenience `cg.ReplayMap`, `cg.ReplayPath`, `cg.ReplayString`, and `cg.ReplayID` methods which create loaded loadables
+* loading a nonexistent replay will now raise `NoInfoAvailable` like it used to (this had regressed recently)
+* raise `ValueError` on replays with empty replay data
+
+# v5.1.2
+
+* add `fuzzy_mods` utils method, which allows you to pass a required mod and a list of optional mods, and a list of each possible mod combination is returned
+* require snaps to also be in the hitwindow of a hitobj to be counted when using `only_on_hitobjs=True`
+  * Previously, snaps could be counted when they were "on" the closest hitobj, even though that hitobj might be many seconds in the past or future
+* move to [osrparse](https://github.com/kszlim/osu-replay-parser) for osr parsing instead of [circleparse](https://github.com/circleguard/circleparse)
+
+# v5.1.1
+
+* require `slider>=0.4.0` instead of `slider~=0.4.0`
+
+# v5.1.0
+
+* add `only_on_hitobjs` parameter to `cg.snaps` (defaults to `True`) which, if set, only returns snaps that occur on hitobjects
+* all hitobjects returned by `Circleguard` methods (from `cg.snaps` and `cg.hits`, for instance) are now converted to their hard_rock form if the replay had HR enabled
+* add convenience method `cg.beatmap(replay)` which returns the beatmap associated with the given replay
+* expose hitobject classes in `__init__.py`
+
+# v5.0.3
+
+* fix maps with no replays for a mod combo throwing `NoInfoAvailableException`
+* required `slider ~= 0.3.1` instead of `slider == 0.3.1`
+
 # v5.0.2
 
 * remove `Mod.__ne__` as it's the inverse of `Mod.__eq__` by default if ne doesn't exist
@@ -8,7 +37,6 @@
 * add `Circleguard#frametime_graph` to generate a frametime graph from a replay. This requires that you have `matplotlib` installed
 * add `__str__` and `__repr__` to `Hit`
 * fix ur and hits erroring on maps that have catmull sliders
-
 
 # v5.0.0
 
