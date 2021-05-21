@@ -594,6 +594,8 @@ class Replay(Loadable):
         # map_info's map_id attribute automatically
         self._map_id       = None
         # replays have no information about their map by default.
+        # TODO: remove in core 6.0.0, in favor of ``Replay#map_available`` (and
+        # possibly other mechanisms).
         self.map_info     = MapInfo()
         self.username     = None
         self.user_id      = None
