@@ -203,11 +203,12 @@ class Circleguard:
             The ur of the replay.
         """
         self.load(replay)
-        if not self.map_available(replay):
+
+        beatmap = self.beatmap(replay)
+        if not beatmap:
             raise ValueError("The ur of a replay that does not know what map "
                 "it was set on cannot be calculated")
 
-        beatmap = self.beatmap(replay)
         ur = Investigator.ur(replay, beatmap)
         if cv:
             ur = convert_statistic(ur, replay.mods, to="cv")
@@ -216,7 +217,8 @@ class Circleguard:
 
 
     def snaps(self, replay, max_angle=DEFAULT_ANGLE, \
-        min_distance=DEFAULT_DISTANCE, only_on_hitobjs=True) -> Iterable[Snap]:
+        min_distance=DEFAULT_DISTANCE, only_on_hitobjs=True,
+        beatmap=None) -> Iterable[Snap]:
         """
         Finds any snaps (sudden, jerky movement) in ``replay``.
 
@@ -231,6 +233,15 @@ class Circleguard:
             ``|ab| > min_distance``.
         only_on_hitobjs: bool
             Whether to only return snaps that occur on a hitobject.
+        beatmap: :class:`slider.beatmap.Beatmap`
+            The beatmap to use to calculate snaps for the ``replay``, instead of
+            retrieving a beatmap from the replay itself. This is only used when
+            ``only_on_hitobjs`` is true, since the beatmap is not necessary
+            otherwise.
+            |br|
+            This parameter is provided primarily as an optimization for when you
+            already have the replay's beatmap, to avoid re-retrieving it in this
+            method.
 
         Returns
         -------
@@ -249,11 +260,17 @@ class Circleguard:
         """
         self.load(replay)
 
-        beatmap = None
+        beatmap_ = None
         if only_on_hitobjs:
-            beatmap = self.beatmap(replay)
+            beatmap_ = beatmap or self.beatmap(replay)
+            if not beatmap_:
+                raise ValueError("The snaps of a replay that does not know "
+                    "what map it was set on cannot be filtered to include only "
+                    "snaps on hit objects. If you cannot retrieve the beatmap, "
+                    "you can pass ``only_on_hitobjs=False`` to avoid requiring "
+                    "a beatmap.")
 
-        return Investigator.snaps(replay, max_angle, min_distance, beatmap)
+        return Investigator.snaps(replay, max_angle, min_distance, beatmap_)
 
 
     def frametime(self, replay, cv=True, mods_unknown="raise") -> float:
@@ -365,8 +382,7 @@ class Circleguard:
             frametimes = convert_statistic(frametimes, mods, to="cv")
         return frametimes
 
-
-    def hits(self, replay, within=None) -> Iterable[Judgment]:
+    def hits(self, replay, within=None, beatmap=None) -> Iterable[Judgment]:
         """
         The locations in the replay where a hitobject is hit.
 
@@ -378,23 +394,31 @@ class Circleguard:
             If passed, only the hits which are ``within`` pixels or less away
             from the edge of the hitobject which they hit will be returned.
             Otherwise, all hits are returned.
+        beatmap: :class:`slider.beatmap.Beatmap`
+            The beatmap to use to calculate hits for the ``replay``, instead of
+            retrieving a beatmap from the replay itself.
+            |br|
+            This parameter is provided primarily as an optimization for when you
+            already have the replay's beatmap, to avoid re-retrieving it in this
+            method.
 
         Returns
         -------
-        [:class:`~circleguard.Investigator.Hit`]
+        [:class:`~circleguard.Investigator.Judgment`]
             The hits of the replay.
 
         Notes
         -----
         In osu!lazer terminology, hits are equivalent to judgements, but
-        only when not considering misses.
+        without misses.
         """
         self.load(replay)
-        if not self.map_available(replay):
+
+        beatmap = beatmap or self.beatmap(replay)
+        if not beatmap:
             raise ValueError("The hits of a replay that does not know what map "
                 "it was set on cannot be calculated.")
 
-        beatmap = self.beatmap(replay)
         hits = Investigator.hits(replay, beatmap)
 
         if not within:
@@ -403,13 +427,35 @@ class Circleguard:
         hits = [hit for hit in hits if hit.within(within)]
         return hits
 
-    def judgments(self, replay):
+    def judgments(self, replay, beatmap=None) -> Iterable[Judgment]:
+        """
+        The locations in the replay where a hitobject is hit or missed.
+        Judgments are marked as either misses, 50s, 100s, or 300s.
+
+        Parameters
+        ----------
+        replay: :class:`~circleguard.loadables.Replay`
+            The replay to calculate the judgments of.
+        beatmap: :class:`slider.beatmap.Beatmap`
+            The beatmap to use to calculate judgments for the ``replay``,
+            instead of retrieving a beatmap from the replay itself.
+            |br|
+            This parameter is provided primarily as an optimization for when you
+            already have the replay's beatmap, to avoid re-retrieving it in this
+            method.
+
+        Returns
+        -------
+        [:class:`~circleguard.Investigator.Judgment`]
+            The judgments of the replay.
+        """
         self.load(replay)
-        if not self.map_available(replay):
+
+        beatmap = beatmap or self.beatmap(replay)
+        if not beatmap:
             raise ValueError("The judgments of a replay that does not know "
                 "what map it was set on cannot be calculated.")
 
-        beatmap = self.beatmap(replay)
         return Investigator.judgments(replay, beatmap)
 
     def frametime_graph(self, replay, cv=True, figure=None,
