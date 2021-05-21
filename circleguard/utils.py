@@ -23,8 +23,8 @@ class RatelimitWeight(Enum):
 
     Notes
     -----
-    This value currently has no effect on the program and is reserved for
-    future functionality.
+    This value currently has no effect in circlecore and is reserved for future
+    functionality.
     """
     NONE  = "None"
     LIGHT = "Light"
