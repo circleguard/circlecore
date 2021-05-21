@@ -43,7 +43,7 @@ setup(
         "wtc==1.2.1",
         "numpy",
         "requests",
-        "slider>=0.4.0",
+        "slider>=0.5.1",
         "scipy"
     ],
     extras_require={
