@@ -449,8 +449,8 @@ class Circleguard:
         from circleguard.frametime_graph import FrametimeGraph
         from matplotlib import pyplot
         self.load(replay)
-        frametime_graph = FrametimeGraph(replay, cv,
-            figure, show_expected_frametime)
+        frametime_graph = FrametimeGraph(replay, cv, figure,
+            show_expected_frametime)
         # strictly speaking, I don't think this return is necessary -
         # ``FrametimeGraph`` modifies the passed figure on instantiation,
         # so consumers could just use the figure they passed in instead of the
