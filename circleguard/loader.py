@@ -481,7 +481,7 @@ class Loader():
         Loader.check_response(response)
         lzma = base64.b64decode(response["content"])
         replay_data = osrparse.parse_replay(lzma, pure_lzma=True).play_data
-        # TODO cache the replay here, might require some restructring/double
+        # TODO cache the replay here, might require some restructuring/double
         # checking everything will work because we only have its id, not map
         # or user id. In fact I think our db asserts map and user id are nonull
         # so insertion into old dbs probably won't work (and we'd have to change
