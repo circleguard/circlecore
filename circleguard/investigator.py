@@ -411,17 +411,17 @@ class Investigator:
                     # sliderheads are always 300s even if you click early or
                     # late
                     if hitobj_type == 1:
-                        hit_type = HitType.Hit300
+                        hit_type = JudgmentType.Hit300
                     # TODO: should these ranges be inclusive?
                     elif abs(keydown_t - hitobj_t) < hw_300:
-                        hit_type = HitType.Hit300
+                        hit_type = JudgmentType.Hit300
                     elif abs(keydown_t - hitobj_t) < hw_100:
-                        hit_type = HitType.Hit100
+                        hit_type = JudgmentType.Hit100
                     elif abs(keydown_t - hitobj_t) < hw_50:
-                        hit_type = HitType.Hit50
+                        hit_type = JudgmentType.Hit50
 
-                    judgment = Hit(hit_type, hitobj, keydown_t, keydown_xy,
-                        replay, beatmap)
+                    judgment = Hit(hitobj, keydown_t, keydown_xy,
+                        replay, beatmap, hit_type)
                     judgments.append(judgment)
                     hitobj_hit[hitobj_i] = True
 
@@ -487,22 +487,24 @@ class Snap:
         return hash((self.time, self.angle, self.distance))
 
 
-class HitType(Enum):
+class JudgmentType(Enum):
     Hit300 = auto()
     Hit100 = auto()
     Hit50 = auto()
+    Miss = auto()
 
 
 class Judgment:
-    def __init__(self, hitobject, replay, beatmap):
+    def __init__(self, hitobject, replay, beatmap, type_):
         # TODO remove `already_converted=True` when
         # https://github.com/llllllllll/slider/issues/80 is fixed
         self.hitobject = Hitobject.from_slider_hitobj(hitobject, replay,
             beatmap, True)
+        self.type = type_
 
 class Miss(Judgment):
     def __init__(self, hitobject, replay, beatmap):
-        super().__init__(hitobject, replay, beatmap)
+        super().__init__(hitobject, replay, beatmap, JudgmentType.Miss)
 
 class Hit(Judgment):
     """
@@ -525,9 +527,10 @@ class Hit(Judgment):
     beatmap: :class:`slider.beatmap.Beatmap`
         The beatmap this hit was made on.
     type: :class:`JudgmentType`
+        The type of this hit (either 50, 100, or 300).
     """
-    def __init__(self, type_, hitobject, t, xy, replay, beatmap):
-        super().__init__(hitobject, replay, beatmap)
+    def __init__(self, hitobject, t, xy, replay, beatmap, type_):
+        super().__init__(hitobject, replay, beatmap, type_)
         # TODO remove ``t`` in core 6.0.0, ``time`` is more intuitive. ``x`` and
         # ``y`` are fine as is though since there's no longer name for them.
         self.t = t
