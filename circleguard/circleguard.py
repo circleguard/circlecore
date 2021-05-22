@@ -185,7 +185,7 @@ class Circleguard:
             mods_unknown)
 
 
-    def ur(self, replay, cv=True) -> float:
+    def ur(self, replay, cv=True, beatmap=None) -> float:
         """
         The unstable rate of ``replay``.
 
@@ -196,6 +196,13 @@ class Circleguard:
         cv: bool
             Whether to return the converted or unconverted ur. The converted ur
             is returned by default.
+        beatmap: :class:`slider.beatmap.Beatmap`
+            The beatmap to use to calculate ur for the ``replay``, instead of
+            retrieving a beatmap from the replay itself.
+            |br|
+            This parameter is provided primarily as an optimization for when you
+            already have the replay's beatmap, to avoid re-retrieving it in this
+            method.
 
         Returns
         -------
@@ -204,7 +211,7 @@ class Circleguard:
         """
         self.load(replay)
 
-        beatmap = self.beatmap(replay)
+        beatmap = beatmap or self.beatmap(replay)
         if not beatmap:
             raise ValueError("The ur of a replay that does not know what map "
                 "it was set on cannot be calculated")
