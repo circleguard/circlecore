@@ -2,7 +2,7 @@ from datetime import timedelta
 from enum import Enum, auto
 
 import numpy as np
-from slider.beatmap import Circle, Slider
+from slider.beatmap import Circle, Slider, Spinner as SliderSpinner
 
 from circleguard.mod import Mod
 from circleguard.utils import KEY_MASK, check_param
@@ -441,7 +441,9 @@ class Investigator:
 
         # add a Miss for each hitobj that was never hit
         for i, hitobj_hit_ in enumerate(hitobj_hit):
-            if not hitobj_hit_:
+            # ignore if the hitobj is a spinner, we don't calculate judgments
+            # for spinners yet
+            if not hitobj_hit_ and not isinstance(hitobjs[i], SliderSpinner):
                 judgment = Miss(hitobjs[i], replay, beatmap)
                 judgments.append(judgment)
 
