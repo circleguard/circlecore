@@ -14,7 +14,7 @@ from circleguard.circleguard import KeylessCircleguard
 # use this class without installing matplotlib. Another file isn't the end of
 # the world.
 
-class FrametimeGraph():
+class FrametimeGraph:
     # for any frametimes larger than this, chuck them into a single bin.
     # matplotlib can't really handle that many bins otherwise
     MAX_FRAMETIME = 50
