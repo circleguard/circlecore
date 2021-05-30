@@ -430,7 +430,7 @@ class Loader():
         -------
         list[:class:`osrparse.replay.ReplayEvent`]
             The replay events with attributes ``x``, ``y``,
-            ``time_since_previous_action``, and ``keys_pressed``.
+            ``time_delta``, and ``keys``.
         None
             If no replay data was available.
 

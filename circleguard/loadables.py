@@ -6,6 +6,7 @@ import sqlite3
 import random
 
 import osrparse
+from osrparse import ReplayEventOsu
 import numpy as np
 import wtc
 
@@ -703,10 +704,18 @@ class Replay(Loadable):
             raise ValueError("This replay's replay data was empty. This should "
                 "not happen and is indicative of a misbehaved replay.")
 
+        # TODO we'll want to add proper support for non-std replays at some
+        # point, but for now we'll just drop the replay data and early return.
+        # This results in identical behavior with previous versions of
+        # circlecore, before osrparse supported non-std gamemodes.
+        if not isinstance(replay_data[0], ReplayEventOsu):
+            self.replay_data = None
+            return
+
         # remove invalid zero time frame at beginning of replay
         # https://github.com/ppy/osu/blob/1587d4b26fbad691242544a62dbf017a78705
         # ae3/osu.Game/Scoring/Legacy/LegacyScoreDecoder.cs#L242-L245
-        if replay_data[0].time_since_previous_action == 0:
+        if replay_data[0].time_delta == 0:
             replay_data = replay_data[1:]
 
         # t, x, y, k
@@ -730,7 +739,7 @@ class Replay(Loadable):
         # this would make ``highest_running_t`` large and cause all replay data
         # before the skip to be ignored. To solve this, we initialize
         # ``running_t`` to the first frame's time.
-        running_t = next(replay_data).time_since_previous_action
+        running_t = next(replay_data).time_delta
         # We consider negative time frames in the middle of replays to be
         # valid, with a caveat. Their negative time is counted toward
         # ``running_t`` (that is, decreases ``running_t``), but any frames
@@ -761,7 +770,7 @@ class Replay(Loadable):
             # the negative section.
             was_in_negative_section = running_t < highest_running_t
 
-            e_t = e.time_since_previous_action
+            e_t = e.time_delta
             running_t += e_t
             highest_running_t = max(highest_running_t, running_t)
             if running_t < highest_running_t:
@@ -799,12 +808,19 @@ class Replay(Loadable):
                 y = np.interp(last_positive_frame_cum_time, xp, fp)
                 data[2].append(y)
 
-                data[3].append(last_positive_frame.keys_pressed)
+                data[3].append(last_positive_frame.keys)
 
             data[0].append(running_t)
             data[1].append(e.x)
             data[2].append(e.y)
-            data[3].append(e.keys_pressed)
+            # TODO: are we taking a performance hit here by letting osrparse
+            # convert keys to an enum in its replay's init, then converting it
+            # back to an int here (since it's faster for us to work with raw
+            # ints)?
+            # We could add a ``fast_parse`` option to osrparse which doesn't
+            # use nice things like enums if this turns out to be a performance
+            # issue.
+            data[3].append(int(e.keys))
             previous_frame = e
 
         block = np.array(data)
