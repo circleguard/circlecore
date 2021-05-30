@@ -6,6 +6,7 @@ import sqlite3
 import random
 
 import osrparse
+from osrparse import ReplayEventOsu
 import numpy as np
 import wtc
 
@@ -702,6 +703,14 @@ class Replay(Loadable):
         if replay_data == []:
             raise ValueError("This replay's replay data was empty. This should "
                 "not happen and is indicative of a misbehaved replay.")
+
+        # TODO we'll want to add proper support for non-std replays at some
+        # point, but for now we'll just drop the replay data and early return.
+        # This results in identical behavior with previous versions of
+        # circlecore, before osrparse supported non-std gamemodes.
+        if not isinstance(replay_data[0], ReplayEventOsu):
+            self.replay_data = None
+            return
 
         # remove invalid zero time frame at beginning of replay
         # https://github.com/ppy/osu/blob/1587d4b26fbad691242544a62dbf017a78705
