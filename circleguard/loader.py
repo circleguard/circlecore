@@ -629,6 +629,7 @@ class Loader():
         # sleep the remainder of the reset cycle so we guarantee it's been that
         # long since the first request
         sleep_seconds = Loader.RATELIMIT_RESET - seconds_passed
+        sleep_seconds = max(sleep_seconds, 0)
         self._ratelimit(sleep_seconds)
 
     def _ratelimit(self, length):
