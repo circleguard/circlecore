@@ -721,9 +721,9 @@ class KeylessCircleguard(Circleguard):
     perform operations on. It should go without saying that instances of this
     class cannot do anything that requires api access.
 
-    ``KeylessCircleguard``s may also load ``ReplayPath``s and ``ReplayString``s,
-    but some attributes of these replays will not be able to be accessed, as
-    they require api access (such as user id or map id).
+    ``KeylessCircleguard``s may also load ``ReplayPath``\s and
+    ``ReplayString``\s, but some attributes of these replays will not be able to
+    be accessed, as they require api access (such as user id or map id).
 
     Parameters
     ----------
