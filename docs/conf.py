@@ -69,14 +69,17 @@ rst_prolog = """
 .. |RatelimitWeight| replace:: :class:`~circleguard.utils.RatelimitWeight`
 
 .. |Circleguard| replace:: :class:`~circleguard.circleguard.Circleguard`
-.. |cg.similarity| replace:: :func:`~circleguard.circleguard.Circleguard.similarity`
-.. |cg.ur| replace:: :func:`~circleguard.circleguard.Circleguard.ur`
-.. |cg.snaps| replace:: :func:`~circleguard.circleguard.Circleguard.snaps`
-.. |cg.frametime| replace:: :func:`~circleguard.circleguard.Circleguard.frametime`
-.. |cg.frametimes| replace:: :func:`~circleguard.circleguard.Circleguard.frametimes`
-.. |cg.hits| replace:: :func:`~circleguard.circleguard.Circleguard.hits`
-.. |cg.load| replace:: :func:`~circleguard.circleguard.Circleguard.load`
-.. |cg.load_info| replace:: :func:`~circleguard.circleguard.Circleguard.load_info`
+.. |cg.similarity| replace:: :func:`cg.similarity() <circleguard.circleguard.Circleguard.similarity>`
+.. |cg.ur| replace:: :func:`cg.ur() <circleguard.circleguard.Circleguard.ur>`
+.. |cg.snaps| replace:: :func:`cg.snaps() <circleguard.circleguard.Circleguard.snaps>`
+.. |cg.frametime| replace:: :func:`cg.frametime() <circleguard.circleguard.Circleguard.frametime>`
+.. |cg.frametimes| replace:: :func:`cg.frametimes() <circleguard.circleguard.Circleguard.frametimes>`
+.. |cg.hits| replace:: :func:`cg.hits() <circleguard.circleguard.Circleguard.hits>`
+.. |cg.judgments| replace:: :func:`cg.judgments() <circleguard.circleguard.Circleguard.judgments>`
+
+.. |cg.load| replace:: :func:`cg.load() <circleguard.circleguard.Circleguard.load>`
+.. |cg.load_info| replace:: :func:`cg.load_info() <circleguard.circleguard.Circleguard.load_info>`
+
 .. |cg.Map| replace:: :func:`cg.Map() <circleguard.circleguard.Circleguard.Map>`
 .. |cg.User| replace:: :func:`cg.User() <circleguard.circleguard.Circleguard.User>`
 .. |cg.MapUser| replace:: :func:`cg.MapUser() <circleguard.circleguard.Circleguard.MapUser>`
@@ -87,6 +90,7 @@ rst_prolog = """
 
 .. |Snap| replace:: :class:`~circleguard.investigator.Snap`
 .. |Hit| replace:: :class:`~circleguard.investigator.Hit`
+.. |Judgment| replace:: :class:`~circleguard.investigator.Judgment`
 
 .. |Span| replace:: :class:`~circleguard.span.Span`
 
