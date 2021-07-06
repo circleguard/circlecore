@@ -253,7 +253,7 @@ class Circleguard:
         Returns
         -------
         list[Snap]
-            The snaps of the replay. This list is empty if no snaps were found.
+            The snaps of the replay.
 
         Notes
         -----
