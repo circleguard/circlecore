@@ -80,6 +80,10 @@ rst_prolog = """
 .. |cg.Map| replace:: :func:`cg.Map() <circleguard.circleguard.Circleguard.Map>`
 .. |cg.User| replace:: :func:`cg.User() <circleguard.circleguard.Circleguard.User>`
 .. |cg.MapUser| replace:: :func:`cg.MapUser() <circleguard.circleguard.Circleguard.MapUser>`
+.. |cg.ReplayMap| replace:: :func:`cg.ReplayMap() <circleguard.circleguard.Circleguard.ReplayMap>`
+.. |cg.ReplayPath| replace:: :func:`cg.ReplayPath() <circleguard.circleguard.Circleguard.ReplayPath>`
+.. |cg.ReplayString| replace:: :func:`cg.ReplayString() <circleguard.circleguard.Circleguard.ReplayString>`
+.. |cg.ReplayID| replace:: :func:`cg.ReplayID() <circleguard.circleguard.Circleguard.ReplayID>`
 
 .. |Snap| replace:: :class:`~circleguard.investigator.Snap`
 .. |Hit| replace:: :class:`~circleguard.investigator.Hit`
