@@ -57,7 +57,7 @@ Links
 
 .. toctree::
     :maxdepth: 2
-    :caption: Tutorials
+    :caption: Tutorial
 
     foreword
     representing-replays

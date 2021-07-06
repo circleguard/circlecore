@@ -66,7 +66,7 @@ instead. This means beatmaps will be cached with respect to a single |Circleguar
 Loadables
 ~~~~~~~~~
 
-|Replay|\s and |ReplayContainer|\s also have a ``cache`` parameter, which determines if they should be cached when loaded.
+A |Replay| or |ReplayContainer| also has a ``cache`` parameter, which determines if it should be cached when loaded.
 
 .. note::
 

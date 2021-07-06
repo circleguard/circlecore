@@ -74,11 +74,13 @@ rst_prolog = """
 .. |cg.snaps| replace:: :func:`cg.snaps() <circleguard.circleguard.Circleguard.snaps>`
 .. |cg.frametime| replace:: :func:`cg.frametime() <circleguard.circleguard.Circleguard.frametime>`
 .. |cg.frametimes| replace:: :func:`cg.frametimes() <circleguard.circleguard.Circleguard.frametimes>`
+.. |cg.frametime_graph| replace:: :func:`cg.frametime_graph() <circleguard.circleguard.Circleguard.frametime_graph>`
 .. |cg.hits| replace:: :func:`cg.hits() <circleguard.circleguard.Circleguard.hits>`
 .. |cg.judgments| replace:: :func:`cg.judgments() <circleguard.circleguard.Circleguard.judgments>`
 
 .. |cg.load| replace:: :func:`cg.load() <circleguard.circleguard.Circleguard.load>`
 .. |cg.load_info| replace:: :func:`cg.load_info() <circleguard.circleguard.Circleguard.load_info>`
+.. |cg.beatmap| replace:: :func:`cg.beatmap() <circleguard.circleguard.Circleguard.beatmap>`
 
 .. |cg.Map| replace:: :func:`cg.Map() <circleguard.circleguard.Circleguard.Map>`
 .. |cg.User| replace:: :func:`cg.User() <circleguard.circleguard.Circleguard.User>`
@@ -88,11 +90,16 @@ rst_prolog = """
 .. |cg.ReplayString| replace:: :func:`cg.ReplayString() <circleguard.circleguard.Circleguard.ReplayString>`
 .. |cg.ReplayID| replace:: :func:`cg.ReplayID() <circleguard.circleguard.Circleguard.ReplayID>`
 
+.. |replay.beatmap| replace:: :func:`replay.Beatmap() <circleguard.loadables.Replay.beatmap>`
+
 .. |Snap| replace:: :class:`~circleguard.investigator.Snap`
 .. |Hit| replace:: :class:`~circleguard.investigator.Hit`
 .. |Judgment| replace:: :class:`~circleguard.investigator.Judgment`
 
 .. |Span| replace:: :class:`~circleguard.span.Span`
+
+.. |library| replace:: :class:`slider.Library <slider.library.Library>`
+.. |beatmap| replace:: :class:`slider.Beatmap <slider.beatmap.Beatmap>`
 
 .. _Circleguard: https://github.com/circleguard/circleguard
 .. _Circlecore: https://github.com/circleguard/circlecore
