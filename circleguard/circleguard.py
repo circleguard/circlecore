@@ -411,7 +411,7 @@ class Circleguard:
 
         Returns
         -------
-        [:class:`~circleguard.Investigator.Judgment`]
+        list[:class:`~circleguard.investigator.Judgment`]
             The hits of the replay.
 
         Notes
@@ -453,7 +453,7 @@ class Circleguard:
 
         Returns
         -------
-        [:class:`~circleguard.Investigator.Judgment`]
+        list[:class:`~circleguard.investigator.Judgment`]
             The judgments of the replay.
         """
         self.load(replay)
