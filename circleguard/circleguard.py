@@ -237,7 +237,7 @@ class Circleguard:
             Consider only (a,b,c) where ``∠abc < max_angle``
         min_distance: float
             Consider only (a,b,c) where ``|ab| > min_distance`` and
-            ``|ab| > min_distance``.
+            ``|bc| > min_distance``.
         only_on_hitobjs: bool
             Whether to only return snaps that occur on a hitobject.
         beatmap: :class:`slider.beatmap.Beatmap`

@@ -63,7 +63,7 @@ class Investigator:
             Consider only (a,b,c) where ``∠abc < max_angle``
         min_distance: float
             Consider only (a,b,c) where ``|ab| > min_distance`` and
-            ``|ab| > min_distance``.
+            ``|bc| > min_distance``.
         beatmap: :class:`slider.beatmap.Beatmap`
             If passed, only the snaps that occur on a hitobject in this beatmap
             will be returned.
