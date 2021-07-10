@@ -38,12 +38,12 @@ setup(
     license = "MIT",
     packages=find_packages(),
     install_requires=[
-        "osrparse~=4.0.0",
+        "osrparse~=5.0.0",
         "ossapi==1.3.0",
         "wtc==1.2.1",
         "numpy",
         "requests",
-        "slider>=0.4.0",
+        "slider>=0.5.1",
         "scipy"
     ],
     extras_require={

@@ -10,7 +10,7 @@ from requests import RequestException
 import osrparse
 from ossapi import Ossapi
 
-from circleguard import Mod
+from circleguard.mod import Mod
 from circleguard.utils import TRACE
 from circleguard.span import Span
 
@@ -33,7 +33,7 @@ class InvalidKeyException(InternalAPIException):
     """An api key was rejected by the api."""
 
 class RatelimitException(InternalAPIException):
-    """The api has ratelimit an api key."""
+    """The api has ratelimited an api key."""
 
 class InvalidJSONException(InternalAPIException):
     """The api returned an invalid json response."""
@@ -430,7 +430,7 @@ class Loader():
         -------
         list[:class:`osrparse.replay.ReplayEvent`]
             The replay events with attributes ``x``, ``y``,
-            ``time_since_previous_action``, and ``keys_pressed``.
+            ``time_delta``, and ``keys``.
         None
             If no replay data was available.
 
@@ -481,7 +481,7 @@ class Loader():
         Loader.check_response(response)
         lzma = base64.b64decode(response["content"])
         replay_data = osrparse.parse_replay(lzma, pure_lzma=True).play_data
-        # TODO cache the replay here, might require some restructring/double
+        # TODO cache the replay here, might require some restructuring/double
         # checking everything will work because we only have its id, not map
         # or user id. In fact I think our db asserts map and user id are nonull
         # so insertion into old dbs probably won't work (and we'd have to change
@@ -629,6 +629,7 @@ class Loader():
         # sleep the remainder of the reset cycle so we guarantee it's been that
         # long since the first request
         sleep_seconds = Loader.RATELIMIT_RESET - seconds_passed
+        sleep_seconds = max(sleep_seconds, 0)
         self._ratelimit(sleep_seconds)
 
     def _ratelimit(self, length):

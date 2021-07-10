@@ -1,26 +1,20 @@
 import logging
 
-# ``Mod`` is actually defined in ossapi, but we want that fact to be totally
-# transparent to consumers. It logically should be defined in circlecore, but
-# since ossapi needs to deal with api responses that return mods, and circlecore
-# already depends on ossapi (so ossapi can't depend on circlecore), we needed to
-# move ``Mod`` to ossapi. But consumers shouldn't need to be aware of this and
-# it should seem as if circlecore is the one that defined ``Mod``.
-from ossapi import Mod
-
 from circleguard.circleguard import Circleguard, KeylessCircleguard, set_options
 from circleguard.loadables import (Replay, ReplayMap, ReplayPath, Map, User,
         MapUser, ReplayDir, ReplayContainer, Loadable, ReplayCache,
         CachedReplay, ReplayID, ReplayString, LoadableContainer)
+from circleguard.mod import Mod
 from circleguard.loader import (Loader, ReplayInfo, APIException,
         NoInfoAvailableException, UnknownAPIException, InternalAPIException,
         InvalidKeyException, RatelimitException, InvalidJSONException,
         ReplayUnavailableException)
 from circleguard.version import __version__
-from circleguard.investigator import Snap, Hit
+from circleguard.investigator import Snap, Judgment, Hit, Miss, JudgmentType
 from circleguard.span import Span
 from circleguard.utils import (convert_statistic, order, Key,
-        RatelimitWeight, TRACE, ColoredFormatter, replay_pairs, fuzzy_mods)
+        RatelimitWeight, TRACE, ColoredFormatter, replay_pairs, fuzzy_mods,
+        hitwindow, hitwindows, hitradius)
 from circleguard.game_version import GameVersion, NoGameVersion
 from circleguard.hitobjects import Hitobject, Circle, Slider, Spinner
 
@@ -34,8 +28,6 @@ logging.getLogger("circleguard").addHandler(handler_stream)
 del ColoredFormatter
 
 __all__ = [
-# mod (from ossapi)
-"Mod",
 # core
 "Circleguard", "KeylessCircleguard", "set_options",
 # loadables
@@ -44,9 +36,11 @@ __all__ = [
 "ReplayID", "ReplayDir", "ReplayString", "LoadableContainer",
 # enums
 "Key", "RatelimitWeight",
+# mod
+"Mod",
 # utils
 "convert_statistic", "order", "Key", "RatelimitWeight", "TRACE", "replay_pairs",
-"fuzzy_mods",
+"fuzzy_mods", "hitwindow", "hitwindows", "hitradius",
 # loader
 "Loader", "ReplayInfo",
 # exceptions
@@ -57,7 +51,7 @@ __all__ = [
 # version
 "__version__",
 # investigation-related classes
-"Snap", "Hit",
+"Snap", "Judgment", "Hit", "Miss", "JudgmentType",
 # span
 "Span",
 # GameVersion

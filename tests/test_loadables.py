@@ -1,5 +1,5 @@
 from circleguard import (ReplayMap, ReplayPath, RatelimitWeight, Map, User,
-    MapUser, Mod, NoInfoAvailableException)
+    MapUser, Mod, NoInfoAvailableException, ReplayString)
 
 from tests.utils import CGTestCase, RES
 
@@ -150,6 +150,18 @@ class TestMapUser(CGTestCase):
         self.assertEqual(self.mu[1].map_id, 795627)
         # test slicing
         self.assertListEqual([r.map_id for r in self.mu[0:2]], [795627, 795627])
+
+class TestReplayString(CGTestCase):
+    def test_replay_string_load(self):
+        replay_data = open(RES / "example_replay.osr", "rb").read()
+        r = ReplayString(replay_data)
+        self.cg.load(r)
+        self.assertEqual(r.mods, Mod.HD + Mod.DT, "Mods was not correct")
+        self.assertEqual(r.replay_id, 2029801532, "Replay id was not correct")
+        self.assertEqual(r.username, "MarthXT", "Username was not correct")
+        self.assertEqual(r.user_id, 2909663, "User id was not correct")
+        self.assertEqual(r.weight, RatelimitWeight.LIGHT, "RatelimitWeight was not correct")
+        self.assertTrue(r.loaded, "Loaded status was not correct")
 
 
 class TestLoadableFromCG(CGTestCase):

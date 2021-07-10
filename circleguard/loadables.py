@@ -6,10 +6,11 @@ import sqlite3
 import random
 
 import osrparse
+from osrparse import ReplayEventOsu
 import numpy as np
 import wtc
 
-from circleguard import Mod
+from circleguard.mod import Mod
 from circleguard.utils import TRACE, KEY_MASK, RatelimitWeight
 from circleguard.loader import Loader
 from circleguard.span import Span
@@ -45,6 +46,12 @@ class Loadable(abc.ABC):
             end up using a :class:`~circleguard.loader.Loader` to load
             themselves (if they don't load anything from the osu api, for
             instance), a loader is still passed regardless.
+            Note: ``loader`` may be ``None``. This means that whatever is
+            loading the loadable does not have api access and cannot provide a
+            loader. If your loadable requires a loader to properly load itself,
+            raise an error on a null ``loader``. If your loadable can load
+            itself without a ``loader``, proceed as planned and ignore the null
+            ``loader``.
         cache: bool
             Whether to cache the replay data once loaded. This argument
             comes from a parent—either a :class:`~.ReplayContainer` or
@@ -264,6 +271,9 @@ class Map(ReplayContainer):
     def load_info(self, loader):
         if self.info_loaded:
             return
+        if not loader:
+            raise ValueError("A Map cannot be info loaded loaded without api "
+                "access")
         for info in loader.replay_info(self.map_id, span=self.span,
             mods=self.mods):
             r = ReplayMap(info.map_id, info.user_id, info.mods,
@@ -326,6 +336,9 @@ class User(ReplayContainer):
     def load_info(self, loader):
         if self.info_loaded:
             return
+        if not loader:
+            raise ValueError("A User cannot be info loaded loaded without api "
+                "access")
         for info in loader.get_user_best(self.user_id, self.span, self.mods):
             if self.available_only and not info.replay_available:
                 continue
@@ -376,6 +389,9 @@ class MapUser(ReplayContainer):
     def load_info(self, loader):
         if self.info_loaded:
             return
+        if not loader:
+            raise ValueError("A MapUser cannot be info loaded loaded without "
+                "api access")
         for info in loader.replay_info(self.map_id, span=self.span,
             user_id=self.user_id, limit=False):
             if self.available_only and not info.replay_available:
@@ -579,6 +595,8 @@ class Replay(Loadable):
         # map_info's map_id attribute automatically
         self._map_id       = None
         # replays have no information about their map by default.
+        # TODO: remove in core 6.0.0, in favor of ``Replay#map_available`` (and
+        # possibly other mechanisms).
         self.map_info     = MapInfo()
         self.username     = None
         self.user_id      = None
@@ -592,6 +610,9 @@ class Replay(Loadable):
         self.xy           = None
         self.k            = None
         self._keydowns    = None
+
+    def map_available(self, _library):
+        return bool(self.map_id)
 
     def has_data(self):
         """
@@ -636,22 +657,10 @@ class Replay(Loadable):
         None
             If we do not know what beatmap this replay was played on.
         """
-        if not self.map_info.available():
+        if not self.map_available(library):
             return None
 
-        # prefer loading from disk, it's cheaper than potentially downloading
-        # the beatmap from osu! servers
-
-        if self.map_info.path:
-            # by default we don't save beatmaps that are already saved on disk.
-            # Subclasses should override `#beatmap` and pass `copy=True` here
-            # in their overridden method if they want to copy the beatmap to the
-            # library's directory.
-            return library.beatmap_from_path(self.map_info.path)
-
-        if self.map_info.map_id:
-            return library.lookup_by_id(self.map_info.map_id, download=True,
-                save=True)
+        return library.lookup_by_id(self.map_id, download=True, save=True)
 
     def _process_replay_data(self, replay_data):
         """
@@ -695,10 +704,18 @@ class Replay(Loadable):
             raise ValueError("This replay's replay data was empty. This should "
                 "not happen and is indicative of a misbehaved replay.")
 
+        # TODO we'll want to add proper support for non-std replays at some
+        # point, but for now we'll just drop the replay data and early return.
+        # This results in identical behavior with previous versions of
+        # circlecore, before osrparse supported non-std gamemodes.
+        if not isinstance(replay_data[0], ReplayEventOsu):
+            self.replay_data = None
+            return
+
         # remove invalid zero time frame at beginning of replay
         # https://github.com/ppy/osu/blob/1587d4b26fbad691242544a62dbf017a78705
         # ae3/osu.Game/Scoring/Legacy/LegacyScoreDecoder.cs#L242-L245
-        if replay_data[0].time_since_previous_action == 0:
+        if replay_data[0].time_delta == 0:
             replay_data = replay_data[1:]
 
         # t, x, y, k
@@ -722,7 +739,7 @@ class Replay(Loadable):
         # this would make ``highest_running_t`` large and cause all replay data
         # before the skip to be ignored. To solve this, we initialize
         # ``running_t`` to the first frame's time.
-        running_t = next(replay_data).time_since_previous_action
+        running_t = next(replay_data).time_delta
         # We consider negative time frames in the middle of replays to be
         # valid, with a caveat. Their negative time is counted toward
         # ``running_t`` (that is, decreases ``running_t``), but any frames
@@ -753,7 +770,7 @@ class Replay(Loadable):
             # the negative section.
             was_in_negative_section = running_t < highest_running_t
 
-            e_t = e.time_since_previous_action
+            e_t = e.time_delta
             running_t += e_t
             highest_running_t = max(highest_running_t, running_t)
             if running_t < highest_running_t:
@@ -791,12 +808,19 @@ class Replay(Loadable):
                 y = np.interp(last_positive_frame_cum_time, xp, fp)
                 data[2].append(y)
 
-                data[3].append(last_positive_frame.keys_pressed)
+                data[3].append(last_positive_frame.keys)
 
             data[0].append(running_t)
             data[1].append(e.x)
             data[2].append(e.y)
-            data[3].append(e.keys_pressed)
+            # TODO: are we taking a performance hit here by letting osrparse
+            # convert keys to an enum in its replay's init, then converting it
+            # back to an int here (since it's faster for us to work with raw
+            # ints)?
+            # We could add a ``fast_parse`` option to osrparse which doesn't
+            # use nice things like enums if this turns out to be a performance
+            # issue.
+            data[3].append(int(e.keys))
             previous_frame = e
 
         block = np.array(data)
@@ -918,11 +942,6 @@ class ReplayMap(Replay):
         cache: bool
             Whether to cache this replay after loading it. This only has an
             effect if ``self.cache`` is unset (``None``).
-
-        Notes
-        -----
-        If ``replay.loaded`` is ``True``, this method has no effect.
-        ``replay.loaded`` is set to ``True`` after this method is finished.
         """
         # only listen to the parent's cache if ours is not set. Lower takes
         # precedence
@@ -931,6 +950,10 @@ class ReplayMap(Replay):
         if self.loaded:
             self.log.debug("%s already loaded, not loading", self)
             return
+
+        if not loader:
+            raise ValueError("A ReplayMap cannot be loaded without api access")
+
         if self.info:
             info = self.info
         else:
@@ -985,7 +1008,148 @@ class ReplayMap(Replay):
             f"{self.user_id} on {self.map_id}")
 
 
-class ReplayPath(Replay):
+class ReplayDataOSR(Replay):
+    """
+    A :class:`~.Replay` which has been saved in the osr format.
+
+    Parameters
+    ----------
+    weight: :class:`~circleguard.utils.RatelimitWeight`
+        How much it 'costs' to load this replay from the api.
+    cache: bool
+        Whether to cache this replay once it is loaded.
+
+    Notes
+    -----
+    ReplayDataStrings have no replay-related attributes available (not ``None``)
+    when they are unloaded.
+
+    The following replay-related attributes are available (not ``None``) when
+    this replay is loaded:
+
+    * timestamp
+    * map_id
+    * username
+    * user_id
+    * mods
+    * replay_id
+    * beatmap_hash
+    * replay_data
+    """
+    def __init__(self, ratelimit_weight, cache=None):
+        super().__init__(ratelimit_weight, cache)
+        self.log = logging.getLogger(__name__ + ".ReplayPath")
+        self.beatmap_hash = None
+
+        self._user_id_func = None
+        self._user_id = None
+        self._map_id_func = None
+
+    def beatmap(self, library):
+        if not self.map_available(library):
+            return None
+        # if we can't load our map_id, fall back to loading from slider.
+        if not self.can_load_api_attributes() and self.beatmap_hash:
+            return library.lookup_by_md5(self.beatmap_hash)
+        return super().beatmap(library)
+
+    def map_available(self, library):
+        beatmap_cached = library.beatmap_cached(beatmap_md5=self.beatmap_hash)
+        if self.beatmap_hash and beatmap_cached:
+            return True
+        return super().map_available(library)
+
+    def load_from_osrparse_replay(self, replay, loader, _cache):
+        """
+        Loads the data for this replay from the already loaded osrparse replay.
+
+        Parameters
+        ----------
+        loader: :class:`~.loader.Loader`
+            The :class:`~.loader.Loader` to load this replay with.
+            |br|
+            If ``None``, this replay will be unable to retrieve its ``map_id``
+            or ``user_id``, but everything else will still be loaded.
+        cache: bool
+            Whether to cache this replay after loading it. This only has an
+            effect if ``self.cache`` is unset (``None``). Note that currently
+            we do not cache :class:`~.ReplayPath` regardless of this parameter.
+        """
+        self.game_version = GameVersion(replay.game_version, concrete=True)
+        self.timestamp = replay.timestamp
+        self.username = replay.player_name
+        self.mods = Mod(int(replay.mod_combination))
+        self.replay_id = replay.replay_id
+        self.beatmap_hash = replay.beatmap_hash
+
+        if loader:
+            self._user_id_func = loader.user_id
+            self._map_id_func = loader.map_id
+
+        self._process_replay_data(replay.play_data)
+        self.loaded = True
+        self.log.log(TRACE, "Finished loading %s", self)
+
+    def load_from_file(self, path, loader, cache):
+        replay = osrparse.parse_replay_file(path)
+        self.load_from_osrparse_replay(replay, loader, cache)
+
+    def load_from_string(self, replay_data_str, loader, cache):
+        replay = osrparse.parse_replay(replay_data_str,
+            pure_lzma=False)
+        self.load_from_osrparse_replay(replay, loader, cache)
+
+
+    @property
+    def user_id(self):
+        if not self.loaded:
+            return None
+        if not self._user_id_func:
+            raise ValueError("The map if of a replay which has been loaded "
+                "without a ``Loader`` cannot be retrieved.")
+        if not self._user_id:
+            self._user_id = self._user_id_func(self.username)
+        return self._user_id
+
+    @property
+    def map_id(self):
+        if not self.loaded:
+            return None
+        if not self._map_id_func:
+            raise ValueError("The map id of a replay which has been loaded "
+                "without a ``Loader`` cannot be retrieved. This can happen if "
+                "the replay was loaded with a ``KeylessCircleguard``.")
+        # property inheritence is a bit nasty. See
+        # https://stackoverflow.com/a/37663266 for reference
+        if not super().map_id:
+            map_id = self._map_id_func(self.beatmap_hash)
+            super(ReplayDataOSR, self.__class__).map_id.fset(self, map_id)
+        return super().map_id
+
+    def can_load_api_attributes(self):
+        """
+        Whether we can load attributes that are lazy loaded and require api
+        calls, such as ``map_id`` or ``user_id``, if requested.
+        """
+        return bool(self._map_id_func) and bool(self._user_id_func)
+
+    def api_attributes_loaded(self):
+        """
+        Whether attributes that are lazy loaded and require api calls, such as
+        ``map_id`` or ``user_id``, have already been loaded.
+        """
+        return bool(self._map_id) and bool(self._user_id)
+
+    @map_id.setter
+    def map_id(self, map_id):
+        super(ReplayDataOSR, self.__class__).map_id.fset(self, map_id)
+
+    @user_id.setter
+    def user_id(self, user_id):
+        self._user_id = user_id
+
+
+class ReplayPath(ReplayDataOSR):
     """
     A :class:`~.Replay` saved locally in a ``.osr`` file.
 
@@ -1020,61 +1184,18 @@ class ReplayPath(Replay):
         self.log = logging.getLogger(__name__ + ".ReplayPath")
         self.path = Path(path).absolute()
         self.beatmap_hash = None
+
         self._user_id_func = None
+        self._user_id = None
+        self._map_id_func = None
 
     def load(self, loader, cache):
-        """
-        Loads the data for this replay from the osr file.
-
-        Parameters
-        ----------
-        loader: :class:`~.loader.Loader`
-            The :class:`~.loader.Loader` to load this replay with.
-        cache: bool
-            Whether to cache this replay after loading it. This only has an
-            effect if ``self.cache`` is unset (``None``). Note that currently
-            we do not cache :class:`~.ReplayPath` regardless of this parameter.
-
-        Notes
-        -----
-        If ``replay.loaded`` is ``True``, this method has no effect.
-        ``replay.loaded`` is set to ``True`` after this method is finished.
-        """
-
         self.log.debug("Loading ReplayPath %r", self)
         if self.loaded:
             self.log.debug("%s already loaded, not loading", self)
             return
 
-        loaded = osrparse.parse_replay_file(self.path)
-        self.game_version = GameVersion(loaded.game_version, concrete=True)
-        self.timestamp = loaded.timestamp
-        self.map_id = loader.map_id(loaded.beatmap_hash)
-        self.username = loaded.player_name
-        # our `user_id` attribute is lazy loaded, so we need to retain the
-        # `Loader#user_id` function to use later to load it.
-        self._user_id_func = loader.user_id
-        self._user_id = None
-        self.mods = Mod(int(loaded.mod_combination))
-        self.replay_id = loaded.replay_id
-        self.beatmap_hash = loaded.beatmap_hash
-
-        self._process_replay_data(loaded.play_data)
-        self.loaded = True
-        self.log.log(TRACE, "Finished loading %s", self)
-
-    @property
-    def user_id(self):
-        # we don't have a user_id_func if we're not loaded, so early return
-        if not self.loaded:
-            return None
-        if not self._user_id:
-            self._user_id = self._user_id_func(self.username)
-        return self._user_id
-
-    @user_id.setter
-    def user_id(self, user_id):
-        self._user_id = user_id
+        self.load_from_file(self.path, loader, cache)
 
     def __eq__(self, loadable):
         """
@@ -1109,10 +1230,16 @@ class ReplayPath(Replay):
 
     def __repr__(self):
         if self.loaded:
-            return (f"ReplayPath(path={self.path},map_id={self.map_id},"
-                f"user_id={self.user_id},mods={self.mods},"
-                f"replay_id={self.replay_id},weight={self.weight},"
-                f"loaded={self.loaded},username={self.username})")
+            api_attrs_string = ","
+            # avoid loading these lazy-loaded attributes by accessing them here,
+            # unless they're already loaded
+            if self.api_attributes_loaded():
+                api_attrs_string = (f"map_id={self.map_id},"
+                    f"user_id={self.user_id},")
+            return (f"ReplayPath(path={self.path},{api_attrs_string}"
+                f"mods={self.mods},replay_id={self.replay_id},"
+                f"weight={self.weight},loaded={self.loaded},"
+                f"username={self.username})")
         return (f"ReplayPath(path={self.path},weight={self.weight},"
                 f"loaded={self.loaded})")
 
@@ -1123,7 +1250,7 @@ class ReplayPath(Replay):
         return f"Unloaded ReplayPath at {self.path}"
 
 
-class ReplayString(Replay):
+class ReplayString(ReplayDataOSR):
     """
     A :class:`~.Replay` saved locally in a ``.osr`` file, when the file has
     already been read as a string.
@@ -1165,63 +1292,11 @@ class ReplayString(Replay):
         super().__init__(RatelimitWeight.LIGHT, cache)
         self.log = logging.getLogger(__name__ + ".ReplayString")
         self.replay_data_str = replay_data_str
-        self.beatmap_hash = None
-        self._user_id_func = None
 
     def load(self, loader, cache):
-        """
-        Loads the data for this replay from the string replay data.
-
-        Parameters
-        ----------
-        loader: :class:`~.loader.Loader`
-            The :class:`~.loader.Loader` to load this replay with.
-        cache: bool
-            Whether to cache this replay after loading it. This only has an
-            effect if ``self.cache`` is unset (``None``). Note that currently
-            we do not cache :class:`~.ReplayString` regardless of this
-            parameter.
-
-        Notes
-        -----
-        If ``replay.loaded`` is ``True``, this method has no effect.
-        ``replay.loaded`` is set to ``True`` after this method is finished.
-        """
-
-        self.log.debug("Loading ReplayString %r", self)
         if self.loaded:
-            self.log.debug("%s already loaded, not loading", self)
             return
-
-        loaded = osrparse.parse_replay(self.replay_data_str, pure_lzma=False)
-        self.game_version = GameVersion(loaded.game_version, concrete=True)
-        self.timestamp = loaded.timestamp
-        self.map_id = loader.map_id(loaded.beatmap_hash)
-        self.username = loaded.player_name
-        # our `user_id` attribute is lazy loaded, so we need to retain the
-        # `Loader#user_id` function to use later to load it.
-        self._user_id_func = loader.user_id
-        self._user_id = None
-        self.mods = Mod(loaded.mod_combination)
-        self.replay_id = loaded.replay_id
-        self.beatmap_hash = loaded.beatmap_hash
-
-        self._process_replay_data(loaded.play_data)
-        self.loaded = True
-        self.log.log(TRACE, "Finished loading %s", self)
-
-    @property
-    def user_id(self):
-        # we don't have a user_id_func if we're not loaded, so early return
-        if not self.loaded:
-            return None
-        if not self._user_id:
-            self._user_id = self._user_id_func(self.username)
-        return self._user_id
-
-    @user_id.setter
-    def user_id(self, user_id):
-        self._user_id = user_id
+        self.load_from_string(self.replay_data_str, loader, cache)
 
     def __eq__(self, loadable):
         if not isinstance(loadable, ReplayString):
@@ -1233,9 +1308,13 @@ class ReplayString(Replay):
 
     def __repr__(self):
         if self.loaded:
+            api_attrs_string = ","
+            if self.api_attributes_loaded():
+                api_attrs_string = (f"map_id={self.map_id},"
+                    f"user_id={self.user_id},")
             return (f"ReplayString(len(replay_data_str)="
-                f"{len(self.replay_data_str)},map_id={self.map_id},"
-                f"user_id={self.user_id},mods={self.mods},"
+                f"{len(self.replay_data_str)},{api_attrs_string}"
+                f"mods={self.mods},"
                 f"replay_id={self.replay_id},weight={self.weight},"
                 f"loaded={self.loaded},username={self.username})")
         return f"ReplayString(len(replay_data_str)={len(self.replay_data_str)})"
@@ -1277,6 +1356,10 @@ class ReplayID(Replay):
         self.replay_id = replay_id
 
     def load(self, loader, cache):
+        if self.loaded:
+            return
+        if not loader:
+            raise ValueError("A ReplayID cannot be loaded without api access")
         # TODO file github issue about loading info from replay id, right now we
         # can literally only load the replay data which isn't that useful
         cache = cache if self.cache is None else self.cache

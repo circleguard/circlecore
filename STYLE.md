@@ -43,7 +43,8 @@ def add(a, b):
     b: int
         The second number to add.
 
-    Returns:
+    Returns
+    -------
     int
         The sum of ``a`` and ``b``.
     """

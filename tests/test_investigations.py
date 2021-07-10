@@ -9,6 +9,12 @@ class TestSnaps(CGTestCase):
     def setUpClass(cls):
         super().setUpClass()
         cls.r1 = ReplayPath(RES / "corrected_replay1.osr")
+        # TODO replays r2 and r5 might not have been properly named, r2 has 0
+        # snaps
+        cls.r2 = ReplayPath(RES / "legit" / "legit_snaps-1.osr")
+        cls.r3 = ReplayPath(RES / "legit" / "legit_snaps-2.osr")
+        cls.r4 = ReplayPath(RES / "legit" / "legit_snaps-3.osr")
+        cls.r5 = ReplayPath(RES / "legit" / "legit_snaps-4.osr")
 
     def test_snaps(self):
         snaps = self.cg.snaps(self.r1)
@@ -55,6 +61,22 @@ class TestSnaps(CGTestCase):
         self.assertEqual(snaps[1].time, 68833)
         self.assertAlmostEqual(snaps[1].angle, 4.39870, delta=DELTA)
         self.assertAlmostEqual(snaps[1].distance, 8.14900, delta=DELTA)
+
+    def test_legit_snaps(self):
+        # these replays have snaps that are picked up when we don't filter for
+        # those on hitobjects. Some of them also have snaps that get through
+        # that filter anyway. Test mostly exists to alert us to accidental
+        # changes in behavior (either good or bad changes).
+
+        snaps = self.cg.snaps(self.r3, only_on_hitobjs=False)
+        filtered_snaps = self.cg.snaps(self.r3)
+        self.assertEqual(len(snaps), 1)
+        self.assertEqual(len(filtered_snaps), 0)
+
+        snaps = self.cg.snaps(self.r4, only_on_hitobjs=False)
+        filtered_snaps = self.cg.snaps(self.r4)
+        self.assertEqual(len(snaps), 3)
+        self.assertEqual(len(filtered_snaps), 1)
 
     def test_snaps_only_on_hitobjs_accounts_for_time(self):
         # checking that a frame that's in the radius of the nearest hitobj,
@@ -150,13 +172,14 @@ class TestUR(CGTestCase):
     def setUpClass(cls):
         super().setUpClass()
         # TODO check `legit-12.osr` as well once ur calc notelock issues are
-        # dealt with, which causes us to be ~3 ur off from the actual for it
+        # dealt with, which causes us to be ~3 ur off from its actual ur
         cls.replays = [ReplayPath(RES / "legit" / f"legit-{i}.osr") for i in range(1, 12)]
         cls.urs = [66.74, 66.56, 242.73, 115.54, 254.56, 90.88, 121.62, 163.01, 207.31, 198.79, 138.25]
 
     def test_ur(self):
         for i, replay in enumerate(self.replays):
-            self.assertAlmostEqual(self.cg.ur(replay), self.urs[i], delta=UR_DELTA)
+            self.assertAlmostEqual(self.cg.ur(replay), self.urs[i],
+                delta=UR_DELTA, msg=f"ur differs for replay {i} ({replay})")
 
 class TestFrametime(CGTestCase):
     @classmethod

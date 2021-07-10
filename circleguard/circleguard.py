@@ -8,12 +8,12 @@ from slider import Library
 
 from circleguard.loader import Loader
 from circleguard.comparer import Comparer
-from circleguard.investigator import Investigator, Hit, Snap
+from circleguard.investigator import Investigator, Judgment, Snap
 from circleguard.cacher import Cacher
 from circleguard.utils import convert_statistic, check_param
 from circleguard.loadables import (Map, User, MapUser, ReplayMap, ReplayID,
     ReplayPath, ReplayString)
-from circleguard import Mod
+from circleguard.mod import Mod
 # from circleguard.frametime_graph import FrametimeGraph
 
 
@@ -185,7 +185,7 @@ class Circleguard:
             mods_unknown)
 
 
-    def ur(self, replay, cv=True) -> float:
+    def ur(self, replay, cv=True, beatmap=None) -> float:
         """
         The unstable rate of ``replay``.
 
@@ -196,6 +196,13 @@ class Circleguard:
         cv: bool
             Whether to return the converted or unconverted ur. The converted ur
             is returned by default.
+        beatmap: :class:`slider.beatmap.Beatmap`
+            The beatmap to use to calculate ur for the ``replay``, instead of
+            retrieving a beatmap from the replay itself.
+            |br|
+            This parameter is provided primarily as an optimization for when you
+            already have the replay's beatmap, to avoid re-retrieving it in this
+            method.
 
         Returns
         -------
@@ -203,11 +210,12 @@ class Circleguard:
             The ur of the replay.
         """
         self.load(replay)
-        if not replay.map_info.available():
+
+        beatmap = beatmap or self.beatmap(replay)
+        if not beatmap:
             raise ValueError("The ur of a replay that does not know what map "
                 "it was set on cannot be calculated")
 
-        beatmap = self.beatmap(replay)
         ur = Investigator.ur(replay, beatmap)
         if cv:
             ur = convert_statistic(ur, replay.mods, to="cv")
@@ -216,7 +224,8 @@ class Circleguard:
 
 
     def snaps(self, replay, max_angle=DEFAULT_ANGLE, \
-        min_distance=DEFAULT_DISTANCE, only_on_hitobjs=True) -> Iterable[Snap]:
+        min_distance=DEFAULT_DISTANCE, only_on_hitobjs=True,
+        beatmap=None) -> Iterable[Snap]:
         """
         Finds any snaps (sudden, jerky movement) in ``replay``.
 
@@ -228,14 +237,23 @@ class Circleguard:
             Consider only (a,b,c) where ``∠abc < max_angle``
         min_distance: float
             Consider only (a,b,c) where ``|ab| > min_distance`` and
-            ``|ab| > min_distance``.
+            ``|bc| > min_distance``.
         only_on_hitobjs: bool
             Whether to only return snaps that occur on a hitobject.
+        beatmap: :class:`slider.beatmap.Beatmap`
+            The beatmap to use to calculate snaps for the ``replay``, instead of
+            retrieving a beatmap from the replay itself. This is only used when
+            ``only_on_hitobjs`` is true, since the beatmap is not necessary
+            otherwise.
+            |br|
+            This parameter is provided primarily as an optimization for when you
+            already have the replay's beatmap, to avoid re-retrieving it in this
+            method.
 
         Returns
         -------
         list[Snap]
-            The snaps of the replay. This list is empty if no snaps were found.
+            The snaps of the replay.
 
         Notes
         -----
@@ -249,11 +267,17 @@ class Circleguard:
         """
         self.load(replay)
 
-        beatmap = None
+        beatmap_ = None
         if only_on_hitobjs:
-            beatmap = self.beatmap(replay)
+            beatmap_ = beatmap or self.beatmap(replay)
+            if not beatmap_:
+                raise ValueError("The snaps of a replay that does not know "
+                    "what map it was set on cannot be filtered to include only "
+                    "snaps on hit objects. If you cannot retrieve the beatmap, "
+                    "you can pass ``only_on_hitobjs=False`` to avoid requiring "
+                    "a beatmap.")
 
-        return Investigator.snaps(replay, max_angle, min_distance, beatmap)
+        return Investigator.snaps(replay, max_angle, min_distance, beatmap_)
 
 
     def frametime(self, replay, cv=True, mods_unknown="raise") -> float:
@@ -359,14 +383,13 @@ class Circleguard:
             else:
                 raise ValueError("The frametimes of a replay that does not "
                     "know with what mods it was set with cannot be converted. "
-                    "Pass a different option to frametime(..., mods_unknown=) "
-                    "if you would like to provide a default mod for "
-                    "conversion.")
+                    "Pass one of ``{\"dt\", \"nm\", \"ht\"}`` for "
+                    "``mods_unknown``if you would like to provide a default "
+                    "mod for conversion.")
             frametimes = convert_statistic(frametimes, mods, to="cv")
         return frametimes
 
-
-    def hits(self, replay, within=None) -> Iterable[Hit]:
+    def hits(self, replay, within=None, beatmap=None) -> Iterable[Judgment]:
         """
         The locations in the replay where a hitobject is hit.
 
@@ -378,23 +401,31 @@ class Circleguard:
             If passed, only the hits which are ``within`` pixels or less away
             from the edge of the hitobject which they hit will be returned.
             Otherwise, all hits are returned.
+        beatmap: :class:`slider.beatmap.Beatmap`
+            The beatmap to use to calculate hits for the ``replay``, instead of
+            retrieving a beatmap from the replay itself.
+            |br|
+            This parameter is provided primarily as an optimization for when you
+            already have the replay's beatmap, to avoid re-retrieving it in this
+            method.
 
         Returns
         -------
-        [:class:`~circleguard.Investigator.Hit`]
+        list[:class:`~circleguard.investigator.Judgment`]
             The hits of the replay.
 
         Notes
         -----
         In osu!lazer terminology, hits are equivalent to judgements, but
-        only when not considering misses.
+        without misses.
         """
         self.load(replay)
-        if not replay.map_info.available():
+
+        beatmap = beatmap or self.beatmap(replay)
+        if not beatmap:
             raise ValueError("The hits of a replay that does not know what map "
                 "it was set on cannot be calculated.")
 
-        beatmap = self.beatmap(replay)
         hits = Investigator.hits(replay, beatmap)
 
         if not within:
@@ -403,7 +434,39 @@ class Circleguard:
         hits = [hit for hit in hits if hit.within(within)]
         return hits
 
-    def frametime_graph(self, replay, cv=True, figure=None):
+    def judgments(self, replay, beatmap=None) -> Iterable[Judgment]:
+        """
+        The locations in the replay where a hitobject is hit or missed.
+        Judgments are marked as either misses, 50s, 100s, or 300s.
+
+        Parameters
+        ----------
+        replay: :class:`~circleguard.loadables.Replay`
+            The replay to calculate the judgments of.
+        beatmap: :class:`slider.beatmap.Beatmap`
+            The beatmap to use to calculate judgments for the ``replay``,
+            instead of retrieving a beatmap from the replay itself.
+            |br|
+            This parameter is provided primarily as an optimization for when you
+            already have the replay's beatmap, to avoid re-retrieving it in this
+            method.
+
+        Returns
+        -------
+        list[:class:`~circleguard.investigator.Judgment`]
+            The judgments of the replay.
+        """
+        self.load(replay)
+
+        beatmap = beatmap or self.beatmap(replay)
+        if not beatmap:
+            raise ValueError("The judgments of a replay that does not know "
+                "what map it was set on cannot be calculated.")
+
+        return Investigator.judgments(replay, beatmap)
+
+    def frametime_graph(self, replay, cv=True, figure=None,
+        show_expected_frametime=True):
         """
         Uses matplotlib to create a graph of the frametimes of the replay.
 
@@ -419,6 +482,9 @@ class Circleguard:
             usage. It is exposed to allow circleguard (the gui) to use this
             method, as matplotlib's pyqt compatability layer adds some
             complications which this works around.
+        show_expected_frametime: bool
+            Whether to show a vertical line where we expect the average
+            frametime to be.
 
         Returns
         -------
@@ -436,7 +502,8 @@ class Circleguard:
         from circleguard.frametime_graph import FrametimeGraph
         from matplotlib import pyplot
         self.load(replay)
-        frametime_graph = FrametimeGraph(replay, cv, figure)
+        frametime_graph = FrametimeGraph(replay, cv, figure,
+            show_expected_frametime)
         # strictly speaking, I don't think this return is necessary -
         # ``FrametimeGraph`` modifies the passed figure on instantiation,
         # so consumers could just use the figure they passed in instead of the
@@ -476,6 +543,8 @@ class Circleguard:
         """
         replay_container.load_info(self.loader)
 
+    def map_available(self, replay):
+        return replay.map_available(self.library)
 
     def Map(self, map_id, span, mods=None, cache=None) -> Map:
         """
@@ -652,6 +721,10 @@ class KeylessCircleguard(Circleguard):
     perform operations on. It should go without saying that instances of this
     class cannot do anything that requires api access.
 
+    ``KeylessCircleguard``s may also load ``ReplayPath``\s and
+    ``ReplayString``\s, but some attributes of these replays will not be able to
+    be accessed, as they require api access (such as user id or map id).
+
     Parameters
     ----------
     db_path: str or :class:`os.PathLike`
@@ -674,90 +747,13 @@ class KeylessCircleguard(Circleguard):
         # key here, and might interfere with future improvements (such as
         # checking the validity of the api key automatically on init).
         super().__init__("INVALID_KEY", db_path, slider_dir, loader, cache)
-
-
-    def similarity(self, replay1, replay2, method="similarity", \
-        num_chunks=Circleguard.DEFAULT_CHUNKS) -> float:
-        if not replay1.loaded or not replay2.loaded:
-            raise ValueError("replays must be loaded before use in a "
-                "KeylessCircleguard")
-        return super().similarity(replay1, replay2, method, num_chunks)
-
-    def ur(self, replay, cv=True) -> float:
-        if not replay.loaded:
-            raise ValueError("replays must be loaded before use in a "
-                "KeylessCircleguard")
-        return super().ur(replay, cv)
-
-    def snaps(self, replay, max_angle=Circleguard.DEFAULT_ANGLE, \
-        min_distance=Circleguard.DEFAULT_DISTANCE, only_on_hitobjs=True) \
-        -> Iterable[Snap]:
-        if not replay.loaded:
-            raise ValueError("replays must be loaded before use in a "
-                "KeylessCircleguard")
-        return super().snaps(replay, max_angle, min_distance, only_on_hitobjs)
-
-    def frametime(self, replay, cv=True) -> float:
-        if not replay.loaded:
-            raise ValueError("replays must be loaded before use in a "
-                "KeylessCircleguard")
-        return super().frametime(replay, cv)
-
-    def frametimes(self, replay, cv=True) -> Iterable[float]:
-        if not replay.loaded:
-            raise ValueError("replays must be loaded before use in a "
-                "KeylessCircleguard")
-        return super().frametimes(replay, cv)
-
-    def hits(self, replay, within=None) -> Iterable[Hit]:
-        if not replay.loaded:
-            raise ValueError("replays must be loaded before use in a "
-                "KeylessCircleguard")
-        return super().hits(replay, within)
-
-    def load(self, loadable):
-        # allow this function to be called as a no-op if the loadable is already
-        # loaded
-        if loadable.loaded:
-            return
-        raise NotImplementedError("Keyless Circleguards cannot load Loadables")
-
-    def load_info(self, container):
-        if container.info_loaded:
-            return
-        raise NotImplementedError("Keyless Circleguards cannot load the info "
-            "of Replay Containers Loadable Containers")
-
-    def Map(self, map_id, span, mods=None, cache=None) -> Map:
-        raise NotImplementedError("KeylessCircleguards cannot create "
-            "info-loaded ReplayContainers")
-
-    def User(self, user_id, span, mods=None, cache=None, available_only=True) \
-        -> User:
-        raise NotImplementedError("KeylessCircleguards cannot create "
-            "info-loaded ReplayContainers")
-
-    def MapUser(self, map_id, user_id, span=Loader.MAX_MAP_SPAN, cache=None,
-        available_only=True) -> MapUser:
-        raise NotImplementedError("KeylessCircleguards cannot create "
-            "info-loaded ReplayContainers")
-
-    def ReplayMap(self, map_id, user_id, mods=None, cache=None, info=None) \
-        -> ReplayMap:
-        raise NotImplementedError("KeylessCircleguards cannot create "
-            "loaded Replays")
-
-    def ReplayPath(self, path, cache=None) -> ReplayPath:
-        raise NotImplementedError("KeylessCircleguards cannot create "
-            "loaded Replays")
-
-    def ReplayString(self, replay_data_str, cache=None) -> ReplayString:
-        raise NotImplementedError("KeylessCircleguards cannot create "
-            "loaded Replays")
-
-    def ReplayID(self, replay_id, cache=None) -> ReplayID:
-        raise NotImplementedError("KeylessCircleguards cannot create "
-            "loaded Replays")
+        # TODO this is a really terrible way of doing this, we have no way to
+        # influence the creation of a loader in Circleguard.__init__ (related
+        # to the above comment), but we need our loader to be null in this
+        # class. Not sure how to make it more flexible. Getting rid of the
+        # cacher-loader relationship might be a start, so we can then pass
+        # entire loader instances to Circleguard instead of just a class.
+        self.loader = None
 
 def set_options(*, loglevel=None):
     """

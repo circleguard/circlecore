@@ -4,7 +4,7 @@ try:
 except ImportError:
     raise ImportError("matplotlib must be installed to create frametime graphs")
 
-from circleguard import Mod
+from circleguard.mod import Mod
 from circleguard.circleguard import KeylessCircleguard
 
 # classes that import optional modules have to be in their own file, or else
@@ -14,16 +14,22 @@ from circleguard.circleguard import KeylessCircleguard
 # use this class without installing matplotlib. Another file isn't the end of
 # the world.
 
-class FrametimeGraph():
+class FrametimeGraph:
     # for any frametimes larger than this, chuck them into a single bin.
     # matplotlib can't really handle that many bins otherwise
     MAX_FRAMETIME = 50
 
-    def __init__(self, replay, cv, figure):
+    def __init__(self, replay, cv, figure, show_expected_frametime):
+        self.cv = cv
         # figsize is in inches for whatever reason lol
         self.figure = figure or pyplot.figure(figsize=(5, 5))
-        self.cv = cv
-        self.conversion_factor = self._conversion_factor(replay)
+        self.show_expected_frametime = show_expected_frametime
+        conversion_factor_raw = self._conversion_factor(replay)
+        self.conversion_factor = conversion_factor_raw if self.cv else 1
+        self.expected_frametime = 16 + 2 / 3
+        if not self.cv:
+            self.expected_frametime /= conversion_factor_raw
+
         # replay is guaranteed to be loaded when we get it
         cg = KeylessCircleguard()
         # we convert the frametimes manually if necessary later on instead of
@@ -31,8 +37,7 @@ class FrametimeGraph():
         # oddities about the frametime graph which make it easier this way.
         frametimes = cg.frametimes(replay, cv=False)
 
-        self.figure.suptitle(f"({'cv' if self.cv else 'ucv'}) "
-            "Frametime Histogram")
+        self.figure.suptitle(f"({'cv' if cv else 'ucv'}) Frametime Histogram")
 
         self.max_frametime = max(frametimes)
         if self.max_frametime > self.MAX_FRAMETIME:
@@ -49,6 +54,9 @@ class FrametimeGraph():
         ax.hist(frametimes, bins)
         ax.set_xlabel("Frametime")
         ax.set_ylabel("Count")
+
+        if self.show_expected_frametime:
+            ax.axvline(x=self.expected_frametime, color="red")
 
     # adapted from
     # https://matplotlib.org/examples/pylab_examples/broken_axis.html
@@ -79,9 +87,10 @@ class FrametimeGraph():
             self.max_frametime]
         ax2.hist(high_frametimes, bins)
 
+        if self.show_expected_frametime:
+            ax1.axvline(x=self.expected_frametime, color="red")
+
     def _conversion_factor(self, replay):
-        if not self.cv:
-            return 1
         if Mod.DT in replay.mods:
             return 1 / 1.5
         if Mod.HT in replay.mods:

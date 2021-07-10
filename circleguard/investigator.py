@@ -1,9 +1,10 @@
 from datetime import timedelta
+from enum import Enum, auto
 
 import numpy as np
-from slider.beatmap import Circle, Slider
+from slider.beatmap import Circle, Slider, Spinner as SliderSpinner
 
-from circleguard import Mod
+from circleguard.mod import Mod
 from circleguard.utils import KEY_MASK, check_param
 import circleguard.utils as utils
 from circleguard.game_version import GameVersion
@@ -28,13 +29,10 @@ class Investigator:
         beatmap: :class:`slider.beatmap.Beatmap`
             The beatmap to calculate ``replay``'s ur with.
         """
+        # TODO cache hits in replay so we don't recalculate hits for both ur
+        # and hits / judgments?
         hits = Investigator.hits(replay, beatmap)
-
-        diffs = []
-        for hit in hits:
-            hitobj_t = hit.hitobject.t
-            hit_t = hit.t
-            diffs.append(hit_t - hitobj_t)
+        diffs = [hit.error() for hit in hits]
         return np.std(diffs) * 10
 
     @staticmethod
@@ -65,7 +63,7 @@ class Investigator:
             Consider only (a,b,c) where ``∠abc < max_angle``
         min_distance: float
             Consider only (a,b,c) where ``|ab| > min_distance`` and
-            ``|ab| > min_distance``.
+            ``|bc| > min_distance``.
         beatmap: :class:`slider.beatmap.Beatmap`
             If passed, only the snaps that occur on a hitobject in this beatmap
             will be returned.
@@ -185,10 +183,13 @@ class Investigator:
         # (dT/dt)^3 = 1/(dt/dT)^3
         dtdT = np.diff(t)
         d3xy = np.diff(xy, axis=0, n=3)
-        # safely calculate the division and replace with zero if the divisor is zero
-        # dtdT is sliced with 2: because differentiating drops one element for each order (slice (n - 1,) to (n - 3,))
-        # d3xy is of shape (n - 3, 2) so dtdT is also reshaped from (n - 3,) to (n - 3, 1) to align the axes.
-        jerk = np.divide(d3xy, dtdT[2:, None] ** 3, out=np.zeros_like(d3xy), where=dtdT[2:,None]!=0)
+        # safely calculate the division and replace with zero if the divisor is
+        # zero. dtdT is sliced with 2: because differentiating drops one element
+        # for each order (slice (n - 1,) to (n - 3,)).
+        # d3xy is of shape (n - 3, 2) so dtdT is also reshaped from (n - 3,) to
+        # (n - 3, 1) to align the axes.
+        jerk = np.divide(d3xy, dtdT[2:, None] ** 3, out=np.zeros_like(d3xy),
+            where=dtdT[2:,None]!=0)
 
         # take the absolute value of the jerk
         jerk = np.linalg.norm(jerk, axis=1)
@@ -276,20 +277,28 @@ class Investigator:
 
         return keydown_frames
 
+    @staticmethod
+    def hits(replay, beatmap):
+        judgment = Investigator.judgments(replay, beatmap)
+        judgments = [j for j in judgment if isinstance(j, Hit)]
+        return judgments
+
     # TODO add exception for 2b objects (>1 object at the same time) for current
     # version of notelock
     @staticmethod
-    def hits(replay, beatmap):
+    def judgments(replay, beatmap):
         """
-        Determines the hits (where any hitobject was hit for the first time)
-        when playing ``replay`` against ``beatmap``
+        Determines the judgments (where hitobjs were hit or missed, and if hit
+        then what type of hit - a 300, 100, or 50) of the given ``replay``
+        played against the given ``beatmap``.
 
         Parameters
         ----------
         replay: :class:`~.Replay`
-            The replay to determine the hits of when played against ``beatmap``.
+            The replay to determine the judgments of when played against
+            ``beatmap``.
         beatmap: :class:`slider.beatmap.Beatmap`
-            The beatmap to determine the hits of when ``replay`` is played
+            The beatmap to determine the udgments of when ``replay`` is played
             against it.
         """
         game_version = replay.game_version
@@ -321,11 +330,15 @@ class Investigator:
         keydowns = Investigator.keydown_frames(replay)
 
 
-        hits = []
+        judgments = []
 
-        hitwindow = utils.hitwindow(OD)
+        (hw_50, hw_100, hw_300) = utils.hitwindows(OD)
         hitradius = utils.hitradius(CS)
 
+        # keep track of the indices of which hitobjs have been hit so far (none
+        # have been hit to start). At the end we'll look through this array and
+        # if any index is still ``False``, we'll mark that as a miss.
+        hitobj_hit = np.zeros(len(hitobjs), dtype=bool)
 
         hitobj_i = 0
         keydown_i = 0
@@ -340,7 +353,7 @@ class Investigator:
 
             if isinstance(hitobj, Circle):
                 hitobj_type = 0
-                hitobj_end_time = hitobj_t + hitwindow
+                hitobj_end_time = hitobj_t + hw_50
             elif isinstance(hitobj, Slider):
                 hitobj_type = 1
                 hitobj_end_time = hitobj.end_time.total_seconds() * 1000
@@ -350,7 +363,7 @@ class Investigator:
 
             # before sliderbug fix, notelock ended after hitwindow50
             if not sliderbug_fixed:
-                notelock_end_time = hitobj_t + hitwindow
+                notelock_end_time = hitobj_t + hw_50
                 # exception for sliders/spinners, where notelock ends after
                 # hitobject end time if it's earlier
                 if hitobj_type != 0:
@@ -369,11 +382,10 @@ class Investigator:
                 keydown_i += 1
                 continue
 
-            if keydown_t <= hitobj_t - hitwindow:
+            if keydown_t <= hitobj_t - hw_50:
                 # pressing on a circle or slider during hitwindowmiss will cause
                 # a miss
                 if np.linalg.norm(keydown_xy - hitobj_xy) <= hitradius and hitobj_type != 2:
-
                     # sliders don't disappear after missing
                     # so we skip to the press_i that is after notelock_end_time
                     if hitobj_type == 1 and sliderbug_fixed:
@@ -392,9 +404,26 @@ class Investigator:
                 # so we move to the next object
                 hitobj_i += 1
             else:
-                if keydown_t < hitobj_t + hitwindow and np.linalg.norm(keydown_xy - hitobj_xy) <= hitradius and hitobj_type != 2:
-                    hit = Hit(hitobj, keydown_t, keydown_xy, replay, beatmap)
-                    hits.append(hit)
+                if (keydown_t < hitobj_t + hw_50 and
+                    np.linalg.norm(keydown_xy - hitobj_xy) <= hitradius and
+                    hitobj_type != 2):
+
+                    # sliderheads are always 300s even if you click early or
+                    # late
+                    if hitobj_type == 1:
+                        hit_type = JudgmentType.Hit300
+                    # TODO: should these ranges be inclusive?
+                    elif abs(keydown_t - hitobj_t) < hw_300:
+                        hit_type = JudgmentType.Hit300
+                    elif abs(keydown_t - hitobj_t) < hw_100:
+                        hit_type = JudgmentType.Hit100
+                    elif abs(keydown_t - hitobj_t) < hw_50:
+                        hit_type = JudgmentType.Hit50
+
+                    judgment = Hit(hitobj, keydown_t, keydown_xy,
+                        replay, beatmap, hit_type)
+                    judgments.append(judgment)
+                    hitobj_hit[hitobj_i] = True
 
                     # sliders don't disappear after clicking
                     # so we skip to the press_i that is after notelock_end_time
@@ -410,7 +439,15 @@ class Investigator:
                 else:
                     keydown_i += 1
 
-        return hits
+        # add a Miss for each hitobj that was never hit
+        for i, hitobj_hit_ in enumerate(hitobj_hit):
+            # ignore if the hitobj is a spinner, we don't calculate judgments
+            # for spinners yet
+            if not hitobj_hit_ and not isinstance(hitobjs[i], SliderSpinner):
+                judgment = Miss(hitobjs[i], replay, beatmap)
+                judgments.append(judgment)
+
+        return judgments
 
     # TODO (some) code duplication with this method and a similar one in
     # ``Comparer``. Consolidate and move this method to utils?
@@ -421,7 +458,7 @@ class Investigator:
         return (t, data)
 
 
-class Snap():
+class Snap:
     """
     A suspicious hit in a replay, specifically so because it snaps away from
     the otherwise normal path. Snaps represent the middle frame in a set of
@@ -452,11 +489,46 @@ class Snap():
         return hash((self.time, self.angle, self.distance))
 
 
-class Hit():
+class JudgmentType(Enum):
+    Hit300 = auto()
+    Hit100 = auto()
+    Hit50 = auto()
+    Miss = auto()
+
+class Judgment:
     """
-    A hit on a hitobject when a replay is played against a beatmap. In osu!lazer
-    terms, this would be a Judgement, though we do not count misses as a ``Hit``
-    while lazer does count them as judgements.
+    A judgment on a hitobject. A "judgment" is either a hit or a miss, with
+    a hit being further classified as a 300, 100, or 50.
+
+    Parameters
+    ----------
+    hitobject: :class:`slider.beatmap.HitObject`
+        The hitobject being judged. This is converted to a
+        :class:`circleguard.hitobjects.Hitobject`.
+    replay: :class:`circleguard.loadables.Replay`
+        The replay this judgment was made on.
+    beatmap: :class:`slider.beatmap.Beatmap`
+        The beatmap this judgment was made on.
+    type: :class:`JudgmentType`
+        The type of this judgment (either Hit300, Hit100, or Hit50, or Miss).
+    """
+    def __init__(self, hitobject, replay, beatmap, type_):
+        # TODO remove `already_converted=True` when
+        # https://github.com/llllllllll/slider/issues/80 is fixed
+        self.hitobject = Hitobject.from_slider_hitobj(hitobject, replay,
+            beatmap, True)
+        self.type = type_
+
+class Miss(Judgment):
+    """
+    A miss on a hitobject when a replay is played against a beatmap.
+    """
+    def __init__(self, hitobject, replay, beatmap):
+        super().__init__(hitobject, replay, beatmap, JudgmentType.Miss)
+
+class Hit(Judgment):
+    """
+    A hit on a hitobject when a replay is played against a beatmap.
 
     Parameters
     ----------
@@ -471,15 +543,19 @@ class Hit():
         The replay this hit was made on.
     beatmap: :class:`slider.beatmap.Beatmap`
         The beatmap this hit was made on.
+    type: :class:`JudgmentType`
+        The type of this hit (either Hit300, Hit100, or Hit50).
     """
-    def __init__(self, hitobject, t, xy, replay, beatmap):
-        # TODO remove `already_converted=True` when
-        # https://github.com/llllllllll/slider/issues/80 is fixed
-        self.hitobject = Hitobject.from_slider_hitobj(hitobject, replay, beatmap, True)
+    def __init__(self, hitobject, t, xy, replay, beatmap, type_):
+        super().__init__(hitobject, replay, beatmap, type_)
+        # TODO remove ``t`` in core 6.0.0, ``time`` is more intuitive. ``x`` and
+        # ``y`` are fine as is though since there's no longer name for them.
         self.t = t
+        self.time = t
         self.xy = xy
         self.x = xy[0]
         self.y = xy[1]
+        self.type = type_
 
     def distance(self, *, to):
         """
@@ -533,6 +609,19 @@ class Hit():
         """
 
         return self.distance(to="edge") < distance
+
+    def error(self):
+        """
+        How many milliseconds off this hit was from being a perfectly on time
+        hit. If negative, this was an early hit. If positive, this was a late
+        hit. If 0, this was a perfect hit.
+
+        Returns
+        -------
+        float
+            How many milliseconds off this hit was from being perfectly on time.
+        """
+        return self.time - self.hitobject.time
 
     def __eq__(self, other):
         return (self.hitobject == other.hitobject and self.t == other.t and
