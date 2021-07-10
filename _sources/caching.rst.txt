@@ -25,8 +25,8 @@ we load it from the api (or local file in the case of |ReplayPath|), compress th
     cg.load(r1) # replay gets loaded from the api and cached
     print("loading from cache")
     cg.load(r2) # loaded from our cache, not the api
-    # we can keep doing this if we want...we won't ever hit the api
-    # atelimit since we're loading from the cache
+    # we can do this as many times as we want - we won't ever
+    # hit the api ratelimit since we're loading from the cache
     for i in range(0, 5):
         print("loading from cache")
         r = ReplayMap(221777, 2757689)
@@ -38,7 +38,7 @@ we load it from the api (or local file in the case of |ReplayPath|), compress th
     The loss is on the order of 0.1 precision in the xy coordinate of frames, which is not enough to impact
     the average use case, but could make a difference in some scenarios.
 
-If you want to use a cache in read only mode (use previously cached replays, but don't cache new replays), pass
+If you want to use a cache in "read only" mode (use previously cached replays, but don't cache new replays), pass
 ``cache=False`` to |Circleguard|:
 
 .. code-block:: python
@@ -66,7 +66,7 @@ instead. This means beatmaps will be cached with respect to a single |Circleguar
 Loadables
 ~~~~~~~~~
 
-|Replay|\s and |ReplayContainer|\s also have a ``cache`` parameter, which determines if they should be cached when loaded.
+A |Replay| or |ReplayContainer| also has a ``cache`` parameter, which determines if it should be cached when loaded.
 
 .. note::
 

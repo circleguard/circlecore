@@ -5,7 +5,7 @@
     <meta name="color-scheme" content="light dark"><link rel="index" title="Index" href="../../genindex.html" /><link rel="search" title="Search" href="../../search.html" />
 
     <meta name="generator" content="sphinx-3.5.2, furo 2021.03.20.beta30"/>
-        <title>circleguard.hitobjects - Circleguard v5.1.2 documentation</title>
+        <title>circleguard.hitobjects - Circleguard v5.2.1 documentation</title>
       <link rel="stylesheet" href="../../_static/styles/furo.css?digest=978e1795dfe158b585dda6a8417f6411828bf3ed">
     <link rel="stylesheet" href="../../_static/pygments.css">
     <link media="(prefers-color-scheme: dark)" rel="stylesheet" href="../../_static/pygments_dark.css">
@@ -86,7 +86,7 @@
       </label>
     </div>
     <div class="header-center">
-      <a href="../../index.html"><div class="brand">Circleguard v5.1.2 documentation</div></a>
+      <a href="../../index.html"><div class="brand">Circleguard v5.2.1 documentation</div></a>
     </div>
     <div class="header-right">
       <label class="toc-overlay-icon toc-header-icon no-toc" for="__toc">
@@ -100,7 +100,7 @@
       <div class="sidebar-sticky"><a class="sidebar-brand" href="../../index.html">
   
   
-  <span class="sidebar-brand-text">Circleguard v5.1.2 documentation</span>
+  <span class="sidebar-brand-text">Circleguard v5.2.1 documentation</span>
   
 </a><form class="sidebar-search-container" method="get" action="../../search.html">
   <input class="sidebar-search" placeholder=Search name="q">
@@ -110,14 +110,15 @@
   <ul>
 <li class="toctree-l1"><a class="reference internal" href="../../index.html">Circlecore</a></li>
 </ul>
-<p class="caption"><span class="caption-text">Tutorials</span></p>
+<p class="caption"><span class="caption-text">Tutorial</span></p>
 <ul>
 <li class="toctree-l1"><a class="reference internal" href="../../foreword.html">Foreword</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../representing-replays.html">Representing Replays</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../using-circleguard.html">Using Circleguard</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../../replay-containers.html"><code class="xref py py-class docutils literal notranslate"><span class="pre">ReplayContainer</span></code>s</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../replay-containers.html">Replay Containers</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../loading.html">Loading</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../caching.html">Caching</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../advanced-usage.html">Advanced Usage</a></li>
 </ul>
 <p class="caption"><span class="caption-text">Contributing</span></p>
 <ul>
@@ -147,7 +148,7 @@
 <span class="kn">from</span> <span class="nn">slider.beatmap</span> <span class="kn">import</span> <span class="n">Spinner</span> <span class="k">as</span> <span class="n">SliderSpinner</span>
 <span class="kn">from</span> <span class="nn">slider.mod</span> <span class="kn">import</span> <span class="n">circle_radius</span>
 
-<span class="kn">from</span> <span class="nn">circleguard</span> <span class="kn">import</span> <span class="n">Mod</span>
+<span class="kn">from</span> <span class="nn">circleguard.mod</span> <span class="kn">import</span> <span class="n">Mod</span>
 
 <span class="c1"># We define our own hitobjects as the slider library's hitobjects have too many</span>
 <span class="c1"># attributes and methods we don't care about, and they also lock position</span>
@@ -159,12 +160,14 @@
 <span class="c1"># HR) because we know with what mods and on what map the hitobject was played</span>
 <span class="c1"># with.</span>
 
-<div class="viewcode-block" id="Hitobject"><a class="viewcode-back" href="../../appendix.html#circleguard.hitobjects.Hitobject">[docs]</a><span class="k">class</span> <span class="nc">Hitobject</span><span class="p">():</span>
+<div class="viewcode-block" id="Hitobject"><a class="viewcode-back" href="../../appendix.html#circleguard.hitobjects.Hitobject">[docs]</a><span class="k">class</span> <span class="nc">Hitobject</span><span class="p">:</span>
     <span class="sd">"""</span>
 <span class="sd">    A Hitobject in osu! gameplay, with a time and a position.</span>
 <span class="sd">    """</span>
-    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">t</span><span class="p">,</span> <span class="n">xy</span><span class="p">):</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">t</span> <span class="o">=</span> <span class="n">t</span>
+    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">time</span><span class="p">,</span> <span class="n">xy</span><span class="p">):</span>
+        <span class="c1"># TODO remove ``t`` in core 6.0.0, ``time`` should be preferred</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">t</span> <span class="o">=</span> <span class="n">time</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">time</span> <span class="o">=</span> <span class="n">time</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">xy</span> <span class="o">=</span> <span class="n">xy</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">x</span> <span class="o">=</span> <span class="n">xy</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">y</span> <span class="o">=</span> <span class="n">xy</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span>
@@ -185,8 +188,12 @@
         <span class="n">hard_rock</span> <span class="o">=</span> <span class="n">Mod</span><span class="o">.</span><span class="n">HR</span> <span class="ow">in</span> <span class="n">replay</span><span class="o">.</span><span class="n">mods</span>
         <span class="n">CS</span> <span class="o">=</span> <span class="n">beatmap</span><span class="o">.</span><span class="n">cs</span><span class="p">(</span><span class="n">easy</span><span class="o">=</span><span class="n">easy</span><span class="p">,</span> <span class="n">hard_rock</span><span class="o">=</span><span class="n">hard_rock</span><span class="p">)</span>
 
-        <span class="c1"># convert to ms</span>
+        <span class="c1"># Convert to ms.</span>
         <span class="n">t</span> <span class="o">=</span> <span class="n">hitobj</span><span class="o">.</span><span class="n">time</span><span class="o">.</span><span class="n">total_seconds</span><span class="p">()</span> <span class="o">*</span> <span class="mi">1000</span>
+        <span class="c1"># Due to floating point errors, ``t`` could actually be something</span>
+        <span class="c1"># like ``129824.99999999999`` or ``128705.00000000001``, so round to the</span>
+        <span class="c1"># nearest int.</span>
+        <span class="n">t</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="nb">round</span><span class="p">(</span><span class="n">t</span><span class="p">))</span>
 
         <span class="k">if</span> <span class="n">hard_rock</span> <span class="ow">and</span> <span class="ow">not</span> <span class="n">already_converted</span><span class="p">:</span>
             <span class="n">hitobj</span> <span class="o">=</span> <span class="n">hitobj</span><span class="o">.</span><span class="n">hard_rock</span>
@@ -204,10 +211,10 @@
             <span class="k">return</span> <span class="n">Spinner</span><span class="p">(</span><span class="n">t</span><span class="p">,</span> <span class="n">xy</span><span class="p">)</span></div>
 
     <span class="k">def</span> <span class="fm">__eq__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">other</span><span class="p">):</span>
-        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">t</span> <span class="o">==</span> <span class="n">other</span><span class="o">.</span><span class="n">t</span> <span class="ow">and</span> <span class="bp">self</span><span class="o">.</span><span class="n">xy</span> <span class="o">==</span> <span class="n">other</span><span class="o">.</span><span class="n">xy</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">time</span> <span class="o">==</span> <span class="n">other</span><span class="o">.</span><span class="n">time</span> <span class="ow">and</span> <span class="bp">self</span><span class="o">.</span><span class="n">xy</span> <span class="o">==</span> <span class="n">other</span><span class="o">.</span><span class="n">xy</span>
 
     <span class="k">def</span> <span class="fm">__hash__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-        <span class="k">return</span> <span class="nb">hash</span><span class="p">((</span><span class="bp">self</span><span class="o">.</span><span class="n">t</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">xy</span><span class="p">))</span></div>
+        <span class="k">return</span> <span class="nb">hash</span><span class="p">((</span><span class="bp">self</span><span class="o">.</span><span class="n">time</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">xy</span><span class="p">))</span></div>
 
 
 <div class="viewcode-block" id="Circle"><a class="viewcode-back" href="../../appendix.html#circleguard.hitobjects.Circle">[docs]</a><span class="k">class</span> <span class="nc">Circle</span><span class="p">(</span><span class="n">Hitobject</span><span class="p">):</span>
@@ -219,11 +226,11 @@
         <span class="bp">self</span><span class="o">.</span><span class="n">radius</span> <span class="o">=</span> <span class="n">radius</span>
 
     <span class="k">def</span> <span class="fm">__eq__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">other</span><span class="p">):</span>
-        <span class="k">return</span> <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">t</span> <span class="o">==</span> <span class="n">other</span><span class="o">.</span><span class="n">t</span> <span class="ow">and</span> <span class="bp">self</span><span class="o">.</span><span class="n">xy</span> <span class="o">==</span> <span class="n">other</span><span class="o">.</span><span class="n">xy</span> <span class="ow">and</span>
+        <span class="k">return</span> <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">time</span> <span class="o">==</span> <span class="n">other</span><span class="o">.</span><span class="n">time</span> <span class="ow">and</span> <span class="bp">self</span><span class="o">.</span><span class="n">xy</span> <span class="o">==</span> <span class="n">other</span><span class="o">.</span><span class="n">xy</span> <span class="ow">and</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">radius</span> <span class="o">==</span> <span class="n">other</span><span class="o">.</span><span class="n">radius</span><span class="p">)</span>
 
     <span class="k">def</span> <span class="fm">__hash__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-        <span class="k">return</span> <span class="nb">hash</span><span class="p">((</span><span class="bp">self</span><span class="o">.</span><span class="n">t</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">xy</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">radius</span><span class="p">))</span></div>
+        <span class="k">return</span> <span class="nb">hash</span><span class="p">((</span><span class="bp">self</span><span class="o">.</span><span class="n">time</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">xy</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">radius</span><span class="p">))</span></div>
 
 
 <div class="viewcode-block" id="Slider"><a class="viewcode-back" href="../../appendix.html#circleguard.hitobjects.Slider">[docs]</a><span class="k">class</span> <span class="nc">Slider</span><span class="p">(</span><span class="n">Hitobject</span><span class="p">):</span>
@@ -235,11 +242,11 @@
         <span class="bp">self</span><span class="o">.</span><span class="n">radius</span> <span class="o">=</span> <span class="n">radius</span>
 
     <span class="k">def</span> <span class="fm">__eq__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">other</span><span class="p">):</span>
-        <span class="k">return</span> <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">t</span> <span class="o">==</span> <span class="n">other</span><span class="o">.</span><span class="n">t</span> <span class="ow">and</span> <span class="bp">self</span><span class="o">.</span><span class="n">xy</span> <span class="o">==</span> <span class="n">other</span><span class="o">.</span><span class="n">xy</span> <span class="ow">and</span>
+        <span class="k">return</span> <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">time</span> <span class="o">==</span> <span class="n">other</span><span class="o">.</span><span class="n">time</span> <span class="ow">and</span> <span class="bp">self</span><span class="o">.</span><span class="n">xy</span> <span class="o">==</span> <span class="n">other</span><span class="o">.</span><span class="n">xy</span> <span class="ow">and</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">radius</span> <span class="o">==</span> <span class="n">other</span><span class="o">.</span><span class="n">radius</span><span class="p">)</span>
 
     <span class="k">def</span> <span class="fm">__hash__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-        <span class="k">return</span> <span class="nb">hash</span><span class="p">((</span><span class="bp">self</span><span class="o">.</span><span class="n">t</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">xy</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">radius</span><span class="p">))</span></div>
+        <span class="k">return</span> <span class="nb">hash</span><span class="p">((</span><span class="bp">self</span><span class="o">.</span><span class="n">time</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">xy</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">radius</span><span class="p">))</span></div>
 
 
 <div class="viewcode-block" id="Spinner"><a class="viewcode-back" href="../../appendix.html#circleguard.hitobjects.Spinner">[docs]</a><span class="k">class</span> <span class="nc">Spinner</span><span class="p">(</span><span class="n">Hitobject</span><span class="p">):</span>

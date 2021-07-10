@@ -5,7 +5,7 @@
     <meta name="color-scheme" content="light dark"><link rel="index" title="Index" href="../../genindex.html" /><link rel="search" title="Search" href="../../search.html" />
 
     <meta name="generator" content="sphinx-3.5.2, furo 2021.03.20.beta30"/>
-        <title>circleguard.loadables - Circleguard v5.1.2 documentation</title>
+        <title>circleguard.loadables - Circleguard v5.2.1 documentation</title>
       <link rel="stylesheet" href="../../_static/styles/furo.css?digest=978e1795dfe158b585dda6a8417f6411828bf3ed">
     <link rel="stylesheet" href="../../_static/pygments.css">
     <link media="(prefers-color-scheme: dark)" rel="stylesheet" href="../../_static/pygments_dark.css">
@@ -86,7 +86,7 @@
       </label>
     </div>
     <div class="header-center">
-      <a href="../../index.html"><div class="brand">Circleguard v5.1.2 documentation</div></a>
+      <a href="../../index.html"><div class="brand">Circleguard v5.2.1 documentation</div></a>
     </div>
     <div class="header-right">
       <label class="toc-overlay-icon toc-header-icon no-toc" for="__toc">
@@ -100,7 +100,7 @@
       <div class="sidebar-sticky"><a class="sidebar-brand" href="../../index.html">
   
   
-  <span class="sidebar-brand-text">Circleguard v5.1.2 documentation</span>
+  <span class="sidebar-brand-text">Circleguard v5.2.1 documentation</span>
   
 </a><form class="sidebar-search-container" method="get" action="../../search.html">
   <input class="sidebar-search" placeholder=Search name="q">
@@ -110,14 +110,15 @@
   <ul>
 <li class="toctree-l1"><a class="reference internal" href="../../index.html">Circlecore</a></li>
 </ul>
-<p class="caption"><span class="caption-text">Tutorials</span></p>
+<p class="caption"><span class="caption-text">Tutorial</span></p>
 <ul>
 <li class="toctree-l1"><a class="reference internal" href="../../foreword.html">Foreword</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../representing-replays.html">Representing Replays</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../using-circleguard.html">Using Circleguard</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../../replay-containers.html"><code class="xref py py-class docutils literal notranslate"><span class="pre">ReplayContainer</span></code>s</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../replay-containers.html">Replay Containers</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../loading.html">Loading</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../caching.html">Caching</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../advanced-usage.html">Advanced Usage</a></li>
 </ul>
 <p class="caption"><span class="caption-text">Contributing</span></p>
 <ul>
@@ -149,10 +150,11 @@
 <span class="kn">import</span> <span class="nn">random</span>
 
 <span class="kn">import</span> <span class="nn">osrparse</span>
+<span class="kn">from</span> <span class="nn">osrparse</span> <span class="kn">import</span> <span class="n">ReplayEventOsu</span>
 <span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
 <span class="kn">import</span> <span class="nn">wtc</span>
 
-<span class="kn">from</span> <span class="nn">circleguard</span> <span class="kn">import</span> <span class="n">Mod</span>
+<span class="kn">from</span> <span class="nn">circleguard.mod</span> <span class="kn">import</span> <span class="n">Mod</span>
 <span class="kn">from</span> <span class="nn">circleguard.utils</span> <span class="kn">import</span> <span class="n">TRACE</span><span class="p">,</span> <span class="n">KEY_MASK</span><span class="p">,</span> <span class="n">RatelimitWeight</span>
 <span class="kn">from</span> <span class="nn">circleguard.loader</span> <span class="kn">import</span> <span class="n">Loader</span>
 <span class="kn">from</span> <span class="nn">circleguard.span</span> <span class="kn">import</span> <span class="n">Span</span>
@@ -188,6 +190,12 @@
 <span class="sd">            end up using a :class:`~circleguard.loader.Loader` to load</span>
 <span class="sd">            themselves (if they don't load anything from the osu api, for</span>
 <span class="sd">            instance), a loader is still passed regardless.</span>
+<span class="sd">            Note: ``loader`` may be ``None``. This means that whatever is</span>
+<span class="sd">            loading the loadable does not have api access and cannot provide a</span>
+<span class="sd">            loader. If your loadable requires a loader to properly load itself,</span>
+<span class="sd">            raise an error on a null ``loader``. If your loadable can load</span>
+<span class="sd">            itself without a ``loader``, proceed as planned and ignore the null</span>
+<span class="sd">            ``loader``.</span>
 <span class="sd">        cache: bool</span>
 <span class="sd">            Whether to cache the replay data once loaded. This argument</span>
 <span class="sd">            comes from a parent—either a :class:`~.ReplayContainer` or</span>
@@ -407,6 +415,9 @@
     <span class="k">def</span> <span class="nf">load_info</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">loader</span><span class="p">):</span>
         <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">info_loaded</span><span class="p">:</span>
             <span class="k">return</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="n">loader</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">"A Map cannot be info loaded loaded without api "</span>
+                <span class="s2">"access"</span><span class="p">)</span>
         <span class="k">for</span> <span class="n">info</span> <span class="ow">in</span> <span class="n">loader</span><span class="o">.</span><span class="n">replay_info</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">map_id</span><span class="p">,</span> <span class="n">span</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">span</span><span class="p">,</span>
             <span class="n">mods</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">mods</span><span class="p">):</span>
             <span class="n">r</span> <span class="o">=</span> <span class="n">ReplayMap</span><span class="p">(</span><span class="n">info</span><span class="o">.</span><span class="n">map_id</span><span class="p">,</span> <span class="n">info</span><span class="o">.</span><span class="n">user_id</span><span class="p">,</span> <span class="n">info</span><span class="o">.</span><span class="n">mods</span><span class="p">,</span>
@@ -469,6 +480,9 @@
     <span class="k">def</span> <span class="nf">load_info</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">loader</span><span class="p">):</span>
         <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">info_loaded</span><span class="p">:</span>
             <span class="k">return</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="n">loader</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">"A User cannot be info loaded loaded without api "</span>
+                <span class="s2">"access"</span><span class="p">)</span>
         <span class="k">for</span> <span class="n">info</span> <span class="ow">in</span> <span class="n">loader</span><span class="o">.</span><span class="n">get_user_best</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">user_id</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">span</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">mods</span><span class="p">):</span>
             <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">available_only</span> <span class="ow">and</span> <span class="ow">not</span> <span class="n">info</span><span class="o">.</span><span class="n">replay_available</span><span class="p">:</span>
                 <span class="k">continue</span>
@@ -519,6 +533,9 @@
     <span class="k">def</span> <span class="nf">load_info</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">loader</span><span class="p">):</span>
         <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">info_loaded</span><span class="p">:</span>
             <span class="k">return</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="n">loader</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">"A MapUser cannot be info loaded loaded without "</span>
+                <span class="s2">"api access"</span><span class="p">)</span>
         <span class="k">for</span> <span class="n">info</span> <span class="ow">in</span> <span class="n">loader</span><span class="o">.</span><span class="n">replay_info</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">map_id</span><span class="p">,</span> <span class="n">span</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">span</span><span class="p">,</span>
             <span class="n">user_id</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">user_id</span><span class="p">,</span> <span class="n">limit</span><span class="o">=</span><span class="kc">False</span><span class="p">):</span>
             <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">available_only</span> <span class="ow">and</span> <span class="ow">not</span> <span class="n">info</span><span class="o">.</span><span class="n">replay_available</span><span class="p">:</span>
@@ -722,6 +739,8 @@
         <span class="c1"># map_info's map_id attribute automatically</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_map_id</span>       <span class="o">=</span> <span class="kc">None</span>
         <span class="c1"># replays have no information about their map by default.</span>
+        <span class="c1"># TODO: remove in core 6.0.0, in favor of ``Replay#map_available`` (and</span>
+        <span class="c1"># possibly other mechanisms).</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">map_info</span>     <span class="o">=</span> <span class="n">MapInfo</span><span class="p">()</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">username</span>     <span class="o">=</span> <span class="kc">None</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">user_id</span>      <span class="o">=</span> <span class="kc">None</span>
@@ -735,6 +754,9 @@
         <span class="bp">self</span><span class="o">.</span><span class="n">xy</span>           <span class="o">=</span> <span class="kc">None</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">k</span>            <span class="o">=</span> <span class="kc">None</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_keydowns</span>    <span class="o">=</span> <span class="kc">None</span>
+
+    <span class="k">def</span> <span class="nf">map_available</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">_library</span><span class="p">):</span>
+        <span class="k">return</span> <span class="nb">bool</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">map_id</span><span class="p">)</span>
 
 <div class="viewcode-block" id="Replay.has_data"><a class="viewcode-back" href="../../appendix.html#circleguard.loadables.Replay.has_data">[docs]</a>    <span class="k">def</span> <span class="nf">has_data</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="sd">"""</span>
@@ -779,22 +801,10 @@
 <span class="sd">        None</span>
 <span class="sd">            If we do not know what beatmap this replay was played on.</span>
 <span class="sd">        """</span>
-        <span class="k">if</span> <span class="ow">not</span> <span class="bp">self</span><span class="o">.</span><span class="n">map_info</span><span class="o">.</span><span class="n">available</span><span class="p">():</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="bp">self</span><span class="o">.</span><span class="n">map_available</span><span class="p">(</span><span class="n">library</span><span class="p">):</span>
             <span class="k">return</span> <span class="kc">None</span>
 
-        <span class="c1"># prefer loading from disk, it's cheaper than potentially downloading</span>
-        <span class="c1"># the beatmap from osu! servers</span>
-
-        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">map_info</span><span class="o">.</span><span class="n">path</span><span class="p">:</span>
-            <span class="c1"># by default we don't save beatmaps that are already saved on disk.</span>
-            <span class="c1"># Subclasses should override `#beatmap` and pass `copy=True` here</span>
-            <span class="c1"># in their overridden method if they want to copy the beatmap to the</span>
-            <span class="c1"># library's directory.</span>
-            <span class="k">return</span> <span class="n">library</span><span class="o">.</span><span class="n">beatmap_from_path</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">map_info</span><span class="o">.</span><span class="n">path</span><span class="p">)</span>
-
-        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">map_info</span><span class="o">.</span><span class="n">map_id</span><span class="p">:</span>
-            <span class="k">return</span> <span class="n">library</span><span class="o">.</span><span class="n">lookup_by_id</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">map_info</span><span class="o">.</span><span class="n">map_id</span><span class="p">,</span> <span class="n">download</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
-                <span class="n">save</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span></div>
+        <span class="k">return</span> <span class="n">library</span><span class="o">.</span><span class="n">lookup_by_id</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">map_id</span><span class="p">,</span> <span class="n">download</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">save</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span></div>
 
     <span class="k">def</span> <span class="nf">_process_replay_data</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">replay_data</span><span class="p">):</span>
         <span class="sd">"""</span>
@@ -838,10 +848,18 @@
             <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">"This replay's replay data was empty. This should "</span>
                 <span class="s2">"not happen and is indicative of a misbehaved replay."</span><span class="p">)</span>
 
+        <span class="c1"># TODO we'll want to add proper support for non-std replays at some</span>
+        <span class="c1"># point, but for now we'll just drop the replay data and early return.</span>
+        <span class="c1"># This results in identical behavior with previous versions of</span>
+        <span class="c1"># circlecore, before osrparse supported non-std gamemodes.</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">replay_data</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="n">ReplayEventOsu</span><span class="p">):</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">replay_data</span> <span class="o">=</span> <span class="kc">None</span>
+            <span class="k">return</span>
+
         <span class="c1"># remove invalid zero time frame at beginning of replay</span>
         <span class="c1"># https://github.com/ppy/osu/blob/1587d4b26fbad691242544a62dbf017a78705</span>
         <span class="c1"># ae3/osu.Game/Scoring/Legacy/LegacyScoreDecoder.cs#L242-L245</span>
-        <span class="k">if</span> <span class="n">replay_data</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">time_since_previous_action</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
+        <span class="k">if</span> <span class="n">replay_data</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">time_delta</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
             <span class="n">replay_data</span> <span class="o">=</span> <span class="n">replay_data</span><span class="p">[</span><span class="mi">1</span><span class="p">:]</span>
 
         <span class="c1"># t, x, y, k</span>
@@ -865,7 +883,7 @@
         <span class="c1"># this would make ``highest_running_t`` large and cause all replay data</span>
         <span class="c1"># before the skip to be ignored. To solve this, we initialize</span>
         <span class="c1"># ``running_t`` to the first frame's time.</span>
-        <span class="n">running_t</span> <span class="o">=</span> <span class="nb">next</span><span class="p">(</span><span class="n">replay_data</span><span class="p">)</span><span class="o">.</span><span class="n">time_since_previous_action</span>
+        <span class="n">running_t</span> <span class="o">=</span> <span class="nb">next</span><span class="p">(</span><span class="n">replay_data</span><span class="p">)</span><span class="o">.</span><span class="n">time_delta</span>
         <span class="c1"># We consider negative time frames in the middle of replays to be</span>
         <span class="c1"># valid, with a caveat. Their negative time is counted toward</span>
         <span class="c1"># ``running_t`` (that is, decreases ``running_t``), but any frames</span>
@@ -896,7 +914,7 @@
             <span class="c1"># the negative section.</span>
             <span class="n">was_in_negative_section</span> <span class="o">=</span> <span class="n">running_t</span> <span class="o">&lt;</span> <span class="n">highest_running_t</span>
 
-            <span class="n">e_t</span> <span class="o">=</span> <span class="n">e</span><span class="o">.</span><span class="n">time_since_previous_action</span>
+            <span class="n">e_t</span> <span class="o">=</span> <span class="n">e</span><span class="o">.</span><span class="n">time_delta</span>
             <span class="n">running_t</span> <span class="o">+=</span> <span class="n">e_t</span>
             <span class="n">highest_running_t</span> <span class="o">=</span> <span class="nb">max</span><span class="p">(</span><span class="n">highest_running_t</span><span class="p">,</span> <span class="n">running_t</span><span class="p">)</span>
             <span class="k">if</span> <span class="n">running_t</span> <span class="o">&lt;</span> <span class="n">highest_running_t</span><span class="p">:</span>
@@ -934,12 +952,19 @@
                 <span class="n">y</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">interp</span><span class="p">(</span><span class="n">last_positive_frame_cum_time</span><span class="p">,</span> <span class="n">xp</span><span class="p">,</span> <span class="n">fp</span><span class="p">)</span>
                 <span class="n">data</span><span class="p">[</span><span class="mi">2</span><span class="p">]</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">y</span><span class="p">)</span>
 
-                <span class="n">data</span><span class="p">[</span><span class="mi">3</span><span class="p">]</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">last_positive_frame</span><span class="o">.</span><span class="n">keys_pressed</span><span class="p">)</span>
+                <span class="n">data</span><span class="p">[</span><span class="mi">3</span><span class="p">]</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">last_positive_frame</span><span class="o">.</span><span class="n">keys</span><span class="p">)</span>
 
             <span class="n">data</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">running_t</span><span class="p">)</span>
             <span class="n">data</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">e</span><span class="o">.</span><span class="n">x</span><span class="p">)</span>
             <span class="n">data</span><span class="p">[</span><span class="mi">2</span><span class="p">]</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">e</span><span class="o">.</span><span class="n">y</span><span class="p">)</span>
-            <span class="n">data</span><span class="p">[</span><span class="mi">3</span><span class="p">]</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">e</span><span class="o">.</span><span class="n">keys_pressed</span><span class="p">)</span>
+            <span class="c1"># TODO: are we taking a performance hit here by letting osrparse</span>
+            <span class="c1"># convert keys to an enum in its replay's init, then converting it</span>
+            <span class="c1"># back to an int here (since it's faster for us to work with raw</span>
+            <span class="c1"># ints)?</span>
+            <span class="c1"># We could add a ``fast_parse`` option to osrparse which doesn't</span>
+            <span class="c1"># use nice things like enums if this turns out to be a performance</span>
+            <span class="c1"># issue.</span>
+            <span class="n">data</span><span class="p">[</span><span class="mi">3</span><span class="p">]</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="nb">int</span><span class="p">(</span><span class="n">e</span><span class="o">.</span><span class="n">keys</span><span class="p">))</span>
             <span class="n">previous_frame</span> <span class="o">=</span> <span class="n">e</span>
 
         <span class="n">block</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">data</span><span class="p">)</span>
@@ -1061,11 +1086,6 @@
 <span class="sd">        cache: bool</span>
 <span class="sd">            Whether to cache this replay after loading it. This only has an</span>
 <span class="sd">            effect if ``self.cache`` is unset (``None``).</span>
-
-<span class="sd">        Notes</span>
-<span class="sd">        -----</span>
-<span class="sd">        If ``replay.loaded`` is ``True``, this method has no effect.</span>
-<span class="sd">        ``replay.loaded`` is set to ``True`` after this method is finished.</span>
 <span class="sd">        """</span>
         <span class="c1"># only listen to the parent's cache if ours is not set. Lower takes</span>
         <span class="c1"># precedence</span>
@@ -1074,6 +1094,10 @@
         <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">loaded</span><span class="p">:</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">log</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="s2">"</span><span class="si">%s</span><span class="s2"> already loaded, not loading"</span><span class="p">,</span> <span class="bp">self</span><span class="p">)</span>
             <span class="k">return</span>
+
+        <span class="k">if</span> <span class="ow">not</span> <span class="n">loader</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">"A ReplayMap cannot be loaded without api access"</span><span class="p">)</span>
+
         <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">info</span><span class="p">:</span>
             <span class="n">info</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">info</span>
         <span class="k">else</span><span class="p">:</span>
@@ -1128,7 +1152,148 @@
             <span class="sa">f</span><span class="s2">"</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">user_id</span><span class="si">}</span><span class="s2"> on </span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">map_id</span><span class="si">}</span><span class="s2">"</span><span class="p">)</span></div>
 
 
-<div class="viewcode-block" id="ReplayPath"><a class="viewcode-back" href="../../appendix.html#circleguard.loadables.ReplayPath">[docs]</a><span class="k">class</span> <span class="nc">ReplayPath</span><span class="p">(</span><span class="n">Replay</span><span class="p">):</span>
+<div class="viewcode-block" id="ReplayDataOSR"><a class="viewcode-back" href="../../appendix.html#circleguard.loadables.ReplayDataOSR">[docs]</a><span class="k">class</span> <span class="nc">ReplayDataOSR</span><span class="p">(</span><span class="n">Replay</span><span class="p">):</span>
+    <span class="sd">"""</span>
+<span class="sd">    A :class:`~.Replay` which has been saved in the osr format.</span>
+
+<span class="sd">    Parameters</span>
+<span class="sd">    ----------</span>
+<span class="sd">    weight: :class:`~circleguard.utils.RatelimitWeight`</span>
+<span class="sd">        How much it 'costs' to load this replay from the api.</span>
+<span class="sd">    cache: bool</span>
+<span class="sd">        Whether to cache this replay once it is loaded.</span>
+
+<span class="sd">    Notes</span>
+<span class="sd">    -----</span>
+<span class="sd">    ReplayDataStrings have no replay-related attributes available (not ``None``)</span>
+<span class="sd">    when they are unloaded.</span>
+
+<span class="sd">    The following replay-related attributes are available (not ``None``) when</span>
+<span class="sd">    this replay is loaded:</span>
+
+<span class="sd">    * timestamp</span>
+<span class="sd">    * map_id</span>
+<span class="sd">    * username</span>
+<span class="sd">    * user_id</span>
+<span class="sd">    * mods</span>
+<span class="sd">    * replay_id</span>
+<span class="sd">    * beatmap_hash</span>
+<span class="sd">    * replay_data</span>
+<span class="sd">    """</span>
+    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">ratelimit_weight</span><span class="p">,</span> <span class="n">cache</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+        <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="n">ratelimit_weight</span><span class="p">,</span> <span class="n">cache</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">log</span> <span class="o">=</span> <span class="n">logging</span><span class="o">.</span><span class="n">getLogger</span><span class="p">(</span><span class="vm">__name__</span> <span class="o">+</span> <span class="s2">".ReplayPath"</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">beatmap_hash</span> <span class="o">=</span> <span class="kc">None</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">_user_id_func</span> <span class="o">=</span> <span class="kc">None</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_user_id</span> <span class="o">=</span> <span class="kc">None</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_map_id_func</span> <span class="o">=</span> <span class="kc">None</span>
+
+<div class="viewcode-block" id="ReplayDataOSR.beatmap"><a class="viewcode-back" href="../../appendix.html#circleguard.loadables.ReplayDataOSR.beatmap">[docs]</a>    <span class="k">def</span> <span class="nf">beatmap</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">library</span><span class="p">):</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="bp">self</span><span class="o">.</span><span class="n">map_available</span><span class="p">(</span><span class="n">library</span><span class="p">):</span>
+            <span class="k">return</span> <span class="kc">None</span>
+        <span class="c1"># if we can't load our map_id, fall back to loading from slider.</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="bp">self</span><span class="o">.</span><span class="n">can_load_api_attributes</span><span class="p">()</span> <span class="ow">and</span> <span class="bp">self</span><span class="o">.</span><span class="n">beatmap_hash</span><span class="p">:</span>
+            <span class="k">return</span> <span class="n">library</span><span class="o">.</span><span class="n">lookup_by_md5</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">beatmap_hash</span><span class="p">)</span>
+        <span class="k">return</span> <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="n">beatmap</span><span class="p">(</span><span class="n">library</span><span class="p">)</span></div>
+
+    <span class="k">def</span> <span class="nf">map_available</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">library</span><span class="p">):</span>
+        <span class="n">beatmap_cached</span> <span class="o">=</span> <span class="n">library</span><span class="o">.</span><span class="n">beatmap_cached</span><span class="p">(</span><span class="n">beatmap_md5</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">beatmap_hash</span><span class="p">)</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">beatmap_hash</span> <span class="ow">and</span> <span class="n">beatmap_cached</span><span class="p">:</span>
+            <span class="k">return</span> <span class="kc">True</span>
+        <span class="k">return</span> <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="n">map_available</span><span class="p">(</span><span class="n">library</span><span class="p">)</span>
+
+<div class="viewcode-block" id="ReplayDataOSR.load_from_osrparse_replay"><a class="viewcode-back" href="../../appendix.html#circleguard.loadables.ReplayDataOSR.load_from_osrparse_replay">[docs]</a>    <span class="k">def</span> <span class="nf">load_from_osrparse_replay</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">replay</span><span class="p">,</span> <span class="n">loader</span><span class="p">,</span> <span class="n">_cache</span><span class="p">):</span>
+        <span class="sd">"""</span>
+<span class="sd">        Loads the data for this replay from the already loaded osrparse replay.</span>
+
+<span class="sd">        Parameters</span>
+<span class="sd">        ----------</span>
+<span class="sd">        loader: :class:`~.loader.Loader`</span>
+<span class="sd">            The :class:`~.loader.Loader` to load this replay with.</span>
+<span class="sd">            |br|</span>
+<span class="sd">            If ``None``, this replay will be unable to retrieve its ``map_id``</span>
+<span class="sd">            or ``user_id``, but everything else will still be loaded.</span>
+<span class="sd">        cache: bool</span>
+<span class="sd">            Whether to cache this replay after loading it. This only has an</span>
+<span class="sd">            effect if ``self.cache`` is unset (``None``). Note that currently</span>
+<span class="sd">            we do not cache :class:`~.ReplayPath` regardless of this parameter.</span>
+<span class="sd">        """</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">game_version</span> <span class="o">=</span> <span class="n">GameVersion</span><span class="p">(</span><span class="n">replay</span><span class="o">.</span><span class="n">game_version</span><span class="p">,</span> <span class="n">concrete</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">timestamp</span> <span class="o">=</span> <span class="n">replay</span><span class="o">.</span><span class="n">timestamp</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">username</span> <span class="o">=</span> <span class="n">replay</span><span class="o">.</span><span class="n">player_name</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">mods</span> <span class="o">=</span> <span class="n">Mod</span><span class="p">(</span><span class="nb">int</span><span class="p">(</span><span class="n">replay</span><span class="o">.</span><span class="n">mod_combination</span><span class="p">))</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">replay_id</span> <span class="o">=</span> <span class="n">replay</span><span class="o">.</span><span class="n">replay_id</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">beatmap_hash</span> <span class="o">=</span> <span class="n">replay</span><span class="o">.</span><span class="n">beatmap_hash</span>
+
+        <span class="k">if</span> <span class="n">loader</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_user_id_func</span> <span class="o">=</span> <span class="n">loader</span><span class="o">.</span><span class="n">user_id</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_map_id_func</span> <span class="o">=</span> <span class="n">loader</span><span class="o">.</span><span class="n">map_id</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">_process_replay_data</span><span class="p">(</span><span class="n">replay</span><span class="o">.</span><span class="n">play_data</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">loaded</span> <span class="o">=</span> <span class="kc">True</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">log</span><span class="o">.</span><span class="n">log</span><span class="p">(</span><span class="n">TRACE</span><span class="p">,</span> <span class="s2">"Finished loading </span><span class="si">%s</span><span class="s2">"</span><span class="p">,</span> <span class="bp">self</span><span class="p">)</span></div>
+
+    <span class="k">def</span> <span class="nf">load_from_file</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">path</span><span class="p">,</span> <span class="n">loader</span><span class="p">,</span> <span class="n">cache</span><span class="p">):</span>
+        <span class="n">replay</span> <span class="o">=</span> <span class="n">osrparse</span><span class="o">.</span><span class="n">parse_replay_file</span><span class="p">(</span><span class="n">path</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">load_from_osrparse_replay</span><span class="p">(</span><span class="n">replay</span><span class="p">,</span> <span class="n">loader</span><span class="p">,</span> <span class="n">cache</span><span class="p">)</span>
+
+    <span class="k">def</span> <span class="nf">load_from_string</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">replay_data_str</span><span class="p">,</span> <span class="n">loader</span><span class="p">,</span> <span class="n">cache</span><span class="p">):</span>
+        <span class="n">replay</span> <span class="o">=</span> <span class="n">osrparse</span><span class="o">.</span><span class="n">parse_replay</span><span class="p">(</span><span class="n">replay_data_str</span><span class="p">,</span>
+            <span class="n">pure_lzma</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">load_from_osrparse_replay</span><span class="p">(</span><span class="n">replay</span><span class="p">,</span> <span class="n">loader</span><span class="p">,</span> <span class="n">cache</span><span class="p">)</span>
+
+
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">user_id</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="bp">self</span><span class="o">.</span><span class="n">loaded</span><span class="p">:</span>
+            <span class="k">return</span> <span class="kc">None</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="bp">self</span><span class="o">.</span><span class="n">_user_id_func</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">"The map if of a replay which has been loaded "</span>
+                <span class="s2">"without a ``Loader`` cannot be retrieved."</span><span class="p">)</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="bp">self</span><span class="o">.</span><span class="n">_user_id</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_user_id</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_user_id_func</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">username</span><span class="p">)</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_user_id</span>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">map_id</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="bp">self</span><span class="o">.</span><span class="n">loaded</span><span class="p">:</span>
+            <span class="k">return</span> <span class="kc">None</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="bp">self</span><span class="o">.</span><span class="n">_map_id_func</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">"The map id of a replay which has been loaded "</span>
+                <span class="s2">"without a ``Loader`` cannot be retrieved. This can happen if "</span>
+                <span class="s2">"the replay was loaded with a ``KeylessCircleguard``."</span><span class="p">)</span>
+        <span class="c1"># property inheritence is a bit nasty. See</span>
+        <span class="c1"># https://stackoverflow.com/a/37663266 for reference</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="n">map_id</span><span class="p">:</span>
+            <span class="n">map_id</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_map_id_func</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">beatmap_hash</span><span class="p">)</span>
+            <span class="nb">super</span><span class="p">(</span><span class="n">ReplayDataOSR</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="vm">__class__</span><span class="p">)</span><span class="o">.</span><span class="n">map_id</span><span class="o">.</span><span class="n">fset</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">map_id</span><span class="p">)</span>
+        <span class="k">return</span> <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="n">map_id</span>
+
+<div class="viewcode-block" id="ReplayDataOSR.can_load_api_attributes"><a class="viewcode-back" href="../../appendix.html#circleguard.loadables.ReplayDataOSR.can_load_api_attributes">[docs]</a>    <span class="k">def</span> <span class="nf">can_load_api_attributes</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">"""</span>
+<span class="sd">        Whether we can load attributes that are lazy loaded and require api</span>
+<span class="sd">        calls, such as ``map_id`` or ``user_id``, if requested.</span>
+<span class="sd">        """</span>
+        <span class="k">return</span> <span class="nb">bool</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_map_id_func</span><span class="p">)</span> <span class="ow">and</span> <span class="nb">bool</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_user_id_func</span><span class="p">)</span></div>
+
+<div class="viewcode-block" id="ReplayDataOSR.api_attributes_loaded"><a class="viewcode-back" href="../../appendix.html#circleguard.loadables.ReplayDataOSR.api_attributes_loaded">[docs]</a>    <span class="k">def</span> <span class="nf">api_attributes_loaded</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">"""</span>
+<span class="sd">        Whether attributes that are lazy loaded and require api calls, such as</span>
+<span class="sd">        ``map_id`` or ``user_id``, have already been loaded.</span>
+<span class="sd">        """</span>
+        <span class="k">return</span> <span class="nb">bool</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_map_id</span><span class="p">)</span> <span class="ow">and</span> <span class="nb">bool</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_user_id</span><span class="p">)</span></div>
+
+    <span class="nd">@map_id</span><span class="o">.</span><span class="n">setter</span>
+    <span class="k">def</span> <span class="nf">map_id</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">map_id</span><span class="p">):</span>
+        <span class="nb">super</span><span class="p">(</span><span class="n">ReplayDataOSR</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="vm">__class__</span><span class="p">)</span><span class="o">.</span><span class="n">map_id</span><span class="o">.</span><span class="n">fset</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">map_id</span><span class="p">)</span>
+
+    <span class="nd">@user_id</span><span class="o">.</span><span class="n">setter</span>
+    <span class="k">def</span> <span class="nf">user_id</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">user_id</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_user_id</span> <span class="o">=</span> <span class="n">user_id</span></div>
+
+
+<div class="viewcode-block" id="ReplayPath"><a class="viewcode-back" href="../../appendix.html#circleguard.loadables.ReplayPath">[docs]</a><span class="k">class</span> <span class="nc">ReplayPath</span><span class="p">(</span><span class="n">ReplayDataOSR</span><span class="p">):</span>
     <span class="sd">"""</span>
 <span class="sd">    A :class:`~.Replay` saved locally in a ``.osr`` file.</span>
 
@@ -1163,61 +1328,18 @@
         <span class="bp">self</span><span class="o">.</span><span class="n">log</span> <span class="o">=</span> <span class="n">logging</span><span class="o">.</span><span class="n">getLogger</span><span class="p">(</span><span class="vm">__name__</span> <span class="o">+</span> <span class="s2">".ReplayPath"</span><span class="p">)</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">path</span> <span class="o">=</span> <span class="n">Path</span><span class="p">(</span><span class="n">path</span><span class="p">)</span><span class="o">.</span><span class="n">absolute</span><span class="p">()</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">beatmap_hash</span> <span class="o">=</span> <span class="kc">None</span>
+
         <span class="bp">self</span><span class="o">.</span><span class="n">_user_id_func</span> <span class="o">=</span> <span class="kc">None</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_user_id</span> <span class="o">=</span> <span class="kc">None</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_map_id_func</span> <span class="o">=</span> <span class="kc">None</span>
 
 <div class="viewcode-block" id="ReplayPath.load"><a class="viewcode-back" href="../../appendix.html#circleguard.loadables.ReplayPath.load">[docs]</a>    <span class="k">def</span> <span class="nf">load</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">loader</span><span class="p">,</span> <span class="n">cache</span><span class="p">):</span>
-        <span class="sd">"""</span>
-<span class="sd">        Loads the data for this replay from the osr file.</span>
-
-<span class="sd">        Parameters</span>
-<span class="sd">        ----------</span>
-<span class="sd">        loader: :class:`~.loader.Loader`</span>
-<span class="sd">            The :class:`~.loader.Loader` to load this replay with.</span>
-<span class="sd">        cache: bool</span>
-<span class="sd">            Whether to cache this replay after loading it. This only has an</span>
-<span class="sd">            effect if ``self.cache`` is unset (``None``). Note that currently</span>
-<span class="sd">            we do not cache :class:`~.ReplayPath` regardless of this parameter.</span>
-
-<span class="sd">        Notes</span>
-<span class="sd">        -----</span>
-<span class="sd">        If ``replay.loaded`` is ``True``, this method has no effect.</span>
-<span class="sd">        ``replay.loaded`` is set to ``True`` after this method is finished.</span>
-<span class="sd">        """</span>
-
         <span class="bp">self</span><span class="o">.</span><span class="n">log</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="s2">"Loading ReplayPath </span><span class="si">%r</span><span class="s2">"</span><span class="p">,</span> <span class="bp">self</span><span class="p">)</span>
         <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">loaded</span><span class="p">:</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">log</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="s2">"</span><span class="si">%s</span><span class="s2"> already loaded, not loading"</span><span class="p">,</span> <span class="bp">self</span><span class="p">)</span>
             <span class="k">return</span>
 
-        <span class="n">loaded</span> <span class="o">=</span> <span class="n">osrparse</span><span class="o">.</span><span class="n">parse_replay_file</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">path</span><span class="p">)</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">game_version</span> <span class="o">=</span> <span class="n">GameVersion</span><span class="p">(</span><span class="n">loaded</span><span class="o">.</span><span class="n">game_version</span><span class="p">,</span> <span class="n">concrete</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">timestamp</span> <span class="o">=</span> <span class="n">loaded</span><span class="o">.</span><span class="n">timestamp</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">map_id</span> <span class="o">=</span> <span class="n">loader</span><span class="o">.</span><span class="n">map_id</span><span class="p">(</span><span class="n">loaded</span><span class="o">.</span><span class="n">beatmap_hash</span><span class="p">)</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">username</span> <span class="o">=</span> <span class="n">loaded</span><span class="o">.</span><span class="n">player_name</span>
-        <span class="c1"># our `user_id` attribute is lazy loaded, so we need to retain the</span>
-        <span class="c1"># `Loader#user_id` function to use later to load it.</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">_user_id_func</span> <span class="o">=</span> <span class="n">loader</span><span class="o">.</span><span class="n">user_id</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">_user_id</span> <span class="o">=</span> <span class="kc">None</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">mods</span> <span class="o">=</span> <span class="n">Mod</span><span class="p">(</span><span class="nb">int</span><span class="p">(</span><span class="n">loaded</span><span class="o">.</span><span class="n">mod_combination</span><span class="p">))</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">replay_id</span> <span class="o">=</span> <span class="n">loaded</span><span class="o">.</span><span class="n">replay_id</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">beatmap_hash</span> <span class="o">=</span> <span class="n">loaded</span><span class="o">.</span><span class="n">beatmap_hash</span>
-
-        <span class="bp">self</span><span class="o">.</span><span class="n">_process_replay_data</span><span class="p">(</span><span class="n">loaded</span><span class="o">.</span><span class="n">play_data</span><span class="p">)</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">loaded</span> <span class="o">=</span> <span class="kc">True</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">log</span><span class="o">.</span><span class="n">log</span><span class="p">(</span><span class="n">TRACE</span><span class="p">,</span> <span class="s2">"Finished loading </span><span class="si">%s</span><span class="s2">"</span><span class="p">,</span> <span class="bp">self</span><span class="p">)</span></div>
-
-    <span class="nd">@property</span>
-    <span class="k">def</span> <span class="nf">user_id</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-        <span class="c1"># we don't have a user_id_func if we're not loaded, so early return</span>
-        <span class="k">if</span> <span class="ow">not</span> <span class="bp">self</span><span class="o">.</span><span class="n">loaded</span><span class="p">:</span>
-            <span class="k">return</span> <span class="kc">None</span>
-        <span class="k">if</span> <span class="ow">not</span> <span class="bp">self</span><span class="o">.</span><span class="n">_user_id</span><span class="p">:</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">_user_id</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_user_id_func</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">username</span><span class="p">)</span>
-        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_user_id</span>
-
-    <span class="nd">@user_id</span><span class="o">.</span><span class="n">setter</span>
-    <span class="k">def</span> <span class="nf">user_id</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">user_id</span><span class="p">):</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">_user_id</span> <span class="o">=</span> <span class="n">user_id</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">load_from_file</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">path</span><span class="p">,</span> <span class="n">loader</span><span class="p">,</span> <span class="n">cache</span><span class="p">)</span></div>
 
     <span class="k">def</span> <span class="fm">__eq__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">loadable</span><span class="p">):</span>
         <span class="sd">"""</span>
@@ -1252,10 +1374,16 @@
 
     <span class="k">def</span> <span class="fm">__repr__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">loaded</span><span class="p">:</span>
-            <span class="k">return</span> <span class="p">(</span><span class="sa">f</span><span class="s2">"ReplayPath(path=</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">path</span><span class="si">}</span><span class="s2">,map_id=</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">map_id</span><span class="si">}</span><span class="s2">,"</span>
-                <span class="sa">f</span><span class="s2">"user_id=</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">user_id</span><span class="si">}</span><span class="s2">,mods=</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">mods</span><span class="si">}</span><span class="s2">,"</span>
-                <span class="sa">f</span><span class="s2">"replay_id=</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">replay_id</span><span class="si">}</span><span class="s2">,weight=</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">weight</span><span class="si">}</span><span class="s2">,"</span>
-                <span class="sa">f</span><span class="s2">"loaded=</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">loaded</span><span class="si">}</span><span class="s2">,username=</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">username</span><span class="si">}</span><span class="s2">)"</span><span class="p">)</span>
+            <span class="n">api_attrs_string</span> <span class="o">=</span> <span class="s2">","</span>
+            <span class="c1"># avoid loading these lazy-loaded attributes by accessing them here,</span>
+            <span class="c1"># unless they're already loaded</span>
+            <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">api_attributes_loaded</span><span class="p">():</span>
+                <span class="n">api_attrs_string</span> <span class="o">=</span> <span class="p">(</span><span class="sa">f</span><span class="s2">"map_id=</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">map_id</span><span class="si">}</span><span class="s2">,"</span>
+                    <span class="sa">f</span><span class="s2">"user_id=</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">user_id</span><span class="si">}</span><span class="s2">,"</span><span class="p">)</span>
+            <span class="k">return</span> <span class="p">(</span><span class="sa">f</span><span class="s2">"ReplayPath(path=</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">path</span><span class="si">}</span><span class="s2">,</span><span class="si">{</span><span class="n">api_attrs_string</span><span class="si">}</span><span class="s2">"</span>
+                <span class="sa">f</span><span class="s2">"mods=</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">mods</span><span class="si">}</span><span class="s2">,replay_id=</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">replay_id</span><span class="si">}</span><span class="s2">,"</span>
+                <span class="sa">f</span><span class="s2">"weight=</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">weight</span><span class="si">}</span><span class="s2">,loaded=</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">loaded</span><span class="si">}</span><span class="s2">,"</span>
+                <span class="sa">f</span><span class="s2">"username=</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">username</span><span class="si">}</span><span class="s2">)"</span><span class="p">)</span>
         <span class="k">return</span> <span class="p">(</span><span class="sa">f</span><span class="s2">"ReplayPath(path=</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">path</span><span class="si">}</span><span class="s2">,weight=</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">weight</span><span class="si">}</span><span class="s2">,"</span>
                 <span class="sa">f</span><span class="s2">"loaded=</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">loaded</span><span class="si">}</span><span class="s2">)"</span><span class="p">)</span>
 
@@ -1266,7 +1394,7 @@
         <span class="k">return</span> <span class="sa">f</span><span class="s2">"Unloaded ReplayPath at </span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">path</span><span class="si">}</span><span class="s2">"</span></div>
 
 
-<div class="viewcode-block" id="ReplayString"><a class="viewcode-back" href="../../appendix.html#circleguard.loadables.ReplayString">[docs]</a><span class="k">class</span> <span class="nc">ReplayString</span><span class="p">(</span><span class="n">Replay</span><span class="p">):</span>
+<div class="viewcode-block" id="ReplayString"><a class="viewcode-back" href="../../appendix.html#circleguard.loadables.ReplayString">[docs]</a><span class="k">class</span> <span class="nc">ReplayString</span><span class="p">(</span><span class="n">ReplayDataOSR</span><span class="p">):</span>
     <span class="sd">"""</span>
 <span class="sd">    A :class:`~.Replay` saved locally in a ``.osr`` file, when the file has</span>
 <span class="sd">    already been read as a string.</span>
@@ -1308,63 +1436,11 @@
         <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="n">RatelimitWeight</span><span class="o">.</span><span class="n">LIGHT</span><span class="p">,</span> <span class="n">cache</span><span class="p">)</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">log</span> <span class="o">=</span> <span class="n">logging</span><span class="o">.</span><span class="n">getLogger</span><span class="p">(</span><span class="vm">__name__</span> <span class="o">+</span> <span class="s2">".ReplayString"</span><span class="p">)</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">replay_data_str</span> <span class="o">=</span> <span class="n">replay_data_str</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">beatmap_hash</span> <span class="o">=</span> <span class="kc">None</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">_user_id_func</span> <span class="o">=</span> <span class="kc">None</span>
 
 <div class="viewcode-block" id="ReplayString.load"><a class="viewcode-back" href="../../appendix.html#circleguard.loadables.ReplayString.load">[docs]</a>    <span class="k">def</span> <span class="nf">load</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">loader</span><span class="p">,</span> <span class="n">cache</span><span class="p">):</span>
-        <span class="sd">"""</span>
-<span class="sd">        Loads the data for this replay from the string replay data.</span>
-
-<span class="sd">        Parameters</span>
-<span class="sd">        ----------</span>
-<span class="sd">        loader: :class:`~.loader.Loader`</span>
-<span class="sd">            The :class:`~.loader.Loader` to load this replay with.</span>
-<span class="sd">        cache: bool</span>
-<span class="sd">            Whether to cache this replay after loading it. This only has an</span>
-<span class="sd">            effect if ``self.cache`` is unset (``None``). Note that currently</span>
-<span class="sd">            we do not cache :class:`~.ReplayString` regardless of this</span>
-<span class="sd">            parameter.</span>
-
-<span class="sd">        Notes</span>
-<span class="sd">        -----</span>
-<span class="sd">        If ``replay.loaded`` is ``True``, this method has no effect.</span>
-<span class="sd">        ``replay.loaded`` is set to ``True`` after this method is finished.</span>
-<span class="sd">        """</span>
-
-        <span class="bp">self</span><span class="o">.</span><span class="n">log</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="s2">"Loading ReplayString </span><span class="si">%r</span><span class="s2">"</span><span class="p">,</span> <span class="bp">self</span><span class="p">)</span>
         <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">loaded</span><span class="p">:</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">log</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="s2">"</span><span class="si">%s</span><span class="s2"> already loaded, not loading"</span><span class="p">,</span> <span class="bp">self</span><span class="p">)</span>
             <span class="k">return</span>
-
-        <span class="n">loaded</span> <span class="o">=</span> <span class="n">osrparse</span><span class="o">.</span><span class="n">parse_replay</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">replay_data_str</span><span class="p">,</span> <span class="n">pure_lzma</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">game_version</span> <span class="o">=</span> <span class="n">GameVersion</span><span class="p">(</span><span class="n">loaded</span><span class="o">.</span><span class="n">game_version</span><span class="p">,</span> <span class="n">concrete</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">timestamp</span> <span class="o">=</span> <span class="n">loaded</span><span class="o">.</span><span class="n">timestamp</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">map_id</span> <span class="o">=</span> <span class="n">loader</span><span class="o">.</span><span class="n">map_id</span><span class="p">(</span><span class="n">loaded</span><span class="o">.</span><span class="n">beatmap_hash</span><span class="p">)</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">username</span> <span class="o">=</span> <span class="n">loaded</span><span class="o">.</span><span class="n">player_name</span>
-        <span class="c1"># our `user_id` attribute is lazy loaded, so we need to retain the</span>
-        <span class="c1"># `Loader#user_id` function to use later to load it.</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">_user_id_func</span> <span class="o">=</span> <span class="n">loader</span><span class="o">.</span><span class="n">user_id</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">_user_id</span> <span class="o">=</span> <span class="kc">None</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">mods</span> <span class="o">=</span> <span class="n">Mod</span><span class="p">(</span><span class="n">loaded</span><span class="o">.</span><span class="n">mod_combination</span><span class="p">)</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">replay_id</span> <span class="o">=</span> <span class="n">loaded</span><span class="o">.</span><span class="n">replay_id</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">beatmap_hash</span> <span class="o">=</span> <span class="n">loaded</span><span class="o">.</span><span class="n">beatmap_hash</span>
-
-        <span class="bp">self</span><span class="o">.</span><span class="n">_process_replay_data</span><span class="p">(</span><span class="n">loaded</span><span class="o">.</span><span class="n">play_data</span><span class="p">)</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">loaded</span> <span class="o">=</span> <span class="kc">True</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">log</span><span class="o">.</span><span class="n">log</span><span class="p">(</span><span class="n">TRACE</span><span class="p">,</span> <span class="s2">"Finished loading </span><span class="si">%s</span><span class="s2">"</span><span class="p">,</span> <span class="bp">self</span><span class="p">)</span></div>
-
-    <span class="nd">@property</span>
-    <span class="k">def</span> <span class="nf">user_id</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-        <span class="c1"># we don't have a user_id_func if we're not loaded, so early return</span>
-        <span class="k">if</span> <span class="ow">not</span> <span class="bp">self</span><span class="o">.</span><span class="n">loaded</span><span class="p">:</span>
-            <span class="k">return</span> <span class="kc">None</span>
-        <span class="k">if</span> <span class="ow">not</span> <span class="bp">self</span><span class="o">.</span><span class="n">_user_id</span><span class="p">:</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">_user_id</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_user_id_func</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">username</span><span class="p">)</span>
-        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_user_id</span>
-
-    <span class="nd">@user_id</span><span class="o">.</span><span class="n">setter</span>
-    <span class="k">def</span> <span class="nf">user_id</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">user_id</span><span class="p">):</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">_user_id</span> <span class="o">=</span> <span class="n">user_id</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">load_from_string</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">replay_data_str</span><span class="p">,</span> <span class="n">loader</span><span class="p">,</span> <span class="n">cache</span><span class="p">)</span></div>
 
     <span class="k">def</span> <span class="fm">__eq__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">loadable</span><span class="p">):</span>
         <span class="k">if</span> <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">loadable</span><span class="p">,</span> <span class="n">ReplayString</span><span class="p">):</span>
@@ -1376,9 +1452,13 @@
 
     <span class="k">def</span> <span class="fm">__repr__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">loaded</span><span class="p">:</span>
+            <span class="n">api_attrs_string</span> <span class="o">=</span> <span class="s2">","</span>
+            <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">api_attributes_loaded</span><span class="p">():</span>
+                <span class="n">api_attrs_string</span> <span class="o">=</span> <span class="p">(</span><span class="sa">f</span><span class="s2">"map_id=</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">map_id</span><span class="si">}</span><span class="s2">,"</span>
+                    <span class="sa">f</span><span class="s2">"user_id=</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">user_id</span><span class="si">}</span><span class="s2">,"</span><span class="p">)</span>
             <span class="k">return</span> <span class="p">(</span><span class="sa">f</span><span class="s2">"ReplayString(len(replay_data_str)="</span>
-                <span class="sa">f</span><span class="s2">"</span><span class="si">{</span><span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">replay_data_str</span><span class="p">)</span><span class="si">}</span><span class="s2">,map_id=</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">map_id</span><span class="si">}</span><span class="s2">,"</span>
-                <span class="sa">f</span><span class="s2">"user_id=</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">user_id</span><span class="si">}</span><span class="s2">,mods=</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">mods</span><span class="si">}</span><span class="s2">,"</span>
+                <span class="sa">f</span><span class="s2">"</span><span class="si">{</span><span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">replay_data_str</span><span class="p">)</span><span class="si">}</span><span class="s2">,</span><span class="si">{</span><span class="n">api_attrs_string</span><span class="si">}</span><span class="s2">"</span>
+                <span class="sa">f</span><span class="s2">"mods=</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">mods</span><span class="si">}</span><span class="s2">,"</span>
                 <span class="sa">f</span><span class="s2">"replay_id=</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">replay_id</span><span class="si">}</span><span class="s2">,weight=</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">weight</span><span class="si">}</span><span class="s2">,"</span>
                 <span class="sa">f</span><span class="s2">"loaded=</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">loaded</span><span class="si">}</span><span class="s2">,username=</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">username</span><span class="si">}</span><span class="s2">)"</span><span class="p">)</span>
         <span class="k">return</span> <span class="sa">f</span><span class="s2">"ReplayString(len(replay_data_str)=</span><span class="si">{</span><span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">replay_data_str</span><span class="p">)</span><span class="si">}</span><span class="s2">)"</span>
@@ -1420,6 +1500,10 @@
         <span class="bp">self</span><span class="o">.</span><span class="n">replay_id</span> <span class="o">=</span> <span class="n">replay_id</span>
 
 <div class="viewcode-block" id="ReplayID.load"><a class="viewcode-back" href="../../appendix.html#circleguard.loadables.ReplayID.load">[docs]</a>    <span class="k">def</span> <span class="nf">load</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">loader</span><span class="p">,</span> <span class="n">cache</span><span class="p">):</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">loaded</span><span class="p">:</span>
+            <span class="k">return</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="n">loader</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">"A ReplayID cannot be loaded without api access"</span><span class="p">)</span>
         <span class="c1"># TODO file github issue about loading info from replay id, right now we</span>
         <span class="c1"># can literally only load the replay data which isn't that useful</span>
         <span class="n">cache</span> <span class="o">=</span> <span class="n">cache</span> <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">cache</span> <span class="ow">is</span> <span class="kc">None</span> <span class="k">else</span> <span class="bp">self</span><span class="o">.</span><span class="n">cache</span>

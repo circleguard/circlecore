@@ -57,7 +57,7 @@ Links
 
 .. toctree::
     :maxdepth: 2
-    :caption: Tutorials
+    :caption: Tutorial
 
     foreword
     representing-replays
@@ -65,6 +65,7 @@ Links
     replay-containers
     loading
     caching
+    advanced-usage
 
 .. toctree::
     :caption: Contributing

@@ -5,7 +5,7 @@
     <meta name="color-scheme" content="light dark"><link rel="index" title="Index" href="../../genindex.html" /><link rel="search" title="Search" href="../../search.html" />
 
     <meta name="generator" content="sphinx-3.5.2, furo 2021.03.20.beta30"/>
-        <title>circleguard.loader - Circleguard v5.1.2 documentation</title>
+        <title>circleguard.loader - Circleguard v5.2.1 documentation</title>
       <link rel="stylesheet" href="../../_static/styles/furo.css?digest=978e1795dfe158b585dda6a8417f6411828bf3ed">
     <link rel="stylesheet" href="../../_static/pygments.css">
     <link media="(prefers-color-scheme: dark)" rel="stylesheet" href="../../_static/pygments_dark.css">
@@ -86,7 +86,7 @@
       </label>
     </div>
     <div class="header-center">
-      <a href="../../index.html"><div class="brand">Circleguard v5.1.2 documentation</div></a>
+      <a href="../../index.html"><div class="brand">Circleguard v5.2.1 documentation</div></a>
     </div>
     <div class="header-right">
       <label class="toc-overlay-icon toc-header-icon no-toc" for="__toc">
@@ -100,7 +100,7 @@
       <div class="sidebar-sticky"><a class="sidebar-brand" href="../../index.html">
   
   
-  <span class="sidebar-brand-text">Circleguard v5.1.2 documentation</span>
+  <span class="sidebar-brand-text">Circleguard v5.2.1 documentation</span>
   
 </a><form class="sidebar-search-container" method="get" action="../../search.html">
   <input class="sidebar-search" placeholder=Search name="q">
@@ -110,14 +110,15 @@
   <ul>
 <li class="toctree-l1"><a class="reference internal" href="../../index.html">Circlecore</a></li>
 </ul>
-<p class="caption"><span class="caption-text">Tutorials</span></p>
+<p class="caption"><span class="caption-text">Tutorial</span></p>
 <ul>
 <li class="toctree-l1"><a class="reference internal" href="../../foreword.html">Foreword</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../representing-replays.html">Representing Replays</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../using-circleguard.html">Using Circleguard</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../../replay-containers.html"><code class="xref py py-class docutils literal notranslate"><span class="pre">ReplayContainer</span></code>s</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../replay-containers.html">Replay Containers</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../loading.html">Loading</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../caching.html">Caching</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../advanced-usage.html">Advanced Usage</a></li>
 </ul>
 <p class="caption"><span class="caption-text">Contributing</span></p>
 <ul>
@@ -153,7 +154,7 @@
 <span class="kn">import</span> <span class="nn">osrparse</span>
 <span class="kn">from</span> <span class="nn">ossapi</span> <span class="kn">import</span> <span class="n">Ossapi</span>
 
-<span class="kn">from</span> <span class="nn">circleguard</span> <span class="kn">import</span> <span class="n">Mod</span>
+<span class="kn">from</span> <span class="nn">circleguard.mod</span> <span class="kn">import</span> <span class="n">Mod</span>
 <span class="kn">from</span> <span class="nn">circleguard.utils</span> <span class="kn">import</span> <span class="n">TRACE</span>
 <span class="kn">from</span> <span class="nn">circleguard.span</span> <span class="kn">import</span> <span class="n">Span</span>
 
@@ -176,7 +177,7 @@
     <span class="sd">"""An api key was rejected by the api."""</span></div>
 
 <div class="viewcode-block" id="RatelimitException"><a class="viewcode-back" href="../../appendix.html#circleguard.loader.RatelimitException">[docs]</a><span class="k">class</span> <span class="nc">RatelimitException</span><span class="p">(</span><span class="n">InternalAPIException</span><span class="p">):</span>
-    <span class="sd">"""The api has ratelimit an api key."""</span></div>
+    <span class="sd">"""The api has ratelimited an api key."""</span></div>
 
 <div class="viewcode-block" id="InvalidJSONException"><a class="viewcode-back" href="../../appendix.html#circleguard.loader.InvalidJSONException">[docs]</a><span class="k">class</span> <span class="nc">InvalidJSONException</span><span class="p">(</span><span class="n">InternalAPIException</span><span class="p">):</span>
     <span class="sd">"""The api returned an invalid json response."""</span></div>
@@ -573,7 +574,7 @@
 <span class="sd">        -------</span>
 <span class="sd">        list[:class:`osrparse.replay.ReplayEvent`]</span>
 <span class="sd">            The replay events with attributes ``x``, ``y``,</span>
-<span class="sd">            ``time_since_previous_action``, and ``keys_pressed``.</span>
+<span class="sd">            ``time_delta``, and ``keys``.</span>
 <span class="sd">        None</span>
 <span class="sd">            If no replay data was available.</span>
 
@@ -624,7 +625,7 @@
         <span class="n">Loader</span><span class="o">.</span><span class="n">check_response</span><span class="p">(</span><span class="n">response</span><span class="p">)</span>
         <span class="n">lzma</span> <span class="o">=</span> <span class="n">base64</span><span class="o">.</span><span class="n">b64decode</span><span class="p">(</span><span class="n">response</span><span class="p">[</span><span class="s2">"content"</span><span class="p">])</span>
         <span class="n">replay_data</span> <span class="o">=</span> <span class="n">osrparse</span><span class="o">.</span><span class="n">parse_replay</span><span class="p">(</span><span class="n">lzma</span><span class="p">,</span> <span class="n">pure_lzma</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span><span class="o">.</span><span class="n">play_data</span>
-        <span class="c1"># TODO cache the replay here, might require some restructring/double</span>
+        <span class="c1"># TODO cache the replay here, might require some restructuring/double</span>
         <span class="c1"># checking everything will work because we only have its id, not map</span>
         <span class="c1"># or user id. In fact I think our db asserts map and user id are nonull</span>
         <span class="c1"># so insertion into old dbs probably won't work (and we'd have to change</span>
@@ -772,6 +773,7 @@
         <span class="c1"># sleep the remainder of the reset cycle so we guarantee it's been that</span>
         <span class="c1"># long since the first request</span>
         <span class="n">sleep_seconds</span> <span class="o">=</span> <span class="n">Loader</span><span class="o">.</span><span class="n">RATELIMIT_RESET</span> <span class="o">-</span> <span class="n">seconds_passed</span>
+        <span class="n">sleep_seconds</span> <span class="o">=</span> <span class="nb">max</span><span class="p">(</span><span class="n">sleep_seconds</span><span class="p">,</span> <span class="mi">0</span><span class="p">)</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_ratelimit</span><span class="p">(</span><span class="n">sleep_seconds</span><span class="p">)</span>
 
     <span class="k">def</span> <span class="nf">_ratelimit</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">length</span><span class="p">):</span>

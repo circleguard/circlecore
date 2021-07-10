@@ -4,50 +4,41 @@ Representing Replays
 Before you can use circleguard to calculate statistics of replays or do other operations on replays, you need
 to know how to represent replays.
 
-All replay classes you can instantiate are subclasses of |Replay|. We cover each subclass below.
+All replay classes you can instantiate are subclasses of |Replay|. We cover each class below.
 
-ReplayMap
----------
+Replay Map
+----------
 
-A |ReplayMap| represents a replay by a user on a map. For instance,
+A |ReplayMap| represents a replay by a user on a map. To get the highest scoring replay by the user
+``2757689`` on the map ``221777``:
 
 .. code-block:: python
 
     replay = ReplayMap(221777, 2757689)
 
-represents the highest scoring replay by user ``2757689`` on map ``221777``.
-
-To restrict this to a replay with a certain mod combination, specify a mods argument.
-For instance, this represents specifically the ``HDHR`` play by the same user on the same map.
+To restrict this to a replay with a certain mod combination, use the ``mods`` argument. To get specifically the ``HDHR`` by
+the same user as above:
 
 .. code-block:: python
 
     replay = ReplayMap(221777, 2757689, mods=Mod.HD + Mod.HR)
 
-While in this case these are identical replays, there are times a user has two
-available replays on a map, with different mods.
 
-ReplayPath
-----------
+Replay Path
+-----------
 
-|ReplayPath| represents a replay stored locally in an ``osr`` file. For instance,
+A |ReplayPath| represents a replay stored locally in an ``osr`` file. To get the replay stored in the file
+at ``/path/to/your/replay.osr``:
 
 .. code-block:: python
 
     replay = ReplayPath("/path/to/your/replay.osr")
 
-represents the replay in the file ``/path/to/your/replay.osr``.
 
+Replay ID
+---------
 
-Lesser Used Replays
--------------------
-
-These replay classes aren't used as often, but can still come up. They are documented here for completeness.
-
-ReplayID
-~~~~~~~~
-
-A |ReplayID| that was submitted online and is represented by a unique replay id.
+A |ReplayID| represents a replay that was submitted online and is represented by a unique replay id.
 
 .. code-block:: python
 
@@ -55,16 +46,16 @@ A |ReplayID| that was submitted online and is represented by a unique replay id.
 
 .. warning::
 
-    We can only retrieve the replay data associated with a replay id due to limitations with the api.
+    We can only retrieve the replay data, and nothing else, for a |ReplayID| due to limitations with the api.
     This means we do not know with what mods or on what map a |ReplayID| was played on. This limits
-    what kinds of functions can be called on it - for instance, |cg.ur| and |cg.hits| both require
-    knowing what beatmap the replay was played on, and will reject |ReplayID|\s.
+    what kinds of functions can be called on it. For instance, |cg.ur| and |cg.hits| both require
+    knowing what beatmap the replay was played on, and will reject a |ReplayID|.
 
 
-ReplayString
-~~~~~~~~~~~~
+Replay String
+-------------
 
-A |ReplayString| represents a replay file which has been read into a string object.
+A |ReplayString| represents a replay file which has been read into a string object. This replay class is rarely used.
 
 .. code-block:: python
 

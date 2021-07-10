@@ -2,10 +2,10 @@
 <html class="no-js">
   <head><meta charset="utf-8"/>
     <meta name="viewport" content="width=device-width,initial-scale=1"/>
-    <meta name="color-scheme" content="light dark"><link rel="index" title="Index" href="genindex.html" /><link rel="search" title="Search" href="search.html" /><link rel="next" title="Contributing" href="contributing.html" /><link rel="prev" title="Loading" href="loading.html" />
+    <meta name="color-scheme" content="light dark"><link rel="index" title="Index" href="genindex.html" /><link rel="search" title="Search" href="search.html" /><link rel="next" title="Advanced Usage" href="advanced-usage.html" /><link rel="prev" title="Loading" href="loading.html" />
 
     <meta name="generator" content="sphinx-3.5.2, furo 2021.03.20.beta30"/>
-        <title>Caching - Circleguard v5.1.2 documentation</title>
+        <title>Caching - Circleguard v5.2.1 documentation</title>
       <link rel="stylesheet" href="_static/styles/furo.css?digest=978e1795dfe158b585dda6a8417f6411828bf3ed">
     <link rel="stylesheet" href="_static/pygments.css">
     <link media="(prefers-color-scheme: dark)" rel="stylesheet" href="_static/pygments_dark.css">
@@ -86,7 +86,7 @@
       </label>
     </div>
     <div class="header-center">
-      <a href="index.html"><div class="brand">Circleguard v5.1.2 documentation</div></a>
+      <a href="index.html"><div class="brand">Circleguard v5.2.1 documentation</div></a>
     </div>
     <div class="header-right">
       <label class="toc-overlay-icon toc-header-icon" for="__toc">
@@ -100,7 +100,7 @@
       <div class="sidebar-sticky"><a class="sidebar-brand" href="index.html">
   
   
-  <span class="sidebar-brand-text">Circleguard v5.1.2 documentation</span>
+  <span class="sidebar-brand-text">Circleguard v5.2.1 documentation</span>
   
 </a><form class="sidebar-search-container" method="get" action="search.html">
   <input class="sidebar-search" placeholder=Search name="q">
@@ -110,14 +110,15 @@
   <ul>
 <li class="toctree-l1"><a class="reference internal" href="index.html">Circlecore</a></li>
 </ul>
-<p class="caption"><span class="caption-text">Tutorials</span></p>
+<p class="caption"><span class="caption-text">Tutorial</span></p>
 <ul class="current">
 <li class="toctree-l1"><a class="reference internal" href="foreword.html">Foreword</a></li>
 <li class="toctree-l1"><a class="reference internal" href="representing-replays.html">Representing Replays</a></li>
 <li class="toctree-l1"><a class="reference internal" href="using-circleguard.html">Using Circleguard</a></li>
-<li class="toctree-l1"><a class="reference internal" href="replay-containers.html"><code class="xref py py-class docutils literal notranslate"><span class="pre">ReplayContainer</span></code>s</a></li>
+<li class="toctree-l1"><a class="reference internal" href="replay-containers.html">Replay Containers</a></li>
 <li class="toctree-l1"><a class="reference internal" href="loading.html">Loading</a></li>
 <li class="toctree-l1 current current-page"><a class="current reference internal" href="#">Caching</a></li>
+<li class="toctree-l1"><a class="reference internal" href="advanced-usage.html">Advanced Usage</a></li>
 </ul>
 <p class="caption"><span class="caption-text">Contributing</span></p>
 <ul>
@@ -160,8 +161,8 @@ we load it from the api (or local file in the case of <a class="reference intern
 <span class="n">cg</span><span class="o">.</span><span class="n">load</span><span class="p">(</span><span class="n">r1</span><span class="p">)</span> <span class="c1"># replay gets loaded from the api and cached</span>
 <span class="nb">print</span><span class="p">(</span><span class="s2">"loading from cache"</span><span class="p">)</span>
 <span class="n">cg</span><span class="o">.</span><span class="n">load</span><span class="p">(</span><span class="n">r2</span><span class="p">)</span> <span class="c1"># loaded from our cache, not the api</span>
-<span class="c1"># we can keep doing this if we want...we won't ever hit the api</span>
-<span class="c1"># atelimit since we're loading from the cache</span>
+<span class="c1"># we can do this as many times as we want - we won't ever</span>
+<span class="c1"># hit the api ratelimit since we're loading from the cache</span>
 <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mi">5</span><span class="p">):</span>
     <span class="nb">print</span><span class="p">(</span><span class="s2">"loading from cache"</span><span class="p">)</span>
     <span class="n">r</span> <span class="o">=</span> <span class="n">ReplayMap</span><span class="p">(</span><span class="mi">221777</span><span class="p">,</span> <span class="mi">2757689</span><span class="p">)</span>
@@ -174,7 +175,7 @@ we load it from the api (or local file in the case of <a class="reference intern
 The loss is on the order of 0.1 precision in the xy coordinate of frames, which is not enough to impact
 the average use case, but could make a difference in some scenarios.</p>
 </div>
-<p>If you want to use a cache in read only mode (use previously cached replays, but don’t cache new replays), pass
+<p>If you want to use a cache in “read only” mode (use previously cached replays, but don’t cache new replays), pass
 <code class="docutils literal notranslate"><span class="pre">cache=False</span></code> to <a class="reference internal" href="appendix.html#circleguard.circleguard.Circleguard" title="circleguard.circleguard.Circleguard"><code class="xref py py-class docutils literal notranslate"><span class="pre">Circleguard</span></code></a>:</p>
 <div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="n">cg</span> <span class="o">=</span> <span class="n">Circleguard</span><span class="p">(</span><span class="s2">"key"</span><span class="p">,</span> <span class="n">db_path</span><span class="o">=</span><span class="s2">"./db.db"</span><span class="p">,</span> <span class="n">cache</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
 </pre></div>
@@ -182,7 +183,7 @@ the average use case, but could make a difference in some scenarios.</p>
 <div class="section" id="slider-dir">
 <h2>slider_dir<a class="headerlink" href="#slider-dir" title="Permalink to this headline">¶</a></h2>
 <p>We use <a class="reference external" href="https://github.com/llllllllll/slider">slider</a> to manage the download and parsing of beatmaps. We download beatmaps
-when certain functions are called, such as <a class="reference internal" href="appendix.html#circleguard.circleguard.Circleguard.hits" title="circleguard.circleguard.Circleguard.hits"><code class="xref py py-func docutils literal notranslate"><span class="pre">hits()</span></code></a>, that require the beatmap the replay was played on to work.</p>
+when certain functions are called, such as <a class="reference internal" href="appendix.html#circleguard.circleguard.Circleguard.hits" title="circleguard.circleguard.Circleguard.hits"><code class="xref py py-func docutils literal notranslate"><span class="pre">cg.hits()</span></code></a>, that require the beatmap the replay was played on to work.</p>
 <p>If <code class="docutils literal notranslate"><span class="pre">slider_dir</span></code> is passed, downloaded beatmaps will be cached to that directory (which must exist). You can use the same
 directory the <a class="reference internal" href="appendix.html#circleguard.circleguard.Circleguard" title="circleguard.circleguard.Circleguard"><code class="xref py py-class docutils literal notranslate"><span class="pre">Circleguard</span></code></a> cache db file is in if you’d like.</p>
 <div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="n">cg</span> <span class="o">=</span> <span class="n">Circleguard</span><span class="p">(</span><span class="s2">"key"</span><span class="p">,</span> <span class="n">db_path</span><span class="o">=</span><span class="s2">"./dbs/db.db"</span><span class="p">,</span> <span class="n">slider_dir</span><span class="o">=</span><span class="s2">"./dbs/"</span><span class="p">)</span>
@@ -195,7 +196,7 @@ instead. This means beatmaps will be cached with respect to a single <a class="r
 </div>
 <div class="section" id="loadables">
 <h2>Loadables<a class="headerlink" href="#loadables" title="Permalink to this headline">¶</a></h2>
-<p><a class="reference internal" href="appendix.html#circleguard.loadables.Replay" title="circleguard.loadables.Replay"><code class="xref py py-class docutils literal notranslate"><span class="pre">Replay</span></code></a>s and <a class="reference internal" href="appendix.html#circleguard.loadables.ReplayContainer" title="circleguard.loadables.ReplayContainer"><code class="xref py py-class docutils literal notranslate"><span class="pre">ReplayContainer</span></code></a>s also have a <code class="docutils literal notranslate"><span class="pre">cache</span></code> parameter, which determines if they should be cached when loaded.</p>
+<p>A <a class="reference internal" href="appendix.html#circleguard.loadables.Replay" title="circleguard.loadables.Replay"><code class="xref py py-class docutils literal notranslate"><span class="pre">Replay</span></code></a> or <a class="reference internal" href="appendix.html#circleguard.loadables.ReplayContainer" title="circleguard.loadables.ReplayContainer"><code class="xref py py-class docutils literal notranslate"><span class="pre">ReplayContainer</span></code></a> also has a <code class="docutils literal notranslate"><span class="pre">cache</span></code> parameter, which determines if it should be cached when loaded.</p>
 <div class="admonition note">
 <p class="admonition-title">Note</p>
 <p>The <code class="docutils literal notranslate"><span class="pre">cache</span></code> parameter has no effect if <a class="reference internal" href="appendix.html#circleguard.circleguard.Circleguard" title="circleguard.circleguard.Circleguard"><code class="xref py py-class docutils literal notranslate"><span class="pre">Circleguard</span></code></a> was not passed a <code class="docutils literal notranslate"><span class="pre">db_path</span></code> or if <a class="reference internal" href="appendix.html#circleguard.circleguard.Circleguard" title="circleguard.circleguard.Circleguard"><code class="xref py py-class docutils literal notranslate"><span class="pre">Circleguard</span></code></a> was
@@ -223,12 +224,12 @@ when they’re loaded:</p>
       <footer>
         
         <div class="related-pages">
-          <a class="next-page" href="contributing.html">
+          <a class="next-page" href="advanced-usage.html">
               <div class="page-info">
                 <div class="context">
                   <span>Next</span>
                 </div>
-                <div class="title">Contributing</div>
+                <div class="title">Advanced Usage</div>
               </div>
               <svg><use href="#svg-arrow-right"></use></svg>
             </a>

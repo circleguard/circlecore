@@ -2,10 +2,10 @@
 <html class="no-js">
   <head><meta charset="utf-8"/>
     <meta name="viewport" content="width=device-width,initial-scale=1"/>
-    <meta name="color-scheme" content="light dark"><link rel="index" title="Index" href="genindex.html" /><link rel="search" title="Search" href="search.html" /><link rel="next" title="Caching" href="caching.html" /><link rel="prev" title="ReplayContainers" href="replay-containers.html" />
+    <meta name="color-scheme" content="light dark"><link rel="index" title="Index" href="genindex.html" /><link rel="search" title="Search" href="search.html" /><link rel="next" title="Caching" href="caching.html" /><link rel="prev" title="Replay Containers" href="replay-containers.html" />
 
     <meta name="generator" content="sphinx-3.5.2, furo 2021.03.20.beta30"/>
-        <title>Loading - Circleguard v5.1.2 documentation</title>
+        <title>Loading - Circleguard v5.2.1 documentation</title>
       <link rel="stylesheet" href="_static/styles/furo.css?digest=978e1795dfe158b585dda6a8417f6411828bf3ed">
     <link rel="stylesheet" href="_static/pygments.css">
     <link media="(prefers-color-scheme: dark)" rel="stylesheet" href="_static/pygments_dark.css">
@@ -86,7 +86,7 @@
       </label>
     </div>
     <div class="header-center">
-      <a href="index.html"><div class="brand">Circleguard v5.1.2 documentation</div></a>
+      <a href="index.html"><div class="brand">Circleguard v5.2.1 documentation</div></a>
     </div>
     <div class="header-right">
       <label class="toc-overlay-icon toc-header-icon" for="__toc">
@@ -100,7 +100,7 @@
       <div class="sidebar-sticky"><a class="sidebar-brand" href="index.html">
   
   
-  <span class="sidebar-brand-text">Circleguard v5.1.2 documentation</span>
+  <span class="sidebar-brand-text">Circleguard v5.2.1 documentation</span>
   
 </a><form class="sidebar-search-container" method="get" action="search.html">
   <input class="sidebar-search" placeholder=Search name="q">
@@ -110,14 +110,15 @@
   <ul>
 <li class="toctree-l1"><a class="reference internal" href="index.html">Circlecore</a></li>
 </ul>
-<p class="caption"><span class="caption-text">Tutorials</span></p>
+<p class="caption"><span class="caption-text">Tutorial</span></p>
 <ul class="current">
 <li class="toctree-l1"><a class="reference internal" href="foreword.html">Foreword</a></li>
 <li class="toctree-l1"><a class="reference internal" href="representing-replays.html">Representing Replays</a></li>
 <li class="toctree-l1"><a class="reference internal" href="using-circleguard.html">Using Circleguard</a></li>
-<li class="toctree-l1"><a class="reference internal" href="replay-containers.html"><code class="xref py py-class docutils literal notranslate"><span class="pre">ReplayContainer</span></code>s</a></li>
+<li class="toctree-l1"><a class="reference internal" href="replay-containers.html">Replay Containers</a></li>
 <li class="toctree-l1 current current-page"><a class="current reference internal" href="#">Loading</a></li>
 <li class="toctree-l1"><a class="reference internal" href="caching.html">Caching</a></li>
+<li class="toctree-l1"><a class="reference internal" href="advanced-usage.html">Advanced Usage</a></li>
 </ul>
 <p class="caption"><span class="caption-text">Contributing</span></p>
 <ul>
@@ -142,11 +143,11 @@
         </label>
         <div class="section" id="loading">
 <h1>Loading<a class="headerlink" href="#loading" title="Permalink to this headline">¶</a></h1>
-<div class="section" id="replays">
-<h2><a class="reference internal" href="appendix.html#circleguard.loadables.Replay" title="circleguard.loadables.Replay"><code class="xref py py-class docutils literal notranslate"><span class="pre">Replay</span></code></a>s<a class="headerlink" href="#replays" title="Permalink to this headline">¶</a></h2>
+<div class="section" id="loading-a-replay">
+<h2>Loading a Replay<a class="headerlink" href="#loading-a-replay" title="Permalink to this headline">¶</a></h2>
 <p>When you instantiate a <a class="reference internal" href="appendix.html#circleguard.loadables.Replay" title="circleguard.loadables.Replay"><code class="xref py py-class docutils literal notranslate"><span class="pre">Replay</span></code></a>, it doesn’t have replay data, know the username or user id of who played it,
 know mods it was played with, or have very much information about itself at all.</p>
-<p>Some <a class="reference internal" href="appendix.html#circleguard.loadables.Replay" title="circleguard.loadables.Replay"><code class="xref py py-class docutils literal notranslate"><span class="pre">Replay</span></code></a>s like <a class="reference internal" href="appendix.html#circleguard.loadables.ReplayMap" title="circleguard.loadables.ReplayMap"><code class="xref py py-class docutils literal notranslate"><span class="pre">ReplayMap</span></code></a> have a little more information, because you passed it explicitly - for example, a
+<p>Some <a class="reference internal" href="appendix.html#circleguard.loadables.Replay" title="circleguard.loadables.Replay"><code class="xref py py-class docutils literal notranslate"><span class="pre">Replay</span></code></a>s like <a class="reference internal" href="appendix.html#circleguard.loadables.ReplayMap" title="circleguard.loadables.ReplayMap"><code class="xref py py-class docutils literal notranslate"><span class="pre">ReplayMap</span></code></a> have a little more information, because you passed it explicitly. For example, a
 <a class="reference internal" href="appendix.html#circleguard.loadables.ReplayMap" title="circleguard.loadables.ReplayMap"><code class="xref py py-class docutils literal notranslate"><span class="pre">ReplayMap</span></code></a> knows the map id and user id of the replay (as well as the mods if passed), and a <a class="reference internal" href="appendix.html#circleguard.loadables.ReplayID" title="circleguard.loadables.ReplayID"><code class="xref py py-class docutils literal notranslate"><span class="pre">ReplayID</span></code></a> knows the id of
 its replay.</p>
 <p>We can illustrate this by trying to access these attributes of replays directly after instantiation:</p>
@@ -176,10 +177,9 @@ its replay.</p>
 </div>
 <p>As you can see, not many attributes are available to us. However, we can retrieve more information about a replay by “loading” it.
 A replay is called “unloaded” if it hasn’t been loaded yet, and “loaded” if it has.</p>
-<p>To load a replay, call <a class="reference internal" href="appendix.html#circleguard.circleguard.Circleguard.load" title="circleguard.circleguard.Circleguard.load"><code class="xref py py-func docutils literal notranslate"><span class="pre">load()</span></code></a> on it. Once the replay is loaded, most of these attributes will be filled with the
+<p>To load a replay, call <a class="reference internal" href="appendix.html#circleguard.circleguard.Circleguard.load" title="circleguard.circleguard.Circleguard.load"><code class="xref py py-func docutils literal notranslate"><span class="pre">cg.load()</span></code></a> on it. Once the replay is loaded, most of these attributes will be filled with the
 proper value:</p>
-<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="n">cg</span> <span class="o">=</span> <span class="n">Circleguard</span><span class="p">(</span><span class="s2">"key"</span><span class="p">)</span>
-<span class="n">r_map</span> <span class="o">=</span> <span class="n">ReplayMap</span><span class="p">(</span><span class="mi">221777</span><span class="p">,</span> <span class="mi">2757689</span><span class="p">)</span>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="n">r_map</span> <span class="o">=</span> <span class="n">ReplayMap</span><span class="p">(</span><span class="mi">221777</span><span class="p">,</span> <span class="mi">2757689</span><span class="p">)</span>
 <span class="n">cg</span><span class="o">.</span><span class="n">load</span><span class="p">(</span><span class="n">r_map</span><span class="p">)</span>
 
 <span class="c1"># now we can access the real values of these attributes</span>
@@ -194,13 +194,12 @@ proper value:</p>
 <div class="admonition warning">
 <p class="admonition-title">Warning</p>
 <p>Circleguard usually requests information about the replay from the api in order to fill in the gaps,
-so a call to <a class="reference internal" href="appendix.html#circleguard.circleguard.Circleguard.load" title="circleguard.circleguard.Circleguard.load"><code class="xref py py-func docutils literal notranslate"><span class="pre">load()</span></code></a> could take considerable (&gt;100ms) time as it involves network requests.</p>
+so a call to <a class="reference internal" href="appendix.html#circleguard.circleguard.Circleguard.load" title="circleguard.circleguard.Circleguard.load"><code class="xref py py-func docutils literal notranslate"><span class="pre">cg.load()</span></code></a> could take considerable (&gt;100ms) time as it involves network requests.</p>
 </div>
-<p>Depending on the replay subclass, some attributes may never be available because of api limitations or
+<p>Depending on the replay class, some attributes may never be available due to api limitations or
 other issues. For instance, the api doesn’t provide <em>any</em> information for a <a class="reference internal" href="appendix.html#circleguard.loadables.ReplayID" title="circleguard.loadables.ReplayID"><code class="xref py py-class docutils literal notranslate"><span class="pre">ReplayID</span></code></a> besides its replay
 data, so almost none of its attributes will be filled, even after loading it:</p>
-<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="n">cg</span> <span class="o">=</span> <span class="n">Circleguard</span><span class="p">(</span><span class="s2">"key"</span><span class="p">)</span>
-<span class="n">r_id</span> <span class="o">=</span> <span class="n">ReplayID</span><span class="p">(</span><span class="mi">2177560145</span><span class="p">)</span>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="n">r_id</span> <span class="o">=</span> <span class="n">ReplayID</span><span class="p">(</span><span class="mi">2177560145</span><span class="p">)</span>
 <span class="n">cg</span><span class="o">.</span><span class="n">load</span><span class="p">(</span><span class="n">r_id</span><span class="p">)</span>
 
 <span class="nb">print</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">r_id</span><span class="o">.</span><span class="n">replay_data</span><span class="p">))</span> <span class="c1"># 20611</span>
@@ -210,20 +209,24 @@ data, so almost none of its attributes will be filled, even after loading it:</p
 <span class="nb">print</span><span class="p">(</span><span class="n">r_id</span><span class="o">.</span><span class="n">mods</span><span class="p">)</span> <span class="c1"># None</span>
 </pre></div>
 </div>
-<p>To find exactly what attributes a replay subclass provides before and after it’s loaded, see its class’
+<p>To find exactly what attributes a replay class provides before and after it’s loaded, see its class’
 documentation.</p>
 </div>
-<div class="section" id="replaycontainers">
-<h2><a class="reference internal" href="appendix.html#circleguard.loadables.ReplayContainer" title="circleguard.loadables.ReplayContainer"><code class="xref py py-class docutils literal notranslate"><span class="pre">ReplayContainer</span></code></a>s<a class="headerlink" href="#replaycontainers" title="Permalink to this headline">¶</a></h2>
-<p>We’ve seen two stages (unloaded and loaded) with <a class="reference internal" href="appendix.html#circleguard.loadables.Replay" title="circleguard.loadables.Replay"><code class="xref py py-class docutils literal notranslate"><span class="pre">Replay</span></code></a>s, but <a class="reference internal" href="appendix.html#circleguard.loadables.ReplayContainer" title="circleguard.loadables.ReplayContainer"><code class="xref py py-class docutils literal notranslate"><span class="pre">ReplayContainer</span></code></a>s introduce a third stage between
-the two, called “info loaded”.</p>
+<div class="section" id="implicit-loading">
+<h2>Implicit Loading<a class="headerlink" href="#implicit-loading" title="Permalink to this headline">¶</a></h2>
+<p>Whenever you pass a <a class="reference internal" href="appendix.html#circleguard.loadables.Replay" title="circleguard.loadables.Replay"><code class="xref py py-class docutils literal notranslate"><span class="pre">Replay</span></code></a> to a <a class="reference internal" href="appendix.html#circleguard.circleguard.Circleguard" title="circleguard.circleguard.Circleguard"><code class="xref py py-class docutils literal notranslate"><span class="pre">Circleguard</span></code></a> method (<a class="reference internal" href="appendix.html#circleguard.circleguard.Circleguard.snaps" title="circleguard.circleguard.Circleguard.snaps"><code class="xref py py-func docutils literal notranslate"><span class="pre">cg.snaps()</span></code></a>, <a class="reference internal" href="appendix.html#circleguard.circleguard.Circleguard.hits" title="circleguard.circleguard.Circleguard.hits"><code class="xref py py-func docutils literal notranslate"><span class="pre">cg.hits()</span></code></a>, <a class="reference internal" href="appendix.html#circleguard.circleguard.Circleguard.judgments" title="circleguard.circleguard.Circleguard.judgments"><code class="xref py py-func docutils literal notranslate"><span class="pre">cg.judgments()</span></code></a>, etc), <a class="reference internal" href="appendix.html#circleguard.circleguard.Circleguard" title="circleguard.circleguard.Circleguard"><code class="xref py py-class docutils literal notranslate"><span class="pre">Circleguard</span></code></a>
+implicitly loads that replay before calculating the relevant statistic. This means that you don’t have to worry
+about loading a replay before passing it to a circleguard method.</p>
+</div>
+<div class="section" id="info-loading">
+<span id="id1"></span><h2>Info Loading<a class="headerlink" href="#info-loading" title="Permalink to this headline">¶</a></h2>
+<p>A <a class="reference internal" href="appendix.html#circleguard.loadables.Replay" title="circleguard.loadables.Replay"><code class="xref py py-class docutils literal notranslate"><span class="pre">Replay</span></code></a> has two stages, “unloaded” and “loaded”. A <a class="reference internal" href="appendix.html#circleguard.loadables.ReplayContainer" title="circleguard.loadables.ReplayContainer"><code class="xref py py-class docutils literal notranslate"><span class="pre">ReplayContainer</span></code></a> introduces a third stage called “info loaded”.</p>
 <p>When a <a class="reference internal" href="appendix.html#circleguard.loadables.ReplayContainer" title="circleguard.loadables.ReplayContainer"><code class="xref py py-class docutils literal notranslate"><span class="pre">ReplayContainer</span></code></a> is first instantiated, it is unloaded, just like a <a class="reference internal" href="appendix.html#circleguard.loadables.Replay" title="circleguard.loadables.Replay"><code class="xref py py-class docutils literal notranslate"><span class="pre">Replay</span></code></a>. This means that it only knows
 the information you’ve given it - its map id if it’s a <a class="reference internal" href="appendix.html#circleguard.loadables.Map" title="circleguard.loadables.Map"><code class="xref py py-class docutils literal notranslate"><span class="pre">Map</span></code></a>, or its user id if it’s a <a class="reference internal" href="appendix.html#circleguard.loadables.User" title="circleguard.loadables.User"><code class="xref py py-class docutils literal notranslate"><span class="pre">User</span></code></a>, for instance. It has
-no idea what <a class="reference internal" href="appendix.html#circleguard.loadables.Replay" title="circleguard.loadables.Replay"><code class="xref py py-class docutils literal notranslate"><span class="pre">Replay</span></code></a> objects it should have.</p>
-<p>You can change this by calling <a class="reference internal" href="appendix.html#circleguard.circleguard.Circleguard.load_info" title="circleguard.circleguard.Circleguard.load_info"><code class="xref py py-func docutils literal notranslate"><span class="pre">load_info()</span></code></a> on the <a class="reference internal" href="appendix.html#circleguard.loadables.ReplayContainer" title="circleguard.loadables.ReplayContainer"><code class="xref py py-class docutils literal notranslate"><span class="pre">ReplayContainer</span></code></a>. After doing so, it becomes info loaded and knows
-what <a class="reference internal" href="appendix.html#circleguard.loadables.Replay" title="circleguard.loadables.Replay"><code class="xref py py-class docutils literal notranslate"><span class="pre">Replay</span></code></a> objects it has:</p>
-<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="n">cg</span> <span class="o">=</span> <span class="n">Circleguard</span><span class="p">(</span><span class="s2">"key"</span><span class="p">)</span>
-<span class="n">m</span> <span class="o">=</span> <span class="n">Map</span><span class="p">(</span><span class="mi">221777</span><span class="p">,</span> <span class="n">span</span><span class="o">=</span><span class="s2">"1-2"</span><span class="p">)</span>
+no knowledge of any <a class="reference internal" href="appendix.html#circleguard.loadables.Replay" title="circleguard.loadables.Replay"><code class="xref py py-class docutils literal notranslate"><span class="pre">Replay</span></code></a> objects yet.</p>
+<p>To ask the <a class="reference internal" href="appendix.html#circleguard.loadables.ReplayContainer" title="circleguard.loadables.ReplayContainer"><code class="xref py py-class docutils literal notranslate"><span class="pre">ReplayContainer</span></code></a> to create its replay objects, call <a class="reference internal" href="appendix.html#circleguard.circleguard.Circleguard.load_info" title="circleguard.circleguard.Circleguard.load_info"><code class="xref py py-func docutils literal notranslate"><span class="pre">cg.load_info()</span></code></a> on the <a class="reference internal" href="appendix.html#circleguard.loadables.ReplayContainer" title="circleguard.loadables.ReplayContainer"><code class="xref py py-class docutils literal notranslate"><span class="pre">ReplayContainer</span></code></a>. This will make the
+<a class="reference internal" href="appendix.html#circleguard.loadables.ReplayContainer" title="circleguard.loadables.ReplayContainer"><code class="xref py py-class docutils literal notranslate"><span class="pre">ReplayContainer</span></code></a> “info loaded”, and its replays can then be retrieved:</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="n">m</span> <span class="o">=</span> <span class="n">Map</span><span class="p">(</span><span class="mi">221777</span><span class="p">,</span> <span class="n">span</span><span class="o">=</span><span class="s2">"1-2"</span><span class="p">)</span>
 
 <span class="nb">print</span><span class="p">(</span><span class="nb">list</span><span class="p">(</span><span class="n">m</span><span class="p">))</span> <span class="c1"># [] since it's not info loaded!</span>
 
@@ -231,10 +234,11 @@ what <a class="reference internal" href="appendix.html#circleguard.loadables.Rep
 <span class="nb">print</span><span class="p">(</span><span class="nb">list</span><span class="p">(</span><span class="n">m</span><span class="p">))</span> <span class="c1"># [ReplayMap(...), ReplayMap(...)]</span>
 </pre></div>
 </div>
-<p>But when a <a class="reference internal" href="appendix.html#circleguard.loadables.ReplayContainer" title="circleguard.loadables.ReplayContainer"><code class="xref py py-class docutils literal notranslate"><span class="pre">ReplayContainer</span></code></a> is info loaded, its <a class="reference internal" href="appendix.html#circleguard.loadables.Replay" title="circleguard.loadables.Replay"><code class="xref py py-class docutils literal notranslate"><span class="pre">Replay</span></code></a>s are not loaded. This is the distinction between the info
-loaded and loaded stage - the former has unloaded replays, and the latter has loaded replays.</p>
-<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="n">cg</span> <span class="o">=</span> <span class="n">Circleguard</span><span class="p">(</span><span class="s2">"key"</span><span class="p">)</span>
-<span class="n">m</span> <span class="o">=</span> <span class="n">Map</span><span class="p">(</span><span class="mi">221777</span><span class="p">,</span> <span class="n">span</span><span class="o">=</span><span class="s2">"1-2"</span><span class="p">)</span>
+<p>The reason this does not happen by default / automatically is that info loading requires making api calls. This is a
+(relatively) expensive operation and so is deferred until explicitly requested.</p>
+<p>An important distinction is that when a <a class="reference internal" href="appendix.html#circleguard.loadables.ReplayContainer" title="circleguard.loadables.ReplayContainer"><code class="xref py py-class docutils literal notranslate"><span class="pre">ReplayContainer</span></code></a> is info loaded, its <a class="reference internal" href="appendix.html#circleguard.loadables.Replay" title="circleguard.loadables.Replay"><code class="xref py py-class docutils literal notranslate"><span class="pre">Replay</span></code></a> objects are not loaded. A
+<a class="reference internal" href="appendix.html#circleguard.loadables.ReplayContainer" title="circleguard.loadables.ReplayContainer"><code class="xref py py-class docutils literal notranslate"><span class="pre">ReplayContainer</span></code></a> only has loaded <a class="reference internal" href="appendix.html#circleguard.loadables.Replay" title="circleguard.loadables.Replay"><code class="xref py py-class docutils literal notranslate"><span class="pre">Replay</span></code></a> objects when it is fully loaded:</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="n">m</span> <span class="o">=</span> <span class="n">Map</span><span class="p">(</span><span class="mi">221777</span><span class="p">,</span> <span class="n">span</span><span class="o">=</span><span class="s2">"1-2"</span><span class="p">)</span>
 
 <span class="n">cg</span><span class="o">.</span><span class="n">load_info</span><span class="p">(</span><span class="n">m</span><span class="p">)</span>
 <span class="k">for</span> <span class="n">replay</span> <span class="ow">in</span> <span class="n">m</span><span class="p">:</span>
@@ -250,40 +254,41 @@ loaded and loaded stage - the former has unloaded replays, and the latter has lo
     <span class="nb">print</span><span class="p">(</span><span class="n">replay</span><span class="o">.</span><span class="n">replay_id</span><span class="p">)</span> <span class="c1"># some number</span>
 </pre></div>
 </div>
-<p>When you call <a class="reference internal" href="appendix.html#circleguard.circleguard.Circleguard.load" title="circleguard.circleguard.Circleguard.load"><code class="xref py py-func docutils literal notranslate"><span class="pre">load()</span></code></a> on a completely unloaded <a class="reference internal" href="appendix.html#circleguard.loadables.ReplayContainer" title="circleguard.loadables.ReplayContainer"><code class="xref py py-class docutils literal notranslate"><span class="pre">ReplayContainer</span></code></a> (that is, not even info loaded), it info loads
-the <a class="reference internal" href="appendix.html#circleguard.loadables.ReplayContainer" title="circleguard.loadables.ReplayContainer"><code class="xref py py-class docutils literal notranslate"><span class="pre">ReplayContainer</span></code></a>s for you before loading it. So the following are equivalent:</p>
-<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="c1"># method 1</span>
-<span class="n">cg</span> <span class="o">=</span> <span class="n">Circleguard</span><span class="p">(</span><span class="s2">"key"</span><span class="p">)</span>
+<p>When you call <a class="reference internal" href="appendix.html#circleguard.circleguard.Circleguard.load" title="circleguard.circleguard.Circleguard.load"><code class="xref py py-func docutils literal notranslate"><span class="pre">cg.load()</span></code></a> on a completely unloaded <a class="reference internal" href="appendix.html#circleguard.loadables.ReplayContainer" title="circleguard.loadables.ReplayContainer"><code class="xref py py-class docutils literal notranslate"><span class="pre">ReplayContainer</span></code></a> (that is, not even info loaded), it info loads
+that <a class="reference internal" href="appendix.html#circleguard.loadables.ReplayContainer" title="circleguard.loadables.ReplayContainer"><code class="xref py py-class docutils literal notranslate"><span class="pre">ReplayContainer</span></code></a> for you before loading it. So the following are equivalent:</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="c1"># good</span>
+<span class="n">m</span> <span class="o">=</span> <span class="n">Map</span><span class="p">(</span><span class="mi">221777</span><span class="p">,</span> <span class="n">span</span><span class="o">=</span><span class="s2">"1-2"</span><span class="p">)</span>
+<span class="n">cg</span><span class="o">.</span><span class="n">load</span><span class="p">(</span><span class="n">m</span><span class="p">)</span>
+
+<span class="c1"># bad</span>
 <span class="n">m</span> <span class="o">=</span> <span class="n">Map</span><span class="p">(</span><span class="mi">221777</span><span class="p">,</span> <span class="n">span</span><span class="o">=</span><span class="s2">"1-2"</span><span class="p">)</span>
 <span class="n">cg</span><span class="o">.</span><span class="n">info_load</span><span class="p">(</span><span class="n">m</span><span class="p">)</span>
 <span class="n">cg</span><span class="o">.</span><span class="n">load</span><span class="p">(</span><span class="n">m</span><span class="p">)</span>
-
-<span class="c1"># method 2 (preferred)</span>
-<span class="n">cg</span> <span class="o">=</span> <span class="n">Circleguard</span><span class="p">(</span><span class="s2">"key"</span><span class="p">)</span>
-<span class="n">m</span> <span class="o">=</span> <span class="n">Map</span><span class="p">(</span><span class="mi">221777</span><span class="p">,</span> <span class="n">span</span><span class="o">=</span><span class="s2">"1-2"</span><span class="p">)</span>
-<span class="n">cg</span><span class="o">.</span><span class="n">load</span><span class="p">(</span><span class="n">m</span><span class="p">)</span>
 </pre></div>
 </div>
 </div>
-<div class="section" id="creating-info-loaded-replaycontainers">
-<h2>Creating Info Loaded <a class="reference internal" href="appendix.html#circleguard.loadables.ReplayContainer" title="circleguard.loadables.ReplayContainer"><code class="xref py py-class docutils literal notranslate"><span class="pre">ReplayContainer</span></code></a>s<a class="headerlink" href="#creating-info-loaded-replaycontainers" title="Permalink to this headline">¶</a></h2>
-<p>Creating <a class="reference internal" href="appendix.html#circleguard.loadables.ReplayContainer" title="circleguard.loadables.ReplayContainer"><code class="xref py py-class docutils literal notranslate"><span class="pre">ReplayContainer</span></code></a>s and iterating over them immediately afterwards is so common that we provide convenience
-methods to create info loaded <a class="reference internal" href="appendix.html#circleguard.loadables.ReplayContainer" title="circleguard.loadables.ReplayContainer"><code class="xref py py-class docutils literal notranslate"><span class="pre">ReplayContainer</span></code></a>s with <a class="reference internal" href="appendix.html#circleguard.circleguard.Circleguard" title="circleguard.circleguard.Circleguard"><code class="xref py py-class docutils literal notranslate"><span class="pre">Circleguard</span></code></a> - <a class="reference internal" href="appendix.html#circleguard.circleguard.Circleguard.Map" title="circleguard.circleguard.Circleguard.Map"><code class="xref py py-func docutils literal notranslate"><span class="pre">cg.Map()</span></code></a>, <a class="reference internal" href="appendix.html#circleguard.circleguard.Circleguard.User" title="circleguard.circleguard.Circleguard.User"><code class="xref py py-func docutils literal notranslate"><span class="pre">cg.User()</span></code></a>, and <a class="reference internal" href="appendix.html#circleguard.circleguard.Circleguard.MapUser" title="circleguard.circleguard.Circleguard.MapUser"><code class="xref py py-func docutils literal notranslate"><span class="pre">cg.MapUser()</span></code></a>. For example:</p>
-<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="n">cg</span> <span class="o">=</span> <span class="n">Circleguard</span><span class="p">(</span><span class="s2">"key"</span><span class="p">)</span>
-<span class="n">m</span> <span class="o">=</span> <span class="n">cg</span><span class="o">.</span><span class="n">Map</span><span class="p">(</span><span class="mi">221777</span><span class="p">,</span> <span class="n">span</span><span class="o">=</span><span class="s2">"1-2"</span><span class="p">)</span>
-<span class="c1"># since it's info loaded, we can iterate</span>
-<span class="k">for</span> <span class="n">r</span> <span class="ow">in</span> <span class="n">m</span><span class="p">:</span>
-    <span class="nb">print</span><span class="p">(</span><span class="n">r</span><span class="p">)</span>
-
-<span class="c1"># the above is shorthand for</span>
-<span class="n">cg</span> <span class="o">=</span> <span class="n">Circleguard</span><span class="p">(</span><span class="s2">"key"</span><span class="p">)</span>
-<span class="n">m</span> <span class="o">=</span> <span class="n">Map</span><span class="p">(</span><span class="mi">221777</span><span class="p">,</span> <span class="n">span</span><span class="o">=</span><span class="p">(</span><span class="s2">"1-2"</span><span class="p">)</span>
-<span class="n">cg</span><span class="o">.</span><span class="n">load_info</span><span class="p">(</span><span class="n">m</span><span class="p">)</span>
-<span class="k">for</span> <span class="n">r</span> <span class="ow">in</span> <span class="n">m</span><span class="p">:</span>
-    <span class="nb">print</span><span class="p">(</span><span class="n">r</span><span class="p">)</span>
+<div class="section" id="creating-loaded-replays-or-replaycontainers">
+<h2>Creating Loaded Replays or ReplayContainers<a class="headerlink" href="#creating-loaded-replays-or-replaycontainers" title="Permalink to this headline">¶</a></h2>
+<p>Creating a <a class="reference internal" href="appendix.html#circleguard.loadables.Replay" title="circleguard.loadables.Replay"><code class="xref py py-class docutils literal notranslate"><span class="pre">Replay</span></code></a> and then loading it immediately afterwards is a common operation. We provide convenience methods
+<a class="reference internal" href="appendix.html#circleguard.circleguard.Circleguard.ReplayMap" title="circleguard.circleguard.Circleguard.ReplayMap"><code class="xref py py-func docutils literal notranslate"><span class="pre">cg.ReplayMap()</span></code></a>, <a class="reference internal" href="appendix.html#circleguard.circleguard.Circleguard.ReplayID" title="circleguard.circleguard.Circleguard.ReplayID"><code class="xref py py-func docutils literal notranslate"><span class="pre">cg.ReplayID()</span></code></a>, <a class="reference internal" href="appendix.html#circleguard.circleguard.Circleguard.ReplayPath" title="circleguard.circleguard.Circleguard.ReplayPath"><code class="xref py py-func docutils literal notranslate"><span class="pre">cg.ReplayPath()</span></code></a>, and <a class="reference internal" href="appendix.html#circleguard.circleguard.Circleguard.ReplayString" title="circleguard.circleguard.Circleguard.ReplayString"><code class="xref py py-func docutils literal notranslate"><span class="pre">cg.ReplayString()</span></code></a> to create a loaded <a class="reference internal" href="appendix.html#circleguard.loadables.Replay" title="circleguard.loadables.Replay"><code class="xref py py-class docutils literal notranslate"><span class="pre">Replay</span></code></a>:</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="n">r</span> <span class="o">=</span> <span class="n">cg</span><span class="o">.</span><span class="n">ReplayMap</span><span class="p">(</span><span class="mi">221777</span><span class="p">,</span> <span class="mi">4196808</span><span class="p">)</span>
+<span class="nb">print</span><span class="p">(</span><span class="n">r</span><span class="o">.</span><span class="n">loaded</span><span class="p">)</span> <span class="c1"># True</span>
+<span class="c1"># similarly for other replays</span>
+<span class="n">r2</span> <span class="o">=</span> <span class="n">cg</span><span class="o">.</span><span class="n">ReplayID</span><span class="p">(</span><span class="mi">2177560145</span><span class="p">)</span>
+<span class="n">r3</span> <span class="o">=</span> <span class="n">cg</span><span class="o">.</span><span class="n">ReplayPath</span><span class="p">(</span><span class="s2">"/path/to/your/osr.osr"</span><span class="p">)</span>
 </pre></div>
 </div>
-<p>Each of these methods takes the exact same arguments as instantiating the relevant <a class="reference internal" href="appendix.html#circleguard.loadables.ReplayContainer" title="circleguard.loadables.ReplayContainer"><code class="xref py py-class docutils literal notranslate"><span class="pre">ReplayContainer</span></code></a> normally.</p>
+<p>Similarly, it is common to info-load a <a class="reference internal" href="appendix.html#circleguard.loadables.ReplayContainer" title="circleguard.loadables.ReplayContainer"><code class="xref py py-class docutils literal notranslate"><span class="pre">ReplayContainer</span></code></a> it immediately after creating it. We provide analogous
+convenience methods <a class="reference internal" href="appendix.html#circleguard.circleguard.Circleguard.Map" title="circleguard.circleguard.Circleguard.Map"><code class="xref py py-func docutils literal notranslate"><span class="pre">cg.Map()</span></code></a>, <a class="reference internal" href="appendix.html#circleguard.circleguard.Circleguard.User" title="circleguard.circleguard.Circleguard.User"><code class="xref py py-func docutils literal notranslate"><span class="pre">cg.User()</span></code></a>, and <a class="reference internal" href="appendix.html#circleguard.circleguard.Circleguard.MapUser" title="circleguard.circleguard.Circleguard.MapUser"><code class="xref py py-func docutils literal notranslate"><span class="pre">cg.MapUser()</span></code></a> to create an info-loaded <a class="reference internal" href="appendix.html#circleguard.loadables.ReplayContainer" title="circleguard.loadables.ReplayContainer"><code class="xref py py-class docutils literal notranslate"><span class="pre">ReplayContainer</span></code></a>:</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="n">m</span> <span class="o">=</span> <span class="n">cg</span><span class="o">.</span><span class="n">Map</span><span class="p">(</span><span class="mi">221777</span><span class="p">,</span> <span class="s2">"1-50"</span><span class="p">)</span>
+<span class="nb">print</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">m</span><span class="p">))</span> <span class="c1"># 50</span>
+<span class="c1"># similarly for other replay containers</span>
+<span class="n">u</span> <span class="o">=</span> <span class="n">cg</span><span class="o">.</span><span class="n">User</span><span class="p">(</span><span class="mi">124493</span><span class="p">,</span> <span class="s2">"1-2"</span><span class="p">)</span>
+<span class="n">mu</span> <span class="o">=</span> <span class="n">cg</span><span class="o">.</span><span class="n">MapUser</span><span class="p">(</span><span class="mi">124493</span><span class="p">,</span> <span class="mi">129891</span><span class="p">)</span>
+</pre></div>
+</div>
+<p>Each of these methods takes the exact same arguments as instantiating the relevant <a class="reference internal" href="appendix.html#circleguard.loadables.Replay" title="circleguard.loadables.Replay"><code class="xref py py-class docutils literal notranslate"><span class="pre">Replay</span></code></a> or <a class="reference internal" href="appendix.html#circleguard.loadables.ReplayContainer" title="circleguard.loadables.ReplayContainer"><code class="xref py py-class docutils literal notranslate"><span class="pre">ReplayContainer</span></code></a> normally.</p>
+<p>Note that we do not currently provide convenience methods to create a loaded <a class="reference internal" href="appendix.html#circleguard.loadables.ReplayContainer" title="circleguard.loadables.ReplayContainer"><code class="xref py py-class docutils literal notranslate"><span class="pre">ReplayContainer</span></code></a>, only info-loaded ones.</p>
 </div>
 <div class="section" id="checking-state">
 <h2>Checking State<a class="headerlink" href="#checking-state" title="Permalink to this headline">¶</a></h2>
@@ -327,7 +332,7 @@ methods to create info loaded <a class="reference internal" href="appendix.html#
                   <span>Previous</span>
                 </div>
                 
-                <div class="title"><code class="xref py py-class docutils literal notranslate"><span class="pre">ReplayContainer</span></code>s</div>
+                <div class="title">Replay Containers</div>
                 
               </div>
             </a>
@@ -356,9 +361,10 @@ methods to create info loaded <a class="reference internal" href="appendix.html#
           <div class="toc-tree">
             <ul>
 <li><a class="reference internal" href="#">Loading</a><ul>
-<li><a class="reference internal" href="#replays"><code class="xref py py-class docutils literal notranslate"><span class="pre">Replay</span></code>s</a></li>
-<li><a class="reference internal" href="#replaycontainers"><code class="xref py py-class docutils literal notranslate"><span class="pre">ReplayContainer</span></code>s</a></li>
-<li><a class="reference internal" href="#creating-info-loaded-replaycontainers">Creating Info Loaded <code class="xref py py-class docutils literal notranslate"><span class="pre">ReplayContainer</span></code>s</a></li>
+<li><a class="reference internal" href="#loading-a-replay">Loading a Replay</a></li>
+<li><a class="reference internal" href="#implicit-loading">Implicit Loading</a></li>
+<li><a class="reference internal" href="#info-loading">Info Loading</a></li>
+<li><a class="reference internal" href="#creating-loaded-replays-or-replaycontainers">Creating Loaded Replays or ReplayContainers</a></li>
 <li><a class="reference internal" href="#checking-state">Checking State</a></li>
 </ul>
 </li>
