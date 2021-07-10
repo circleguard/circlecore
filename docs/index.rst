@@ -65,6 +65,7 @@ Links
     replay-containers
     loading
     caching
+    advanced-usage
 
 .. toctree::
     :caption: Contributing

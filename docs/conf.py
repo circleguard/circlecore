@@ -96,6 +96,12 @@ rst_prolog = """
 .. |Judgment| replace:: :class:`~circleguard.investigator.Judgment`
 
 .. |Span| replace:: :class:`~circleguard.span.Span`
+.. |Loader| replace:: :class:`~circleguard.loader.Loader`
+
+.. |convert_statistic| replace:: :func:`~circleguard.utils.convert_statistic`
+.. |fuzzy_mods| replace:: :func:`~circleguard.utils.fuzzy_mods`
+.. |replay_pairs| replace:: :func:`~circleguard.utils.replay_pairs`
+.. |order| replace:: :func:`~circleguard.utils.order`
 
 .. |library| replace:: :class:`slider.Library <slider.library.Library>`
 .. |beatmap| replace:: :class:`slider.Beatmap <slider.beatmap.Beatmap>`
