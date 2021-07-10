@@ -495,8 +495,23 @@ class JudgmentType(Enum):
     Hit50 = auto()
     Miss = auto()
 
-
 class Judgment:
+    """
+    A judgment on a hitobject. A "judgment" is either a hit or a miss, with
+    a hit being further classified as a 300, 100, or 50.
+
+    Parameters
+    ----------
+    hitobject: :class:`slider.beatmap.HitObject`
+        The hitobject being judged. This is converted to a
+        :class:`circleguard.hitobjects.Hitobject`.
+    replay: :class:`circleguard.loadables.Replay`
+        The replay this judgment was made on.
+    beatmap: :class:`slider.beatmap.Beatmap`
+        The beatmap this judgment was made on.
+    type: :class:`JudgmentType`
+        The type of this judgment (either Hit300, Hit100, or Hit50, or Miss).
+    """
     def __init__(self, hitobject, replay, beatmap, type_):
         # TODO remove `already_converted=True` when
         # https://github.com/llllllllll/slider/issues/80 is fixed
@@ -505,15 +520,15 @@ class Judgment:
         self.type = type_
 
 class Miss(Judgment):
+    """
+    A miss on a hitobject when a replay is played against a beatmap.
+    """
     def __init__(self, hitobject, replay, beatmap):
         super().__init__(hitobject, replay, beatmap, JudgmentType.Miss)
 
 class Hit(Judgment):
     """
-    # TODO: update this documentation
-    A hit on a hitobject when a replay is played against a beatmap. In osu!lazer
-    terms, this would be a Judgement, though we do not count misses as a ``Hit``
-    while lazer does count them as judgements.
+    A hit on a hitobject when a replay is played against a beatmap.
 
     Parameters
     ----------
@@ -529,7 +544,7 @@ class Hit(Judgment):
     beatmap: :class:`slider.beatmap.Beatmap`
         The beatmap this hit was made on.
     type: :class:`JudgmentType`
-        The type of this hit (either 50, 100, or 300).
+        The type of this hit (either Hit300, Hit100, or Hit50).
     """
     def __init__(self, hitobject, t, xy, replay, beatmap, type_):
         super().__init__(hitobject, replay, beatmap, type_)
