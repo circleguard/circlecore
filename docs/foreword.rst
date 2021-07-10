@@ -5,6 +5,6 @@ The following pages serve as an introduction to circleguard. Although they would
 The source code is rather well documented, and you should refer to it whenever necessary. You can also browse the documentation
 for all classes, methods, etc by visiting the :doc:`../appendix`.
 
-You are also welcome to ask questions on our `discord <https://discord.gg/VNnkTjm>`_.
+You are also welcome to ask questions on the `discord <https://discord.gg/VNnkTjm>`_.
 
 To aid in readability, ``import`` statements have been ommitted from all example code blocks. Please supply your own.

@@ -87,6 +87,8 @@ Whenever you pass a |Replay| to a |Circleguard| method (|cg.snaps|, |cg.hits|, |
 implicitly loads that replay before calculating the relevant statistic. This means that you don't have to worry
 about loading a replay before passing it to a circleguard method.
 
+.. _info-loading:
+
 Info Loading
 ------------
 

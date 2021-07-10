@@ -97,5 +97,5 @@ Creating a list from the |ReplayContainer| (or alternatively calling |all_replay
     print(list(m))
     print(m.all_replays())
 
-We've used a method above, |cg.load_info|, that we haven't introduced yet. We will cover this method on the very next page,
-under `<Info Loading>`_.
+We've used a method above, |cg.load_info|, that we haven't introduced yet. We will cover this method on the very next page
+(under :ref:`info-loading`).

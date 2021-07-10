@@ -1,8 +1,8 @@
 Contributing
 ============
 
-If you'd like to donate some time to improving circleguard, pull requests are more than welcome!
+If you'd like to contribute to circleguard, pull requests are always welcome!
 
-We try to keep track of issues through the `circlecore github <https://github.com/circleguard/circlecore/issues>`_,
-but aren't always the most rigorous about it. The best way to find out what you can help with is to ask on
-`our discord <https://discord.gg/VNnkTjm>`_. We don't bite, I promise :)
+I do a decent job of keep track of issues through the `circlecore github <https://github.com/circleguard/circlecore/issues>`_;
+find one that interests you and give it a shot. You can also always ask what you can help with on
+`the discord <https://discord.gg/VNnkTjm>`_. I don't bite, I promise :)
