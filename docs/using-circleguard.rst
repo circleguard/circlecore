@@ -129,6 +129,10 @@ The locations in a replay where a hitobject is hit. This is equivalent to callin
     r = ReplayMap(221777, 2757689)
     print(cg.hits(r)) # a list with lots of elements
 
+You can also get only the hits which are within a certain number of pixels to the edge of the hitobject:
+
+    print(cg.hits(r, within=10)) # a list with fewer elements
+
 This returns a list of |Hit| objects. See the |Hit| documentation for details.
 
 Other Replay Classes
