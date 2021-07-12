@@ -4,7 +4,7 @@ from tempfile import TemporaryDirectory
 from typing import Iterable, Union, Tuple
 import weakref
 
-from slider import Library
+from slider import Library, Beatmap
 
 from circleguard.loader import Loader
 from circleguard.comparer import Comparer
@@ -695,7 +695,18 @@ class Circleguard:
         self.load(r)
         return r
 
-    def beatmap(self, replay):
+    def beatmap(self, replay) -> Beatmap:
+        """
+        The beatmap the replay was played on, or ``None`` if the replay doesn't
+        know what beatmap it was played on.
+
+        Returns
+        -------
+        :class:`slider.beatmap.Beatmap`
+            The beatmap this replay was played on.
+        None
+            If the replay doesn't know what beatmap it was played on.
+        """
         self.load(replay)
         return replay.beatmap(self.library)
 
