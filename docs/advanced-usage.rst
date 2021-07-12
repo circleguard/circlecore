@@ -187,6 +187,6 @@ replay container would return the union of those sets in this method.
 .. note::
 
     If the above instructions for subclassing |Replay| and |ReplayContainer| are unclear, you should look at the
-    source code for examples. Every default |Replay| and |ReplayContainer| is well abstracted and documented in the source code,
-    and may be a clearer guide to follow than the above examples. See
+    source code for examples. Every default |Replay| and |ReplayContainer| subclass is well abstracted and documented in the source
+    code, and may be a clearer guide to follow than the above examples. See
     `<https://github.com/circleguard/circlecore/blob/master/circleguard/loadables.py>`__ for the file containing these classes.
