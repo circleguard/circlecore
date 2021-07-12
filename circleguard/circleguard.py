@@ -13,7 +13,6 @@ from circleguard.utils import convert_statistic, check_param
 from circleguard.loadables import (Map, User, MapUser, ReplayMap, ReplayID,
     ReplayPath, ReplayString)
 from circleguard.mod import Mod
-# from circleguard.frametime_graph import FrametimeGraph
 
 
 class Circleguard:
