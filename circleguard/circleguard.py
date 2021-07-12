@@ -7,8 +7,7 @@ import weakref
 from slider import Library, Beatmap
 
 from circleguard.loader import Loader
-from circleguard.comparer import Comparer
-from circleguard.investigator import Investigator, Judgment, Snap
+from circleguard.investigations import Investigations, Judgment, Snap
 from circleguard.cacher import Cacher
 from circleguard.utils import convert_statistic, check_param
 from circleguard.loadables import (Map, User, MapUser, ReplayMap, ReplayID,
@@ -181,7 +180,7 @@ class Circleguard:
 
         self.load(replay1)
         self.load(replay2)
-        return Comparer.similarity(replay1, replay2, method, num_chunks,
+        return Investigations.similarity(replay1, replay2, method, num_chunks,
             mods_unknown)
 
 
@@ -216,7 +215,7 @@ class Circleguard:
             raise ValueError("The ur of a replay that does not know what map "
                 "it was set on cannot be calculated")
 
-        ur = Investigator.ur(replay, beatmap)
+        ur = Investigations.ur(replay, beatmap)
         if cv:
             ur = convert_statistic(ur, replay.mods, to="cv")
 
@@ -277,7 +276,7 @@ class Circleguard:
                     "you can pass ``only_on_hitobjs=False`` to avoid requiring "
                     "a beatmap.")
 
-        return Investigator.snaps(replay, max_angle, min_distance, beatmap_)
+        return Investigations.snaps(replay, max_angle, min_distance, beatmap_)
 
 
     def frametime(self, replay, cv=True, mods_unknown="raise") -> float:
@@ -314,7 +313,7 @@ class Circleguard:
         check_param(mods_unknown, ["raise", "dt", "nm", "ht"])
 
         self.load(replay)
-        frametime = Investigator.frametime(replay)
+        frametime = Investigations.frametime(replay)
         if cv:
             if replay.mods:
                 mods = replay.mods
@@ -370,7 +369,7 @@ class Circleguard:
             second and third frame, etc.
         """
         self.load(replay)
-        frametimes = Investigator.frametimes(replay)
+        frametimes = Investigations.frametimes(replay)
         if cv:
             if replay.mods:
                 mods = replay.mods
@@ -426,7 +425,7 @@ class Circleguard:
             raise ValueError("The hits of a replay that does not know what map "
                 "it was set on cannot be calculated.")
 
-        hits = Investigator.hits(replay, beatmap)
+        hits = Investigations.hits(replay, beatmap)
 
         if not within:
             return hits
@@ -463,7 +462,7 @@ class Circleguard:
             raise ValueError("The judgments of a replay that does not know "
                 "what map it was set on cannot be calculated.")
 
-        return Investigator.judgments(replay, beatmap)
+        return Investigations.judgments(replay, beatmap)
 
     def frametime_graph(self, replay, cv=True, figure=None,
         show_expected_frametime=True):

@@ -2,6 +2,7 @@ from datetime import timedelta
 from enum import Enum, auto
 
 import numpy as np
+from scipy import signal
 from slider.beatmap import Circle, Slider, Spinner as SliderSpinner
 
 from circleguard.mod import Mod
@@ -11,7 +12,7 @@ from circleguard.game_version import GameVersion
 from circleguard.hitobjects import Hitobject, Spinner
 
 
-class Investigator:
+class Investigations:
     # https://osu.ppy.sh/home/changelog/stable40/20190207.2
     VERSION_SLIDERBUG_FIXED_STABLE = GameVersion(20190207, concrete=True)
     # https://osu.ppy.sh/home/changelog/cuttingedge/20190111
@@ -31,7 +32,7 @@ class Investigator:
         """
         # TODO cache hits in replay so we don't recalculate hits for both ur
         # and hits / judgments?
-        hits = Investigator.hits(replay, beatmap)
+        hits = Investigations.hits(replay, beatmap)
         diffs = [hit.error() for hit in hits]
         return np.std(diffs) * 10
 
@@ -41,7 +42,7 @@ class Investigator:
         An alternative snap detection algorithm using relative cross products
         of vectors.
         """
-        t, xy = Investigator.remove_duplicate_t(replay.t, replay.xy)
+        t, xy = Investigations.remove_duplicate_t(replay.t, replay.xy)
         # label three consecutive points (a, b, c) and the vectors between them
         # (ab, bc, ac)
         ab = xy[1:-1] - xy[:-2]
@@ -86,7 +87,7 @@ class Investigator:
         # sometimes get detected (falesly) as aim correction.
         # TODO Worth looking into a bit more to see if we can avoid it without
         # removing the frames entirely.
-        t, xy = Investigator.remove_duplicate_t(replay.t, replay.xy)
+        t, xy = Investigations.remove_duplicate_t(replay.t, replay.xy)
         t = t[1:-1]
 
         # label three consecutive points (a b c) and the vectors between them
@@ -221,7 +222,7 @@ class Investigator:
         -----
         Median is used instead of mean to lessen the effect of outliers.
         """
-        frametimes = Investigator.frametimes(replay)
+        frametimes = Investigations.frametimes(replay)
         return np.median(frametimes)
 
     @staticmethod
@@ -234,9 +235,10 @@ class Investigator:
         replay: :class:`~.Replay`
             The replay to get the frametimes of.
         """
-        # replay.t is cumsum so convert it back to "time since previous frame"
         return np.diff(replay.t)
-
+        # replay.t is cumsum so convert it back to "time since previous frame"
+        frametimes = np.diff(replay.t)
+        keydown_frames = Investigations.keydown_frames(replay)
 
     @staticmethod
     def keydown_frames(replay):
@@ -279,7 +281,7 @@ class Investigator:
 
     @staticmethod
     def hits(replay, beatmap):
-        judgment = Investigator.judgments(replay, beatmap)
+        judgment = Investigations.judgments(replay, beatmap)
         judgments = [j for j in judgment if isinstance(j, Hit)]
         return judgments
 
@@ -317,9 +319,9 @@ class Investigator:
             # This is wrong for cutting edge replays between those two versions
             # which do not have a concrete version, but that's better than being
             # wrong for stable replays between those two versions.
-            sliderbug_fixed = game_version >= Investigator.VERSION_SLIDERBUG_FIXED_STABLE
+            sliderbug_fixed = game_version >= Investigations.VERSION_SLIDERBUG_FIXED_STABLE
         else:
-            sliderbug_fixed = game_version >= Investigator.VERSION_SLIDERBUG_FIXED_CUTTING_EDGE
+            sliderbug_fixed = game_version >= Investigations.VERSION_SLIDERBUG_FIXED_CUTTING_EDGE
 
         easy = Mod.EZ in replay.mods
         hard_rock = Mod.HR in replay.mods
@@ -327,8 +329,7 @@ class Investigator:
 
         OD = beatmap.od(easy=easy, hard_rock=hard_rock)
         CS = beatmap.cs(easy=easy, hard_rock=hard_rock)
-        keydowns = Investigator.keydown_frames(replay)
-
+        keydowns = Investigations.keydown_frames(replay)
 
         judgments = []
 
@@ -449,13 +450,170 @@ class Investigator:
 
         return judgments
 
-    # TODO (some) code duplication with this method and a similar one in
-    # ``Comparer``. Consolidate and move this method to utils?
+    @staticmethod
+    def similarity(replay1, replay2, method, num_chunks, mods_unknown):
+        """
+        Compares two :class:`~.replay.Replay`\s.
+
+        Parameters
+        ----------
+        replay1: :class:`~.replay.Replay`
+            The first replay to compare.
+        replay2: :class:`~.replay.Replay`
+            The second replay to compare.
+
+        Returns
+        -------
+        :class:`~.result.ComparisonResult`
+            The result of comparing ``replay1`` to ``replay2``.
+        """
+        # perform preprocessing here as an optimization, so it is not repeated
+        # within different comparison algorithms. This will likely need to
+        # become more advanced if we add more (and different) algorithms.
+
+        # interpolation breaks when multiple frames have the same time values
+        # (which occurs semi frequently in replays). So filter them out
+        t1, xy1 = Investigations.remove_duplicate_t(replay1.t, replay1.xy)
+        t2, xy2 = Investigations.remove_duplicate_t(replay2.t, replay2.xy)
+        xy1, xy2 = Investigations.interpolate(t1, t2, xy1, xy2)
+        xy1, xy2 = Investigations.clean(xy1, xy2)
+
+        # kind of a dirty function with all the switching between similarity
+        # and correlation, but I'm not sure I can make it any cleaner
+
+        if not replay1.mods or not replay2.mods:
+            # first compute with no modifications
+            if method == "similarity":
+                sim1 = Investigations.compute_similarity(xy1, xy2)
+            if method == "correlation":
+                sim1 = Investigations.compute_correlation(xy1, xy2, num_chunks)
+
+            # then compute with hr applied to ``replay1``
+            xy1[:, 1] = 384 - xy1[:, 1]
+
+            if method == "similarity":
+                sim2 = Investigations.compute_similarity(xy1, xy2)
+            if method == "correlation":
+                sim2 = Investigations.compute_correlation(xy1, xy2, num_chunks)
+
+            if mods_unknown == "best":
+                if method == "similarity":
+                    return min(sim1, sim2)
+                if method == "correlation":
+                    return max(sim1, sim2)
+
+            if mods_unknown == "both":
+                return (sim1, sim2)
+
+        # flip if one but not both has HR
+        if (Mod.HR in replay1.mods) ^ (Mod.HR in replay2.mods):
+            xy1[:, 1] = 384 - xy1[:, 1]
+
+        if method == "similarity":
+            return Investigations.compute_similarity(xy1, xy2)
+        if method == "correlation":
+            return Investigations.compute_correlation(xy1, xy2, num_chunks)
+
+    @staticmethod
+    def compute_similarity(xy1, xy2):
+        """
+        Calculates the average distance between two sets of cursor position
+        data.
+
+        Parameters
+        ----------
+        replay1: ndarray
+            The first xy data to compare.
+        replay2: ndarray
+            The second xy data to compare.
+
+        Returns
+        -------
+        float
+            The mean distance between the two datasets.
+        """
+        # euclidean distance
+        distance = xy1 - xy2
+        distance = (distance ** 2).sum(axis=1) ** 0.5
+        return distance.mean()
+
+    @staticmethod
+    def compute_correlation(xy1, xy2, num_chunks):
+        xy1 = xy1.T
+        xy2 = xy2.T
+
+        # section into chunks, used to reduce the effect of outlier data
+        # (eg. cheater inserts replay data during breaks that places them
+        # far away from the actual replay)
+        horizontal_length = xy1.shape[1] - xy1.shape[1] % num_chunks
+        xy1_parts = np.hsplit(xy1[:,:horizontal_length], num_chunks)
+        xy2_parts = np.hsplit(xy2[:,:horizontal_length], num_chunks)
+        correlations = []
+        for (xy1_part, xy2_part) in zip(xy1_parts, xy2_parts):
+            xy1_part -= np.mean(xy1_part)
+            xy2_part -= np.mean(xy2_part)
+            norm = np.std(xy1_part) * np.std(xy2_part) * xy1_part.size
+            # matrix of correlations between xy1 and xy2 at different time
+            # shifts
+            cross_corr_matrix = signal.correlate(xy1_part, xy2_part) / norm
+
+            # pick the maximum correlation, which will probably be at 0
+            # time shift, unless the replays have been intentionally shifted in
+            # time
+            max_corr = np.max(cross_corr_matrix)
+            correlations.append(max_corr)
+        # take the median of all the chunks to reduce the effect of outliers
+        return np.median(correlations)
+
+
     @staticmethod
     def remove_duplicate_t(t, data):
         t, t_sort = np.unique(t, return_index=True)
         data = data[t_sort]
         return (t, data)
+
+    @staticmethod
+    def interpolate(t1, t2, xy1, xy2):
+        """
+        Interpolates the xy data of the shorter replay to the longer replay.
+
+        Returns
+        -------
+        (ndarray, ndarray)
+            The interpolated replay data of the first and second replay
+            respectively.
+
+        Notes
+        -----
+        The length of the two returned arrays will be equal. This is a
+        (desirous) side effect of interpolating.
+        """
+        if len(t1) > len(t2):
+            xy2x = np.interp(t1, t2, xy2[:, 0])
+            xy2y = np.interp(t1, t2, xy2[:, 1])
+            xy2 = np.array([xy2x, xy2y]).T
+        else:
+            xy1x = np.interp(t2, t1, xy1[:, 0])
+            xy1y = np.interp(t2, t1, xy1[:, 1])
+            xy1 = np.array([xy1x, xy1y]).T
+
+        return (xy1, xy2)
+
+    @staticmethod
+    def clean(xy1, xy2):
+        """
+        Cleans the given xy data to only include indices where both coordinates
+        are inside the osu gameplay window (a 512 by 384 osu!pixel window).
+
+        Warnings
+        --------
+        The length of the two passed arrays must be equal.
+        """
+        valid = np.all(([0, 0] <= xy1) & (xy1 <= [512, 384]), axis=1) & \
+            np.all(([0, 0] <= xy2) & (xy2 <= [512, 384]), axis=1)
+        xy1 = xy1[valid]
+        xy2 = xy2[valid]
+        return (xy1, xy2)
 
 
 class Snap:
