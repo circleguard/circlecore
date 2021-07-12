@@ -1,8 +1,8 @@
 Advanced Usage
 ==============
 
-This is a hodgepodge of circleguard features not mentioned in other parts of the documentation. This page will
-be written at a high level and is intended for developers who know what they are doing, and are just looking for a
+This is a hodgepodge of circleguard features not mentioned in other parts of the documentation. This page is
+written at a high level and is intended for developers who know what they are doing, and are just looking for a
 page listing all the things they *can* do, or are looking to learn more about circleguard's internals.
 
 Retrieve a Beatmap
