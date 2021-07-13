@@ -256,7 +256,7 @@ class Investigations:
             if invalid(i - 1) or invalid(i) or invalid(i + 1):
                 continue
 
-            # remove frames outside the playarea (plus a buuffer)
+            # remove frames outside the playarea (plus a buffer)
             xy = replay.xy[i]
             if np.any((xy <= [0 - BUF, 0 - BUF]) | (xy >= [512 + BUF, 384 + BUF])):
                 continue
