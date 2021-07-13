@@ -1,5 +1,6 @@
 from datetime import timedelta
 from enum import Enum, auto
+from collections import Counter
 
 import numpy as np
 from scipy import signal
@@ -223,10 +224,15 @@ class Investigations:
         Median is used instead of mean to lessen the effect of outliers.
         """
         frametimes = Investigations.frametimes(replay)
+
         return np.median(frametimes)
 
     @staticmethod
     def frametimes(replay):
+        return np.diff(replay.t)
+
+    @staticmethod
+    def frametimes2(replay):
         """
         Returns the time between each two consecutive frames in ``replay``.
 
@@ -235,10 +241,57 @@ class Investigations:
         replay: :class:`~.Replay`
             The replay to get the frametimes of.
         """
-        return np.diff(replay.t)
-        # replay.t is cumsum so convert it back to "time since previous frame"
-        frametimes = np.diff(replay.t)
-        keydown_frames = Investigations.keydown_frames(replay)
+        BUF = 50
+        FREQ_RANGE = 50
+
+        print(f"num frames: {len(replay.k)}")
+
+        def invalid(i):
+            return replay.k[i] != replay.k[i - 1]
+
+        frametimes = []
+
+        for i, k in enumerate(replay.k[2:-2], 2):
+            # remove frames surrounding keyup and keydown frames
+            if invalid(i - 1) or invalid(i) or invalid(i + 1):
+                continue
+
+            # remove frames outside the playarea (plus a buuffer)
+            xy = replay.xy[i]
+            if np.any((xy <= [0 - BUF, 0 - BUF]) | (xy >= [512 + BUF, 384 + BUF])):
+                continue
+
+            frametime = replay.t[i] - replay.t[i - 1]
+            # deal with negative (or 0 ms) frametime issues, by ignoring them
+            if frametime <= 0:
+                continue
+
+            frametime = (i, frametime)
+            frametimes.append(frametime)
+
+        print(f"num valid frames: {len(frametimes)}")
+
+        frametimes_filtered = []
+        for i in range(len(frametimes) // 2):
+            i1 = i * 2
+            i2 = (i * 2) + 1
+            frametime_i = frametimes[i1][0]
+            frametime = frametimes[i1][1]
+            next_frametime_i = frametimes[i2][0]
+            next_frametime = frametimes[i2][1]
+            # ignore frames that aren't consecutive
+            if frametime_i + 1 != next_frametime_i:
+                continue
+            frametimes_filtered.append(frametime + next_frametime)
+
+        print(f"num frame pairs: {len(frametimes_filtered)}")
+
+        mode = Counter(frametimes_filtered).most_common(1)[0][0]
+
+        frametimes_filtered = [f[1] for f in frametimes if (mode - FREQ_RANGE) <= f[1] <= (mode + FREQ_RANGE)]
+        return (sum(frametimes_filtered) / 2) / len(frametimes_filtered)
+
+
 
     @staticmethod
     def keydown_frames(replay):
