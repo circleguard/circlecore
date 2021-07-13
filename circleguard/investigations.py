@@ -242,7 +242,7 @@ class Investigations:
             The replay to get the frametimes of.
         """
         BUF = 50
-        FREQ_RANGE = 50
+        FREQ_RANGE = 6
 
         print(f"num frames: {len(replay.k)}")
 
