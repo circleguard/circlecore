@@ -272,19 +272,22 @@ class Investigations:
         print(f"num valid frames: {len(frametimes)}")
 
         frametimes_filtered = []
-        for i in range(len(frametimes) // 2):
-            i1 = i * 2
-            i2 = (i * 2) + 1
-            frametime_i = frametimes[i1][0]
-            frametime = frametimes[i1][1]
-            next_frametime_i = frametimes[i2][0]
-            next_frametime = frametimes[i2][1]
+        i = 0
+        while True:
+            i += 1
+            if i >= len(frametimes):
+                break
+            prev_frametime_i = frametimes[i - 1][0]
+            prev_frametime = frametimes[i - 1][1]
+            frametime_i = frametimes[i][0]
+            frametime = frametimes[i][1]
             # ignore frames that aren't consecutive
-            if frametime_i + 1 != next_frametime_i:
+            if prev_frametime_i + 1 != frametime_i:
                 continue
-            frametimes_filtered.append(frametime + next_frametime)
+            i += 1
+            frametimes_filtered.append(prev_frametime + frametime)
 
-        print(f"num filtered frames: {len(frametimes_filtered)}")
+        print(f"num filtered frame pairs: {len(frametimes_filtered)}")
 
         mode = Counter(frametimes_filtered).most_common(1)[0][0]
 
