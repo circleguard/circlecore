@@ -284,11 +284,12 @@ class Investigations:
                 continue
             frametimes_filtered.append(frametime + next_frametime)
 
-        print(f"num frame pairs: {len(frametimes_filtered)}")
+        print(f"num filtered frames: {len(frametimes_filtered)}")
 
         mode = Counter(frametimes_filtered).most_common(1)[0][0]
 
-        frametimes_filtered = [f[1] for f in frametimes if (mode - FREQ_RANGE) <= f[1] <= (mode + FREQ_RANGE)]
+        frametimes_filtered = [f for f in frametimes_filtered if (mode - FREQ_RANGE) <= f <= (mode + FREQ_RANGE)]
+        print(f"num final replay pairs: {len(frametimes_filtered)}")
         return (sum(frametimes_filtered) / 2) / len(frametimes_filtered)
 
 
