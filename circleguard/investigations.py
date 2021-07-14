@@ -38,19 +38,6 @@ class Investigations:
         return np.std(diffs) * 10
 
     @staticmethod
-    def snaps_cross(replay):
-        """
-        An alternative snap detection algorithm using relative cross products
-        of vectors.
-        """
-        t, xy = Investigations.remove_duplicate_t(replay.t, replay.xy)
-        # label three consecutive points (a, b, c) and the vectors between them
-        # (ab, bc, ac)
-        ab = xy[1:-1] - xy[:-2]
-        bc = xy[2:] - xy[1:-1]
-        ac = xy[2:] - xy[:-2]
-
-    @staticmethod
     def snaps(replay, max_angle, min_distance, beatmap):
         """
         Calculates the angle between each set of three points (a,b,c) and finds
