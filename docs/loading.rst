@@ -163,7 +163,7 @@ Creating a |Replay| and then loading it immediately afterwards is a common opera
     r3 = cg.ReplayPath("/path/to/your/osr.osr")
 
 Similarly, it is common to info-load a |ReplayContainer| immediately after creating it. We provide analogous
-convenience methods |cg.Map|, |cg.User|, and |cg.MapUser| to create an info-loaded |ReplayContainer|:
+convenience methods |cg.Map|, |cg.User|, |cg.MapUser|, and |cg.ReplayDir| to create an info-loaded |ReplayContainer|:
 
 .. code-block:: python
 

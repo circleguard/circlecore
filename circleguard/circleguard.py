@@ -12,7 +12,7 @@ from circleguard.judgment import Judgment
 from circleguard.cacher import Cacher
 from circleguard.utils import convert_statistic, check_param
 from circleguard.loadables import (Map, User, MapUser, ReplayMap, ReplayID,
-    ReplayPath, ReplayString)
+    ReplayPath, ReplayString, ReplayDir)
 from circleguard.mod import Mod
 
 
@@ -41,6 +41,8 @@ class Circleguard:
       loads its info.
     * :meth:`~.MapUser` - creates a new :class:`~circleguard.loadables.MapUser`
       and loads its info.
+    * :meth:`~.ReplayDir` - creates a new
+      :class:`~circleguard.loadables.ReplayDir` and loads its info.
 
     Parameters
     ----------
@@ -558,16 +560,14 @@ class Circleguard:
         be info loaded before it can be iterated over, so this function does
         that info loading for you.
 
-        >>> # usage without this function (bad)
-        >>> cg = Circleguard("key")
-        >>> m = Map(221777, "1-2")
-        >>> cg.load_info(m)
+        >>> # good
+        >>> m = cg.Map(221777, "1-2")
         >>> for replay in m:
         >>>     ...
-        >>>
-        >>> # usage with this function (good)
-        >>> cg = Circleguard("key")
-        >>> m = cg.Map(221777, "1-2")
+
+        >>> # bad
+        >>> m = Map(221777, "1-2")
+        >>> cg.load_info(m)
         >>> for replay in m:
         >>>     ...
         """
@@ -589,16 +589,14 @@ class Circleguard:
         be info loaded before it can be iterated over, so this function does
         that info loading for you.
 
-        >>> # usage without this function (bad)
-        >>> cg = Circleguard("key")
-        >>> u = User(124493, "1-2")
-        >>> cg.load_info(u)
+        >>> # good
+        >>> u = cg.User(124493, "1-2")
         >>> for replay in u:
         >>>     ...
-        >>>
-        >>> # usage with this function (good)
-        >>> cg = Circleguard("key")
-        >>> u = cg.User(124493, "1-2")
+
+        >>> # bad
+        >>> u = User(124493, "1-2")
+        >>> cg.load_info(u)
         >>> for replay in u:
         >>>     ...
         """
@@ -620,22 +618,49 @@ class Circleguard:
         must be info loaded before it can be iterated over, so this function
         does that info loading for you.
 
-        >>> # usage without this function (bad)
-        >>> cg = Circleguard("key")
-        >>> mu = MapUser(124493, 129891)
-        >>> cg.load_info(mu)
+        >>> # good
+        >>> mu = cg.MapUser(124493, 129891)
         >>> for replay in mu:
         >>>     ...
-        >>>
-        >>> # usage with this function (good)
-        >>> cg = Circleguard("key")
-        >>> mu = cg.MapUser(124493, 129891)
+
+        >>> # bad
+        >>> mu = MapUser(124493, 129891)
+        >>> cg.load_info(mu)
         >>> for replay in mu:
         >>>     ...
         """
         mu = MapUser(map_id, user_id, span, cache, available_only)
         self.load_info(mu)
         return mu
+
+    def ReplayDir(self, path, cache=None) -> ReplayDir:
+        """
+        Returns a new, info-loaded :class:`~circleguard.loadables.ReplayDir`.
+
+        Notes
+        -----
+        This function is provided as a convenience for when you want to create a
+        ``ReplayDir`` and load its info immediately. A common occurrence in using
+        ``Circleguard`` is to want to instantiate a ``ReplayDir`` and immediately
+        iterate over it to operate on its replays. However, this ``ReplayDir``
+        must be info loaded before it can be iterated over, so this function
+        does that info loading for you.
+
+        >>> # bad
+        >>> r_dir = cg.ReplayDir("/Users/tybug/Desktop/replays")
+        >>> for replay in r_dir:
+        >>>     ...
+
+        >>> # good
+        >>> r_dir = ReplayDir("/Users/tybug/Desktop/replays")
+        >>> cg.load_info(r_dir)
+        >>> for replay in r_dir:
+        >>>     ...
+        """
+        r_dir = ReplayDir(path, cache)
+        self.load_info(r_dir)
+        return r_dir
+
 
     def ReplayMap(self, map_id, user_id, mods=None, cache=None, info=None) \
         -> ReplayMap:
