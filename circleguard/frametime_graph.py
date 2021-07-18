@@ -14,7 +14,7 @@ from circleguard.circleguard import KeylessCircleguard
 # use this class without installing matplotlib. Another file isn't the end of
 # the world.
 
-class FrametimeGraph():
+class FrametimeGraph:
     # for any frametimes larger than this, chuck them into a single bin.
     # matplotlib can't really handle that many bins otherwise
     MAX_FRAMETIME = 50
@@ -37,7 +37,8 @@ class FrametimeGraph():
         # oddities about the frametime graph which make it easier this way.
         frametimes = cg.frametimes(replay, cv=False)
 
-        self.figure.suptitle(f"({'cv' if cv else 'ucv'}) Frametime Histogram")
+        self.figure.suptitle(f"Frametimes for {replay.username} "
+            f"+{replay.mods.short_name()} on b/{replay.map_id}")
 
         self.max_frametime = max(frametimes)
         if self.max_frametime > self.MAX_FRAMETIME:

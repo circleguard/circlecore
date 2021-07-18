@@ -1,8 +1,8 @@
 Using Circleguard
 =================
 
-Now you know how to represent replays, but how do we start calculating statistics or other information about them?
-The answer is the |Circleguard| class.
+Now that we know how to represent replays, we can start operating on them. We will use the |Circleguard| class to do
+so. |Circleguard| is the main entry point for this library, alongside the replay classes.
 
 To instantiate |Circleguard|, you will need an api key. If you don't already have one, visit https://osu.ppy.sh/p/api/
 and enter ``Circleguard`` for ``App Name`` and ``https://github.com/circleguard/circlecore`` for ``App URL``.
@@ -14,97 +14,136 @@ Circleguard needs this key to retrieve replay data and user information, among o
     on the website, you may need to log in and wait 30 seconds before being
     able to access the api page through the above link.
 
-After you have your api key, circleguard instantion is easy:
+After you have your api key, instantiate circleguard as follows:
 
 .. code-block:: python
 
-    cg = Circleguard("key")
+    cg = Circleguard("your-api-key)
 
-Replace ``key`` in all codeblocks in this documentation with your api key.
+Whenever you see ``cg`` in any codeblocks in this documentation, it refers to this circleguard instance.
+We will omit this declaration from examples going forward to avoid duplicating it in every codeblock.
 
-|cg.similarity|
-~~~~~~~~~~~~~~~
+Similarity
+----------
 
-The similarity between two replays. Similarity is, roughly speaking, how
-far apart in pixels the replays are on average.
+|cg.similarity| returns the similarity between two replays. Roughly speaking, this how far apart in pixels the
+cursors in the replays are on average.
 
 .. code-block::
 
-    cg = Circleguard("key")
     r1 = ReplayMap(221777, 2757689)
     r2 = ReplayMap(221777, 3219026)
     print(cg.similarity(r1, r2)) # 19.310565461539074
 
-|cg.ur|
-~~~~~~~
+Unstable Rate
+-------------
 
-The unstable rate of the replay.
-
-.. code-block::
-
-    cg = Circleguard("key")
-    r = ReplayMap(1136506, 846038)
-    print(cg.ur(r)) # 75.45
-
-    # you can also get the unconverted unstable rate
-    print(cg.ur(r, cv=False)) # 113.18
-
-|cg.snaps|
-~~~~~~~~~~
-
-Any unusual snaps in the cursor movement of the replay.
+|cg.ur| returns the (converted) unstable rate of the replay.
 
 .. code-block:: python
 
-    cg = Circleguard("key")
+    r = ReplayMap(1136506, 846038)
+    print(cg.ur(r)) # 75.45
+
+You can also get the unconverted unstable rate:
+
+.. code-block:: python
+
+    print(cg.ur(r, cv=False)) # 113.18
+
+Snaps
+-----
+
+|cg.snaps| returns any unusual, jerky, snappy cursor movement in a replay.
+
+.. code-block:: python
+
     r = ReplayMap(1136506, 6451401)
     print(cg.snaps(r)) # [<circleguard.investigator.Snap>]
 
-    # you can adjust what counts as a "snap" by increasing
-    # or decreasing these parameters. See |cg.snap|'s
-    # documentation for details
+You can adjust what counts as "snap" with the ``max_angle`` and ``min_distance`` arguments. See the |cg.snaps|
+documentation for details.
+
+.. code-block:: python
+
     print(cg.snaps(r, max_angle=12, min_distance=6))
     # [<circleguard.investigator.Snap>, <circleguard.investigator.Snap>]
 
 This returns a list of |Snap| objects. See the |Snap| documentation for details.
 
-|cg.frametime|
-~~~~~~~~~~~~~~
+Frametime
+---------
 
-The average frametime of the replay. Frametime is defined as the time (in ms)
-between each frame and the frame after it.
+|cg.frametime| returns the average (converted) frametime of the replay. Frametime is defined as the time, in ms, between each frame and
+the frame after it. Typical frametime is ``16.66``. A low frametime is indicative of timewarp (though not necessarily proof of timewarp; see
+`<https://github.com/circleguard/circleguard/wiki/Frametime-Tutorial>`_).
 
 .. code-block:: python
 
-    cg = Circleguard("key")
     r = ReplayMap(1136506, 846038)
     print(cg.frametime(r)) # 15.33
 
-    # you can also get the unconverted frametime
-    print(cg.frametime(r, cv=False)) # 23.0
-
-|cg.hits|
-~~~~~~~~~
-
-The locations in a replay where a hitobject is hit.
+You can also get the unconverted frametime:
 
 .. code-block:: python
 
-    cg = Circleguard("key")
+    print(cg.frametime(r, cv=False)) # 23.0
+
+Frametimes
+----------
+
+|cg.frametimes| returns the list of (converted) frametimes in the replay. This is useful for performing more advanced analysis
+on a replay's frametime, beyond just its average frametime.
+
+.. code-block:: python
+
+    r = ReplayMap(1136506, 846038)
+    print(cg.frametimes(r)) # [16. 8.67 ... 16.67 16.67]
+
+You can also get the unconverted frametime:
+
+.. code-block:: python
+
+    print(cg.frametimes(r, cv=False)) # [24 13 ... 25 25]
+
+Judgments
+---------
+
+The locations in a replay where a hitobject is hit or missed. Judgments are marked as either misses, 50s, 100s, or 300s. See |cg.judgments|.
+
+.. code-block:: python
+
+    r = ReplayMap(221777, 2757689)
+    print(cg.judgments(r)) # a list with lots of elements
+
+This returns a list of |Judgment| objects. See its documentation for details.
+
+
+Hits
+----
+
+The locations in a replay where a hitobject is hit. This is equivalent to calling |cg.judgments| and filtering out misses. See |cg.hits|.
+
+.. code-block:: python
+
     r = ReplayMap(221777, 2757689)
     print(cg.hits(r)) # a list with lots of elements
 
-This returns a list of |Hit| objects. See the |Hit| documentation for details.
-
-Other Replay Subclasses
-~~~~~~~~~~~~~~~~~~~~~~~
-
-The examples above have been using |ReplayMap| as their example replay, but you can pass any |Replay| subclass
-to |Circleguard| methods:
+You can also get only the hits which are within a certain number of pixels to the edge of the hitobject:
 
 .. code-block:: python
 
-    cg = Circleguard("key")
+    print(cg.hits(r, within=10)) # a list with fewer elements
+
+This returns a list of |Hit| objects. See the |Hit| documentation for details.
+
+Other Replay Classes
+--------------------
+
+The examples above have been using |ReplayMap| as their example replay, but you can pass any |Replay| class
+to any |Circleguard| method:
+
+.. code-block:: python
 
     r1 = ReplayPath("/path/to/your/replay.osr")
     print(cg.ur(r1))
@@ -118,3 +157,5 @@ to |Circleguard| methods:
     replay_data = open("/path/to/your/replay.osr", "rb").read()
     r4 = ReplayString(replay_data)
     print(cg.hits(r4))
+
+    # or any combination of the above

@@ -6,19 +6,14 @@
 Appendix
 ========
 
-Cacher
-------
-.. automodule:: circleguard.cacher
-   :members:
-
 Circleguard
 -----------
 .. automodule:: circleguard.circleguard
    :members:
 
-Comparer
---------
-.. automodule:: circleguard.comparer
+Cacher
+------
+.. automodule:: circleguard.cacher
    :members:
 
 Game Version
@@ -31,9 +26,9 @@ Hit Objects
 .. automodule:: circleguard.hitobjects
    :members:
 
-Investigator
-------------
-.. automodule:: circleguard.investigator
+Investigations
+--------------
+.. automodule:: circleguard.investigations
    :members:
 
 Loadables

@@ -34,8 +34,7 @@ intersphinx_mapping = {"python": ("https://docs.python.org/3", None),
 # https://stackoverflow.com/a/37210251
 autodoc_member_order = "bysource"
 
-html_theme = "sphinx_rtd_theme"
-# html_theme_options = {"display_version": False}
+html_theme = "furo"
 
 # Add any paths that contain templates here, relative to this directory.
 templates_path = ["_templates"]
@@ -56,6 +55,7 @@ rst_prolog = """
 .. |Loadable| replace:: :class:`~circleguard.loadables.Loadable`
 .. |Replay| replace:: :class:`~circleguard.loadables.Replay`
 .. |ReplayMap| replace:: :class:`~circleguard.loadables.ReplayMap`
+.. |ReplayDir| replace:: :class:`~circleguard.loadables.ReplayDir`
 .. |ReplayPath| replace:: :class:`~circleguard.loadables.ReplayPath`
 .. |ReplayString| replace:: :class:`~circleguard.loadables.ReplayString`
 .. |ReplayID| replace:: :class:`~circleguard.loadables.ReplayID`
@@ -69,22 +69,44 @@ rst_prolog = """
 .. |RatelimitWeight| replace:: :class:`~circleguard.utils.RatelimitWeight`
 
 .. |Circleguard| replace:: :class:`~circleguard.circleguard.Circleguard`
-.. |cg.similarity| replace:: :func:`~circleguard.circleguard.Circleguard.similarity`
-.. |cg.ur| replace:: :func:`~circleguard.circleguard.Circleguard.ur`
-.. |cg.snaps| replace:: :func:`~circleguard.circleguard.Circleguard.snaps`
-.. |cg.frametime| replace:: :func:`~circleguard.circleguard.Circleguard.frametime`
-.. |cg.frametimes| replace:: :func:`~circleguard.circleguard.Circleguard.frametimes`
-.. |cg.hits| replace:: :func:`~circleguard.circleguard.Circleguard.hits`
-.. |cg.load| replace:: :func:`~circleguard.circleguard.Circleguard.load`
-.. |cg.load_info| replace:: :func:`~circleguard.circleguard.Circleguard.load_info`
+.. |cg.similarity| replace:: :func:`cg.similarity() <circleguard.circleguard.Circleguard.similarity>`
+.. |cg.ur| replace:: :func:`cg.ur() <circleguard.circleguard.Circleguard.ur>`
+.. |cg.snaps| replace:: :func:`cg.snaps() <circleguard.circleguard.Circleguard.snaps>`
+.. |cg.frametime| replace:: :func:`cg.frametime() <circleguard.circleguard.Circleguard.frametime>`
+.. |cg.frametimes| replace:: :func:`cg.frametimes() <circleguard.circleguard.Circleguard.frametimes>`
+.. |cg.frametime_graph| replace:: :func:`cg.frametime_graph() <circleguard.circleguard.Circleguard.frametime_graph>`
+.. |cg.hits| replace:: :func:`cg.hits() <circleguard.circleguard.Circleguard.hits>`
+.. |cg.judgments| replace:: :func:`cg.judgments() <circleguard.circleguard.Circleguard.judgments>`
+
+.. |cg.load| replace:: :func:`cg.load() <circleguard.circleguard.Circleguard.load>`
+.. |cg.load_info| replace:: :func:`cg.load_info() <circleguard.circleguard.Circleguard.load_info>`
+.. |cg.beatmap| replace:: :func:`cg.beatmap() <circleguard.circleguard.Circleguard.beatmap>`
+
 .. |cg.Map| replace:: :func:`cg.Map() <circleguard.circleguard.Circleguard.Map>`
 .. |cg.User| replace:: :func:`cg.User() <circleguard.circleguard.Circleguard.User>`
 .. |cg.MapUser| replace:: :func:`cg.MapUser() <circleguard.circleguard.Circleguard.MapUser>`
+.. |cg.ReplayMap| replace:: :func:`cg.ReplayMap() <circleguard.circleguard.Circleguard.ReplayMap>`
+.. |cg.ReplayDir| replace:: :func:`cg.ReplayDir() <circleguard.circleguard.Circleguard.ReplayDir>`
+.. |cg.ReplayPath| replace:: :func:`cg.ReplayPath() <circleguard.circleguard.Circleguard.ReplayPath>`
+.. |cg.ReplayString| replace:: :func:`cg.ReplayString() <circleguard.circleguard.Circleguard.ReplayString>`
+.. |cg.ReplayID| replace:: :func:`cg.ReplayID() <circleguard.circleguard.Circleguard.ReplayID>`
+
+.. |replay.beatmap| replace:: :func:`replay.Beatmap() <circleguard.loadables.Replay.beatmap>`
 
 .. |Snap| replace:: :class:`~circleguard.investigator.Snap`
 .. |Hit| replace:: :class:`~circleguard.investigator.Hit`
+.. |Judgment| replace:: :class:`~circleguard.investigator.Judgment`
 
 .. |Span| replace:: :class:`~circleguard.span.Span`
+.. |Loader| replace:: :class:`~circleguard.loader.Loader`
+
+.. |convert_statistic| replace:: :func:`~circleguard.utils.convert_statistic`
+.. |fuzzy_mods| replace:: :func:`~circleguard.utils.fuzzy_mods`
+.. |replay_pairs| replace:: :func:`~circleguard.utils.replay_pairs`
+.. |order| replace:: :func:`~circleguard.utils.order`
+
+.. |library| replace:: :class:`slider.Library <slider.library.Library>`
+.. |beatmap| replace:: :class:`slider.Beatmap <slider.beatmap.Beatmap>`
 
 .. _Circleguard: https://github.com/circleguard/circleguard
 .. _Circlecore: https://github.com/circleguard/circlecore

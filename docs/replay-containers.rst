@@ -1,16 +1,15 @@
-|ReplayContainer|\s
-===================
+Replay Containers
+=================
 
-|Replay| subclasses work fine for some situations, but what if you wanted to calculate e.g. the unstable rate for all
-replays on a map or in a user's top plays? You would have to make api requests and manually construct |ReplayMap|
-objects. That would be annoying, so we provide classes that do this for you. They are called |ReplayContainer|\s.
+Whereas a |Replay| represents a single replay, a |ReplayContainer| represents a set of replays. This is useful for if you want to
+operate over the entire leaderboard of a map, a user's top plays, etc.
 
-|Map|
------
+Map
+---
 
-|Map|\s represent a beatmap's top plays (ie leaderboard), as seen on the osu! website.
+A |Map| represents a beatmap's top plays (ie leaderboard), as seen on the osu! website.
 
-When instantiating a |Map|, you must specify which scores you want from the map:
+When instantiating a |Map|, you must specify which scores you want from the map via the ``span`` argument:
 
 .. code-block:: python
 
@@ -33,10 +32,10 @@ We can also select replays set with a certain mod combination:
     # third best HDHR score
     m2 = Map(221777, span="3", mods=Mod.HDHR)
 
-|User|
-------
+User
+----
 
-|User|\s represent the top plays of a user, as seen on their profile.
+A |User| represents the top plays of a user, as seen on their profile.
 
 Similar to a |Map|, you must specify which scores of the user you want, and you can optionally
 specify a mod combination to receive scores set with only that mod:
@@ -49,57 +48,66 @@ specify a mod combination to receive scores set with only that mod:
     # second and third best scores with only HD
     u = User(2757689, span="2-3", mods=Mod.HD)
 
-|MapUser|
----------
+Map User
+--------
 
-|MapUser|\s represent all of a user's plays on a beatmap. This is often only one score if the user has only ever
+A |MapUser| represents all of a user's plays on a beatmap. This is often only one score if the user has only ever
 played the map with a single mod combination, but could be more depending on how many times they've played the map
 with different mods.
 
-Unlike |Map| and |User|, you do not have to specify which scores you would like - |MapUser| assumes you want all
-of the scores the user has set on the beatmap. You can still optionally specify which scores you want:
+Unlike |Map| and |User|, you are not required to specify which scores you would like via ``span``. |MapUser| assumes you want all
+of the scores the user has set on the beatmap:
 
 .. code-block:: python
 
-    cg = Circleguard("key")
     # all replays by cookiezi on everything will freeze
     mu = MapUser(555797, 124493)
 
+You can still optionally specify a ``span`` argument if you would like:
+
+.. code-block:: python
+
     # only cookiezi's second best replay on everything will freeze
     mu = MapUser(555797, 124493, span="2")
-    cg.load_info(mu)
 
-Notice that you cannot pass a ``mods`` argument to |MapUser|. This is intentional, because
-``MapUser(221777, 2757689, mods=Mod.HDHR)`` (should that parameter exist) would return the identical replay as
-``ReplayMap(221777, 2757689, mods=Mod.HDHR)``. ``ReplayMap`` usage is preferred in all cases.
+Replay Dir
+----------
 
-Iterating
----------
-
-All |ReplayContainer|\s are iterable, so you can iterate over them to operate on their replays:
+A |ReplayDir| represents replays stored locally in a folder. This replay container creates |ReplayPath| objects. Any file ending
+in ``.osr`` is recognized as a replay file. Nested directories are currently not supported.
 
 .. code-block:: python
 
-    cg = Circleguard("key")
-    m = Map(221777, "1-2")
-    cg.load_info(m)
+    # all replays in `/Users/tybug/Desktop/replays`
+    r_dir = ReplayDir("/Users/tybug/Desktop/replays")
 
-    for r in m:
-        print(r)
 
-This means you can also create a list of replays from a |ReplayContainer| (or, equivalently, call |all_replays|):
+Accessing Replays
+-----------------
+
+A |ReplayContainer| is iterable, so you can retrieve |Replay| instances contained by the |ReplayContainer| in the usual ways.
+
+Index access:
 
 .. code-block:: python
 
-    cg = Circleguard("key")
     m = Map(221777, "1-2")
     cg.load_info(m)
+    print(m[0])
 
-    print(list(m)) # [ReplayMap(...), ReplayMap(...)]
-    print(m.all_replays()) # [ReplayMap(...), ReplayMap(...)]
+Iterating:
 
-But what are these mysterious |cg.load_info| methods? When you instantiate a |ReplayContainer|, it doesn't have any
-|Replay| objects you can iterate over, because it hasn't made any api calls to determine which |Replay| objects
-(by who, on what map) it should have. By calling |cg.load_info|, you are telling it to make these api calls and load
-the info about its replays so you can iterate over them. We cover this (and loading in general) in more detail on
-the very next page.
+.. code-block:: python
+
+    for replay in m:
+        print(replay)
+
+Creating a list from the |ReplayContainer| (or alternatively calling |all_replays|):
+
+.. code-block:: python
+
+    print(list(m))
+    print(m.all_replays())
+
+We've used a method above, |cg.load_info|, that we haven't introduced yet. We will cover this method on the very next page
+(under :ref:`info-loading`).

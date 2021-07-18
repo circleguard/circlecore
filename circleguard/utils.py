@@ -123,7 +123,7 @@ def replay_pairs(replays, replays2=None):
 
     Returns
     -------
-    (Replay, Replay)
+    Iterable[(Replay, Replay)]
         The first element is the earlier replay, and the second element is the
         later replay.
 

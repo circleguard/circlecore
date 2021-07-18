@@ -10,7 +10,8 @@ from circleguard.loader import (Loader, ReplayInfo, APIException,
         InvalidKeyException, RatelimitException, InvalidJSONException,
         ReplayUnavailableException)
 from circleguard.version import __version__
-from circleguard.investigator import (Snap, Judgment, Hit, Miss, HitType)
+from circleguard.investigations import Snap
+from circleguard.judgment import Judgment, Hit, Miss, JudgmentType
 from circleguard.span import Span
 from circleguard.utils import (convert_statistic, order, Key,
         RatelimitWeight, TRACE, ColoredFormatter, replay_pairs, fuzzy_mods,
@@ -51,7 +52,7 @@ __all__ = [
 # version
 "__version__",
 # investigation-related classes
-"Snap", "Judgment", "Hit", "Miss", "HitType",
+"Snap", "Judgment", "Hit", "Miss", "JudgmentType",
 # span
 "Span",
 # GameVersion

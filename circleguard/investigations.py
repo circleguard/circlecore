@@ -1,17 +1,18 @@
 from datetime import timedelta
-from enum import Enum, auto
 
 import numpy as np
-from slider.beatmap import Circle, Slider
+from scipy import signal
+from slider.beatmap import Circle, Slider, Spinner as SliderSpinner
 
 from circleguard.mod import Mod
-from circleguard.utils import KEY_MASK, check_param
+from circleguard.utils import KEY_MASK
 import circleguard.utils as utils
 from circleguard.game_version import GameVersion
 from circleguard.hitobjects import Hitobject, Spinner
+from circleguard.judgment import JudgmentType, Miss, Hit
 
 
-class Investigator:
+class Investigations:
     # https://osu.ppy.sh/home/changelog/stable40/20190207.2
     VERSION_SLIDERBUG_FIXED_STABLE = GameVersion(20190207, concrete=True)
     # https://osu.ppy.sh/home/changelog/cuttingedge/20190111
@@ -31,22 +32,9 @@ class Investigator:
         """
         # TODO cache hits in replay so we don't recalculate hits for both ur
         # and hits / judgments?
-        hits = Investigator.hits(replay, beatmap)
+        hits = Investigations.hits(replay, beatmap)
         diffs = [hit.error() for hit in hits]
         return np.std(diffs) * 10
-
-    @staticmethod
-    def snaps_cross(replay):
-        """
-        An alternative snap detection algorithm using relative cross products
-        of vectors.
-        """
-        t, xy = Investigator.remove_duplicate_t(replay.t, replay.xy)
-        # label three consecutive points (a, b, c) and the vectors between them
-        # (ab, bc, ac)
-        ab = xy[1:-1] - xy[:-2]
-        bc = xy[2:] - xy[1:-1]
-        ac = xy[2:] - xy[:-2]
 
     @staticmethod
     def snaps(replay, max_angle, min_distance, beatmap):
@@ -63,7 +51,7 @@ class Investigator:
             Consider only (a,b,c) where ``∠abc < max_angle``
         min_distance: float
             Consider only (a,b,c) where ``|ab| > min_distance`` and
-            ``|ab| > min_distance``.
+            ``|bc| > min_distance``.
         beatmap: :class:`slider.beatmap.Beatmap`
             If passed, only the snaps that occur on a hitobject in this beatmap
             will be returned.
@@ -86,7 +74,7 @@ class Investigator:
         # sometimes get detected (falesly) as aim correction.
         # TODO Worth looking into a bit more to see if we can avoid it without
         # removing the frames entirely.
-        t, xy = Investigator.remove_duplicate_t(replay.t, replay.xy)
+        t, xy = Investigations.remove_duplicate_t(replay.t, replay.xy)
         t = t[1:-1]
 
         # label three consecutive points (a b c) and the vectors between them
@@ -221,7 +209,7 @@ class Investigator:
         -----
         Median is used instead of mean to lessen the effect of outliers.
         """
-        frametimes = Investigator.frametimes(replay)
+        frametimes = Investigations.frametimes(replay)
         return np.median(frametimes)
 
     @staticmethod
@@ -234,9 +222,7 @@ class Investigator:
         replay: :class:`~.Replay`
             The replay to get the frametimes of.
         """
-        # replay.t is cumsum so convert it back to "time since previous frame"
         return np.diff(replay.t)
-
 
     @staticmethod
     def keydown_frames(replay):
@@ -279,7 +265,7 @@ class Investigator:
 
     @staticmethod
     def hits(replay, beatmap):
-        judgment = Investigator.judgments(replay, beatmap)
+        judgment = Investigations.judgments(replay, beatmap)
         judgments = [j for j in judgment if isinstance(j, Hit)]
         return judgments
 
@@ -317,9 +303,9 @@ class Investigator:
             # This is wrong for cutting edge replays between those two versions
             # which do not have a concrete version, but that's better than being
             # wrong for stable replays between those two versions.
-            sliderbug_fixed = game_version >= Investigator.VERSION_SLIDERBUG_FIXED_STABLE
+            sliderbug_fixed = game_version >= Investigations.VERSION_SLIDERBUG_FIXED_STABLE
         else:
-            sliderbug_fixed = game_version >= Investigator.VERSION_SLIDERBUG_FIXED_CUTTING_EDGE
+            sliderbug_fixed = game_version >= Investigations.VERSION_SLIDERBUG_FIXED_CUTTING_EDGE
 
         easy = Mod.EZ in replay.mods
         hard_rock = Mod.HR in replay.mods
@@ -327,8 +313,7 @@ class Investigator:
 
         OD = beatmap.od(easy=easy, hard_rock=hard_rock)
         CS = beatmap.cs(easy=easy, hard_rock=hard_rock)
-        keydowns = Investigator.keydown_frames(replay)
-
+        keydowns = Investigations.keydown_frames(replay)
 
         judgments = []
 
@@ -411,17 +396,17 @@ class Investigator:
                     # sliderheads are always 300s even if you click early or
                     # late
                     if hitobj_type == 1:
-                        hit_type = HitType.Hit300
+                        hit_type = JudgmentType.Hit300
                     # TODO: should these ranges be inclusive?
                     elif abs(keydown_t - hitobj_t) < hw_300:
-                        hit_type = HitType.Hit300
+                        hit_type = JudgmentType.Hit300
                     elif abs(keydown_t - hitobj_t) < hw_100:
-                        hit_type = HitType.Hit100
+                        hit_type = JudgmentType.Hit100
                     elif abs(keydown_t - hitobj_t) < hw_50:
-                        hit_type = HitType.Hit50
+                        hit_type = JudgmentType.Hit50
 
-                    judgment = Hit(hit_type, hitobj, keydown_t, keydown_xy,
-                        replay, beatmap)
+                    judgment = Hit(hitobj, keydown_t, keydown_xy,
+                        replay, beatmap, hit_type)
                     judgments.append(judgment)
                     hitobj_hit[hitobj_i] = True
 
@@ -441,19 +426,178 @@ class Investigator:
 
         # add a Miss for each hitobj that was never hit
         for i, hitobj_hit_ in enumerate(hitobj_hit):
-            if not hitobj_hit_:
+            # ignore if the hitobj is a spinner, we don't calculate judgments
+            # for spinners yet
+            if not hitobj_hit_ and not isinstance(hitobjs[i], SliderSpinner):
                 judgment = Miss(hitobjs[i], replay, beatmap)
                 judgments.append(judgment)
 
         return judgments
 
-    # TODO (some) code duplication with this method and a similar one in
-    # ``Comparer``. Consolidate and move this method to utils?
+    @staticmethod
+    def similarity(replay1, replay2, method, num_chunks, mods_unknown):
+        """
+        Compares two :class:`~.replay.Replay`\s.
+
+        Parameters
+        ----------
+        replay1: :class:`~.replay.Replay`
+            The first replay to compare.
+        replay2: :class:`~.replay.Replay`
+            The second replay to compare.
+
+        Returns
+        -------
+        :class:`~.result.ComparisonResult`
+            The result of comparing ``replay1`` to ``replay2``.
+        """
+        # perform preprocessing here as an optimization, so it is not repeated
+        # within different comparison algorithms. This will likely need to
+        # become more advanced if we add more (and different) algorithms.
+
+        # interpolation breaks when multiple frames have the same time values
+        # (which occurs semi frequently in replays). So filter them out
+        t1, xy1 = Investigations.remove_duplicate_t(replay1.t, replay1.xy)
+        t2, xy2 = Investigations.remove_duplicate_t(replay2.t, replay2.xy)
+        xy1, xy2 = Investigations.interpolate(t1, t2, xy1, xy2)
+        xy1, xy2 = Investigations.clean(xy1, xy2)
+
+        # kind of a dirty function with all the switching between similarity
+        # and correlation, but I'm not sure I can make it any cleaner
+
+        if not replay1.mods or not replay2.mods:
+            # first compute with no modifications
+            if method == "similarity":
+                sim1 = Investigations.compute_similarity(xy1, xy2)
+            if method == "correlation":
+                sim1 = Investigations.compute_correlation(xy1, xy2, num_chunks)
+
+            # then compute with hr applied to ``replay1``
+            xy1[:, 1] = 384 - xy1[:, 1]
+
+            if method == "similarity":
+                sim2 = Investigations.compute_similarity(xy1, xy2)
+            if method == "correlation":
+                sim2 = Investigations.compute_correlation(xy1, xy2, num_chunks)
+
+            if mods_unknown == "best":
+                if method == "similarity":
+                    return min(sim1, sim2)
+                if method == "correlation":
+                    return max(sim1, sim2)
+
+            if mods_unknown == "both":
+                return (sim1, sim2)
+
+        # flip if one but not both has HR
+        if (Mod.HR in replay1.mods) ^ (Mod.HR in replay2.mods):
+            xy1[:, 1] = 384 - xy1[:, 1]
+
+        if method == "similarity":
+            return Investigations.compute_similarity(xy1, xy2)
+        if method == "correlation":
+            return Investigations.compute_correlation(xy1, xy2, num_chunks)
+
+    @staticmethod
+    def compute_similarity(xy1, xy2):
+        """
+        Calculates the average distance between two sets of cursor position
+        data.
+
+        Parameters
+        ----------
+        replay1: ndarray
+            The first xy data to compare.
+        replay2: ndarray
+            The second xy data to compare.
+
+        Returns
+        -------
+        float
+            The mean distance between the two datasets.
+        """
+        # euclidean distance
+        distance = xy1 - xy2
+        distance = (distance ** 2).sum(axis=1) ** 0.5
+        return distance.mean()
+
+    @staticmethod
+    def compute_correlation(xy1, xy2, num_chunks):
+        xy1 = xy1.T
+        xy2 = xy2.T
+
+        # section into chunks, used to reduce the effect of outlier data
+        # (eg. cheater inserts replay data during breaks that places them
+        # far away from the actual replay)
+        horizontal_length = xy1.shape[1] - xy1.shape[1] % num_chunks
+        xy1_parts = np.hsplit(xy1[:,:horizontal_length], num_chunks)
+        xy2_parts = np.hsplit(xy2[:,:horizontal_length], num_chunks)
+        correlations = []
+        for (xy1_part, xy2_part) in zip(xy1_parts, xy2_parts):
+            xy1_part -= np.mean(xy1_part)
+            xy2_part -= np.mean(xy2_part)
+            norm = np.std(xy1_part) * np.std(xy2_part) * xy1_part.size
+            # matrix of correlations between xy1 and xy2 at different time
+            # shifts
+            cross_corr_matrix = signal.correlate(xy1_part, xy2_part) / norm
+
+            # pick the maximum correlation, which will probably be at 0
+            # time shift, unless the replays have been intentionally shifted in
+            # time
+            max_corr = np.max(cross_corr_matrix)
+            correlations.append(max_corr)
+        # take the median of all the chunks to reduce the effect of outliers
+        return np.median(correlations)
+
+
     @staticmethod
     def remove_duplicate_t(t, data):
         t, t_sort = np.unique(t, return_index=True)
         data = data[t_sort]
         return (t, data)
+
+    @staticmethod
+    def interpolate(t1, t2, xy1, xy2):
+        """
+        Interpolates the xy data of the shorter replay to the longer replay.
+
+        Returns
+        -------
+        (ndarray, ndarray)
+            The interpolated replay data of the first and second replay
+            respectively.
+
+        Notes
+        -----
+        The length of the two returned arrays will be equal. This is a
+        (desirous) side effect of interpolating.
+        """
+        if len(t1) > len(t2):
+            xy2x = np.interp(t1, t2, xy2[:, 0])
+            xy2y = np.interp(t1, t2, xy2[:, 1])
+            xy2 = np.array([xy2x, xy2y]).T
+        else:
+            xy1x = np.interp(t2, t1, xy1[:, 0])
+            xy1y = np.interp(t2, t1, xy1[:, 1])
+            xy1 = np.array([xy1x, xy1y]).T
+
+        return (xy1, xy2)
+
+    @staticmethod
+    def clean(xy1, xy2):
+        """
+        Cleans the given xy data to only include indices where both coordinates
+        are inside the osu gameplay window (a 512 by 384 osu!pixel window).
+
+        Warnings
+        --------
+        The length of the two passed arrays must be equal.
+        """
+        valid = np.all(([0, 0] <= xy1) & (xy1 <= [512, 384]), axis=1) & \
+            np.all(([0, 0] <= xy2) & (xy2 <= [512, 384]), axis=1)
+        xy1 = xy1[valid]
+        xy2 = xy2[valid]
+        return (xy1, xy2)
 
 
 class Snap:
@@ -485,133 +629,3 @@ class Snap:
 
     def __hash__(self):
         return hash((self.time, self.angle, self.distance))
-
-
-class HitType(Enum):
-    Hit300 = auto()
-    Hit100 = auto()
-    Hit50 = auto()
-
-
-class Judgment:
-    def __init__(self, hitobject, replay, beatmap):
-        # TODO remove `already_converted=True` when
-        # https://github.com/llllllllll/slider/issues/80 is fixed
-        self.hitobject = Hitobject.from_slider_hitobj(hitobject, replay,
-            beatmap, True)
-
-class Miss(Judgment):
-    def __init__(self, hitobject, replay, beatmap):
-        super().__init__(hitobject, replay, beatmap)
-
-class Hit(Judgment):
-    """
-    # TODO: update this documentation
-    A hit on a hitobject when a replay is played against a beatmap. In osu!lazer
-    terms, this would be a Judgement, though we do not count misses as a ``Hit``
-    while lazer does count them as judgements.
-
-    Parameters
-    ----------
-    hitobject: :class:`slider.beatmap.HitObject`
-        The hitobject that was hit. This is converted to a
-        :class:`circleguard.hitobjects.Hitobject`.
-    t: float
-        The time the hit occured.
-    xy: list[float, float]
-        The x and y position where the hit occured.
-    replay: :class:`circleguard.loadables.Replay`
-        The replay this hit was made on.
-    beatmap: :class:`slider.beatmap.Beatmap`
-        The beatmap this hit was made on.
-    type: :class:`JudgmentType`
-    """
-    def __init__(self, type_, hitobject, t, xy, replay, beatmap):
-        super().__init__(hitobject, replay, beatmap)
-        # TODO remove ``t`` in core 6.0.0, ``time`` is more intuitive. ``x`` and
-        # ``y`` are fine as is though since there's no longer name for them.
-        self.t = t
-        self.time = t
-        self.xy = xy
-        self.x = xy[0]
-        self.y = xy[1]
-        self.type = type_
-
-    def distance(self, *, to):
-        """
-        The distance from this hit to either the center or edge of its
-        hitobject.
-
-        Parameters
-        ----------
-        to: {"center", "edge"}
-            If ``center``, the distance from this hit to the center of its
-            hitobject is calculated. If ``edge``, the distance from this hit to
-            the edge of its hitobject is calculated.
-        Returns
-        -------
-        float
-            The distance from this hit to either the center or edge of its
-            hitobject.
-        """
-        check_param(to, ["center", "edge"])
-
-        hitobj_xy = self.hitobject.xy
-
-        if to == "edge":
-            dist = np.linalg.norm(self.xy - hitobj_xy) - self.hitobject.radius
-            # value is negative since we're inside the hitobject, so take abs
-            return abs(dist)
-
-        if to == "center":
-            return np.linalg.norm(self.xy - hitobj_xy)
-
-    def within(self, distance):
-        """
-        Whether the hit was within ``distance`` of the edge of its hitobject.
-
-        Parameters
-        ----------
-        distance: float
-            How close, in pixels, to the edge of the hitobject the hit has to
-            be.
-
-        Returns
-        -------
-        bool
-            Whether the hit was within ``distance`` of the edge of its
-            hitobject.
-
-        Notes
-        -----
-        The lower the value, the closer to the edge the hit occurred. This value
-        can never be greater than the radius of the hitobject.
-        """
-
-        return self.distance(to="edge") < distance
-
-    def error(self):
-        """
-        How many milliseconds off this hit was from being a perfectly on time
-        hit. If negative, this was an early hit. If positive, this was a late
-        hit. If 0, this was a perfect hit.
-
-        Returns
-        -------
-        float
-            How many milliseconds off this hit was from being perfectly on time.
-        """
-        return self.time - self.hitobject.time
-
-    def __eq__(self, other):
-        return (self.hitobject == other.hitobject and self.t == other.t and
-            self.xy == other.xy)
-
-    def __hash__(self):
-        return hash((self.hitobject, self.t, self.xy))
-
-    def __repr__(self):
-        return f"Hit(hitobject={self.hitobject},t={self.t},xy={self.xy}"
-
-    def __str__(self):
-        return f"({self.x}, {self.y}) at t {self.t}"
