@@ -283,7 +283,6 @@ class Investigations:
         return (sum(frametimes_filtered) / 2) / len(frametimes_filtered)
 
 
-
     @staticmethod
     def keydown_frames(replay):
         """
