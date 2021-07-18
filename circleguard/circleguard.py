@@ -7,7 +7,8 @@ import weakref
 from slider import Library, Beatmap
 
 from circleguard.loader import Loader
-from circleguard.investigations import Investigations, Judgment, Snap
+from circleguard.investigations import Investigations, Snap
+from circleguard.judgment import Judgment
 from circleguard.cacher import Cacher
 from circleguard.utils import convert_statistic, check_param
 from circleguard.loadables import (Map, User, MapUser, ReplayMap, ReplayID,
