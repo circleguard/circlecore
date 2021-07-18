@@ -547,7 +547,7 @@ class Circleguard:
     def map_available(self, replay):
         return replay.map_available(self.library)
 
-    def Map(self, map_id, span, mods=None, cache=None) -> Map:
+    def Map(self, map_id, span, mods=None, cache=None, load=False) -> Map:
         """
         Returns a new, info-loaded :class:`~circleguard.loadables.Map`.
 
@@ -572,11 +572,11 @@ class Circleguard:
         >>>     ...
         """
         m = Map(map_id, span, mods, cache)
-        self.load_info(m)
+        self.load(m) if load else self.load_info(m)
         return m
 
-    def User(self, user_id, span, mods=None, cache=None, available_only=True) \
-        -> User:
+    def User(self, user_id, span, mods=None, cache=None,
+        available_only=True, load=False) -> User:
         """
         Returns a new, info-loaded :class:`~circleguard.loadables.User`.
 
@@ -601,11 +601,11 @@ class Circleguard:
         >>>     ...
         """
         u = User(user_id, span, mods, cache, available_only)
-        self.load_info(u)
+        self.load(u) if load else self.load_info(u)
         return u
 
     def MapUser(self, map_id, user_id, span=Loader.MAX_MAP_SPAN, cache=None,
-        available_only=True) -> MapUser:
+        available_only=True, load=False) -> MapUser:
         """
         Returns a new, info-loaded :class:`~circleguard.loadables.MapUser`.
 
@@ -630,10 +630,10 @@ class Circleguard:
         >>>     ...
         """
         mu = MapUser(map_id, user_id, span, cache, available_only)
-        self.load_info(mu)
+        self.load(mu) if load else self.load_info(mu)
         return mu
 
-    def ReplayDir(self, path, cache=None) -> ReplayDir:
+    def ReplayDir(self, path, cache=None, load=False) -> ReplayDir:
         """
         Returns a new, info-loaded :class:`~circleguard.loadables.ReplayDir`.
 
@@ -658,7 +658,7 @@ class Circleguard:
         >>>     ...
         """
         r_dir = ReplayDir(path, cache)
-        self.load_info(r_dir)
+        self.load(r_dir) if load else self.load_info(r_dir)
         return r_dir
 
 
