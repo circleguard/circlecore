@@ -4,17 +4,16 @@ from tempfile import TemporaryDirectory
 from typing import Iterable, Union, Tuple
 import weakref
 
-from slider import Library
+from slider import Library, Beatmap
 
 from circleguard.loader import Loader
-from circleguard.comparer import Comparer
-from circleguard.investigator import Investigator, Judgment, Snap
+from circleguard.investigations import Investigations, Snap
+from circleguard.judgment import Judgment
 from circleguard.cacher import Cacher
 from circleguard.utils import convert_statistic, check_param
 from circleguard.loadables import (Map, User, MapUser, ReplayMap, ReplayID,
-    ReplayPath, ReplayString)
+    ReplayPath, ReplayString, ReplayDir)
 from circleguard.mod import Mod
-# from circleguard.frametime_graph import FrametimeGraph
 
 
 class Circleguard:
@@ -42,6 +41,8 @@ class Circleguard:
       loads its info.
     * :meth:`~.MapUser` - creates a new :class:`~circleguard.loadables.MapUser`
       and loads its info.
+    * :meth:`~.ReplayDir` - creates a new
+      :class:`~circleguard.loadables.ReplayDir` and loads its info.
 
     Parameters
     ----------
@@ -181,7 +182,7 @@ class Circleguard:
 
         self.load(replay1)
         self.load(replay2)
-        return Comparer.similarity(replay1, replay2, method, num_chunks,
+        return Investigations.similarity(replay1, replay2, method, num_chunks,
             mods_unknown)
 
 
@@ -216,7 +217,7 @@ class Circleguard:
             raise ValueError("The ur of a replay that does not know what map "
                 "it was set on cannot be calculated")
 
-        ur = Investigator.ur(replay, beatmap)
+        ur = Investigations.ur(replay, beatmap)
         if cv:
             ur = convert_statistic(ur, replay.mods, to="cv")
 
@@ -277,7 +278,7 @@ class Circleguard:
                     "you can pass ``only_on_hitobjs=False`` to avoid requiring "
                     "a beatmap.")
 
-        return Investigator.snaps(replay, max_angle, min_distance, beatmap_)
+        return Investigations.snaps(replay, max_angle, min_distance, beatmap_)
 
 
     def frametime(self, replay, cv=True, mods_unknown="raise") -> float:
@@ -314,7 +315,7 @@ class Circleguard:
         check_param(mods_unknown, ["raise", "dt", "nm", "ht"])
 
         self.load(replay)
-        frametime = Investigator.frametime(replay)
+        frametime = Investigations.frametime(replay)
         if cv:
             if replay.mods:
                 mods = replay.mods
@@ -370,7 +371,7 @@ class Circleguard:
             second and third frame, etc.
         """
         self.load(replay)
-        frametimes = Investigator.frametimes(replay)
+        frametimes = Investigations.frametimes(replay)
         if cv:
             if replay.mods:
                 mods = replay.mods
@@ -426,7 +427,7 @@ class Circleguard:
             raise ValueError("The hits of a replay that does not know what map "
                 "it was set on cannot be calculated.")
 
-        hits = Investigator.hits(replay, beatmap)
+        hits = Investigations.hits(replay, beatmap)
 
         if not within:
             return hits
@@ -463,7 +464,7 @@ class Circleguard:
             raise ValueError("The judgments of a replay that does not know "
                 "what map it was set on cannot be calculated.")
 
-        return Investigator.judgments(replay, beatmap)
+        return Investigations.judgments(replay, beatmap)
 
     def frametime_graph(self, replay, cv=True, figure=None,
         show_expected_frametime=True):
@@ -546,7 +547,7 @@ class Circleguard:
     def map_available(self, replay):
         return replay.map_available(self.library)
 
-    def Map(self, map_id, span, mods=None, cache=None) -> Map:
+    def Map(self, map_id, span, mods=None, cache=None, load=False) -> Map:
         """
         Returns a new, info-loaded :class:`~circleguard.loadables.Map`.
 
@@ -559,25 +560,23 @@ class Circleguard:
         be info loaded before it can be iterated over, so this function does
         that info loading for you.
 
-        >>> # usage without this function (bad)
-        >>> cg = Circleguard("key")
+        >>> # good
+        >>> m = cg.Map(221777, "1-2")
+        >>> for replay in m:
+        >>>     ...
+
+        >>> # bad
         >>> m = Map(221777, "1-2")
         >>> cg.load_info(m)
         >>> for replay in m:
         >>>     ...
-        >>>
-        >>> # usage with this function (good)
-        >>> cg = Circleguard("key")
-        >>> m = cg.Map(221777, "1-2")
-        >>> for replay in m:
-        >>>     ...
         """
         m = Map(map_id, span, mods, cache)
-        self.load_info(m)
+        self.load(m) if load else self.load_info(m)
         return m
 
-    def User(self, user_id, span, mods=None, cache=None, available_only=True) \
-        -> User:
+    def User(self, user_id, span, mods=None, cache=None,
+        available_only=True, load=False) -> User:
         """
         Returns a new, info-loaded :class:`~circleguard.loadables.User`.
 
@@ -590,25 +589,23 @@ class Circleguard:
         be info loaded before it can be iterated over, so this function does
         that info loading for you.
 
-        >>> # usage without this function (bad)
-        >>> cg = Circleguard("key")
+        >>> # good
+        >>> u = cg.User(124493, "1-2")
+        >>> for replay in u:
+        >>>     ...
+
+        >>> # bad
         >>> u = User(124493, "1-2")
         >>> cg.load_info(u)
         >>> for replay in u:
         >>>     ...
-        >>>
-        >>> # usage with this function (good)
-        >>> cg = Circleguard("key")
-        >>> u = cg.User(124493, "1-2")
-        >>> for replay in u:
-        >>>     ...
         """
         u = User(user_id, span, mods, cache, available_only)
-        self.load_info(u)
+        self.load(u) if load else self.load_info(u)
         return u
 
     def MapUser(self, map_id, user_id, span=Loader.MAX_MAP_SPAN, cache=None,
-        available_only=True) -> MapUser:
+        available_only=True, load=False) -> MapUser:
         """
         Returns a new, info-loaded :class:`~circleguard.loadables.MapUser`.
 
@@ -621,22 +618,49 @@ class Circleguard:
         must be info loaded before it can be iterated over, so this function
         does that info loading for you.
 
-        >>> # usage without this function (bad)
-        >>> cg = Circleguard("key")
+        >>> # good
+        >>> mu = cg.MapUser(124493, 129891)
+        >>> for replay in mu:
+        >>>     ...
+
+        >>> # bad
         >>> mu = MapUser(124493, 129891)
         >>> cg.load_info(mu)
         >>> for replay in mu:
         >>>     ...
-        >>>
-        >>> # usage with this function (good)
-        >>> cg = Circleguard("key")
-        >>> mu = cg.MapUser(124493, 129891)
-        >>> for replay in mu:
-        >>>     ...
         """
         mu = MapUser(map_id, user_id, span, cache, available_only)
-        self.load_info(mu)
+        self.load(mu) if load else self.load_info(mu)
         return mu
+
+    def ReplayDir(self, path, cache=None, load=False) -> ReplayDir:
+        """
+        Returns a new, info-loaded :class:`~circleguard.loadables.ReplayDir`.
+
+        Notes
+        -----
+        This function is provided as a convenience for when you want to create a
+        ``ReplayDir`` and load its info immediately. A common occurrence in using
+        ``Circleguard`` is to want to instantiate a ``ReplayDir`` and immediately
+        iterate over it to operate on its replays. However, this ``ReplayDir``
+        must be info loaded before it can be iterated over, so this function
+        does that info loading for you.
+
+        >>> # bad
+        >>> r_dir = cg.ReplayDir("/Users/tybug/Desktop/replays")
+        >>> for replay in r_dir:
+        >>>     ...
+
+        >>> # good
+        >>> r_dir = ReplayDir("/Users/tybug/Desktop/replays")
+        >>> cg.load_info(r_dir)
+        >>> for replay in r_dir:
+        >>>     ...
+        """
+        r_dir = ReplayDir(path, cache)
+        self.load(r_dir) if load else self.load_info(r_dir)
+        return r_dir
+
 
     def ReplayMap(self, map_id, user_id, mods=None, cache=None, info=None) \
         -> ReplayMap:
@@ -695,7 +719,18 @@ class Circleguard:
         self.load(r)
         return r
 
-    def beatmap(self, replay):
+    def beatmap(self, replay) -> Beatmap:
+        """
+        The beatmap the replay was played on, or ``None`` if the replay doesn't
+        know what beatmap it was played on.
+
+        Returns
+        -------
+        :class:`slider.beatmap.Beatmap`
+            The beatmap this replay was played on.
+        None
+            If the replay doesn't know what beatmap it was played on.
+        """
         self.load(replay)
         return replay.beatmap(self.library)
 

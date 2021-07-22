@@ -162,8 +162,8 @@ Creating a |Replay| and then loading it immediately afterwards is a common opera
     r2 = cg.ReplayID(2177560145)
     r3 = cg.ReplayPath("/path/to/your/osr.osr")
 
-Similarly, it is common to info-load a |ReplayContainer| it immediately after creating it. We provide analogous
-convenience methods |cg.Map|, |cg.User|, and |cg.MapUser| to create an info-loaded |ReplayContainer|:
+Similarly, it is common to info-load a |ReplayContainer| immediately after creating it. We provide analogous
+convenience methods |cg.Map|, |cg.User|, |cg.MapUser|, and |cg.ReplayDir| to create an info-loaded |ReplayContainer|:
 
 .. code-block:: python
 
@@ -175,7 +175,12 @@ convenience methods |cg.Map|, |cg.User|, and |cg.MapUser| to create an info-load
 
 Each of these methods takes the exact same arguments as instantiating the relevant |Replay| or |ReplayContainer| normally.
 
-Note that we do not currently provide convenience methods to create a loaded |ReplayContainer|, only info-loaded ones.
+If you would like to create a fully loaded |ReplayContainer|, not just an info-loaded one, pass ``load=True``:
+
+.. code-block:: python
+
+    m = cg.Map(221777, "1-2", load=True)
+    print(m[0].loaded) # True
 
 Checking State
 --------------

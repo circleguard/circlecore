@@ -1,8 +1,8 @@
 Advanced Usage
 ==============
 
-This is a hodgepodge of circleguard features not mentioned in other parts of the documentation. This page will
-be written at a high level and is intended for developers who know what they are doing, and are just looking for a
+This is a hodgepodge of circleguard features not mentioned in other parts of the documentation. This page is
+written at a high level and is intended for developers who know what they are doing, and are just looking for a
 page listing all the things they *can* do, or are looking to learn more about circleguard's internals.
 
 Retrieve a Beatmap
@@ -89,7 +89,7 @@ replay's replay data from whatever data source it wants (an api, a replay file, 
 ``self._process_replay_data`` with the loaded replay data and set ``self.loaded`` to ``True``.
 
 .. note::
-    One philosophy of circleguard is that |Replay| objects are pseudo lazy loaded. Tat is, they are cheap to
+    One philosophy of circleguard is that |Replay| objects are pseudo lazy loaded. That is, they are cheap to
     instantiate and only incur a cost when they need to be loaded. This is why we require that loading logic goes into
     its own ``load`` method instead of happening on instantiation.
 
@@ -187,6 +187,6 @@ replay container would return the union of those sets in this method.
 .. note::
 
     If the above instructions for subclassing |Replay| and |ReplayContainer| are unclear, you should look at the
-    source code for examples. Every default |Replay| and |ReplayContainer| is well abstracted and documented in the source code,
-    and may be a clearer guide to follow than the above examples. See
+    source code for examples. Every default |Replay| and |ReplayContainer| subclass is well abstracted and documented in the source
+    code, and may be a clearer guide to follow than the above examples. See
     `<https://github.com/circleguard/circlecore/blob/master/circleguard/loadables.py>`__ for the file containing these classes.

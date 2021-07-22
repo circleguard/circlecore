@@ -70,6 +70,18 @@ You can still optionally specify a ``span`` argument if you would like:
     # only cookiezi's second best replay on everything will freeze
     mu = MapUser(555797, 124493, span="2")
 
+Replay Dir
+----------
+
+A |ReplayDir| represents replays stored locally in a folder. This replay container creates |ReplayPath| objects. Any file ending
+in ``.osr`` is recognized as a replay file. Nested directories are currently not supported.
+
+.. code-block:: python
+
+    # all replays in `/Users/tybug/Desktop/replays`
+    r_dir = ReplayDir("/Users/tybug/Desktop/replays")
+
+
 Accessing Replays
 -----------------
 
