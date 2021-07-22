@@ -143,12 +143,12 @@
         </label>
         <div class="section" id="advanced-usage">
 <h1>Advanced Usage<a class="headerlink" href="#advanced-usage" title="Permalink to this headline">¶</a></h1>
-<p>This is a hodgepodge of circleguard features not mentioned in other parts of the documentation. This page will
-be written at a high level and is intended for developers who know what they are doing, and are just looking for a
+<p>This is a hodgepodge of circleguard features not mentioned in other parts of the documentation. This page is
+written at a high level and is intended for developers who know what they are doing, and are just looking for a
 page listing all the things they <em>can</em> do, or are looking to learn more about circleguard’s internals.</p>
 <div class="section" id="retrieve-a-beatmap">
 <h2>Retrieve a Beatmap<a class="headerlink" href="#retrieve-a-beatmap" title="Permalink to this headline">¶</a></h2>
-<p>To retrieve a beatmap from a replay, call <code class="xref py py-func docutils literal notranslate"><span class="pre">cg.beatmap()</span></code>. This returns <code class="docutils literal notranslate"><span class="pre">None</span></code> if the replay cannot determine
+<p>To retrieve a beatmap from a replay, call <a class="reference internal" href="appendix.html#circleguard.circleguard.Circleguard.beatmap" title="circleguard.circleguard.Circleguard.beatmap"><code class="xref py py-func docutils literal notranslate"><span class="pre">cg.beatmap()</span></code></a>. This returns <code class="docutils literal notranslate"><span class="pre">None</span></code> if the replay cannot determine
 what beatmap it was set on, and a <a class="reference external" href="https://llllllllll.github.io/slider/appendix.html#slider.beatmap.Beatmap" title="(in slider v0.2.1)"><code class="xref py py-class docutils literal notranslate"><span class="pre">slider.Beatmap</span></code></a> otherwise.</p>
 </div>
 <div class="section" id="generate-a-frametime-graph">
@@ -214,7 +214,7 @@ replay’s replay data from whatever data source it wants (an api, a replay file
 <code class="docutils literal notranslate"><span class="pre">self._process_replay_data</span></code> with the loaded replay data and set <code class="docutils literal notranslate"><span class="pre">self.loaded</span></code> to <code class="docutils literal notranslate"><span class="pre">True</span></code>.</p>
 <div class="admonition note">
 <p class="admonition-title">Note</p>
-<p>One philosophy of circleguard is that <a class="reference internal" href="appendix.html#circleguard.loadables.Replay" title="circleguard.loadables.Replay"><code class="xref py py-class docutils literal notranslate"><span class="pre">Replay</span></code></a> objects are pseudo lazy loaded. Tat is, they are cheap to
+<p>One philosophy of circleguard is that <a class="reference internal" href="appendix.html#circleguard.loadables.Replay" title="circleguard.loadables.Replay"><code class="xref py py-class docutils literal notranslate"><span class="pre">Replay</span></code></a> objects are pseudo lazy loaded. That is, they are cheap to
 instantiate and only incur a cost when they need to be loaded. This is why we require that loading logic goes into
 its own <code class="docutils literal notranslate"><span class="pre">load</span></code> method instead of happening on instantiation.</p>
 </div>
@@ -291,8 +291,8 @@ replay container would return the union of those sets in this method.</p>
 <div class="admonition note">
 <p class="admonition-title">Note</p>
 <p>If the above instructions for subclassing <a class="reference internal" href="appendix.html#circleguard.loadables.Replay" title="circleguard.loadables.Replay"><code class="xref py py-class docutils literal notranslate"><span class="pre">Replay</span></code></a> and <a class="reference internal" href="appendix.html#circleguard.loadables.ReplayContainer" title="circleguard.loadables.ReplayContainer"><code class="xref py py-class docutils literal notranslate"><span class="pre">ReplayContainer</span></code></a> are unclear, you should look at the
-source code for examples. Every default <a class="reference internal" href="appendix.html#circleguard.loadables.Replay" title="circleguard.loadables.Replay"><code class="xref py py-class docutils literal notranslate"><span class="pre">Replay</span></code></a> and <a class="reference internal" href="appendix.html#circleguard.loadables.ReplayContainer" title="circleguard.loadables.ReplayContainer"><code class="xref py py-class docutils literal notranslate"><span class="pre">ReplayContainer</span></code></a> is well abstracted and documented in the source code,
-and may be a clearer guide to follow than the above examples. See
+source code for examples. Every default <a class="reference internal" href="appendix.html#circleguard.loadables.Replay" title="circleguard.loadables.Replay"><code class="xref py py-class docutils literal notranslate"><span class="pre">Replay</span></code></a> and <a class="reference internal" href="appendix.html#circleguard.loadables.ReplayContainer" title="circleguard.loadables.ReplayContainer"><code class="xref py py-class docutils literal notranslate"><span class="pre">ReplayContainer</span></code></a> subclass is well abstracted and documented in the source
+code, and may be a clearer guide to follow than the above examples. See
 <a class="reference external" href="https://github.com/circleguard/circlecore/blob/master/circleguard/loadables.py">https://github.com/circleguard/circlecore/blob/master/circleguard/loadables.py</a> for the file containing these classes.</p>
 </div>
 </div>

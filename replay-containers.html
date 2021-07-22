@@ -198,6 +198,15 @@ of the scores the user has set on the beatmap:</p>
 </pre></div>
 </div>
 </div>
+<div class="section" id="replay-dir">
+<h2>Replay Dir<a class="headerlink" href="#replay-dir" title="Permalink to this headline">¶</a></h2>
+<p>A <a class="reference internal" href="appendix.html#circleguard.loadables.ReplayDir" title="circleguard.loadables.ReplayDir"><code class="xref py py-class docutils literal notranslate"><span class="pre">ReplayDir</span></code></a> represents replays stored locally in a folder. This replay container creates <a class="reference internal" href="appendix.html#circleguard.loadables.ReplayPath" title="circleguard.loadables.ReplayPath"><code class="xref py py-class docutils literal notranslate"><span class="pre">ReplayPath</span></code></a> objects. Any file ending
+in <code class="docutils literal notranslate"><span class="pre">.osr</span></code> is recognized as a replay file. Nested directories are currently not supported.</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="c1"># all replays in `/Users/tybug/Desktop/replays`</span>
+<span class="n">r_dir</span> <span class="o">=</span> <span class="n">ReplayDir</span><span class="p">(</span><span class="s2">"/Users/tybug/Desktop/replays"</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
 <div class="section" id="accessing-replays">
 <h2>Accessing Replays<a class="headerlink" href="#accessing-replays" title="Permalink to this headline">¶</a></h2>
 <p>A <a class="reference internal" href="appendix.html#circleguard.loadables.ReplayContainer" title="circleguard.loadables.ReplayContainer"><code class="xref py py-class docutils literal notranslate"><span class="pre">ReplayContainer</span></code></a> is iterable, so you can retrieve <a class="reference internal" href="appendix.html#circleguard.loadables.Replay" title="circleguard.loadables.Replay"><code class="xref py py-class docutils literal notranslate"><span class="pre">Replay</span></code></a> instances contained by the <a class="reference internal" href="appendix.html#circleguard.loadables.ReplayContainer" title="circleguard.loadables.ReplayContainer"><code class="xref py py-class docutils literal notranslate"><span class="pre">ReplayContainer</span></code></a> in the usual ways.</p>
@@ -274,6 +283,7 @@ of the scores the user has set on the beatmap:</p>
 <li><a class="reference internal" href="#map">Map</a></li>
 <li><a class="reference internal" href="#user">User</a></li>
 <li><a class="reference internal" href="#map-user">Map User</a></li>
+<li><a class="reference internal" href="#replay-dir">Replay Dir</a></li>
 <li><a class="reference internal" href="#accessing-replays">Accessing Replays</a></li>
 </ul>
 </li>

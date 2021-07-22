@@ -143,100 +143,6 @@
         </label>
         <div class="section" id="appendix">
 <h1>Appendix<a class="headerlink" href="#appendix" title="Permalink to this headline">¶</a></h1>
-<div class="section" id="module-circleguard.cacher">
-<span id="cacher"></span><h2>Cacher<a class="headerlink" href="#module-circleguard.cacher" title="Permalink to this headline">¶</a></h2>
-<dl class="py class">
-<dt id="circleguard.cacher.Cacher">
-<em class="property"><span class="pre">class</span> </em><code class="sig-prename descclassname"><span class="pre">circleguard.cacher.</span></code><code class="sig-name descname"><span class="pre">Cacher</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">cache</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">path</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/circleguard/cacher.html#Cacher"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#circleguard.cacher.Cacher" title="Permalink to this definition">¶</a></dt>
-<dd><p>Handles compressing and caching replay data to a database.</p>
-<dl class="field-list simple">
-<dt class="field-odd">Parameters</dt>
-<dd class="field-odd"><ul class="simple">
-<li><p><strong>cache</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.9)"><em>bool</em></a>) – Whether or not replays should be cached.</p></li>
-<li><p><strong>path</strong> (str or <a class="reference external" href="https://docs.python.org/3/library/os.html#os.PathLike" title="(in Python v3.9)"><code class="xref py py-class docutils literal notranslate"><span class="pre">os.PathLike</span></code></a>) – The absolute path to the database. If the path does not exist,
-a fresh database will be created there.</p></li>
-</ul>
-</dd>
-</dl>
-<p class="rubric">Notes</p>
-<p>Each Cacher instance maintains its own database connection.</p>
-<dl class="py method">
-<dt id="circleguard.cacher.Cacher.cache">
-<code class="sig-name descname"><span class="pre">cache</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">lzma_bytes</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">replay_info</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/circleguard/cacher.html#Cacher.cache"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#circleguard.cacher.Cacher.cache" title="Permalink to this definition">¶</a></dt>
-<dd><p>Caches a replay in the form of a (compressed) lzma stream to the
-database, linking it to the replay info.</p>
-<dl class="field-list simple">
-<dt class="field-odd">Parameters</dt>
-<dd class="field-odd"><ul class="simple">
-<li><p><strong>map_id</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.9)"><em>str</em></a>) – The map id to insert into the db.</p></li>
-<li><p><strong>lzma_bytes</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.9)"><em>str</em></a>) – The lzma stream to compress and insert into the db.</p></li>
-<li><p><strong>replay_info</strong> (<a class="reference internal" href="#circleguard.loader.ReplayInfo" title="circleguard.loader.ReplayInfo"><code class="xref py py-class docutils literal notranslate"><span class="pre">ReplayInfo</span></code></a>) – The ReplayInfo object representing this replay.</p></li>
-</ul>
-</dd>
-</dl>
-<p class="rubric">Notes</p>
-<p>If an entry with the given replay info already exists, it is overwritten
-by the passed lzma.</p>
-<p>The lzma string is compressed with wtc compression. See
-<code class="xref py py-func docutils literal notranslate"><span class="pre">_compress()</span></code> and <code class="xref py py-func docutils literal notranslate"><span class="pre">wtc.compress()</span></code> for more.</p>
-<p>A call to this method has no effect if the Cacher’s <code class="docutils literal notranslate"><span class="pre">should_cache</span></code>
-is <code class="docutils literal notranslate"><span class="pre">False</span></code>.</p>
-</dd></dl>
-<dl class="py method">
-<dt id="circleguard.cacher.Cacher.revalidate">
-<code class="sig-name descname"><span class="pre">revalidate</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">loader</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">replay_info</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/circleguard/cacher.html#Cacher.revalidate"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#circleguard.cacher.Cacher.revalidate" title="Permalink to this definition">¶</a></dt>
-<dd><p>Checks entries in <code class="docutils literal notranslate"><span class="pre">replay_info</span></code> against their entries in the database
-(if any) to look for score id mismatches, indicating an outdated replay.
-If there are mismatches, the replay is redownloaded and cached from the
-replay info.</p>
-<dl class="field-list simple">
-<dt class="field-odd">Parameters</dt>
-<dd class="field-odd"><ul class="simple">
-<li><p><strong>loader</strong> (<a class="reference internal" href="#circleguard.loader.Loader" title="circleguard.loader.Loader"><code class="xref py py-class docutils literal notranslate"><span class="pre">Loader</span></code></a>) – The Loader from the circleguard instance to redownload replays with
-if they are outdated.</p></li>
-<li><p><strong>replay_info</strong> (list[<a class="reference internal" href="#circleguard.loader.ReplayInfo" title="circleguard.loader.ReplayInfo"><code class="xref py py-class docutils literal notranslate"><span class="pre">ReplayInfo</span></code></a>]) – A list of ReplayInfo objects containing the up-to-date information
-of user’s replays.</p></li>
-</ul>
-</dd>
-<dt class="field-even">Raises</dt>
-<dd class="field-even"><p><a class="reference external" href="https://docs.python.org/3/library/exceptions.html#ValueError" title="(in Python v3.9)"><strong>ValueError</strong></a> – Raised when the redownloaded replay id is lower than the cached
-    replay id. This should never happen and is indicative of either a
-    fault on our end or the api’s end.
-    
-    Also raised if the replay data is not available from the api when
-    redownloaded.</p>
-</dd>
-</dl>
-<p class="rubric">Notes</p>
-<p>If the replay is found to be outdated, it will be overwritten
-by the newer replay in the database.</p>
-<div class="admonition warning">
-<p class="admonition-title">Warning</p>
-<p>This function is unused and left for historical purposes. Do not use.
-In particular, it searches with parameters other than the primary key
-(<code class="docutils literal notranslate"><span class="pre">replay_id</span></code>), which is orders of magnitude slower without an index.</p>
-</div>
-</dd></dl>
-<dl class="py method">
-<dt id="circleguard.cacher.Cacher.check_cache">
-<code class="sig-name descname"><span class="pre">check_cache</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">replay_info</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/circleguard/cacher.html#Cacher.check_cache"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#circleguard.cacher.Cacher.check_cache" title="Permalink to this definition">¶</a></dt>
-<dd><p>Checks the cache for a replay matching <code class="docutils literal notranslate"><span class="pre">replay_info</span></code>, returning its
-(uncompressed) replay data if it finds a match, and <code class="docutils literal notranslate"><span class="pre">None</span></code> otherwise.</p>
-<dl class="field-list simple">
-<dt class="field-odd">Parameters</dt>
-<dd class="field-odd"><p><strong>replay_info</strong> (<a class="reference internal" href="#circleguard.loader.ReplayInfo" title="circleguard.loader.ReplayInfo"><code class="xref py py-class docutils literal notranslate"><span class="pre">ReplayInfo</span></code></a>) – The replay info to search for a matching replay with.</p>
-</dd>
-<dt class="field-even">Returns</dt>
-<dd class="field-even"><p>The replay data in decompressed lzma form if the cache contains the
-replay, or None if not.</p>
-</dd>
-<dt class="field-odd">Return type</dt>
-<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.9)">str</a> or <a class="reference external" href="https://docs.python.org/3/library/constants.html#None" title="(in Python v3.9)">None</a></p>
-</dd>
-</dl>
-</dd></dl>
-</dd></dl>
-</div>
 <div class="section" id="id1">
 <h2>Circleguard<a class="headerlink" href="#id1" title="Permalink to this headline">¶</a></h2>
 <span class="target" id="module-circleguard.circleguard"></span><dl class="py class">
@@ -265,6 +171,8 @@ loads its info.</p></li>
 loads its info.</p></li>
 <li><p><a class="reference internal" href="#circleguard.circleguard.Circleguard.MapUser" title="circleguard.circleguard.Circleguard.MapUser"><code class="xref py py-meth docutils literal notranslate"><span class="pre">MapUser()</span></code></a> - creates a new <a class="reference internal" href="#circleguard.loadables.MapUser" title="circleguard.loadables.MapUser"><code class="xref py py-class docutils literal notranslate"><span class="pre">MapUser</span></code></a>
 and loads its info.</p></li>
+<li><p><a class="reference internal" href="#circleguard.circleguard.Circleguard.ReplayDir" title="circleguard.circleguard.Circleguard.ReplayDir"><code class="xref py py-meth docutils literal notranslate"><span class="pre">ReplayDir()</span></code></a> - creates a new
+<a class="reference internal" href="#circleguard.loadables.ReplayDir" title="circleguard.loadables.ReplayDir"><code class="xref py py-class docutils literal notranslate"><span class="pre">ReplayDir</span></code></a> and loads its info.</p></li>
 </ul>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
@@ -369,7 +277,7 @@ method.</p></li>
 </dd></dl>
 <dl class="py method">
 <dt id="circleguard.circleguard.Circleguard.snaps">
-<code class="sig-name descname"><span class="pre">snaps</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">replay</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">max_angle</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">10</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">min_distance</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">8</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">only_on_hitobjs</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">beatmap</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span> → <span class="pre">Iterable</span><span class="p"><span class="pre">[</span></span><a class="reference internal" href="#circleguard.investigator.Snap" title="circleguard.investigator.Snap"><span class="pre">circleguard.investigator.Snap</span></a><span class="p"><span class="pre">]</span></span><a class="reference internal" href="_modules/circleguard/circleguard.html#Circleguard.snaps"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#circleguard.circleguard.Circleguard.snaps" title="Permalink to this definition">¶</a></dt>
+<code class="sig-name descname"><span class="pre">snaps</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">replay</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">max_angle</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">10</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">min_distance</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">8</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">only_on_hitobjs</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">beatmap</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span> → <span class="pre">Iterable</span><span class="p"><span class="pre">[</span></span><a class="reference internal" href="#circleguard.investigations.Snap" title="circleguard.investigations.Snap"><span class="pre">circleguard.investigations.Snap</span></a><span class="p"><span class="pre">]</span></span><a class="reference internal" href="_modules/circleguard/circleguard.html#Circleguard.snaps"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#circleguard.circleguard.Circleguard.snaps" title="Permalink to this definition">¶</a></dt>
 <dd><p>Finds any snaps (sudden, jerky movement) in <code class="docutils literal notranslate"><span class="pre">replay</span></code>.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
@@ -393,7 +301,7 @@ method.</p></li>
 <dd class="field-even"><p>The snaps of the replay.</p>
 </dd>
 <dt class="field-odd">Return type</dt>
-<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#list" title="(in Python v3.9)">list</a>[<a class="reference internal" href="#circleguard.investigator.Snap" title="circleguard.investigator.Snap">Snap</a>]</p>
+<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#list" title="(in Python v3.9)">list</a>[<a class="reference internal" href="#circleguard.investigations.Snap" title="circleguard.investigations.Snap">Snap</a>]</p>
 </dd>
 </dl>
 <p class="rubric">Notes</p>
@@ -476,7 +384,7 @@ second and third frame, etc.</p>
 </dd></dl>
 <dl class="py method">
 <dt id="circleguard.circleguard.Circleguard.hits">
-<code class="sig-name descname"><span class="pre">hits</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">replay</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">within</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">beatmap</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span> → <span class="pre">Iterable</span><span class="p"><span class="pre">[</span></span><a class="reference internal" href="#circleguard.investigator.Judgment" title="circleguard.investigator.Judgment"><span class="pre">circleguard.investigator.Judgment</span></a><span class="p"><span class="pre">]</span></span><a class="reference internal" href="_modules/circleguard/circleguard.html#Circleguard.hits"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#circleguard.circleguard.Circleguard.hits" title="Permalink to this definition">¶</a></dt>
+<code class="sig-name descname"><span class="pre">hits</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">replay</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">within</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">beatmap</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span> → <span class="pre">Iterable</span><span class="p"><span class="pre">[</span></span><span class="pre">circleguard.judgment.Judgment</span><span class="p"><span class="pre">]</span></span><a class="reference internal" href="_modules/circleguard/circleguard.html#Circleguard.hits"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#circleguard.circleguard.Circleguard.hits" title="Permalink to this definition">¶</a></dt>
 <dd><p>The locations in the replay where a hitobject is hit.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
@@ -497,7 +405,7 @@ method.</p></li>
 <dd class="field-even"><p>The hits of the replay.</p>
 </dd>
 <dt class="field-odd">Return type</dt>
-<dd class="field-odd"><p>list[<a class="reference internal" href="#circleguard.investigator.Judgment" title="circleguard.investigator.Judgment"><code class="xref py py-class docutils literal notranslate"><span class="pre">Judgment</span></code></a>]</p>
+<dd class="field-odd"><p>list[<code class="xref py py-class docutils literal notranslate"><span class="pre">Judgment</span></code>]</p>
 </dd>
 </dl>
 <p class="rubric">Notes</p>
@@ -506,7 +414,7 @@ without misses.</p>
 </dd></dl>
 <dl class="py method">
 <dt id="circleguard.circleguard.Circleguard.judgments">
-<code class="sig-name descname"><span class="pre">judgments</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">replay</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">beatmap</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span> → <span class="pre">Iterable</span><span class="p"><span class="pre">[</span></span><a class="reference internal" href="#circleguard.investigator.Judgment" title="circleguard.investigator.Judgment"><span class="pre">circleguard.investigator.Judgment</span></a><span class="p"><span class="pre">]</span></span><a class="reference internal" href="_modules/circleguard/circleguard.html#Circleguard.judgments"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#circleguard.circleguard.Circleguard.judgments" title="Permalink to this definition">¶</a></dt>
+<code class="sig-name descname"><span class="pre">judgments</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">replay</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">beatmap</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span> → <span class="pre">Iterable</span><span class="p"><span class="pre">[</span></span><span class="pre">circleguard.judgment.Judgment</span><span class="p"><span class="pre">]</span></span><a class="reference internal" href="_modules/circleguard/circleguard.html#Circleguard.judgments"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#circleguard.circleguard.Circleguard.judgments" title="Permalink to this definition">¶</a></dt>
 <dd><p>The locations in the replay where a hitobject is hit or missed.
 Judgments are marked as either misses, 50s, 100s, or 300s.</p>
 <dl class="field-list simple">
@@ -525,7 +433,7 @@ method.</p></li>
 <dd class="field-even"><p>The judgments of the replay.</p>
 </dd>
 <dt class="field-odd">Return type</dt>
-<dd class="field-odd"><p>list[<a class="reference internal" href="#circleguard.investigator.Judgment" title="circleguard.investigator.Judgment"><code class="xref py py-class docutils literal notranslate"><span class="pre">Judgment</span></code></a>]</p>
+<dd class="field-odd"><p>list[<code class="xref py py-class docutils literal notranslate"><span class="pre">Judgment</span></code>]</p>
 </dd>
 </dl>
 </dd></dl>
@@ -587,7 +495,7 @@ figure after being modified by the frametime graph.</p>
 </dd></dl>
 <dl class="py method">
 <dt id="circleguard.circleguard.Circleguard.Map">
-<code class="sig-name descname"><span class="pre">Map</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">map_id</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">span</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">mods</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">cache</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span> → <a class="reference internal" href="#circleguard.loadables.Map" title="circleguard.loadables.Map"><span class="pre">circleguard.loadables.Map</span></a><a class="reference internal" href="_modules/circleguard/circleguard.html#Circleguard.Map"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#circleguard.circleguard.Circleguard.Map" title="Permalink to this definition">¶</a></dt>
+<code class="sig-name descname"><span class="pre">Map</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">map_id</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">span</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">mods</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">cache</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">load</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span> → <a class="reference internal" href="#circleguard.loadables.Map" title="circleguard.loadables.Map"><span class="pre">circleguard.loadables.Map</span></a><a class="reference internal" href="_modules/circleguard/circleguard.html#Circleguard.Map"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#circleguard.circleguard.Circleguard.Map" title="Permalink to this definition">¶</a></dt>
 <dd><p>Returns a new, info-loaded <a class="reference internal" href="#circleguard.loadables.Map" title="circleguard.loadables.Map"><code class="xref py py-class docutils literal notranslate"><span class="pre">Map</span></code></a>.</p>
 <p class="rubric">Notes</p>
 <p>This function is provided as a convenience for when you want to create a
@@ -596,16 +504,15 @@ figure after being modified by the frametime graph.</p>
 iterate over it to operate on its replays. However, this <code class="docutils literal notranslate"><span class="pre">Map</span></code> must
 be info loaded before it can be iterated over, so this function does
 that info loading for you.</p>
-<div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="c1"># usage without this function (bad)</span>
-<span class="gp">&gt;&gt;&gt; </span><span class="n">cg</span> <span class="o">=</span> <span class="n">Circleguard</span><span class="p">(</span><span class="s2">"key"</span><span class="p">)</span>
-<span class="gp">&gt;&gt;&gt; </span><span class="n">m</span> <span class="o">=</span> <span class="n">Map</span><span class="p">(</span><span class="mi">221777</span><span class="p">,</span> <span class="s2">"1-2"</span><span class="p">)</span>
-<span class="gp">&gt;&gt;&gt; </span><span class="n">cg</span><span class="o">.</span><span class="n">load_info</span><span class="p">(</span><span class="n">m</span><span class="p">)</span>
+<div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="c1"># good</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">m</span> <span class="o">=</span> <span class="n">cg</span><span class="o">.</span><span class="n">Map</span><span class="p">(</span><span class="mi">221777</span><span class="p">,</span> <span class="s2">"1-2"</span><span class="p">)</span>
 <span class="gp">&gt;&gt;&gt; </span><span class="k">for</span> <span class="n">replay</span> <span class="ow">in</span> <span class="n">m</span><span class="p">:</span>
 <span class="gp">&gt;&gt;&gt; </span>    <span class="o">...</span>
-<span class="go">&gt;&gt;&gt;</span>
-<span class="gp">&gt;&gt;&gt; </span><span class="c1"># usage with this function (good)</span>
-<span class="gp">&gt;&gt;&gt; </span><span class="n">cg</span> <span class="o">=</span> <span class="n">Circleguard</span><span class="p">(</span><span class="s2">"key"</span><span class="p">)</span>
-<span class="gp">&gt;&gt;&gt; </span><span class="n">m</span> <span class="o">=</span> <span class="n">cg</span><span class="o">.</span><span class="n">Map</span><span class="p">(</span><span class="mi">221777</span><span class="p">,</span> <span class="s2">"1-2"</span><span class="p">)</span>
+</pre></div>
+</div>
+<div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="c1"># bad</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">m</span> <span class="o">=</span> <span class="n">Map</span><span class="p">(</span><span class="mi">221777</span><span class="p">,</span> <span class="s2">"1-2"</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">cg</span><span class="o">.</span><span class="n">load_info</span><span class="p">(</span><span class="n">m</span><span class="p">)</span>
 <span class="gp">&gt;&gt;&gt; </span><span class="k">for</span> <span class="n">replay</span> <span class="ow">in</span> <span class="n">m</span><span class="p">:</span>
 <span class="gp">&gt;&gt;&gt; </span>    <span class="o">...</span>
 </pre></div>
@@ -613,7 +520,7 @@ that info loading for you.</p>
 </dd></dl>
 <dl class="py method">
 <dt id="circleguard.circleguard.Circleguard.User">
-<code class="sig-name descname"><span class="pre">User</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">user_id</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">span</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">mods</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">cache</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">available_only</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em><span class="sig-paren">)</span> → <a class="reference internal" href="#circleguard.loadables.User" title="circleguard.loadables.User"><span class="pre">circleguard.loadables.User</span></a><a class="reference internal" href="_modules/circleguard/circleguard.html#Circleguard.User"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#circleguard.circleguard.Circleguard.User" title="Permalink to this definition">¶</a></dt>
+<code class="sig-name descname"><span class="pre">User</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">user_id</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">span</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">mods</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">cache</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">available_only</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">load</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span> → <a class="reference internal" href="#circleguard.loadables.User" title="circleguard.loadables.User"><span class="pre">circleguard.loadables.User</span></a><a class="reference internal" href="_modules/circleguard/circleguard.html#Circleguard.User"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#circleguard.circleguard.Circleguard.User" title="Permalink to this definition">¶</a></dt>
 <dd><p>Returns a new, info-loaded <a class="reference internal" href="#circleguard.loadables.User" title="circleguard.loadables.User"><code class="xref py py-class docutils literal notranslate"><span class="pre">User</span></code></a>.</p>
 <p class="rubric">Notes</p>
 <p>This function is provided as a convenience for when you want to create a
@@ -622,16 +529,15 @@ that info loading for you.</p>
 iterate over it to operate on its replays. However, this <code class="docutils literal notranslate"><span class="pre">User</span></code> must
 be info loaded before it can be iterated over, so this function does
 that info loading for you.</p>
-<div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="c1"># usage without this function (bad)</span>
-<span class="gp">&gt;&gt;&gt; </span><span class="n">cg</span> <span class="o">=</span> <span class="n">Circleguard</span><span class="p">(</span><span class="s2">"key"</span><span class="p">)</span>
-<span class="gp">&gt;&gt;&gt; </span><span class="n">u</span> <span class="o">=</span> <span class="n">User</span><span class="p">(</span><span class="mi">124493</span><span class="p">,</span> <span class="s2">"1-2"</span><span class="p">)</span>
-<span class="gp">&gt;&gt;&gt; </span><span class="n">cg</span><span class="o">.</span><span class="n">load_info</span><span class="p">(</span><span class="n">u</span><span class="p">)</span>
+<div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="c1"># good</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">u</span> <span class="o">=</span> <span class="n">cg</span><span class="o">.</span><span class="n">User</span><span class="p">(</span><span class="mi">124493</span><span class="p">,</span> <span class="s2">"1-2"</span><span class="p">)</span>
 <span class="gp">&gt;&gt;&gt; </span><span class="k">for</span> <span class="n">replay</span> <span class="ow">in</span> <span class="n">u</span><span class="p">:</span>
 <span class="gp">&gt;&gt;&gt; </span>    <span class="o">...</span>
-<span class="go">&gt;&gt;&gt;</span>
-<span class="gp">&gt;&gt;&gt; </span><span class="c1"># usage with this function (good)</span>
-<span class="gp">&gt;&gt;&gt; </span><span class="n">cg</span> <span class="o">=</span> <span class="n">Circleguard</span><span class="p">(</span><span class="s2">"key"</span><span class="p">)</span>
-<span class="gp">&gt;&gt;&gt; </span><span class="n">u</span> <span class="o">=</span> <span class="n">cg</span><span class="o">.</span><span class="n">User</span><span class="p">(</span><span class="mi">124493</span><span class="p">,</span> <span class="s2">"1-2"</span><span class="p">)</span>
+</pre></div>
+</div>
+<div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="c1"># bad</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">u</span> <span class="o">=</span> <span class="n">User</span><span class="p">(</span><span class="mi">124493</span><span class="p">,</span> <span class="s2">"1-2"</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">cg</span><span class="o">.</span><span class="n">load_info</span><span class="p">(</span><span class="n">u</span><span class="p">)</span>
 <span class="gp">&gt;&gt;&gt; </span><span class="k">for</span> <span class="n">replay</span> <span class="ow">in</span> <span class="n">u</span><span class="p">:</span>
 <span class="gp">&gt;&gt;&gt; </span>    <span class="o">...</span>
 </pre></div>
@@ -639,7 +545,7 @@ that info loading for you.</p>
 </dd></dl>
 <dl class="py method">
 <dt id="circleguard.circleguard.Circleguard.MapUser">
-<code class="sig-name descname"><span class="pre">MapUser</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">map_id</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">user_id</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">span</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">{1,</span> <span class="pre">2,</span> <span class="pre">3,</span> <span class="pre">4,</span> <span class="pre">5,</span> <span class="pre">6,</span> <span class="pre">7,</span> <span class="pre">8,</span> <span class="pre">9,</span> <span class="pre">10,</span> <span class="pre">11,</span> <span class="pre">12,</span> <span class="pre">13,</span> <span class="pre">14,</span> <span class="pre">15,</span> <span class="pre">16,</span> <span class="pre">17,</span> <span class="pre">18,</span> <span class="pre">19,</span> <span class="pre">20,</span> <span class="pre">21,</span> <span class="pre">22,</span> <span class="pre">23,</span> <span class="pre">24,</span> <span class="pre">25,</span> <span class="pre">26,</span> <span class="pre">27,</span> <span class="pre">28,</span> <span class="pre">29,</span> <span class="pre">30,</span> <span class="pre">31,</span> <span class="pre">32,</span> <span class="pre">33,</span> <span class="pre">34,</span> <span class="pre">35,</span> <span class="pre">36,</span> <span class="pre">37,</span> <span class="pre">38,</span> <span class="pre">39,</span> <span class="pre">40,</span> <span class="pre">41,</span> <span class="pre">42,</span> <span class="pre">43,</span> <span class="pre">44,</span> <span class="pre">45,</span> <span class="pre">46,</span> <span class="pre">47,</span> <span class="pre">48,</span> <span class="pre">49,</span> <span class="pre">50,</span> <span class="pre">51,</span> <span class="pre">52,</span> <span class="pre">53,</span> <span class="pre">54,</span> <span class="pre">55,</span> <span class="pre">56,</span> <span class="pre">57,</span> <span class="pre">58,</span> <span class="pre">59,</span> <span class="pre">60,</span> <span class="pre">61,</span> <span class="pre">62,</span> <span class="pre">63,</span> <span class="pre">64,</span> <span class="pre">65,</span> <span class="pre">66,</span> <span class="pre">67,</span> <span class="pre">68,</span> <span class="pre">69,</span> <span class="pre">70,</span> <span class="pre">71,</span> <span class="pre">72,</span> <span class="pre">73,</span> <span class="pre">74,</span> <span class="pre">75,</span> <span class="pre">76,</span> <span class="pre">77,</span> <span class="pre">78,</span> <span class="pre">79,</span> <span class="pre">80,</span> <span class="pre">81,</span> <span class="pre">82,</span> <span class="pre">83,</span> <span class="pre">84,</span> <span class="pre">85,</span> <span class="pre">86,</span> <span class="pre">87,</span> <span class="pre">88,</span> <span class="pre">89,</span> <span class="pre">90,</span> <span class="pre">91,</span> <span class="pre">92,</span> <span class="pre">93,</span> <span class="pre">94,</span> <span class="pre">95,</span> <span class="pre">96,</span> <span class="pre">97,</span> <span class="pre">98,</span> <span class="pre">99,</span> <span class="pre">100}</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">cache</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">available_only</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em><span class="sig-paren">)</span> → <a class="reference internal" href="#circleguard.loadables.MapUser" title="circleguard.loadables.MapUser"><span class="pre">circleguard.loadables.MapUser</span></a><a class="reference internal" href="_modules/circleguard/circleguard.html#Circleguard.MapUser"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#circleguard.circleguard.Circleguard.MapUser" title="Permalink to this definition">¶</a></dt>
+<code class="sig-name descname"><span class="pre">MapUser</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">map_id</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">user_id</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">span</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">{1,</span> <span class="pre">2,</span> <span class="pre">3,</span> <span class="pre">4,</span> <span class="pre">5,</span> <span class="pre">6,</span> <span class="pre">7,</span> <span class="pre">8,</span> <span class="pre">9,</span> <span class="pre">10,</span> <span class="pre">11,</span> <span class="pre">12,</span> <span class="pre">13,</span> <span class="pre">14,</span> <span class="pre">15,</span> <span class="pre">16,</span> <span class="pre">17,</span> <span class="pre">18,</span> <span class="pre">19,</span> <span class="pre">20,</span> <span class="pre">21,</span> <span class="pre">22,</span> <span class="pre">23,</span> <span class="pre">24,</span> <span class="pre">25,</span> <span class="pre">26,</span> <span class="pre">27,</span> <span class="pre">28,</span> <span class="pre">29,</span> <span class="pre">30,</span> <span class="pre">31,</span> <span class="pre">32,</span> <span class="pre">33,</span> <span class="pre">34,</span> <span class="pre">35,</span> <span class="pre">36,</span> <span class="pre">37,</span> <span class="pre">38,</span> <span class="pre">39,</span> <span class="pre">40,</span> <span class="pre">41,</span> <span class="pre">42,</span> <span class="pre">43,</span> <span class="pre">44,</span> <span class="pre">45,</span> <span class="pre">46,</span> <span class="pre">47,</span> <span class="pre">48,</span> <span class="pre">49,</span> <span class="pre">50,</span> <span class="pre">51,</span> <span class="pre">52,</span> <span class="pre">53,</span> <span class="pre">54,</span> <span class="pre">55,</span> <span class="pre">56,</span> <span class="pre">57,</span> <span class="pre">58,</span> <span class="pre">59,</span> <span class="pre">60,</span> <span class="pre">61,</span> <span class="pre">62,</span> <span class="pre">63,</span> <span class="pre">64,</span> <span class="pre">65,</span> <span class="pre">66,</span> <span class="pre">67,</span> <span class="pre">68,</span> <span class="pre">69,</span> <span class="pre">70,</span> <span class="pre">71,</span> <span class="pre">72,</span> <span class="pre">73,</span> <span class="pre">74,</span> <span class="pre">75,</span> <span class="pre">76,</span> <span class="pre">77,</span> <span class="pre">78,</span> <span class="pre">79,</span> <span class="pre">80,</span> <span class="pre">81,</span> <span class="pre">82,</span> <span class="pre">83,</span> <span class="pre">84,</span> <span class="pre">85,</span> <span class="pre">86,</span> <span class="pre">87,</span> <span class="pre">88,</span> <span class="pre">89,</span> <span class="pre">90,</span> <span class="pre">91,</span> <span class="pre">92,</span> <span class="pre">93,</span> <span class="pre">94,</span> <span class="pre">95,</span> <span class="pre">96,</span> <span class="pre">97,</span> <span class="pre">98,</span> <span class="pre">99,</span> <span class="pre">100}</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">cache</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">available_only</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">load</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span> → <a class="reference internal" href="#circleguard.loadables.MapUser" title="circleguard.loadables.MapUser"><span class="pre">circleguard.loadables.MapUser</span></a><a class="reference internal" href="_modules/circleguard/circleguard.html#Circleguard.MapUser"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#circleguard.circleguard.Circleguard.MapUser" title="Permalink to this definition">¶</a></dt>
 <dd><p>Returns a new, info-loaded <a class="reference internal" href="#circleguard.loadables.MapUser" title="circleguard.loadables.MapUser"><code class="xref py py-class docutils literal notranslate"><span class="pre">MapUser</span></code></a>.</p>
 <p class="rubric">Notes</p>
 <p>This function is provided as a convenience for when you want to create a
@@ -648,17 +554,41 @@ that info loading for you.</p>
 iterate over it to operate on its replays. However, this <code class="docutils literal notranslate"><span class="pre">MapUser</span></code>
 must be info loaded before it can be iterated over, so this function
 does that info loading for you.</p>
-<div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="c1"># usage without this function (bad)</span>
-<span class="gp">&gt;&gt;&gt; </span><span class="n">cg</span> <span class="o">=</span> <span class="n">Circleguard</span><span class="p">(</span><span class="s2">"key"</span><span class="p">)</span>
+<div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="c1"># good</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">mu</span> <span class="o">=</span> <span class="n">cg</span><span class="o">.</span><span class="n">MapUser</span><span class="p">(</span><span class="mi">124493</span><span class="p">,</span> <span class="mi">129891</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="k">for</span> <span class="n">replay</span> <span class="ow">in</span> <span class="n">mu</span><span class="p">:</span>
+<span class="gp">&gt;&gt;&gt; </span>    <span class="o">...</span>
+</pre></div>
+</div>
+<div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="c1"># bad</span>
 <span class="gp">&gt;&gt;&gt; </span><span class="n">mu</span> <span class="o">=</span> <span class="n">MapUser</span><span class="p">(</span><span class="mi">124493</span><span class="p">,</span> <span class="mi">129891</span><span class="p">)</span>
 <span class="gp">&gt;&gt;&gt; </span><span class="n">cg</span><span class="o">.</span><span class="n">load_info</span><span class="p">(</span><span class="n">mu</span><span class="p">)</span>
 <span class="gp">&gt;&gt;&gt; </span><span class="k">for</span> <span class="n">replay</span> <span class="ow">in</span> <span class="n">mu</span><span class="p">:</span>
 <span class="gp">&gt;&gt;&gt; </span>    <span class="o">...</span>
-<span class="go">&gt;&gt;&gt;</span>
-<span class="gp">&gt;&gt;&gt; </span><span class="c1"># usage with this function (good)</span>
-<span class="gp">&gt;&gt;&gt; </span><span class="n">cg</span> <span class="o">=</span> <span class="n">Circleguard</span><span class="p">(</span><span class="s2">"key"</span><span class="p">)</span>
-<span class="gp">&gt;&gt;&gt; </span><span class="n">mu</span> <span class="o">=</span> <span class="n">cg</span><span class="o">.</span><span class="n">MapUser</span><span class="p">(</span><span class="mi">124493</span><span class="p">,</span> <span class="mi">129891</span><span class="p">)</span>
-<span class="gp">&gt;&gt;&gt; </span><span class="k">for</span> <span class="n">replay</span> <span class="ow">in</span> <span class="n">mu</span><span class="p">:</span>
+</pre></div>
+</div>
+</dd></dl>
+<dl class="py method">
+<dt id="circleguard.circleguard.Circleguard.ReplayDir">
+<code class="sig-name descname"><span class="pre">ReplayDir</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">path</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">cache</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">load</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span> → <a class="reference internal" href="#circleguard.loadables.ReplayDir" title="circleguard.loadables.ReplayDir"><span class="pre">circleguard.loadables.ReplayDir</span></a><a class="reference internal" href="_modules/circleguard/circleguard.html#Circleguard.ReplayDir"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#circleguard.circleguard.Circleguard.ReplayDir" title="Permalink to this definition">¶</a></dt>
+<dd><p>Returns a new, info-loaded <a class="reference internal" href="#circleguard.loadables.ReplayDir" title="circleguard.loadables.ReplayDir"><code class="xref py py-class docutils literal notranslate"><span class="pre">ReplayDir</span></code></a>.</p>
+<p class="rubric">Notes</p>
+<p>This function is provided as a convenience for when you want to create a
+<code class="docutils literal notranslate"><span class="pre">ReplayDir</span></code> and load its info immediately. A common occurrence in using
+<code class="docutils literal notranslate"><span class="pre">Circleguard</span></code> is to want to instantiate a <code class="docutils literal notranslate"><span class="pre">ReplayDir</span></code> and immediately
+iterate over it to operate on its replays. However, this <code class="docutils literal notranslate"><span class="pre">ReplayDir</span></code>
+must be info loaded before it can be iterated over, so this function
+does that info loading for you.</p>
+<div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="c1"># bad</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">r_dir</span> <span class="o">=</span> <span class="n">cg</span><span class="o">.</span><span class="n">ReplayDir</span><span class="p">(</span><span class="s2">"/Users/tybug/Desktop/replays"</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="k">for</span> <span class="n">replay</span> <span class="ow">in</span> <span class="n">r_dir</span><span class="p">:</span>
+<span class="gp">&gt;&gt;&gt; </span>    <span class="o">...</span>
+</pre></div>
+</div>
+<div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="c1"># good</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">r_dir</span> <span class="o">=</span> <span class="n">ReplayDir</span><span class="p">(</span><span class="s2">"/Users/tybug/Desktop/replays"</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">cg</span><span class="o">.</span><span class="n">load_info</span><span class="p">(</span><span class="n">r_dir</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="k">for</span> <span class="n">replay</span> <span class="ow">in</span> <span class="n">r_dir</span><span class="p">:</span>
 <span class="gp">&gt;&gt;&gt; </span>    <span class="o">...</span>
 </pre></div>
 </div>
@@ -698,6 +628,21 @@ operation which is why this does not occur by default.</p>
 <p>This function is provided as a convenience for when you want to create a
 <code class="docutils literal notranslate"><span class="pre">ReplayID</span></code> and load it immediately. Loading can be an expensive
 operation which is why this does not occur by default.</p>
+</dd></dl>
+<dl class="py method">
+<dt id="circleguard.circleguard.Circleguard.beatmap">
+<code class="sig-name descname"><span class="pre">beatmap</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">replay</span></span></em><span class="sig-paren">)</span> → <a class="reference external" href="https://llllllllll.github.io/slider/appendix.html#slider.beatmap.Beatmap" title="(in slider v0.2.1)"><span class="pre">slider.beatmap.Beatmap</span></a><a class="reference internal" href="_modules/circleguard/circleguard.html#Circleguard.beatmap"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#circleguard.circleguard.Circleguard.beatmap" title="Permalink to this definition">¶</a></dt>
+<dd><p>The beatmap the replay was played on, or <code class="docutils literal notranslate"><span class="pre">None</span></code> if the replay doesn’t
+know what beatmap it was played on.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns</dt>
+<dd class="field-odd"><p><ul class="simple">
+<li><p><a class="reference external" href="https://llllllllll.github.io/slider/appendix.html#slider.beatmap.Beatmap" title="(in slider v0.2.1)"><code class="xref py py-class docutils literal notranslate"><span class="pre">slider.beatmap.Beatmap</span></code></a> – The beatmap this replay was played on.</p></li>
+<li><p><em>None</em> – If the replay doesn’t know what beatmap it was played on.</p></li>
+</ul>
+</p>
+</dd>
+</dl>
 </dd></dl>
 </dd></dl>
 <dl class="py class">
@@ -743,8 +688,99 @@ logging lib.</p>
 </dl>
 </dd></dl>
 </div>
-<div class="section" id="module-circleguard.comparer">
-<span id="comparer"></span><h2>Comparer<a class="headerlink" href="#module-circleguard.comparer" title="Permalink to this headline">¶</a></h2>
+<div class="section" id="module-circleguard.cacher">
+<span id="cacher"></span><h2>Cacher<a class="headerlink" href="#module-circleguard.cacher" title="Permalink to this headline">¶</a></h2>
+<dl class="py class">
+<dt id="circleguard.cacher.Cacher">
+<em class="property"><span class="pre">class</span> </em><code class="sig-prename descclassname"><span class="pre">circleguard.cacher.</span></code><code class="sig-name descname"><span class="pre">Cacher</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">cache</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">path</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/circleguard/cacher.html#Cacher"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#circleguard.cacher.Cacher" title="Permalink to this definition">¶</a></dt>
+<dd><p>Handles compressing and caching replay data to a database.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>cache</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.9)"><em>bool</em></a>) – Whether or not replays should be cached.</p></li>
+<li><p><strong>path</strong> (str or <a class="reference external" href="https://docs.python.org/3/library/os.html#os.PathLike" title="(in Python v3.9)"><code class="xref py py-class docutils literal notranslate"><span class="pre">os.PathLike</span></code></a>) – The absolute path to the database. If the path does not exist,
+a fresh database will be created there.</p></li>
+</ul>
+</dd>
+</dl>
+<p class="rubric">Notes</p>
+<p>Each Cacher instance maintains its own database connection.</p>
+<dl class="py method">
+<dt id="circleguard.cacher.Cacher.cache">
+<code class="sig-name descname"><span class="pre">cache</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">lzma_bytes</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">replay_info</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/circleguard/cacher.html#Cacher.cache"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#circleguard.cacher.Cacher.cache" title="Permalink to this definition">¶</a></dt>
+<dd><p>Caches a replay in the form of a (compressed) lzma stream to the
+database, linking it to the replay info.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>map_id</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.9)"><em>str</em></a>) – The map id to insert into the db.</p></li>
+<li><p><strong>lzma_bytes</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.9)"><em>str</em></a>) – The lzma stream to compress and insert into the db.</p></li>
+<li><p><strong>replay_info</strong> (<a class="reference internal" href="#circleguard.loader.ReplayInfo" title="circleguard.loader.ReplayInfo"><code class="xref py py-class docutils literal notranslate"><span class="pre">ReplayInfo</span></code></a>) – The ReplayInfo object representing this replay.</p></li>
+</ul>
+</dd>
+</dl>
+<p class="rubric">Notes</p>
+<p>If an entry with the given replay info already exists, it is overwritten
+by the passed lzma.</p>
+<p>The lzma string is compressed with wtc compression. See
+<code class="xref py py-func docutils literal notranslate"><span class="pre">_compress()</span></code> and <code class="xref py py-func docutils literal notranslate"><span class="pre">wtc.compress()</span></code> for more.</p>
+<p>A call to this method has no effect if the Cacher’s <code class="docutils literal notranslate"><span class="pre">should_cache</span></code>
+is <code class="docutils literal notranslate"><span class="pre">False</span></code>.</p>
+</dd></dl>
+<dl class="py method">
+<dt id="circleguard.cacher.Cacher.revalidate">
+<code class="sig-name descname"><span class="pre">revalidate</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">loader</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">replay_info</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/circleguard/cacher.html#Cacher.revalidate"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#circleguard.cacher.Cacher.revalidate" title="Permalink to this definition">¶</a></dt>
+<dd><p>Checks entries in <code class="docutils literal notranslate"><span class="pre">replay_info</span></code> against their entries in the database
+(if any) to look for score id mismatches, indicating an outdated replay.
+If there are mismatches, the replay is redownloaded and cached from the
+replay info.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>loader</strong> (<a class="reference internal" href="#circleguard.loader.Loader" title="circleguard.loader.Loader"><code class="xref py py-class docutils literal notranslate"><span class="pre">Loader</span></code></a>) – The Loader from the circleguard instance to redownload replays with
+if they are outdated.</p></li>
+<li><p><strong>replay_info</strong> (list[<a class="reference internal" href="#circleguard.loader.ReplayInfo" title="circleguard.loader.ReplayInfo"><code class="xref py py-class docutils literal notranslate"><span class="pre">ReplayInfo</span></code></a>]) – A list of ReplayInfo objects containing the up-to-date information
+of user’s replays.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Raises</dt>
+<dd class="field-even"><p><a class="reference external" href="https://docs.python.org/3/library/exceptions.html#ValueError" title="(in Python v3.9)"><strong>ValueError</strong></a> – Raised when the redownloaded replay id is lower than the cached
+    replay id. This should never happen and is indicative of either a
+    fault on our end or the api’s end.
+    
+    Also raised if the replay data is not available from the api when
+    redownloaded.</p>
+</dd>
+</dl>
+<p class="rubric">Notes</p>
+<p>If the replay is found to be outdated, it will be overwritten
+by the newer replay in the database.</p>
+<div class="admonition warning">
+<p class="admonition-title">Warning</p>
+<p>This function is unused and left for historical purposes. Do not use.
+In particular, it searches with parameters other than the primary key
+(<code class="docutils literal notranslate"><span class="pre">replay_id</span></code>), which is orders of magnitude slower without an index.</p>
+</div>
+</dd></dl>
+<dl class="py method">
+<dt id="circleguard.cacher.Cacher.check_cache">
+<code class="sig-name descname"><span class="pre">check_cache</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">replay_info</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/circleguard/cacher.html#Cacher.check_cache"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#circleguard.cacher.Cacher.check_cache" title="Permalink to this definition">¶</a></dt>
+<dd><p>Checks the cache for a replay matching <code class="docutils literal notranslate"><span class="pre">replay_info</span></code>, returning its
+(uncompressed) replay data if it finds a match, and <code class="docutils literal notranslate"><span class="pre">None</span></code> otherwise.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><p><strong>replay_info</strong> (<a class="reference internal" href="#circleguard.loader.ReplayInfo" title="circleguard.loader.ReplayInfo"><code class="xref py py-class docutils literal notranslate"><span class="pre">ReplayInfo</span></code></a>) – The replay info to search for a matching replay with.</p>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>The replay data in decompressed lzma form if the cache contains the
+replay, or None if not.</p>
+</dd>
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.9)">str</a> or <a class="reference external" href="https://docs.python.org/3/library/constants.html#None" title="(in Python v3.9)">None</a></p>
+</dd>
+</dl>
+</dd></dl>
+</dd></dl>
 </div>
 <div class="section" id="module-circleguard.game_version">
 <span id="game-version"></span><h2>Game Version<a class="headerlink" href="#module-circleguard.game_version" title="Permalink to this headline">¶</a></h2>
@@ -856,11 +892,11 @@ it is fixed.</p>
 <dd><p>A spinner in osu! gameplay, with a time and position.</p>
 </dd></dl>
 </div>
-<div class="section" id="module-circleguard.investigator">
-<span id="investigator"></span><h2>Investigator<a class="headerlink" href="#module-circleguard.investigator" title="Permalink to this headline">¶</a></h2>
+<div class="section" id="module-circleguard.investigations">
+<span id="investigations"></span><h2>Investigations<a class="headerlink" href="#module-circleguard.investigations" title="Permalink to this headline">¶</a></h2>
 <dl class="py class">
-<dt id="circleguard.investigator.Snap">
-<em class="property"><span class="pre">class</span> </em><code class="sig-prename descclassname"><span class="pre">circleguard.investigator.</span></code><code class="sig-name descname"><span class="pre">Snap</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">time</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">angle</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">distance</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/circleguard/investigator.html#Snap"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#circleguard.investigator.Snap" title="Permalink to this definition">¶</a></dt>
+<dt id="circleguard.investigations.Snap">
+<em class="property"><span class="pre">class</span> </em><code class="sig-prename descclassname"><span class="pre">circleguard.investigations.</span></code><code class="sig-name descname"><span class="pre">Snap</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">time</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">angle</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">distance</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/circleguard/investigations.html#Snap"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#circleguard.investigations.Snap" title="Permalink to this definition">¶</a></dt>
 <dd><p>A suspicious hit in a replay, specifically so because it snaps away from
 the otherwise normal path. Snaps represent the middle frame in a set of
 three replay frames (so for example <code class="docutils literal notranslate"><span class="pre">time</span></code> is the time of the middle
@@ -876,107 +912,6 @@ datapoints with <code class="docutils literal notranslate"><span class="pre">b</
 </ul>
 </dd>
 </dl>
-</dd></dl>
-<dl class="py class">
-<dt id="circleguard.investigator.JudgmentType">
-<em class="property"><span class="pre">class</span> </em><code class="sig-prename descclassname"><span class="pre">circleguard.investigator.</span></code><code class="sig-name descname"><span class="pre">JudgmentType</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">value</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/circleguard/investigator.html#JudgmentType"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#circleguard.investigator.JudgmentType" title="Permalink to this definition">¶</a></dt>
-<dd><p>An enumeration.</p>
-</dd></dl>
-<dl class="py class">
-<dt id="circleguard.investigator.Judgment">
-<em class="property"><span class="pre">class</span> </em><code class="sig-prename descclassname"><span class="pre">circleguard.investigator.</span></code><code class="sig-name descname"><span class="pre">Judgment</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">hitobject</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">replay</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">beatmap</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">type_</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/circleguard/investigator.html#Judgment"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#circleguard.investigator.Judgment" title="Permalink to this definition">¶</a></dt>
-<dd><p>A judgment on a hitobject. A “judgment” is either a hit or a miss, with
-a hit being further classified as a 300, 100, or 50.</p>
-<dl class="field-list simple">
-<dt class="field-odd">Parameters</dt>
-<dd class="field-odd"><ul class="simple">
-<li><p><strong>hitobject</strong> (<a class="reference external" href="https://llllllllll.github.io/slider/appendix.html#slider.beatmap.HitObject" title="(in slider v0.2.1)"><code class="xref py py-class docutils literal notranslate"><span class="pre">slider.beatmap.HitObject</span></code></a>) – The hitobject being judged. This is converted to a
-<a class="reference internal" href="#circleguard.hitobjects.Hitobject" title="circleguard.hitobjects.Hitobject"><code class="xref py py-class docutils literal notranslate"><span class="pre">circleguard.hitobjects.Hitobject</span></code></a>.</p></li>
-<li><p><strong>replay</strong> (<a class="reference internal" href="#circleguard.loadables.Replay" title="circleguard.loadables.Replay"><code class="xref py py-class docutils literal notranslate"><span class="pre">circleguard.loadables.Replay</span></code></a>) – The replay this judgment was made on.</p></li>
-<li><p><strong>beatmap</strong> (<a class="reference external" href="https://llllllllll.github.io/slider/appendix.html#slider.beatmap.Beatmap" title="(in slider v0.2.1)"><code class="xref py py-class docutils literal notranslate"><span class="pre">slider.beatmap.Beatmap</span></code></a>) – The beatmap this judgment was made on.</p></li>
-<li><p><strong>type</strong> (<a class="reference internal" href="#circleguard.investigator.JudgmentType" title="circleguard.investigator.JudgmentType"><code class="xref py py-class docutils literal notranslate"><span class="pre">JudgmentType</span></code></a>) – The type of this judgment (either Hit300, Hit100, or Hit50, or Miss).</p></li>
-</ul>
-</dd>
-</dl>
-</dd></dl>
-<dl class="py class">
-<dt id="circleguard.investigator.Miss">
-<em class="property"><span class="pre">class</span> </em><code class="sig-prename descclassname"><span class="pre">circleguard.investigator.</span></code><code class="sig-name descname"><span class="pre">Miss</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">hitobject</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">replay</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">beatmap</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/circleguard/investigator.html#Miss"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#circleguard.investigator.Miss" title="Permalink to this definition">¶</a></dt>
-<dd><p>A miss on a hitobject when a replay is played against a beatmap.</p>
-</dd></dl>
-<dl class="py class">
-<dt id="circleguard.investigator.Hit">
-<em class="property"><span class="pre">class</span> </em><code class="sig-prename descclassname"><span class="pre">circleguard.investigator.</span></code><code class="sig-name descname"><span class="pre">Hit</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">hitobject</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">t</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">xy</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">replay</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">beatmap</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">type_</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/circleguard/investigator.html#Hit"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#circleguard.investigator.Hit" title="Permalink to this definition">¶</a></dt>
-<dd><p>A hit on a hitobject when a replay is played against a beatmap.</p>
-<dl class="field-list simple">
-<dt class="field-odd">Parameters</dt>
-<dd class="field-odd"><ul class="simple">
-<li><p><strong>hitobject</strong> (<a class="reference external" href="https://llllllllll.github.io/slider/appendix.html#slider.beatmap.HitObject" title="(in slider v0.2.1)"><code class="xref py py-class docutils literal notranslate"><span class="pre">slider.beatmap.HitObject</span></code></a>) – The hitobject that was hit. This is converted to a
-<a class="reference internal" href="#circleguard.hitobjects.Hitobject" title="circleguard.hitobjects.Hitobject"><code class="xref py py-class docutils literal notranslate"><span class="pre">circleguard.hitobjects.Hitobject</span></code></a>.</p></li>
-<li><p><strong>t</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.9)"><em>float</em></a>) – The time the hit occured.</p></li>
-<li><p><strong>xy</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#list" title="(in Python v3.9)"><em>list</em></a><em>[</em><a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.9)"><em>float</em></a><em>, </em><a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.9)"><em>float</em></a><em>]</em>) – The x and y position where the hit occured.</p></li>
-<li><p><strong>replay</strong> (<a class="reference internal" href="#circleguard.loadables.Replay" title="circleguard.loadables.Replay"><code class="xref py py-class docutils literal notranslate"><span class="pre">circleguard.loadables.Replay</span></code></a>) – The replay this hit was made on.</p></li>
-<li><p><strong>beatmap</strong> (<a class="reference external" href="https://llllllllll.github.io/slider/appendix.html#slider.beatmap.Beatmap" title="(in slider v0.2.1)"><code class="xref py py-class docutils literal notranslate"><span class="pre">slider.beatmap.Beatmap</span></code></a>) – The beatmap this hit was made on.</p></li>
-<li><p><strong>type</strong> (<a class="reference internal" href="#circleguard.investigator.JudgmentType" title="circleguard.investigator.JudgmentType"><code class="xref py py-class docutils literal notranslate"><span class="pre">JudgmentType</span></code></a>) – The type of this hit (either Hit300, Hit100, or Hit50).</p></li>
-</ul>
-</dd>
-</dl>
-<dl class="py method">
-<dt id="circleguard.investigator.Hit.distance">
-<code class="sig-name descname"><span class="pre">distance</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">*</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">to</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/circleguard/investigator.html#Hit.distance"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#circleguard.investigator.Hit.distance" title="Permalink to this definition">¶</a></dt>
-<dd><p>The distance from this hit to either the center or edge of its
-hitobject.</p>
-<dl class="field-list simple">
-<dt class="field-odd">Parameters</dt>
-<dd class="field-odd"><p><strong>to</strong> (<em>{"center"</em><em>, </em><em>"edge"}</em>) – If <code class="docutils literal notranslate"><span class="pre">center</span></code>, the distance from this hit to the center of its
-hitobject is calculated. If <code class="docutils literal notranslate"><span class="pre">edge</span></code>, the distance from this hit to
-the edge of its hitobject is calculated.</p>
-</dd>
-<dt class="field-even">Returns</dt>
-<dd class="field-even"><p>The distance from this hit to either the center or edge of its
-hitobject.</p>
-</dd>
-<dt class="field-odd">Return type</dt>
-<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.9)">float</a></p>
-</dd>
-</dl>
-</dd></dl>
-<dl class="py method">
-<dt id="circleguard.investigator.Hit.within">
-<code class="sig-name descname"><span class="pre">within</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">distance</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/circleguard/investigator.html#Hit.within"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#circleguard.investigator.Hit.within" title="Permalink to this definition">¶</a></dt>
-<dd><p>Whether the hit was within <code class="docutils literal notranslate"><span class="pre">distance</span></code> of the edge of its hitobject.</p>
-<dl class="field-list simple">
-<dt class="field-odd">Parameters</dt>
-<dd class="field-odd"><p><strong>distance</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.9)"><em>float</em></a>) – How close, in pixels, to the edge of the hitobject the hit has to
-be.</p>
-</dd>
-<dt class="field-even">Returns</dt>
-<dd class="field-even"><p>Whether the hit was within <code class="docutils literal notranslate"><span class="pre">distance</span></code> of the edge of its
-hitobject.</p>
-</dd>
-<dt class="field-odd">Return type</dt>
-<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.9)">bool</a></p>
-</dd>
-</dl>
-<p class="rubric">Notes</p>
-<p>The lower the value, the closer to the edge the hit occurred. This value
-can never be greater than the radius of the hitobject.</p>
-</dd></dl>
-<dl class="py method">
-<dt id="circleguard.investigator.Hit.error">
-<code class="sig-name descname"><span class="pre">error</span></code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/circleguard/investigator.html#Hit.error"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#circleguard.investigator.Hit.error" title="Permalink to this definition">¶</a></dt>
-<dd><p>How many milliseconds off this hit was from being a perfectly on time
-hit. If negative, this was an early hit. If positive, this was a late
-hit. If 0, this was a perfect hit.</p>
-<dl class="field-list simple">
-<dt class="field-odd">Returns</dt>
-<dd class="field-odd"><p>How many milliseconds off this hit was from being perfectly on time.</p>
-</dd>
-<dt class="field-even">Return type</dt>
-<dd class="field-even"><p><a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.9)">float</a></p>
-</dd>
-</dl>
-</dd></dl>
 </dd></dl>
 </div>
 <div class="section" id="module-circleguard.loadables">
@@ -2363,12 +2298,11 @@ it is formatted using formatException() and appended to the message.</p>
           <div class="toc-tree">
             <ul>
 <li><a class="reference internal" href="#">Appendix</a><ul>
-<li><a class="reference internal" href="#module-circleguard.cacher">Cacher</a></li>
 <li><a class="reference internal" href="#id1">Circleguard</a></li>
-<li><a class="reference internal" href="#module-circleguard.comparer">Comparer</a></li>
+<li><a class="reference internal" href="#module-circleguard.cacher">Cacher</a></li>
 <li><a class="reference internal" href="#module-circleguard.game_version">Game Version</a></li>
 <li><a class="reference internal" href="#module-circleguard.hitobjects">Hit Objects</a></li>
-<li><a class="reference internal" href="#module-circleguard.investigator">Investigator</a></li>
+<li><a class="reference internal" href="#module-circleguard.investigations">Investigations</a></li>
 <li><a class="reference internal" href="#module-circleguard.loadables">Loadables</a></li>
 <li><a class="reference internal" href="#module-circleguard.loader">Loader</a></li>
 <li><a class="reference internal" href="#module-circleguard.map_info">Map Info</a></li>

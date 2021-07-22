@@ -195,7 +195,7 @@ documentation for details.</p>
 <span class="c1"># [&lt;circleguard.investigator.Snap&gt;, &lt;circleguard.investigator.Snap&gt;]</span>
 </pre></div>
 </div>
-<p>This returns a list of <a class="reference internal" href="appendix.html#circleguard.investigator.Snap" title="circleguard.investigator.Snap"><code class="xref py py-class docutils literal notranslate"><span class="pre">Snap</span></code></a> objects. See the <a class="reference internal" href="appendix.html#circleguard.investigator.Snap" title="circleguard.investigator.Snap"><code class="xref py py-class docutils literal notranslate"><span class="pre">Snap</span></code></a> documentation for details.</p>
+<p>This returns a list of <code class="xref py py-class docutils literal notranslate"><span class="pre">Snap</span></code> objects. See the <code class="xref py py-class docutils literal notranslate"><span class="pre">Snap</span></code> documentation for details.</p>
 </div>
 <div class="section" id="frametime">
 <h2>Frametime<a class="headerlink" href="#frametime" title="Permalink to this headline">¶</a></h2>
@@ -231,7 +231,7 @@ on a replay’s frametime, beyond just its average frametime.</p>
 <span class="nb">print</span><span class="p">(</span><span class="n">cg</span><span class="o">.</span><span class="n">judgments</span><span class="p">(</span><span class="n">r</span><span class="p">))</span> <span class="c1"># a list with lots of elements</span>
 </pre></div>
 </div>
-<p>This returns a list of <a class="reference internal" href="appendix.html#circleguard.investigator.Judgment" title="circleguard.investigator.Judgment"><code class="xref py py-class docutils literal notranslate"><span class="pre">Judgment</span></code></a> objects. See its documentation for details.</p>
+<p>This returns a list of <code class="xref py py-class docutils literal notranslate"><span class="pre">Judgment</span></code> objects. See its documentation for details.</p>
 </div>
 <div class="section" id="hits">
 <h2>Hits<a class="headerlink" href="#hits" title="Permalink to this headline">¶</a></h2>
@@ -241,10 +241,10 @@ on a replay’s frametime, beyond just its average frametime.</p>
 </pre></div>
 </div>
 <p>You can also get only the hits which are within a certain number of pixels to the edge of the hitobject:</p>
-<blockquote>
-<div><p>print(cg.hits(r, within=10)) # a list with fewer elements</p>
-</div></blockquote>
-<p>This returns a list of <a class="reference internal" href="appendix.html#circleguard.investigator.Hit" title="circleguard.investigator.Hit"><code class="xref py py-class docutils literal notranslate"><span class="pre">Hit</span></code></a> objects. See the <a class="reference internal" href="appendix.html#circleguard.investigator.Hit" title="circleguard.investigator.Hit"><code class="xref py py-class docutils literal notranslate"><span class="pre">Hit</span></code></a> documentation for details.</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="nb">print</span><span class="p">(</span><span class="n">cg</span><span class="o">.</span><span class="n">hits</span><span class="p">(</span><span class="n">r</span><span class="p">,</span> <span class="n">within</span><span class="o">=</span><span class="mi">10</span><span class="p">))</span> <span class="c1"># a list with fewer elements</span>
+</pre></div>
+</div>
+<p>This returns a list of <code class="xref py py-class docutils literal notranslate"><span class="pre">Hit</span></code> objects. See the <code class="xref py py-class docutils literal notranslate"><span class="pre">Hit</span></code> documentation for details.</p>
 </div>
 <div class="section" id="other-replay-classes">
 <h2>Other Replay Classes<a class="headerlink" href="#other-replay-classes" title="Permalink to this headline">¶</a></h2>
