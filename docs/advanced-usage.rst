@@ -89,7 +89,7 @@ replay's replay data from whatever data source it wants (an api, a replay file, 
 ``self._process_replay_data`` with the loaded replay data and set ``self.loaded`` to ``True``.
 
 .. note::
-    One philosophy of circleguard is that |Replay| objects are pseudo lazy loaded. Tat is, they are cheap to
+    One philosophy of circleguard is that |Replay| objects are pseudo lazy loaded. That is, they are cheap to
     instantiate and only incur a cost when they need to be loaded. This is why we require that loading logic goes into
     its own ``load`` method instead of happening on instantiation.
 
