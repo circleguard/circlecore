@@ -359,6 +359,9 @@ class User(ReplayContainer):
         return (self.user_id == loadable.user_id and self.mods == loadable.mods
                 and self.span == loadable.span)
 
+    def __str__(self):
+        return f"User {self.user_id}"
+
 
 class MapUser(ReplayContainer):
     """
@@ -416,6 +419,8 @@ class MapUser(ReplayContainer):
         return (self.beatmap_id == loadable.beatmap_id and
             self.user_id == loadable.user_id and self.span == loadable.span)
 
+    def __str__(self):
+        return f"MapUser for {self.user_id} on /b/{self.beatmap_id}"
 
 class ReplayCache(ReplayContainer):
     """
