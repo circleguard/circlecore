@@ -6,6 +6,9 @@ from lzma import LZMAError
 from functools import lru_cache
 from enum import Enum
 from dataclasses import dataclass
+from pathlib import Path
+import sqlite3
+import wtc
 
 from requests import RequestException
 import osrparse
@@ -116,7 +119,6 @@ def request(function):
         difference = datetime.now() - Loader.start_time
         if difference.seconds > Loader.RATELIMIT_RESET:
             Loader.start_time = datetime.now()
-        # catch them exceptions boy
         ret = None
         self = args[0]
         try:
@@ -171,21 +173,18 @@ def check_cache(function):
         self = args[0]
         replay_info = args[1]
 
-        if self.cacher is None:
+        decompressed_lzma = self._check_cache(replay_info)
+        if not decompressed_lzma:
             return function(*args, **kwargs)
 
-        decompressed_lzma = self.cacher.check_cache(replay_info)
-        if decompressed_lzma:
-            parsed = osrparse.parse_replay(decompressed_lzma, \
-                pure_lzma=True, decompressed_lzma=True)
-            return parsed.play_data
-        else:
-            return function(*args, **kwargs)
+        parsed = osrparse.parse_replay(decompressed_lzma, pure_lzma=True,
+            decompressed_lzma=True)
+        return parsed.play_data
     return wrapper
 
 
 
-class Loader():
+class Loader:
     """
     Manages interactions with the osu api, using the :mod:`ossapi` wrapper.
 
@@ -193,10 +192,11 @@ class Loader():
     ----------
     key: str
         A valid api key. Can be retrieved from https://osu.ppy.sh/p/api/.
-    cacher: :class:`~circleguard.cacher.Cacher`
-        A :class:`~circleguard.cacher.Cacher` instance to manage
-        replay loading/caching. If `None`, replays will not be loaded from
-        the cache or cached to the database.
+    cache_path: str
+        The path to the database to use for caching. A new database will be
+        created at this location if one doesn't exist already.
+        |br|
+        If ``None``, no cache will be used or created.
 
     Notes
     -----
@@ -220,10 +220,22 @@ class Loader():
     start_time = datetime.min
 
 
-    def __init__(self, key, cacher=None):
-        self.log = logging.getLogger(__name__)
+    def __init__(self, key, cache_path=None, write_to_cache=True):
         self.api = Ossapi(key)
-        self.cacher = cacher
+        self.log = logging.getLogger(__name__)
+
+        self._conn = None
+        self._cursor = None
+        self.write_to_cache = write_to_cache and bool(cache_path)
+        self.read_from_cache = bool(cache_path)
+
+        if cache_path:
+            cache_path = Path(cache_path)
+            if not cache_path.is_file():
+                self._create_cache(cache_path)
+
+            self._conn = sqlite3.connect(str(cache_path))
+            self._cursor = self._conn.cursor()
 
     @request
     def replay_info(self, beatmap_id, span=None, user_id=None, mods=None, \
@@ -461,8 +473,8 @@ class Loader():
                 "returned corrupt replay", replay_info)
             return None
         replay_data = parsed_replay.play_data
-        if cache and self.cacher is not None:
-            self.cacher.cache(lzma_bytes, replay_info)
+        if cache:
+            self._cache(lzma_bytes, replay_info)
         return replay_data
 
     # TODO make this check cache for the replay
@@ -652,3 +664,101 @@ class Loader():
         """
         self.log.info("Ratelimited, sleeping for %s seconds.", length)
         time.sleep(length)
+
+    def _create_cache(self, path):
+        """
+        Creates a database with the necessary tables at the given path.
+
+        Parameters
+        ----------
+        path: str
+            The absolute path to where the database should be created.
+
+        Notes
+        -----
+        This function will create directories specified in the path if they
+        don't already exist.
+        """
+        self.log.info("Cache not found at path %s, creating cache", path)
+        # create dir if nonexistent
+        import os
+        if not os.path.exists(path.parent):
+            os.makedirs(path.parent)
+        conn = sqlite3.connect(str(path))
+        c = conn.cursor()
+        c.execute(
+            """
+            CREATE TABLE "REPLAYS" (
+                `MAP_ID` INTEGER NOT NULL,
+                `USER_ID` INTEGER NOT NULL,
+                `REPLAY_DATA` MEDIUMTEXT NOT NULL,
+                `REPLAY_ID` INTEGER NOT NULL,
+                `MODS` INTEGER NOT NULL,
+                PRIMARY KEY(`REPLAY_ID`)
+            )""")
+        # create our index - this does unfortunately add some size (and
+        # insertion time) to the db, but it's worth it to get fast lookups on
+        # a map, user, or mods, which are all common operations.
+        c.execute(
+            """
+            CREATE INDEX `lookup_index` ON `REPLAYS` (
+                `MAP_ID`, `USER_ID`, `MODS`
+            )
+            """)
+        conn.close()
+
+    def _cache(self, lzma_bytes, replay_info):
+        """
+        Compresses and caches the given lzma_bytes to the database, linking it
+        to the given replay_info. If an entry with the given replay info already
+        exists, it is overwritten.
+
+        Parameters
+        ----------
+        lzma_bytes: str
+            The lzma stream to compress and insert into the db.
+        replay_info: :class:`~circleguard.loader.ReplayInfo`
+            The ReplayInfo object representing this replay.
+        """
+        if not self.write_to_cache:
+            return
+
+        compressed_bytes = wtc.compress(lzma_bytes)
+        beatmap_id = replay_info.beatmap_id
+        user_id = replay_info.user_id
+        mods = replay_info.mods.value
+        replay_id = replay_info.replay_id
+
+        self.log.log(TRACE, "Writing compressed lzma to db")
+        self._cursor.execute("INSERT INTO replays VALUES(?, ?, ?, ?, ?)",
+            [beatmap_id, user_id, compressed_bytes, replay_id, mods])
+        self._conn.commit()
+
+    def _check_cache(self, replay_info):
+        """
+        Checks the cache for a replay matching ``replay_info``.
+
+        Parameters
+        ----------
+        replay_info: :class:`~circleguard.loader.ReplayInfo`
+            The replay info to search for a matching replay with.
+
+        Returns
+        -------
+        str or None
+            The replay data in decompressed lzma form if the cache contains the
+            replay, or None if not.
+        """
+        if not self.read_from_cache:
+            return None
+
+        replay_id = replay_info.replay_id
+
+        self.log.log(TRACE, "Checking cache for replay info %s", replay_info)
+        result = self._cursor.execute("SELECT replay_data FROM replays WHERE "
+            "replay_id=?", [replay_id]).fetchone()
+        if result:
+            self.log.debug("Loading replay for replay info %s from cache",
+                replay_info)
+            return wtc.decompress(result[0], decompressed_lzma=True)
+        self.log.log(TRACE, "No replay found in cache")

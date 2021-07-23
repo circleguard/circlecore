@@ -1,4 +1,3 @@
-from pathlib import Path
 import logging
 from tempfile import TemporaryDirectory
 from typing import Iterable, Union, Tuple
@@ -9,7 +8,6 @@ from slider import Library, Beatmap
 from circleguard.loader import Loader
 from circleguard.investigations import Investigations, Snap
 from circleguard.judgment import Judgment
-from circleguard.cacher import Cacher
 from circleguard.utils import convert_statistic, check_param
 from circleguard.loadables import (Map, User, MapUser, ReplayMap, ReplayID,
     ReplayPath, ReplayString, ReplayDir)
@@ -58,9 +56,8 @@ class Circleguard:
         :class:`slider.library.Library` and subsequently destroyed when this
         :class:`~Circleguard` object is garbage collected.
     loader: :class:`~circleguard.loader.Loader`
-        This loader will be used instead of the base loader if passed.
-        This must be the class itself, *not* an instantiation of it. It will be
-        instantiated with two args - a key and a cacher.
+        An instance of :class:`~circleguard.loader.Loader` or a subclass
+        thereof, which will be used instead of creating a loader if passed.
     """
     DEFAULT_ANGLE = 10
     DEFAULT_DISTANCE = 8
@@ -78,19 +75,14 @@ class Circleguard:
 
     def __init__(self, key, db_path=None, slider_dir=None, loader=None, \
         cache=True):
-        self._cache = cache
-        self.cacher = None
-        if db_path is not None:
-            # resolve relative paths
-            db_path = Path(db_path).absolute()
-            self.cacher = Cacher(self._cache, db_path)
-
         self.log = logging.getLogger(__name__)
 
         # allow for people to pass their own loader implementation/subclass.
         # Mostly exposed for circleguard (the gui).
-        LoaderClass = Loader if loader is None else loader
-        self.loader = LoaderClass(key, self.cacher)
+        if loader:
+            self.loader = loader
+        else:
+            self.loader = Loader(key, db_path, write_to_cache=cache)
 
         if slider_dir:
             self.library = Library(slider_dir)
@@ -739,12 +731,11 @@ class Circleguard:
 
     @property
     def cache(self):
-        return self._cache
+        return self.loader.write_to_cache
 
     @cache.setter
     def cache(self, cache):
-        self._cache = cache
-        self.cacher.should_cache = cache
+        self.loader.write_to_cache = cache
 
     @classmethod
     def _cleanup(cls, library):
@@ -775,23 +766,12 @@ class KeylessCircleguard(Circleguard):
         :class:`slider.library.Library` and subsequently destroyed when this
         :class:`~Circleguard` object is garbage collected.
     loader: :class:`~circleguard.loader.Loader`
-        This loader will be used instead of the base loader if passed.
-        This must be the class itself, *not* an instantiation of it. It will be
-        instantiated with two args - a key and a cacher.
+        An instance of :class:`~circleguard.loader.Loader` or a subclass
+        thereof, which will be used instead of creating a loader if passed.
     """
 
-    def __init__(self, db_path=None, slider_dir=None, loader=None, cache=True):
-        # it's sufficient but not particularly rigorous to pass an invalid api
-        # key here, and might interfere with future improvements (such as
-        # checking the validity of the api key automatically on init).
-        super().__init__("INVALID_KEY", db_path, slider_dir, loader, cache)
-        # TODO this is a really terrible way of doing this, we have no way to
-        # influence the creation of a loader in Circleguard.__init__ (related
-        # to the above comment), but we need our loader to be null in this
-        # class. Not sure how to make it more flexible. Getting rid of the
-        # cacher-loader relationship might be a start, so we can then pass
-        # entire loader instances to Circleguard instead of just a class.
-        self.loader = None
+    def __init__(self, db_path=None, slider_dir=None, cache=True):
+        super().__init__("INVALID_KEY", db_path, slider_dir, None, cache)
 
 def set_options(*, loglevel=None):
     """
