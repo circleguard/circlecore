@@ -54,7 +54,7 @@ class Span(set):
         for s in span.split(","):
             if "-" in s:
                 p = s.split("-")
-                l = list(range(int(p[0]), int(p[1])+1))
+                l = list(range(int(p[0]), int(p[1]) + 1))
                 ret.update(l)
             else:
                 ret.add(int(s))
