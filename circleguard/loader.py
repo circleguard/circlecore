@@ -5,6 +5,7 @@ import logging
 from lzma import LZMAError
 from functools import lru_cache
 from enum import Enum
+from dataclasses import dataclass
 
 from requests import RequestException
 import osrparse
@@ -59,8 +60,8 @@ class Error(Enum):
     UNKNOWN           = ["Unknown error.", UnknownAPIException,
         "Unknown error when requesting a replay."]
 
-
-class ReplayInfo():
+@dataclass
+class ReplayInfo:
     """
     A container class representing all the information we get about a replay
     from the api.
@@ -69,8 +70,8 @@ class ReplayInfo():
     ----------
     timestamp: :class:`datetime.datetime`
         When this replay was set.
-    map_id: int
-        The id of the map the replay was played on.
+    beatmap_id: int
+        The id of the beatmap the replay was played on.
     user_id: int
         The id of the player who played the replay.
     username: str
@@ -82,15 +83,13 @@ class ReplayInfo():
     replay_available: bool
         Whether this replay is available from the api or not.
     """
-    def __init__(self, timestamp, map_id, user_id, username, replay_id, mods, \
-        replay_available):
-        self.timestamp = timestamp
-        self.map_id = map_id
-        self.user_id = user_id
-        self.username = username
-        self.replay_id = replay_id
-        self.mods = mods
-        self.replay_available = replay_available
+    timestamp: datetime
+    beatmap_id: int
+    user_id: int
+    username: str
+    replay_id: int
+    mods: Mod
+    replay_available: bool
 
 
 def request(function):
@@ -227,14 +226,14 @@ class Loader():
         self.cacher = cacher
 
     @request
-    def replay_info(self, map_id, span=None, user_id=None, mods=None, \
+    def replay_info(self, beatmap_id, span=None, user_id=None, mods=None, \
         limit=True):
         """
         Retrieves replay infos from a map's leaderboard.
 
         Parameters
         ----------
-        map_id: int
+        beatmap_id: int
             The map id to retrieve replay info for.
         span: Span
             A comma separated list of ranges of top replays on the map to
@@ -275,7 +274,7 @@ class Loader():
         # scope and takes on different locals.
         locals_ = locals()
         self.log.log(TRACE, "Loading replay info on map %d with options %s",
-            map_id, {k: locals_[k] for k in locals_ if k != 'self'})
+            beatmap_id, {k: locals_[k] for k in locals_ if k != 'self'})
 
         if not (span or user_id):
             raise ValueError("One of user_id or span must be passed, but not "
@@ -284,8 +283,8 @@ class Loader():
         if span:
             api_limit = max(span)
         mods = None if mods is None else mods.value
-        request_data = {"m": "0", "b": map_id, "limit": api_limit, "u": user_id,
-            "mods": mods}
+        request_data = {"m": "0", "b": beatmap_id, "limit": api_limit,
+            "u": user_id, "mods": mods}
         response = self.api.get_scores(request_data)
         try:
             Loader.check_response(response)
@@ -305,7 +304,7 @@ class Loader():
             # combination - both are empty responses which will trigger a no
             # info available exception. We need to figure out which case has
             # occurred here to determine if we should raise or not.
-            beatmap_response = self.api.get_beatmaps({"b": map_id})
+            beatmap_response = self.api.get_beatmaps({"b": beatmap_id})
             # If the beatmap does not exist, this response will be empty.
             if not beatmap_response:
                 raise
@@ -321,9 +320,9 @@ class Loader():
         # either ``"0"`` or ``"1"`` and all strings are truthy
         # strptime format from https://github.com/ppy/osu-api/wiki#apiget_scores
         infos = [ReplayInfo(datetime.strptime(x["date"], "%Y-%m-%d %H:%M:%S"),
-            map_id, int(x["user_id"]), str(x["username"]), int(x["score_id"]),
-            Mod(int(x["enabled_mods"])), bool(int(x["replay_available"])))
-            for x in response]
+            beatmap_id, int(x["user_id"]), str(x["username"]),
+            int(x["score_id"]), Mod(int(x["enabled_mods"])),
+            bool(int(x["replay_available"]))) for x in response]
 
         # limit only applies if user_id was set
         return infos[0] if (limit and user_id) else infos
@@ -379,13 +378,13 @@ class Loader():
 
 
     @request
-    def load_replay_data(self, map_id, user_id, mods=None):
+    def load_replay_data(self, beatmap_id, user_id, mods=None):
         """
         Retrieves replay data from the api.
 
         Parameters
         ----------
-        map_id: int
+        beatmap_id: int
             The map the replay was played on.
         user_id: int
             The user that played the replay.
@@ -408,9 +407,9 @@ class Loader():
         """
 
         self.log.log(TRACE, "Requesting replay data by user %d on map %d with "
-            "mods %s", user_id, map_id, mods)
+            "mods %s", user_id, beatmap_id, mods)
         mods = None if mods is None else mods.value
-        request_data = {"m": "0", "b": map_id, "u": user_id, "mods": mods}
+        request_data = {"m": "0", "b": beatmap_id, "u": user_id, "mods": mods}
         response = self.api.get_replay(request_data)
         Loader.check_response(response)
         return base64.b64decode(response["content"])
@@ -442,14 +441,14 @@ class Loader():
         """
 
         user_id = replay_info.user_id
-        map_id = replay_info.map_id
+        beatmap_id = replay_info.beatmap_id
         mods = replay_info.mods
         if not replay_info.replay_available:
             self.log.debug("Replay data by user %d on map %d with mods %s not "
-                "available", user_id, map_id, mods)
+                "available", user_id, beatmap_id, mods)
             return None
 
-        lzma_bytes = self.load_replay_data(map_id, user_id, mods)
+        lzma_bytes = self.load_replay_data(beatmap_id, user_id, mods)
         if lzma_bytes is None:
             raise UnknownAPIException("The api guaranteed there would be a "
                 "replay available, but we did not receive any data.")
@@ -493,9 +492,10 @@ class Loader():
 
     @lru_cache()
     @request
-    def map_id(self, map_hash):
+    def beatmap_id(self, beatmap_hash):
         """
-        Retrieves a map id from a corresponding map hash through the api.
+        Retrieves a beatmap id from a corresponding beatmap hash through the
+        api.
 
         Parameters
         ----------
@@ -514,12 +514,15 @@ class Loader():
         duplicate api calls.
         """
 
-        response = self.api.get_beatmaps({"h": map_hash})
+        response = self.api.get_beatmaps({"h": beatmap_hash})
         try:
             Loader.check_response(response)
         except NoInfoAvailableException:
             return 0
         return int(response[0]["beatmap_id"])
+
+    # TODO remove in core 6.0.0
+    map_id = beatmap_id
 
     @lru_cache()
     @request

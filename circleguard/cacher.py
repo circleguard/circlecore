@@ -25,7 +25,8 @@ class Cacher:
     def __init__(self, cache, path):
 
         self.log = logging.getLogger(__name__)
-        self.log.info("Cacher initialized at path %s, should cache? %s ", path, cache)
+        self.log.info("Cacher initialized at path %s, should cache? %s ",
+            path, cache)
         self.should_cache = cache
         if not os.path.isfile(str(path)):
             self._create_cache(str(path))
@@ -39,8 +40,6 @@ class Cacher:
 
         Parameters
         ----------
-        map_id: str
-            The map id to insert into the db.
         lzma_bytes: str
             The lzma stream to compress and insert into the db.
         replay_info: :class:`~circleguard.loader.ReplayInfo`
@@ -66,79 +65,14 @@ class Cacher:
 
         compressed_bytes = self._compress(lzma_bytes)
 
-        map_id = replay_info.map_id
+        beatmap_id = replay_info.beatmap_id
         user_id = replay_info.user_id
         mods = replay_info.mods.value
         replay_id = replay_info.replay_id
 
         self.log.log(TRACE, "Writing compressed lzma to db")
-        self._write("INSERT INTO replays VALUES(?, ?, ?, ?, ?)", [map_id, user_id, compressed_bytes, replay_id, mods])
-
-    def revalidate(self, loader, replay_info):
-        """
-        Checks entries in ``replay_info`` against their entries in the database
-        (if any) to look for score id mismatches, indicating an outdated replay.
-        If there are mismatches, the replay is redownloaded and cached from the
-        replay info.
-
-        Parameters
-        ----------
-        loader: :class:`~circleguard.loader.Loader`
-            The Loader from the circleguard instance to redownload replays with
-            if they are outdated.
-        replay_info: list[:class:`~circleguard.loader.ReplayInfo`]
-            A list of ReplayInfo objects containing the up-to-date information
-            of user's replays.
-
-        Raises
-        ------
-        ValueError
-            Raised when the redownloaded replay id is lower than the cached
-            replay id. This should never happen and is indicative of either a
-            fault on our end or the api's end.
-
-            Also raised if the replay data is not available from the api when
-            redownloaded.
-
-        Notes
-        -----
-        If the replay is found to be outdated, it will be overwritten
-        by the newer replay in the database.
-
-        Warnings
-        --------
-        This function is unused and left for historical purposes. Do not use.
-        In particular, it searches with parameters other than the primary key
-        (``replay_id``), which is orders of magnitude slower without an index.
-        """
-        self.log.info("Revalidating cache with %d replay_infos", len(replay_info))
-
-        for info in replay_info:
-            map_id = info.map_id
-            user_id = info.user_id
-            mods = info.enabled_mods.value
-
-            self.log.log(TRACE, "Revalidating entry with map id %s, user %d, mods %s", map_id, user_id, mods)
-
-            result = self.cursor.execute("SELECT replay_id FROM replays WHERE map_id=? AND user_id=? AND mods=?", [map_id, user_id, mods]).fetchall()
-            if not result:
-                self.log.trace("Nothing cached with map id %s, user %d, mods %s", map_id, user_id, mods)
-                continue # nothing cached
-
-            db_replay_id = result[0][0] # blame sqlite for nesting tuples in lists
-            new_replay_id = info.replay_id
-
-            if db_replay_id != new_replay_id:
-                if db_replay_id > new_replay_id:
-                    raise ValueError("The cached replay id of {} is higher than the new replay id of {}. Map id: {}, User id: {}, mods: {}"
-                                                .format(db_replay_id, new_replay_id, user_id, map_id, mods))
-
-                self.log.info("Cached replay on map %d by user %d with mods %d is outdated, redownloading", map_id, user_id, mods)
-                lzma_data = loader.replay_data(info)
-                if lzma_data is None:
-                    raise Exception("We could not load lzma data for map {}, user {}, mods {}, replay available {} while revalidating."
-                                                .format(map_id, user_id, mods, info.replay_available))
-                self.cache(lzma_data, info)
+        self._write("INSERT INTO replays VALUES(?, ?, ?, ?, ?)",
+            [beatmap_id, user_id, compressed_bytes, replay_id, mods])
 
     def check_cache(self, replay_info):
         """
@@ -157,15 +91,14 @@ class Cacher:
             replay, or None if not.
         """
 
-        map_id = replay_info.map_id
-        user_id = replay_info.user_id
-        mods = replay_info.mods
         replay_id = replay_info.replay_id
 
-        self.log.log(TRACE, "Checking cache for a replay on map %d by user %d with mods %s with replay id %d", map_id, user_id, mods, replay_id)
-        result = self.cursor.execute("SELECT replay_data FROM replays WHERE replay_id=?", [replay_id]).fetchone()
+        self.log.log(TRACE, "Checking cache for replay info %s", replay_info)
+        result = self.cursor.execute("SELECT replay_data FROM replays WHERE "
+            "replay_id=?", [replay_id]).fetchone()
         if result:
-            self.log.debug("Loading replay on map %d by user %d with mods %s with replay id %d from cache", map_id, user_id, mods, replay_id)
+            self.log.debug("Loading replay for replay info %s from cache",
+                replay_info)
             return wtc.decompress(result[0], decompressed_lzma=True)
         self.log.log(TRACE, "No replay found in cache")
         return None
@@ -226,7 +159,8 @@ class Cacher:
         don't already exist.
         """
         self.log.info("Cache not found at path %s, creating cache", path)
-        if not os.path.exists(os.path.split(path)[0]): # create dir if nonexistent
+        # create dir if nonexistent
+        if not os.path.exists(os.path.split(path)[0]):
             os.makedirs(os.path.split(path)[0])
         conn = sqlite3.connect(str(path))
         c = conn.cursor()

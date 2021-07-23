@@ -544,10 +544,13 @@ class Circleguard:
         """
         replay_container.load_info(self.loader)
 
-    def map_available(self, replay):
-        return replay.map_available(self.library)
+    def beatmap_available(self, replay):
+        return replay.beatmap_available(self.library)
 
-    def Map(self, map_id, span, mods=None, cache=None, load=False) -> Map:
+    # TODO remove in core 6.0.0
+    map_available = beatmap_available
+
+    def Map(self, beatmap_id, span, mods=None, cache=None, load=False) -> Map:
         """
         Returns a new, info-loaded :class:`~circleguard.loadables.Map`.
 
@@ -571,7 +574,7 @@ class Circleguard:
         >>> for replay in m:
         >>>     ...
         """
-        m = Map(map_id, span, mods, cache)
+        m = Map(beatmap_id, span, mods, cache)
         self.load(m) if load else self.load_info(m)
         return m
 
@@ -604,7 +607,7 @@ class Circleguard:
         self.load(u) if load else self.load_info(u)
         return u
 
-    def MapUser(self, map_id, user_id, span=Loader.MAX_MAP_SPAN, cache=None,
+    def MapUser(self, beatmap_id, user_id, span=Loader.MAX_MAP_SPAN, cache=None,
         available_only=True, load=False) -> MapUser:
         """
         Returns a new, info-loaded :class:`~circleguard.loadables.MapUser`.
@@ -629,7 +632,7 @@ class Circleguard:
         >>> for replay in mu:
         >>>     ...
         """
-        mu = MapUser(map_id, user_id, span, cache, available_only)
+        mu = MapUser(beatmap_id, user_id, span, cache, available_only)
         self.load(mu) if load else self.load_info(mu)
         return mu
 
@@ -662,7 +665,7 @@ class Circleguard:
         return r_dir
 
 
-    def ReplayMap(self, map_id, user_id, mods=None, cache=None, info=None) \
+    def ReplayMap(self, beatmap_id, user_id, mods=None, cache=None, info=None) \
         -> ReplayMap:
         """
         Returns a new, loaded :class:`~circleguard.loadables.ReplayMap`.
@@ -673,7 +676,7 @@ class Circleguard:
         ``ReplayMap`` and load it immediately. Loading can be an expensive
         operation which is why this does not occur by default.
         """
-        r = ReplayMap(map_id, user_id, mods, cache, info)
+        r = ReplayMap(beatmap_id, user_id, mods, cache, info)
         self.load(r)
         return r
 

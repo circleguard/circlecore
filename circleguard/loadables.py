@@ -245,7 +245,7 @@ class Map(ReplayContainer):
 
     Parameters
     ----------
-    map_id: int
+    beatmap_id: int
         The map to represent the top plays for.
     span: str or Span
         A comma separated list of ranges of top plays to retrieve.
@@ -261,10 +261,10 @@ class Map(ReplayContainer):
     cache: bool
         Whether to cache the replays once they are loaded.
     """
-    def __init__(self, map_id, span, mods=None, cache=None):
+    def __init__(self, beatmap_id, span, mods=None, cache=None):
         super().__init__(cache)
         self.replays = []
-        self.map_id = map_id
+        self.beatmap_id = beatmap_id
         self.mods = mods
         self.span = Span(span)
 
@@ -274,9 +274,9 @@ class Map(ReplayContainer):
         if not loader:
             raise ValueError("A Map cannot be info loaded loaded without api "
                 "access")
-        for info in loader.replay_info(self.map_id, span=self.span,
+        for info in loader.replay_info(self.beatmap_id, span=self.span,
             mods=self.mods):
-            r = ReplayMap(info.map_id, info.user_id, info.mods,
+            r = ReplayMap(info.beatmap_id, info.user_id, info.mods,
                 cache=self.cache, info=info)
             self.replays.append(r)
         self.info_loaded = True
@@ -287,16 +287,16 @@ class Map(ReplayContainer):
     def __eq__(self, loadable):
         if not isinstance(loadable, Map):
             return False
-        return (self.map_id == loadable.map_id and self.mods == loadable.mods
-                and self.span == loadable.span)
+        return (self.beatmap_id == loadable.beatmap_id
+                and self.mods == loadable.mods and self.span == loadable.span)
 
     def __repr__(self):
-        return (f"Map(map_id={self.map_id},cache={self.cache},mods={self.mods},"
-                f"span={self.span},replays={self.replays},"
-                f"loaded={self.loaded})")
+        return (f"Map(beatmap_id={self.beatmap_id},cache={self.cache},"
+            f"mods={self.mods},span={self.span},replays={self.replays},"
+            f"loaded={self.loaded})")
 
     def __str__(self):
-        return f"Map {self.map_id}"
+        return f"Map {self.beatmap_id}"
 
 
 class User(ReplayContainer):
@@ -342,7 +342,7 @@ class User(ReplayContainer):
         for info in loader.get_user_best(self.user_id, self.span, self.mods):
             if self.available_only and not info.replay_available:
                 continue
-            r = ReplayMap(info.map_id, info.user_id, info.mods, self.cache,
+            r = ReplayMap(info.beatmap_id, info.user_id, info.mods, self.cache,
                 info=info)
             self.replays.append(r)
         self.info_loaded = True
@@ -363,10 +363,10 @@ class MapUser(ReplayContainer):
 
     Parameters
     ----------
-    map_id: int
-        The map to represent scores by `user_id` on.
+    beatmap_id: int
+        The beatmap to represent scores by `user_id` on.
     user_id: int
-        The user to represent scores on `map_id` for.
+        The user to represent scores on `beatmap_id` for.
     span: str or Span
         A comma separated list of ranges of plays to retrieve.
         ``span="1-3,6,2-4"`` -> replays in the range ``[1,2,3,4,6]``.
@@ -377,11 +377,11 @@ class MapUser(ReplayContainer):
         Replays are filtered on this basis after ``span`` is applied.
         True by default.
     """
-    def __init__(self, map_id, user_id, span=Loader.MAX_MAP_SPAN, cache=None, \
-        available_only=True):
+    def __init__(self, beatmap_id, user_id, span=Loader.MAX_MAP_SPAN, \
+        cache=None, available_only=True):
         super().__init__(cache)
         self.replays = []
-        self.map_id = map_id
+        self.beatmap_id = beatmap_id
         self.user_id = user_id
         self.span = Span(span)
         self.available_only = available_only
@@ -392,11 +392,11 @@ class MapUser(ReplayContainer):
         if not loader:
             raise ValueError("A MapUser cannot be info loaded loaded without "
                 "api access")
-        for info in loader.replay_info(self.map_id, span=self.span,
+        for info in loader.replay_info(self.beatmap_id, span=self.span,
             user_id=self.user_id, limit=False):
             if self.available_only and not info.replay_available:
                 continue
-            r = ReplayMap(info.map_id, info.user_id, info.mods, self.cache,
+            r = ReplayMap(info.beatmap_id, info.user_id, info.mods, self.cache,
                 info=info)
             self.replays.append(r)
         self.info_loaded = True
@@ -407,7 +407,7 @@ class MapUser(ReplayContainer):
     def __eq__(self, loadable):
         if not isinstance(loadable, MapUser):
             return False
-        return (self.map_id == loadable.map_id and
+        return (self.beatmap_id == loadable.beatmap_id and
             self.user_id == loadable.user_id and self.span == loadable.span)
 
 
@@ -593,7 +593,7 @@ class Replay(Loadable):
         self.timestamp    = None
         # declared as a property with a getter and setter so we can set
         # map_info's map_id attribute automatically
-        self._map_id       = None
+        self._beatmap_id       = None
         # replays have no information about their map by default.
         # TODO: remove in core 6.0.0, in favor of ``Replay#map_available`` (and
         # possibly other mechanisms).
@@ -611,8 +611,11 @@ class Replay(Loadable):
         self.k            = None
         self._keydowns    = None
 
-    def map_available(self, _library):
-        return bool(self.map_id)
+    def beatmap_available(self, _library):
+        return bool(self.beatmap_id)
+
+    # TODO remove in core 6.0.0
+    map_available = beatmap_available
 
     def has_data(self):
         """
@@ -657,10 +660,10 @@ class Replay(Loadable):
         None
             If we do not know what beatmap this replay was played on.
         """
-        if not self.map_available(library):
+        if not self.beatmap_available(library):
             return None
 
-        return library.lookup_by_id(self.map_id, download=True, save=True)
+        return library.lookup_by_id(self.beatmap_id, download=True, save=True)
 
     def _process_replay_data(self, replay_data):
         """
@@ -841,13 +844,23 @@ class Replay(Loadable):
         self.k = k
 
     @property
+    def beatmap_id(self):
+        return self._beatmap_id
+
+    @beatmap_id.setter
+    def beatmap_id(self, beatmap_id):
+        self._beatmap_id = beatmap_id
+        self.map_info.map_id = beatmap_id
+
+    # TODO remove in core 6.0.0
+    @property
     def map_id(self):
-        return self._map_id
+        return self._beatmap_id
 
     @map_id.setter
-    def map_id(self, map_id):
-        self._map_id = map_id
-        self.map_info.map_id = map_id
+    def map_id(self, beatmap_id):
+        self._beatmap_id = beatmap_id
+        self.map_info.map_id = beatmap_id
 
     @property
     def keydowns(self):
@@ -870,13 +883,13 @@ class Replay(Loadable):
         return self._keydowns
 
     def __repr__(self):
-        return (f"Replay(timestamp={self.timestamp},map_id={self.map_id},"
-            f"user_id={self.user_id},mods={self.mods},"
-            f"replay_id={self.replay_id},weight={self.weight},"
+        return (f"Replay(timestamp={self.timestamp},"
+            f"beatmap_id={self.beatmap_id},user_id={self.user_id},"
+            f"mods={self.mods},replay_id={self.replay_id},weight={self.weight},"
             f"loaded={self.loaded},username={self.username})")
 
     def __str__(self):
-        return f"Replay by {self.username} on {self.map_id}"
+        return f"Replay by {self.username} on {self.beatmap_id}"
 
 
 class ReplayMap(Replay):
@@ -902,7 +915,7 @@ class ReplayMap(Replay):
     The following replay-related attributes are available (not ``None``) when
     this replay is unloaded:
 
-    * map_id
+    * beatmap_id
     * user_id
     * mods (if passed)
 
@@ -916,16 +929,16 @@ class ReplayMap(Replay):
     * replay_data
     """
 
-    def __init__(self, map_id, user_id, mods=None, cache=None, info=None):
+    def __init__(self, beatmap_id, user_id, mods=None, cache=None, info=None):
         super().__init__(RatelimitWeight.HEAVY, cache)
         self.log = logging.getLogger(__name__ + ".ReplayMap")
-        self.map_id = map_id
+        self.beatmap_id = beatmap_id
         self.user_id = user_id
         self.mods = mods
         self.info = info
         if info:
             self.timestamp = info.timestamp
-            self.map_id = info.map_id
+            self.beatmap_id = info.beatmap_id
             self.user_id = info.user_id
             self.username = info.username
             self.replay_id = info.replay_id
@@ -957,7 +970,7 @@ class ReplayMap(Replay):
         if self.info:
             info = self.info
         else:
-            info = loader.replay_info(self.map_id, user_id=self.user_id,
+            info = loader.replay_info(self.beatmap_id, user_id=self.user_id,
                 mods=self.mods)
 
         self.timestamp = info.timestamp
@@ -988,24 +1001,25 @@ class ReplayMap(Replay):
             return False
         if self.has_data() and loadable.has_data():
             return self.replay_data == loadable.replay_data
-        return (self.map_id == loadable.map_id and
+        return (self.beatmap_id == loadable.beatmap_id and
             self.user_id == loadable.user_id and self.mods == loadable.mods)
 
     def __hash__(self):
-        return hash((self.map_id, self.user_id, self.mods))
+        return hash((self.beatmap_id, self.user_id, self.mods))
 
     def __repr__(self):
         if self.loaded:
-            return (f"ReplayMap(timestamp={self.timestamp},map_id={self.map_id}"
-            f",user_id={self.user_id},mods={self.mods},cache={self.cache},"
-            f"replay_id={self.replay_id},loaded={self.loaded},"
-            f"username={self.username})")
-        return (f"ReplayMap(map_id={self.map_id},user_id={self.user_id},"
-                f"mods={self.mods},cache={self.cache},loaded={self.loaded})")
+            return (f"ReplayMap(timestamp={self.timestamp},"
+            f"beatmap_id={self.beatmap_id},user_id={self.user_id},"
+            f"mods={self.mods},cache={self.cache},replay_id={self.replay_id},"
+            f"loaded={self.loaded},username={self.username})")
+        return (f"ReplayMap(beatmap_id={self.beatmap_id},"
+            f"user_id={self.user_id},mods={self.mods},cache={self.cache},"
+            f"loaded={self.loaded})")
 
     def __str__(self):
         return (f"{'Loaded' if self.loaded else 'Unloaded'} ReplayMap by "
-            f"{self.user_id} on {self.map_id}")
+            f"{self.user_id} on {self.beatmap_id}")
 
 
 class ReplayDataOSR(Replay):
@@ -1043,21 +1057,21 @@ class ReplayDataOSR(Replay):
 
         self._user_id_func = None
         self._user_id = None
-        self._map_id_func = None
+        self._beatmap_id_func = None
 
     def beatmap(self, library):
-        if not self.map_available(library):
+        if not self.beatmap_available(library):
             return None
-        # if we can't load our map_id, fall back to loading from slider.
+        # if we can't load our beatmap_id, fall back to loading from slider.
         if not self.can_load_api_attributes() and self.beatmap_hash:
             return library.lookup_by_md5(self.beatmap_hash)
         return super().beatmap(library)
 
-    def map_available(self, library):
+    def beatmap_available(self, library):
         beatmap_cached = library.beatmap_cached(beatmap_md5=self.beatmap_hash)
         if self.beatmap_hash and beatmap_cached:
             return True
-        return super().map_available(library)
+        return super().beatmap_available(library)
 
     def load_from_osrparse_replay(self, replay, loader, _cache):
         """
@@ -1084,7 +1098,7 @@ class ReplayDataOSR(Replay):
 
         if loader:
             self._user_id_func = loader.user_id
-            self._map_id_func = loader.map_id
+            self._beatmap_id_func = loader.beatmap_id
 
         self._process_replay_data(replay.play_data)
         self.loaded = True
@@ -1112,37 +1126,58 @@ class ReplayDataOSR(Replay):
         return self._user_id
 
     @property
-    def map_id(self):
+    def beatmap_id(self):
         if not self.loaded:
             return None
-        if not self._map_id_func:
+        if not self._beatmap_id_func:
             raise ValueError("The map id of a replay which has been loaded "
                 "without a ``Loader`` cannot be retrieved. This can happen if "
                 "the replay was loaded with a ``KeylessCircleguard``.")
         # property inheritence is a bit nasty. See
         # https://stackoverflow.com/a/37663266 for reference
-        if not super().map_id:
-            map_id = self._map_id_func(self.beatmap_hash)
-            super(ReplayDataOSR, self.__class__).map_id.fset(self, map_id)
-        return super().map_id
+        if not super().beatmap_id:
+            beatmap_id = self._beatmap_id_func(self.beatmap_hash)
+            super(ReplayDataOSR, self.__class__).beatmap_id.fset(self,
+                beatmap_id)
+        return super().beatmap_id
+
+    @beatmap_id.setter
+    def beatmap_id(self, beatmap_id):
+        super(ReplayDataOSR, self.__class__).beatmap_id.fset(self, beatmap_id)
+
+    # TODO remove in core 6.0.0
+    @property
+    def map_id(self):
+        if not self.loaded:
+            return None
+        if not self._beatmap_id_func:
+            raise ValueError("The map id of a replay which has been loaded "
+                "without a ``Loader`` cannot be retrieved. This can happen if "
+                "the replay was loaded with a ``KeylessCircleguard``.")
+        if not super().beatmap_id:
+            beatmap_id = self._beatmap_id_func(self.beatmap_hash)
+            super(ReplayDataOSR, self.__class__).beatmap_id.fset(self,
+                beatmap_id)
+        return super().beatmap_id
+
+    @map_id.setter
+    def map_id(self, map_id):
+        super(ReplayDataOSR, self.__class__).map_id.fset(self, map_id)
 
     def can_load_api_attributes(self):
         """
         Whether we can load attributes that are lazy loaded and require api
         calls, such as ``map_id`` or ``user_id``, if requested.
         """
-        return bool(self._map_id_func) and bool(self._user_id_func)
+        return bool(self._beatmap_id_func) and bool(self._user_id_func)
 
     def api_attributes_loaded(self):
         """
         Whether attributes that are lazy loaded and require api calls, such as
         ``map_id`` or ``user_id``, have already been loaded.
         """
-        return bool(self._map_id) and bool(self._user_id)
+        return bool(self._beatmap_id) and bool(self._user_id)
 
-    @map_id.setter
-    def map_id(self, map_id):
-        super(ReplayDataOSR, self.__class__).map_id.fset(self, map_id)
 
     @user_id.setter
     def user_id(self, user_id):
@@ -1170,7 +1205,7 @@ class ReplayPath(ReplayDataOSR):
     this replay is loaded:
 
     * timestamp
-    * map_id
+    * beatmap_id
     * username
     * user_id
     * mods
@@ -1187,7 +1222,7 @@ class ReplayPath(ReplayDataOSR):
 
         self._user_id_func = None
         self._user_id = None
-        self._map_id_func = None
+        self._beatmap_id_func = None
 
     def load(self, loader, cache):
         self.log.debug("Loading ReplayPath %r", self)
@@ -1234,7 +1269,7 @@ class ReplayPath(ReplayDataOSR):
             # avoid loading these lazy-loaded attributes by accessing them here,
             # unless they're already loaded
             if self.api_attributes_loaded():
-                api_attrs_string = (f"map_id={self.map_id},"
+                api_attrs_string = (f"beatmap_id={self.beatmap_id},"
                     f"user_id={self.user_id},")
             return (f"ReplayPath(path={self.path},{api_attrs_string}"
                 f"mods={self.mods},replay_id={self.replay_id},"
@@ -1245,8 +1280,8 @@ class ReplayPath(ReplayDataOSR):
 
     def __str__(self):
         if self.loaded:
-            return (f"Loaded ReplayPath by {self.username} on {self.map_id} at"
-                f" {self.path}")
+            return (f"Loaded ReplayPath by {self.username} on "
+                f"{self.beatmap_id} at {self.path}")
         return f"Unloaded ReplayPath at {self.path}"
 
 
@@ -1272,7 +1307,7 @@ class ReplayString(ReplayDataOSR):
     this replay is loaded:
 
     * timestamp
-    * map_id
+    * beatmap_id
     * username
     * user_id
     * mods
@@ -1310,7 +1345,7 @@ class ReplayString(ReplayDataOSR):
         if self.loaded:
             api_attrs_string = ","
             if self.api_attributes_loaded():
-                api_attrs_string = (f"map_id={self.map_id},"
+                api_attrs_string = (f"beatmap_id={self.beatmap_id},"
                     f"user_id={self.user_id},")
             return (f"ReplayString(len(replay_data_str)="
                 f"{len(self.replay_data_str)},{api_attrs_string}"
@@ -1321,7 +1356,8 @@ class ReplayString(ReplayDataOSR):
 
     def __str__(self):
         if self.loaded:
-            return f"Loaded ReplayString by {self.username} on {self.map_id}"
+            return (f"Loaded ReplayString by {self.username} on "
+                f"{self.beatmap_id}")
         return (f"Unloaded ReplayString with {len(self.replay_data_str)} "
             "chars of data")
 
@@ -1379,10 +1415,10 @@ class CachedReplay(Replay):
     This class is intended to be instantiated from
     :func:`~.ReplayCache.load_info` and should not be instantiated manually.
     """
-    def __init__(self, user_id, map_id, mods, replay_data, replay_id):
+    def __init__(self, user_id, beatmap_id, mods, replay_data, replay_id):
         super().__init__(RatelimitWeight.NONE, False)
         self.user_id = user_id
-        self.map_id = map_id
+        self.beatmap_id = beatmap_id
         self.mods = Mod(mods)
         self.replay_data = replay_data
         self.replay_id = replay_id
