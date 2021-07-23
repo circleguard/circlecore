@@ -268,6 +268,9 @@ class Map(ReplayContainer):
         self.mods = mods
         self.span = Span(span)
 
+        # TODO remove in core 6.0.0
+        self.map_id = beatmap_id
+
     def load_info(self, loader):
         if self.info_loaded:
             return
@@ -385,6 +388,9 @@ class MapUser(ReplayContainer):
         self.user_id = user_id
         self.span = Span(span)
         self.available_only = available_only
+
+        # TODO remove in core 6.0.0
+        self.map_id = beatmap_id
 
     def load_info(self, loader):
         if self.info_loaded:
@@ -944,6 +950,9 @@ class ReplayMap(Replay):
             self.replay_id = info.replay_id
             self.mods = info.mods
 
+        # TODO remove in core 6.0.0
+        self.map_id = self.beatmap_id
+
     def load(self, loader, cache):
         """
         Loads the data for this replay from the api.
@@ -1422,6 +1431,9 @@ class CachedReplay(Replay):
         self.mods = Mod(mods)
         self.replay_data = replay_data
         self.replay_id = replay_id
+
+        # TODO remove in core 6.0.0
+        self.map_id = beatmap_id
 
     def load(self, loader, cache):
         if self.loaded:
