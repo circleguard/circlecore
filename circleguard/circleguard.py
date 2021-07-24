@@ -771,7 +771,14 @@ class KeylessCircleguard(Circleguard):
     """
 
     def __init__(self, db_path=None, slider_dir=None, cache=True):
-        super().__init__("INVALID_KEY", db_path, slider_dir, None, cache)
+        super().__init__("INVALID_KEY", db_path, slider_dir, cache=cache)
+
+    def load(self, loadable):
+        loadable.load(None, self.cache)
+
+    def load_info(self, replay_container):
+        replay_container.load_info(None)
+
 
 def set_options(*, loglevel=None):
     """
