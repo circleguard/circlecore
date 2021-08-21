@@ -608,14 +608,25 @@ class Replay(Loadable):
         # replays have no information about their map by default.
         # TODO: remove in core 6.0.0, in favor of ``Replay#map_available`` (and
         # possibly other mechanisms).
-        self.map_info     = MapInfo()
-        self.username     = None
-        self.user_id      = None
-        self.mods         = None
-        self.replay_id    = None
-        self.replay_data  = None
+        self.map_info         = MapInfo()
+        self.username         = None
+        self.user_id          = None
+        self.mods             = None
+        self.replay_id        = None
+        self.replay_data      = None
+        self.replay_hash      = None
+        self.count_300        = None
+        self.count_100        = None
+        self.count_50         = None
+        self.count_gekis      = None
+        self.count_katus      = None
+        self.count_misses     = None
+        self.score            = None
+        self.max_combo        = None
+        self.is_perfect_combo = None
+        self.life_bar_graph   = None
 
-        # These attributes remain ``None``` when replay is unloaded or loaded
+        # These attributes remain ``None``` when replay is unloaded, or loaded
         # but with no data.
         self.t            = None
         self.xy           = None
@@ -1104,11 +1115,22 @@ class ReplayDataOSR(Replay):
             we do not cache :class:`~.ReplayPath` regardless of this parameter.
         """
         self.game_version = GameVersion(replay.game_version, concrete=True)
-        self.timestamp = replay.timestamp
-        self.username = replay.player_name
-        self.mods = Mod(int(replay.mod_combination))
-        self.replay_id = replay.replay_id
         self.beatmap_hash = replay.beatmap_hash
+        self.username = replay.player_name
+        self.replay_hash = replay.replay_hash
+        self.count_300 = replay.number_300s
+        self.count_100 = replay.number_100s
+        self.count_50 = replay.number_50s
+        self.count_gekis = replay.gekis
+        self.count_katus = replay.katus
+        self.count_misses = replay.misses
+        self.score = replay.score
+        self.max_combo = replay.max_combo
+        self.is_perfect_combo = replay.is_perfect_combo
+        self.mods = Mod(int(replay.mod_combination))
+        self.life_bar_graph = replay.life_bar_graph
+        self.timestamp = replay.timestamp
+        self.replay_id = replay.replay_id
 
         if loader:
             self._user_id_func = loader.user_id
