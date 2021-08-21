@@ -67,12 +67,12 @@ class TestMap(CGTestCase):
     def test_map_slice(self):
         # sanity check (map id better be what we put in)
         self.assertEqual(self.map[0].map_id, 221777)
-        # 3rd (rohulk)
-        self.assertEqual(self.map[1].user_id, 3219026)
-        # 2nd, 3rd, and 4th (toy, rohulk, wilchq)
-        self.assertListEqual([r.user_id for r in self.map[0:3]], [2757689, 3219026, 2021758])
-        # 2nd and 4th (toy and wilchq)
-        self.assertListEqual([r.user_id for r in self.map[0:3:2]], [2757689, 2021758])
+        # 3rd (kirby mix)
+        self.assertEqual(self.map[1].user_id, 9665206)
+        # 2nd, 3rd, and 4th (toy, kirby mix, rohulk)
+        self.assertListEqual([r.user_id for r in self.map[0:3]], [2757689, 9665206, 3219026])
+        # 2nd and 4th (toy and rohulk)
+        self.assertListEqual([r.user_id for r in self.map[0:3:2]], [2757689, 3219026])
 
     def test_no_replays_does_not_raise(self):
         # previously, loading the info of a map or user with no scores on the
