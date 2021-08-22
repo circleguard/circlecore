@@ -1,3 +1,5 @@
+from datetime import datetime
+
 from circleguard import (ReplayMap, ReplayPath, RatelimitWeight, Map, User,
     MapUser, Mod, NoInfoAvailableException, ReplayString)
 
@@ -16,6 +18,19 @@ class TestReplays(CGTestCase):
         self.assertEqual(r.user_id, 2909663)
         self.assertEqual(r.weight, RatelimitWeight.LIGHT)
         self.assertTrue(r.loaded)
+        self.assertEqual(r.beatmap_hash, "c7f9bc1fea826c0f371db08bc5ebc1cc")
+        self.assertEqual(r.replay_hash, "266bc8a5f6e9ac0557862da6760388ef")
+        self.assertEqual(r.count_300, 154)
+        self.assertEqual(r.count_100, 0)
+        self.assertEqual(r.count_50, 0)
+        self.assertEqual(r.count_geki, 23)
+        self.assertEqual(r.count_katu, 0)
+        self.assertEqual(r.count_miss, 0)
+        self.assertEqual(r.score, 1083482)
+        self.assertEqual(r.max_combo, 186)
+        self.assertTrue(r.is_perfect_combo)
+        self.assertEqual(r.life_bar_graph, "")
+        self.assertEqual(r.timestamp, datetime(2015, 12, 16, 19, 40, 39))
 
     def test_loading_replaymap(self):
         # Toy HDHR score on Pretender
@@ -29,6 +44,16 @@ class TestReplays(CGTestCase):
         self.assertEqual(r.weight, RatelimitWeight.HEAVY)
         self.assertEqual(r.username, "Toy")
         self.assertTrue(r.loaded)
+        self.assertEqual(r.count_300, 1449)
+        self.assertEqual(r.count_100, 1)
+        self.assertEqual(r.count_50, 0)
+        self.assertEqual(r.count_geki, 339)
+        self.assertEqual(r.count_katu, 1)
+        self.assertEqual(r.count_miss, 0)
+        self.assertEqual(r.score, 89927731)
+        self.assertEqual(r.max_combo, 2388)
+        self.assertTrue(r.is_perfect_combo)
+        self.assertEqual(r.timestamp, datetime(2019, 6, 19, 3, 22, 44))
 
     def test_no_replay_raises(self):
         # contrary to loading a Map, where we don't want to raise if the map
