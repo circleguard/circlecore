@@ -1006,6 +1006,15 @@ class ReplayMap(Replay):
         self.username = info.username
         self.mods = info.mods
         self.replay_id = info.replay_id
+        self.count_100 = info.count_100
+        self.count_300 = info.count_300
+        self.count_50 = info.count_50
+        self.count_gekis = info.count_gekis
+        self.count_katus = info.count_katus
+        self.count_misses = info.count_misses
+        self.score = info.score
+        self.max_combo = info.max_combo
+        self.is_perfect_combo = info.perfect
 
         replay_data = loader.replay_data(info, cache=cache)
         self._process_replay_data(replay_data)
