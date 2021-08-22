@@ -277,10 +277,10 @@ class Map(ReplayContainer):
         if not loader:
             raise ValueError("A Map cannot be info loaded loaded without api "
                 "access")
-        for info in loader.replay_info(self.beatmap_id, span=self.span,
+        for score in loader.replay_info(self.beatmap_id, span=self.span,
             mods=self.mods):
-            r = ReplayMap(info.beatmap_id, info.user_id, info.mods,
-                cache=self.cache, info=info)
+            r = ReplayMap(score.beatmap_id, score.user_id, score.mods,
+                cache=self.cache, info=score)
             self.replays.append(r)
         self.info_loaded = True
 
@@ -959,7 +959,7 @@ class ReplayMap(Replay):
         self.mods = mods
         self.info = info
         if info:
-            self.timestamp = info.timestamp
+            self.timestamp = info.date
             self.beatmap_id = info.beatmap_id
             self.user_id = info.user_id
             self.username = info.username
@@ -998,7 +998,7 @@ class ReplayMap(Replay):
             info = loader.replay_info(self.beatmap_id, user_id=self.user_id,
                 mods=self.mods)
 
-        self.timestamp = info.timestamp
+        self.timestamp = info.date
         # estimate version with timestamp, this is only accurate if the user
         # keeps their game up to date
         self.game_version = GameVersion.from_datetime(self.timestamp,

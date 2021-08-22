@@ -1,149 +1,22 @@
-from datetime import datetime
-import time
 import base64
 import logging
 from lzma import LZMAError
 from functools import lru_cache
-from enum import Enum
-from dataclasses import dataclass
 from pathlib import Path
 import sqlite3
 import wtc
 
-from requests import RequestException
 import osrparse
-from ossapi import Ossapi
+from ossapi import Ossapi, ReplayUnavailableException
 
-from circleguard.mod import Mod
 from circleguard.utils import TRACE
 from circleguard.span import Span
 
 
-class APIException(Exception):
-    """An error involving the osu! api."""
-
-class NoInfoAvailableException(APIException):
-    """The api returned no information for the given arguments."""
-
-class UnknownAPIException(APIException):
-    """An api error that we were not prepared to handle."""
-
-class InternalAPIException(APIException):
-    """
-    An api error that we know how to handle, and will do so automatically.
-    """
-
-class InvalidKeyException(InternalAPIException):
-    """An api key was rejected by the api."""
-
-class RatelimitException(InternalAPIException):
-    """The api has ratelimited an api key."""
-
-class InvalidJSONException(InternalAPIException):
-    """The api returned an invalid json response."""
-
-class ReplayUnavailableException(InternalAPIException):
-    """
-    We expected a replay from the api but the api was unable to deliver it.
-    """
-
-# Strings taken from osu api error responses. Format is
-# [api response, exception class type, details to pass to an exception]
-class Error(Enum):
-    NO_REPLAY         = ["Replay not available.", ReplayUnavailableException,
-        "Could not find any replay data. Skipping"]
-    RATELIMITED       = ["Requesting too fast! Slow your operation, cap'n!",
-        RatelimitException, "We were ratelimited. Waiting it out"]
-    RETRIEVAL_FAILED  = ["Replay retrieval failed.", ReplayUnavailableException,
-        "Replay retrieval failed. Skipping"]
-    INVALID_KEY       = ["Please provide a valid API key.", InvalidKeyException,
-        "Please provide a valid api key"]
-    INVALID_JSON      = ["The api broke.", InvalidJSONException,
-        "The api returned an invalid json response, retrying"]
-    UNKNOWN           = ["Unknown error.", UnknownAPIException,
-        "Unknown error when requesting a replay."]
-
-@dataclass
-class ReplayInfo:
-    """
-    A container class representing all the information we get about a replay
-    from the api.
-
-    Parameters
-    ----------
-    timestamp: :class:`datetime.datetime`
-        When this replay was set.
-    beatmap_id: int
-        The id of the beatmap the replay was played on.
-    user_id: int
-        The id of the player who played the replay.
-    username: str
-        The username of the player who played the replay.
-    replay_id: int
-        The id of the replay.
-    mods: :class:`~circleguard.mod.ModCombination`
-        The mods the replay was played with.
-    replay_available: bool
-        Whether this replay is available from the api or not.
-    """
-    timestamp: datetime
-    beatmap_id: int
-    user_id: int
-    username: str
-    replay_id: int
-    mods: Mod
-    replay_available: bool
-
-
-def request(function):
-    """
-    A decorator that handles :mod:`requests` and api related exceptions, as
-    well as resetting our ratelimits if appropriate.
-
-    Parameters
-    ----------
-    function: callable
-        The function to wrap.
-
-    Notes
-    -----
-    Should be wrapped around any function that makes a request; to the api or
-    otherwise.
-
-    If it has been more than :data:`Loader.RATELIMIT_RESET` since
-    :data:`Loader.start_time`, sets :data:`Loader.start_time` to be
-    :func:`datetime.now <datetime.datetime.now>`.
-    """
-
-    def wrapper(*args, **kwargs):
-        difference = datetime.now() - Loader.start_time
-        if difference.seconds > Loader.RATELIMIT_RESET:
-            Loader.start_time = datetime.now()
-        ret = None
-        self = args[0]
-        try:
-            ret = function(*args, **kwargs)
-        except RatelimitException:
-            self._enforce_ratelimit()
-            # wrap function with the decorator then call decorator
-            ret = request(function)(*args, **kwargs)
-        except InvalidJSONException as e:
-            self.log.warning(f"Invalid json exception: {e}. API likely having "
-                "issues; sleeping for 3 seconds then retrying")
-            time.sleep(3)
-            ret = request(function)(*args, **kwargs)
-        except RequestException as e:
-            self.log.warning(f"Request exception: {e}. Likely a network issue; "
-                "sleeping for 5 seconds then retrying")
-            time.sleep(5)
-            ret = request(function)(*args, **kwargs)
-        except ReplayUnavailableException as e:
-            self.log.warning("We expected a replay from the api, but it was "
-                f"unable to deliver it: {e}")
-            ret = None
-        return ret
-    return wrapper
-
+class NoInfoAvailableException(Exception):
+    def __init__(self):
+        super().__init__("No info was available from the api for the given "
+            "arguments.")
 
 def check_cache(function):
     """
@@ -214,10 +87,6 @@ class Loader:
     # mods of the replay.
     MAX_MAP_SPAN = Span("1-100")
     MAX_USER_SPAN = Span("1-100")
-    # time in seconds until the api refreshes our ratelimits
-    RATELIMIT_RESET = 60
-    # when we started our requests cycle
-    start_time = datetime.min
 
 
     def __init__(self, key, cache_path=None, write_to_cache=True):
@@ -237,7 +106,6 @@ class Loader:
             self._conn = sqlite3.connect(str(cache_path))
             self._cursor = self._conn.cursor()
 
-    @request
     def replay_info(self, beatmap_id, span=None, user_id=None, mods=None, \
         limit=True):
         """
@@ -295,12 +163,10 @@ class Loader:
         if span:
             api_limit = max(span)
         mods = None if mods is None else mods.value
-        request_data = {"m": "0", "b": beatmap_id, "limit": api_limit,
-            "u": user_id, "mods": mods}
-        response = self.api.get_scores(request_data)
-        try:
-            Loader.check_response(response)
-        except NoInfoAvailableException:
+        scores = self.api.get_scores(beatmap_id, mode=0, limit=api_limit,
+            user=user_id, mods=mods)
+
+        if scores == []:
             # The logic below allows us to load eg
             # ``Map(221777, mods=Mod.SO + Mod.PF + Mod.HT)`` or some equally
             # absurd mod combination for which there are no replays, and have
@@ -310,37 +176,29 @@ class Loader:
             # ``span`` has been passed. If ``user_id`` was passed instead, raise
             # the exception as usual.
             if user_id:
-                raise
+                raise NoInfoAvailableException()
             # the osu! api doesn't distinguish between a map not existing, and
             # no scores having been set on that map for a particular mod
             # combination - both are empty responses which will trigger a no
             # info available exception. We need to figure out which case has
             # occurred here to determine if we should raise or not.
-            beatmap_response = self.api.get_beatmaps({"b": beatmap_id})
+            beatmap_response = self.api.get_beatmaps(beatmap_id=beatmap_id)
             # If the beatmap does not exist, this response will be empty.
             if not beatmap_response:
-                raise
-            # else, ignore the exception.
+                raise NoInfoAvailableException()
+            # else, the empty response is ok.
 
         if span:
             # Remove indices that would error when indexing ``response``.
             # we index at [i-1], so use <= instead of <
-            _span = {x for x in span if x <= len(response)}
+            _span = {x for x in span if x <= len(scores)}
             # filter out anything not in our span
-            response = [response[i-1] for i in _span]
-        # need to cast replay_available to int before bool since the api returns
-        # either ``"0"`` or ``"1"`` and all strings are truthy
-        # strptime format from https://github.com/ppy/osu-api/wiki#apiget_scores
-        infos = [ReplayInfo(datetime.strptime(x["date"], "%Y-%m-%d %H:%M:%S"),
-            beatmap_id, int(x["user_id"]), str(x["username"]),
-            int(x["score_id"]), Mod(int(x["enabled_mods"])),
-            bool(int(x["replay_available"]))) for x in response]
+            scores = [scores[i-1] for i in _span]
 
         # limit only applies if user_id was set
-        return infos[0] if (limit and user_id) else infos
+        return scores[0] if (limit and user_id) else scores
 
 
-    @request
     def get_user_best(self, user_id, span, mods=None):
         """
         Retrieves replay infos from a user's top plays.
@@ -365,31 +223,24 @@ class Loader:
         self.log.log(TRACE, "Loading user best of %s with options %s",
             user_id, {k: locals_[k] for k in locals_ if k != 'self'})
 
-        request_data = {"m": "0", "u": user_id, "limit": max(span)}
-        response = self.api.get_user_best(request_data)
-        Loader.check_response(response)
+        scores = self.api.get_user_best(user_id, mode=0, limit=max(span))
+        if scores == []:
+            raise NoInfoAvailableException()
         if mods:
-            _response = []
-            for r in response:
-                if Mod(int(r["enabled_mods"])) == mods:
-                    _response.append(r)
-            response = _response
+            _scores = []
+            for score in scores:
+                if score.mods == mods:
+                    _scores.append(score)
+            scores = _scores
 
         # remove span indices which would cause an index error because there
         # weren't that many replay infos returned by the api. eg if there
         # were 4 responses, remove any span above 4
-        response_count = len(response)
-        _span = [x for x in span if x <= response_count]
-
-        response = [response[i-1] for i in _span]
-        return [ReplayInfo(datetime.strptime(r["date"], "%Y-%m-%d %H:%M:%S"),
-            int(r["beatmap_id"]), int(r["user_id"]),
-            self.username(int(r["user_id"])), int(r["score_id"]),
-            Mod(int(r["enabled_mods"])), bool(int(r["replay_available"])))
-            for r in response]
+        _span = [x for x in span if x <= len(scores)]
+        scores = [scores[i-1] for i in _span]
+        return scores
 
 
-    @request
     def load_replay_data(self, beatmap_id, user_id, mods=None):
         """
         Retrieves replay data from the api.
@@ -421,10 +272,9 @@ class Loader:
         self.log.log(TRACE, "Requesting replay data by user %d on map %d with "
             "mods %s", user_id, beatmap_id, mods)
         mods = None if mods is None else mods.value
-        request_data = {"m": "0", "b": beatmap_id, "u": user_id, "mods": mods}
-        response = self.api.get_replay(request_data)
-        Loader.check_response(response)
-        return base64.b64decode(response["content"])
+        content = self.api.get_replay(beatmap_id=beatmap_id, user=user_id,
+            mods=mods, mode=0)
+        return base64.b64decode(content)
 
     @check_cache
     def replay_data(self, replay_info, cache=None):
@@ -447,8 +297,8 @@ class Loader:
 
         Raises
         ------
-        UnknownAPIException
-            If ``uxser_info.replay_available` was 1, but we did not receive
+        ReplayUnavailableException
+            If ``user_info.replay_available` was 1, but we did not receive
             replay data from the api.
         """
 
@@ -462,8 +312,8 @@ class Loader:
 
         lzma_bytes = self.load_replay_data(beatmap_id, user_id, mods)
         if lzma_bytes is None:
-            raise UnknownAPIException("The api guaranteed there would be a "
-                "replay available, but we did not receive any data.")
+            raise ReplayUnavailableException("The api guaranteed there "
+                "would be a replay available, but we did not receive any data.")
         try:
             parsed_replay = osrparse.parse_replay(lzma_bytes, pure_lzma=True)
         # see https://github.com/circleguard/circlecore/issues/61
@@ -478,8 +328,7 @@ class Loader:
         return replay_data
 
     # TODO make this check cache for the replay
-    @request
-    def replay_data_from_id(self, replay_id, cache):
+    def replay_data_from_id(self, replay_id, _cache):
         """
         Retrieves replay data from the api, given a replay id.
 
@@ -488,9 +337,8 @@ class Loader:
         replay_id: int
             The id of the replay to retrieve data for.
         """
-        response = self.api.get_replay({"s": replay_id})
-        Loader.check_response(response)
-        lzma = base64.b64decode(response["content"])
+        content = self.api.get_replay(score_id=replay_id)
+        lzma = base64.b64decode(content)
         replay_data = osrparse.parse_replay(lzma, pure_lzma=True).play_data
         # TODO cache the replay here, might require some restructuring/double
         # checking everything will work because we only have its id, not map
@@ -503,7 +351,6 @@ class Loader:
         return replay_data
 
     @lru_cache()
-    @request
     def beatmap_id(self, beatmap_hash):
         """
         Retrieves a beatmap id from a corresponding beatmap hash through the
@@ -526,18 +373,15 @@ class Loader:
         duplicate api calls.
         """
 
-        response = self.api.get_beatmaps({"h": beatmap_hash})
-        try:
-            Loader.check_response(response)
-        except NoInfoAvailableException:
+        beatmaps = self.api.get_beatmaps(beatmap_hash=beatmap_hash)
+        if beatmaps == []:
             return 0
-        return int(response[0]["beatmap_id"])
+        return beatmaps[0].beatmap_id
 
     # TODO remove in core 6.0.0
     map_id = beatmap_id
 
     @lru_cache()
-    @request
     def user_id(self, username):
         """
         Retrieves a user id from a corresponding username through the api.
@@ -567,15 +411,12 @@ class Loader:
         duplicate api calls.
         """
 
-        response = self.api.get_user({"u": username, "type": "string"})
-        try:
-            Loader.check_response(response)
-        except NoInfoAvailableException:
+        user = self.api.get_user(username, user_type="string")
+        if user == []:
             return 0
-        return int(response[0]["user_id"])
+        return user.user_id
 
     @lru_cache()
-    @request
     def username(self, user_id):
         """
         Retrieves the username from a corresponding user id through the api.
@@ -599,71 +440,10 @@ class Loader:
         This function is wrapped in a :func:`functools.lru_cache` to prevent
         duplicate api calls.
         """
-        response = self.api.get_user({"u": user_id, "type": "id"})
-        try:
-            Loader.check_response(response)
-        except NoInfoAvailableException:
+        user = self.api.get_user(user_id, user_type="id")
+        if user == []:
             return ""
-        return response[0]["username"]
-
-    @staticmethod
-    def check_response(response):
-        """
-        Checks a response from the api for an error or empty response.
-
-        Parameters
-        ----------
-        response: list or dict
-            The response returned by the api.
-
-        Raises
-        ------
-        One of :class:`~.Error`
-            If an error exists in the response.
-        NoInfoAvailable
-            If the response is empty.
-        """
-        if "error" in response: # dict case
-            for error in Error:
-                if response["error"] == error.value[0]:
-                    raise error.value[1](error.value[2])
-            # don't know why pylint is throwing hands but this is definitely
-            # legit
-            raise Error.UNKNOWN.value[1](Error.UNKNOWN.value[2]) # pylint: disable=unsubscriptable-object
-        if not response: # response is empty, list or dict case
-            raise NoInfoAvailableException("No info was available from the api "
-                "for the given arguments.")
-
-    def _enforce_ratelimit(self):
-        """
-        Sleeps the thread until we have refreshed our ratelimits.
-        """
-        difference = datetime.now() - Loader.start_time
-        seconds_passed = difference.seconds
-
-        # sleep the remainder of the reset cycle so we guarantee it's been that
-        # long since the first request
-        sleep_seconds = Loader.RATELIMIT_RESET - seconds_passed
-        sleep_seconds = max(sleep_seconds, 0)
-        self._ratelimit(sleep_seconds)
-
-    def _ratelimit(self, length):
-        """
-        Sleeps the thread for ``length`` time.
-
-        Parameters
-        ----------
-        length: int
-            How long, in seconds, to sleep the thread for.
-
-        Notes
-        -----
-        This method is only called by :meth:`~._enforce_ratelimit`. It is split
-        into two functions to allow :class:`~.Loader` subclasses to overload
-        just this function and easily interact with the ``length``.
-        """
-        self.log.info("Ratelimited, sleeping for %s seconds.", length)
-        time.sleep(length)
+        return user.username
 
     def _create_cache(self, path):
         """

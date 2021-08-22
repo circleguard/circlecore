@@ -5,10 +5,7 @@ from circleguard.loadables import (Replay, ReplayMap, ReplayPath, Map, User,
         MapUser, ReplayDir, ReplayContainer, Loadable, ReplayCache,
         CachedReplay, ReplayID, ReplayString, LoadableContainer)
 from circleguard.mod import Mod
-from circleguard.loader import (Loader, ReplayInfo, APIException,
-        NoInfoAvailableException, UnknownAPIException, InternalAPIException,
-        InvalidKeyException, RatelimitException, InvalidJSONException,
-        ReplayUnavailableException)
+from circleguard.loader import Loader, NoInfoAvailableException
 from circleguard.version import __version__
 from circleguard.investigations import Snap
 from circleguard.judgment import Judgment, Hit, Miss, JudgmentType
@@ -18,6 +15,9 @@ from circleguard.utils import (convert_statistic, order, Key,
         hitwindow, hitwindows, hitradius)
 from circleguard.game_version import GameVersion, NoGameVersion
 from circleguard.hitobjects import Hitobject, Circle, Slider, Spinner
+
+from ossapi.ossapi import (APIException, InvalidKeyException,
+        ReplayUnavailableException)
 
 logging.addLevelName(TRACE, "TRACE")
 formatter = ColoredFormatter("[%(threadName)s][%(name)s][%(levelname)s]  %(message)s  (%(filename)s:%(lineno)s)")
@@ -43,11 +43,9 @@ __all__ = [
 "convert_statistic", "order", "Key", "RatelimitWeight", "TRACE", "replay_pairs",
 "fuzzy_mods", "hitwindow", "hitwindows", "hitradius",
 # loader
-"Loader", "ReplayInfo",
+"Loader",
 # exceptions
-"APIException",
-"NoInfoAvailableException", "UnknownAPIException", "InternalAPIException",
-"InvalidKeyException", "RatelimitException", "InvalidJSONException",
+"APIException", "NoInfoAvailableException", "InvalidKeyException",
 "ReplayUnavailableException",
 # version
 "__version__",
