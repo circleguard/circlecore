@@ -1085,7 +1085,7 @@ class ReplayDataOSR(Replay):
     this replay is loaded:
 
     * timestamp
-    * map_id
+    * beatmap_id
     * username
     * user_id
     * mods
