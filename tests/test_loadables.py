@@ -8,27 +8,27 @@ class TestReplays(CGTestCase):
 
     def test_loading_replaypath(self):
         r = ReplayPath(RES / "example_replay.osr")
-        self.assertFalse(r.loaded, "Loaded status was not correct")
+        self.assertFalse(r.loaded)
         self.cg.load(r)
-        self.assertEqual(r.mods, Mod.HD + Mod.DT, "Mods was not correct")
-        self.assertEqual(r.replay_id, 2029801532, "Replay id was not correct")
-        self.assertEqual(r.username, "MarthXT", "Username was not correct")
-        self.assertEqual(r.user_id, 2909663, "User id was not correct")
-        self.assertEqual(r.weight, RatelimitWeight.LIGHT, "RatelimitWeight was not correct")
-        self.assertTrue(r.loaded, "Loaded status was not correct")
+        self.assertEqual(r.mods, Mod.HD + Mod.DT)
+        self.assertEqual(r.replay_id, 2029801532)
+        self.assertEqual(r.username, "MarthXT")
+        self.assertEqual(r.user_id, 2909663)
+        self.assertEqual(r.weight, RatelimitWeight.LIGHT)
+        self.assertTrue(r.loaded)
 
     def test_loading_replaymap(self):
         # Toy HDHR score on Pretender
         r = ReplayMap(221777, 2757689)
-        self.assertFalse(r.loaded, "Loaded status was not correct")
+        self.assertFalse(r.loaded)
         self.cg.load(r)
-        self.assertEqual(r.map_id, 221777, "Map id was not correct")
-        self.assertEqual(r.user_id, 2757689, "Map id was not correct")
-        self.assertEqual(r.mods, Mod.HD + Mod.HR, "Mods was not correct")
-        self.assertEqual(r.replay_id, 2832574010, "Replay is was not correct")
-        self.assertEqual(r.weight, RatelimitWeight.HEAVY, "RatelimitWeight was not correct")
-        self.assertEqual(r.username, "Toy", "Username was not correct")
-        self.assertTrue(r.loaded, "Loaded status was not correct")
+        self.assertEqual(r.map_id, 221777)
+        self.assertEqual(r.user_id, 2757689)
+        self.assertEqual(r.mods, Mod.HD + Mod.HR)
+        self.assertEqual(r.replay_id, 2832574010)
+        self.assertEqual(r.weight, RatelimitWeight.HEAVY)
+        self.assertEqual(r.username, "Toy")
+        self.assertTrue(r.loaded)
 
     def test_no_replay_raises(self):
         # contrary to loading a Map, where we don't want to raise if the map
@@ -156,12 +156,12 @@ class TestReplayString(CGTestCase):
         replay_data = open(RES / "example_replay.osr", "rb").read()
         r = ReplayString(replay_data)
         self.cg.load(r)
-        self.assertEqual(r.mods, Mod.HD + Mod.DT, "Mods was not correct")
-        self.assertEqual(r.replay_id, 2029801532, "Replay id was not correct")
-        self.assertEqual(r.username, "MarthXT", "Username was not correct")
-        self.assertEqual(r.user_id, 2909663, "User id was not correct")
-        self.assertEqual(r.weight, RatelimitWeight.LIGHT, "RatelimitWeight was not correct")
-        self.assertTrue(r.loaded, "Loaded status was not correct")
+        self.assertEqual(r.mods, Mod.HD + Mod.DT)
+        self.assertEqual(r.replay_id, 2029801532)
+        self.assertEqual(r.username, "MarthXT")
+        self.assertEqual(r.user_id, 2909663)
+        self.assertEqual(r.weight, RatelimitWeight.LIGHT)
+        self.assertTrue(r.loaded)
 
 
 class TestLoadableFromCG(CGTestCase):
