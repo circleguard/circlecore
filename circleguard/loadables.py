@@ -948,6 +948,15 @@ class ReplayMap(Replay):
     * username
     * mods
     * replay_id
+    * count_300
+    * count_100
+    * count_50
+    * count_geki
+    * count_katu
+    * count_miss
+    * score
+    * max_combo
+    * is_perfect_combo
     * replay_data
     """
 
@@ -1082,6 +1091,17 @@ class ReplayDataOSR(Replay):
     * mods
     * replay_id
     * beatmap_hash
+    * replay_hash
+    * count_300
+    * count_100
+    * count_50
+    * count_geki
+    * count_katu
+    * count_miss
+    * score
+    * max_combo
+    * is_perfect_combo
+    * life_bar_graph (currently unparsed)
     * replay_data
     """
     def __init__(self, ratelimit_weight, cache=None):
