@@ -587,11 +587,12 @@ class Replay(Loadable):
 
         # These attributes might or might not be set once the replay loads.
         # Ideally, a replay would provide all of these attributes, but there are
-        # some cases when only a subset is available. <br>
+        # some cases when only a subset is available.
+        #
         # If only some of these attributes are set after the replay is loaded,
         # some ``Circleguard`` methods may reject this replay, as it does not
         # contain the information necessary to do whatever the method needs to.
-        # <br>
+        #
         # For instance, if the replay provides ``replay_data`` but not ``mods``,
         # ``Circleguard#similarity`` will reject it, as we will not know whether
         # whether ``Mod.HR`` was enabled on the replay, and thus whether to flip
