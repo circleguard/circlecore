@@ -1151,9 +1151,9 @@ class ReplayDataOSR(Replay):
         self.count_300 = replay.number_300s
         self.count_100 = replay.number_100s
         self.count_50 = replay.number_50s
-        self.count_geki = replay.geki
-        self.count_katu = replay.katu
-        self.count_miss = replay.miss
+        self.count_geki = replay.gekis
+        self.count_katu = replay.katus
+        self.count_miss = replay.misses
         self.score = replay.score
         self.max_combo = replay.max_combo
         self.is_perfect_combo = replay.is_perfect_combo
