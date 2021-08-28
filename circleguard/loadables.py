@@ -958,6 +958,7 @@ class ReplayMap(Replay):
     * score
     * max_combo
     * is_perfect_combo
+    * pp
     * replay_data
     """
 
@@ -1025,6 +1026,7 @@ class ReplayMap(Replay):
         self.score = info.score
         self.max_combo = info.max_combo
         self.is_perfect_combo = info.perfect
+        self.pp = info.pp
 
         replay_data = loader.replay_data(info, cache=cache)
         self._process_replay_data(replay_data)
