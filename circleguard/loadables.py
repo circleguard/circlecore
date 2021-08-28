@@ -626,6 +626,7 @@ class Replay(Loadable):
         self.max_combo        = None
         self.is_perfect_combo = None
         self.life_bar_graph   = None
+        self.pp               = None
 
         # These attributes remain ``None``` when replay is unloaded, or loaded
         # but with no data.
