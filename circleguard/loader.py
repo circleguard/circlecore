@@ -88,7 +88,6 @@ class Loader:
     MAX_MAP_SPAN = Span("1-100")
     MAX_USER_SPAN = Span("1-100")
 
-
     def __init__(self, key, cache_path=None, write_to_cache=True):
         self.api = Ossapi(key)
         self.log = logging.getLogger(__name__)
