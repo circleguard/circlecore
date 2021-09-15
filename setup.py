@@ -39,7 +39,7 @@ setup(
     packages=find_packages(),
     install_requires=[
         "osrparse~=5.0.0",
-        "ossapi==1.3.0",
+        "ossapi~=2.0.0",
         "wtc==1.2.1",
         "numpy",
         "requests",
