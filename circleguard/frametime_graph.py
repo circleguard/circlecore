@@ -94,6 +94,8 @@ class FrametimeGraph:
     def _conversion_factor(self, replay):
         if Mod.DT in replay.mods:
             return 1 / 1.5
+        if Mod.NC in replay.mods:
+            return 1 / 1.5
         if Mod.HT in replay.mods:
             return 1 / 0.75
         return 1
