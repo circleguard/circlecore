@@ -1,7 +1,6 @@
 <img src="readme_resources/logo.png" alt="logo" width="200" height="200"/>
 
 [![PyPi version](https://badge.fury.io/py/circleguard.svg)](https://pypi.org/project/circleguard/)
-[![CodeFactor](https://www.codefactor.io/repository/github/circleguard/circlecore/badge)](https://www.codefactor.io/repository/github/circleguard/circlecore)
 
 # Circlecore
 
