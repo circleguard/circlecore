@@ -2,7 +2,7 @@
 
 [![PyPi version](https://badge.fury.io/py/circleguard.svg)](https://pypi.org/project/circleguard/)
 
-# Circlecore
+# Circlecore ([documentation](https://circleguard.github.io/circlecore/))
 
 Circlecore is a utilities library for osu!. Features include:
 
