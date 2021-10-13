@@ -38,8 +38,8 @@ setup(
     license = "MIT",
     packages=find_packages(),
     install_requires=[
-        "osrparse~=5.0.0",
-        "ossapi~=2.0.0",
+        "osrparse~=5.0",
+        "ossapi~=2.1",
         "wtc==1.2.1",
         "numpy",
         "requests",
