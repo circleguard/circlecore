@@ -71,7 +71,7 @@ class TestMap(CGTestCase):
     @classmethod
     def setUpClass(cls):
         super().setUpClass()
-        cls.map = Map(221777, "2-4")
+        cls.map = Map(221777, "3-5")
 
     def test_map_load(self):
         self.assertEqual(len(self.map.all_replays()), 0)
@@ -92,11 +92,11 @@ class TestMap(CGTestCase):
     def test_map_slice(self):
         # sanity check (map id better be what we put in)
         self.assertEqual(self.map[0].map_id, 221777)
-        # 3rd (kirby mix)
+        # 4rd (kirby mix)
         self.assertEqual(self.map[1].user_id, 9665206)
-        # 2nd, 3rd, and 4th (toy, kirby mix, rohulk)
+        # 3rd, 4th, and 5th (toy, kirby mix, rohulk)
         self.assertListEqual([r.user_id for r in self.map[0:3]], [2757689, 9665206, 3219026])
-        # 2nd and 4th (toy and rohulk)
+        # 3rd and 5th (toy and rohulk)
         self.assertListEqual([r.user_id for r in self.map[0:3:2]], [2757689, 3219026])
 
     def test_no_replays_does_not_raise(self):
