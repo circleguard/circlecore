@@ -27,7 +27,7 @@ setup(
     classifiers=[
         "Programming Language :: Python :: 3",
         "Intended Audience :: Developers",
-        "License :: OSI Approved :: MIT License",
+        "License :: OSI Approved :: GNU General Public License v3 (GPLv3)",
         "Operating System :: OS Independent",
     ],
     keywords = ["osu!, python, cheat-detection, replay-stealing, remodding"],
@@ -35,7 +35,6 @@ setup(
     author_email="orionldevoe@gmail.com",
     url="https://github.com/circleguard/circlecore",
     download_url = "https://github.com/circleguard/circlecore/tarball/v" + VERSION,
-    license = "MIT",
     packages=find_packages(),
     install_requires=[
         "osrparse~=5.0",
