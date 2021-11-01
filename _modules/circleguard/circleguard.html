@@ -322,7 +322,7 @@
             <span class="n">mods_unknown</span><span class="p">)</span></div>
 
 
-<div class="viewcode-block" id="Circleguard.ur"><a class="viewcode-back" href="../../appendix.html#circleguard.circleguard.Circleguard.ur">[docs]</a>    <span class="k">def</span> <span class="nf">ur</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">replay</span><span class="p">,</span> <span class="n">cv</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">beatmap</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">adjusted</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">float</span><span class="p">:</span>
+<div class="viewcode-block" id="Circleguard.ur"><a class="viewcode-back" href="../../appendix.html#circleguard.circleguard.Circleguard.ur">[docs]</a>    <span class="k">def</span> <span class="nf">ur</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">replay</span><span class="p">,</span> <span class="n">cv</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">beatmap</span><span class="o">=</span><span class="kc">None</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">float</span><span class="p">:</span>
         <span class="sd">"""</span>
 <span class="sd">        The unstable rate of ``replay``.</span>
 
@@ -340,12 +340,6 @@
 <span class="sd">            This parameter is provided primarily as an optimization for when you</span>
 <span class="sd">            already have the replay's beatmap, to avoid re-retrieving it in this</span>
 <span class="sd">            method.</span>
-<span class="sd">        adjusted: bool</span>
-<span class="sd">            Whether to calculate the "adjusted" ur. Adjusted ur is the same as</span>
-<span class="sd">            ur, but with non-300 judgments taken out of consideration. Often</span>
-<span class="sd">            100s or 50s are a result of late hits for relax hacks, and by</span>
-<span class="sd">            discounting them we can get a potentially more accurate insight</span>
-<span class="sd">            into a replay's ur.</span>
 
 <span class="sd">        Returns</span>
 <span class="sd">        -------</span>
@@ -359,7 +353,7 @@
             <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">"The ur of a replay that does not know what map "</span>
                 <span class="s2">"it was set on cannot be calculated"</span><span class="p">)</span>
 
-        <span class="n">ur</span> <span class="o">=</span> <span class="n">Investigations</span><span class="o">.</span><span class="n">ur</span><span class="p">(</span><span class="n">replay</span><span class="p">,</span> <span class="n">beatmap</span><span class="p">,</span> <span class="n">adjusted</span><span class="p">)</span>
+        <span class="n">ur</span> <span class="o">=</span> <span class="n">Investigations</span><span class="o">.</span><span class="n">ur</span><span class="p">(</span><span class="n">replay</span><span class="p">,</span> <span class="n">beatmap</span><span class="p">)</span>
         <span class="k">if</span> <span class="n">cv</span><span class="p">:</span>
             <span class="n">ur</span> <span class="o">=</span> <span class="n">convert_statistic</span><span class="p">(</span><span class="n">ur</span><span class="p">,</span> <span class="n">replay</span><span class="o">.</span><span class="n">mods</span><span class="p">,</span> <span class="n">to</span><span class="o">=</span><span class="s2">"cv"</span><span class="p">)</span>
 

@@ -250,7 +250,7 @@ modifications, and the second element is the similarity with
 </dd></dl>
 <dl class="py method">
 <dt id="circleguard.circleguard.Circleguard.ur">
-<code class="sig-name descname"><span class="pre">ur</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">replay</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">cv</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">beatmap</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">adjusted</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span> → <a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.10)"><span class="pre">float</span></a><a class="reference internal" href="_modules/circleguard/circleguard.html#Circleguard.ur"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#circleguard.circleguard.Circleguard.ur" title="Permalink to this definition">¶</a></dt>
+<code class="sig-name descname"><span class="pre">ur</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">replay</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">cv</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">beatmap</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span> → <a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.10)"><span class="pre">float</span></a><a class="reference internal" href="_modules/circleguard/circleguard.html#Circleguard.ur"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#circleguard.circleguard.Circleguard.ur" title="Permalink to this definition">¶</a></dt>
 <dd><p>The unstable rate of <code class="docutils literal notranslate"><span class="pre">replay</span></code>.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
@@ -264,11 +264,6 @@ retrieving a beatmap from the replay itself.
 This parameter is provided primarily as an optimization for when you
 already have the replay’s beatmap, to avoid re-retrieving it in this
 method.</p></li>
-<li><p><strong>adjusted</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.10)"><em>bool</em></a>) – Whether to calculate the “adjusted” ur. Adjusted ur is the same as
-ur, but with non-300 judgments taken out of consideration. Often
-100s or 50s are a result of late hits for relax hacks, and by
-discounting them we can get a potentially more accurate insight
-into a replay’s ur.</p></li>
 </ul>
 </dd>
 <dt class="field-even">Returns</dt>
