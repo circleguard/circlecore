@@ -26,8 +26,8 @@ Investigations
 .. automodule:: circleguard.investigations
    :members:
 
-Investigations
---------------
+Judgment
+--------
 .. automodule:: circleguard.judgment
    :members:
 
