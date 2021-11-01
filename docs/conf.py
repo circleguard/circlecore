@@ -94,8 +94,8 @@ rst_prolog = """
 .. |replay.beatmap| replace:: :func:`replay.Beatmap() <circleguard.loadables.Replay.beatmap>`
 
 .. |Snap| replace:: :class:`~circleguard.investigator.Snap`
-.. |Hit| replace:: :class:`~circleguard.investigator.Hit`
-.. |Judgment| replace:: :class:`~circleguard.investigator.Judgment`
+.. |Hit| replace:: :class:`~circleguard.judgment.Hit`
+.. |Judgment| replace:: :class:`~circleguard.judgment.Judgment`
 
 .. |Span| replace:: :class:`~circleguard.span.Span`
 .. |Loader| replace:: :class:`~circleguard.loader.Loader`
