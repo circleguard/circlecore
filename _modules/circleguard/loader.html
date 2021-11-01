@@ -1,0 +1,822 @@
+<!doctype html>
+<html class="no-js">
+  <head><meta charset="utf-8"/>
+    <meta name="viewport" content="width=device-width,initial-scale=1"/>
+    <meta name="color-scheme" content="light dark"><link rel="index" title="Index" href="../../genindex.html" /><link rel="search" title="Search" href="../../search.html" />
+
+    <meta name="generator" content="sphinx-3.5.2, furo 2021.03.20.beta30"/>
+        <title>circleguard.loader - Circleguard v5.2.2 documentation</title>
+      <link rel="stylesheet" href="../../_static/styles/furo.css?digest=978e1795dfe158b585dda6a8417f6411828bf3ed">
+    <link rel="stylesheet" href="../../_static/pygments.css">
+    <link media="(prefers-color-scheme: dark)" rel="stylesheet" href="../../_static/pygments_dark.css">
+    
+
+
+<style>
+  :root {
+    --color-code-background: #f8f8f8;
+  --color-code-foreground: black;
+  
+  }
+  @media (prefers-color-scheme: dark) {
+    :root {
+      --color-code-background: #202020;
+  --color-code-foreground: #d0d0d0;
+  
+    }
+  }
+
+  /* For allowing end-user-specific overrides */
+  .override-light {
+    --color-code-background: #f8f8f8;
+  --color-code-foreground: black;
+  
+  }
+  .override-dark {
+    --color-code-background: #202020;
+  --color-code-foreground: #d0d0d0;
+  
+  }
+</style><link rel="stylesheet" href="../../_static/styles/furo-extensions.css?digest=d391b54134226e4196576da3bdb6dddb7e05ba2b"></head>
+  <body dir="">
+    
+<svg xmlns="http://www.w3.org/2000/svg" style="display: none;">
+  <symbol id="svg-toc" viewBox="0 0 24 24">
+    <title>Contents</title>
+    <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none"
+      stroke-width="1.5" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round">
+      <path stroke="none" d="M0 0h24v24H0z"/>
+      <line x1="4" y1="6" x2="20" y2="6" />
+      <line x1="10" y1="12" x2="20" y2="12" />
+      <line x1="6" y1="18" x2="20" y2="18" />
+    </svg>
+  </symbol>
+  <symbol id="svg-menu" viewBox="0 0 24 24">
+    <title>Menu</title>
+    <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none"
+      stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"
+      class="feather feather-menu">
+      <line x1="3" y1="12" x2="21" y2="12"></line>
+      <line x1="3" y1="6" x2="21" y2="6"></line>
+      <line x1="3" y1="18" x2="21" y2="18"></line>
+    </svg>
+  </symbol>
+  <symbol id="svg-arrow-right" viewBox="0 0 24 24">
+    <title>Expand</title>
+    <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none"
+      stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"
+      class="feather feather-chevron-right">
+      <polyline points="9 18 15 12 9 6"></polyline>
+    </svg>
+  </symbol>
+</svg>
+
+<input type="checkbox" class="sidebar-toggle" name="__navigation" id="__navigation">
+<input type="checkbox" class="sidebar-toggle" name="__toc" id="__toc">
+<label class="overlay sidebar-overlay" for="__navigation"></label>
+<label class="overlay toc-overlay" for="__toc"></label>
+
+
+
+<div class="page">
+  <header class="mobile-header">
+    <div class="header-left">
+      <label class="nav-overlay-icon" for="__navigation">
+        <i class="icon"><svg><use href="#svg-menu"></use></svg></i>
+      </label>
+    </div>
+    <div class="header-center">
+      <a href="../../index.html"><div class="brand">Circleguard v5.2.2 documentation</div></a>
+    </div>
+    <div class="header-right">
+      <label class="toc-overlay-icon toc-header-icon no-toc" for="__toc">
+        <i class="icon"><svg><use href="#svg-toc"></use></svg></i>
+      </label>
+    </div>
+  </header>
+  <aside class="sidebar-drawer">
+    <div class="sidebar-container">
+      
+      <div class="sidebar-sticky"><a class="sidebar-brand" href="../../index.html">
+  
+  
+  <span class="sidebar-brand-text">Circleguard v5.2.2 documentation</span>
+  
+</a><form class="sidebar-search-container" method="get" action="../../search.html">
+  <input class="sidebar-search" placeholder=Search name="q">
+  <input type="hidden" name="check_keywords" value="yes">
+  <input type="hidden" name="area" value="default">
+</form><div class="sidebar-scroll"><div class="sidebar-tree">
+  <ul>
+<li class="toctree-l1"><a class="reference internal" href="../../index.html">Circlecore</a></li>
+</ul>
+<p class="caption"><span class="caption-text">Tutorial</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../foreword.html">Foreword</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../representing-replays.html">Representing Replays</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../using-circleguard.html">Using Circleguard</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../replay-containers.html">Replay Containers</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../loading.html">Loading</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../caching.html">Caching</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../advanced-usage.html">Advanced Usage</a></li>
+</ul>
+<p class="caption"><span class="caption-text">Contributing</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../contributing.html">Contributing</a></li>
+</ul>
+<p class="caption"><span class="caption-text">Appendix</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../appendix.html">Appendix</a></li>
+</ul>
+
+</div>
+</div>
+      </div>
+      
+    </div>
+  </aside>
+  <main class="main">
+    <div class="content">
+      <article role="main">
+        <label class="toc-overlay-icon toc-content-icon no-toc" for="__toc">
+          <i class="icon"><svg><use href="#svg-toc"></use></svg></i>
+        </label>
+        <h1>Source code for circleguard.loader</h1><div class="highlight"><pre>
+<span></span><span class="kn">from</span> <span class="nn">datetime</span> <span class="kn">import</span> <span class="n">datetime</span>
+<span class="kn">import</span> <span class="nn">time</span>
+<span class="kn">import</span> <span class="nn">base64</span>
+<span class="kn">import</span> <span class="nn">logging</span>
+<span class="kn">from</span> <span class="nn">lzma</span> <span class="kn">import</span> <span class="n">LZMAError</span>
+<span class="kn">from</span> <span class="nn">functools</span> <span class="kn">import</span> <span class="n">lru_cache</span>
+<span class="kn">from</span> <span class="nn">enum</span> <span class="kn">import</span> <span class="n">Enum</span>
+
+<span class="kn">from</span> <span class="nn">requests</span> <span class="kn">import</span> <span class="n">RequestException</span>
+<span class="kn">import</span> <span class="nn">osrparse</span>
+<span class="kn">from</span> <span class="nn">ossapi</span> <span class="kn">import</span> <span class="n">Ossapi</span>
+
+<span class="kn">from</span> <span class="nn">circleguard.mod</span> <span class="kn">import</span> <span class="n">Mod</span>
+<span class="kn">from</span> <span class="nn">circleguard.utils</span> <span class="kn">import</span> <span class="n">TRACE</span>
+<span class="kn">from</span> <span class="nn">circleguard.span</span> <span class="kn">import</span> <span class="n">Span</span>
+
+
+<div class="viewcode-block" id="APIException"><a class="viewcode-back" href="../../appendix.html#circleguard.loader.APIException">[docs]</a><span class="k">class</span> <span class="nc">APIException</span><span class="p">(</span><span class="ne">Exception</span><span class="p">):</span>
+    <span class="sd">"""An error involving the osu! api."""</span></div>
+
+<div class="viewcode-block" id="NoInfoAvailableException"><a class="viewcode-back" href="../../appendix.html#circleguard.loader.NoInfoAvailableException">[docs]</a><span class="k">class</span> <span class="nc">NoInfoAvailableException</span><span class="p">(</span><span class="n">APIException</span><span class="p">):</span>
+    <span class="sd">"""The api returned no information for the given arguments."""</span></div>
+
+<div class="viewcode-block" id="UnknownAPIException"><a class="viewcode-back" href="../../appendix.html#circleguard.loader.UnknownAPIException">[docs]</a><span class="k">class</span> <span class="nc">UnknownAPIException</span><span class="p">(</span><span class="n">APIException</span><span class="p">):</span>
+    <span class="sd">"""An api error that we were not prepared to handle."""</span></div>
+
+<div class="viewcode-block" id="InternalAPIException"><a class="viewcode-back" href="../../appendix.html#circleguard.loader.InternalAPIException">[docs]</a><span class="k">class</span> <span class="nc">InternalAPIException</span><span class="p">(</span><span class="n">APIException</span><span class="p">):</span>
+    <span class="sd">"""</span>
+<span class="sd">    An api error that we know how to handle, and will do so automatically.</span>
+<span class="sd">    """</span></div>
+
+<div class="viewcode-block" id="InvalidKeyException"><a class="viewcode-back" href="../../appendix.html#circleguard.loader.InvalidKeyException">[docs]</a><span class="k">class</span> <span class="nc">InvalidKeyException</span><span class="p">(</span><span class="n">InternalAPIException</span><span class="p">):</span>
+    <span class="sd">"""An api key was rejected by the api."""</span></div>
+
+<div class="viewcode-block" id="RatelimitException"><a class="viewcode-back" href="../../appendix.html#circleguard.loader.RatelimitException">[docs]</a><span class="k">class</span> <span class="nc">RatelimitException</span><span class="p">(</span><span class="n">InternalAPIException</span><span class="p">):</span>
+    <span class="sd">"""The api has ratelimited an api key."""</span></div>
+
+<div class="viewcode-block" id="InvalidJSONException"><a class="viewcode-back" href="../../appendix.html#circleguard.loader.InvalidJSONException">[docs]</a><span class="k">class</span> <span class="nc">InvalidJSONException</span><span class="p">(</span><span class="n">InternalAPIException</span><span class="p">):</span>
+    <span class="sd">"""The api returned an invalid json response."""</span></div>
+
+<div class="viewcode-block" id="ReplayUnavailableException"><a class="viewcode-back" href="../../appendix.html#circleguard.loader.ReplayUnavailableException">[docs]</a><span class="k">class</span> <span class="nc">ReplayUnavailableException</span><span class="p">(</span><span class="n">InternalAPIException</span><span class="p">):</span>
+    <span class="sd">"""</span>
+<span class="sd">    We expected a replay from the api but the api was unable to deliver it.</span>
+<span class="sd">    """</span></div>
+
+<span class="c1"># Strings taken from osu api error responses. Format is</span>
+<span class="c1"># [api response, exception class type, details to pass to an exception]</span>
+<div class="viewcode-block" id="Error"><a class="viewcode-back" href="../../appendix.html#circleguard.loader.Error">[docs]</a><span class="k">class</span> <span class="nc">Error</span><span class="p">(</span><span class="n">Enum</span><span class="p">):</span>
+    <span class="n">NO_REPLAY</span>         <span class="o">=</span> <span class="p">[</span><span class="s2">"Replay not available."</span><span class="p">,</span> <span class="n">ReplayUnavailableException</span><span class="p">,</span>
+        <span class="s2">"Could not find any replay data. Skipping"</span><span class="p">]</span>
+    <span class="n">RATELIMITED</span>       <span class="o">=</span> <span class="p">[</span><span class="s2">"Requesting too fast! Slow your operation, cap'n!"</span><span class="p">,</span>
+        <span class="n">RatelimitException</span><span class="p">,</span> <span class="s2">"We were ratelimited. Waiting it out"</span><span class="p">]</span>
+    <span class="n">RETRIEVAL_FAILED</span>  <span class="o">=</span> <span class="p">[</span><span class="s2">"Replay retrieval failed."</span><span class="p">,</span> <span class="n">ReplayUnavailableException</span><span class="p">,</span>
+        <span class="s2">"Replay retrieval failed. Skipping"</span><span class="p">]</span>
+    <span class="n">INVALID_KEY</span>       <span class="o">=</span> <span class="p">[</span><span class="s2">"Please provide a valid API key."</span><span class="p">,</span> <span class="n">InvalidKeyException</span><span class="p">,</span>
+        <span class="s2">"Please provide a valid api key"</span><span class="p">]</span>
+    <span class="n">INVALID_JSON</span>      <span class="o">=</span> <span class="p">[</span><span class="s2">"The api broke."</span><span class="p">,</span> <span class="n">InvalidJSONException</span><span class="p">,</span>
+        <span class="s2">"The api returned an invalid json response, retrying"</span><span class="p">]</span>
+    <span class="n">UNKNOWN</span>           <span class="o">=</span> <span class="p">[</span><span class="s2">"Unknown error."</span><span class="p">,</span> <span class="n">UnknownAPIException</span><span class="p">,</span>
+        <span class="s2">"Unknown error when requesting a replay."</span><span class="p">]</span></div>
+
+
+<div class="viewcode-block" id="ReplayInfo"><a class="viewcode-back" href="../../appendix.html#circleguard.loader.ReplayInfo">[docs]</a><span class="k">class</span> <span class="nc">ReplayInfo</span><span class="p">():</span>
+    <span class="sd">"""</span>
+<span class="sd">    A container class representing all the information we get about a replay</span>
+<span class="sd">    from the api.</span>
+
+<span class="sd">    Parameters</span>
+<span class="sd">    ----------</span>
+<span class="sd">    timestamp: :class:`datetime.datetime`</span>
+<span class="sd">        When this replay was set.</span>
+<span class="sd">    map_id: int</span>
+<span class="sd">        The id of the map the replay was played on.</span>
+<span class="sd">    user_id: int</span>
+<span class="sd">        The id of the player who played the replay.</span>
+<span class="sd">    username: str</span>
+<span class="sd">        The username of the player who played the replay.</span>
+<span class="sd">    replay_id: int</span>
+<span class="sd">        The id of the replay.</span>
+<span class="sd">    mods: :class:`~circleguard.mod.ModCombination`</span>
+<span class="sd">        The mods the replay was played with.</span>
+<span class="sd">    replay_available: bool</span>
+<span class="sd">        Whether this replay is available from the api or not.</span>
+<span class="sd">    """</span>
+    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">timestamp</span><span class="p">,</span> <span class="n">map_id</span><span class="p">,</span> <span class="n">user_id</span><span class="p">,</span> <span class="n">username</span><span class="p">,</span> <span class="n">replay_id</span><span class="p">,</span> <span class="n">mods</span><span class="p">,</span> \
+        <span class="n">replay_available</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">timestamp</span> <span class="o">=</span> <span class="n">timestamp</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">map_id</span> <span class="o">=</span> <span class="n">map_id</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">user_id</span> <span class="o">=</span> <span class="n">user_id</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">username</span> <span class="o">=</span> <span class="n">username</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">replay_id</span> <span class="o">=</span> <span class="n">replay_id</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">mods</span> <span class="o">=</span> <span class="n">mods</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">replay_available</span> <span class="o">=</span> <span class="n">replay_available</span></div>
+
+
+<div class="viewcode-block" id="request"><a class="viewcode-back" href="../../appendix.html#circleguard.loader.request">[docs]</a><span class="k">def</span> <span class="nf">request</span><span class="p">(</span><span class="n">function</span><span class="p">):</span>
+    <span class="sd">"""</span>
+<span class="sd">    A decorator that handles :mod:`requests` and api related exceptions, as</span>
+<span class="sd">    well as resetting our ratelimits if appropriate.</span>
+
+<span class="sd">    Parameters</span>
+<span class="sd">    ----------</span>
+<span class="sd">    function: callable</span>
+<span class="sd">        The function to wrap.</span>
+
+<span class="sd">    Notes</span>
+<span class="sd">    -----</span>
+<span class="sd">    Should be wrapped around any function that makes a request; to the api or</span>
+<span class="sd">    otherwise.</span>
+
+<span class="sd">    If it has been more than :data:`Loader.RATELIMIT_RESET` since</span>
+<span class="sd">    :data:`Loader.start_time`, sets :data:`Loader.start_time` to be</span>
+<span class="sd">    :func:`datetime.now &lt;datetime.datetime.now&gt;`.</span>
+<span class="sd">    """</span>
+
+    <span class="k">def</span> <span class="nf">wrapper</span><span class="p">(</span><span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+        <span class="n">difference</span> <span class="o">=</span> <span class="n">datetime</span><span class="o">.</span><span class="n">now</span><span class="p">()</span> <span class="o">-</span> <span class="n">Loader</span><span class="o">.</span><span class="n">start_time</span>
+        <span class="k">if</span> <span class="n">difference</span><span class="o">.</span><span class="n">seconds</span> <span class="o">&gt;</span> <span class="n">Loader</span><span class="o">.</span><span class="n">RATELIMIT_RESET</span><span class="p">:</span>
+            <span class="n">Loader</span><span class="o">.</span><span class="n">start_time</span> <span class="o">=</span> <span class="n">datetime</span><span class="o">.</span><span class="n">now</span><span class="p">()</span>
+        <span class="c1"># catch them exceptions boy</span>
+        <span class="n">ret</span> <span class="o">=</span> <span class="kc">None</span>
+        <span class="bp">self</span> <span class="o">=</span> <span class="n">args</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+        <span class="k">try</span><span class="p">:</span>
+            <span class="n">ret</span> <span class="o">=</span> <span class="n">function</span><span class="p">(</span><span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
+        <span class="k">except</span> <span class="n">RatelimitException</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_enforce_ratelimit</span><span class="p">()</span>
+            <span class="c1"># wrap function with the decorator then call decorator</span>
+            <span class="n">ret</span> <span class="o">=</span> <span class="n">request</span><span class="p">(</span><span class="n">function</span><span class="p">)(</span><span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
+        <span class="k">except</span> <span class="n">InvalidJSONException</span> <span class="k">as</span> <span class="n">e</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">log</span><span class="o">.</span><span class="n">warning</span><span class="p">(</span><span class="sa">f</span><span class="s2">"Invalid json exception: </span><span class="si">{</span><span class="n">e</span><span class="si">}</span><span class="s2">. API likely having "</span>
+                <span class="s2">"issues; sleeping for 3 seconds then retrying"</span><span class="p">)</span>
+            <span class="n">time</span><span class="o">.</span><span class="n">sleep</span><span class="p">(</span><span class="mi">3</span><span class="p">)</span>
+            <span class="n">ret</span> <span class="o">=</span> <span class="n">request</span><span class="p">(</span><span class="n">function</span><span class="p">)(</span><span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
+        <span class="k">except</span> <span class="n">RequestException</span> <span class="k">as</span> <span class="n">e</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">log</span><span class="o">.</span><span class="n">warning</span><span class="p">(</span><span class="sa">f</span><span class="s2">"Request exception: </span><span class="si">{</span><span class="n">e</span><span class="si">}</span><span class="s2">. Likely a network issue; "</span>
+                <span class="s2">"sleeping for 5 seconds then retrying"</span><span class="p">)</span>
+            <span class="n">time</span><span class="o">.</span><span class="n">sleep</span><span class="p">(</span><span class="mi">5</span><span class="p">)</span>
+            <span class="n">ret</span> <span class="o">=</span> <span class="n">request</span><span class="p">(</span><span class="n">function</span><span class="p">)(</span><span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
+        <span class="k">except</span> <span class="n">ReplayUnavailableException</span> <span class="k">as</span> <span class="n">e</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">log</span><span class="o">.</span><span class="n">warning</span><span class="p">(</span><span class="s2">"We expected a replay from the api, but it was "</span>
+                <span class="sa">f</span><span class="s2">"unable to deliver it: </span><span class="si">{</span><span class="n">e</span><span class="si">}</span><span class="s2">"</span><span class="p">)</span>
+            <span class="n">ret</span> <span class="o">=</span> <span class="kc">None</span>
+        <span class="k">return</span> <span class="n">ret</span>
+    <span class="k">return</span> <span class="n">wrapper</span></div>
+
+
+<div class="viewcode-block" id="check_cache"><a class="viewcode-back" href="../../appendix.html#circleguard.loader.check_cache">[docs]</a><span class="k">def</span> <span class="nf">check_cache</span><span class="p">(</span><span class="n">function</span><span class="p">):</span>
+    <span class="sd">"""</span>
+<span class="sd">    A decorator that checks if the passed</span>
+<span class="sd">    :class:`~.ReplayInfo` has its replay cached. If so,</span>
+<span class="sd">    returns a :class:`~circleguard.loadables.Replay` instance from the cached</span>
+<span class="sd">    data. Otherwise, calls and returns the `function` as normal.</span>
+
+<span class="sd">    Parameters</span>
+<span class="sd">    ----------</span>
+<span class="sd">    function: callable</span>
+<span class="sd">        The function to wrap.</span>
+
+<span class="sd">    Notes</span>
+<span class="sd">    -----</span>
+<span class="sd">    ``self`` and ``replay_info`` **MUST** be the first and second arguments to</span>
+<span class="sd">    the function, respectively.</span>
+
+<span class="sd">    Returns</span>
+<span class="sd">    -------</span>
+<span class="sd">    :class:`~circleguard.loadables.Replay` or Unknown:</span>
+<span class="sd">        A :class:`~circleguard.loadables.Replay` instance from the cached data</span>
+<span class="sd">        if it was cached, or the return value of the function if not.</span>
+<span class="sd">    """</span>
+
+    <span class="k">def</span> <span class="nf">wrapper</span><span class="p">(</span><span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+        <span class="bp">self</span> <span class="o">=</span> <span class="n">args</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+        <span class="n">replay_info</span> <span class="o">=</span> <span class="n">args</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span>
+
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">cacher</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="k">return</span> <span class="n">function</span><span class="p">(</span><span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
+
+        <span class="n">decompressed_lzma</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">cacher</span><span class="o">.</span><span class="n">check_cache</span><span class="p">(</span><span class="n">replay_info</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">decompressed_lzma</span><span class="p">:</span>
+            <span class="n">parsed</span> <span class="o">=</span> <span class="n">osrparse</span><span class="o">.</span><span class="n">parse_replay</span><span class="p">(</span><span class="n">decompressed_lzma</span><span class="p">,</span> \
+                <span class="n">pure_lzma</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">decompressed_lzma</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+            <span class="k">return</span> <span class="n">parsed</span><span class="o">.</span><span class="n">play_data</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="k">return</span> <span class="n">function</span><span class="p">(</span><span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
+    <span class="k">return</span> <span class="n">wrapper</span></div>
+
+
+
+<div class="viewcode-block" id="Loader"><a class="viewcode-back" href="../../appendix.html#circleguard.loader.Loader">[docs]</a><span class="k">class</span> <span class="nc">Loader</span><span class="p">():</span>
+    <span class="sd">"""</span>
+<span class="sd">    Manages interactions with the osu api, using the :mod:`ossapi` wrapper.</span>
+
+<span class="sd">    Parameters</span>
+<span class="sd">    ----------</span>
+<span class="sd">    key: str</span>
+<span class="sd">        A valid api key. Can be retrieved from https://osu.ppy.sh/p/api/.</span>
+<span class="sd">    cacher: :class:`~circleguard.cacher.Cacher`</span>
+<span class="sd">        A :class:`~circleguard.cacher.Cacher` instance to manage</span>
+<span class="sd">        replay loading/caching. If `None`, replays will not be loaded from</span>
+<span class="sd">        the cache or cached to the database.</span>
+
+<span class="sd">    Notes</span>
+<span class="sd">    -----</span>
+<span class="sd">    If the api ratelimits the key, we wait until our ratelimits are refreshed</span>
+<span class="sd">    and retry the request. Because the api does not provide the time until the</span>
+<span class="sd">    next refresh (and we do not use exponential backoff or another retry</span>
+<span class="sd">    strategy), if the key is ratelimited because of an interaction not managed</span>
+<span class="sd">    by this class, the class may wait more time than necessary for the key to</span>
+<span class="sd">    refresh.</span>
+<span class="sd">    """</span>
+
+    <span class="c1"># the maximum number of replay info available through the respective api</span>
+    <span class="c1"># calls. Note that osu! stores at least the top 1000 replays, but does not</span>
+    <span class="c1"># make these discoverable unless you know the exact user id, map id, and</span>
+    <span class="c1"># mods of the replay.</span>
+    <span class="n">MAX_MAP_SPAN</span> <span class="o">=</span> <span class="n">Span</span><span class="p">(</span><span class="s2">"1-100"</span><span class="p">)</span>
+    <span class="n">MAX_USER_SPAN</span> <span class="o">=</span> <span class="n">Span</span><span class="p">(</span><span class="s2">"1-100"</span><span class="p">)</span>
+    <span class="c1"># time in seconds until the api refreshes our ratelimits</span>
+    <span class="n">RATELIMIT_RESET</span> <span class="o">=</span> <span class="mi">60</span>
+    <span class="c1"># when we started our requests cycle</span>
+    <span class="n">start_time</span> <span class="o">=</span> <span class="n">datetime</span><span class="o">.</span><span class="n">min</span>
+
+
+    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">key</span><span class="p">,</span> <span class="n">cacher</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">log</span> <span class="o">=</span> <span class="n">logging</span><span class="o">.</span><span class="n">getLogger</span><span class="p">(</span><span class="vm">__name__</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">api</span> <span class="o">=</span> <span class="n">Ossapi</span><span class="p">(</span><span class="n">key</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">cacher</span> <span class="o">=</span> <span class="n">cacher</span>
+
+    <span class="nd">@request</span>
+    <span class="k">def</span> <span class="nf">replay_info</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">map_id</span><span class="p">,</span> <span class="n">span</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">user_id</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">mods</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> \
+        <span class="n">limit</span><span class="o">=</span><span class="kc">True</span><span class="p">):</span>
+        <span class="sd">"""</span>
+<span class="sd">        Retrieves replay infos from a map's leaderboard.</span>
+
+<span class="sd">        Parameters</span>
+<span class="sd">        ----------</span>
+<span class="sd">        map_id: int</span>
+<span class="sd">            The map id to retrieve replay info for.</span>
+<span class="sd">        span: Span</span>
+<span class="sd">            A comma separated list of ranges of top replays on the map to</span>
+<span class="sd">            retrieve. ``span="1-3,6,2-4"`` -&gt; replays in the range</span>
+<span class="sd">            ``[1,2,3,4,6]``.</span>
+<span class="sd">        user_id: int</span>
+<span class="sd">            If passed, only retrieve replay info on ``map_id`` for this user.</span>
+<span class="sd">            Note that this is not necessarily limited to just the user's top</span>
+<span class="sd">            score on the map. See ``limit``.</span>
+<span class="sd">        mods: :class:`~.ModCombination`</span>
+<span class="sd">            If passed, will only retrieve replay infos for scores that were</span>
+<span class="sd">            played with the given mods.</span>
+<span class="sd">        limit: bool</span>
+<span class="sd">            Whether to limit to only one response. Only has an effect if</span>
+<span class="sd">            ``user_id`` is passed. If ``limit`` is ``True``, will only return</span>
+<span class="sd">            the top scoring replay info by ``user_id``. If ``False``, will</span>
+<span class="sd">            return all scores by ``user_id``.</span>
+
+<span class="sd">        Returns</span>
+<span class="sd">        -------</span>
+<span class="sd">        list[:class:`~.ReplayInfo`]</span>
+<span class="sd">            The replay infos representing the map's leaderboard.</span>
+<span class="sd">        :class:`~.ReplayInfo`</span>
+<span class="sd">            If ``limit`` is ``True`` and ``user_id`` is passed.</span>
+
+<span class="sd">        Notes</span>
+<span class="sd">        -----</span>
+<span class="sd">        One of ``user_id`` or ``span`` must be passed.</span>
+
+<span class="sd">        Raises</span>
+<span class="sd">        ------</span>
+<span class="sd">        NoInfoAvailableException</span>
+<span class="sd">            If there is no info available for the given parameters.</span>
+<span class="sd">        """</span>
+
+        <span class="c1"># we have to define a new variable to hold locals - otherwise when we</span>
+        <span class="c1"># call it twice inside the dict comprehension, it rebinds to the comp</span>
+        <span class="c1"># scope and takes on different locals.</span>
+        <span class="n">locals_</span> <span class="o">=</span> <span class="nb">locals</span><span class="p">()</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">log</span><span class="o">.</span><span class="n">log</span><span class="p">(</span><span class="n">TRACE</span><span class="p">,</span> <span class="s2">"Loading replay info on map </span><span class="si">%d</span><span class="s2"> with options </span><span class="si">%s</span><span class="s2">"</span><span class="p">,</span>
+            <span class="n">map_id</span><span class="p">,</span> <span class="p">{</span><span class="n">k</span><span class="p">:</span> <span class="n">locals_</span><span class="p">[</span><span class="n">k</span><span class="p">]</span> <span class="k">for</span> <span class="n">k</span> <span class="ow">in</span> <span class="n">locals_</span> <span class="k">if</span> <span class="n">k</span> <span class="o">!=</span> <span class="s1">'self'</span><span class="p">})</span>
+
+        <span class="k">if</span> <span class="ow">not</span> <span class="p">(</span><span class="n">span</span> <span class="ow">or</span> <span class="n">user_id</span><span class="p">):</span>
+            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">"One of user_id or span must be passed, but not "</span>
+                <span class="s2">"both"</span><span class="p">)</span>
+        <span class="n">api_limit</span> <span class="o">=</span> <span class="kc">None</span>
+        <span class="k">if</span> <span class="n">span</span><span class="p">:</span>
+            <span class="n">api_limit</span> <span class="o">=</span> <span class="nb">max</span><span class="p">(</span><span class="n">span</span><span class="p">)</span>
+        <span class="n">mods</span> <span class="o">=</span> <span class="kc">None</span> <span class="k">if</span> <span class="n">mods</span> <span class="ow">is</span> <span class="kc">None</span> <span class="k">else</span> <span class="n">mods</span><span class="o">.</span><span class="n">value</span>
+        <span class="n">request_data</span> <span class="o">=</span> <span class="p">{</span><span class="s2">"m"</span><span class="p">:</span> <span class="s2">"0"</span><span class="p">,</span> <span class="s2">"b"</span><span class="p">:</span> <span class="n">map_id</span><span class="p">,</span> <span class="s2">"limit"</span><span class="p">:</span> <span class="n">api_limit</span><span class="p">,</span> <span class="s2">"u"</span><span class="p">:</span> <span class="n">user_id</span><span class="p">,</span>
+            <span class="s2">"mods"</span><span class="p">:</span> <span class="n">mods</span><span class="p">}</span>
+        <span class="n">response</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">api</span><span class="o">.</span><span class="n">get_scores</span><span class="p">(</span><span class="n">request_data</span><span class="p">)</span>
+        <span class="k">try</span><span class="p">:</span>
+            <span class="n">Loader</span><span class="o">.</span><span class="n">check_response</span><span class="p">(</span><span class="n">response</span><span class="p">)</span>
+        <span class="k">except</span> <span class="n">NoInfoAvailableException</span><span class="p">:</span>
+            <span class="c1"># The logic below allows us to load eg</span>
+            <span class="c1"># ``Map(221777, mods=Mod.SO + Mod.PF + Mod.HT)`` or some equally</span>
+            <span class="c1"># absurd mod combination for which there are no replays, and have</span>
+            <span class="c1"># that loading not throw ``NoInfoAvailableException``. Instead,</span>
+            <span class="c1"># the map's replays list will just be empty.</span>
+            <span class="c1"># However, we only want to apply this if we're loading a map, ie</span>
+            <span class="c1"># ``span`` has been passed. If ``user_id`` was passed instead, raise</span>
+            <span class="c1"># the exception as usual.</span>
+            <span class="k">if</span> <span class="n">user_id</span><span class="p">:</span>
+                <span class="k">raise</span>
+            <span class="c1"># the osu! api doesn't distinguish between a map not existing, and</span>
+            <span class="c1"># no scores having been set on that map for a particular mod</span>
+            <span class="c1"># combination - both are empty responses which will trigger a no</span>
+            <span class="c1"># info available exception. We need to figure out which case has</span>
+            <span class="c1"># occurred here to determine if we should raise or not.</span>
+            <span class="n">beatmap_response</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">api</span><span class="o">.</span><span class="n">get_beatmaps</span><span class="p">({</span><span class="s2">"b"</span><span class="p">:</span> <span class="n">map_id</span><span class="p">})</span>
+            <span class="c1"># If the beatmap does not exist, this response will be empty.</span>
+            <span class="k">if</span> <span class="ow">not</span> <span class="n">beatmap_response</span><span class="p">:</span>
+                <span class="k">raise</span>
+            <span class="c1"># else, ignore the exception.</span>
+
+        <span class="k">if</span> <span class="n">span</span><span class="p">:</span>
+            <span class="c1"># Remove indices that would error when indexing ``response``.</span>
+            <span class="c1"># we index at [i-1], so use &lt;= instead of &lt;</span>
+            <span class="n">_span</span> <span class="o">=</span> <span class="p">{</span><span class="n">x</span> <span class="k">for</span> <span class="n">x</span> <span class="ow">in</span> <span class="n">span</span> <span class="k">if</span> <span class="n">x</span> <span class="o">&lt;=</span> <span class="nb">len</span><span class="p">(</span><span class="n">response</span><span class="p">)}</span>
+            <span class="c1"># filter out anything not in our span</span>
+            <span class="n">response</span> <span class="o">=</span> <span class="p">[</span><span class="n">response</span><span class="p">[</span><span class="n">i</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span> <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="n">_span</span><span class="p">]</span>
+        <span class="c1"># need to cast replay_available to int before bool since the api returns</span>
+        <span class="c1"># either ``"0"`` or ``"1"`` and all strings are truthy</span>
+        <span class="c1"># strptime format from https://github.com/ppy/osu-api/wiki#apiget_scores</span>
+        <span class="n">infos</span> <span class="o">=</span> <span class="p">[</span><span class="n">ReplayInfo</span><span class="p">(</span><span class="n">datetime</span><span class="o">.</span><span class="n">strptime</span><span class="p">(</span><span class="n">x</span><span class="p">[</span><span class="s2">"date"</span><span class="p">],</span> <span class="s2">"%Y-%m-</span><span class="si">%d</span><span class="s2"> %H:%M:%S"</span><span class="p">),</span>
+            <span class="n">map_id</span><span class="p">,</span> <span class="nb">int</span><span class="p">(</span><span class="n">x</span><span class="p">[</span><span class="s2">"user_id"</span><span class="p">]),</span> <span class="nb">str</span><span class="p">(</span><span class="n">x</span><span class="p">[</span><span class="s2">"username"</span><span class="p">]),</span> <span class="nb">int</span><span class="p">(</span><span class="n">x</span><span class="p">[</span><span class="s2">"score_id"</span><span class="p">]),</span>
+            <span class="n">Mod</span><span class="p">(</span><span class="nb">int</span><span class="p">(</span><span class="n">x</span><span class="p">[</span><span class="s2">"enabled_mods"</span><span class="p">])),</span> <span class="nb">bool</span><span class="p">(</span><span class="nb">int</span><span class="p">(</span><span class="n">x</span><span class="p">[</span><span class="s2">"replay_available"</span><span class="p">])))</span>
+            <span class="k">for</span> <span class="n">x</span> <span class="ow">in</span> <span class="n">response</span><span class="p">]</span>
+
+        <span class="c1"># limit only applies if user_id was set</span>
+        <span class="k">return</span> <span class="n">infos</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="k">if</span> <span class="p">(</span><span class="n">limit</span> <span class="ow">and</span> <span class="n">user_id</span><span class="p">)</span> <span class="k">else</span> <span class="n">infos</span>
+
+
+    <span class="nd">@request</span>
+    <span class="k">def</span> <span class="nf">get_user_best</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">user_id</span><span class="p">,</span> <span class="n">span</span><span class="p">,</span> <span class="n">mods</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+        <span class="sd">"""</span>
+<span class="sd">        Retrieves replay infos from a user's top plays.</span>
+
+<span class="sd">        Parameters</span>
+<span class="sd">        ----------</span>
+<span class="sd">        user_id: int</span>
+<span class="sd">            The user id to get best plays of.</span>
+<span class="sd">        span: Span</span>
+<span class="sd">            A comma separated list of ranges of top plays to retrieve.</span>
+<span class="sd">            ``span="1-3,6,2-4"`` -&gt; replays in the range ``[1,2,3,4,6]``.</span>
+<span class="sd">        mods: :class:`~.ModCombination`</span>
+<span class="sd">            If passed, will only retrieve replay infos for scores that were</span>
+<span class="sd">            played with the given mods.</span>
+
+<span class="sd">        Returns</span>
+<span class="sd">        -------</span>
+<span class="sd">        list[:class:`~.ReplayInfo`]</span>
+<span class="sd">            The replay infos representing the user's top plays.</span>
+<span class="sd">        """</span>
+        <span class="n">locals_</span> <span class="o">=</span> <span class="nb">locals</span><span class="p">()</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">log</span><span class="o">.</span><span class="n">log</span><span class="p">(</span><span class="n">TRACE</span><span class="p">,</span> <span class="s2">"Loading user best of </span><span class="si">%s</span><span class="s2"> with options </span><span class="si">%s</span><span class="s2">"</span><span class="p">,</span>
+            <span class="n">user_id</span><span class="p">,</span> <span class="p">{</span><span class="n">k</span><span class="p">:</span> <span class="n">locals_</span><span class="p">[</span><span class="n">k</span><span class="p">]</span> <span class="k">for</span> <span class="n">k</span> <span class="ow">in</span> <span class="n">locals_</span> <span class="k">if</span> <span class="n">k</span> <span class="o">!=</span> <span class="s1">'self'</span><span class="p">})</span>
+
+        <span class="n">request_data</span> <span class="o">=</span> <span class="p">{</span><span class="s2">"m"</span><span class="p">:</span> <span class="s2">"0"</span><span class="p">,</span> <span class="s2">"u"</span><span class="p">:</span> <span class="n">user_id</span><span class="p">,</span> <span class="s2">"limit"</span><span class="p">:</span> <span class="nb">max</span><span class="p">(</span><span class="n">span</span><span class="p">)}</span>
+        <span class="n">response</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">api</span><span class="o">.</span><span class="n">get_user_best</span><span class="p">(</span><span class="n">request_data</span><span class="p">)</span>
+        <span class="n">Loader</span><span class="o">.</span><span class="n">check_response</span><span class="p">(</span><span class="n">response</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">mods</span><span class="p">:</span>
+            <span class="n">_response</span> <span class="o">=</span> <span class="p">[]</span>
+            <span class="k">for</span> <span class="n">r</span> <span class="ow">in</span> <span class="n">response</span><span class="p">:</span>
+                <span class="k">if</span> <span class="n">Mod</span><span class="p">(</span><span class="nb">int</span><span class="p">(</span><span class="n">r</span><span class="p">[</span><span class="s2">"enabled_mods"</span><span class="p">]))</span> <span class="o">==</span> <span class="n">mods</span><span class="p">:</span>
+                    <span class="n">_response</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">r</span><span class="p">)</span>
+            <span class="n">response</span> <span class="o">=</span> <span class="n">_response</span>
+
+        <span class="c1"># remove span indices which would cause an index error because there</span>
+        <span class="c1"># weren't that many replay infos returned by the api. eg if there</span>
+        <span class="c1"># were 4 responses, remove any span above 4</span>
+        <span class="n">response_count</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">response</span><span class="p">)</span>
+        <span class="n">_span</span> <span class="o">=</span> <span class="p">[</span><span class="n">x</span> <span class="k">for</span> <span class="n">x</span> <span class="ow">in</span> <span class="n">span</span> <span class="k">if</span> <span class="n">x</span> <span class="o">&lt;=</span> <span class="n">response_count</span><span class="p">]</span>
+
+        <span class="n">response</span> <span class="o">=</span> <span class="p">[</span><span class="n">response</span><span class="p">[</span><span class="n">i</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span> <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="n">_span</span><span class="p">]</span>
+        <span class="k">return</span> <span class="p">[</span><span class="n">ReplayInfo</span><span class="p">(</span><span class="n">datetime</span><span class="o">.</span><span class="n">strptime</span><span class="p">(</span><span class="n">r</span><span class="p">[</span><span class="s2">"date"</span><span class="p">],</span> <span class="s2">"%Y-%m-</span><span class="si">%d</span><span class="s2"> %H:%M:%S"</span><span class="p">),</span>
+            <span class="nb">int</span><span class="p">(</span><span class="n">r</span><span class="p">[</span><span class="s2">"beatmap_id"</span><span class="p">]),</span> <span class="nb">int</span><span class="p">(</span><span class="n">r</span><span class="p">[</span><span class="s2">"user_id"</span><span class="p">]),</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">username</span><span class="p">(</span><span class="nb">int</span><span class="p">(</span><span class="n">r</span><span class="p">[</span><span class="s2">"user_id"</span><span class="p">])),</span> <span class="nb">int</span><span class="p">(</span><span class="n">r</span><span class="p">[</span><span class="s2">"score_id"</span><span class="p">]),</span>
+            <span class="n">Mod</span><span class="p">(</span><span class="nb">int</span><span class="p">(</span><span class="n">r</span><span class="p">[</span><span class="s2">"enabled_mods"</span><span class="p">])),</span> <span class="nb">bool</span><span class="p">(</span><span class="nb">int</span><span class="p">(</span><span class="n">r</span><span class="p">[</span><span class="s2">"replay_available"</span><span class="p">])))</span>
+            <span class="k">for</span> <span class="n">r</span> <span class="ow">in</span> <span class="n">response</span><span class="p">]</span>
+
+
+    <span class="nd">@request</span>
+    <span class="k">def</span> <span class="nf">load_replay_data</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">map_id</span><span class="p">,</span> <span class="n">user_id</span><span class="p">,</span> <span class="n">mods</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+        <span class="sd">"""</span>
+<span class="sd">        Retrieves replay data from the api.</span>
+
+<span class="sd">        Parameters</span>
+<span class="sd">        ----------</span>
+<span class="sd">        map_id: int</span>
+<span class="sd">            The map the replay was played on.</span>
+<span class="sd">        user_id: int</span>
+<span class="sd">            The user that played the replay.</span>
+<span class="sd">        mods: :class:`~.ModCombination`</span>
+<span class="sd">            The mods the replay was played with, or ``None`` for the highest</span>
+<span class="sd">            scoring replay, regardless of mods.</span>
+
+<span class="sd">        Returns</span>
+<span class="sd">        -------</span>
+<span class="sd">        str</span>
+<span class="sd">            The lzma-encoded string, decoded from the base 64 api response,</span>
+<span class="sd">            representing the replay.</span>
+<span class="sd">        None</span>
+<span class="sd">            If no replay data was available.</span>
+
+<span class="sd">        Notes</span>
+<span class="sd">        -----</span>
+<span class="sd">        This is the low level implementation of :func:`~.replay_data`, handling</span>
+<span class="sd">        the actual api request.</span>
+<span class="sd">        """</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">log</span><span class="o">.</span><span class="n">log</span><span class="p">(</span><span class="n">TRACE</span><span class="p">,</span> <span class="s2">"Requesting replay data by user </span><span class="si">%d</span><span class="s2"> on map </span><span class="si">%d</span><span class="s2"> with "</span>
+            <span class="s2">"mods </span><span class="si">%s</span><span class="s2">"</span><span class="p">,</span> <span class="n">user_id</span><span class="p">,</span> <span class="n">map_id</span><span class="p">,</span> <span class="n">mods</span><span class="p">)</span>
+        <span class="n">mods</span> <span class="o">=</span> <span class="kc">None</span> <span class="k">if</span> <span class="n">mods</span> <span class="ow">is</span> <span class="kc">None</span> <span class="k">else</span> <span class="n">mods</span><span class="o">.</span><span class="n">value</span>
+        <span class="n">request_data</span> <span class="o">=</span> <span class="p">{</span><span class="s2">"m"</span><span class="p">:</span> <span class="s2">"0"</span><span class="p">,</span> <span class="s2">"b"</span><span class="p">:</span> <span class="n">map_id</span><span class="p">,</span> <span class="s2">"u"</span><span class="p">:</span> <span class="n">user_id</span><span class="p">,</span> <span class="s2">"mods"</span><span class="p">:</span> <span class="n">mods</span><span class="p">}</span>
+        <span class="n">response</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">api</span><span class="o">.</span><span class="n">get_replay</span><span class="p">(</span><span class="n">request_data</span><span class="p">)</span>
+        <span class="n">Loader</span><span class="o">.</span><span class="n">check_response</span><span class="p">(</span><span class="n">response</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">base64</span><span class="o">.</span><span class="n">b64decode</span><span class="p">(</span><span class="n">response</span><span class="p">[</span><span class="s2">"content"</span><span class="p">])</span>
+
+    <span class="nd">@check_cache</span>
+    <span class="k">def</span> <span class="nf">replay_data</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">replay_info</span><span class="p">,</span> <span class="n">cache</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+        <span class="sd">"""</span>
+<span class="sd">        Retrieves replay data from the api, or from the cache if it is already</span>
+<span class="sd">        cached.</span>
+
+<span class="sd">        Parameters</span>
+<span class="sd">        ----------</span>
+<span class="sd">        replay_info: :class:`~.ReplayInfo`</span>
+<span class="sd">            The replay info representing the replay to retrieve.</span>
+
+<span class="sd">        Returns</span>
+<span class="sd">        -------</span>
+<span class="sd">        list[:class:`osrparse.replay.ReplayEvent`]</span>
+<span class="sd">            The replay events with attributes ``x``, ``y``,</span>
+<span class="sd">            ``time_delta``, and ``keys``.</span>
+<span class="sd">        None</span>
+<span class="sd">            If no replay data was available.</span>
+
+<span class="sd">        Raises</span>
+<span class="sd">        ------</span>
+<span class="sd">        UnknownAPIException</span>
+<span class="sd">            If ``uxser_info.replay_available` was 1, but we did not receive</span>
+<span class="sd">            replay data from the api.</span>
+<span class="sd">        """</span>
+
+        <span class="n">user_id</span> <span class="o">=</span> <span class="n">replay_info</span><span class="o">.</span><span class="n">user_id</span>
+        <span class="n">map_id</span> <span class="o">=</span> <span class="n">replay_info</span><span class="o">.</span><span class="n">map_id</span>
+        <span class="n">mods</span> <span class="o">=</span> <span class="n">replay_info</span><span class="o">.</span><span class="n">mods</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="n">replay_info</span><span class="o">.</span><span class="n">replay_available</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">log</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="s2">"Replay data by user </span><span class="si">%d</span><span class="s2"> on map </span><span class="si">%d</span><span class="s2"> with mods </span><span class="si">%s</span><span class="s2"> not "</span>
+                <span class="s2">"available"</span><span class="p">,</span> <span class="n">user_id</span><span class="p">,</span> <span class="n">map_id</span><span class="p">,</span> <span class="n">mods</span><span class="p">)</span>
+            <span class="k">return</span> <span class="kc">None</span>
+
+        <span class="n">lzma_bytes</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">load_replay_data</span><span class="p">(</span><span class="n">map_id</span><span class="p">,</span> <span class="n">user_id</span><span class="p">,</span> <span class="n">mods</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">lzma_bytes</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="n">UnknownAPIException</span><span class="p">(</span><span class="s2">"The api guaranteed there would be a "</span>
+                <span class="s2">"replay available, but we did not receive any data."</span><span class="p">)</span>
+        <span class="k">try</span><span class="p">:</span>
+            <span class="n">parsed_replay</span> <span class="o">=</span> <span class="n">osrparse</span><span class="o">.</span><span class="n">parse_replay</span><span class="p">(</span><span class="n">lzma_bytes</span><span class="p">,</span> <span class="n">pure_lzma</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+        <span class="c1"># see https://github.com/circleguard/circlecore/issues/61</span>
+        <span class="c1"># api sometimes returns corrupt replays</span>
+        <span class="k">except</span> <span class="n">LZMAError</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">log</span><span class="o">.</span><span class="n">warning</span><span class="p">(</span><span class="s2">"lzma from </span><span class="si">%r</span><span class="s2"> could not be decompressed, api "</span>
+                <span class="s2">"returned corrupt replay"</span><span class="p">,</span> <span class="n">replay_info</span><span class="p">)</span>
+            <span class="k">return</span> <span class="kc">None</span>
+        <span class="n">replay_data</span> <span class="o">=</span> <span class="n">parsed_replay</span><span class="o">.</span><span class="n">play_data</span>
+        <span class="k">if</span> <span class="n">cache</span> <span class="ow">and</span> <span class="bp">self</span><span class="o">.</span><span class="n">cacher</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">cacher</span><span class="o">.</span><span class="n">cache</span><span class="p">(</span><span class="n">lzma_bytes</span><span class="p">,</span> <span class="n">replay_info</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">replay_data</span>
+
+    <span class="c1"># TODO make this check cache for the replay</span>
+    <span class="nd">@request</span>
+    <span class="k">def</span> <span class="nf">replay_data_from_id</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">replay_id</span><span class="p">,</span> <span class="n">cache</span><span class="p">):</span>
+        <span class="sd">"""</span>
+<span class="sd">        Retrieves replay data from the api, given a replay id.</span>
+
+<span class="sd">        Parameters</span>
+<span class="sd">        ----------</span>
+<span class="sd">        replay_id: int</span>
+<span class="sd">            The id of the replay to retrieve data for.</span>
+<span class="sd">        """</span>
+        <span class="n">response</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">api</span><span class="o">.</span><span class="n">get_replay</span><span class="p">({</span><span class="s2">"s"</span><span class="p">:</span> <span class="n">replay_id</span><span class="p">})</span>
+        <span class="n">Loader</span><span class="o">.</span><span class="n">check_response</span><span class="p">(</span><span class="n">response</span><span class="p">)</span>
+        <span class="n">lzma</span> <span class="o">=</span> <span class="n">base64</span><span class="o">.</span><span class="n">b64decode</span><span class="p">(</span><span class="n">response</span><span class="p">[</span><span class="s2">"content"</span><span class="p">])</span>
+        <span class="n">replay_data</span> <span class="o">=</span> <span class="n">osrparse</span><span class="o">.</span><span class="n">parse_replay</span><span class="p">(</span><span class="n">lzma</span><span class="p">,</span> <span class="n">pure_lzma</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span><span class="o">.</span><span class="n">play_data</span>
+        <span class="c1"># TODO cache the replay here, might require some restructuring/double</span>
+        <span class="c1"># checking everything will work because we only have its id, not map</span>
+        <span class="c1"># or user id. In fact I think our db asserts map and user id are nonull</span>
+        <span class="c1"># so insertion into old dbs probably won't work (and we'd have to change</span>
+        <span class="c1"># the schema).</span>
+        <span class="c1"># TODO include a db version in the db for future scenarios like this?</span>
+        <span class="c1"># look into how that's typically done, maybe just a `VERSION` table with</span>
+        <span class="c1"># a single row</span>
+        <span class="k">return</span> <span class="n">replay_data</span>
+
+    <span class="nd">@lru_cache</span><span class="p">()</span>
+    <span class="nd">@request</span>
+    <span class="k">def</span> <span class="nf">map_id</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">map_hash</span><span class="p">):</span>
+        <span class="sd">"""</span>
+<span class="sd">        Retrieves a map id from a corresponding map hash through the api.</span>
+
+<span class="sd">        Parameters</span>
+<span class="sd">        ----------</span>
+<span class="sd">        map_hash: str</span>
+<span class="sd">            The md5 hash of the map to get the id of.</span>
+
+<span class="sd">        Returns</span>
+<span class="sd">        -------</span>
+<span class="sd">        int</span>
+<span class="sd">            The map id that corresponds to ``map_hash``, or ``0`` if</span>
+<span class="sd">            ``map_hash`` doesn't mach any map.</span>
+
+<span class="sd">        Notes</span>
+<span class="sd">        -----</span>
+<span class="sd">        This function is wrapped in a :func:`functools.lru_cache` to prevent</span>
+<span class="sd">        duplicate api calls.</span>
+<span class="sd">        """</span>
+
+        <span class="n">response</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">api</span><span class="o">.</span><span class="n">get_beatmaps</span><span class="p">({</span><span class="s2">"h"</span><span class="p">:</span> <span class="n">map_hash</span><span class="p">})</span>
+        <span class="k">try</span><span class="p">:</span>
+            <span class="n">Loader</span><span class="o">.</span><span class="n">check_response</span><span class="p">(</span><span class="n">response</span><span class="p">)</span>
+        <span class="k">except</span> <span class="n">NoInfoAvailableException</span><span class="p">:</span>
+            <span class="k">return</span> <span class="mi">0</span>
+        <span class="k">return</span> <span class="nb">int</span><span class="p">(</span><span class="n">response</span><span class="p">[</span><span class="mi">0</span><span class="p">][</span><span class="s2">"beatmap_id"</span><span class="p">])</span>
+
+    <span class="nd">@lru_cache</span><span class="p">()</span>
+    <span class="nd">@request</span>
+    <span class="k">def</span> <span class="nf">user_id</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">username</span><span class="p">):</span>
+        <span class="sd">"""</span>
+<span class="sd">        Retrieves a user id from a corresponding username through the api.</span>
+
+<span class="sd">        Parameters</span>
+<span class="sd">        ----------</span>
+<span class="sd">        username: str</span>
+<span class="sd">            The username of the user to get the user id of.</span>
+
+<span class="sd">        Returns</span>
+<span class="sd">        -------</span>
+<span class="sd">        int</span>
+<span class="sd">            The user id that corresponds to ``username``, or ``0`` if</span>
+<span class="sd">            ``username`` doesn't match any user.</span>
+
+<span class="sd">        Notes</span>
+<span class="sd">        -----</span>
+<span class="sd">        The api redirects name changes to the current username. For instance,</span>
+<span class="sd">        ``user_id("cookiezi")`` will return ``124493``, despite shige's current</span>
+<span class="sd">        osu! username being ``chocomint``. However, I am not sure if this</span>
+<span class="sd">        behavior is as well defined when someone else takes the previous name</span>
+<span class="sd">        of a user.</span>
+
+<span class="sd">        This function is case insensitive.</span>
+
+<span class="sd">        This function is wrapped in a :func:`functools.lru_cache` to prevent</span>
+<span class="sd">        duplicate api calls.</span>
+<span class="sd">        """</span>
+
+        <span class="n">response</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">api</span><span class="o">.</span><span class="n">get_user</span><span class="p">({</span><span class="s2">"u"</span><span class="p">:</span> <span class="n">username</span><span class="p">,</span> <span class="s2">"type"</span><span class="p">:</span> <span class="s2">"string"</span><span class="p">})</span>
+        <span class="k">try</span><span class="p">:</span>
+            <span class="n">Loader</span><span class="o">.</span><span class="n">check_response</span><span class="p">(</span><span class="n">response</span><span class="p">)</span>
+        <span class="k">except</span> <span class="n">NoInfoAvailableException</span><span class="p">:</span>
+            <span class="k">return</span> <span class="mi">0</span>
+        <span class="k">return</span> <span class="nb">int</span><span class="p">(</span><span class="n">response</span><span class="p">[</span><span class="mi">0</span><span class="p">][</span><span class="s2">"user_id"</span><span class="p">])</span>
+
+    <span class="nd">@lru_cache</span><span class="p">()</span>
+    <span class="nd">@request</span>
+    <span class="k">def</span> <span class="nf">username</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">user_id</span><span class="p">):</span>
+        <span class="sd">"""</span>
+<span class="sd">        Retrieves the username from a corresponding user id through the api.</span>
+
+<span class="sd">        Parameters</span>
+<span class="sd">        ----------</span>
+<span class="sd">        user_id: int</span>
+<span class="sd">            The user id of the user to get the username of.</span>
+
+<span class="sd">        Returns</span>
+<span class="sd">        -------</span>
+<span class="sd">        str</span>
+<span class="sd">            The username that corresponds to ``user_id``, or an empty string</span>
+<span class="sd">            if ``user_id`` doesn't match any user.</span>
+
+<span class="sd">        Notes</span>
+<span class="sd">        -----</span>
+<span class="sd">        This function is the inverse of</span>
+<span class="sd">        :meth:`~circleguard.loader.Loader.user_id`.</span>
+
+<span class="sd">        This function is wrapped in a :func:`functools.lru_cache` to prevent</span>
+<span class="sd">        duplicate api calls.</span>
+<span class="sd">        """</span>
+        <span class="n">response</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">api</span><span class="o">.</span><span class="n">get_user</span><span class="p">({</span><span class="s2">"u"</span><span class="p">:</span> <span class="n">user_id</span><span class="p">,</span> <span class="s2">"type"</span><span class="p">:</span> <span class="s2">"id"</span><span class="p">})</span>
+        <span class="k">try</span><span class="p">:</span>
+            <span class="n">Loader</span><span class="o">.</span><span class="n">check_response</span><span class="p">(</span><span class="n">response</span><span class="p">)</span>
+        <span class="k">except</span> <span class="n">NoInfoAvailableException</span><span class="p">:</span>
+            <span class="k">return</span> <span class="s2">""</span>
+        <span class="k">return</span> <span class="n">response</span><span class="p">[</span><span class="mi">0</span><span class="p">][</span><span class="s2">"username"</span><span class="p">]</span>
+
+<div class="viewcode-block" id="Loader.check_response"><a class="viewcode-back" href="../../appendix.html#circleguard.loader.Loader.check_response">[docs]</a>    <span class="nd">@staticmethod</span>
+    <span class="k">def</span> <span class="nf">check_response</span><span class="p">(</span><span class="n">response</span><span class="p">):</span>
+        <span class="sd">"""</span>
+<span class="sd">        Checks a response from the api for an error or empty response.</span>
+
+<span class="sd">        Parameters</span>
+<span class="sd">        ----------</span>
+<span class="sd">        response: list or dict</span>
+<span class="sd">            The response returned by the api.</span>
+
+<span class="sd">        Raises</span>
+<span class="sd">        ------</span>
+<span class="sd">        One of :class:`~.Error`</span>
+<span class="sd">            If an error exists in the response.</span>
+<span class="sd">        NoInfoAvailable</span>
+<span class="sd">            If the response is empty.</span>
+<span class="sd">        """</span>
+        <span class="k">if</span> <span class="s2">"error"</span> <span class="ow">in</span> <span class="n">response</span><span class="p">:</span> <span class="c1"># dict case</span>
+            <span class="k">for</span> <span class="n">error</span> <span class="ow">in</span> <span class="n">Error</span><span class="p">:</span>
+                <span class="k">if</span> <span class="n">response</span><span class="p">[</span><span class="s2">"error"</span><span class="p">]</span> <span class="o">==</span> <span class="n">error</span><span class="o">.</span><span class="n">value</span><span class="p">[</span><span class="mi">0</span><span class="p">]:</span>
+                    <span class="k">raise</span> <span class="n">error</span><span class="o">.</span><span class="n">value</span><span class="p">[</span><span class="mi">1</span><span class="p">](</span><span class="n">error</span><span class="o">.</span><span class="n">value</span><span class="p">[</span><span class="mi">2</span><span class="p">])</span>
+            <span class="c1"># don't know why pylint is throwing hands but this is definitely</span>
+            <span class="c1"># legit</span>
+            <span class="k">raise</span> <span class="n">Error</span><span class="o">.</span><span class="n">UNKNOWN</span><span class="o">.</span><span class="n">value</span><span class="p">[</span><span class="mi">1</span><span class="p">](</span><span class="n">Error</span><span class="o">.</span><span class="n">UNKNOWN</span><span class="o">.</span><span class="n">value</span><span class="p">[</span><span class="mi">2</span><span class="p">])</span> <span class="c1"># pylint: disable=unsubscriptable-object</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="n">response</span><span class="p">:</span> <span class="c1"># response is empty, list or dict case</span>
+            <span class="k">raise</span> <span class="n">NoInfoAvailableException</span><span class="p">(</span><span class="s2">"No info was available from the api "</span>
+                <span class="s2">"for the given arguments."</span><span class="p">)</span></div>
+
+    <span class="k">def</span> <span class="nf">_enforce_ratelimit</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">"""</span>
+<span class="sd">        Sleeps the thread until we have refreshed our ratelimits.</span>
+<span class="sd">        """</span>
+        <span class="n">difference</span> <span class="o">=</span> <span class="n">datetime</span><span class="o">.</span><span class="n">now</span><span class="p">()</span> <span class="o">-</span> <span class="n">Loader</span><span class="o">.</span><span class="n">start_time</span>
+        <span class="n">seconds_passed</span> <span class="o">=</span> <span class="n">difference</span><span class="o">.</span><span class="n">seconds</span>
+
+        <span class="c1"># sleep the remainder of the reset cycle so we guarantee it's been that</span>
+        <span class="c1"># long since the first request</span>
+        <span class="n">sleep_seconds</span> <span class="o">=</span> <span class="n">Loader</span><span class="o">.</span><span class="n">RATELIMIT_RESET</span> <span class="o">-</span> <span class="n">seconds_passed</span>
+        <span class="n">sleep_seconds</span> <span class="o">=</span> <span class="nb">max</span><span class="p">(</span><span class="n">sleep_seconds</span><span class="p">,</span> <span class="mi">0</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_ratelimit</span><span class="p">(</span><span class="n">sleep_seconds</span><span class="p">)</span>
+
+    <span class="k">def</span> <span class="nf">_ratelimit</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">length</span><span class="p">):</span>
+        <span class="sd">"""</span>
+<span class="sd">        Sleeps the thread for ``length`` time.</span>
+
+<span class="sd">        Parameters</span>
+<span class="sd">        ----------</span>
+<span class="sd">        length: int</span>
+<span class="sd">            How long, in seconds, to sleep the thread for.</span>
+
+<span class="sd">        Notes</span>
+<span class="sd">        -----</span>
+<span class="sd">        This method is only called by :meth:`~._enforce_ratelimit`. It is split</span>
+<span class="sd">        into two functions to allow :class:`~.Loader` subclasses to overload</span>
+<span class="sd">        just this function and easily interact with the ``length``.</span>
+<span class="sd">        """</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">log</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s2">"Ratelimited, sleeping for </span><span class="si">%s</span><span class="s2"> seconds."</span><span class="p">,</span> <span class="n">length</span><span class="p">)</span>
+        <span class="n">time</span><span class="o">.</span><span class="n">sleep</span><span class="p">(</span><span class="n">length</span><span class="p">)</span></div>
+</pre></div>
+      </article>
+      <footer>
+        
+        <div class="related-pages">
+          
+          
+        </div>
+
+        <div class="related-information">
+        </div>
+        
+      </footer>
+    </div>
+    <aside class="toc-drawer no-toc">
+      
+      
+      
+    </aside>
+  </main>
+</div>
+    <script id="documentation_options" data-url_root="../../" src="../../_static/documentation_options.js"></script>
+    <script src="../../_static/jquery.js"></script>
+    <script src="../../_static/underscore.js"></script>
+    <script src="../../_static/doctools.js"></script>
+    <script src="../../_static/scripts/main.js?digest=e931d09b2a40c1bb82b542effe772014573baf67"></script></body>
+</html>
