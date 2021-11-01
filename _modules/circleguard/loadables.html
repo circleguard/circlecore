@@ -5,7 +5,7 @@
     <meta name="color-scheme" content="light dark"><link rel="index" title="Index" href="../../genindex.html" /><link rel="search" title="Search" href="../../search.html" />
 
     <meta name="generator" content="sphinx-3.5.2, furo 2021.03.20.beta30"/>
-        <title>circleguard.loadables - Circleguard v5.2.2 documentation</title>
+        <title>circleguard.loadables - Circleguard v5.2.4 documentation</title>
       <link rel="stylesheet" href="../../_static/styles/furo.css?digest=978e1795dfe158b585dda6a8417f6411828bf3ed">
     <link rel="stylesheet" href="../../_static/pygments.css">
     <link media="(prefers-color-scheme: dark)" rel="stylesheet" href="../../_static/pygments_dark.css">
@@ -86,7 +86,7 @@
       </label>
     </div>
     <div class="header-center">
-      <a href="../../index.html"><div class="brand">Circleguard v5.2.2 documentation</div></a>
+      <a href="../../index.html"><div class="brand">Circleguard v5.2.4 documentation</div></a>
     </div>
     <div class="header-right">
       <label class="toc-overlay-icon toc-header-icon no-toc" for="__toc">
@@ -100,7 +100,7 @@
       <div class="sidebar-sticky"><a class="sidebar-brand" href="../../index.html">
   
   
-  <span class="sidebar-brand-text">Circleguard v5.2.2 documentation</span>
+  <span class="sidebar-brand-text">Circleguard v5.2.4 documentation</span>
   
 </a><form class="sidebar-search-container" method="get" action="../../search.html">
   <input class="sidebar-search" placeholder=Search name="q">
@@ -389,7 +389,7 @@
 
 <span class="sd">    Parameters</span>
 <span class="sd">    ----------</span>
-<span class="sd">    map_id: int</span>
+<span class="sd">    beatmap_id: int</span>
 <span class="sd">        The map to represent the top plays for.</span>
 <span class="sd">    span: str or Span</span>
 <span class="sd">        A comma separated list of ranges of top plays to retrieve.</span>
@@ -405,12 +405,15 @@
 <span class="sd">    cache: bool</span>
 <span class="sd">        Whether to cache the replays once they are loaded.</span>
 <span class="sd">    """</span>
-    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">map_id</span><span class="p">,</span> <span class="n">span</span><span class="p">,</span> <span class="n">mods</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">cache</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">beatmap_id</span><span class="p">,</span> <span class="n">span</span><span class="p">,</span> <span class="n">mods</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">cache</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
         <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="n">cache</span><span class="p">)</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">replays</span> <span class="o">=</span> <span class="p">[]</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">map_id</span> <span class="o">=</span> <span class="n">map_id</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">beatmap_id</span> <span class="o">=</span> <span class="n">beatmap_id</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">mods</span> <span class="o">=</span> <span class="n">mods</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">span</span> <span class="o">=</span> <span class="n">Span</span><span class="p">(</span><span class="n">span</span><span class="p">)</span>
+
+        <span class="c1"># TODO remove in core 6.0.0</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">map_id</span> <span class="o">=</span> <span class="n">beatmap_id</span>
 
     <span class="k">def</span> <span class="nf">load_info</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">loader</span><span class="p">):</span>
         <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">info_loaded</span><span class="p">:</span>
@@ -418,10 +421,10 @@
         <span class="k">if</span> <span class="ow">not</span> <span class="n">loader</span><span class="p">:</span>
             <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">"A Map cannot be info loaded loaded without api "</span>
                 <span class="s2">"access"</span><span class="p">)</span>
-        <span class="k">for</span> <span class="n">info</span> <span class="ow">in</span> <span class="n">loader</span><span class="o">.</span><span class="n">replay_info</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">map_id</span><span class="p">,</span> <span class="n">span</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">span</span><span class="p">,</span>
+        <span class="k">for</span> <span class="n">score</span> <span class="ow">in</span> <span class="n">loader</span><span class="o">.</span><span class="n">replay_info</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">beatmap_id</span><span class="p">,</span> <span class="n">span</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">span</span><span class="p">,</span>
             <span class="n">mods</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">mods</span><span class="p">):</span>
-            <span class="n">r</span> <span class="o">=</span> <span class="n">ReplayMap</span><span class="p">(</span><span class="n">info</span><span class="o">.</span><span class="n">map_id</span><span class="p">,</span> <span class="n">info</span><span class="o">.</span><span class="n">user_id</span><span class="p">,</span> <span class="n">info</span><span class="o">.</span><span class="n">mods</span><span class="p">,</span>
-                <span class="n">cache</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">cache</span><span class="p">,</span> <span class="n">info</span><span class="o">=</span><span class="n">info</span><span class="p">)</span>
+            <span class="n">r</span> <span class="o">=</span> <span class="n">ReplayMap</span><span class="p">(</span><span class="n">score</span><span class="o">.</span><span class="n">beatmap_id</span><span class="p">,</span> <span class="n">score</span><span class="o">.</span><span class="n">user_id</span><span class="p">,</span> <span class="n">score</span><span class="o">.</span><span class="n">mods</span><span class="p">,</span>
+                <span class="n">cache</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">cache</span><span class="p">,</span> <span class="n">info</span><span class="o">=</span><span class="n">score</span><span class="p">)</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">replays</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">r</span><span class="p">)</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">info_loaded</span> <span class="o">=</span> <span class="kc">True</span>
 
@@ -431,16 +434,16 @@
     <span class="k">def</span> <span class="fm">__eq__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">loadable</span><span class="p">):</span>
         <span class="k">if</span> <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">loadable</span><span class="p">,</span> <span class="n">Map</span><span class="p">):</span>
             <span class="k">return</span> <span class="kc">False</span>
-        <span class="k">return</span> <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">map_id</span> <span class="o">==</span> <span class="n">loadable</span><span class="o">.</span><span class="n">map_id</span> <span class="ow">and</span> <span class="bp">self</span><span class="o">.</span><span class="n">mods</span> <span class="o">==</span> <span class="n">loadable</span><span class="o">.</span><span class="n">mods</span>
-                <span class="ow">and</span> <span class="bp">self</span><span class="o">.</span><span class="n">span</span> <span class="o">==</span> <span class="n">loadable</span><span class="o">.</span><span class="n">span</span><span class="p">)</span>
+        <span class="k">return</span> <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">beatmap_id</span> <span class="o">==</span> <span class="n">loadable</span><span class="o">.</span><span class="n">beatmap_id</span>
+                <span class="ow">and</span> <span class="bp">self</span><span class="o">.</span><span class="n">mods</span> <span class="o">==</span> <span class="n">loadable</span><span class="o">.</span><span class="n">mods</span> <span class="ow">and</span> <span class="bp">self</span><span class="o">.</span><span class="n">span</span> <span class="o">==</span> <span class="n">loadable</span><span class="o">.</span><span class="n">span</span><span class="p">)</span>
 
     <span class="k">def</span> <span class="fm">__repr__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-        <span class="k">return</span> <span class="p">(</span><span class="sa">f</span><span class="s2">"Map(map_id=</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">map_id</span><span class="si">}</span><span class="s2">,cache=</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">cache</span><span class="si">}</span><span class="s2">,mods=</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">mods</span><span class="si">}</span><span class="s2">,"</span>
-                <span class="sa">f</span><span class="s2">"span=</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">span</span><span class="si">}</span><span class="s2">,replays=</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">replays</span><span class="si">}</span><span class="s2">,"</span>
-                <span class="sa">f</span><span class="s2">"loaded=</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">loaded</span><span class="si">}</span><span class="s2">)"</span><span class="p">)</span>
+        <span class="k">return</span> <span class="p">(</span><span class="sa">f</span><span class="s2">"Map(beatmap_id=</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">beatmap_id</span><span class="si">}</span><span class="s2">,cache=</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">cache</span><span class="si">}</span><span class="s2">,"</span>
+            <span class="sa">f</span><span class="s2">"mods=</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">mods</span><span class="si">}</span><span class="s2">,span=</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">span</span><span class="si">}</span><span class="s2">,replays=</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">replays</span><span class="si">}</span><span class="s2">,"</span>
+            <span class="sa">f</span><span class="s2">"loaded=</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">loaded</span><span class="si">}</span><span class="s2">)"</span><span class="p">)</span>
 
     <span class="k">def</span> <span class="fm">__str__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-        <span class="k">return</span> <span class="sa">f</span><span class="s2">"Map </span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">map_id</span><span class="si">}</span><span class="s2">"</span></div>
+        <span class="k">return</span> <span class="sa">f</span><span class="s2">"Map </span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">beatmap_id</span><span class="si">}</span><span class="s2">"</span></div>
 
 
 <div class="viewcode-block" id="User"><a class="viewcode-back" href="../../appendix.html#circleguard.loadables.User">[docs]</a><span class="k">class</span> <span class="nc">User</span><span class="p">(</span><span class="n">ReplayContainer</span><span class="p">):</span>
@@ -486,7 +489,7 @@
         <span class="k">for</span> <span class="n">info</span> <span class="ow">in</span> <span class="n">loader</span><span class="o">.</span><span class="n">get_user_best</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">user_id</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">span</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">mods</span><span class="p">):</span>
             <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">available_only</span> <span class="ow">and</span> <span class="ow">not</span> <span class="n">info</span><span class="o">.</span><span class="n">replay_available</span><span class="p">:</span>
                 <span class="k">continue</span>
-            <span class="n">r</span> <span class="o">=</span> <span class="n">ReplayMap</span><span class="p">(</span><span class="n">info</span><span class="o">.</span><span class="n">map_id</span><span class="p">,</span> <span class="n">info</span><span class="o">.</span><span class="n">user_id</span><span class="p">,</span> <span class="n">info</span><span class="o">.</span><span class="n">mods</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">cache</span><span class="p">,</span>
+            <span class="n">r</span> <span class="o">=</span> <span class="n">ReplayMap</span><span class="p">(</span><span class="n">info</span><span class="o">.</span><span class="n">beatmap_id</span><span class="p">,</span> <span class="n">info</span><span class="o">.</span><span class="n">user_id</span><span class="p">,</span> <span class="n">info</span><span class="o">.</span><span class="n">mods</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">cache</span><span class="p">,</span>
                 <span class="n">info</span><span class="o">=</span><span class="n">info</span><span class="p">)</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">replays</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">r</span><span class="p">)</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">info_loaded</span> <span class="o">=</span> <span class="kc">True</span>
@@ -498,7 +501,10 @@
         <span class="k">if</span> <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">loadable</span><span class="p">,</span> <span class="n">User</span><span class="p">):</span>
             <span class="k">return</span> <span class="kc">False</span>
         <span class="k">return</span> <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">user_id</span> <span class="o">==</span> <span class="n">loadable</span><span class="o">.</span><span class="n">user_id</span> <span class="ow">and</span> <span class="bp">self</span><span class="o">.</span><span class="n">mods</span> <span class="o">==</span> <span class="n">loadable</span><span class="o">.</span><span class="n">mods</span>
-                <span class="ow">and</span> <span class="bp">self</span><span class="o">.</span><span class="n">span</span> <span class="o">==</span> <span class="n">loadable</span><span class="o">.</span><span class="n">span</span><span class="p">)</span></div>
+                <span class="ow">and</span> <span class="bp">self</span><span class="o">.</span><span class="n">span</span> <span class="o">==</span> <span class="n">loadable</span><span class="o">.</span><span class="n">span</span><span class="p">)</span>
+
+    <span class="k">def</span> <span class="fm">__str__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">return</span> <span class="sa">f</span><span class="s2">"User </span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">user_id</span><span class="si">}</span><span class="s2">"</span></div>
 
 
 <div class="viewcode-block" id="MapUser"><a class="viewcode-back" href="../../appendix.html#circleguard.loadables.MapUser">[docs]</a><span class="k">class</span> <span class="nc">MapUser</span><span class="p">(</span><span class="n">ReplayContainer</span><span class="p">):</span>
@@ -507,10 +513,10 @@
 
 <span class="sd">    Parameters</span>
 <span class="sd">    ----------</span>
-<span class="sd">    map_id: int</span>
-<span class="sd">        The map to represent scores by `user_id` on.</span>
+<span class="sd">    beatmap_id: int</span>
+<span class="sd">        The beatmap to represent scores by `user_id` on.</span>
 <span class="sd">    user_id: int</span>
-<span class="sd">        The user to represent scores on `map_id` for.</span>
+<span class="sd">        The user to represent scores on `beatmap_id` for.</span>
 <span class="sd">    span: str or Span</span>
 <span class="sd">        A comma separated list of ranges of plays to retrieve.</span>
 <span class="sd">        ``span="1-3,6,2-4"`` -&gt; replays in the range ``[1,2,3,4,6]``.</span>
@@ -521,14 +527,17 @@
 <span class="sd">        Replays are filtered on this basis after ``span`` is applied.</span>
 <span class="sd">        True by default.</span>
 <span class="sd">    """</span>
-    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">map_id</span><span class="p">,</span> <span class="n">user_id</span><span class="p">,</span> <span class="n">span</span><span class="o">=</span><span class="n">Loader</span><span class="o">.</span><span class="n">MAX_MAP_SPAN</span><span class="p">,</span> <span class="n">cache</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> \
-        <span class="n">available_only</span><span class="o">=</span><span class="kc">True</span><span class="p">):</span>
+    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">beatmap_id</span><span class="p">,</span> <span class="n">user_id</span><span class="p">,</span> <span class="n">span</span><span class="o">=</span><span class="n">Loader</span><span class="o">.</span><span class="n">MAX_MAP_SPAN</span><span class="p">,</span> \
+        <span class="n">cache</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">available_only</span><span class="o">=</span><span class="kc">True</span><span class="p">):</span>
         <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="n">cache</span><span class="p">)</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">replays</span> <span class="o">=</span> <span class="p">[]</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">map_id</span> <span class="o">=</span> <span class="n">map_id</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">beatmap_id</span> <span class="o">=</span> <span class="n">beatmap_id</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">user_id</span> <span class="o">=</span> <span class="n">user_id</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">span</span> <span class="o">=</span> <span class="n">Span</span><span class="p">(</span><span class="n">span</span><span class="p">)</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">available_only</span> <span class="o">=</span> <span class="n">available_only</span>
+
+        <span class="c1"># TODO remove in core 6.0.0</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">map_id</span> <span class="o">=</span> <span class="n">beatmap_id</span>
 
     <span class="k">def</span> <span class="nf">load_info</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">loader</span><span class="p">):</span>
         <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">info_loaded</span><span class="p">:</span>
@@ -536,11 +545,11 @@
         <span class="k">if</span> <span class="ow">not</span> <span class="n">loader</span><span class="p">:</span>
             <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">"A MapUser cannot be info loaded loaded without "</span>
                 <span class="s2">"api access"</span><span class="p">)</span>
-        <span class="k">for</span> <span class="n">info</span> <span class="ow">in</span> <span class="n">loader</span><span class="o">.</span><span class="n">replay_info</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">map_id</span><span class="p">,</span> <span class="n">span</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">span</span><span class="p">,</span>
+        <span class="k">for</span> <span class="n">info</span> <span class="ow">in</span> <span class="n">loader</span><span class="o">.</span><span class="n">replay_info</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">beatmap_id</span><span class="p">,</span> <span class="n">span</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">span</span><span class="p">,</span>
             <span class="n">user_id</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">user_id</span><span class="p">,</span> <span class="n">limit</span><span class="o">=</span><span class="kc">False</span><span class="p">):</span>
             <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">available_only</span> <span class="ow">and</span> <span class="ow">not</span> <span class="n">info</span><span class="o">.</span><span class="n">replay_available</span><span class="p">:</span>
                 <span class="k">continue</span>
-            <span class="n">r</span> <span class="o">=</span> <span class="n">ReplayMap</span><span class="p">(</span><span class="n">info</span><span class="o">.</span><span class="n">map_id</span><span class="p">,</span> <span class="n">info</span><span class="o">.</span><span class="n">user_id</span><span class="p">,</span> <span class="n">info</span><span class="o">.</span><span class="n">mods</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">cache</span><span class="p">,</span>
+            <span class="n">r</span> <span class="o">=</span> <span class="n">ReplayMap</span><span class="p">(</span><span class="n">info</span><span class="o">.</span><span class="n">beatmap_id</span><span class="p">,</span> <span class="n">info</span><span class="o">.</span><span class="n">user_id</span><span class="p">,</span> <span class="n">info</span><span class="o">.</span><span class="n">mods</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">cache</span><span class="p">,</span>
                 <span class="n">info</span><span class="o">=</span><span class="n">info</span><span class="p">)</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">replays</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">r</span><span class="p">)</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">info_loaded</span> <span class="o">=</span> <span class="kc">True</span>
@@ -551,9 +560,11 @@
     <span class="k">def</span> <span class="fm">__eq__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">loadable</span><span class="p">):</span>
         <span class="k">if</span> <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">loadable</span><span class="p">,</span> <span class="n">MapUser</span><span class="p">):</span>
             <span class="k">return</span> <span class="kc">False</span>
-        <span class="k">return</span> <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">map_id</span> <span class="o">==</span> <span class="n">loadable</span><span class="o">.</span><span class="n">map_id</span> <span class="ow">and</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">user_id</span> <span class="o">==</span> <span class="n">loadable</span><span class="o">.</span><span class="n">user_id</span> <span class="ow">and</span> <span class="bp">self</span><span class="o">.</span><span class="n">span</span> <span class="o">==</span> <span class="n">loadable</span><span class="o">.</span><span class="n">span</span><span class="p">)</span></div>
+        <span class="k">return</span> <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">beatmap_id</span> <span class="o">==</span> <span class="n">loadable</span><span class="o">.</span><span class="n">beatmap_id</span> <span class="ow">and</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">user_id</span> <span class="o">==</span> <span class="n">loadable</span><span class="o">.</span><span class="n">user_id</span> <span class="ow">and</span> <span class="bp">self</span><span class="o">.</span><span class="n">span</span> <span class="o">==</span> <span class="n">loadable</span><span class="o">.</span><span class="n">span</span><span class="p">)</span>
 
+    <span class="k">def</span> <span class="fm">__str__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">return</span> <span class="sa">f</span><span class="s2">"MapUser for </span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">user_id</span><span class="si">}</span><span class="s2"> on /b/</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">beatmap_id</span><span class="si">}</span><span class="s2">"</span></div>
 
 <div class="viewcode-block" id="ReplayCache"><a class="viewcode-back" href="../../appendix.html#circleguard.loadables.ReplayCache">[docs]</a><span class="k">class</span> <span class="nc">ReplayCache</span><span class="p">(</span><span class="n">ReplayContainer</span><span class="p">):</span>
     <span class="sd">"""</span>
@@ -720,11 +731,12 @@
 
         <span class="c1"># These attributes might or might not be set once the replay loads.</span>
         <span class="c1"># Ideally, a replay would provide all of these attributes, but there are</span>
-        <span class="c1"># some cases when only a subset is available. &lt;br&gt;</span>
+        <span class="c1"># some cases when only a subset is available.</span>
+        <span class="c1">#</span>
         <span class="c1"># If only some of these attributes are set after the replay is loaded,</span>
         <span class="c1"># some ``Circleguard`` methods may reject this replay, as it does not</span>
         <span class="c1"># contain the information necessary to do whatever the method needs to.</span>
-        <span class="c1"># &lt;br&gt;</span>
+        <span class="c1">#</span>
         <span class="c1"># For instance, if the replay provides ``replay_data`` but not ``mods``,</span>
         <span class="c1"># ``Circleguard#similarity`` will reject it, as we will not know whether</span>
         <span class="c1"># whether ``Mod.HR`` was enabled on the replay, and thus whether to flip</span>
@@ -737,26 +749,41 @@
         <span class="bp">self</span><span class="o">.</span><span class="n">timestamp</span>    <span class="o">=</span> <span class="kc">None</span>
         <span class="c1"># declared as a property with a getter and setter so we can set</span>
         <span class="c1"># map_info's map_id attribute automatically</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">_map_id</span>       <span class="o">=</span> <span class="kc">None</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_beatmap_id</span>       <span class="o">=</span> <span class="kc">None</span>
         <span class="c1"># replays have no information about their map by default.</span>
         <span class="c1"># TODO: remove in core 6.0.0, in favor of ``Replay#map_available`` (and</span>
         <span class="c1"># possibly other mechanisms).</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">map_info</span>     <span class="o">=</span> <span class="n">MapInfo</span><span class="p">()</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">username</span>     <span class="o">=</span> <span class="kc">None</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">user_id</span>      <span class="o">=</span> <span class="kc">None</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">mods</span>         <span class="o">=</span> <span class="kc">None</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">replay_id</span>    <span class="o">=</span> <span class="kc">None</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">replay_data</span>  <span class="o">=</span> <span class="kc">None</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">map_info</span>         <span class="o">=</span> <span class="n">MapInfo</span><span class="p">()</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">username</span>         <span class="o">=</span> <span class="kc">None</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">user_id</span>          <span class="o">=</span> <span class="kc">None</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">mods</span>             <span class="o">=</span> <span class="kc">None</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">replay_id</span>        <span class="o">=</span> <span class="kc">None</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">replay_data</span>      <span class="o">=</span> <span class="kc">None</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">replay_hash</span>      <span class="o">=</span> <span class="kc">None</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">count_300</span>        <span class="o">=</span> <span class="kc">None</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">count_100</span>        <span class="o">=</span> <span class="kc">None</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">count_50</span>         <span class="o">=</span> <span class="kc">None</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">count_geki</span>       <span class="o">=</span> <span class="kc">None</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">count_katu</span>       <span class="o">=</span> <span class="kc">None</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">count_miss</span>       <span class="o">=</span> <span class="kc">None</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">score</span>            <span class="o">=</span> <span class="kc">None</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">max_combo</span>        <span class="o">=</span> <span class="kc">None</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">is_perfect_combo</span> <span class="o">=</span> <span class="kc">None</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">life_bar_graph</span>   <span class="o">=</span> <span class="kc">None</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">pp</span>               <span class="o">=</span> <span class="kc">None</span>
 
-        <span class="c1"># These attributes remain ``None``` when replay is unloaded or loaded</span>
+        <span class="c1"># These attributes remain ``None``` when replay is unloaded, or loaded</span>
         <span class="c1"># but with no data.</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">t</span>            <span class="o">=</span> <span class="kc">None</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">xy</span>           <span class="o">=</span> <span class="kc">None</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">k</span>            <span class="o">=</span> <span class="kc">None</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_keydowns</span>    <span class="o">=</span> <span class="kc">None</span>
 
-    <span class="k">def</span> <span class="nf">map_available</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">_library</span><span class="p">):</span>
-        <span class="k">return</span> <span class="nb">bool</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">map_id</span><span class="p">)</span>
+    <span class="k">def</span> <span class="nf">beatmap_available</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">_library</span><span class="p">):</span>
+        <span class="k">return</span> <span class="nb">bool</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">beatmap_id</span><span class="p">)</span>
+
+    <span class="c1"># TODO remove in core 6.0.0</span>
+    <span class="n">map_available</span> <span class="o">=</span> <span class="n">beatmap_available</span>
 
 <div class="viewcode-block" id="Replay.has_data"><a class="viewcode-back" href="../../appendix.html#circleguard.loadables.Replay.has_data">[docs]</a>    <span class="k">def</span> <span class="nf">has_data</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="sd">"""</span>
@@ -801,10 +828,10 @@
 <span class="sd">        None</span>
 <span class="sd">            If we do not know what beatmap this replay was played on.</span>
 <span class="sd">        """</span>
-        <span class="k">if</span> <span class="ow">not</span> <span class="bp">self</span><span class="o">.</span><span class="n">map_available</span><span class="p">(</span><span class="n">library</span><span class="p">):</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="bp">self</span><span class="o">.</span><span class="n">beatmap_available</span><span class="p">(</span><span class="n">library</span><span class="p">):</span>
             <span class="k">return</span> <span class="kc">None</span>
 
-        <span class="k">return</span> <span class="n">library</span><span class="o">.</span><span class="n">lookup_by_id</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">map_id</span><span class="p">,</span> <span class="n">download</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">save</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span></div>
+        <span class="k">return</span> <span class="n">library</span><span class="o">.</span><span class="n">lookup_by_id</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">beatmap_id</span><span class="p">,</span> <span class="n">download</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">save</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span></div>
 
     <span class="k">def</span> <span class="nf">_process_replay_data</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">replay_data</span><span class="p">):</span>
         <span class="sd">"""</span>
@@ -985,13 +1012,23 @@
         <span class="bp">self</span><span class="o">.</span><span class="n">k</span> <span class="o">=</span> <span class="n">k</span>
 
     <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">beatmap_id</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_beatmap_id</span>
+
+    <span class="nd">@beatmap_id</span><span class="o">.</span><span class="n">setter</span>
+    <span class="k">def</span> <span class="nf">beatmap_id</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">beatmap_id</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_beatmap_id</span> <span class="o">=</span> <span class="n">beatmap_id</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">map_info</span><span class="o">.</span><span class="n">map_id</span> <span class="o">=</span> <span class="n">beatmap_id</span>
+
+    <span class="c1"># TODO remove in core 6.0.0</span>
+    <span class="nd">@property</span>
     <span class="k">def</span> <span class="nf">map_id</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_map_id</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_beatmap_id</span>
 
     <span class="nd">@map_id</span><span class="o">.</span><span class="n">setter</span>
-    <span class="k">def</span> <span class="nf">map_id</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">map_id</span><span class="p">):</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">_map_id</span> <span class="o">=</span> <span class="n">map_id</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">map_info</span><span class="o">.</span><span class="n">map_id</span> <span class="o">=</span> <span class="n">map_id</span>
+    <span class="k">def</span> <span class="nf">map_id</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">beatmap_id</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_beatmap_id</span> <span class="o">=</span> <span class="n">beatmap_id</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">map_info</span><span class="o">.</span><span class="n">map_id</span> <span class="o">=</span> <span class="n">beatmap_id</span>
 
     <span class="nd">@property</span>
     <span class="k">def</span> <span class="nf">keydowns</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
@@ -1014,13 +1051,13 @@
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_keydowns</span>
 
     <span class="k">def</span> <span class="fm">__repr__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-        <span class="k">return</span> <span class="p">(</span><span class="sa">f</span><span class="s2">"Replay(timestamp=</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">timestamp</span><span class="si">}</span><span class="s2">,map_id=</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">map_id</span><span class="si">}</span><span class="s2">,"</span>
-            <span class="sa">f</span><span class="s2">"user_id=</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">user_id</span><span class="si">}</span><span class="s2">,mods=</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">mods</span><span class="si">}</span><span class="s2">,"</span>
-            <span class="sa">f</span><span class="s2">"replay_id=</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">replay_id</span><span class="si">}</span><span class="s2">,weight=</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">weight</span><span class="si">}</span><span class="s2">,"</span>
+        <span class="k">return</span> <span class="p">(</span><span class="sa">f</span><span class="s2">"Replay(timestamp=</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">timestamp</span><span class="si">}</span><span class="s2">,"</span>
+            <span class="sa">f</span><span class="s2">"beatmap_id=</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">beatmap_id</span><span class="si">}</span><span class="s2">,user_id=</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">user_id</span><span class="si">}</span><span class="s2">,"</span>
+            <span class="sa">f</span><span class="s2">"mods=</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">mods</span><span class="si">}</span><span class="s2">,replay_id=</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">replay_id</span><span class="si">}</span><span class="s2">,weight=</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">weight</span><span class="si">}</span><span class="s2">,"</span>
             <span class="sa">f</span><span class="s2">"loaded=</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">loaded</span><span class="si">}</span><span class="s2">,username=</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">username</span><span class="si">}</span><span class="s2">)"</span><span class="p">)</span>
 
     <span class="k">def</span> <span class="fm">__str__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-        <span class="k">return</span> <span class="sa">f</span><span class="s2">"Replay by </span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">username</span><span class="si">}</span><span class="s2"> on </span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">map_id</span><span class="si">}</span><span class="s2">"</span></div>
+        <span class="k">return</span> <span class="sa">f</span><span class="s2">"Replay by </span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">username</span><span class="si">}</span><span class="s2"> on </span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">beatmap_id</span><span class="si">}</span><span class="s2">"</span></div>
 
 
 <div class="viewcode-block" id="ReplayMap"><a class="viewcode-back" href="../../appendix.html#circleguard.loadables.ReplayMap">[docs]</a><span class="k">class</span> <span class="nc">ReplayMap</span><span class="p">(</span><span class="n">Replay</span><span class="p">):</span>
@@ -1046,7 +1083,7 @@
 <span class="sd">    The following replay-related attributes are available (not ``None``) when</span>
 <span class="sd">    this replay is unloaded:</span>
 
-<span class="sd">    * map_id</span>
+<span class="sd">    * beatmap_id</span>
 <span class="sd">    * user_id</span>
 <span class="sd">    * mods (if passed)</span>
 
@@ -1057,23 +1094,36 @@
 <span class="sd">    * username</span>
 <span class="sd">    * mods</span>
 <span class="sd">    * replay_id</span>
+<span class="sd">    * count_300</span>
+<span class="sd">    * count_100</span>
+<span class="sd">    * count_50</span>
+<span class="sd">    * count_geki</span>
+<span class="sd">    * count_katu</span>
+<span class="sd">    * count_miss</span>
+<span class="sd">    * score</span>
+<span class="sd">    * max_combo</span>
+<span class="sd">    * is_perfect_combo</span>
+<span class="sd">    * pp</span>
 <span class="sd">    * replay_data</span>
 <span class="sd">    """</span>
 
-    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">map_id</span><span class="p">,</span> <span class="n">user_id</span><span class="p">,</span> <span class="n">mods</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">cache</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">info</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">beatmap_id</span><span class="p">,</span> <span class="n">user_id</span><span class="p">,</span> <span class="n">mods</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">cache</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">info</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
         <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="n">RatelimitWeight</span><span class="o">.</span><span class="n">HEAVY</span><span class="p">,</span> <span class="n">cache</span><span class="p">)</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">log</span> <span class="o">=</span> <span class="n">logging</span><span class="o">.</span><span class="n">getLogger</span><span class="p">(</span><span class="vm">__name__</span> <span class="o">+</span> <span class="s2">".ReplayMap"</span><span class="p">)</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">map_id</span> <span class="o">=</span> <span class="n">map_id</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">beatmap_id</span> <span class="o">=</span> <span class="n">beatmap_id</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">user_id</span> <span class="o">=</span> <span class="n">user_id</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">mods</span> <span class="o">=</span> <span class="n">mods</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">info</span> <span class="o">=</span> <span class="n">info</span>
         <span class="k">if</span> <span class="n">info</span><span class="p">:</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">timestamp</span> <span class="o">=</span> <span class="n">info</span><span class="o">.</span><span class="n">timestamp</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">map_id</span> <span class="o">=</span> <span class="n">info</span><span class="o">.</span><span class="n">map_id</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">timestamp</span> <span class="o">=</span> <span class="n">info</span><span class="o">.</span><span class="n">date</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">beatmap_id</span> <span class="o">=</span> <span class="n">info</span><span class="o">.</span><span class="n">beatmap_id</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">user_id</span> <span class="o">=</span> <span class="n">info</span><span class="o">.</span><span class="n">user_id</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">username</span> <span class="o">=</span> <span class="n">info</span><span class="o">.</span><span class="n">username</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">replay_id</span> <span class="o">=</span> <span class="n">info</span><span class="o">.</span><span class="n">replay_id</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">mods</span> <span class="o">=</span> <span class="n">info</span><span class="o">.</span><span class="n">mods</span>
+
+        <span class="c1"># TODO remove in core 6.0.0</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">map_id</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">beatmap_id</span>
 
 <div class="viewcode-block" id="ReplayMap.load"><a class="viewcode-back" href="../../appendix.html#circleguard.loadables.ReplayMap.load">[docs]</a>    <span class="k">def</span> <span class="nf">load</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">loader</span><span class="p">,</span> <span class="n">cache</span><span class="p">):</span>
         <span class="sd">"""</span>
@@ -1101,10 +1151,10 @@
         <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">info</span><span class="p">:</span>
             <span class="n">info</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">info</span>
         <span class="k">else</span><span class="p">:</span>
-            <span class="n">info</span> <span class="o">=</span> <span class="n">loader</span><span class="o">.</span><span class="n">replay_info</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">map_id</span><span class="p">,</span> <span class="n">user_id</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">user_id</span><span class="p">,</span>
+            <span class="n">info</span> <span class="o">=</span> <span class="n">loader</span><span class="o">.</span><span class="n">replay_info</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">beatmap_id</span><span class="p">,</span> <span class="n">user_id</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">user_id</span><span class="p">,</span>
                 <span class="n">mods</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">mods</span><span class="p">)</span>
 
-        <span class="bp">self</span><span class="o">.</span><span class="n">timestamp</span> <span class="o">=</span> <span class="n">info</span><span class="o">.</span><span class="n">timestamp</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">timestamp</span> <span class="o">=</span> <span class="n">info</span><span class="o">.</span><span class="n">date</span>
         <span class="c1"># estimate version with timestamp, this is only accurate if the user</span>
         <span class="c1"># keeps their game up to date</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">game_version</span> <span class="o">=</span> <span class="n">GameVersion</span><span class="o">.</span><span class="n">from_datetime</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">timestamp</span><span class="p">,</span>
@@ -1112,6 +1162,16 @@
         <span class="bp">self</span><span class="o">.</span><span class="n">username</span> <span class="o">=</span> <span class="n">info</span><span class="o">.</span><span class="n">username</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">mods</span> <span class="o">=</span> <span class="n">info</span><span class="o">.</span><span class="n">mods</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">replay_id</span> <span class="o">=</span> <span class="n">info</span><span class="o">.</span><span class="n">replay_id</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">count_100</span> <span class="o">=</span> <span class="n">info</span><span class="o">.</span><span class="n">count_100</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">count_300</span> <span class="o">=</span> <span class="n">info</span><span class="o">.</span><span class="n">count_300</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">count_50</span> <span class="o">=</span> <span class="n">info</span><span class="o">.</span><span class="n">count_50</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">count_geki</span> <span class="o">=</span> <span class="n">info</span><span class="o">.</span><span class="n">count_geki</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">count_katu</span> <span class="o">=</span> <span class="n">info</span><span class="o">.</span><span class="n">count_katu</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">count_miss</span> <span class="o">=</span> <span class="n">info</span><span class="o">.</span><span class="n">count_miss</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">score</span> <span class="o">=</span> <span class="n">info</span><span class="o">.</span><span class="n">score</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">max_combo</span> <span class="o">=</span> <span class="n">info</span><span class="o">.</span><span class="n">max_combo</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">is_perfect_combo</span> <span class="o">=</span> <span class="n">info</span><span class="o">.</span><span class="n">perfect</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">pp</span> <span class="o">=</span> <span class="n">info</span><span class="o">.</span><span class="n">pp</span>
 
         <span class="n">replay_data</span> <span class="o">=</span> <span class="n">loader</span><span class="o">.</span><span class="n">replay_data</span><span class="p">(</span><span class="n">info</span><span class="p">,</span> <span class="n">cache</span><span class="o">=</span><span class="n">cache</span><span class="p">)</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_process_replay_data</span><span class="p">(</span><span class="n">replay_data</span><span class="p">)</span>
@@ -1132,24 +1192,25 @@
             <span class="k">return</span> <span class="kc">False</span>
         <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">has_data</span><span class="p">()</span> <span class="ow">and</span> <span class="n">loadable</span><span class="o">.</span><span class="n">has_data</span><span class="p">():</span>
             <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">replay_data</span> <span class="o">==</span> <span class="n">loadable</span><span class="o">.</span><span class="n">replay_data</span>
-        <span class="k">return</span> <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">map_id</span> <span class="o">==</span> <span class="n">loadable</span><span class="o">.</span><span class="n">map_id</span> <span class="ow">and</span>
+        <span class="k">return</span> <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">beatmap_id</span> <span class="o">==</span> <span class="n">loadable</span><span class="o">.</span><span class="n">beatmap_id</span> <span class="ow">and</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">user_id</span> <span class="o">==</span> <span class="n">loadable</span><span class="o">.</span><span class="n">user_id</span> <span class="ow">and</span> <span class="bp">self</span><span class="o">.</span><span class="n">mods</span> <span class="o">==</span> <span class="n">loadable</span><span class="o">.</span><span class="n">mods</span><span class="p">)</span>
 
     <span class="k">def</span> <span class="fm">__hash__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-        <span class="k">return</span> <span class="nb">hash</span><span class="p">((</span><span class="bp">self</span><span class="o">.</span><span class="n">map_id</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">user_id</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">mods</span><span class="p">))</span>
+        <span class="k">return</span> <span class="nb">hash</span><span class="p">((</span><span class="bp">self</span><span class="o">.</span><span class="n">beatmap_id</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">user_id</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">mods</span><span class="p">))</span>
 
     <span class="k">def</span> <span class="fm">__repr__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">loaded</span><span class="p">:</span>
-            <span class="k">return</span> <span class="p">(</span><span class="sa">f</span><span class="s2">"ReplayMap(timestamp=</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">timestamp</span><span class="si">}</span><span class="s2">,map_id=</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">map_id</span><span class="si">}</span><span class="s2">"</span>
-            <span class="sa">f</span><span class="s2">",user_id=</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">user_id</span><span class="si">}</span><span class="s2">,mods=</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">mods</span><span class="si">}</span><span class="s2">,cache=</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">cache</span><span class="si">}</span><span class="s2">,"</span>
-            <span class="sa">f</span><span class="s2">"replay_id=</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">replay_id</span><span class="si">}</span><span class="s2">,loaded=</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">loaded</span><span class="si">}</span><span class="s2">,"</span>
-            <span class="sa">f</span><span class="s2">"username=</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">username</span><span class="si">}</span><span class="s2">)"</span><span class="p">)</span>
-        <span class="k">return</span> <span class="p">(</span><span class="sa">f</span><span class="s2">"ReplayMap(map_id=</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">map_id</span><span class="si">}</span><span class="s2">,user_id=</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">user_id</span><span class="si">}</span><span class="s2">,"</span>
-                <span class="sa">f</span><span class="s2">"mods=</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">mods</span><span class="si">}</span><span class="s2">,cache=</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">cache</span><span class="si">}</span><span class="s2">,loaded=</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">loaded</span><span class="si">}</span><span class="s2">)"</span><span class="p">)</span>
+            <span class="k">return</span> <span class="p">(</span><span class="sa">f</span><span class="s2">"ReplayMap(timestamp=</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">timestamp</span><span class="si">}</span><span class="s2">,"</span>
+            <span class="sa">f</span><span class="s2">"beatmap_id=</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">beatmap_id</span><span class="si">}</span><span class="s2">,user_id=</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">user_id</span><span class="si">}</span><span class="s2">,"</span>
+            <span class="sa">f</span><span class="s2">"mods=</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">mods</span><span class="si">}</span><span class="s2">,cache=</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">cache</span><span class="si">}</span><span class="s2">,replay_id=</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">replay_id</span><span class="si">}</span><span class="s2">,"</span>
+            <span class="sa">f</span><span class="s2">"loaded=</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">loaded</span><span class="si">}</span><span class="s2">,username=</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">username</span><span class="si">}</span><span class="s2">)"</span><span class="p">)</span>
+        <span class="k">return</span> <span class="p">(</span><span class="sa">f</span><span class="s2">"ReplayMap(beatmap_id=</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">beatmap_id</span><span class="si">}</span><span class="s2">,"</span>
+            <span class="sa">f</span><span class="s2">"user_id=</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">user_id</span><span class="si">}</span><span class="s2">,mods=</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">mods</span><span class="si">}</span><span class="s2">,cache=</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">cache</span><span class="si">}</span><span class="s2">,"</span>
+            <span class="sa">f</span><span class="s2">"loaded=</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">loaded</span><span class="si">}</span><span class="s2">)"</span><span class="p">)</span>
 
     <span class="k">def</span> <span class="fm">__str__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="k">return</span> <span class="p">(</span><span class="sa">f</span><span class="s2">"</span><span class="si">{</span><span class="s1">'Loaded'</span> <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">loaded</span> <span class="k">else</span> <span class="s1">'Unloaded'</span><span class="si">}</span><span class="s2"> ReplayMap by "</span>
-            <span class="sa">f</span><span class="s2">"</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">user_id</span><span class="si">}</span><span class="s2"> on </span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">map_id</span><span class="si">}</span><span class="s2">"</span><span class="p">)</span></div>
+            <span class="sa">f</span><span class="s2">"</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">user_id</span><span class="si">}</span><span class="s2"> on </span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">beatmap_id</span><span class="si">}</span><span class="s2">"</span><span class="p">)</span></div>
 
 
 <div class="viewcode-block" id="ReplayDataOSR"><a class="viewcode-back" href="../../appendix.html#circleguard.loadables.ReplayDataOSR">[docs]</a><span class="k">class</span> <span class="nc">ReplayDataOSR</span><span class="p">(</span><span class="n">Replay</span><span class="p">):</span>
@@ -1172,12 +1233,23 @@
 <span class="sd">    this replay is loaded:</span>
 
 <span class="sd">    * timestamp</span>
-<span class="sd">    * map_id</span>
+<span class="sd">    * beatmap_id</span>
 <span class="sd">    * username</span>
 <span class="sd">    * user_id</span>
 <span class="sd">    * mods</span>
 <span class="sd">    * replay_id</span>
 <span class="sd">    * beatmap_hash</span>
+<span class="sd">    * replay_hash</span>
+<span class="sd">    * count_300</span>
+<span class="sd">    * count_100</span>
+<span class="sd">    * count_50</span>
+<span class="sd">    * count_geki</span>
+<span class="sd">    * count_katu</span>
+<span class="sd">    * count_miss</span>
+<span class="sd">    * score</span>
+<span class="sd">    * max_combo</span>
+<span class="sd">    * is_perfect_combo</span>
+<span class="sd">    * life_bar_graph (currently unparsed)</span>
 <span class="sd">    * replay_data</span>
 <span class="sd">    """</span>
     <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">ratelimit_weight</span><span class="p">,</span> <span class="n">cache</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
@@ -1187,21 +1259,21 @@
 
         <span class="bp">self</span><span class="o">.</span><span class="n">_user_id_func</span> <span class="o">=</span> <span class="kc">None</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_user_id</span> <span class="o">=</span> <span class="kc">None</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">_map_id_func</span> <span class="o">=</span> <span class="kc">None</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_beatmap_id_func</span> <span class="o">=</span> <span class="kc">None</span>
 
 <div class="viewcode-block" id="ReplayDataOSR.beatmap"><a class="viewcode-back" href="../../appendix.html#circleguard.loadables.ReplayDataOSR.beatmap">[docs]</a>    <span class="k">def</span> <span class="nf">beatmap</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">library</span><span class="p">):</span>
-        <span class="k">if</span> <span class="ow">not</span> <span class="bp">self</span><span class="o">.</span><span class="n">map_available</span><span class="p">(</span><span class="n">library</span><span class="p">):</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="bp">self</span><span class="o">.</span><span class="n">beatmap_available</span><span class="p">(</span><span class="n">library</span><span class="p">):</span>
             <span class="k">return</span> <span class="kc">None</span>
-        <span class="c1"># if we can't load our map_id, fall back to loading from slider.</span>
+        <span class="c1"># if we can't load our beatmap_id, fall back to loading from slider.</span>
         <span class="k">if</span> <span class="ow">not</span> <span class="bp">self</span><span class="o">.</span><span class="n">can_load_api_attributes</span><span class="p">()</span> <span class="ow">and</span> <span class="bp">self</span><span class="o">.</span><span class="n">beatmap_hash</span><span class="p">:</span>
             <span class="k">return</span> <span class="n">library</span><span class="o">.</span><span class="n">lookup_by_md5</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">beatmap_hash</span><span class="p">)</span>
         <span class="k">return</span> <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="n">beatmap</span><span class="p">(</span><span class="n">library</span><span class="p">)</span></div>
 
-    <span class="k">def</span> <span class="nf">map_available</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">library</span><span class="p">):</span>
+    <span class="k">def</span> <span class="nf">beatmap_available</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">library</span><span class="p">):</span>
         <span class="n">beatmap_cached</span> <span class="o">=</span> <span class="n">library</span><span class="o">.</span><span class="n">beatmap_cached</span><span class="p">(</span><span class="n">beatmap_md5</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">beatmap_hash</span><span class="p">)</span>
         <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">beatmap_hash</span> <span class="ow">and</span> <span class="n">beatmap_cached</span><span class="p">:</span>
             <span class="k">return</span> <span class="kc">True</span>
-        <span class="k">return</span> <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="n">map_available</span><span class="p">(</span><span class="n">library</span><span class="p">)</span>
+        <span class="k">return</span> <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="n">beatmap_available</span><span class="p">(</span><span class="n">library</span><span class="p">)</span>
 
 <div class="viewcode-block" id="ReplayDataOSR.load_from_osrparse_replay"><a class="viewcode-back" href="../../appendix.html#circleguard.loadables.ReplayDataOSR.load_from_osrparse_replay">[docs]</a>    <span class="k">def</span> <span class="nf">load_from_osrparse_replay</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">replay</span><span class="p">,</span> <span class="n">loader</span><span class="p">,</span> <span class="n">_cache</span><span class="p">):</span>
         <span class="sd">"""</span>
@@ -1220,15 +1292,26 @@
 <span class="sd">            we do not cache :class:`~.ReplayPath` regardless of this parameter.</span>
 <span class="sd">        """</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">game_version</span> <span class="o">=</span> <span class="n">GameVersion</span><span class="p">(</span><span class="n">replay</span><span class="o">.</span><span class="n">game_version</span><span class="p">,</span> <span class="n">concrete</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">timestamp</span> <span class="o">=</span> <span class="n">replay</span><span class="o">.</span><span class="n">timestamp</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">username</span> <span class="o">=</span> <span class="n">replay</span><span class="o">.</span><span class="n">player_name</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">mods</span> <span class="o">=</span> <span class="n">Mod</span><span class="p">(</span><span class="nb">int</span><span class="p">(</span><span class="n">replay</span><span class="o">.</span><span class="n">mod_combination</span><span class="p">))</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">replay_id</span> <span class="o">=</span> <span class="n">replay</span><span class="o">.</span><span class="n">replay_id</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">beatmap_hash</span> <span class="o">=</span> <span class="n">replay</span><span class="o">.</span><span class="n">beatmap_hash</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">username</span> <span class="o">=</span> <span class="n">replay</span><span class="o">.</span><span class="n">player_name</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">replay_hash</span> <span class="o">=</span> <span class="n">replay</span><span class="o">.</span><span class="n">replay_hash</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">count_300</span> <span class="o">=</span> <span class="n">replay</span><span class="o">.</span><span class="n">number_300s</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">count_100</span> <span class="o">=</span> <span class="n">replay</span><span class="o">.</span><span class="n">number_100s</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">count_50</span> <span class="o">=</span> <span class="n">replay</span><span class="o">.</span><span class="n">number_50s</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">count_geki</span> <span class="o">=</span> <span class="n">replay</span><span class="o">.</span><span class="n">gekis</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">count_katu</span> <span class="o">=</span> <span class="n">replay</span><span class="o">.</span><span class="n">katus</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">count_miss</span> <span class="o">=</span> <span class="n">replay</span><span class="o">.</span><span class="n">misses</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">score</span> <span class="o">=</span> <span class="n">replay</span><span class="o">.</span><span class="n">score</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">max_combo</span> <span class="o">=</span> <span class="n">replay</span><span class="o">.</span><span class="n">max_combo</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">is_perfect_combo</span> <span class="o">=</span> <span class="n">replay</span><span class="o">.</span><span class="n">is_perfect_combo</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">mods</span> <span class="o">=</span> <span class="n">Mod</span><span class="p">(</span><span class="nb">int</span><span class="p">(</span><span class="n">replay</span><span class="o">.</span><span class="n">mod_combination</span><span class="p">))</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">life_bar_graph</span> <span class="o">=</span> <span class="n">replay</span><span class="o">.</span><span class="n">life_bar_graph</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">timestamp</span> <span class="o">=</span> <span class="n">replay</span><span class="o">.</span><span class="n">timestamp</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">replay_id</span> <span class="o">=</span> <span class="n">replay</span><span class="o">.</span><span class="n">replay_id</span>
 
         <span class="k">if</span> <span class="n">loader</span><span class="p">:</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">_user_id_func</span> <span class="o">=</span> <span class="n">loader</span><span class="o">.</span><span class="n">user_id</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">_map_id_func</span> <span class="o">=</span> <span class="n">loader</span><span class="o">.</span><span class="n">map_id</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_beatmap_id_func</span> <span class="o">=</span> <span class="n">loader</span><span class="o">.</span><span class="n">beatmap_id</span>
 
         <span class="bp">self</span><span class="o">.</span><span class="n">_process_replay_data</span><span class="p">(</span><span class="n">replay</span><span class="o">.</span><span class="n">play_data</span><span class="p">)</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">loaded</span> <span class="o">=</span> <span class="kc">True</span>
@@ -1256,37 +1339,58 @@
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_user_id</span>
 
     <span class="nd">@property</span>
-    <span class="k">def</span> <span class="nf">map_id</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+    <span class="k">def</span> <span class="nf">beatmap_id</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="k">if</span> <span class="ow">not</span> <span class="bp">self</span><span class="o">.</span><span class="n">loaded</span><span class="p">:</span>
             <span class="k">return</span> <span class="kc">None</span>
-        <span class="k">if</span> <span class="ow">not</span> <span class="bp">self</span><span class="o">.</span><span class="n">_map_id_func</span><span class="p">:</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="bp">self</span><span class="o">.</span><span class="n">_beatmap_id_func</span><span class="p">:</span>
             <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">"The map id of a replay which has been loaded "</span>
                 <span class="s2">"without a ``Loader`` cannot be retrieved. This can happen if "</span>
                 <span class="s2">"the replay was loaded with a ``KeylessCircleguard``."</span><span class="p">)</span>
         <span class="c1"># property inheritence is a bit nasty. See</span>
         <span class="c1"># https://stackoverflow.com/a/37663266 for reference</span>
-        <span class="k">if</span> <span class="ow">not</span> <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="n">map_id</span><span class="p">:</span>
-            <span class="n">map_id</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_map_id_func</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">beatmap_hash</span><span class="p">)</span>
-            <span class="nb">super</span><span class="p">(</span><span class="n">ReplayDataOSR</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="vm">__class__</span><span class="p">)</span><span class="o">.</span><span class="n">map_id</span><span class="o">.</span><span class="n">fset</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">map_id</span><span class="p">)</span>
-        <span class="k">return</span> <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="n">map_id</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="n">beatmap_id</span><span class="p">:</span>
+            <span class="n">beatmap_id</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_beatmap_id_func</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">beatmap_hash</span><span class="p">)</span>
+            <span class="nb">super</span><span class="p">(</span><span class="n">ReplayDataOSR</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="vm">__class__</span><span class="p">)</span><span class="o">.</span><span class="n">beatmap_id</span><span class="o">.</span><span class="n">fset</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span>
+                <span class="n">beatmap_id</span><span class="p">)</span>
+        <span class="k">return</span> <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="n">beatmap_id</span>
+
+    <span class="nd">@beatmap_id</span><span class="o">.</span><span class="n">setter</span>
+    <span class="k">def</span> <span class="nf">beatmap_id</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">beatmap_id</span><span class="p">):</span>
+        <span class="nb">super</span><span class="p">(</span><span class="n">ReplayDataOSR</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="vm">__class__</span><span class="p">)</span><span class="o">.</span><span class="n">beatmap_id</span><span class="o">.</span><span class="n">fset</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">beatmap_id</span><span class="p">)</span>
+
+    <span class="c1"># TODO remove in core 6.0.0</span>
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">map_id</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="bp">self</span><span class="o">.</span><span class="n">loaded</span><span class="p">:</span>
+            <span class="k">return</span> <span class="kc">None</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="bp">self</span><span class="o">.</span><span class="n">_beatmap_id_func</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">"The map id of a replay which has been loaded "</span>
+                <span class="s2">"without a ``Loader`` cannot be retrieved. This can happen if "</span>
+                <span class="s2">"the replay was loaded with a ``KeylessCircleguard``."</span><span class="p">)</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="n">beatmap_id</span><span class="p">:</span>
+            <span class="n">beatmap_id</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_beatmap_id_func</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">beatmap_hash</span><span class="p">)</span>
+            <span class="nb">super</span><span class="p">(</span><span class="n">ReplayDataOSR</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="vm">__class__</span><span class="p">)</span><span class="o">.</span><span class="n">beatmap_id</span><span class="o">.</span><span class="n">fset</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span>
+                <span class="n">beatmap_id</span><span class="p">)</span>
+        <span class="k">return</span> <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="n">beatmap_id</span>
+
+    <span class="nd">@map_id</span><span class="o">.</span><span class="n">setter</span>
+    <span class="k">def</span> <span class="nf">map_id</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">map_id</span><span class="p">):</span>
+        <span class="nb">super</span><span class="p">(</span><span class="n">ReplayDataOSR</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="vm">__class__</span><span class="p">)</span><span class="o">.</span><span class="n">map_id</span><span class="o">.</span><span class="n">fset</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">map_id</span><span class="p">)</span>
 
 <div class="viewcode-block" id="ReplayDataOSR.can_load_api_attributes"><a class="viewcode-back" href="../../appendix.html#circleguard.loadables.ReplayDataOSR.can_load_api_attributes">[docs]</a>    <span class="k">def</span> <span class="nf">can_load_api_attributes</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="sd">"""</span>
 <span class="sd">        Whether we can load attributes that are lazy loaded and require api</span>
 <span class="sd">        calls, such as ``map_id`` or ``user_id``, if requested.</span>
 <span class="sd">        """</span>
-        <span class="k">return</span> <span class="nb">bool</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_map_id_func</span><span class="p">)</span> <span class="ow">and</span> <span class="nb">bool</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_user_id_func</span><span class="p">)</span></div>
+        <span class="k">return</span> <span class="nb">bool</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_beatmap_id_func</span><span class="p">)</span> <span class="ow">and</span> <span class="nb">bool</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_user_id_func</span><span class="p">)</span></div>
 
 <div class="viewcode-block" id="ReplayDataOSR.api_attributes_loaded"><a class="viewcode-back" href="../../appendix.html#circleguard.loadables.ReplayDataOSR.api_attributes_loaded">[docs]</a>    <span class="k">def</span> <span class="nf">api_attributes_loaded</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="sd">"""</span>
 <span class="sd">        Whether attributes that are lazy loaded and require api calls, such as</span>
 <span class="sd">        ``map_id`` or ``user_id``, have already been loaded.</span>
 <span class="sd">        """</span>
-        <span class="k">return</span> <span class="nb">bool</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_map_id</span><span class="p">)</span> <span class="ow">and</span> <span class="nb">bool</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_user_id</span><span class="p">)</span></div>
+        <span class="k">return</span> <span class="nb">bool</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_beatmap_id</span><span class="p">)</span> <span class="ow">and</span> <span class="nb">bool</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_user_id</span><span class="p">)</span></div>
 
-    <span class="nd">@map_id</span><span class="o">.</span><span class="n">setter</span>
-    <span class="k">def</span> <span class="nf">map_id</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">map_id</span><span class="p">):</span>
-        <span class="nb">super</span><span class="p">(</span><span class="n">ReplayDataOSR</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="vm">__class__</span><span class="p">)</span><span class="o">.</span><span class="n">map_id</span><span class="o">.</span><span class="n">fset</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">map_id</span><span class="p">)</span>
 
     <span class="nd">@user_id</span><span class="o">.</span><span class="n">setter</span>
     <span class="k">def</span> <span class="nf">user_id</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">user_id</span><span class="p">):</span>
@@ -1314,12 +1418,23 @@
 <span class="sd">    this replay is loaded:</span>
 
 <span class="sd">    * timestamp</span>
-<span class="sd">    * map_id</span>
+<span class="sd">    * beatmap_id</span>
 <span class="sd">    * username</span>
 <span class="sd">    * user_id</span>
 <span class="sd">    * mods</span>
 <span class="sd">    * replay_id</span>
 <span class="sd">    * beatmap_hash</span>
+<span class="sd">    * replay_hash</span>
+<span class="sd">    * count_300</span>
+<span class="sd">    * count_100</span>
+<span class="sd">    * count_50</span>
+<span class="sd">    * count_geki</span>
+<span class="sd">    * count_katu</span>
+<span class="sd">    * count_miss</span>
+<span class="sd">    * score</span>
+<span class="sd">    * max_combo</span>
+<span class="sd">    * is_perfect_combo</span>
+<span class="sd">    * life_bar_graph (currently unparsed)</span>
 <span class="sd">    * replay_data</span>
 <span class="sd">    """</span>
 
@@ -1331,7 +1446,7 @@
 
         <span class="bp">self</span><span class="o">.</span><span class="n">_user_id_func</span> <span class="o">=</span> <span class="kc">None</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_user_id</span> <span class="o">=</span> <span class="kc">None</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">_map_id_func</span> <span class="o">=</span> <span class="kc">None</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_beatmap_id_func</span> <span class="o">=</span> <span class="kc">None</span>
 
 <div class="viewcode-block" id="ReplayPath.load"><a class="viewcode-back" href="../../appendix.html#circleguard.loadables.ReplayPath.load">[docs]</a>    <span class="k">def</span> <span class="nf">load</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">loader</span><span class="p">,</span> <span class="n">cache</span><span class="p">):</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">log</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="s2">"Loading ReplayPath </span><span class="si">%r</span><span class="s2">"</span><span class="p">,</span> <span class="bp">self</span><span class="p">)</span>
@@ -1378,7 +1493,7 @@
             <span class="c1"># avoid loading these lazy-loaded attributes by accessing them here,</span>
             <span class="c1"># unless they're already loaded</span>
             <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">api_attributes_loaded</span><span class="p">():</span>
-                <span class="n">api_attrs_string</span> <span class="o">=</span> <span class="p">(</span><span class="sa">f</span><span class="s2">"map_id=</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">map_id</span><span class="si">}</span><span class="s2">,"</span>
+                <span class="n">api_attrs_string</span> <span class="o">=</span> <span class="p">(</span><span class="sa">f</span><span class="s2">"beatmap_id=</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">beatmap_id</span><span class="si">}</span><span class="s2">,"</span>
                     <span class="sa">f</span><span class="s2">"user_id=</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">user_id</span><span class="si">}</span><span class="s2">,"</span><span class="p">)</span>
             <span class="k">return</span> <span class="p">(</span><span class="sa">f</span><span class="s2">"ReplayPath(path=</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">path</span><span class="si">}</span><span class="s2">,</span><span class="si">{</span><span class="n">api_attrs_string</span><span class="si">}</span><span class="s2">"</span>
                 <span class="sa">f</span><span class="s2">"mods=</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">mods</span><span class="si">}</span><span class="s2">,replay_id=</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">replay_id</span><span class="si">}</span><span class="s2">,"</span>
@@ -1389,8 +1504,8 @@
 
     <span class="k">def</span> <span class="fm">__str__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">loaded</span><span class="p">:</span>
-            <span class="k">return</span> <span class="p">(</span><span class="sa">f</span><span class="s2">"Loaded ReplayPath by </span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">username</span><span class="si">}</span><span class="s2"> on </span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">map_id</span><span class="si">}</span><span class="s2"> at"</span>
-                <span class="sa">f</span><span class="s2">" </span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">path</span><span class="si">}</span><span class="s2">"</span><span class="p">)</span>
+            <span class="k">return</span> <span class="p">(</span><span class="sa">f</span><span class="s2">"Loaded ReplayPath by </span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">username</span><span class="si">}</span><span class="s2"> on "</span>
+                <span class="sa">f</span><span class="s2">"</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">beatmap_id</span><span class="si">}</span><span class="s2"> at </span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">path</span><span class="si">}</span><span class="s2">"</span><span class="p">)</span>
         <span class="k">return</span> <span class="sa">f</span><span class="s2">"Unloaded ReplayPath at </span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">path</span><span class="si">}</span><span class="s2">"</span></div>
 
 
@@ -1416,12 +1531,23 @@
 <span class="sd">    this replay is loaded:</span>
 
 <span class="sd">    * timestamp</span>
-<span class="sd">    * map_id</span>
+<span class="sd">    * beatmap_id</span>
 <span class="sd">    * username</span>
 <span class="sd">    * user_id</span>
 <span class="sd">    * mods</span>
 <span class="sd">    * replay_id</span>
 <span class="sd">    * beatmap_hash</span>
+<span class="sd">    * replay_hash</span>
+<span class="sd">    * count_300</span>
+<span class="sd">    * count_100</span>
+<span class="sd">    * count_50</span>
+<span class="sd">    * count_geki</span>
+<span class="sd">    * count_katu</span>
+<span class="sd">    * count_miss</span>
+<span class="sd">    * score</span>
+<span class="sd">    * max_combo</span>
+<span class="sd">    * is_perfect_combo</span>
+<span class="sd">    * life_bar_graph (currently unparsed)</span>
 <span class="sd">    * replay_data</span>
 
 <span class="sd">    Examples</span>
@@ -1454,7 +1580,7 @@
         <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">loaded</span><span class="p">:</span>
             <span class="n">api_attrs_string</span> <span class="o">=</span> <span class="s2">","</span>
             <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">api_attributes_loaded</span><span class="p">():</span>
-                <span class="n">api_attrs_string</span> <span class="o">=</span> <span class="p">(</span><span class="sa">f</span><span class="s2">"map_id=</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">map_id</span><span class="si">}</span><span class="s2">,"</span>
+                <span class="n">api_attrs_string</span> <span class="o">=</span> <span class="p">(</span><span class="sa">f</span><span class="s2">"beatmap_id=</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">beatmap_id</span><span class="si">}</span><span class="s2">,"</span>
                     <span class="sa">f</span><span class="s2">"user_id=</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">user_id</span><span class="si">}</span><span class="s2">,"</span><span class="p">)</span>
             <span class="k">return</span> <span class="p">(</span><span class="sa">f</span><span class="s2">"ReplayString(len(replay_data_str)="</span>
                 <span class="sa">f</span><span class="s2">"</span><span class="si">{</span><span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">replay_data_str</span><span class="p">)</span><span class="si">}</span><span class="s2">,</span><span class="si">{</span><span class="n">api_attrs_string</span><span class="si">}</span><span class="s2">"</span>
@@ -1465,7 +1591,8 @@
 
     <span class="k">def</span> <span class="fm">__str__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">loaded</span><span class="p">:</span>
-            <span class="k">return</span> <span class="sa">f</span><span class="s2">"Loaded ReplayString by </span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">username</span><span class="si">}</span><span class="s2"> on </span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">map_id</span><span class="si">}</span><span class="s2">"</span>
+            <span class="k">return</span> <span class="p">(</span><span class="sa">f</span><span class="s2">"Loaded ReplayString by </span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">username</span><span class="si">}</span><span class="s2"> on "</span>
+                <span class="sa">f</span><span class="s2">"</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">beatmap_id</span><span class="si">}</span><span class="s2">"</span><span class="p">)</span>
         <span class="k">return</span> <span class="p">(</span><span class="sa">f</span><span class="s2">"Unloaded ReplayString with </span><span class="si">{</span><span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">replay_data_str</span><span class="p">)</span><span class="si">}</span><span class="s2"> "</span>
             <span class="s2">"chars of data"</span><span class="p">)</span></div>
 
@@ -1523,13 +1650,16 @@
 <span class="sd">    This class is intended to be instantiated from</span>
 <span class="sd">    :func:`~.ReplayCache.load_info` and should not be instantiated manually.</span>
 <span class="sd">    """</span>
-    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">user_id</span><span class="p">,</span> <span class="n">map_id</span><span class="p">,</span> <span class="n">mods</span><span class="p">,</span> <span class="n">replay_data</span><span class="p">,</span> <span class="n">replay_id</span><span class="p">):</span>
+    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">user_id</span><span class="p">,</span> <span class="n">beatmap_id</span><span class="p">,</span> <span class="n">mods</span><span class="p">,</span> <span class="n">replay_data</span><span class="p">,</span> <span class="n">replay_id</span><span class="p">):</span>
         <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="n">RatelimitWeight</span><span class="o">.</span><span class="n">NONE</span><span class="p">,</span> <span class="kc">False</span><span class="p">)</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">user_id</span> <span class="o">=</span> <span class="n">user_id</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">map_id</span> <span class="o">=</span> <span class="n">map_id</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">beatmap_id</span> <span class="o">=</span> <span class="n">beatmap_id</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">mods</span> <span class="o">=</span> <span class="n">Mod</span><span class="p">(</span><span class="n">mods</span><span class="p">)</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">replay_data</span> <span class="o">=</span> <span class="n">replay_data</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">replay_id</span> <span class="o">=</span> <span class="n">replay_id</span>
+
+        <span class="c1"># TODO remove in core 6.0.0</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">map_id</span> <span class="o">=</span> <span class="n">beatmap_id</span>
 
 <div class="viewcode-block" id="CachedReplay.load"><a class="viewcode-back" href="../../appendix.html#circleguard.loadables.CachedReplay.load">[docs]</a>    <span class="k">def</span> <span class="nf">load</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">loader</span><span class="p">,</span> <span class="n">cache</span><span class="p">):</span>
         <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">loaded</span><span class="p">:</span>

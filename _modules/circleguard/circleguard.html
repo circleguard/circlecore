@@ -5,7 +5,7 @@
     <meta name="color-scheme" content="light dark"><link rel="index" title="Index" href="../../genindex.html" /><link rel="search" title="Search" href="../../search.html" />
 
     <meta name="generator" content="sphinx-3.5.2, furo 2021.03.20.beta30"/>
-        <title>circleguard.circleguard - Circleguard v5.2.2 documentation</title>
+        <title>circleguard.circleguard - Circleguard v5.2.4 documentation</title>
       <link rel="stylesheet" href="../../_static/styles/furo.css?digest=978e1795dfe158b585dda6a8417f6411828bf3ed">
     <link rel="stylesheet" href="../../_static/pygments.css">
     <link media="(prefers-color-scheme: dark)" rel="stylesheet" href="../../_static/pygments_dark.css">
@@ -86,7 +86,7 @@
       </label>
     </div>
     <div class="header-center">
-      <a href="../../index.html"><div class="brand">Circleguard v5.2.2 documentation</div></a>
+      <a href="../../index.html"><div class="brand">Circleguard v5.2.4 documentation</div></a>
     </div>
     <div class="header-right">
       <label class="toc-overlay-icon toc-header-icon no-toc" for="__toc">
@@ -100,7 +100,7 @@
       <div class="sidebar-sticky"><a class="sidebar-brand" href="../../index.html">
   
   
-  <span class="sidebar-brand-text">Circleguard v5.2.2 documentation</span>
+  <span class="sidebar-brand-text">Circleguard v5.2.4 documentation</span>
   
 </a><form class="sidebar-search-container" method="get" action="../../search.html">
   <input class="sidebar-search" placeholder=Search name="q">
@@ -142,8 +142,7 @@
           <i class="icon"><svg><use href="#svg-toc"></use></svg></i>
         </label>
         <h1>Source code for circleguard.circleguard</h1><div class="highlight"><pre>
-<span></span><span class="kn">from</span> <span class="nn">pathlib</span> <span class="kn">import</span> <span class="n">Path</span>
-<span class="kn">import</span> <span class="nn">logging</span>
+<span></span><span class="kn">import</span> <span class="nn">logging</span>
 <span class="kn">from</span> <span class="nn">tempfile</span> <span class="kn">import</span> <span class="n">TemporaryDirectory</span>
 <span class="kn">from</span> <span class="nn">typing</span> <span class="kn">import</span> <span class="n">Iterable</span><span class="p">,</span> <span class="n">Union</span><span class="p">,</span> <span class="n">Tuple</span>
 <span class="kn">import</span> <span class="nn">weakref</span>
@@ -153,7 +152,6 @@
 <span class="kn">from</span> <span class="nn">circleguard.loader</span> <span class="kn">import</span> <span class="n">Loader</span>
 <span class="kn">from</span> <span class="nn">circleguard.investigations</span> <span class="kn">import</span> <span class="n">Investigations</span><span class="p">,</span> <span class="n">Snap</span>
 <span class="kn">from</span> <span class="nn">circleguard.judgment</span> <span class="kn">import</span> <span class="n">Judgment</span>
-<span class="kn">from</span> <span class="nn">circleguard.cacher</span> <span class="kn">import</span> <span class="n">Cacher</span>
 <span class="kn">from</span> <span class="nn">circleguard.utils</span> <span class="kn">import</span> <span class="n">convert_statistic</span><span class="p">,</span> <span class="n">check_param</span>
 <span class="kn">from</span> <span class="nn">circleguard.loadables</span> <span class="kn">import</span> <span class="p">(</span><span class="n">Map</span><span class="p">,</span> <span class="n">User</span><span class="p">,</span> <span class="n">MapUser</span><span class="p">,</span> <span class="n">ReplayMap</span><span class="p">,</span> <span class="n">ReplayID</span><span class="p">,</span>
     <span class="n">ReplayPath</span><span class="p">,</span> <span class="n">ReplayString</span><span class="p">,</span> <span class="n">ReplayDir</span><span class="p">)</span>
@@ -202,9 +200,8 @@
 <span class="sd">        :class:`slider.library.Library` and subsequently destroyed when this</span>
 <span class="sd">        :class:`~Circleguard` object is garbage collected.</span>
 <span class="sd">    loader: :class:`~circleguard.loader.Loader`</span>
-<span class="sd">        This loader will be used instead of the base loader if passed.</span>
-<span class="sd">        This must be the class itself, *not* an instantiation of it. It will be</span>
-<span class="sd">        instantiated with two args - a key and a cacher.</span>
+<span class="sd">        An instance of :class:`~circleguard.loader.Loader` or a subclass</span>
+<span class="sd">        thereof, which will be used instead of creating a loader if passed.</span>
 <span class="sd">    """</span>
     <span class="n">DEFAULT_ANGLE</span> <span class="o">=</span> <span class="mi">10</span>
     <span class="n">DEFAULT_DISTANCE</span> <span class="o">=</span> <span class="mi">8</span>
@@ -222,19 +219,14 @@
 
     <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">key</span><span class="p">,</span> <span class="n">db_path</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">slider_dir</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">loader</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> \
         <span class="n">cache</span><span class="o">=</span><span class="kc">True</span><span class="p">):</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">_cache</span> <span class="o">=</span> <span class="n">cache</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">cacher</span> <span class="o">=</span> <span class="kc">None</span>
-        <span class="k">if</span> <span class="n">db_path</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
-            <span class="c1"># resolve relative paths</span>
-            <span class="n">db_path</span> <span class="o">=</span> <span class="n">Path</span><span class="p">(</span><span class="n">db_path</span><span class="p">)</span><span class="o">.</span><span class="n">absolute</span><span class="p">()</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">cacher</span> <span class="o">=</span> <span class="n">Cacher</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_cache</span><span class="p">,</span> <span class="n">db_path</span><span class="p">)</span>
-
         <span class="bp">self</span><span class="o">.</span><span class="n">log</span> <span class="o">=</span> <span class="n">logging</span><span class="o">.</span><span class="n">getLogger</span><span class="p">(</span><span class="vm">__name__</span><span class="p">)</span>
 
         <span class="c1"># allow for people to pass their own loader implementation/subclass.</span>
         <span class="c1"># Mostly exposed for circleguard (the gui).</span>
-        <span class="n">LoaderClass</span> <span class="o">=</span> <span class="n">Loader</span> <span class="k">if</span> <span class="n">loader</span> <span class="ow">is</span> <span class="kc">None</span> <span class="k">else</span> <span class="n">loader</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">loader</span> <span class="o">=</span> <span class="n">LoaderClass</span><span class="p">(</span><span class="n">key</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">cacher</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">loader</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">loader</span> <span class="o">=</span> <span class="n">loader</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">loader</span> <span class="o">=</span> <span class="n">Loader</span><span class="p">(</span><span class="n">key</span><span class="p">,</span> <span class="n">db_path</span><span class="p">,</span> <span class="n">write_to_cache</span><span class="o">=</span><span class="n">cache</span><span class="p">)</span>
 
         <span class="k">if</span> <span class="n">slider_dir</span><span class="p">:</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">library</span> <span class="o">=</span> <span class="n">Library</span><span class="p">(</span><span class="n">slider_dir</span><span class="p">)</span>
@@ -330,7 +322,7 @@
             <span class="n">mods_unknown</span><span class="p">)</span></div>
 
 
-<div class="viewcode-block" id="Circleguard.ur"><a class="viewcode-back" href="../../appendix.html#circleguard.circleguard.Circleguard.ur">[docs]</a>    <span class="k">def</span> <span class="nf">ur</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">replay</span><span class="p">,</span> <span class="n">cv</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">beatmap</span><span class="o">=</span><span class="kc">None</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">float</span><span class="p">:</span>
+<div class="viewcode-block" id="Circleguard.ur"><a class="viewcode-back" href="../../appendix.html#circleguard.circleguard.Circleguard.ur">[docs]</a>    <span class="k">def</span> <span class="nf">ur</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">replay</span><span class="p">,</span> <span class="n">cv</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">beatmap</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">adjusted</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">float</span><span class="p">:</span>
         <span class="sd">"""</span>
 <span class="sd">        The unstable rate of ``replay``.</span>
 
@@ -348,6 +340,12 @@
 <span class="sd">            This parameter is provided primarily as an optimization for when you</span>
 <span class="sd">            already have the replay's beatmap, to avoid re-retrieving it in this</span>
 <span class="sd">            method.</span>
+<span class="sd">        adjusted: bool</span>
+<span class="sd">            Whether to calculate the "adjusted" ur. Adjusted ur is the same as</span>
+<span class="sd">            ur, but with non-300 judgments taken out of consideration. Often</span>
+<span class="sd">            100s or 50s are a result of late hits for relax hacks, and by</span>
+<span class="sd">            discounting them we can get a potentially more accurate insight</span>
+<span class="sd">            into a replay's ur.</span>
 
 <span class="sd">        Returns</span>
 <span class="sd">        -------</span>
@@ -361,7 +359,7 @@
             <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">"The ur of a replay that does not know what map "</span>
                 <span class="s2">"it was set on cannot be calculated"</span><span class="p">)</span>
 
-        <span class="n">ur</span> <span class="o">=</span> <span class="n">Investigations</span><span class="o">.</span><span class="n">ur</span><span class="p">(</span><span class="n">replay</span><span class="p">,</span> <span class="n">beatmap</span><span class="p">)</span>
+        <span class="n">ur</span> <span class="o">=</span> <span class="n">Investigations</span><span class="o">.</span><span class="n">ur</span><span class="p">(</span><span class="n">replay</span><span class="p">,</span> <span class="n">beatmap</span><span class="p">,</span> <span class="n">adjusted</span><span class="p">)</span>
         <span class="k">if</span> <span class="n">cv</span><span class="p">:</span>
             <span class="n">ur</span> <span class="o">=</span> <span class="n">convert_statistic</span><span class="p">(</span><span class="n">ur</span><span class="p">,</span> <span class="n">replay</span><span class="o">.</span><span class="n">mods</span><span class="p">,</span> <span class="n">to</span><span class="o">=</span><span class="s2">"cv"</span><span class="p">)</span>
 
@@ -556,7 +554,7 @@
 
 <span class="sd">        Returns</span>
 <span class="sd">        -------</span>
-<span class="sd">        list[:class:`~circleguard.investigator.Judgment`]</span>
+<span class="sd">        list[:class:`~circleguard.judgment.Judgment`]</span>
 <span class="sd">            The hits of the replay.</span>
 
 <span class="sd">        Notes</span>
@@ -598,7 +596,7 @@
 
 <span class="sd">        Returns</span>
 <span class="sd">        -------</span>
-<span class="sd">        list[:class:`~circleguard.investigator.Judgment`]</span>
+<span class="sd">        list[:class:`~circleguard.judgment.Judgment`]</span>
 <span class="sd">            The judgments of the replay.</span>
 <span class="sd">        """</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">load</span><span class="p">(</span><span class="n">replay</span><span class="p">)</span>
@@ -688,10 +686,13 @@
 <span class="sd">        """</span>
         <span class="n">replay_container</span><span class="o">.</span><span class="n">load_info</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">loader</span><span class="p">)</span></div>
 
-    <span class="k">def</span> <span class="nf">map_available</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">replay</span><span class="p">):</span>
-        <span class="k">return</span> <span class="n">replay</span><span class="o">.</span><span class="n">map_available</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">library</span><span class="p">)</span>
+    <span class="k">def</span> <span class="nf">beatmap_available</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">replay</span><span class="p">):</span>
+        <span class="k">return</span> <span class="n">replay</span><span class="o">.</span><span class="n">beatmap_available</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">library</span><span class="p">)</span>
 
-<div class="viewcode-block" id="Circleguard.Map"><a class="viewcode-back" href="../../appendix.html#circleguard.circleguard.Circleguard.Map">[docs]</a>    <span class="k">def</span> <span class="nf">Map</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">map_id</span><span class="p">,</span> <span class="n">span</span><span class="p">,</span> <span class="n">mods</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">cache</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">load</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Map</span><span class="p">:</span>
+    <span class="c1"># TODO remove in core 6.0.0</span>
+    <span class="n">map_available</span> <span class="o">=</span> <span class="n">beatmap_available</span>
+
+<div class="viewcode-block" id="Circleguard.Map"><a class="viewcode-back" href="../../appendix.html#circleguard.circleguard.Circleguard.Map">[docs]</a>    <span class="k">def</span> <span class="nf">Map</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">beatmap_id</span><span class="p">,</span> <span class="n">span</span><span class="p">,</span> <span class="n">mods</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">cache</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">load</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Map</span><span class="p">:</span>
         <span class="sd">"""</span>
 <span class="sd">        Returns a new, info-loaded :class:`~circleguard.loadables.Map`.</span>
 
@@ -715,7 +716,7 @@
 <span class="sd">        &gt;&gt;&gt; for replay in m:</span>
 <span class="sd">        &gt;&gt;&gt;     ...</span>
 <span class="sd">        """</span>
-        <span class="n">m</span> <span class="o">=</span> <span class="n">Map</span><span class="p">(</span><span class="n">map_id</span><span class="p">,</span> <span class="n">span</span><span class="p">,</span> <span class="n">mods</span><span class="p">,</span> <span class="n">cache</span><span class="p">)</span>
+        <span class="n">m</span> <span class="o">=</span> <span class="n">Map</span><span class="p">(</span><span class="n">beatmap_id</span><span class="p">,</span> <span class="n">span</span><span class="p">,</span> <span class="n">mods</span><span class="p">,</span> <span class="n">cache</span><span class="p">)</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">load</span><span class="p">(</span><span class="n">m</span><span class="p">)</span> <span class="k">if</span> <span class="n">load</span> <span class="k">else</span> <span class="bp">self</span><span class="o">.</span><span class="n">load_info</span><span class="p">(</span><span class="n">m</span><span class="p">)</span>
         <span class="k">return</span> <span class="n">m</span></div>
 
@@ -748,7 +749,7 @@
         <span class="bp">self</span><span class="o">.</span><span class="n">load</span><span class="p">(</span><span class="n">u</span><span class="p">)</span> <span class="k">if</span> <span class="n">load</span> <span class="k">else</span> <span class="bp">self</span><span class="o">.</span><span class="n">load_info</span><span class="p">(</span><span class="n">u</span><span class="p">)</span>
         <span class="k">return</span> <span class="n">u</span></div>
 
-<div class="viewcode-block" id="Circleguard.MapUser"><a class="viewcode-back" href="../../appendix.html#circleguard.circleguard.Circleguard.MapUser">[docs]</a>    <span class="k">def</span> <span class="nf">MapUser</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">map_id</span><span class="p">,</span> <span class="n">user_id</span><span class="p">,</span> <span class="n">span</span><span class="o">=</span><span class="n">Loader</span><span class="o">.</span><span class="n">MAX_MAP_SPAN</span><span class="p">,</span> <span class="n">cache</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+<div class="viewcode-block" id="Circleguard.MapUser"><a class="viewcode-back" href="../../appendix.html#circleguard.circleguard.Circleguard.MapUser">[docs]</a>    <span class="k">def</span> <span class="nf">MapUser</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">beatmap_id</span><span class="p">,</span> <span class="n">user_id</span><span class="p">,</span> <span class="n">span</span><span class="o">=</span><span class="n">Loader</span><span class="o">.</span><span class="n">MAX_MAP_SPAN</span><span class="p">,</span> <span class="n">cache</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
         <span class="n">available_only</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">load</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">MapUser</span><span class="p">:</span>
         <span class="sd">"""</span>
 <span class="sd">        Returns a new, info-loaded :class:`~circleguard.loadables.MapUser`.</span>
@@ -773,7 +774,7 @@
 <span class="sd">        &gt;&gt;&gt; for replay in mu:</span>
 <span class="sd">        &gt;&gt;&gt;     ...</span>
 <span class="sd">        """</span>
-        <span class="n">mu</span> <span class="o">=</span> <span class="n">MapUser</span><span class="p">(</span><span class="n">map_id</span><span class="p">,</span> <span class="n">user_id</span><span class="p">,</span> <span class="n">span</span><span class="p">,</span> <span class="n">cache</span><span class="p">,</span> <span class="n">available_only</span><span class="p">)</span>
+        <span class="n">mu</span> <span class="o">=</span> <span class="n">MapUser</span><span class="p">(</span><span class="n">beatmap_id</span><span class="p">,</span> <span class="n">user_id</span><span class="p">,</span> <span class="n">span</span><span class="p">,</span> <span class="n">cache</span><span class="p">,</span> <span class="n">available_only</span><span class="p">)</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">load</span><span class="p">(</span><span class="n">mu</span><span class="p">)</span> <span class="k">if</span> <span class="n">load</span> <span class="k">else</span> <span class="bp">self</span><span class="o">.</span><span class="n">load_info</span><span class="p">(</span><span class="n">mu</span><span class="p">)</span>
         <span class="k">return</span> <span class="n">mu</span></div>
 
@@ -806,7 +807,7 @@
         <span class="k">return</span> <span class="n">r_dir</span></div>
 
 
-<div class="viewcode-block" id="Circleguard.ReplayMap"><a class="viewcode-back" href="../../appendix.html#circleguard.circleguard.Circleguard.ReplayMap">[docs]</a>    <span class="k">def</span> <span class="nf">ReplayMap</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">map_id</span><span class="p">,</span> <span class="n">user_id</span><span class="p">,</span> <span class="n">mods</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">cache</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">info</span><span class="o">=</span><span class="kc">None</span><span class="p">)</span> \
+<div class="viewcode-block" id="Circleguard.ReplayMap"><a class="viewcode-back" href="../../appendix.html#circleguard.circleguard.Circleguard.ReplayMap">[docs]</a>    <span class="k">def</span> <span class="nf">ReplayMap</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">beatmap_id</span><span class="p">,</span> <span class="n">user_id</span><span class="p">,</span> <span class="n">mods</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">cache</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">info</span><span class="o">=</span><span class="kc">None</span><span class="p">)</span> \
         <span class="o">-&gt;</span> <span class="n">ReplayMap</span><span class="p">:</span>
         <span class="sd">"""</span>
 <span class="sd">        Returns a new, loaded :class:`~circleguard.loadables.ReplayMap`.</span>
@@ -817,7 +818,7 @@
 <span class="sd">        ``ReplayMap`` and load it immediately. Loading can be an expensive</span>
 <span class="sd">        operation which is why this does not occur by default.</span>
 <span class="sd">        """</span>
-        <span class="n">r</span> <span class="o">=</span> <span class="n">ReplayMap</span><span class="p">(</span><span class="n">map_id</span><span class="p">,</span> <span class="n">user_id</span><span class="p">,</span> <span class="n">mods</span><span class="p">,</span> <span class="n">cache</span><span class="p">,</span> <span class="n">info</span><span class="p">)</span>
+        <span class="n">r</span> <span class="o">=</span> <span class="n">ReplayMap</span><span class="p">(</span><span class="n">beatmap_id</span><span class="p">,</span> <span class="n">user_id</span><span class="p">,</span> <span class="n">mods</span><span class="p">,</span> <span class="n">cache</span><span class="p">,</span> <span class="n">info</span><span class="p">)</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">load</span><span class="p">(</span><span class="n">r</span><span class="p">)</span>
         <span class="k">return</span> <span class="n">r</span></div>
 
@@ -880,12 +881,11 @@
 
     <span class="nd">@property</span>
     <span class="k">def</span> <span class="nf">cache</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_cache</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">loader</span><span class="o">.</span><span class="n">write_to_cache</span>
 
     <span class="nd">@cache</span><span class="o">.</span><span class="n">setter</span>
     <span class="k">def</span> <span class="nf">cache</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">cache</span><span class="p">):</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">_cache</span> <span class="o">=</span> <span class="n">cache</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">cacher</span><span class="o">.</span><span class="n">should_cache</span> <span class="o">=</span> <span class="n">cache</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">loader</span><span class="o">.</span><span class="n">write_to_cache</span> <span class="o">=</span> <span class="n">cache</span>
 
     <span class="nd">@classmethod</span>
     <span class="k">def</span> <span class="nf">_cleanup</span><span class="p">(</span><span class="bp">cls</span><span class="p">,</span> <span class="n">library</span><span class="p">):</span>
@@ -916,23 +916,19 @@
 <span class="sd">        :class:`slider.library.Library` and subsequently destroyed when this</span>
 <span class="sd">        :class:`~Circleguard` object is garbage collected.</span>
 <span class="sd">    loader: :class:`~circleguard.loader.Loader`</span>
-<span class="sd">        This loader will be used instead of the base loader if passed.</span>
-<span class="sd">        This must be the class itself, *not* an instantiation of it. It will be</span>
-<span class="sd">        instantiated with two args - a key and a cacher.</span>
+<span class="sd">        An instance of :class:`~circleguard.loader.Loader` or a subclass</span>
+<span class="sd">        thereof, which will be used instead of creating a loader if passed.</span>
 <span class="sd">    """</span>
 
-    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">db_path</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">slider_dir</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">loader</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">cache</span><span class="o">=</span><span class="kc">True</span><span class="p">):</span>
-        <span class="c1"># it's sufficient but not particularly rigorous to pass an invalid api</span>
-        <span class="c1"># key here, and might interfere with future improvements (such as</span>
-        <span class="c1"># checking the validity of the api key automatically on init).</span>
-        <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="s2">"INVALID_KEY"</span><span class="p">,</span> <span class="n">db_path</span><span class="p">,</span> <span class="n">slider_dir</span><span class="p">,</span> <span class="n">loader</span><span class="p">,</span> <span class="n">cache</span><span class="p">)</span>
-        <span class="c1"># TODO this is a really terrible way of doing this, we have no way to</span>
-        <span class="c1"># influence the creation of a loader in Circleguard.__init__ (related</span>
-        <span class="c1"># to the above comment), but we need our loader to be null in this</span>
-        <span class="c1"># class. Not sure how to make it more flexible. Getting rid of the</span>
-        <span class="c1"># cacher-loader relationship might be a start, so we can then pass</span>
-        <span class="c1"># entire loader instances to Circleguard instead of just a class.</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">loader</span> <span class="o">=</span> <span class="kc">None</span></div>
+    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">db_path</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">slider_dir</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">cache</span><span class="o">=</span><span class="kc">True</span><span class="p">):</span>
+        <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="s2">"INVALID_KEY"</span><span class="p">,</span> <span class="n">db_path</span><span class="p">,</span> <span class="n">slider_dir</span><span class="p">,</span> <span class="n">cache</span><span class="o">=</span><span class="n">cache</span><span class="p">)</span>
+
+<div class="viewcode-block" id="KeylessCircleguard.load"><a class="viewcode-back" href="../../appendix.html#circleguard.circleguard.KeylessCircleguard.load">[docs]</a>    <span class="k">def</span> <span class="nf">load</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">loadable</span><span class="p">):</span>
+        <span class="n">loadable</span><span class="o">.</span><span class="n">load</span><span class="p">(</span><span class="kc">None</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">cache</span><span class="p">)</span></div>
+
+<div class="viewcode-block" id="KeylessCircleguard.load_info"><a class="viewcode-back" href="../../appendix.html#circleguard.circleguard.KeylessCircleguard.load_info">[docs]</a>    <span class="k">def</span> <span class="nf">load_info</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">replay_container</span><span class="p">):</span>
+        <span class="n">replay_container</span><span class="o">.</span><span class="n">load_info</span><span class="p">(</span><span class="kc">None</span><span class="p">)</span></div></div>
+
 
 <div class="viewcode-block" id="set_options"><a class="viewcode-back" href="../../appendix.html#circleguard.circleguard.set_options">[docs]</a><span class="k">def</span> <span class="nf">set_options</span><span class="p">(</span><span class="o">*</span><span class="p">,</span> <span class="n">loglevel</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
     <span class="sd">"""</span>

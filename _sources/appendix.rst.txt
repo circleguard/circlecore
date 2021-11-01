@@ -11,11 +11,6 @@ Circleguard
 .. automodule:: circleguard.circleguard
    :members:
 
-Cacher
-------
-.. automodule:: circleguard.cacher
-   :members:
-
 Game Version
 ------------
 .. automodule:: circleguard.game_version
@@ -29,6 +24,11 @@ Hit Objects
 Investigations
 --------------
 .. automodule:: circleguard.investigations
+   :members:
+
+Investigations
+--------------
+.. automodule:: circleguard.judgment
    :members:
 
 Loadables

@@ -4,7 +4,7 @@ Circlecore
 Circlecore is a utilities library for osu!. Features include:
 
 * Unstable Rate calculation
-* Judgments calculation (classifying all hitobjects into misses, hit300s, hit100s, hit50s, or sliderbreaks
+* Judgments calculation (classifying all hitobjects into misses, hit300s, hit100s, hit50s, or sliderbreaks)
 * Similarity calculation between two replays, for replay stealing detection
 * Frametime calculation, for timewarp detection
 * Jerky, suspicious movement detection (called Snaps)
