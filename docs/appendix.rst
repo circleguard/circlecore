@@ -11,11 +11,6 @@ Circleguard
 .. automodule:: circleguard.circleguard
    :members:
 
-Cacher
-------
-.. automodule:: circleguard.cacher
-   :members:
-
 Game Version
 ------------
 .. automodule:: circleguard.game_version
