@@ -31,6 +31,11 @@ Investigations
 .. automodule:: circleguard.investigations
    :members:
 
+Investigations
+--------------
+.. automodule:: circleguard.judgment
+   :members:
+
 Loadables
 ---------
 .. automodule:: circleguard.loadables
