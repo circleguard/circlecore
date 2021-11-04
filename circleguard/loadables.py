@@ -275,8 +275,7 @@ class Map(ReplayContainer):
         if self.info_loaded:
             return
         if not loader:
-            raise ValueError("A Map cannot be info loaded loaded without api "
-                "access")
+            raise ValueError("A Map cannot be info loaded without api access")
         for score in loader.replay_info(self.beatmap_id, span=self.span,
             mods=self.mods):
             r = ReplayMap(score.beatmap_id, score.user_id, score.mods,
@@ -340,8 +339,7 @@ class User(ReplayContainer):
         if self.info_loaded:
             return
         if not loader:
-            raise ValueError("A User cannot be info loaded loaded without api "
-                "access")
+            raise ValueError("A User cannot be info loaded without api access")
         # thanks to api v1 weirdness, depending on the endpoint we use to
         # retrieve the Score model, the username may or may not be present (to
         # be explicit, `get_scores` includes the username, `get_user_best` does
@@ -413,7 +411,7 @@ class MapUser(ReplayContainer):
         if self.info_loaded:
             return
         if not loader:
-            raise ValueError("A MapUser cannot be info loaded loaded without "
+            raise ValueError("A MapUser cannot be info loaded without "
                 "api access")
         for info in loader.replay_info(self.beatmap_id, span=self.span,
             user_id=self.user_id, limit=False):
