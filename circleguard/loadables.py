@@ -342,9 +342,23 @@ class User(ReplayContainer):
         if not loader:
             raise ValueError("A User cannot be info loaded loaded without api "
                 "access")
+        # thanks to api v1 weirdness, depending on the endpoint we use to
+        # retrieve the Score model, the username may or may not be present (to
+        # be explicit, `get_scores` includes the username, `get_user_best` does
+        # not). We guarantee that this attribute is present for `ReplayMap`s
+        # but when we pass an override `info` to it here it won't retrieve
+        # the username, meaning it gets stuck with a `None` username. To fix
+        # this just manually retrieve the username once here and set
+        # `info.username` manually.
+        # Ideally this attribute would be lazy-loaded in some form so this call
+        # isn't hit until required, but doing so would require more complexity
+        # than I'm comfortable with for such minor savings (one api call per
+        # unique user, since `loader.username` is @lru_cached).
+        username = loader.username(self.user_id)
         for info in loader.get_user_best(self.user_id, self.span, self.mods):
             if self.available_only and not info.replay_available:
                 continue
+            info.username = username
             r = ReplayMap(info.beatmap_id, info.user_id, info.mods, self.cache,
                 info=info)
             self.replays.append(r)
