@@ -7,7 +7,7 @@ from slider import Library, Beatmap
 
 from circleguard.loader import Loader
 from circleguard.investigations import Investigations, Snap
-from circleguard.judgment import Judgment
+from circleguard.judgment import Judgment, Hit
 from circleguard.utils import convert_statistic, check_param
 from circleguard.loadables import (Map, User, MapUser, ReplayMap, ReplayID,
     ReplayPath, ReplayString, ReplayDir)
@@ -382,7 +382,7 @@ class Circleguard:
             frametimes = convert_statistic(frametimes, mods, to="cv")
         return frametimes
 
-    def hits(self, replay, within=None, beatmap=None) -> Iterable[Judgment]:
+    def hits(self, replay, within=None, beatmap=None) -> Iterable[Hit]:
         """
         The locations in the replay where a hitobject is hit.
 
