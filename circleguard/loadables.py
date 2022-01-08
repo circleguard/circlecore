@@ -638,6 +638,7 @@ class Replay(Loadable):
         self.max_combo        = None
         self.is_perfect_combo = None
         self.life_bar_graph   = None
+        self.rng_seed         = None
         self.pp               = None
 
         # These attributes remain ``None``` when replay is unloaded, or loaded
@@ -1161,37 +1162,37 @@ class ReplayDataOSR(Replay):
         """
         self.game_version = GameVersion(replay.game_version, concrete=True)
         self.beatmap_hash = replay.beatmap_hash
-        self.username = replay.player_name
+        self.username = replay.username
         self.replay_hash = replay.replay_hash
-        self.count_300 = replay.number_300s
-        self.count_100 = replay.number_100s
-        self.count_50 = replay.number_50s
-        self.count_geki = replay.gekis
-        self.count_katu = replay.katus
-        self.count_miss = replay.misses
+        self.count_300 = replay.count_300
+        self.count_100 = replay.count_100
+        self.count_50 = replay.count_50
+        self.count_geki = replay.count_geki
+        self.count_katu = replay.count_katu
+        self.count_miss = replay.count_miss
         self.score = replay.score
         self.max_combo = replay.max_combo
-        self.is_perfect_combo = replay.is_perfect_combo
-        self.mods = Mod(int(replay.mod_combination))
+        self.is_perfect_combo = replay.perfect
+        self.mods = Mod(replay.mods.value)
         self.life_bar_graph = replay.life_bar_graph
         self.timestamp = replay.timestamp
         self.replay_id = replay.replay_id
+        self.rng_seed = replay.rng_seed
 
         if loader:
             self._user_id_func = loader.user_id
             self._beatmap_id_func = loader.beatmap_id
 
-        self._process_replay_data(replay.play_data)
+        self._process_replay_data(replay.replay_data)
         self.loaded = True
         self.log.log(TRACE, "Finished loading %s", self)
 
     def load_from_file(self, path, loader, cache):
-        replay = osrparse.parse_replay_file(path)
+        replay = osrparse.Replay.from_path(path)
         self.load_from_osrparse_replay(replay, loader, cache)
 
     def load_from_string(self, replay_data_str, loader, cache):
-        replay = osrparse.parse_replay(replay_data_str,
-            pure_lzma=False)
+        replay = osrparse.Replay.from_string(replay_data_str)
         self.load_from_osrparse_replay(replay, loader, cache)
 
 
@@ -1533,8 +1534,8 @@ class CachedReplay(Replay):
         if self.loaded:
             return
         decompressed = wtc.decompress(self.replay_data)
-        parsed = osrparse.parse_replay(decompressed, pure_lzma=True)
-        self._process_replay_data(parsed.play_data)
+        replay_data = osrparse.parse_replay_data(decompressed, decoded=True)
+        self._process_replay_data(replay_data)
         self.loaded = True
 
     def __eq__(self, other):

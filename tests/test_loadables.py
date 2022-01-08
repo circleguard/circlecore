@@ -1,4 +1,4 @@
-from datetime import datetime
+from datetime import datetime, timezone
 
 from circleguard import (ReplayMap, ReplayPath, RatelimitWeight, Map, User,
     MapUser, Mod, NoInfoAvailableException, ReplayString)
@@ -30,7 +30,8 @@ class TestReplays(CGTestCase):
         self.assertEqual(r.max_combo, 186)
         self.assertTrue(r.is_perfect_combo)
         self.assertEqual(r.life_bar_graph, "")
-        self.assertEqual(r.timestamp, datetime(2015, 12, 16, 19, 40, 39))
+        self.assertEqual(r.timestamp, datetime(2015, 12, 16, 19, 40, 39,
+            tzinfo=timezone.utc))
 
     def test_loading_replaymap(self):
         # Toy HDHR score on Pretender
@@ -133,12 +134,12 @@ class TestUser(CGTestCase):
     def test_user_slice(self):
         # sanity check (user id better be what we put in)
         self.assertEqual(self.user[0].user_id, 124493)
-        # 2nd (Everything will Freeze)
-        self.assertEqual(self.user[1].map_id, 555797)
-        # 1st, 2nd, and 3rd (FDFD, Everything will Freeze, and Remote Control)
-        self.assertListEqual([r.map_id for r in self.user[0:3]], [129891, 555797, 774965])
-        # 1st and 3rd (FDFD and Remote Control)
-        self.assertListEqual([r.map_id for r in self.user[0:3:2]], [129891, 774965])
+        # 2nd (Remote Control)
+        self.assertEqual(self.user[1].map_id, 774965)
+        # 1st, 2nd, and 3rd (FDFD, Remote Control, and Glorious Crown)
+        self.assertListEqual([r.map_id for r in self.user[0:3]], [129891, 774965, 1181761])
+        # 1st and 3rd (FDFD and Glorious Crown)
+        self.assertListEqual([r.map_id for r in self.user[0:3:2]], [129891, 1181761])
 
     def test_no_replays_does_not_raise(self):
         u = User(12092800, "1-2", Mod.FL + Mod.EZ)
