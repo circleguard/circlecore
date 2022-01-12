@@ -37,7 +37,7 @@ setup(
     download_url = "https://github.com/circleguard/circlecore/tarball/v" + VERSION,
     packages=find_packages(),
     install_requires=[
-        "osrparse~=5.0",
+        "osrparse~=6.0",
         "ossapi~=2.1",
         "wtc==1.2.1",
         "numpy",
