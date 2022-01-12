@@ -29,7 +29,7 @@ class TestReplays(CGTestCase):
         self.assertEqual(r.score, 1083482)
         self.assertEqual(r.max_combo, 186)
         self.assertTrue(r.is_perfect_combo)
-        self.assertEqual(r.life_bar_graph, "")
+        self.assertEqual(r.life_bar_graph, None)
         self.assertEqual(r.timestamp, datetime(2015, 12, 16, 19, 40, 39,
             tzinfo=timezone.utc))
 
