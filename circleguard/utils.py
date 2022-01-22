@@ -207,8 +207,13 @@ def hitwindow(OD):
 
 def hitwindows(OD):
     hitwindow_50 = hitwindow(OD)
-    hitwindow_100 = (280 - 16 * OD) / 2
-    hitwindow_300 = (160 - 12 * OD) / 2
+    # not entirely sure these int() casts are appropriate, but it does seem to
+    # fix some 100s being shown as 300 instead, though it doesn't fix others
+    # Test replays:
+    # * https://osu.ppy.sh/scores/osu/3921749955
+    # * https://osu.ppy.sh/scores/osu/3924513207
+    hitwindow_100 = int((280 - 16 * OD) / 2)
+    hitwindow_300 = int((160 - 12 * OD) / 2)
 
     return (hitwindow_50, hitwindow_100, hitwindow_300)
 
