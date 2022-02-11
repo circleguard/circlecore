@@ -186,11 +186,11 @@ class Loader:
             # else, the empty response is ok.
 
         if span:
-            # Remove indices that would error when indexing ``response``.
-            # we index at [i-1], so use <= instead of <
-            _span = {x for x in span if x <= len(scores)}
-            # filter out anything not in our span
-            scores = [scores[i-1] for i in _span]
+            # important: if we iterated over ``span`` instead, we would change
+            # the order of the scores returned, since ``Span`` is an (unordered)
+            # set. Iterate over the scores instead, which have a guaranteed
+            # order.
+            scores = [score for (i, score) in enumerate(scores, 1) if i in span]
 
         # limit only applies if user_id was set
         return scores[0] if (limit and user_id) else scores
