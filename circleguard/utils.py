@@ -220,7 +220,7 @@ def hitradius(CS):
     return np.float32(64 * ((1.0 - np.float32(0.7) * (float(np.float32(CS)) - 5) / 5)) / 2) * np.float32(1.00041)
 
 
-def GetQuartiles(arr):
+def get_quartiles(arr):
     """
     Getting the quartiles in order to use Tukeys method to eliminate the outliers in hits
 
@@ -229,17 +229,18 @@ def GetQuartiles(arr):
     arr = np.sort(arr)
     mid = len(arr)//2
     if(len(arr)%2 == 0):
-        Q1 = np.median(arr[:mid])
-        Q3 = np.median(arr[mid:])
+        q1 = np.median(arr[:mid])
+        q3 = np.median(arr[mid:])
     else:
-        Q1 = np.median(arr[:mid])
-        Q3 = np.median(arr[mid+1:])
-    return Q1,Q3
+        q1 = np.median(arr[:mid])
+        q3 = np.median(arr[mid+1:])
+    return q1,q3
     
-def EliminateOutliers(arr, bias = 1.5):
+def eliminate_outliers(arr, bias = 1.5):
     """
     Starting function to eliminate outliers in hits.
-    This function gets rid of super late or early hits in order to represent UR a bit better in order to determine on how far spread the hits are  
+    This function gets rid of super late or early hits in order to represent UR a bit better 
+    in order to determine on how spread the majority of hits are   
 
     Parameters
     ----------
@@ -249,11 +250,11 @@ def EliminateOutliers(arr, bias = 1.5):
         How high the bias should be (standard is 1.5)
 
     """
-    q1,q3 = GetQuartiles(arr)
+    q1,q3 = get_quartiles(arr)
     iqr = q3 - q1
-    lowerLimit = q1 - bias*iqr
-    upperLimit = q3 + bias*iqr
-    return filter(lambda x: (x > lowerLimit and x < upperLimit),arr)
+    lower_limit = q1 - bias*iqr
+    upper_limit = q3 + bias*iqr
+    return [x for x in arr if lower_limit < x < upper_limit]
 
 
 TRACE = 5
