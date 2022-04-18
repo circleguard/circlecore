@@ -5,8 +5,7 @@ import cProfile
 from pstats import Stats
 
 from circleguard import Circleguard, ReplayPath
-# pylint has trouble with files named "utils" apparently
-from utils import KEY, RES # pylint: disable=no-name-in-module
+from utils import KEY, RES
 
 cg = Circleguard(KEY)
 
