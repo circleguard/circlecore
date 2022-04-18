@@ -37,6 +37,23 @@ class Investigations:
         return np.std(diffs) * 10
 
     @staticmethod
+    def correctedur(replay, beatmap):
+        """
+        Calculates a ``corrected`` ur of ``replay`` when played against ``beatmap``.
+
+        Parameters
+        ----------
+        replay: :class:`~.Replay`
+            The replay to calculate the corrected ur of.
+        beatmap: :class:`slider.beatmap.Beatmap`
+            The beatmap to calculate ``replay``'s corrected ur with.
+        """
+        hits = Investigations.hits(replay, beatmap)
+        diffs = [hit.error() for hit in hits]
+        diffs = utils.EliminateOutliers(diffs)
+        return np.std(diffs) * 10
+
+    @staticmethod
     def snaps(replay, max_angle, min_distance, beatmap):
         """
         Calculates the angle between each set of three points (a,b,c) and finds

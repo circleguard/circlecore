@@ -220,6 +220,42 @@ def hitradius(CS):
     return np.float32(64 * ((1.0 - np.float32(0.7) * (float(np.float32(CS)) - 5) / 5)) / 2) * np.float32(1.00041)
 
 
+def GetQuartiles(arr):
+    """
+    Getting the quartiles in order to use Tukeys method to eliminate the outliers in hits
+
+    This function only gets called by 'EliminateOutliers'
+    """
+    arr = np.sort(arr)
+    mid = len(arr)//2
+    if(len(arr)%2 == 0):
+        Q1 = np.median(arr[:mid])
+        Q3 = np.median(arr[mid:])
+    else:
+        Q1 = np.median(arr[:mid])
+        Q3 = np.median(arr[mid+1:])
+    return Q1,Q3
+    
+def EliminateOutliers(arr, bias = 1.5):
+    """
+    Starting function to eliminate outliers in hits.
+    This function gets rid of super late or early hits in order to represent UR a bit better in order to determine on how far spread the hits are  
+
+    Parameters
+    ----------
+    arr: list:`numeric list`
+        List of hits
+    bias = numeric:`number`
+        How high the bias should be (standard is 1.5)
+
+    """
+    q1,q3 = GetQuartiles(arr)
+    iqr = q3 - q1
+    lowerLimit = q1 - bias*iqr
+    upperLimit = q3 + bias*iqr
+    return filter(lambda x: (x > lowerLimit and x < upperLimit),arr)
+
+
 TRACE = 5
 
 class ColoredFormatter(Formatter):
@@ -291,3 +327,6 @@ class ColoredFormatter(Formatter):
         c_record.lineno = c_lineno
 
         return Formatter.format(self, c_record)
+
+
+
