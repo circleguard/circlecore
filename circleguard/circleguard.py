@@ -1,4 +1,3 @@
-from email import utils
 import logging
 from tempfile import TemporaryDirectory
 from typing import Iterable, Union, Tuple
