@@ -218,23 +218,6 @@ def hitradius(CS):
     """
     # attempting to match stable hitradius
     return np.float32(64 * ((1.0 - np.float32(0.7) * (float(np.float32(CS)) - 5) / 5)) / 2) * np.float32(1.00041)
-
-
-def get_quartiles(arr):
-    """
-    Getting the quartiles in order to use Tukeys method to eliminate the outliers in hits
-
-    This function only gets called by 'EliminateOutliers'
-    """
-    arr = np.sort(arr)
-    mid = len(arr)//2
-    if(len(arr)%2 == 0):
-        q1 = np.median(arr[:mid])
-        q3 = np.median(arr[mid:])
-    else:
-        q1 = np.median(arr[:mid])
-        q3 = np.median(arr[mid+1:])
-    return q1,q3
     
 def eliminate_outliers(arr, bias = 1.5):
     """
@@ -250,7 +233,7 @@ def eliminate_outliers(arr, bias = 1.5):
         How high the bias should be (standard is 1.5)
 
     """
-    q1,q3 = get_quartiles(arr)
+    q3,q1 = np.percentile(arr, [75 ,25])
     iqr = q3 - q1
     lower_limit = q1 - bias*iqr
     upper_limit = q3 + bias*iqr

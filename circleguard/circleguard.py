@@ -178,7 +178,7 @@ class Circleguard:
             mods_unknown)
 
 
-    def ur(self, replay, cv=True, beatmap=None) -> float:
+    def ur(self, replay, cv=True, beatmap=None, adjusted=False) -> float:
         """
         The unstable rate of ``replay``.
 
@@ -196,6 +196,8 @@ class Circleguard:
             This parameter is provided primarily as an optimization for when you
             already have the replay's beatmap, to avoid re-retrieving it in this
             method.
+        adjusted: boolean
+            Use the adjusted ur calculation.
 
         Returns
         -------
@@ -209,7 +211,7 @@ class Circleguard:
             raise ValueError("The ur of a replay that does not know what map "
                 "it was set on cannot be calculated")
 
-        ur = Investigations.ur(replay, beatmap)
+        ur = Investigations.ur(replay, beatmap, adjusted)
         if cv:
             ur = convert_statistic(ur, replay.mods, to="cv")
 
