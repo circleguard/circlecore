@@ -219,6 +219,24 @@ def hitradius(CS):
     # attempting to match stable hitradius
     return np.float32(64 * ((1.0 - np.float32(0.7) * (float(np.float32(CS)) - 5) / 5)) / 2) * np.float32(1.00041)
 
+def filter_outliers(arr, bias=1.5):
+    """
+    Returns ``arr` with outliers removed.
+
+    Parameters
+    ----------
+    arr: list
+        List of numbers to filter outliers from.
+    bias: int
+        Points in ``arr`` which are more than ``IQR * bias`` away from the first
+        or third quartile of ``arr`` will be removed.
+    """
+    q3, q1 = np.percentile(arr, [75 ,25])
+    iqr = q3 - q1
+    lower_limit = q1 - (bias * iqr)
+    upper_limit = q3 + (bias * iqr)
+    return [x for x in arr if lower_limit < x < upper_limit]
+
 
 TRACE = 5
 
