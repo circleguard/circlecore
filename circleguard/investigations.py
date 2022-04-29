@@ -19,7 +19,7 @@ class Investigations:
     VERSION_SLIDERBUG_FIXED_CUTTING_EDGE = GameVersion(20190111, concrete=True)
 
     @staticmethod
-    def ur(replay, beatmap, adjusted=False):
+    def ur(replay, beatmap, adjusted):
         """
         Calculates the ur of ``replay`` when played against ``beatmap``.
 
@@ -30,7 +30,7 @@ class Investigations:
         beatmap: :class:`slider.beatmap.Beatmap`
             The beatmap to calculate ``replay``'s ur with.
         adjusted: boolean
-            Use the adjusted ur calculation.
+            Whether to filter outlier hits before calculating ur.
         """
         # TODO cache hits in replay so we don't recalculate hits for both ur
         # and hits / judgments?

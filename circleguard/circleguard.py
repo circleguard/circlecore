@@ -197,7 +197,9 @@ class Circleguard:
             already have the replay's beatmap, to avoid re-retrieving it in this
             method.
         adjusted: boolean
-            Use the adjusted ur calculation.
+            Whether to calculate "adjusted" ur. Adjusted ur filters outlier hits
+            before calculating ur and can result in a more accurate ur for some
+            replays.
 
         Returns
         -------
