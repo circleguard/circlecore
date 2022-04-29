@@ -37,7 +37,7 @@ class Investigations:
         hits = Investigations.hits(replay, beatmap)
         diffs = [hit.error() for hit in hits]
         if adjusted:
-            diffs = utils.eliminate_outliers(diffs)
+            diffs = utils.filter_outliers(diffs)
         return np.std(diffs) * 10
 
     @staticmethod

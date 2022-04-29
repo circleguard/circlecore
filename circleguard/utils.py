@@ -218,25 +218,23 @@ def hitradius(CS):
     """
     # attempting to match stable hitradius
     return np.float32(64 * ((1.0 - np.float32(0.7) * (float(np.float32(CS)) - 5) / 5)) / 2) * np.float32(1.00041)
-    
-def eliminate_outliers(arr, bias = 1.5):
+
+def filter_outliers(arr, bias=1.5):
     """
-    Starting function to eliminate outliers in hits.
-    This function gets rid of super late or early hits in order to represent UR a bit better 
-    in order to determine on how spread the majority of hits are   
+    Filters outliers from ``arr``
 
     Parameters
     ----------
-    arr: list:`numeric list`
-        List of hits
-    bias = numeric:`number`
-        How high the bias should be (standard is 1.5)
-
+    arr: list
+        List of numbers to filter outliers from.
+    bias: int
+        Points in ``arr`` which are more than ``IQR * bias`` away from the first
+        or third quartile of ``arr`` will be removed.
     """
-    q3,q1 = np.percentile(arr, [75 ,25])
+    q3, q1 = np.percentile(arr, [75 ,25])
     iqr = q3 - q1
-    lower_limit = q1 - bias*iqr
-    upper_limit = q3 + bias*iqr
+    lower_limit = q1 - (bias * iqr)
+    upper_limit = q3 + (bias * iqr)
     return [x for x in arr if lower_limit < x < upper_limit]
 
 
@@ -311,6 +309,3 @@ class ColoredFormatter(Formatter):
         c_record.lineno = c_lineno
 
         return Formatter.format(self, c_record)
-
-
-
