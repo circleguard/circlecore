@@ -54,7 +54,8 @@ class TestReplays(CGTestCase):
         self.assertEqual(r.score, 89927731)
         self.assertEqual(r.max_combo, 2388)
         self.assertTrue(r.is_perfect_combo)
-        self.assertEqual(r.timestamp, datetime(2019, 6, 19, 3, 22, 44))
+        self.assertEqual(r.timestamp, datetime(2019, 6, 19, 3, 22, 44,
+            tzinfo=timezone.utc))
 
     def test_no_replay_raises(self):
         # contrary to loading a Map, where we don't want to raise if the map
