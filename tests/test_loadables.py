@@ -54,7 +54,8 @@ class TestReplays(CGTestCase):
         self.assertEqual(r.score, 89927731)
         self.assertEqual(r.max_combo, 2388)
         self.assertTrue(r.is_perfect_combo)
-        self.assertEqual(r.timestamp, datetime(2019, 6, 19, 3, 22, 44))
+        self.assertEqual(r.timestamp, datetime(2019, 6, 19, 3, 22, 44,
+            tzinfo=timezone.utc))
 
     def test_no_replay_raises(self):
         # contrary to loading a Map, where we don't want to raise if the map
@@ -134,12 +135,12 @@ class TestUser(CGTestCase):
     def test_user_slice(self):
         # sanity check (user id better be what we put in)
         self.assertEqual(self.user[0].user_id, 124493)
-        # 2nd (Remote Control)
-        self.assertEqual(self.user[1].map_id, 774965)
-        # 1st, 2nd, and 3rd (FDFD, Remote Control, and Glorious Crown)
-        self.assertListEqual([r.map_id for r in self.user[0:3]], [129891, 774965, 1181761])
-        # 1st and 3rd (FDFD and Glorious Crown)
-        self.assertListEqual([r.map_id for r in self.user[0:3:2]], [129891, 1181761])
+        # 2nd (FDFD)
+        self.assertEqual(self.user[1].map_id, 129891)
+        # 1st, 2nd, and 3rd (FDED, FDFD, remote control)
+        self.assertListEqual([r.map_id for r in self.user[0:3]], [2249059, 129891, 774965])
+        # 1st and 3rd (FDEF, remote control)
+        self.assertListEqual([r.map_id for r in self.user[0:3:2]], [2249059, 774965])
 
     def test_no_replays_does_not_raise(self):
         u = User(12092800, "1-2", Mod.FL + Mod.EZ)

@@ -174,12 +174,17 @@ class TestUR(CGTestCase):
         # TODO check `legit-12.osr` as well once ur calc notelock issues are
         # dealt with, which causes us to be ~3 ur off from its actual ur
         cls.replays = [ReplayPath(RES / "legit" / f"legit-{i}.osr") for i in range(1, 12)]
-        cls.urs = [66.74, 66.56, 242.73, 115.54, 254.56, 90.88, 121.62, 163.01, 207.31, 198.79, 138.25]
+        cls.urs =          [66.74, 66.56, 242.73, 115.54, 254.56, 90.88, 121.62, 163.01, 207.31, 198.79, 138.25]
+        cls.urs_adjusted = [66.73, 63.03, 170.23, 110.76, 182.22, 88.63, 92.53,  104.43, 132.06, 160.68, 104.58]
 
     def test_ur(self):
         for i, replay in enumerate(self.replays):
             self.assertAlmostEqual(self.cg.ur(replay), self.urs[i],
                 delta=UR_DELTA, msg=f"ur differs for replay {i} ({replay})")
+            self.assertAlmostEqual(self.cg.ur(replay, adjusted=True),
+                self.urs_adjusted[i], delta=UR_DELTA,
+                msg=f"adjusted ur differs for replay {i} ({replay})")
+
 
 class TestFrametime(CGTestCase):
     @classmethod
