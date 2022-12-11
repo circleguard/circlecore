@@ -1543,3 +1543,67 @@ class CachedReplay(Replay):
 
     def __hash__(self):
         return hash(self.replay_id)
+
+class ReplayOssapi(ReplayDataOSR):
+    """
+    Converts a :module:`ossapi` replay to a circlecore :class:`~.Replay`.
+    Requires ossapi to be installed (you can't get an ossapi replay without
+    having ossapi installed anyway).
+    """
+
+    def __init__(self, ossapi_replay):
+        super().__init__(RatelimitWeight.NONE, False)
+
+        import ossapi
+        game_mode_map = {
+            ossapi.GameMode.OSU:    osrparse.GameMode.STD,
+            ossapi.GameMode.TAIKO:  osrparse.GameMode.TAIKO,
+            ossapi.GameMode.CATCH:  osrparse.GameMode.CTB,
+            ossapi.GameMode.MANIA:  osrparse.GameMode.MANIA,
+        }
+
+        # an ossapi replay is almost identical to an osrparse replay, except
+        # it has a different gamemode and mod enum.
+        self.osrparse_replay = osrparse.Replay(
+            game_mode_map[ossapi_replay.mode],
+            ossapi_replay.game_version,
+            ossapi_replay.beatmap_hash,
+            ossapi_replay.username,
+            ossapi_replay.replay_hash,
+            ossapi_replay.count_300,
+            ossapi_replay.count_100,
+            ossapi_replay.count_50,
+            ossapi_replay.count_geki,
+            ossapi_replay.count_katu,
+            ossapi_replay.count_miss,
+            ossapi_replay.score,
+            ossapi_replay.max_combo,
+            ossapi_replay.perfect,
+            osrparse.Mod(ossapi_replay.mods.value),
+            ossapi_replay.life_bar_graph,
+            ossapi_replay.timestamp,
+            ossapi_replay.replay_data,
+            ossapi_replay.replay_id,
+            ossapi_replay.rng_seed,
+        )
+
+    def load(self, loader, cache):
+        if self.loaded:
+            return
+
+        self.load_from_osrparse_replay(self.osrparse_replay, loader, cache)
+
+    def __eq__(self, loadable):
+        if not isinstance(loadable, ReplayOssapi):
+            return False
+        return self.osrparse_replay == loadable.osrparse_replay
+
+    def __hash__(self):
+        return hash(self.osrparse_replay)
+
+    def __str__(self):
+        if self.loaded:
+            return (f"Loaded ReplayOssapi by {self.username} on "
+                f"{self.beatmap_id}")
+        return (f"Unloaded ReplayOssapi by {len(self.username)} on beatmap "
+            f"hash {self.beatmap_hash}")
