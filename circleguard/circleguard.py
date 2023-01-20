@@ -73,8 +73,9 @@ class Circleguard:
     SIM_LIMIT = 17
     CORR_LIMIT = 0.99
 
-    def __init__(self, key, db_path=None, slider_dir=None, loader=None, \
-        cache=True):
+    def __init__(self, key, db_path=None, slider_dir=None, loader=None,
+        cache=True
+    ):
         self.log = logging.getLogger(__name__)
 
         # allow for people to pass their own loader implementation/subclass.
@@ -108,7 +109,7 @@ class Circleguard:
                 self.library)
 
 
-    def similarity(self, replay1, replay2, method="similarity", \
+    def similarity(self, replay1, replay2, method="similarity",
         num_chunks=DEFAULT_CHUNKS, mods_unknown="best") -> \
         Union[float, Tuple[float]]:
         """
@@ -220,7 +221,7 @@ class Circleguard:
         return ur
 
 
-    def snaps(self, replay, max_angle=DEFAULT_ANGLE, \
+    def snaps(self, replay, max_angle=DEFAULT_ANGLE,
         min_distance=DEFAULT_DISTANCE, only_on_hitobjs=True,
         beatmap=None) -> Iterable[Snap]:
         """
