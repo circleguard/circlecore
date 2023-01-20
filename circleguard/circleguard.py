@@ -382,7 +382,7 @@ class Circleguard:
                 raise ValueError("The frametimes of a replay that does not "
                     "know with what mods it was set with cannot be converted. "
                     "Pass one of ``{\"dt\", \"nm\", \"ht\"}`` for "
-                    "``mods_unknown``if you would like to provide a default "
+                    "``mods_unknown`` if you would like to provide a default "
                     "mod for conversion.")
             frametimes = convert_statistic(frametimes, mods, to="cv")
         return frametimes
