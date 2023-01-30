@@ -7,7 +7,7 @@ from slider import Library, Beatmap
 
 from circleguard.loader import Loader
 from circleguard.investigations import Investigations, Snap
-from circleguard.judgment import Judgment
+from circleguard.judgment import Judgment, Hit
 from circleguard.utils import convert_statistic, check_param
 from circleguard.loadables import (Map, User, MapUser, ReplayMap, ReplayID,
     ReplayPath, ReplayString, ReplayDir)
@@ -73,8 +73,9 @@ class Circleguard:
     SIM_LIMIT = 17
     CORR_LIMIT = 0.99
 
-    def __init__(self, key, db_path=None, slider_dir=None, loader=None, \
-        cache=True):
+    def __init__(self, key, db_path=None, slider_dir=None, loader=None,
+        cache=True
+    ):
         self.log = logging.getLogger(__name__)
 
         # allow for people to pass their own loader implementation/subclass.
@@ -108,7 +109,7 @@ class Circleguard:
                 self.library)
 
 
-    def similarity(self, replay1, replay2, method="similarity", \
+    def similarity(self, replay1, replay2, method="similarity",
         num_chunks=DEFAULT_CHUNKS, mods_unknown="best") -> \
         Union[float, Tuple[float]]:
         """
@@ -178,7 +179,7 @@ class Circleguard:
             mods_unknown)
 
 
-    def ur(self, replay, cv=True, beatmap=None) -> float:
+    def ur(self, replay, cv=True, beatmap=None, adjusted=False) -> float:
         """
         The unstable rate of ``replay``.
 
@@ -196,6 +197,10 @@ class Circleguard:
             This parameter is provided primarily as an optimization for when you
             already have the replay's beatmap, to avoid re-retrieving it in this
             method.
+        adjusted: boolean
+            Whether to calculate "adjusted" ur. Adjusted ur filters outlier hits
+            before calculating ur and can result in a more accurate ur for some
+            replays.
 
         Returns
         -------
@@ -209,14 +214,14 @@ class Circleguard:
             raise ValueError("The ur of a replay that does not know what map "
                 "it was set on cannot be calculated")
 
-        ur = Investigations.ur(replay, beatmap)
+        ur = Investigations.ur(replay, beatmap, adjusted)
         if cv:
             ur = convert_statistic(ur, replay.mods, to="cv")
 
         return ur
 
 
-    def snaps(self, replay, max_angle=DEFAULT_ANGLE, \
+    def snaps(self, replay, max_angle=DEFAULT_ANGLE,
         min_distance=DEFAULT_DISTANCE, only_on_hitobjs=True,
         beatmap=None) -> Iterable[Snap]:
         """
@@ -377,12 +382,12 @@ class Circleguard:
                 raise ValueError("The frametimes of a replay that does not "
                     "know with what mods it was set with cannot be converted. "
                     "Pass one of ``{\"dt\", \"nm\", \"ht\"}`` for "
-                    "``mods_unknown``if you would like to provide a default "
+                    "``mods_unknown`` if you would like to provide a default "
                     "mod for conversion.")
             frametimes = convert_statistic(frametimes, mods, to="cv")
         return frametimes
 
-    def hits(self, replay, within=None, beatmap=None) -> Iterable[Judgment]:
+    def hits(self, replay, within=None, beatmap=None) -> Iterable[Hit]:
         """
         The locations in the replay where a hitobject is hit.
 

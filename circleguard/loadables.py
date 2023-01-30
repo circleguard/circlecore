@@ -275,8 +275,7 @@ class Map(ReplayContainer):
         if self.info_loaded:
             return
         if not loader:
-            raise ValueError("A Map cannot be info loaded loaded without api "
-                "access")
+            raise ValueError("A Map cannot be info loaded without api access")
         for score in loader.replay_info(self.beatmap_id, span=self.span,
             mods=self.mods):
             r = ReplayMap(score.beatmap_id, score.user_id, score.mods,
@@ -340,11 +339,24 @@ class User(ReplayContainer):
         if self.info_loaded:
             return
         if not loader:
-            raise ValueError("A User cannot be info loaded loaded without api "
-                "access")
+            raise ValueError("A User cannot be info loaded without api access")
+        # thanks to api v1 weirdness, depending on the endpoint we use to
+        # retrieve the Score model, the username may or may not be present (to
+        # be explicit, `get_scores` includes the username, `get_user_best` does
+        # not). We guarantee that this attribute is present for `ReplayMap`s
+        # but when we pass an override `info` to it here it won't retrieve
+        # the username, meaning it gets stuck with a `None` username. To fix
+        # this just manually retrieve the username once here and set
+        # `info.username` manually.
+        # Ideally this attribute would be lazy-loaded in some form so this call
+        # isn't hit until required, but doing so would require more complexity
+        # than I'm comfortable with for such minor savings (one api call per
+        # unique user, since `loader.username` is @lru_cached).
+        username = loader.username(self.user_id)
         for info in loader.get_user_best(self.user_id, self.span, self.mods):
             if self.available_only and not info.replay_available:
                 continue
+            info.username = username
             r = ReplayMap(info.beatmap_id, info.user_id, info.mods, self.cache,
                 info=info)
             self.replays.append(r)
@@ -399,7 +411,7 @@ class MapUser(ReplayContainer):
         if self.info_loaded:
             return
         if not loader:
-            raise ValueError("A MapUser cannot be info loaded loaded without "
+            raise ValueError("A MapUser cannot be info loaded without "
                 "api access")
         for info in loader.replay_info(self.beatmap_id, span=self.span,
             user_id=self.user_id, limit=False):
@@ -626,6 +638,7 @@ class Replay(Loadable):
         self.max_combo        = None
         self.is_perfect_combo = None
         self.life_bar_graph   = None
+        self.rng_seed         = None
         self.pp               = None
 
         # These attributes remain ``None``` when replay is unloaded, or loaded
@@ -1149,37 +1162,37 @@ class ReplayDataOSR(Replay):
         """
         self.game_version = GameVersion(replay.game_version, concrete=True)
         self.beatmap_hash = replay.beatmap_hash
-        self.username = replay.player_name
+        self.username = replay.username
         self.replay_hash = replay.replay_hash
-        self.count_300 = replay.number_300s
-        self.count_100 = replay.number_100s
-        self.count_50 = replay.number_50s
-        self.count_geki = replay.gekis
-        self.count_katu = replay.katus
-        self.count_miss = replay.misses
+        self.count_300 = replay.count_300
+        self.count_100 = replay.count_100
+        self.count_50 = replay.count_50
+        self.count_geki = replay.count_geki
+        self.count_katu = replay.count_katu
+        self.count_miss = replay.count_miss
         self.score = replay.score
         self.max_combo = replay.max_combo
-        self.is_perfect_combo = replay.is_perfect_combo
-        self.mods = Mod(int(replay.mod_combination))
+        self.is_perfect_combo = replay.perfect
+        self.mods = Mod(replay.mods.value)
         self.life_bar_graph = replay.life_bar_graph
         self.timestamp = replay.timestamp
         self.replay_id = replay.replay_id
+        self.rng_seed = replay.rng_seed
 
         if loader:
             self._user_id_func = loader.user_id
             self._beatmap_id_func = loader.beatmap_id
 
-        self._process_replay_data(replay.play_data)
+        self._process_replay_data(replay.replay_data)
         self.loaded = True
         self.log.log(TRACE, "Finished loading %s", self)
 
     def load_from_file(self, path, loader, cache):
-        replay = osrparse.parse_replay_file(path)
+        replay = osrparse.Replay.from_path(path)
         self.load_from_osrparse_replay(replay, loader, cache)
 
     def load_from_string(self, replay_data_str, loader, cache):
-        replay = osrparse.parse_replay(replay_data_str,
-            pure_lzma=False)
+        replay = osrparse.Replay.from_string(replay_data_str)
         self.load_from_osrparse_replay(replay, loader, cache)
 
 
@@ -1521,8 +1534,8 @@ class CachedReplay(Replay):
         if self.loaded:
             return
         decompressed = wtc.decompress(self.replay_data)
-        parsed = osrparse.parse_replay(decompressed, pure_lzma=True)
-        self._process_replay_data(parsed.play_data)
+        replay_data = osrparse.parse_replay_data(decompressed, decoded=True)
+        self._process_replay_data(replay_data)
         self.loaded = True
 
     def __eq__(self, other):
@@ -1530,3 +1543,67 @@ class CachedReplay(Replay):
 
     def __hash__(self):
         return hash(self.replay_id)
+
+class ReplayOssapi(ReplayDataOSR):
+    """
+    Converts a :module:`ossapi` replay to a circlecore :class:`~.Replay`.
+    Requires ossapi to be installed (you can't get an ossapi replay without
+    having ossapi installed anyway).
+    """
+
+    def __init__(self, ossapi_replay):
+        super().__init__(RatelimitWeight.NONE, False)
+
+        import ossapi
+        game_mode_map = {
+            ossapi.GameMode.OSU:    osrparse.GameMode.STD,
+            ossapi.GameMode.TAIKO:  osrparse.GameMode.TAIKO,
+            ossapi.GameMode.CATCH:  osrparse.GameMode.CTB,
+            ossapi.GameMode.MANIA:  osrparse.GameMode.MANIA,
+        }
+
+        # an ossapi replay is almost identical to an osrparse replay, except
+        # it has a different gamemode and mod enum.
+        self.osrparse_replay = osrparse.Replay(
+            game_mode_map[ossapi_replay.mode],
+            ossapi_replay.game_version,
+            ossapi_replay.beatmap_hash,
+            ossapi_replay.username,
+            ossapi_replay.replay_hash,
+            ossapi_replay.count_300,
+            ossapi_replay.count_100,
+            ossapi_replay.count_50,
+            ossapi_replay.count_geki,
+            ossapi_replay.count_katu,
+            ossapi_replay.count_miss,
+            ossapi_replay.score,
+            ossapi_replay.max_combo,
+            ossapi_replay.perfect,
+            osrparse.Mod(ossapi_replay.mods.value),
+            ossapi_replay.life_bar_graph,
+            ossapi_replay.timestamp,
+            ossapi_replay.replay_data,
+            ossapi_replay.replay_id,
+            ossapi_replay.rng_seed,
+        )
+
+    def load(self, loader, cache):
+        if self.loaded:
+            return
+
+        self.load_from_osrparse_replay(self.osrparse_replay, loader, cache)
+
+    def __eq__(self, loadable):
+        if not isinstance(loadable, ReplayOssapi):
+            return False
+        return self.osrparse_replay == loadable.osrparse_replay
+
+    def __hash__(self):
+        return hash(self.osrparse_replay)
+
+    def __str__(self):
+        if self.loaded:
+            return (f"Loaded ReplayOssapi by {self.username} on "
+                f"{self.beatmap_id}")
+        return (f"Unloaded ReplayOssapi by {len(self.username)} on beatmap "
+            f"hash {self.beatmap_hash}")

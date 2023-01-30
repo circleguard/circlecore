@@ -104,7 +104,7 @@ to load itself, and is passed a null ``loader``, raise an error:
 .. code-block:: python
 
     if not loader:
-        raise ValueError("A Map cannot be info loaded loaded without api "
+        raise ValueError("A Map cannot be info loaded without api "
             "access")
 
 If your replay does not need api access, you may safely ignore the ``loader`` argument.

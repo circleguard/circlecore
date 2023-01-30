@@ -50,9 +50,7 @@ def check_cache(function):
         if not decompressed_lzma:
             return function(*args, **kwargs)
 
-        parsed = osrparse.parse_replay(decompressed_lzma, pure_lzma=True,
-            decompressed_lzma=True)
-        return parsed.play_data
+        return osrparse.parse_replay_data(decompressed_lzma, decompressed=True)
     return wrapper
 
 
@@ -188,11 +186,11 @@ class Loader:
             # else, the empty response is ok.
 
         if span:
-            # Remove indices that would error when indexing ``response``.
-            # we index at [i-1], so use <= instead of <
-            _span = {x for x in span if x <= len(scores)}
-            # filter out anything not in our span
-            scores = [scores[i-1] for i in _span]
+            # important: if we iterated over ``span`` instead, we would change
+            # the order of the scores returned, since ``Span`` is an (unordered)
+            # set. Iterate over the scores instead, which have a guaranteed
+            # order.
+            scores = [score for (i, score) in enumerate(scores, 1) if i in span]
 
         # limit only applies if user_id was set
         return scores[0] if (limit and user_id) else scores
@@ -310,18 +308,20 @@ class Loader:
             return None
 
         lzma_bytes = self.load_replay_data(beatmap_id, user_id, mods)
+        # TODO can this ever be `None`? shouldn't the `base64.b64decode` call in
+        # `self.load_replay_data` error on a `None` value? in other words, I
+        # don't see how the decode function could ever return `None`.
         if lzma_bytes is None:
             raise ReplayUnavailableException("The api guaranteed there "
                 "would be a replay available, but we did not receive any data.")
         try:
-            parsed_replay = osrparse.parse_replay(lzma_bytes, pure_lzma=True)
+            replay_data = osrparse.parse_replay_data(lzma_bytes, decoded=True)
         # see https://github.com/circleguard/circlecore/issues/61
         # api sometimes returns corrupt replays
         except LZMAError:
             self.log.warning("lzma from %r could not be decompressed, api "
                 "returned corrupt replay", replay_info)
             return None
-        replay_data = parsed_replay.play_data
         if cache:
             self._cache(lzma_bytes, replay_info)
         return replay_data
@@ -337,8 +337,7 @@ class Loader:
             The id of the replay to retrieve data for.
         """
         content = self.api.get_replay(score_id=replay_id)
-        lzma = base64.b64decode(content)
-        replay_data = osrparse.parse_replay(lzma, pure_lzma=True).play_data
+        replay_data = osrparse.parse_replay_data(content)
         # TODO cache the replay here, might require some restructuring/double
         # checking everything will work because we only have its id, not map
         # or user id. In fact I think our db asserts map and user id are nonull
