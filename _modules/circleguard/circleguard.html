@@ -1,61 +1,57 @@
 <!doctype html>
-<html class="no-js">
+<html class="no-js" lang="en">
   <head><meta charset="utf-8"/>
     <meta name="viewport" content="width=device-width,initial-scale=1"/>
     <meta name="color-scheme" content="light dark"><link rel="index" title="Index" href="../../genindex.html" /><link rel="search" title="Search" href="../../search.html" />
 
-    <meta name="generator" content="sphinx-3.5.2, furo 2021.03.20.beta30"/>
-        <title>circleguard.circleguard - Circleguard v5.2.4 documentation</title>
-      <link rel="stylesheet" href="../../_static/styles/furo.css?digest=978e1795dfe158b585dda6a8417f6411828bf3ed">
-    <link rel="stylesheet" href="../../_static/pygments.css">
-    <link media="(prefers-color-scheme: dark)" rel="stylesheet" href="../../_static/pygments_dark.css">
+    <!-- Generated with Sphinx 6.1.3 and Furo 2022.12.07 -->
+        <title>circleguard.circleguard - Circleguard v5.4.0 documentation</title>
+      <link rel="stylesheet" type="text/css" href="../../_static/pygments.css" />
+    <link rel="stylesheet" type="text/css" href="../../_static/styles/furo.css?digest=91d0f0d1c444bdcb17a68e833c7a53903343c195" />
+    <link rel="stylesheet" type="text/css" href="../../_static/styles/furo-extensions.css?digest=30d1aed668e5c3a91c3e3bf6a60b675221979f0e" />
+    
     
 
 
 <style>
-  :root {
+  body {
     --color-code-background: #f8f8f8;
   --color-code-foreground: black;
   
   }
-  @media (prefers-color-scheme: dark) {
-    :root {
+  @media not print {
+    body[data-theme="dark"] {
       --color-code-background: #202020;
   --color-code-foreground: #d0d0d0;
   
     }
-  }
-
-  /* For allowing end-user-specific overrides */
-  .override-light {
-    --color-code-background: #f8f8f8;
-  --color-code-foreground: black;
-  
-  }
-  .override-dark {
-    --color-code-background: #202020;
+    @media (prefers-color-scheme: dark) {
+      body:not([data-theme="light"]) {
+        --color-code-background: #202020;
   --color-code-foreground: #d0d0d0;
   
+      }
+    }
   }
-</style><link rel="stylesheet" href="../../_static/styles/furo-extensions.css?digest=d391b54134226e4196576da3bdb6dddb7e05ba2b"></head>
-  <body dir="">
+</style></head>
+  <body>
     
+    <script>
+      document.body.dataset.theme = localStorage.getItem("theme") || "auto";
+    </script>
+    
+
 <svg xmlns="http://www.w3.org/2000/svg" style="display: none;">
   <symbol id="svg-toc" viewBox="0 0 24 24">
     <title>Contents</title>
-    <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none"
-      stroke-width="1.5" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round">
-      <path stroke="none" d="M0 0h24v24H0z"/>
-      <line x1="4" y1="6" x2="20" y2="6" />
-      <line x1="10" y1="12" x2="20" y2="12" />
-      <line x1="6" y1="18" x2="20" y2="18" />
+    <svg stroke="currentColor" fill="currentColor" stroke-width="0" viewBox="0 0 1024 1024">
+      <path d="M408 442h480c4.4 0 8-3.6 8-8v-56c0-4.4-3.6-8-8-8H408c-4.4 0-8 3.6-8 8v56c0 4.4 3.6 8 8 8zm-8 204c0 4.4 3.6 8 8 8h480c4.4 0 8-3.6 8-8v-56c0-4.4-3.6-8-8-8H408c-4.4 0-8 3.6-8 8v56zm504-486H120c-4.4 0-8 3.6-8 8v56c0 4.4 3.6 8 8 8h784c4.4 0 8-3.6 8-8v-56c0-4.4-3.6-8-8-8zm0 632H120c-4.4 0-8 3.6-8 8v56c0 4.4 3.6 8 8 8h784c4.4 0 8-3.6 8-8v-56c0-4.4-3.6-8-8-8zM115.4 518.9L271.7 642c5.8 4.6 14.4.5 14.4-6.9V388.9c0-7.4-8.5-11.5-14.4-6.9L115.4 505.1a8.74 8.74 0 0 0 0 13.8z"/>
     </svg>
   </symbol>
   <symbol id="svg-menu" viewBox="0 0 24 24">
     <title>Menu</title>
-    <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none"
-      stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"
-      class="feather feather-menu">
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+      stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="feather-menu">
       <line x1="3" y1="12" x2="21" y2="12"></line>
       <line x1="3" y1="6" x2="21" y2="6"></line>
       <line x1="3" y1="18" x2="21" y2="18"></line>
@@ -63,18 +59,57 @@
   </symbol>
   <symbol id="svg-arrow-right" viewBox="0 0 24 24">
     <title>Expand</title>
-    <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none"
-      stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"
-      class="feather feather-chevron-right">
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+      stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="feather-chevron-right">
       <polyline points="9 18 15 12 9 6"></polyline>
+    </svg>
+  </symbol>
+  <symbol id="svg-sun" viewBox="0 0 24 24">
+    <title>Light mode</title>
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+      stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" class="feather-sun">
+      <circle cx="12" cy="12" r="5"></circle>
+      <line x1="12" y1="1" x2="12" y2="3"></line>
+      <line x1="12" y1="21" x2="12" y2="23"></line>
+      <line x1="4.22" y1="4.22" x2="5.64" y2="5.64"></line>
+      <line x1="18.36" y1="18.36" x2="19.78" y2="19.78"></line>
+      <line x1="1" y1="12" x2="3" y2="12"></line>
+      <line x1="21" y1="12" x2="23" y2="12"></line>
+      <line x1="4.22" y1="19.78" x2="5.64" y2="18.36"></line>
+      <line x1="18.36" y1="5.64" x2="19.78" y2="4.22"></line>
+    </svg>
+  </symbol>
+  <symbol id="svg-moon" viewBox="0 0 24 24">
+    <title>Dark mode</title>
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+      stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" class="icon-tabler-moon">
+      <path stroke="none" d="M0 0h24v24H0z" fill="none" />
+      <path d="M12 3c.132 0 .263 0 .393 0a7.5 7.5 0 0 0 7.92 12.446a9 9 0 1 1 -8.313 -12.454z" />
+    </svg>
+  </symbol>
+  <symbol id="svg-sun-half" viewBox="0 0 24 24">
+    <title>Auto light/dark mode</title>
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+      stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" class="icon-tabler-shadow">
+      <path stroke="none" d="M0 0h24v24H0z" fill="none"/>
+      <circle cx="12" cy="12" r="9" />
+      <path d="M13 12h5" />
+      <path d="M13 15h4" />
+      <path d="M13 18h1" />
+      <path d="M13 9h4" />
+      <path d="M13 6h1" />
     </svg>
   </symbol>
 </svg>
 
 <input type="checkbox" class="sidebar-toggle" name="__navigation" id="__navigation">
 <input type="checkbox" class="sidebar-toggle" name="__toc" id="__toc">
-<label class="overlay sidebar-overlay" for="__navigation"></label>
-<label class="overlay toc-overlay" for="__toc"></label>
+<label class="overlay sidebar-overlay" for="__navigation">
+  <div class="visually-hidden">Hide navigation sidebar</div>
+</label>
+<label class="overlay toc-overlay" for="__toc">
+  <div class="visually-hidden">Hide table of contents sidebar</div>
+</label>
 
 
 
@@ -82,14 +117,24 @@
   <header class="mobile-header">
     <div class="header-left">
       <label class="nav-overlay-icon" for="__navigation">
+        <div class="visually-hidden">Toggle site navigation sidebar</div>
         <i class="icon"><svg><use href="#svg-menu"></use></svg></i>
       </label>
     </div>
     <div class="header-center">
-      <a href="../../index.html"><div class="brand">Circleguard v5.2.4 documentation</div></a>
+      <a href="../../index.html"><div class="brand">Circleguard v5.4.0 documentation</div></a>
     </div>
     <div class="header-right">
+      <div class="theme-toggle-container theme-toggle-header">
+        <button class="theme-toggle">
+          <div class="visually-hidden">Toggle Light / Dark / Auto color theme</div>
+          <svg class="theme-icon-when-auto"><use href="#svg-sun-half"></use></svg>
+          <svg class="theme-icon-when-dark"><use href="#svg-moon"></use></svg>
+          <svg class="theme-icon-when-light"><use href="#svg-sun"></use></svg>
+        </button>
+      </div>
       <label class="toc-overlay-icon toc-header-icon no-toc" for="__toc">
+        <div class="visually-hidden">Toggle table of contents sidebar</div>
         <i class="icon"><svg><use href="#svg-toc"></use></svg></i>
       </label>
     </div>
@@ -100,17 +145,18 @@
       <div class="sidebar-sticky"><a class="sidebar-brand" href="../../index.html">
   
   
-  <span class="sidebar-brand-text">Circleguard v5.2.4 documentation</span>
+  <span class="sidebar-brand-text">Circleguard v5.4.0 documentation</span>
   
-</a><form class="sidebar-search-container" method="get" action="../../search.html">
-  <input class="sidebar-search" placeholder=Search name="q">
+</a><form class="sidebar-search-container" method="get" action="../../search.html" role="search">
+  <input class="sidebar-search" placeholder="Search" name="q" aria-label="Search">
   <input type="hidden" name="check_keywords" value="yes">
   <input type="hidden" name="area" value="default">
-</form><div class="sidebar-scroll"><div class="sidebar-tree">
+</form>
+<div id="searchbox"></div><div class="sidebar-scroll"><div class="sidebar-tree">
   <ul>
 <li class="toctree-l1"><a class="reference internal" href="../../index.html">Circlecore</a></li>
 </ul>
-<p class="caption"><span class="caption-text">Tutorial</span></p>
+<p class="caption" role="heading"><span class="caption-text">Tutorial</span></p>
 <ul>
 <li class="toctree-l1"><a class="reference internal" href="../../foreword.html">Foreword</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../representing-replays.html">Representing Replays</a></li>
@@ -120,28 +166,47 @@
 <li class="toctree-l1"><a class="reference internal" href="../../caching.html">Caching</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../advanced-usage.html">Advanced Usage</a></li>
 </ul>
-<p class="caption"><span class="caption-text">Contributing</span></p>
+<p class="caption" role="heading"><span class="caption-text">Contributing</span></p>
 <ul>
 <li class="toctree-l1"><a class="reference internal" href="../../contributing.html">Contributing</a></li>
 </ul>
-<p class="caption"><span class="caption-text">Appendix</span></p>
+<p class="caption" role="heading"><span class="caption-text">Appendix</span></p>
 <ul>
 <li class="toctree-l1"><a class="reference internal" href="../../appendix.html">Appendix</a></li>
 </ul>
 
 </div>
 </div>
+
       </div>
       
     </div>
   </aside>
-  <main class="main">
+  <div class="main">
     <div class="content">
-      <article role="main">
-        <label class="toc-overlay-icon toc-content-icon no-toc" for="__toc">
-          <i class="icon"><svg><use href="#svg-toc"></use></svg></i>
-        </label>
-        <h1>Source code for circleguard.circleguard</h1><div class="highlight"><pre>
+      <div class="article-container">
+        <a href="#" class="back-to-top muted-link">
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24">
+            <path d="M13 20h-2V8l-5.5 5.5-1.42-1.42L12 4.16l7.92 7.92-1.42 1.42L13 8v12z"></path>
+          </svg>
+          <span>Back to top</span>
+        </a>
+        <div class="content-icon-container">
+          <div class="theme-toggle-container theme-toggle-content">
+            <button class="theme-toggle">
+              <div class="visually-hidden">Toggle Light / Dark / Auto color theme</div>
+              <svg class="theme-icon-when-auto"><use href="#svg-sun-half"></use></svg>
+              <svg class="theme-icon-when-dark"><use href="#svg-moon"></use></svg>
+              <svg class="theme-icon-when-light"><use href="#svg-sun"></use></svg>
+            </button>
+          </div>
+          <label class="toc-overlay-icon toc-content-icon no-toc" for="__toc">
+            <div class="visually-hidden">Toggle table of contents sidebar</div>
+            <i class="icon"><svg><use href="#svg-toc"></use></svg></i>
+          </label>
+        </div>
+        <article role="main">
+          <h1>Source code for circleguard.circleguard</h1><div class="highlight"><pre>
 <span></span><span class="kn">import</span> <span class="nn">logging</span>
 <span class="kn">from</span> <span class="nn">tempfile</span> <span class="kn">import</span> <span class="n">TemporaryDirectory</span>
 <span class="kn">from</span> <span class="nn">typing</span> <span class="kn">import</span> <span class="n">Iterable</span><span class="p">,</span> <span class="n">Union</span><span class="p">,</span> <span class="n">Tuple</span>
@@ -151,7 +216,7 @@
 
 <span class="kn">from</span> <span class="nn">circleguard.loader</span> <span class="kn">import</span> <span class="n">Loader</span>
 <span class="kn">from</span> <span class="nn">circleguard.investigations</span> <span class="kn">import</span> <span class="n">Investigations</span><span class="p">,</span> <span class="n">Snap</span>
-<span class="kn">from</span> <span class="nn">circleguard.judgment</span> <span class="kn">import</span> <span class="n">Judgment</span>
+<span class="kn">from</span> <span class="nn">circleguard.judgment</span> <span class="kn">import</span> <span class="n">Judgment</span><span class="p">,</span> <span class="n">Hit</span>
 <span class="kn">from</span> <span class="nn">circleguard.utils</span> <span class="kn">import</span> <span class="n">convert_statistic</span><span class="p">,</span> <span class="n">check_param</span>
 <span class="kn">from</span> <span class="nn">circleguard.loadables</span> <span class="kn">import</span> <span class="p">(</span><span class="n">Map</span><span class="p">,</span> <span class="n">User</span><span class="p">,</span> <span class="n">MapUser</span><span class="p">,</span> <span class="n">ReplayMap</span><span class="p">,</span> <span class="n">ReplayID</span><span class="p">,</span>
     <span class="n">ReplayPath</span><span class="p">,</span> <span class="n">ReplayString</span><span class="p">,</span> <span class="n">ReplayDir</span><span class="p">)</span>
@@ -159,7 +224,7 @@
 
 
 <div class="viewcode-block" id="Circleguard"><a class="viewcode-back" href="../../appendix.html#circleguard.circleguard.Circleguard">[docs]</a><span class="k">class</span> <span class="nc">Circleguard</span><span class="p">:</span>
-    <span class="sd">"""</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Circleguard is the main entry point for using circlecore. In particular, we</span>
 <span class="sd">    provide methods to calculate various statistics about</span>
 <span class="sd">    :class:`~circleguard.loadables.Replay`\s:</span>
@@ -202,13 +267,13 @@
 <span class="sd">    loader: :class:`~circleguard.loader.Loader`</span>
 <span class="sd">        An instance of :class:`~circleguard.loader.Loader` or a subclass</span>
 <span class="sd">        thereof, which will be used instead of creating a loader if passed.</span>
-<span class="sd">    """</span>
+<span class="sd">    &quot;&quot;&quot;</span>
     <span class="n">DEFAULT_ANGLE</span> <span class="o">=</span> <span class="mi">10</span>
     <span class="n">DEFAULT_DISTANCE</span> <span class="o">=</span> <span class="mi">8</span>
     <span class="c1"># A good balance between speed and accuracy when calculating correlation.</span>
     <span class="n">DEFAULT_CHUNKS</span> <span class="o">=</span> <span class="mi">5</span>
 
-    <span class="c1"># We provide suggested "cheated thresholds" for comparisons, as those</span>
+    <span class="c1"># We provide suggested &quot;cheated thresholds&quot; for comparisons, as those</span>
     <span class="c1"># algorithms are our own invention and consumers should not be expected to</span>
     <span class="c1"># know how they work at anything but a high level.</span>
     <span class="c1"># We do not, however, provide thresholds for any other statistic, as they</span>
@@ -217,8 +282,9 @@
     <span class="n">SIM_LIMIT</span> <span class="o">=</span> <span class="mi">17</span>
     <span class="n">CORR_LIMIT</span> <span class="o">=</span> <span class="mf">0.99</span>
 
-    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">key</span><span class="p">,</span> <span class="n">db_path</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">slider_dir</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">loader</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> \
-        <span class="n">cache</span><span class="o">=</span><span class="kc">True</span><span class="p">):</span>
+    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">key</span><span class="p">,</span> <span class="n">db_path</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">slider_dir</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">loader</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+        <span class="n">cache</span><span class="o">=</span><span class="kc">True</span>
+    <span class="p">):</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">log</span> <span class="o">=</span> <span class="n">logging</span><span class="o">.</span><span class="n">getLogger</span><span class="p">(</span><span class="vm">__name__</span><span class="p">)</span>
 
         <span class="c1"># allow for people to pass their own loader implementation/subclass.</span>
@@ -231,7 +297,7 @@
         <span class="k">if</span> <span class="n">slider_dir</span><span class="p">:</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">library</span> <span class="o">=</span> <span class="n">Library</span><span class="p">(</span><span class="n">slider_dir</span><span class="p">)</span>
         <span class="k">else</span><span class="p">:</span>
-            <span class="c1"># If slider dir wasn't passed, use a temporary library which will</span>
+            <span class="c1"># If slider dir wasn&#39;t passed, use a temporary library which will</span>
             <span class="c1"># effectively cache beatmaps for just this cg instance.</span>
             <span class="c1"># Have to keep a reference to this dir or the folder gets deleted.</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">slider_dir</span> <span class="o">=</span> <span class="n">TemporaryDirectory</span><span class="p">()</span>
@@ -239,8 +305,8 @@
             <span class="c1"># clean up our library (which resides in a temporary dir) or else</span>
             <span class="c1"># garbage collection of this cg object (and subsequently the</span>
             <span class="c1"># temp dir and library) will cause an error to be thrown. This</span>
-            <span class="c1"># happens because the temp dir's finalizer is called first, which</span>
-            <span class="c1"># tries to remove the directory, but it can't because the library's</span>
+            <span class="c1"># happens because the temp dir&#39;s finalizer is called first, which</span>
+            <span class="c1"># tries to remove the directory, but it can&#39;t because the library&#39;s</span>
             <span class="c1"># sql connection to the db file in that dir is still alive, and a</span>
             <span class="c1"># PermissionError is thrown. We need to close the library before</span>
             <span class="c1"># the temp dir is finalized.</span>
@@ -252,10 +318,10 @@
                 <span class="bp">self</span><span class="o">.</span><span class="n">library</span><span class="p">)</span>
 
 
-<div class="viewcode-block" id="Circleguard.similarity"><a class="viewcode-back" href="../../appendix.html#circleguard.circleguard.Circleguard.similarity">[docs]</a>    <span class="k">def</span> <span class="nf">similarity</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">replay1</span><span class="p">,</span> <span class="n">replay2</span><span class="p">,</span> <span class="n">method</span><span class="o">=</span><span class="s2">"similarity"</span><span class="p">,</span> \
-        <span class="n">num_chunks</span><span class="o">=</span><span class="n">DEFAULT_CHUNKS</span><span class="p">,</span> <span class="n">mods_unknown</span><span class="o">=</span><span class="s2">"best"</span><span class="p">)</span> <span class="o">-&gt;</span> \
+<div class="viewcode-block" id="Circleguard.similarity"><a class="viewcode-back" href="../../appendix.html#circleguard.circleguard.Circleguard.similarity">[docs]</a>    <span class="k">def</span> <span class="nf">similarity</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">replay1</span><span class="p">,</span> <span class="n">replay2</span><span class="p">,</span> <span class="n">method</span><span class="o">=</span><span class="s2">&quot;similarity&quot;</span><span class="p">,</span>
+        <span class="n">num_chunks</span><span class="o">=</span><span class="n">DEFAULT_CHUNKS</span><span class="p">,</span> <span class="n">mods_unknown</span><span class="o">=</span><span class="s2">&quot;best&quot;</span><span class="p">)</span> <span class="o">-&gt;</span> \
         <span class="n">Union</span><span class="p">[</span><span class="nb">float</span><span class="p">,</span> <span class="n">Tuple</span><span class="p">[</span><span class="nb">float</span><span class="p">]]:</span>
-        <span class="sd">"""</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        The similarity between ``replay1`` and ``replay2``.</span>
 
 <span class="sd">        Parameters</span>
@@ -264,7 +330,7 @@
 <span class="sd">            The replay to compare against ``replay2``.</span>
 <span class="sd">        replay2: :class:`~circleguard.loadables.Replay`</span>
 <span class="sd">            The replay to compare against ``replay1``.</span>
-<span class="sd">        method: {"similarity", "correlation"}</span>
+<span class="sd">        method: {&quot;similarity&quot;, &quot;correlation&quot;}</span>
 <span class="sd">            What method to use to calculate the similarity between the replays.</span>
 <span class="sd">            |br|</span>
 <span class="sd">            ``similarity`` is (roughly speaking) the average distance</span>
@@ -285,7 +351,7 @@
 <span class="sd">            How many chunks to split the replay into when comparing. This</span>
 <span class="sd">            parameter only has an affect if ``method`` is ``correlation``.</span>
 <span class="sd">            Note that runtime increases linearly with the number of chunks.</span>
-<span class="sd">        mods_unknown: {"best", "both"}</span>
+<span class="sd">        mods_unknown: {&quot;best&quot;, &quot;both&quot;}</span>
 <span class="sd">            What to do if one or both of ``replay1`` and ``replay2`` do not</span>
 <span class="sd">            know what mods they were played with. In this case, the similarity</span>
 <span class="sd">            will be computed twice, both with no modifications and with</span>
@@ -312,9 +378,9 @@
 <span class="sd">            modifications, and the second element is the similarity with</span>
 <span class="sd">            ``Mod.HR`` applied to ``replay1``. See the documentation for the</span>
 <span class="sd">            ``mods_unknown`` parameter for more information.</span>
-<span class="sd">        """</span>
-        <span class="n">check_param</span><span class="p">(</span><span class="n">method</span><span class="p">,</span> <span class="p">[</span><span class="s2">"similarity"</span><span class="p">,</span> <span class="s2">"correlation"</span><span class="p">])</span>
-        <span class="n">check_param</span><span class="p">(</span><span class="n">mods_unknown</span><span class="p">,</span> <span class="p">[</span><span class="s2">"best"</span><span class="p">,</span> <span class="s2">"both"</span><span class="p">])</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">check_param</span><span class="p">(</span><span class="n">method</span><span class="p">,</span> <span class="p">[</span><span class="s2">&quot;similarity&quot;</span><span class="p">,</span> <span class="s2">&quot;correlation&quot;</span><span class="p">])</span>
+        <span class="n">check_param</span><span class="p">(</span><span class="n">mods_unknown</span><span class="p">,</span> <span class="p">[</span><span class="s2">&quot;best&quot;</span><span class="p">,</span> <span class="s2">&quot;both&quot;</span><span class="p">])</span>
 
         <span class="bp">self</span><span class="o">.</span><span class="n">load</span><span class="p">(</span><span class="n">replay1</span><span class="p">)</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">load</span><span class="p">(</span><span class="n">replay2</span><span class="p">)</span>
@@ -322,8 +388,8 @@
             <span class="n">mods_unknown</span><span class="p">)</span></div>
 
 
-<div class="viewcode-block" id="Circleguard.ur"><a class="viewcode-back" href="../../appendix.html#circleguard.circleguard.Circleguard.ur">[docs]</a>    <span class="k">def</span> <span class="nf">ur</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">replay</span><span class="p">,</span> <span class="n">cv</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">beatmap</span><span class="o">=</span><span class="kc">None</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">float</span><span class="p">:</span>
-        <span class="sd">"""</span>
+<div class="viewcode-block" id="Circleguard.ur"><a class="viewcode-back" href="../../appendix.html#circleguard.circleguard.Circleguard.ur">[docs]</a>    <span class="k">def</span> <span class="nf">ur</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">replay</span><span class="p">,</span> <span class="n">cv</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">beatmap</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">adjusted</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">float</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        The unstable rate of ``replay``.</span>
 
 <span class="sd">        Parameters</span>
@@ -338,32 +404,36 @@
 <span class="sd">            retrieving a beatmap from the replay itself.</span>
 <span class="sd">            |br|</span>
 <span class="sd">            This parameter is provided primarily as an optimization for when you</span>
-<span class="sd">            already have the replay's beatmap, to avoid re-retrieving it in this</span>
+<span class="sd">            already have the replay&#39;s beatmap, to avoid re-retrieving it in this</span>
 <span class="sd">            method.</span>
+<span class="sd">        adjusted: boolean</span>
+<span class="sd">            Whether to calculate &quot;adjusted&quot; ur. Adjusted ur filters outlier hits</span>
+<span class="sd">            before calculating ur and can result in a more accurate ur for some</span>
+<span class="sd">            replays.</span>
 
 <span class="sd">        Returns</span>
 <span class="sd">        -------</span>
 <span class="sd">        float</span>
 <span class="sd">            The ur of the replay.</span>
-<span class="sd">        """</span>
+<span class="sd">        &quot;&quot;&quot;</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">load</span><span class="p">(</span><span class="n">replay</span><span class="p">)</span>
 
         <span class="n">beatmap</span> <span class="o">=</span> <span class="n">beatmap</span> <span class="ow">or</span> <span class="bp">self</span><span class="o">.</span><span class="n">beatmap</span><span class="p">(</span><span class="n">replay</span><span class="p">)</span>
         <span class="k">if</span> <span class="ow">not</span> <span class="n">beatmap</span><span class="p">:</span>
-            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">"The ur of a replay that does not know what map "</span>
-                <span class="s2">"it was set on cannot be calculated"</span><span class="p">)</span>
+            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;The ur of a replay that does not know what map &quot;</span>
+                <span class="s2">&quot;it was set on cannot be calculated&quot;</span><span class="p">)</span>
 
-        <span class="n">ur</span> <span class="o">=</span> <span class="n">Investigations</span><span class="o">.</span><span class="n">ur</span><span class="p">(</span><span class="n">replay</span><span class="p">,</span> <span class="n">beatmap</span><span class="p">)</span>
+        <span class="n">ur</span> <span class="o">=</span> <span class="n">Investigations</span><span class="o">.</span><span class="n">ur</span><span class="p">(</span><span class="n">replay</span><span class="p">,</span> <span class="n">beatmap</span><span class="p">,</span> <span class="n">adjusted</span><span class="p">)</span>
         <span class="k">if</span> <span class="n">cv</span><span class="p">:</span>
-            <span class="n">ur</span> <span class="o">=</span> <span class="n">convert_statistic</span><span class="p">(</span><span class="n">ur</span><span class="p">,</span> <span class="n">replay</span><span class="o">.</span><span class="n">mods</span><span class="p">,</span> <span class="n">to</span><span class="o">=</span><span class="s2">"cv"</span><span class="p">)</span>
+            <span class="n">ur</span> <span class="o">=</span> <span class="n">convert_statistic</span><span class="p">(</span><span class="n">ur</span><span class="p">,</span> <span class="n">replay</span><span class="o">.</span><span class="n">mods</span><span class="p">,</span> <span class="n">to</span><span class="o">=</span><span class="s2">&quot;cv&quot;</span><span class="p">)</span>
 
         <span class="k">return</span> <span class="n">ur</span></div>
 
 
-<div class="viewcode-block" id="Circleguard.snaps"><a class="viewcode-back" href="../../appendix.html#circleguard.circleguard.Circleguard.snaps">[docs]</a>    <span class="k">def</span> <span class="nf">snaps</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">replay</span><span class="p">,</span> <span class="n">max_angle</span><span class="o">=</span><span class="n">DEFAULT_ANGLE</span><span class="p">,</span> \
+<div class="viewcode-block" id="Circleguard.snaps"><a class="viewcode-back" href="../../appendix.html#circleguard.circleguard.Circleguard.snaps">[docs]</a>    <span class="k">def</span> <span class="nf">snaps</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">replay</span><span class="p">,</span> <span class="n">max_angle</span><span class="o">=</span><span class="n">DEFAULT_ANGLE</span><span class="p">,</span>
         <span class="n">min_distance</span><span class="o">=</span><span class="n">DEFAULT_DISTANCE</span><span class="p">,</span> <span class="n">only_on_hitobjs</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
         <span class="n">beatmap</span><span class="o">=</span><span class="kc">None</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Iterable</span><span class="p">[</span><span class="n">Snap</span><span class="p">]:</span>
-        <span class="sd">"""</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Finds any snaps (sudden, jerky movement) in ``replay``.</span>
 
 <span class="sd">        Parameters</span>
@@ -384,7 +454,7 @@
 <span class="sd">            otherwise.</span>
 <span class="sd">            |br|</span>
 <span class="sd">            This parameter is provided primarily as an optimization for when you</span>
-<span class="sd">            already have the replay's beatmap, to avoid re-retrieving it in this</span>
+<span class="sd">            already have the replay&#39;s beatmap, to avoid re-retrieving it in this</span>
 <span class="sd">            method.</span>
 
 <span class="sd">        Returns</span>
@@ -401,24 +471,24 @@
 <span class="sd">        By default, only snaps which occur on a hitobject are returned. This is</span>
 <span class="sd">        to reduce false positives from spinners, driver issues, or lifting the</span>
 <span class="sd">        pen off the tablet and back on again.</span>
-<span class="sd">        """</span>
+<span class="sd">        &quot;&quot;&quot;</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">load</span><span class="p">(</span><span class="n">replay</span><span class="p">)</span>
 
         <span class="n">beatmap_</span> <span class="o">=</span> <span class="kc">None</span>
         <span class="k">if</span> <span class="n">only_on_hitobjs</span><span class="p">:</span>
             <span class="n">beatmap_</span> <span class="o">=</span> <span class="n">beatmap</span> <span class="ow">or</span> <span class="bp">self</span><span class="o">.</span><span class="n">beatmap</span><span class="p">(</span><span class="n">replay</span><span class="p">)</span>
             <span class="k">if</span> <span class="ow">not</span> <span class="n">beatmap_</span><span class="p">:</span>
-                <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">"The snaps of a replay that does not know "</span>
-                    <span class="s2">"what map it was set on cannot be filtered to include only "</span>
-                    <span class="s2">"snaps on hit objects. If you cannot retrieve the beatmap, "</span>
-                    <span class="s2">"you can pass ``only_on_hitobjs=False`` to avoid requiring "</span>
-                    <span class="s2">"a beatmap."</span><span class="p">)</span>
+                <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;The snaps of a replay that does not know &quot;</span>
+                    <span class="s2">&quot;what map it was set on cannot be filtered to include only &quot;</span>
+                    <span class="s2">&quot;snaps on hit objects. If you cannot retrieve the beatmap, &quot;</span>
+                    <span class="s2">&quot;you can pass ``only_on_hitobjs=False`` to avoid requiring &quot;</span>
+                    <span class="s2">&quot;a beatmap.&quot;</span><span class="p">)</span>
 
         <span class="k">return</span> <span class="n">Investigations</span><span class="o">.</span><span class="n">snaps</span><span class="p">(</span><span class="n">replay</span><span class="p">,</span> <span class="n">max_angle</span><span class="p">,</span> <span class="n">min_distance</span><span class="p">,</span> <span class="n">beatmap_</span><span class="p">)</span></div>
 
 
-<div class="viewcode-block" id="Circleguard.frametime"><a class="viewcode-back" href="../../appendix.html#circleguard.circleguard.Circleguard.frametime">[docs]</a>    <span class="k">def</span> <span class="nf">frametime</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">replay</span><span class="p">,</span> <span class="n">cv</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">mods_unknown</span><span class="o">=</span><span class="s2">"raise"</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">float</span><span class="p">:</span>
-        <span class="sd">"""</span>
+<div class="viewcode-block" id="Circleguard.frametime"><a class="viewcode-back" href="../../appendix.html#circleguard.circleguard.Circleguard.frametime">[docs]</a>    <span class="k">def</span> <span class="nf">frametime</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">replay</span><span class="p">,</span> <span class="n">cv</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">mods_unknown</span><span class="o">=</span><span class="s2">&quot;raise&quot;</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">float</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        The median frametime (in ms) of ``replay``.</span>
 
 <span class="sd">        Parameters</span>
@@ -428,7 +498,7 @@
 <span class="sd">        cv: bool</span>
 <span class="sd">            Whether to return the converted or unconverted frametime. The</span>
 <span class="sd">            converted frametime is returned by default.</span>
-<span class="sd">        mods_unknown: {"raise", "dt", "nm", "ht"}</span>
+<span class="sd">        mods_unknown: {&quot;raise&quot;, &quot;dt&quot;, &quot;nm&quot;, &quot;ht&quot;}</span>
 <span class="sd">            What to do if ``replay`` does not know what mods it was played with,</span>
 <span class="sd">            and ``cv`` is ``True``.</span>
 <span class="sd">            |br|</span>
@@ -447,32 +517,32 @@
 <span class="sd">        -------</span>
 <span class="sd">        float</span>
 <span class="sd">            The median frametime (in ms) of the replay.</span>
-<span class="sd">        """</span>
-        <span class="n">check_param</span><span class="p">(</span><span class="n">mods_unknown</span><span class="p">,</span> <span class="p">[</span><span class="s2">"raise"</span><span class="p">,</span> <span class="s2">"dt"</span><span class="p">,</span> <span class="s2">"nm"</span><span class="p">,</span> <span class="s2">"ht"</span><span class="p">])</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">check_param</span><span class="p">(</span><span class="n">mods_unknown</span><span class="p">,</span> <span class="p">[</span><span class="s2">&quot;raise&quot;</span><span class="p">,</span> <span class="s2">&quot;dt&quot;</span><span class="p">,</span> <span class="s2">&quot;nm&quot;</span><span class="p">,</span> <span class="s2">&quot;ht&quot;</span><span class="p">])</span>
 
         <span class="bp">self</span><span class="o">.</span><span class="n">load</span><span class="p">(</span><span class="n">replay</span><span class="p">)</span>
         <span class="n">frametime</span> <span class="o">=</span> <span class="n">Investigations</span><span class="o">.</span><span class="n">frametime</span><span class="p">(</span><span class="n">replay</span><span class="p">)</span>
         <span class="k">if</span> <span class="n">cv</span><span class="p">:</span>
             <span class="k">if</span> <span class="n">replay</span><span class="o">.</span><span class="n">mods</span><span class="p">:</span>
                 <span class="n">mods</span> <span class="o">=</span> <span class="n">replay</span><span class="o">.</span><span class="n">mods</span>
-            <span class="k">elif</span> <span class="n">mods_unknown</span> <span class="o">==</span> <span class="s2">"dt"</span><span class="p">:</span>
+            <span class="k">elif</span> <span class="n">mods_unknown</span> <span class="o">==</span> <span class="s2">&quot;dt&quot;</span><span class="p">:</span>
                 <span class="n">mods</span> <span class="o">=</span> <span class="n">Mod</span><span class="o">.</span><span class="n">DT</span>
-            <span class="k">elif</span> <span class="n">mods_unknown</span> <span class="o">==</span> <span class="s2">"nm"</span><span class="p">:</span>
+            <span class="k">elif</span> <span class="n">mods_unknown</span> <span class="o">==</span> <span class="s2">&quot;nm&quot;</span><span class="p">:</span>
                 <span class="n">mods</span> <span class="o">=</span> <span class="n">Mod</span><span class="o">.</span><span class="n">NM</span>
-            <span class="k">elif</span> <span class="n">mods_unknown</span> <span class="o">==</span> <span class="s2">"ht"</span><span class="p">:</span>
+            <span class="k">elif</span> <span class="n">mods_unknown</span> <span class="o">==</span> <span class="s2">&quot;ht&quot;</span><span class="p">:</span>
                 <span class="n">mods</span> <span class="o">=</span> <span class="n">Mod</span><span class="o">.</span><span class="n">HT</span>
             <span class="k">else</span><span class="p">:</span>
-                <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">"The frametime of a replay that does not know "</span>
-                    <span class="s2">"with what mods it was set with cannot be converted. Pass "</span>
-                    <span class="s2">"a different option to frametime(..., mods_unknown=) if "</span>
-                    <span class="s2">"you would like to provide a default mod for conversion."</span><span class="p">)</span>
-            <span class="n">frametime</span> <span class="o">=</span> <span class="n">convert_statistic</span><span class="p">(</span><span class="n">frametime</span><span class="p">,</span> <span class="n">mods</span><span class="p">,</span> <span class="n">to</span><span class="o">=</span><span class="s2">"cv"</span><span class="p">)</span>
+                <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;The frametime of a replay that does not know &quot;</span>
+                    <span class="s2">&quot;with what mods it was set with cannot be converted. Pass &quot;</span>
+                    <span class="s2">&quot;a different option to frametime(..., mods_unknown=) if &quot;</span>
+                    <span class="s2">&quot;you would like to provide a default mod for conversion.&quot;</span><span class="p">)</span>
+            <span class="n">frametime</span> <span class="o">=</span> <span class="n">convert_statistic</span><span class="p">(</span><span class="n">frametime</span><span class="p">,</span> <span class="n">mods</span><span class="p">,</span> <span class="n">to</span><span class="o">=</span><span class="s2">&quot;cv&quot;</span><span class="p">)</span>
 
         <span class="k">return</span> <span class="n">frametime</span></div>
 
-<div class="viewcode-block" id="Circleguard.frametimes"><a class="viewcode-back" href="../../appendix.html#circleguard.circleguard.Circleguard.frametimes">[docs]</a>    <span class="k">def</span> <span class="nf">frametimes</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">replay</span><span class="p">,</span> <span class="n">cv</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">mods_unknown</span><span class="o">=</span><span class="s2">"raise"</span><span class="p">)</span> \
+<div class="viewcode-block" id="Circleguard.frametimes"><a class="viewcode-back" href="../../appendix.html#circleguard.circleguard.Circleguard.frametimes">[docs]</a>    <span class="k">def</span> <span class="nf">frametimes</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">replay</span><span class="p">,</span> <span class="n">cv</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">mods_unknown</span><span class="o">=</span><span class="s2">&quot;raise&quot;</span><span class="p">)</span> \
         <span class="o">-&gt;</span> <span class="n">Iterable</span><span class="p">[</span><span class="nb">float</span><span class="p">]:</span>
-        <span class="sd">"""</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        The time (in ms) between each frame in ``replay``.</span>
 
 <span class="sd">        Parameters</span>
@@ -482,7 +552,7 @@
 <span class="sd">        cv: bool</span>
 <span class="sd">            Whether to return the converted or unconverted frametimes. The</span>
 <span class="sd">            converted frametimes is returned by default.</span>
-<span class="sd">        mods_unknown: {"raise", "dt", "nm", "ht"}</span>
+<span class="sd">        mods_unknown: {&quot;raise&quot;, &quot;dt&quot;, &quot;nm&quot;, &quot;ht&quot;}</span>
 <span class="sd">            What to do if ``replay`` does not know what mods it was played with,</span>
 <span class="sd">            and ``cv`` is ``True``.</span>
 <span class="sd">            |br|</span>
@@ -505,29 +575,29 @@
 <span class="sd">            The first element of this array corresponds to the time between the</span>
 <span class="sd">            first and second frame, the second element to the time between the</span>
 <span class="sd">            second and third frame, etc.</span>
-<span class="sd">        """</span>
+<span class="sd">        &quot;&quot;&quot;</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">load</span><span class="p">(</span><span class="n">replay</span><span class="p">)</span>
         <span class="n">frametimes</span> <span class="o">=</span> <span class="n">Investigations</span><span class="o">.</span><span class="n">frametimes</span><span class="p">(</span><span class="n">replay</span><span class="p">)</span>
         <span class="k">if</span> <span class="n">cv</span><span class="p">:</span>
             <span class="k">if</span> <span class="n">replay</span><span class="o">.</span><span class="n">mods</span><span class="p">:</span>
                 <span class="n">mods</span> <span class="o">=</span> <span class="n">replay</span><span class="o">.</span><span class="n">mods</span>
-            <span class="k">elif</span> <span class="n">mods_unknown</span> <span class="o">==</span> <span class="s2">"dt"</span><span class="p">:</span>
+            <span class="k">elif</span> <span class="n">mods_unknown</span> <span class="o">==</span> <span class="s2">&quot;dt&quot;</span><span class="p">:</span>
                 <span class="n">mods</span> <span class="o">=</span> <span class="n">Mod</span><span class="o">.</span><span class="n">DT</span>
-            <span class="k">elif</span> <span class="n">mods_unknown</span> <span class="o">==</span> <span class="s2">"nm"</span><span class="p">:</span>
+            <span class="k">elif</span> <span class="n">mods_unknown</span> <span class="o">==</span> <span class="s2">&quot;nm&quot;</span><span class="p">:</span>
                 <span class="n">mods</span> <span class="o">=</span> <span class="n">Mod</span><span class="o">.</span><span class="n">NM</span>
-            <span class="k">elif</span> <span class="n">mods_unknown</span> <span class="o">==</span> <span class="s2">"ht"</span><span class="p">:</span>
+            <span class="k">elif</span> <span class="n">mods_unknown</span> <span class="o">==</span> <span class="s2">&quot;ht&quot;</span><span class="p">:</span>
                 <span class="n">mods</span> <span class="o">=</span> <span class="n">Mod</span><span class="o">.</span><span class="n">HT</span>
             <span class="k">else</span><span class="p">:</span>
-                <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">"The frametimes of a replay that does not "</span>
-                    <span class="s2">"know with what mods it was set with cannot be converted. "</span>
-                    <span class="s2">"Pass one of ``{</span><span class="se">\"</span><span class="s2">dt</span><span class="se">\"</span><span class="s2">, </span><span class="se">\"</span><span class="s2">nm</span><span class="se">\"</span><span class="s2">, </span><span class="se">\"</span><span class="s2">ht</span><span class="se">\"</span><span class="s2">}`` for "</span>
-                    <span class="s2">"``mods_unknown``if you would like to provide a default "</span>
-                    <span class="s2">"mod for conversion."</span><span class="p">)</span>
-            <span class="n">frametimes</span> <span class="o">=</span> <span class="n">convert_statistic</span><span class="p">(</span><span class="n">frametimes</span><span class="p">,</span> <span class="n">mods</span><span class="p">,</span> <span class="n">to</span><span class="o">=</span><span class="s2">"cv"</span><span class="p">)</span>
+                <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;The frametimes of a replay that does not &quot;</span>
+                    <span class="s2">&quot;know with what mods it was set with cannot be converted. &quot;</span>
+                    <span class="s2">&quot;Pass one of ``{</span><span class="se">\&quot;</span><span class="s2">dt</span><span class="se">\&quot;</span><span class="s2">, </span><span class="se">\&quot;</span><span class="s2">nm</span><span class="se">\&quot;</span><span class="s2">, </span><span class="se">\&quot;</span><span class="s2">ht</span><span class="se">\&quot;</span><span class="s2">}`` for &quot;</span>
+                    <span class="s2">&quot;``mods_unknown`` if you would like to provide a default &quot;</span>
+                    <span class="s2">&quot;mod for conversion.&quot;</span><span class="p">)</span>
+            <span class="n">frametimes</span> <span class="o">=</span> <span class="n">convert_statistic</span><span class="p">(</span><span class="n">frametimes</span><span class="p">,</span> <span class="n">mods</span><span class="p">,</span> <span class="n">to</span><span class="o">=</span><span class="s2">&quot;cv&quot;</span><span class="p">)</span>
         <span class="k">return</span> <span class="n">frametimes</span></div>
 
-<div class="viewcode-block" id="Circleguard.hits"><a class="viewcode-back" href="../../appendix.html#circleguard.circleguard.Circleguard.hits">[docs]</a>    <span class="k">def</span> <span class="nf">hits</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">replay</span><span class="p">,</span> <span class="n">within</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">beatmap</span><span class="o">=</span><span class="kc">None</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Iterable</span><span class="p">[</span><span class="n">Judgment</span><span class="p">]:</span>
-        <span class="sd">"""</span>
+<div class="viewcode-block" id="Circleguard.hits"><a class="viewcode-back" href="../../appendix.html#circleguard.circleguard.Circleguard.hits">[docs]</a>    <span class="k">def</span> <span class="nf">hits</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">replay</span><span class="p">,</span> <span class="n">within</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">beatmap</span><span class="o">=</span><span class="kc">None</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Iterable</span><span class="p">[</span><span class="n">Hit</span><span class="p">]:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        The locations in the replay where a hitobject is hit.</span>
 
 <span class="sd">        Parameters</span>
@@ -543,7 +613,7 @@
 <span class="sd">            retrieving a beatmap from the replay itself.</span>
 <span class="sd">            |br|</span>
 <span class="sd">            This parameter is provided primarily as an optimization for when you</span>
-<span class="sd">            already have the replay's beatmap, to avoid re-retrieving it in this</span>
+<span class="sd">            already have the replay&#39;s beatmap, to avoid re-retrieving it in this</span>
 <span class="sd">            method.</span>
 
 <span class="sd">        Returns</span>
@@ -555,13 +625,13 @@
 <span class="sd">        -----</span>
 <span class="sd">        In osu!lazer terminology, hits are equivalent to judgements, but</span>
 <span class="sd">        without misses.</span>
-<span class="sd">        """</span>
+<span class="sd">        &quot;&quot;&quot;</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">load</span><span class="p">(</span><span class="n">replay</span><span class="p">)</span>
 
         <span class="n">beatmap</span> <span class="o">=</span> <span class="n">beatmap</span> <span class="ow">or</span> <span class="bp">self</span><span class="o">.</span><span class="n">beatmap</span><span class="p">(</span><span class="n">replay</span><span class="p">)</span>
         <span class="k">if</span> <span class="ow">not</span> <span class="n">beatmap</span><span class="p">:</span>
-            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">"The hits of a replay that does not know what map "</span>
-                <span class="s2">"it was set on cannot be calculated."</span><span class="p">)</span>
+            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;The hits of a replay that does not know what map &quot;</span>
+                <span class="s2">&quot;it was set on cannot be calculated.&quot;</span><span class="p">)</span>
 
         <span class="n">hits</span> <span class="o">=</span> <span class="n">Investigations</span><span class="o">.</span><span class="n">hits</span><span class="p">(</span><span class="n">replay</span><span class="p">,</span> <span class="n">beatmap</span><span class="p">)</span>
 
@@ -572,7 +642,7 @@
         <span class="k">return</span> <span class="n">hits</span></div>
 
 <div class="viewcode-block" id="Circleguard.judgments"><a class="viewcode-back" href="../../appendix.html#circleguard.circleguard.Circleguard.judgments">[docs]</a>    <span class="k">def</span> <span class="nf">judgments</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">replay</span><span class="p">,</span> <span class="n">beatmap</span><span class="o">=</span><span class="kc">None</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Iterable</span><span class="p">[</span><span class="n">Judgment</span><span class="p">]:</span>
-        <span class="sd">"""</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        The locations in the replay where a hitobject is hit or missed.</span>
 <span class="sd">        Judgments are marked as either misses, 50s, 100s, or 300s.</span>
 
@@ -585,26 +655,26 @@
 <span class="sd">            instead of retrieving a beatmap from the replay itself.</span>
 <span class="sd">            |br|</span>
 <span class="sd">            This parameter is provided primarily as an optimization for when you</span>
-<span class="sd">            already have the replay's beatmap, to avoid re-retrieving it in this</span>
+<span class="sd">            already have the replay&#39;s beatmap, to avoid re-retrieving it in this</span>
 <span class="sd">            method.</span>
 
 <span class="sd">        Returns</span>
 <span class="sd">        -------</span>
 <span class="sd">        list[:class:`~circleguard.judgment.Judgment`]</span>
 <span class="sd">            The judgments of the replay.</span>
-<span class="sd">        """</span>
+<span class="sd">        &quot;&quot;&quot;</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">load</span><span class="p">(</span><span class="n">replay</span><span class="p">)</span>
 
         <span class="n">beatmap</span> <span class="o">=</span> <span class="n">beatmap</span> <span class="ow">or</span> <span class="bp">self</span><span class="o">.</span><span class="n">beatmap</span><span class="p">(</span><span class="n">replay</span><span class="p">)</span>
         <span class="k">if</span> <span class="ow">not</span> <span class="n">beatmap</span><span class="p">:</span>
-            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">"The judgments of a replay that does not know "</span>
-                <span class="s2">"what map it was set on cannot be calculated."</span><span class="p">)</span>
+            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;The judgments of a replay that does not know &quot;</span>
+                <span class="s2">&quot;what map it was set on cannot be calculated.&quot;</span><span class="p">)</span>
 
         <span class="k">return</span> <span class="n">Investigations</span><span class="o">.</span><span class="n">judgments</span><span class="p">(</span><span class="n">replay</span><span class="p">,</span> <span class="n">beatmap</span><span class="p">)</span></div>
 
 <div class="viewcode-block" id="Circleguard.frametime_graph"><a class="viewcode-back" href="../../appendix.html#circleguard.circleguard.Circleguard.frametime_graph">[docs]</a>    <span class="k">def</span> <span class="nf">frametime_graph</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">replay</span><span class="p">,</span> <span class="n">cv</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">figure</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
         <span class="n">show_expected_frametime</span><span class="o">=</span><span class="kc">True</span><span class="p">):</span>
-        <span class="sd">"""</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Uses matplotlib to create a graph of the frametimes of the replay.</span>
 
 <span class="sd">        Parameters</span>
@@ -617,7 +687,7 @@
 <span class="sd">            If passed, this figure will be used instead of creating a new one</span>
 <span class="sd">            with pyplot. Using this parameter is not recommended for normal</span>
 <span class="sd">            usage. It is exposed to allow circleguard (the gui) to use this</span>
-<span class="sd">            method, as matplotlib's pyqt compatability layer adds some</span>
+<span class="sd">            method, as matplotlib&#39;s pyqt compatability layer adds some</span>
 <span class="sd">            complications which this works around.</span>
 <span class="sd">        show_expected_frametime: bool</span>
 <span class="sd">            Whether to show a vertical line where we expect the average</span>
@@ -626,14 +696,14 @@
 <span class="sd">        Returns</span>
 <span class="sd">        -------</span>
 <span class="sd">        :module:`matplotlib.pyplot` or :class:`matplotlib.figure.Figure`</span>
-<span class="sd">            Matplotlib's pyplot module for ease of use, so you can call</span>
+<span class="sd">            Matplotlib&#39;s pyplot module for ease of use, so you can call</span>
 <span class="sd">            :meth:`matplotlib.pyplot.show` on the return value of this function</span>
 <span class="sd">            to display the graph.</span>
 <span class="sd">            |br|</span>
 <span class="sd">            If ``figure`` is passed, the return value is instead the passed</span>
 <span class="sd">            figure after being modified by the frametime graph.</span>
-<span class="sd">        """</span>
-        <span class="c1"># we raise an ImportError if the consumer doesn't have matplotlib</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="c1"># we raise an ImportError if the consumer doesn&#39;t have matplotlib</span>
         <span class="c1"># installed, which is why we have to import it only when this function</span>
         <span class="c1"># is called.</span>
         <span class="kn">from</span> <span class="nn">circleguard.frametime_graph</span> <span class="kn">import</span> <span class="n">FrametimeGraph</span>
@@ -641,7 +711,7 @@
         <span class="bp">self</span><span class="o">.</span><span class="n">load</span><span class="p">(</span><span class="n">replay</span><span class="p">)</span>
         <span class="n">frametime_graph</span> <span class="o">=</span> <span class="n">FrametimeGraph</span><span class="p">(</span><span class="n">replay</span><span class="p">,</span> <span class="n">cv</span><span class="p">,</span> <span class="n">figure</span><span class="p">,</span>
             <span class="n">show_expected_frametime</span><span class="p">)</span>
-        <span class="c1"># strictly speaking, I don't think this return is necessary -</span>
+        <span class="c1"># strictly speaking, I don&#39;t think this return is necessary -</span>
         <span class="c1"># ``FrametimeGraph`` modifies the passed figure on instantiation,</span>
         <span class="c1"># so consumers could just use the figure they passed in instead of the</span>
         <span class="c1"># return value here. Returning it anyway feels better though.</span>
@@ -649,7 +719,7 @@
 
 
 <div class="viewcode-block" id="Circleguard.load"><a class="viewcode-back" href="../../appendix.html#circleguard.circleguard.Circleguard.load">[docs]</a>    <span class="k">def</span> <span class="nf">load</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">loadable</span><span class="p">):</span>
-        <span class="sd">"""</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Loads the ``loadable``.</span>
 
 <span class="sd">        Parameters</span>
@@ -660,12 +730,12 @@
 <span class="sd">        Notes</span>
 <span class="sd">        -----</span>
 <span class="sd">        This is identical to calling ``loadable.load(cg.loader, cg.cache)``.</span>
-<span class="sd">        """</span>
+<span class="sd">        &quot;&quot;&quot;</span>
         <span class="n">loadable</span><span class="o">.</span><span class="n">load</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">loader</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">cache</span><span class="p">)</span></div>
 
 
 <div class="viewcode-block" id="Circleguard.load_info"><a class="viewcode-back" href="../../appendix.html#circleguard.circleguard.Circleguard.load_info">[docs]</a>    <span class="k">def</span> <span class="nf">load_info</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">replay_container</span><span class="p">):</span>
-        <span class="sd">"""</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Loads the info of the ``replay_container``.</span>
 
 <span class="sd">        Parameters</span>
@@ -677,7 +747,7 @@
 <span class="sd">        -----</span>
 <span class="sd">        This is identical to calling</span>
 <span class="sd">        ``replay_container.load_info(cg.loader)``.</span>
-<span class="sd">        """</span>
+<span class="sd">        &quot;&quot;&quot;</span>
         <span class="n">replay_container</span><span class="o">.</span><span class="n">load_info</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">loader</span><span class="p">)</span></div>
 
     <span class="k">def</span> <span class="nf">beatmap_available</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">replay</span><span class="p">):</span>
@@ -687,7 +757,7 @@
     <span class="n">map_available</span> <span class="o">=</span> <span class="n">beatmap_available</span>
 
 <div class="viewcode-block" id="Circleguard.Map"><a class="viewcode-back" href="../../appendix.html#circleguard.circleguard.Circleguard.Map">[docs]</a>    <span class="k">def</span> <span class="nf">Map</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">beatmap_id</span><span class="p">,</span> <span class="n">span</span><span class="p">,</span> <span class="n">mods</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">cache</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">load</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Map</span><span class="p">:</span>
-        <span class="sd">"""</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Returns a new, info-loaded :class:`~circleguard.loadables.Map`.</span>
 
 <span class="sd">        Notes</span>
@@ -700,23 +770,23 @@
 <span class="sd">        that info loading for you.</span>
 
 <span class="sd">        &gt;&gt;&gt; # good</span>
-<span class="sd">        &gt;&gt;&gt; m = cg.Map(221777, "1-2")</span>
+<span class="sd">        &gt;&gt;&gt; m = cg.Map(221777, &quot;1-2&quot;)</span>
 <span class="sd">        &gt;&gt;&gt; for replay in m:</span>
 <span class="sd">        &gt;&gt;&gt;     ...</span>
 
 <span class="sd">        &gt;&gt;&gt; # bad</span>
-<span class="sd">        &gt;&gt;&gt; m = Map(221777, "1-2")</span>
+<span class="sd">        &gt;&gt;&gt; m = Map(221777, &quot;1-2&quot;)</span>
 <span class="sd">        &gt;&gt;&gt; cg.load_info(m)</span>
 <span class="sd">        &gt;&gt;&gt; for replay in m:</span>
 <span class="sd">        &gt;&gt;&gt;     ...</span>
-<span class="sd">        """</span>
+<span class="sd">        &quot;&quot;&quot;</span>
         <span class="n">m</span> <span class="o">=</span> <span class="n">Map</span><span class="p">(</span><span class="n">beatmap_id</span><span class="p">,</span> <span class="n">span</span><span class="p">,</span> <span class="n">mods</span><span class="p">,</span> <span class="n">cache</span><span class="p">)</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">load</span><span class="p">(</span><span class="n">m</span><span class="p">)</span> <span class="k">if</span> <span class="n">load</span> <span class="k">else</span> <span class="bp">self</span><span class="o">.</span><span class="n">load_info</span><span class="p">(</span><span class="n">m</span><span class="p">)</span>
         <span class="k">return</span> <span class="n">m</span></div>
 
 <div class="viewcode-block" id="Circleguard.User"><a class="viewcode-back" href="../../appendix.html#circleguard.circleguard.Circleguard.User">[docs]</a>    <span class="k">def</span> <span class="nf">User</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">user_id</span><span class="p">,</span> <span class="n">span</span><span class="p">,</span> <span class="n">mods</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">cache</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
         <span class="n">available_only</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">load</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">User</span><span class="p">:</span>
-        <span class="sd">"""</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Returns a new, info-loaded :class:`~circleguard.loadables.User`.</span>
 
 <span class="sd">        Notes</span>
@@ -729,23 +799,23 @@
 <span class="sd">        that info loading for you.</span>
 
 <span class="sd">        &gt;&gt;&gt; # good</span>
-<span class="sd">        &gt;&gt;&gt; u = cg.User(124493, "1-2")</span>
+<span class="sd">        &gt;&gt;&gt; u = cg.User(124493, &quot;1-2&quot;)</span>
 <span class="sd">        &gt;&gt;&gt; for replay in u:</span>
 <span class="sd">        &gt;&gt;&gt;     ...</span>
 
 <span class="sd">        &gt;&gt;&gt; # bad</span>
-<span class="sd">        &gt;&gt;&gt; u = User(124493, "1-2")</span>
+<span class="sd">        &gt;&gt;&gt; u = User(124493, &quot;1-2&quot;)</span>
 <span class="sd">        &gt;&gt;&gt; cg.load_info(u)</span>
 <span class="sd">        &gt;&gt;&gt; for replay in u:</span>
 <span class="sd">        &gt;&gt;&gt;     ...</span>
-<span class="sd">        """</span>
+<span class="sd">        &quot;&quot;&quot;</span>
         <span class="n">u</span> <span class="o">=</span> <span class="n">User</span><span class="p">(</span><span class="n">user_id</span><span class="p">,</span> <span class="n">span</span><span class="p">,</span> <span class="n">mods</span><span class="p">,</span> <span class="n">cache</span><span class="p">,</span> <span class="n">available_only</span><span class="p">)</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">load</span><span class="p">(</span><span class="n">u</span><span class="p">)</span> <span class="k">if</span> <span class="n">load</span> <span class="k">else</span> <span class="bp">self</span><span class="o">.</span><span class="n">load_info</span><span class="p">(</span><span class="n">u</span><span class="p">)</span>
         <span class="k">return</span> <span class="n">u</span></div>
 
 <div class="viewcode-block" id="Circleguard.MapUser"><a class="viewcode-back" href="../../appendix.html#circleguard.circleguard.Circleguard.MapUser">[docs]</a>    <span class="k">def</span> <span class="nf">MapUser</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">beatmap_id</span><span class="p">,</span> <span class="n">user_id</span><span class="p">,</span> <span class="n">span</span><span class="o">=</span><span class="n">Loader</span><span class="o">.</span><span class="n">MAX_MAP_SPAN</span><span class="p">,</span> <span class="n">cache</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
         <span class="n">available_only</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">load</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">MapUser</span><span class="p">:</span>
-        <span class="sd">"""</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Returns a new, info-loaded :class:`~circleguard.loadables.MapUser`.</span>
 
 <span class="sd">        Notes</span>
@@ -767,13 +837,13 @@
 <span class="sd">        &gt;&gt;&gt; cg.load_info(mu)</span>
 <span class="sd">        &gt;&gt;&gt; for replay in mu:</span>
 <span class="sd">        &gt;&gt;&gt;     ...</span>
-<span class="sd">        """</span>
+<span class="sd">        &quot;&quot;&quot;</span>
         <span class="n">mu</span> <span class="o">=</span> <span class="n">MapUser</span><span class="p">(</span><span class="n">beatmap_id</span><span class="p">,</span> <span class="n">user_id</span><span class="p">,</span> <span class="n">span</span><span class="p">,</span> <span class="n">cache</span><span class="p">,</span> <span class="n">available_only</span><span class="p">)</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">load</span><span class="p">(</span><span class="n">mu</span><span class="p">)</span> <span class="k">if</span> <span class="n">load</span> <span class="k">else</span> <span class="bp">self</span><span class="o">.</span><span class="n">load_info</span><span class="p">(</span><span class="n">mu</span><span class="p">)</span>
         <span class="k">return</span> <span class="n">mu</span></div>
 
 <div class="viewcode-block" id="Circleguard.ReplayDir"><a class="viewcode-back" href="../../appendix.html#circleguard.circleguard.Circleguard.ReplayDir">[docs]</a>    <span class="k">def</span> <span class="nf">ReplayDir</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">path</span><span class="p">,</span> <span class="n">cache</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">load</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">ReplayDir</span><span class="p">:</span>
-        <span class="sd">"""</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Returns a new, info-loaded :class:`~circleguard.loadables.ReplayDir`.</span>
 
 <span class="sd">        Notes</span>
@@ -786,16 +856,16 @@
 <span class="sd">        does that info loading for you.</span>
 
 <span class="sd">        &gt;&gt;&gt; # bad</span>
-<span class="sd">        &gt;&gt;&gt; r_dir = cg.ReplayDir("/Users/tybug/Desktop/replays")</span>
+<span class="sd">        &gt;&gt;&gt; r_dir = cg.ReplayDir(&quot;/Users/tybug/Desktop/replays&quot;)</span>
 <span class="sd">        &gt;&gt;&gt; for replay in r_dir:</span>
 <span class="sd">        &gt;&gt;&gt;     ...</span>
 
 <span class="sd">        &gt;&gt;&gt; # good</span>
-<span class="sd">        &gt;&gt;&gt; r_dir = ReplayDir("/Users/tybug/Desktop/replays")</span>
+<span class="sd">        &gt;&gt;&gt; r_dir = ReplayDir(&quot;/Users/tybug/Desktop/replays&quot;)</span>
 <span class="sd">        &gt;&gt;&gt; cg.load_info(r_dir)</span>
 <span class="sd">        &gt;&gt;&gt; for replay in r_dir:</span>
 <span class="sd">        &gt;&gt;&gt;     ...</span>
-<span class="sd">        """</span>
+<span class="sd">        &quot;&quot;&quot;</span>
         <span class="n">r_dir</span> <span class="o">=</span> <span class="n">ReplayDir</span><span class="p">(</span><span class="n">path</span><span class="p">,</span> <span class="n">cache</span><span class="p">)</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">load</span><span class="p">(</span><span class="n">r_dir</span><span class="p">)</span> <span class="k">if</span> <span class="n">load</span> <span class="k">else</span> <span class="bp">self</span><span class="o">.</span><span class="n">load_info</span><span class="p">(</span><span class="n">r_dir</span><span class="p">)</span>
         <span class="k">return</span> <span class="n">r_dir</span></div>
@@ -803,7 +873,7 @@
 
 <div class="viewcode-block" id="Circleguard.ReplayMap"><a class="viewcode-back" href="../../appendix.html#circleguard.circleguard.Circleguard.ReplayMap">[docs]</a>    <span class="k">def</span> <span class="nf">ReplayMap</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">beatmap_id</span><span class="p">,</span> <span class="n">user_id</span><span class="p">,</span> <span class="n">mods</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">cache</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">info</span><span class="o">=</span><span class="kc">None</span><span class="p">)</span> \
         <span class="o">-&gt;</span> <span class="n">ReplayMap</span><span class="p">:</span>
-        <span class="sd">"""</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Returns a new, loaded :class:`~circleguard.loadables.ReplayMap`.</span>
 
 <span class="sd">        Notes</span>
@@ -811,13 +881,13 @@
 <span class="sd">        This function is provided as a convenience for when you want to create a</span>
 <span class="sd">        ``ReplayMap`` and load it immediately. Loading can be an expensive</span>
 <span class="sd">        operation which is why this does not occur by default.</span>
-<span class="sd">        """</span>
+<span class="sd">        &quot;&quot;&quot;</span>
         <span class="n">r</span> <span class="o">=</span> <span class="n">ReplayMap</span><span class="p">(</span><span class="n">beatmap_id</span><span class="p">,</span> <span class="n">user_id</span><span class="p">,</span> <span class="n">mods</span><span class="p">,</span> <span class="n">cache</span><span class="p">,</span> <span class="n">info</span><span class="p">)</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">load</span><span class="p">(</span><span class="n">r</span><span class="p">)</span>
         <span class="k">return</span> <span class="n">r</span></div>
 
 <div class="viewcode-block" id="Circleguard.ReplayPath"><a class="viewcode-back" href="../../appendix.html#circleguard.circleguard.Circleguard.ReplayPath">[docs]</a>    <span class="k">def</span> <span class="nf">ReplayPath</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">path</span><span class="p">,</span> <span class="n">cache</span><span class="o">=</span><span class="kc">None</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">ReplayPath</span><span class="p">:</span>
-        <span class="sd">"""</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Returns a new, loaded :class:`~circleguard.loadables.ReplayPath`.</span>
 
 <span class="sd">        Notes</span>
@@ -825,13 +895,13 @@
 <span class="sd">        This function is provided as a convenience for when you want to create a</span>
 <span class="sd">        ``ReplayPath`` and load it immediately. Loading can be an expensive</span>
 <span class="sd">        operation which is why this does not occur by default.</span>
-<span class="sd">        """</span>
+<span class="sd">        &quot;&quot;&quot;</span>
         <span class="n">r</span> <span class="o">=</span> <span class="n">ReplayPath</span><span class="p">(</span><span class="n">path</span><span class="p">,</span> <span class="n">cache</span><span class="p">)</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">load</span><span class="p">(</span><span class="n">r</span><span class="p">)</span>
         <span class="k">return</span> <span class="n">r</span></div>
 
 <div class="viewcode-block" id="Circleguard.ReplayString"><a class="viewcode-back" href="../../appendix.html#circleguard.circleguard.Circleguard.ReplayString">[docs]</a>    <span class="k">def</span> <span class="nf">ReplayString</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">replay_data_str</span><span class="p">,</span> <span class="n">cache</span><span class="o">=</span><span class="kc">None</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">ReplayString</span><span class="p">:</span>
-        <span class="sd">"""</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Returns a new, loaded :class:`~circleguard.loadables.ReplayString`.</span>
 
 <span class="sd">        Notes</span>
@@ -839,13 +909,13 @@
 <span class="sd">        This function is provided as a convenience for when you want to create a</span>
 <span class="sd">        ``ReplayString`` and load it immediately. Loading can be an expensive</span>
 <span class="sd">        operation which is why this does not occur by default.</span>
-<span class="sd">        """</span>
+<span class="sd">        &quot;&quot;&quot;</span>
         <span class="n">r</span> <span class="o">=</span> <span class="n">ReplayString</span><span class="p">(</span><span class="n">replay_data_str</span><span class="p">,</span> <span class="n">cache</span><span class="p">)</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">load</span><span class="p">(</span><span class="n">r</span><span class="p">)</span>
         <span class="k">return</span> <span class="n">r</span></div>
 
 <div class="viewcode-block" id="Circleguard.ReplayID"><a class="viewcode-back" href="../../appendix.html#circleguard.circleguard.Circleguard.ReplayID">[docs]</a>    <span class="k">def</span> <span class="nf">ReplayID</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">replay_id</span><span class="p">,</span> <span class="n">cache</span><span class="o">=</span><span class="kc">None</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">ReplayID</span><span class="p">:</span>
-        <span class="sd">"""</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Returns a new, loaded :class:`~circleguard.loadables.ReplayID`.</span>
 
 <span class="sd">        Notes</span>
@@ -853,14 +923,14 @@
 <span class="sd">        This function is provided as a convenience for when you want to create a</span>
 <span class="sd">        ``ReplayID`` and load it immediately. Loading can be an expensive</span>
 <span class="sd">        operation which is why this does not occur by default.</span>
-<span class="sd">        """</span>
+<span class="sd">        &quot;&quot;&quot;</span>
         <span class="n">r</span> <span class="o">=</span> <span class="n">ReplayID</span><span class="p">(</span><span class="n">replay_id</span><span class="p">,</span> <span class="n">cache</span><span class="p">)</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">load</span><span class="p">(</span><span class="n">r</span><span class="p">)</span>
         <span class="k">return</span> <span class="n">r</span></div>
 
 <div class="viewcode-block" id="Circleguard.beatmap"><a class="viewcode-back" href="../../appendix.html#circleguard.circleguard.Circleguard.beatmap">[docs]</a>    <span class="k">def</span> <span class="nf">beatmap</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">replay</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Beatmap</span><span class="p">:</span>
-        <span class="sd">"""</span>
-<span class="sd">        The beatmap the replay was played on, or ``None`` if the replay doesn't</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        The beatmap the replay was played on, or ``None`` if the replay doesn&#39;t</span>
 <span class="sd">        know what beatmap it was played on.</span>
 
 <span class="sd">        Returns</span>
@@ -868,8 +938,8 @@
 <span class="sd">        :class:`slider.beatmap.Beatmap`</span>
 <span class="sd">            The beatmap this replay was played on.</span>
 <span class="sd">        None</span>
-<span class="sd">            If the replay doesn't know what beatmap it was played on.</span>
-<span class="sd">        """</span>
+<span class="sd">            If the replay doesn&#39;t know what beatmap it was played on.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">load</span><span class="p">(</span><span class="n">replay</span><span class="p">)</span>
         <span class="k">return</span> <span class="n">replay</span><span class="o">.</span><span class="n">beatmap</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">library</span><span class="p">)</span></div>
 
@@ -888,7 +958,7 @@
         <span class="n">library</span><span class="o">.</span><span class="n">close</span><span class="p">()</span></div>
 
 <div class="viewcode-block" id="KeylessCircleguard"><a class="viewcode-back" href="../../appendix.html#circleguard.circleguard.KeylessCircleguard">[docs]</a><span class="k">class</span> <span class="nc">KeylessCircleguard</span><span class="p">(</span><span class="n">Circleguard</span><span class="p">):</span>
-    <span class="sd">"""</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    A :class:`~.Circleguard` for when you do not have access to an api key, but</span>
 <span class="sd">    have loaded :class:`~circleguard.loadables.Loadable`\s that you want to</span>
 <span class="sd">    perform operations on. It should go without saying that instances of this</span>
@@ -912,10 +982,10 @@
 <span class="sd">    loader: :class:`~circleguard.loader.Loader`</span>
 <span class="sd">        An instance of :class:`~circleguard.loader.Loader` or a subclass</span>
 <span class="sd">        thereof, which will be used instead of creating a loader if passed.</span>
-<span class="sd">    """</span>
+<span class="sd">    &quot;&quot;&quot;</span>
 
     <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">db_path</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">slider_dir</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">cache</span><span class="o">=</span><span class="kc">True</span><span class="p">):</span>
-        <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="s2">"INVALID_KEY"</span><span class="p">,</span> <span class="n">db_path</span><span class="p">,</span> <span class="n">slider_dir</span><span class="p">,</span> <span class="n">cache</span><span class="o">=</span><span class="n">cache</span><span class="p">)</span>
+        <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="s2">&quot;INVALID_KEY&quot;</span><span class="p">,</span> <span class="n">db_path</span><span class="p">,</span> <span class="n">slider_dir</span><span class="p">,</span> <span class="n">cache</span><span class="o">=</span><span class="n">cache</span><span class="p">)</span>
 
 <div class="viewcode-block" id="KeylessCircleguard.load"><a class="viewcode-back" href="../../appendix.html#circleguard.circleguard.KeylessCircleguard.load">[docs]</a>    <span class="k">def</span> <span class="nf">load</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">loadable</span><span class="p">):</span>
         <span class="n">loadable</span><span class="o">.</span><span class="n">load</span><span class="p">(</span><span class="kc">None</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">cache</span><span class="p">)</span></div>
@@ -925,7 +995,7 @@
 
 
 <div class="viewcode-block" id="set_options"><a class="viewcode-back" href="../../appendix.html#circleguard.circleguard.set_options">[docs]</a><span class="k">def</span> <span class="nf">set_options</span><span class="p">(</span><span class="o">*</span><span class="p">,</span> <span class="n">loglevel</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
-    <span class="sd">"""</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Set global options for circlecore.</span>
 
 <span class="sd">    Parameters</span>
@@ -937,19 +1007,27 @@
 <span class="sd">        the setLevel function of the circleguard root logger. WARNING by</span>
 <span class="sd">        default. For more information on log levels, see the standard python</span>
 <span class="sd">        logging lib.</span>
-<span class="sd">    """</span>
+<span class="sd">    &quot;&quot;&quot;</span>
     <span class="k">if</span> <span class="n">loglevel</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
-        <span class="n">logging</span><span class="o">.</span><span class="n">getLogger</span><span class="p">(</span><span class="s2">"circleguard"</span><span class="p">)</span><span class="o">.</span><span class="n">setLevel</span><span class="p">(</span><span class="n">loglevel</span><span class="p">)</span></div>
+        <span class="n">logging</span><span class="o">.</span><span class="n">getLogger</span><span class="p">(</span><span class="s2">&quot;circleguard&quot;</span><span class="p">)</span><span class="o">.</span><span class="n">setLevel</span><span class="p">(</span><span class="n">loglevel</span><span class="p">)</span></div>
 </pre></div>
-      </article>
+        </article>
+      </div>
       <footer>
         
         <div class="related-pages">
           
           
         </div>
-
-        <div class="related-information">
+        <div class="bottom-of-page">
+          <div class="left-details">
+            Made with 
+            <a href="https://github.com/pradyunsg/furo">Furo</a>
+            
+          </div>
+          <div class="right-details">
+            
+          </div>
         </div>
         
       </footer>
@@ -959,11 +1037,10 @@
       
       
     </aside>
-  </main>
-</div>
-    <script id="documentation_options" data-url_root="../../" src="../../_static/documentation_options.js"></script>
-    <script src="../../_static/jquery.js"></script>
-    <script src="../../_static/underscore.js"></script>
+  </div>
+</div><script data-url_root="../../" id="documentation_options" src="../../_static/documentation_options.js"></script>
     <script src="../../_static/doctools.js"></script>
-    <script src="../../_static/scripts/main.js?digest=e931d09b2a40c1bb82b542effe772014573baf67"></script></body>
+    <script src="../../_static/sphinx_highlight.js"></script>
+    <script src="../../_static/scripts/furo.js"></script>
+    </body>
 </html>

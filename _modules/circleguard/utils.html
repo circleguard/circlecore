@@ -1,61 +1,57 @@
 <!doctype html>
-<html class="no-js">
+<html class="no-js" lang="en">
   <head><meta charset="utf-8"/>
     <meta name="viewport" content="width=device-width,initial-scale=1"/>
     <meta name="color-scheme" content="light dark"><link rel="index" title="Index" href="../../genindex.html" /><link rel="search" title="Search" href="../../search.html" />
 
-    <meta name="generator" content="sphinx-3.5.2, furo 2021.03.20.beta30"/>
-        <title>circleguard.utils - Circleguard v5.2.4 documentation</title>
-      <link rel="stylesheet" href="../../_static/styles/furo.css?digest=978e1795dfe158b585dda6a8417f6411828bf3ed">
-    <link rel="stylesheet" href="../../_static/pygments.css">
-    <link media="(prefers-color-scheme: dark)" rel="stylesheet" href="../../_static/pygments_dark.css">
+    <!-- Generated with Sphinx 6.1.3 and Furo 2022.12.07 -->
+        <title>circleguard.utils - Circleguard v5.4.0 documentation</title>
+      <link rel="stylesheet" type="text/css" href="../../_static/pygments.css" />
+    <link rel="stylesheet" type="text/css" href="../../_static/styles/furo.css?digest=91d0f0d1c444bdcb17a68e833c7a53903343c195" />
+    <link rel="stylesheet" type="text/css" href="../../_static/styles/furo-extensions.css?digest=30d1aed668e5c3a91c3e3bf6a60b675221979f0e" />
+    
     
 
 
 <style>
-  :root {
+  body {
     --color-code-background: #f8f8f8;
   --color-code-foreground: black;
   
   }
-  @media (prefers-color-scheme: dark) {
-    :root {
+  @media not print {
+    body[data-theme="dark"] {
       --color-code-background: #202020;
   --color-code-foreground: #d0d0d0;
   
     }
-  }
-
-  /* For allowing end-user-specific overrides */
-  .override-light {
-    --color-code-background: #f8f8f8;
-  --color-code-foreground: black;
-  
-  }
-  .override-dark {
-    --color-code-background: #202020;
+    @media (prefers-color-scheme: dark) {
+      body:not([data-theme="light"]) {
+        --color-code-background: #202020;
   --color-code-foreground: #d0d0d0;
   
+      }
+    }
   }
-</style><link rel="stylesheet" href="../../_static/styles/furo-extensions.css?digest=d391b54134226e4196576da3bdb6dddb7e05ba2b"></head>
-  <body dir="">
+</style></head>
+  <body>
     
+    <script>
+      document.body.dataset.theme = localStorage.getItem("theme") || "auto";
+    </script>
+    
+
 <svg xmlns="http://www.w3.org/2000/svg" style="display: none;">
   <symbol id="svg-toc" viewBox="0 0 24 24">
     <title>Contents</title>
-    <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none"
-      stroke-width="1.5" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round">
-      <path stroke="none" d="M0 0h24v24H0z"/>
-      <line x1="4" y1="6" x2="20" y2="6" />
-      <line x1="10" y1="12" x2="20" y2="12" />
-      <line x1="6" y1="18" x2="20" y2="18" />
+    <svg stroke="currentColor" fill="currentColor" stroke-width="0" viewBox="0 0 1024 1024">
+      <path d="M408 442h480c4.4 0 8-3.6 8-8v-56c0-4.4-3.6-8-8-8H408c-4.4 0-8 3.6-8 8v56c0 4.4 3.6 8 8 8zm-8 204c0 4.4 3.6 8 8 8h480c4.4 0 8-3.6 8-8v-56c0-4.4-3.6-8-8-8H408c-4.4 0-8 3.6-8 8v56zm504-486H120c-4.4 0-8 3.6-8 8v56c0 4.4 3.6 8 8 8h784c4.4 0 8-3.6 8-8v-56c0-4.4-3.6-8-8-8zm0 632H120c-4.4 0-8 3.6-8 8v56c0 4.4 3.6 8 8 8h784c4.4 0 8-3.6 8-8v-56c0-4.4-3.6-8-8-8zM115.4 518.9L271.7 642c5.8 4.6 14.4.5 14.4-6.9V388.9c0-7.4-8.5-11.5-14.4-6.9L115.4 505.1a8.74 8.74 0 0 0 0 13.8z"/>
     </svg>
   </symbol>
   <symbol id="svg-menu" viewBox="0 0 24 24">
     <title>Menu</title>
-    <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none"
-      stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"
-      class="feather feather-menu">
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+      stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="feather-menu">
       <line x1="3" y1="12" x2="21" y2="12"></line>
       <line x1="3" y1="6" x2="21" y2="6"></line>
       <line x1="3" y1="18" x2="21" y2="18"></line>
@@ -63,18 +59,57 @@
   </symbol>
   <symbol id="svg-arrow-right" viewBox="0 0 24 24">
     <title>Expand</title>
-    <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none"
-      stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"
-      class="feather feather-chevron-right">
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+      stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="feather-chevron-right">
       <polyline points="9 18 15 12 9 6"></polyline>
+    </svg>
+  </symbol>
+  <symbol id="svg-sun" viewBox="0 0 24 24">
+    <title>Light mode</title>
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+      stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" class="feather-sun">
+      <circle cx="12" cy="12" r="5"></circle>
+      <line x1="12" y1="1" x2="12" y2="3"></line>
+      <line x1="12" y1="21" x2="12" y2="23"></line>
+      <line x1="4.22" y1="4.22" x2="5.64" y2="5.64"></line>
+      <line x1="18.36" y1="18.36" x2="19.78" y2="19.78"></line>
+      <line x1="1" y1="12" x2="3" y2="12"></line>
+      <line x1="21" y1="12" x2="23" y2="12"></line>
+      <line x1="4.22" y1="19.78" x2="5.64" y2="18.36"></line>
+      <line x1="18.36" y1="5.64" x2="19.78" y2="4.22"></line>
+    </svg>
+  </symbol>
+  <symbol id="svg-moon" viewBox="0 0 24 24">
+    <title>Dark mode</title>
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+      stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" class="icon-tabler-moon">
+      <path stroke="none" d="M0 0h24v24H0z" fill="none" />
+      <path d="M12 3c.132 0 .263 0 .393 0a7.5 7.5 0 0 0 7.92 12.446a9 9 0 1 1 -8.313 -12.454z" />
+    </svg>
+  </symbol>
+  <symbol id="svg-sun-half" viewBox="0 0 24 24">
+    <title>Auto light/dark mode</title>
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+      stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" class="icon-tabler-shadow">
+      <path stroke="none" d="M0 0h24v24H0z" fill="none"/>
+      <circle cx="12" cy="12" r="9" />
+      <path d="M13 12h5" />
+      <path d="M13 15h4" />
+      <path d="M13 18h1" />
+      <path d="M13 9h4" />
+      <path d="M13 6h1" />
     </svg>
   </symbol>
 </svg>
 
 <input type="checkbox" class="sidebar-toggle" name="__navigation" id="__navigation">
 <input type="checkbox" class="sidebar-toggle" name="__toc" id="__toc">
-<label class="overlay sidebar-overlay" for="__navigation"></label>
-<label class="overlay toc-overlay" for="__toc"></label>
+<label class="overlay sidebar-overlay" for="__navigation">
+  <div class="visually-hidden">Hide navigation sidebar</div>
+</label>
+<label class="overlay toc-overlay" for="__toc">
+  <div class="visually-hidden">Hide table of contents sidebar</div>
+</label>
 
 
 
@@ -82,14 +117,24 @@
   <header class="mobile-header">
     <div class="header-left">
       <label class="nav-overlay-icon" for="__navigation">
+        <div class="visually-hidden">Toggle site navigation sidebar</div>
         <i class="icon"><svg><use href="#svg-menu"></use></svg></i>
       </label>
     </div>
     <div class="header-center">
-      <a href="../../index.html"><div class="brand">Circleguard v5.2.4 documentation</div></a>
+      <a href="../../index.html"><div class="brand">Circleguard v5.4.0 documentation</div></a>
     </div>
     <div class="header-right">
+      <div class="theme-toggle-container theme-toggle-header">
+        <button class="theme-toggle">
+          <div class="visually-hidden">Toggle Light / Dark / Auto color theme</div>
+          <svg class="theme-icon-when-auto"><use href="#svg-sun-half"></use></svg>
+          <svg class="theme-icon-when-dark"><use href="#svg-moon"></use></svg>
+          <svg class="theme-icon-when-light"><use href="#svg-sun"></use></svg>
+        </button>
+      </div>
       <label class="toc-overlay-icon toc-header-icon no-toc" for="__toc">
+        <div class="visually-hidden">Toggle table of contents sidebar</div>
         <i class="icon"><svg><use href="#svg-toc"></use></svg></i>
       </label>
     </div>
@@ -100,17 +145,18 @@
       <div class="sidebar-sticky"><a class="sidebar-brand" href="../../index.html">
   
   
-  <span class="sidebar-brand-text">Circleguard v5.2.4 documentation</span>
+  <span class="sidebar-brand-text">Circleguard v5.4.0 documentation</span>
   
-</a><form class="sidebar-search-container" method="get" action="../../search.html">
-  <input class="sidebar-search" placeholder=Search name="q">
+</a><form class="sidebar-search-container" method="get" action="../../search.html" role="search">
+  <input class="sidebar-search" placeholder="Search" name="q" aria-label="Search">
   <input type="hidden" name="check_keywords" value="yes">
   <input type="hidden" name="area" value="default">
-</form><div class="sidebar-scroll"><div class="sidebar-tree">
+</form>
+<div id="searchbox"></div><div class="sidebar-scroll"><div class="sidebar-tree">
   <ul>
 <li class="toctree-l1"><a class="reference internal" href="../../index.html">Circlecore</a></li>
 </ul>
-<p class="caption"><span class="caption-text">Tutorial</span></p>
+<p class="caption" role="heading"><span class="caption-text">Tutorial</span></p>
 <ul>
 <li class="toctree-l1"><a class="reference internal" href="../../foreword.html">Foreword</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../representing-replays.html">Representing Replays</a></li>
@@ -120,28 +166,47 @@
 <li class="toctree-l1"><a class="reference internal" href="../../caching.html">Caching</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../advanced-usage.html">Advanced Usage</a></li>
 </ul>
-<p class="caption"><span class="caption-text">Contributing</span></p>
+<p class="caption" role="heading"><span class="caption-text">Contributing</span></p>
 <ul>
 <li class="toctree-l1"><a class="reference internal" href="../../contributing.html">Contributing</a></li>
 </ul>
-<p class="caption"><span class="caption-text">Appendix</span></p>
+<p class="caption" role="heading"><span class="caption-text">Appendix</span></p>
 <ul>
 <li class="toctree-l1"><a class="reference internal" href="../../appendix.html">Appendix</a></li>
 </ul>
 
 </div>
 </div>
+
       </div>
       
     </div>
   </aside>
-  <main class="main">
+  <div class="main">
     <div class="content">
-      <article role="main">
-        <label class="toc-overlay-icon toc-content-icon no-toc" for="__toc">
-          <i class="icon"><svg><use href="#svg-toc"></use></svg></i>
-        </label>
-        <h1>Source code for circleguard.utils</h1><div class="highlight"><pre>
+      <div class="article-container">
+        <a href="#" class="back-to-top muted-link">
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24">
+            <path d="M13 20h-2V8l-5.5 5.5-1.42-1.42L12 4.16l7.92 7.92-1.42 1.42L13 8v12z"></path>
+          </svg>
+          <span>Back to top</span>
+        </a>
+        <div class="content-icon-container">
+          <div class="theme-toggle-container theme-toggle-content">
+            <button class="theme-toggle">
+              <div class="visually-hidden">Toggle Light / Dark / Auto color theme</div>
+              <svg class="theme-icon-when-auto"><use href="#svg-sun-half"></use></svg>
+              <svg class="theme-icon-when-dark"><use href="#svg-moon"></use></svg>
+              <svg class="theme-icon-when-light"><use href="#svg-sun"></use></svg>
+            </button>
+          </div>
+          <label class="toc-overlay-icon toc-content-icon no-toc" for="__toc">
+            <div class="visually-hidden">Toggle table of contents sidebar</div>
+            <i class="icon"><svg><use href="#svg-toc"></use></svg></i>
+          </label>
+        </div>
+        <article role="main">
+          <h1>Source code for circleguard.utils</h1><div class="highlight"><pre>
 <span></span><span class="kn">from</span> <span class="nn">logging</span> <span class="kn">import</span> <span class="n">Formatter</span>
 <span class="kn">from</span> <span class="nn">copy</span> <span class="kn">import</span> <span class="n">copy</span>
 <span class="kn">from</span> <span class="nn">enum</span> <span class="kn">import</span> <span class="n">Enum</span><span class="p">,</span> <span class="n">IntFlag</span>
@@ -153,8 +218,8 @@
 
 
 <div class="viewcode-block" id="RatelimitWeight"><a class="viewcode-back" href="../../appendix.html#circleguard.utils.RatelimitWeight">[docs]</a><span class="k">class</span> <span class="nc">RatelimitWeight</span><span class="p">(</span><span class="n">Enum</span><span class="p">):</span>
-    <span class="sd">"""</span>
-<span class="sd">    How much it 'costs' to load a replay from the api.</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    How much it &#39;costs&#39; to load a replay from the api.</span>
 
 <span class="sd">    :data:`~.RatelimitWeight.NONE` if the load method of a replay makes no api</span>
 <span class="sd">    calls.</span>
@@ -169,10 +234,10 @@
 <span class="sd">    -----</span>
 <span class="sd">    This value currently has no effect in circlecore and is reserved for future</span>
 <span class="sd">    functionality.</span>
-<span class="sd">    """</span>
-    <span class="n">NONE</span>  <span class="o">=</span> <span class="s2">"None"</span>
-    <span class="n">LIGHT</span> <span class="o">=</span> <span class="s2">"Light"</span>
-    <span class="n">HEAVY</span> <span class="o">=</span> <span class="s2">"Heavy"</span></div>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">NONE</span>  <span class="o">=</span> <span class="s2">&quot;None&quot;</span>
+    <span class="n">LIGHT</span> <span class="o">=</span> <span class="s2">&quot;Light&quot;</span>
+    <span class="n">HEAVY</span> <span class="o">=</span> <span class="s2">&quot;Heavy&quot;</span></div>
 
 
 <div class="viewcode-block" id="Key"><a class="viewcode-back" href="../../appendix.html#circleguard.utils.Key">[docs]</a><span class="k">class</span> <span class="nc">Key</span><span class="p">(</span><span class="n">IntFlag</span><span class="p">):</span>
@@ -187,7 +252,7 @@
 
 
 <div class="viewcode-block" id="convert_statistic"><a class="viewcode-back" href="../../appendix.html#circleguard.utils.convert_statistic">[docs]</a><span class="k">def</span> <span class="nf">convert_statistic</span><span class="p">(</span><span class="n">stat</span><span class="p">,</span> <span class="n">mods</span><span class="p">,</span> <span class="o">*</span><span class="p">,</span> <span class="n">to</span><span class="p">):</span>
-    <span class="sd">"""</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Converts a game statistic to either its unconverted or converted form,</span>
 <span class="sd">    depending on ``to``.</span>
 
@@ -198,7 +263,7 @@
 <span class="sd">    mods: Mod</span>
 <span class="sd">        The mods the replay was played with. Only ``Mod.DT`` and ``Mod.HT``</span>
 <span class="sd">        will affect the statistic conversion.</span>
-<span class="sd">    to: {"cv", "ucv"}</span>
+<span class="sd">    to: {&quot;cv&quot;, &quot;ucv&quot;}</span>
 <span class="sd">        ``cv`` if the statistic should be converted to its converted form, and</span>
 <span class="sd">        ``ucv`` if the statistic should be converted to its unconverted form.</span>
 
@@ -208,8 +273,8 @@
 <span class="sd">    expect by ``Mod.DT`` or ``Mod.HT`` being applied (ie changing the game</span>
 <span class="sd">    clock speed). This includes ur (unstable rate) and median frametime</span>
 <span class="sd">    (time between frames).</span>
-<span class="sd">    """</span>
-    <span class="n">check_param</span><span class="p">(</span><span class="n">to</span><span class="p">,</span> <span class="p">[</span><span class="s2">"cv"</span><span class="p">,</span> <span class="s2">"ucv"</span><span class="p">])</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">check_param</span><span class="p">(</span><span class="n">to</span><span class="p">,</span> <span class="p">[</span><span class="s2">&quot;cv&quot;</span><span class="p">,</span> <span class="s2">&quot;ucv&quot;</span><span class="p">])</span>
 
     <span class="n">conversion_factor</span> <span class="o">=</span> <span class="mi">1</span>
 
@@ -218,13 +283,13 @@
     <span class="k">elif</span> <span class="n">Mod</span><span class="o">.</span><span class="n">HT</span> <span class="ow">in</span> <span class="n">mods</span><span class="p">:</span>
         <span class="n">conversion_factor</span> <span class="o">=</span> <span class="p">(</span><span class="mi">1</span> <span class="o">/</span> <span class="mf">0.75</span><span class="p">)</span>
 
-    <span class="k">if</span> <span class="n">to</span> <span class="o">==</span> <span class="s2">"cv"</span><span class="p">:</span>
+    <span class="k">if</span> <span class="n">to</span> <span class="o">==</span> <span class="s2">&quot;cv&quot;</span><span class="p">:</span>
         <span class="k">return</span> <span class="n">stat</span> <span class="o">*</span> <span class="n">conversion_factor</span>
     <span class="k">return</span> <span class="n">stat</span> <span class="o">/</span> <span class="n">conversion_factor</span></div>
 
 
 <div class="viewcode-block" id="order"><a class="viewcode-back" href="../../appendix.html#circleguard.utils.order">[docs]</a><span class="k">def</span> <span class="nf">order</span><span class="p">(</span><span class="n">replay1</span><span class="p">,</span> <span class="n">replay2</span><span class="p">):</span>
-    <span class="sd">"""</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    An ordered tuple of the given replays. The first element is the earlier</span>
 <span class="sd">    replay, and the second element is the later replay.</span>
 
@@ -240,11 +305,11 @@
 <span class="sd">    (Replay, Replay)</span>
 <span class="sd">        The first element is the earlier replay, and the second element is the</span>
 <span class="sd">        later replay.</span>
-<span class="sd">    """</span>
+<span class="sd">    &quot;&quot;&quot;</span>
     <span class="k">if</span> <span class="ow">not</span> <span class="n">replay1</span><span class="o">.</span><span class="n">timestamp</span> <span class="ow">or</span> <span class="ow">not</span> <span class="n">replay2</span><span class="o">.</span><span class="n">timestamp</span><span class="p">:</span>
-        <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">"Both replay1 and replay2 must provide a timestamp. "</span>
-            <span class="s2">"Replays without a timestamp cannot be ordered."</span><span class="p">)</span>
-    <span class="c1"># assume they're passed in order (earliest first); if not, switch them</span>
+        <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;Both replay1 and replay2 must provide a timestamp. &quot;</span>
+            <span class="s2">&quot;Replays without a timestamp cannot be ordered.&quot;</span><span class="p">)</span>
+    <span class="c1"># assume they&#39;re passed in order (earliest first); if not, switch them</span>
     <span class="n">order</span> <span class="o">=</span> <span class="p">(</span><span class="n">replay1</span><span class="p">,</span> <span class="n">replay2</span><span class="p">)</span>
     <span class="k">if</span> <span class="n">replay2</span><span class="o">.</span><span class="n">timestamp</span> <span class="o">&lt;</span> <span class="n">replay1</span><span class="o">.</span><span class="n">timestamp</span><span class="p">:</span>
         <span class="n">order</span> <span class="o">=</span> <span class="nb">tuple</span><span class="p">(</span><span class="nb">reversed</span><span class="p">(</span><span class="n">order</span><span class="p">))</span>
@@ -252,7 +317,7 @@
 
 
 <div class="viewcode-block" id="replay_pairs"><a class="viewcode-back" href="../../appendix.html#circleguard.utils.replay_pairs">[docs]</a><span class="k">def</span> <span class="nf">replay_pairs</span><span class="p">(</span><span class="n">replays</span><span class="p">,</span> <span class="n">replays2</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
-    <span class="sd">"""</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    A list of pairs of replays which can be compared against each other to cover</span>
 <span class="sd">    all cases of replay stealing in ``replays`` and/or ``replays2``.</span>
 
@@ -276,7 +341,7 @@
 <span class="sd">    This is equivalent to ``itertools.combinations(replays, 2)`` if ``replays2``</span>
 <span class="sd">    is ``None`` or the empty list, and ``itertools.product(replays, replays2)``</span>
 <span class="sd">    otherwise.</span>
-<span class="sd">    """</span>
+<span class="sd">    &quot;&quot;&quot;</span>
     <span class="k">if</span> <span class="ow">not</span> <span class="n">replays2</span><span class="p">:</span>
         <span class="k">return</span> <span class="n">combinations</span><span class="p">(</span><span class="n">replays</span><span class="p">,</span> <span class="mi">2</span><span class="p">)</span>
     <span class="k">return</span> <span class="n">product</span><span class="p">(</span><span class="n">replays</span><span class="p">,</span> <span class="n">replays2</span><span class="p">)</span></div>
@@ -284,15 +349,15 @@
 
 <span class="k">def</span> <span class="nf">check_param</span><span class="p">(</span><span class="n">param</span><span class="p">,</span> <span class="n">options</span><span class="p">):</span>
     <span class="k">if</span> <span class="n">param</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">options</span><span class="p">:</span>
-        <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="sa">f</span><span class="s2">"Expected one of </span><span class="si">{</span><span class="s1">','</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">options</span><span class="p">)</span><span class="si">}</span><span class="s2">. Got </span><span class="si">{</span><span class="n">param</span><span class="si">}</span><span class="s2">"</span><span class="p">)</span>
+        <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Expected one of </span><span class="si">{</span><span class="s1">&#39;,&#39;</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">options</span><span class="p">)</span><span class="si">}</span><span class="s2">. Got </span><span class="si">{</span><span class="n">param</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
 
 
 <div class="viewcode-block" id="fuzzy_mods"><a class="viewcode-back" href="../../appendix.html#circleguard.utils.fuzzy_mods">[docs]</a><span class="k">def</span> <span class="nf">fuzzy_mods</span><span class="p">(</span><span class="n">required_mod</span><span class="p">,</span> <span class="n">optional_mods</span><span class="p">):</span>
-    <span class="sd">"""</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    All mod combinations where each mod in ``optional_mods`` is allowed to be</span>
 <span class="sd">    present or absent.</span>
 
-<span class="sd">    If you don't want any mods to be required, pass ``Mod.NM`` as your</span>
+<span class="sd">    If you don&#39;t want any mods to be required, pass ``Mod.NM`` as your</span>
 <span class="sd">    ``required_mod``.</span>
 
 <span class="sd">    Parameters</span>
@@ -310,7 +375,7 @@
 <span class="sd">    [HD, HDDT, HDEZ, HDDTEZ]</span>
 <span class="sd">    &gt;&gt;&gt; fuzzy_mods(Mod.NM, [Mod.EZ, Mod.DT])</span>
 <span class="sd">    [NM, DT, EZ, DTEZ]</span>
-<span class="sd">    """</span>
+<span class="sd">    &quot;&quot;&quot;</span>
 
     <span class="n">all_mods</span> <span class="o">=</span> <span class="p">[]</span>
     <span class="k">for</span> <span class="n">mods</span> <span class="ow">in</span> <span class="n">powerset</span><span class="p">(</span><span class="n">optional_mods</span><span class="p">):</span>
@@ -323,7 +388,7 @@
 
 
 <div class="viewcode-block" id="powerset"><a class="viewcode-back" href="../../appendix.html#circleguard.utils.powerset">[docs]</a><span class="k">def</span> <span class="nf">powerset</span><span class="p">(</span><span class="n">iterable</span><span class="p">):</span>
-    <span class="sd">"""</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    The powerset of an iterable.</span>
 
 <span class="sd">    Examples</span>
@@ -334,16 +399,16 @@
 <span class="sd">    Notes</span>
 <span class="sd">    -----</span>
 <span class="sd">    https://stackoverflow.com/a/1482316</span>
-<span class="sd">    """</span>
+<span class="sd">    &quot;&quot;&quot;</span>
     <span class="n">s</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="n">iterable</span><span class="p">)</span>
     <span class="k">return</span> <span class="n">chain</span><span class="o">.</span><span class="n">from_iterable</span><span class="p">(</span><span class="n">combinations</span><span class="p">(</span><span class="n">s</span><span class="p">,</span> <span class="n">r</span><span class="p">)</span> <span class="k">for</span> <span class="n">r</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">s</span><span class="p">)</span> <span class="o">+</span> <span class="mi">1</span><span class="p">))</span></div>
 
 
 <div class="viewcode-block" id="hitwindow"><a class="viewcode-back" href="../../appendix.html#circleguard.utils.hitwindow">[docs]</a><span class="k">def</span> <span class="nf">hitwindow</span><span class="p">(</span><span class="n">OD</span><span class="p">):</span>
-    <span class="sd">"""</span>
-<span class="sd">    The number of milliseconds before and after a hitobject's time where that</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    The number of milliseconds before and after a hitobject&#39;s time where that</span>
 <span class="sd">    hitobject can be hit.</span>
-<span class="sd">    """</span>
+<span class="sd">    &quot;&quot;&quot;</span>
     <span class="c1"># stable converts OD (and CS), which are originally a float32, to a</span>
     <span class="c1"># double and this causes some hitwindows to be messed up when casted to</span>
     <span class="c1"># an int so we replicate this</span>
@@ -357,17 +422,35 @@
     <span class="k">return</span> <span class="p">(</span><span class="n">hitwindow_50</span><span class="p">,</span> <span class="n">hitwindow_100</span><span class="p">,</span> <span class="n">hitwindow_300</span><span class="p">)</span>
 
 <div class="viewcode-block" id="hitradius"><a class="viewcode-back" href="../../appendix.html#circleguard.utils.hitradius">[docs]</a><span class="k">def</span> <span class="nf">hitradius</span><span class="p">(</span><span class="n">CS</span><span class="p">):</span>
-    <span class="sd">"""</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    The radius, in osu!pixels (?) of where a hitobject can be hit.</span>
-<span class="sd">    """</span>
+<span class="sd">    &quot;&quot;&quot;</span>
     <span class="c1"># attempting to match stable hitradius</span>
     <span class="k">return</span> <span class="n">np</span><span class="o">.</span><span class="n">float32</span><span class="p">(</span><span class="mi">64</span> <span class="o">*</span> <span class="p">((</span><span class="mf">1.0</span> <span class="o">-</span> <span class="n">np</span><span class="o">.</span><span class="n">float32</span><span class="p">(</span><span class="mf">0.7</span><span class="p">)</span> <span class="o">*</span> <span class="p">(</span><span class="nb">float</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">float32</span><span class="p">(</span><span class="n">CS</span><span class="p">))</span> <span class="o">-</span> <span class="mi">5</span><span class="p">)</span> <span class="o">/</span> <span class="mi">5</span><span class="p">))</span> <span class="o">/</span> <span class="mi">2</span><span class="p">)</span> <span class="o">*</span> <span class="n">np</span><span class="o">.</span><span class="n">float32</span><span class="p">(</span><span class="mf">1.00041</span><span class="p">)</span></div>
+
+<div class="viewcode-block" id="filter_outliers"><a class="viewcode-back" href="../../appendix.html#circleguard.utils.filter_outliers">[docs]</a><span class="k">def</span> <span class="nf">filter_outliers</span><span class="p">(</span><span class="n">arr</span><span class="p">,</span> <span class="n">bias</span><span class="o">=</span><span class="mf">1.5</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Returns ``arr` with outliers removed.</span>
+
+<span class="sd">    Parameters</span>
+<span class="sd">    ----------</span>
+<span class="sd">    arr: list</span>
+<span class="sd">        List of numbers to filter outliers from.</span>
+<span class="sd">    bias: int</span>
+<span class="sd">        Points in ``arr`` which are more than ``IQR * bias`` away from the first</span>
+<span class="sd">        or third quartile of ``arr`` will be removed.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">q3</span><span class="p">,</span> <span class="n">q1</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">percentile</span><span class="p">(</span><span class="n">arr</span><span class="p">,</span> <span class="p">[</span><span class="mi">75</span> <span class="p">,</span><span class="mi">25</span><span class="p">])</span>
+    <span class="n">iqr</span> <span class="o">=</span> <span class="n">q3</span> <span class="o">-</span> <span class="n">q1</span>
+    <span class="n">lower_limit</span> <span class="o">=</span> <span class="n">q1</span> <span class="o">-</span> <span class="p">(</span><span class="n">bias</span> <span class="o">*</span> <span class="n">iqr</span><span class="p">)</span>
+    <span class="n">upper_limit</span> <span class="o">=</span> <span class="n">q3</span> <span class="o">+</span> <span class="p">(</span><span class="n">bias</span> <span class="o">*</span> <span class="n">iqr</span><span class="p">)</span>
+    <span class="k">return</span> <span class="p">[</span><span class="n">x</span> <span class="k">for</span> <span class="n">x</span> <span class="ow">in</span> <span class="n">arr</span> <span class="k">if</span> <span class="n">lower_limit</span> <span class="o">&lt;</span> <span class="n">x</span> <span class="o">&lt;</span> <span class="n">upper_limit</span><span class="p">]</span></div>
 
 
 <span class="n">TRACE</span> <span class="o">=</span> <span class="mi">5</span>
 
 <div class="viewcode-block" id="ColoredFormatter"><a class="viewcode-back" href="../../appendix.html#circleguard.utils.ColoredFormatter">[docs]</a><span class="k">class</span> <span class="nc">ColoredFormatter</span><span class="p">(</span><span class="n">Formatter</span><span class="p">):</span>
-    <span class="sd">"""</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    A subclass of :class:`logging.Formatter` that uses ANSI escape codes</span>
 <span class="sd">    to color different parts of the :class:`logging.LogRecord` when printed to</span>
 <span class="sd">    the console.</span>
@@ -375,36 +458,36 @@
 <span class="sd">    Notes</span>
 <span class="sd">    -----</span>
 <span class="sd">    Adapted from https://stackoverflow.com/a/46482050.</span>
-<span class="sd">    """</span>
+<span class="sd">    &quot;&quot;&quot;</span>
 
-    <span class="n">COLOR_PREFIX</span> <span class="o">=</span> <span class="s1">'</span><span class="se">\033</span><span class="s1">['</span>
-    <span class="n">COLOR_SUFFIX</span> <span class="o">=</span> <span class="s1">'</span><span class="se">\033</span><span class="s1">[0m'</span>
+    <span class="n">COLOR_PREFIX</span> <span class="o">=</span> <span class="s1">&#39;</span><span class="se">\033</span><span class="s1">[&#39;</span>
+    <span class="n">COLOR_SUFFIX</span> <span class="o">=</span> <span class="s1">&#39;</span><span class="se">\033</span><span class="s1">[0m&#39;</span>
     <span class="n">COLOR_MAPPING</span> <span class="o">=</span> <span class="p">{</span>
-        <span class="s2">"TRACE"</span>    <span class="p">:</span> <span class="mi">90</span><span class="p">,</span> <span class="c1"># bright black</span>
-        <span class="s2">"DEBUG"</span>    <span class="p">:</span> <span class="mi">94</span><span class="p">,</span> <span class="c1"># bright blue</span>
-        <span class="s2">"INFO"</span>     <span class="p">:</span> <span class="mi">95</span><span class="p">,</span> <span class="c1"># bright magenta</span>
-        <span class="s2">"WARNING"</span>  <span class="p">:</span> <span class="mi">31</span><span class="p">,</span> <span class="c1"># red</span>
-        <span class="s2">"ERROR"</span>    <span class="p">:</span> <span class="mi">91</span><span class="p">,</span> <span class="c1"># bright red</span>
-        <span class="s2">"CRITICAL"</span> <span class="p">:</span> <span class="mi">41</span><span class="p">,</span> <span class="c1"># white on red bg</span>
+        <span class="s2">&quot;TRACE&quot;</span>    <span class="p">:</span> <span class="mi">90</span><span class="p">,</span> <span class="c1"># bright black</span>
+        <span class="s2">&quot;DEBUG&quot;</span>    <span class="p">:</span> <span class="mi">94</span><span class="p">,</span> <span class="c1"># bright blue</span>
+        <span class="s2">&quot;INFO&quot;</span>     <span class="p">:</span> <span class="mi">95</span><span class="p">,</span> <span class="c1"># bright magenta</span>
+        <span class="s2">&quot;WARNING&quot;</span>  <span class="p">:</span> <span class="mi">31</span><span class="p">,</span> <span class="c1"># red</span>
+        <span class="s2">&quot;ERROR&quot;</span>    <span class="p">:</span> <span class="mi">91</span><span class="p">,</span> <span class="c1"># bright red</span>
+        <span class="s2">&quot;CRITICAL&quot;</span> <span class="p">:</span> <span class="mi">41</span><span class="p">,</span> <span class="c1"># white on red bg</span>
 
-        <span class="s2">"NAME"</span>     <span class="p">:</span> <span class="mi">32</span><span class="p">,</span> <span class="c1"># green</span>
-        <span class="s2">"MESSAGE"</span>  <span class="p">:</span> <span class="mi">93</span><span class="p">,</span> <span class="c1"># bright yellow</span>
-        <span class="s2">"FILENAME"</span> <span class="p">:</span> <span class="mi">92</span><span class="p">,</span> <span class="c1"># bright green</span>
-        <span class="s2">"LINENO"</span>   <span class="p">:</span> <span class="mi">91</span>  <span class="c1"># bright red</span>
+        <span class="s2">&quot;NAME&quot;</span>     <span class="p">:</span> <span class="mi">32</span><span class="p">,</span> <span class="c1"># green</span>
+        <span class="s2">&quot;MESSAGE&quot;</span>  <span class="p">:</span> <span class="mi">93</span><span class="p">,</span> <span class="c1"># bright yellow</span>
+        <span class="s2">&quot;FILENAME&quot;</span> <span class="p">:</span> <span class="mi">92</span><span class="p">,</span> <span class="c1"># bright green</span>
+        <span class="s2">&quot;LINENO&quot;</span>   <span class="p">:</span> <span class="mi">91</span>  <span class="c1"># bright red</span>
     <span class="p">}</span>
 
     <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">patern</span><span class="p">):</span>
         <span class="n">Formatter</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">patern</span><span class="p">)</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">colored_log</span> <span class="o">=</span> <span class="s2">"</span><span class="si">{prefix}</span><span class="s2">{{color}}m{{msg}}</span><span class="si">{suffix}</span><span class="s2">"</span><span class="o">.</span><span class="n">format</span><span class="p">(</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">colored_log</span> <span class="o">=</span> <span class="s2">&quot;</span><span class="si">{prefix}</span><span class="s2">{{color}}m{{msg}}</span><span class="si">{suffix}</span><span class="s2">&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span>
                     <span class="n">prefix</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">COLOR_PREFIX</span><span class="p">,</span> <span class="n">suffix</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">COLOR_SUFFIX</span><span class="p">)</span>
 
 <div class="viewcode-block" id="ColoredFormatter.format"><a class="viewcode-back" href="../../appendix.html#circleguard.utils.ColoredFormatter.format">[docs]</a>    <span class="k">def</span> <span class="nf">format</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">record</span><span class="p">):</span>
         <span class="c1"># c as in colored, not as in copy</span>
         <span class="n">c_record</span> <span class="o">=</span> <span class="n">copy</span><span class="p">(</span><span class="n">record</span><span class="p">)</span>
 
-        <span class="c1"># logging's choice of camelCase, not mine</span>
+        <span class="c1"># logging&#39;s choice of camelCase, not mine</span>
         <span class="n">threadName</span> <span class="o">=</span> <span class="n">c_record</span><span class="o">.</span><span class="n">threadName</span>
-        <span class="n">color</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">COLOR_MAPPING</span><span class="p">[</span><span class="s2">"NAME"</span><span class="p">]</span>
+        <span class="n">color</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">COLOR_MAPPING</span><span class="p">[</span><span class="s2">&quot;NAME&quot;</span><span class="p">]</span>
         <span class="n">c_threadName</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">colored_log</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">color</span><span class="o">=</span><span class="n">color</span><span class="p">,</span> <span class="n">msg</span><span class="o">=</span><span class="n">threadName</span><span class="p">)</span>
 
         <span class="n">levelname</span> <span class="o">=</span> <span class="n">c_record</span><span class="o">.</span><span class="n">levelname</span>
@@ -412,19 +495,19 @@
         <span class="n">c_levelname</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">colored_log</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">color</span><span class="o">=</span><span class="n">color</span><span class="p">,</span> <span class="n">msg</span><span class="o">=</span><span class="n">levelname</span><span class="p">)</span>
 
         <span class="n">name</span> <span class="o">=</span> <span class="n">c_record</span><span class="o">.</span><span class="n">name</span>
-        <span class="n">color</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">COLOR_MAPPING</span><span class="p">[</span><span class="s2">"NAME"</span><span class="p">]</span>
+        <span class="n">color</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">COLOR_MAPPING</span><span class="p">[</span><span class="s2">&quot;NAME&quot;</span><span class="p">]</span>
         <span class="n">c_name</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">colored_log</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">color</span><span class="o">=</span><span class="n">color</span><span class="p">,</span> <span class="n">msg</span><span class="o">=</span><span class="n">name</span><span class="p">)</span>
 
         <span class="n">message</span> <span class="o">=</span> <span class="n">c_record</span><span class="o">.</span><span class="n">msg</span>
-        <span class="n">color</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">COLOR_MAPPING</span><span class="p">[</span><span class="s2">"MESSAGE"</span><span class="p">]</span>
+        <span class="n">color</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">COLOR_MAPPING</span><span class="p">[</span><span class="s2">&quot;MESSAGE&quot;</span><span class="p">]</span>
         <span class="n">c_msg</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">colored_log</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">color</span><span class="o">=</span><span class="n">color</span><span class="p">,</span> <span class="n">msg</span><span class="o">=</span><span class="n">message</span><span class="p">)</span>
 
         <span class="n">filename</span> <span class="o">=</span> <span class="n">c_record</span><span class="o">.</span><span class="n">filename</span>
-        <span class="n">color</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">COLOR_MAPPING</span><span class="p">[</span><span class="s2">"FILENAME"</span><span class="p">]</span>
+        <span class="n">color</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">COLOR_MAPPING</span><span class="p">[</span><span class="s2">&quot;FILENAME&quot;</span><span class="p">]</span>
         <span class="n">c_filename</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">colored_log</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">color</span><span class="o">=</span><span class="n">color</span><span class="p">,</span> <span class="n">msg</span><span class="o">=</span><span class="n">filename</span><span class="p">)</span>
 
         <span class="n">lineno</span> <span class="o">=</span> <span class="n">c_record</span><span class="o">.</span><span class="n">lineno</span>
-        <span class="n">color</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">COLOR_MAPPING</span><span class="p">[</span><span class="s2">"LINENO"</span><span class="p">]</span>
+        <span class="n">color</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">COLOR_MAPPING</span><span class="p">[</span><span class="s2">&quot;LINENO&quot;</span><span class="p">]</span>
         <span class="n">c_lineno</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">colored_log</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">color</span><span class="o">=</span><span class="n">color</span><span class="p">,</span> <span class="n">msg</span><span class="o">=</span><span class="n">lineno</span><span class="p">)</span>
 
         <span class="n">c_record</span><span class="o">.</span><span class="n">threadName</span> <span class="o">=</span> <span class="n">c_threadName</span>
@@ -436,15 +519,23 @@
 
         <span class="k">return</span> <span class="n">Formatter</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">c_record</span><span class="p">)</span></div></div>
 </pre></div>
-      </article>
+        </article>
+      </div>
       <footer>
         
         <div class="related-pages">
           
           
         </div>
-
-        <div class="related-information">
+        <div class="bottom-of-page">
+          <div class="left-details">
+            Made with 
+            <a href="https://github.com/pradyunsg/furo">Furo</a>
+            
+          </div>
+          <div class="right-details">
+            
+          </div>
         </div>
         
       </footer>
@@ -454,11 +545,10 @@
       
       
     </aside>
-  </main>
-</div>
-    <script id="documentation_options" data-url_root="../../" src="../../_static/documentation_options.js"></script>
-    <script src="../../_static/jquery.js"></script>
-    <script src="../../_static/underscore.js"></script>
+  </div>
+</div><script data-url_root="../../" id="documentation_options" src="../../_static/documentation_options.js"></script>
     <script src="../../_static/doctools.js"></script>
-    <script src="../../_static/scripts/main.js?digest=e931d09b2a40c1bb82b542effe772014573baf67"></script></body>
+    <script src="../../_static/sphinx_highlight.js"></script>
+    <script src="../../_static/scripts/furo.js"></script>
+    </body>
 </html>
