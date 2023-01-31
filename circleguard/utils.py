@@ -221,7 +221,7 @@ def hitradius(CS):
 
 def filter_outliers(arr, bias=1.5):
     """
-    Returns ``arr` with outliers removed.
+    Returns ``arr`` with outliers removed.
 
     Parameters
     ----------
