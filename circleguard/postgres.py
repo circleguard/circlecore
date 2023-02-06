@@ -1,7 +1,7 @@
 import logging
 
 import wtc
-from ossapi import Ossapi
+from ossapi import OssapiV1
 try:
     import psycopg2
 except ImportError:
@@ -31,7 +31,7 @@ class PostgresLoader(Loader):
         self, key, db_username, db_password, db_host, db_port, db_name,
         write_to_cache=True
     ):
-        self.api = Ossapi(key)
+        self.api = OssapiV1(key)
         self.log = logging.getLogger(__name__)
 
         self._conn = None

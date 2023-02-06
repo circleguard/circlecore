@@ -7,7 +7,7 @@ import sqlite3
 import wtc
 
 import osrparse
-from ossapi import Ossapi, ReplayUnavailableException
+from ossapi import OssapiV1, ReplayUnavailableException
 
 from circleguard.utils import TRACE
 from circleguard.span import Span
@@ -87,7 +87,7 @@ class Loader:
     MAX_USER_SPAN = Span("1-100")
 
     def __init__(self, key, cache_path=None, write_to_cache=True):
-        self.api = Ossapi(key)
+        self.api = OssapiV1(key)
         self.log = logging.getLogger(__name__)
 
         self._conn = None
