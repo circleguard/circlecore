@@ -62,7 +62,8 @@ class Loader:
     Parameters
     ----------
     key: str
-        A valid api key. Can be retrieved from https://osu.ppy.sh/p/api/.
+        A valid api key. Can be created at
+        https://osu.ppy.sh/home/account/edit#legacy-api.
     cache_path: str
         The path to the database to use for caching. A new database will be
         created at this location if one doesn't exist already.

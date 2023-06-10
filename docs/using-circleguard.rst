@@ -4,9 +4,7 @@ Using Circleguard
 Now that we know how to represent replays, we can start operating on them. We will use the |Circleguard| class to do
 so. |Circleguard| is the main entry point for this library, alongside the replay classes.
 
-To instantiate |Circleguard|, you will need an api key. If you don't already have one, visit https://osu.ppy.sh/p/api/
-and enter ``Circleguard`` for ``App Name`` and ``https://github.com/circleguard/circlecore`` for ``App URL``.
-Circleguard needs this key to retrieve replay data and user information, among other things.
+To instantiate |Circleguard|, you will need an api key. If you don't already have one, visit https://osu.ppy.sh/home/account/edit#legacy-api. Click Click "New Legacy API Key" and enter ``Circleguard`` for ``App Name`` and ``https://github.com/circleguard/circlecore`` for ``App URL``. Circleguard needs this key to retrieve replay data and user information, among other things.
 
 .. note::
 

@@ -45,7 +45,8 @@ class Circleguard:
     Parameters
     ----------
     key: str
-        A valid api key. Can be retrieved from https://osu.ppy.sh/p/api/.
+        A valid api key. Can be created at
+        https://osu.ppy.sh/home/account/edit#legacy-api.
     db_path: str or :class:`os.PathLike`
         The path to the database file to read and write cached replays. If the
         path does not exist, a fresh database will be created there.
