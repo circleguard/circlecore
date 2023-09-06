@@ -70,9 +70,9 @@ def convert_statistic(stat, mods, *, to):
     conversion_factor = 1
 
     if Mod.DT in mods:
-        conversion_factor = (1 / 1.5)
+        conversion_factor = 1 / 1.5
     elif Mod.HT in mods:
-        conversion_factor = (1 / 0.75)
+        conversion_factor = 1 / 0.75
 
     if to == "cv":
         return stat * conversion_factor
