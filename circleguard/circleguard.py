@@ -2,6 +2,7 @@ import logging
 from tempfile import TemporaryDirectory
 from typing import Iterable, Union, Tuple
 import weakref
+from pathlib import Path
 
 from slider import Library, Beatmap
 
@@ -87,6 +88,8 @@ class Circleguard:
             self.loader = Loader(key, db_path, write_to_cache=cache)
 
         if slider_dir:
+            slider_dir = Path(slider_dir)
+            slider_dir.mkdir(parents=True, exist_ok=True)
             self.library = Library(slider_dir)
         else:
             # If slider dir wasn't passed, use a temporary library which will
