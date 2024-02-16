@@ -235,7 +235,8 @@ def filter_outliers(arr, bias=1.5):
     iqr = q3 - q1
     lower_limit = q1 - (bias * iqr)
     upper_limit = q3 + (bias * iqr)
-    return [x for x in arr if lower_limit < x < upper_limit]
+    outliers = [x for x in arr if lower_limit < x < upper_limit]
+    return arr if not outliers else outliers
 
 
 TRACE = 5
