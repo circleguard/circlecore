@@ -794,7 +794,7 @@ class Replay(Loadable):
         # It is not what lazer does, as far as I can tell. But it is the only
         # reasonable explanation for stable behavior. This solution may not,
         # however, be the canonical solution.
-        highest_running_t = np.NINF
+        highest_running_t = -np.inf
         # The last positive frame we encountered before entering a negative
         # section.
         last_positive_frame = None
