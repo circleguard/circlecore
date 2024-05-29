@@ -74,6 +74,7 @@ def convert_statistic(stat, mods, *, to):
     elif Mod.HT in mods:
         conversion_factor = 1 / 0.75
 
+    stat = np.array(stat)
     if to == "cv":
         return stat * conversion_factor
     return stat / conversion_factor
