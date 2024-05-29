@@ -94,18 +94,18 @@ class TestMap(CGTestCase):
     def test_map_slice(self):
         # sanity check (map id better be what we put in)
         self.assertEqual(self.map[0].map_id, 221777)
-        # 4rd (kirby mix)
+        # 4th (kirby mix)
         self.assertEqual(self.map[1].user_id, 9665206)
-        # 3rd, 4th, and 5th (toy, kirby mix, rohulk)
-        self.assertListEqual([r.user_id for r in self.map[0:3]], [2757689, 9665206, 3219026])
-        # 3rd and 5th (toy and rohulk)
-        self.assertListEqual([r.user_id for r in self.map[0:3:2]], [2757689, 3219026])
+        # 3rd, 4th, and 5th (toy, kirby mix, dolter)
+        self.assertListEqual([r.user_id for r in self.map[0:3]], [2757689, 9665206, 6920104])
+        # 3rd and 5th (toy and dolter)
+        self.assertListEqual([r.user_id for r in self.map[0:3:2]], [2757689, 6920104])
 
     def test_no_replays_does_not_raise(self):
         # previously, loading the info of a map or user with no scores on the
         # specified mod combination would result in a NoInfoAvailableException
         # being thrown. We want to make sure this doesn't happen.
-        m = Map(2245774, "1-2", Mod.NC + Mod.HR + Mod.SO)
+        m = Map(2245774, "1-2", Mod.NC + Mod.HR + Mod.SO + Mod.TD)
         self.cg.load_info(m)
         self.assertEqual(len(m), 0)
 
@@ -136,11 +136,11 @@ class TestUser(CGTestCase):
         # sanity check (user id better be what we put in)
         self.assertEqual(self.user[0].user_id, 124493)
         # 2nd (FDFD)
-        self.assertEqual(self.user[1].map_id, 129891)
-        # 1st, 2nd, and 3rd (FDED, FDFD, remote control)
-        self.assertListEqual([r.map_id for r in self.user[0:3]], [2249059, 129891, 774965])
-        # 1st and 3rd (FDEF, remote control)
-        self.assertListEqual([r.map_id for r in self.user[0:3:2]], [2249059, 774965])
+        self.assertEqual(self.user[1].map_id, 2249059)
+        # 1st, 2nd, and 3rd (shinkou, FDFD, arkadia)
+        self.assertListEqual([r.map_id for r in self.user[0:3]], [3747453, 2249059, 3645144])
+        # 1st and 3rd (shinkou, arkadia)
+        self.assertListEqual([r.map_id for r in self.user[0:3:2]], [3747453, 3645144])
 
     def test_no_replays_does_not_raise(self):
         u = User(12092800, "1-2", Mod.FL + Mod.EZ)
