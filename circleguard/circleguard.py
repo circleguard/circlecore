@@ -413,7 +413,7 @@ class Circleguard:
 
         Returns
         -------
-        list[:class:`~circleguard.judgment.Judgment`]
+        list[:class:`~circleguard.judgment.Hit`]
             The hits of the replay.
 
         Notes
