@@ -1,7 +1,6 @@
 from datetime import timedelta
 
 import numpy as np
-from scipy import signal
 from slider.beatmap import Circle, Slider, Spinner as SliderSpinner
 
 from circleguard.mod import Mod
@@ -527,6 +526,8 @@ class Investigations:
 
     @staticmethod
     def compute_correlation(xy1, xy2, num_chunks):
+        from scipy import signal
+
         xy1 = xy1.T
         xy2 = xy2.T
 
