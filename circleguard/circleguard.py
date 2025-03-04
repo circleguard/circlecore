@@ -16,7 +16,7 @@ from circleguard.mod import Mod
 
 
 class Circleguard:
-    """
+    r"""
     Circleguard is the main entry point for using circlecore. In particular, we
     provide methods to calculate various statistics about
     :class:`~circleguard.loadables.Replay`\s:
@@ -97,20 +97,6 @@ class Circleguard:
             # Have to keep a reference to this dir or the folder gets deleted.
             self.slider_dir = TemporaryDirectory()
             self.library = Library(self.slider_dir.name)
-            # clean up our library (which resides in a temporary dir) or else
-            # garbage collection of this cg object (and subsequently the
-            # temp dir and library) will cause an error to be thrown. This
-            # happens because the temp dir's finalizer is called first, which
-            # tries to remove the directory, but it can't because the library's
-            # sql connection to the db file in that dir is still alive, and a
-            # PermissionError is thrown. We need to close the library before
-            # the temp dir is finalized.
-            # Errors that happen during garbage collection are ignored I
-            # believe, so this only fixes the error message appearing (which is
-            # still a good thing to do) rather than actually fixing any programs
-            # that broke because of this.
-            self._finalizer = weakref.finalize(self, self._cleanup,
-                self.library)
 
 
     def similarity(self, replay1, replay2, method="similarity",
@@ -746,14 +732,9 @@ class Circleguard:
     def cache(self, cache):
         self.loader.write_to_cache = cache
 
-    @classmethod
-    def _cleanup(cls, library):
-        # see the call to this method for documentation on why this method
-        # exists.
-        library.close()
 
 class KeylessCircleguard(Circleguard):
-    """
+    r"""
     A :class:`~.Circleguard` for when you do not have access to an api key, but
     have loaded :class:`~circleguard.loadables.Loadable`\s that you want to
     perform operations on. It should go without saying that instances of this
