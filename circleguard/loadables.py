@@ -70,7 +70,7 @@ class Loadable(abc.ABC):
 
 
 class LoadableContainer(Loadable):
-    """
+    r"""
     A Loadable that holds Loadables, which may be ``ReplayContainer``\s or
     ``Replay``\s.
 
@@ -113,7 +113,7 @@ class LoadableContainer(Loadable):
         self.loadables = loadables
 
     def all_replays(self):
-        """
+        r"""
         All the :class:`~.Replay`\s in this loadable container.
 
         Returns
@@ -190,7 +190,7 @@ class ReplayContainer(Loadable):
         self.info_loaded = False
 
     def load(self, loader, cache=None):
-        """
+        r"""
         Loads all :class:`~circleguard.loadables.Loadable`\s contained by this
         loadable container.
 
@@ -214,7 +214,7 @@ class ReplayContainer(Loadable):
 
     @abc.abstractmethod
     def all_replays(self):
-        """
+        r"""
         Returns all the :class:`~.Replay`\s in this loadable container.
 
         Warnings

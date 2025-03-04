@@ -453,7 +453,7 @@ class Investigations:
 
     @staticmethod
     def similarity(replay1, replay2, method, num_chunks, mods_unknown):
-        """
+        r"""
         Compares two :class:`~.replay.Replay`\s.
 
         Parameters

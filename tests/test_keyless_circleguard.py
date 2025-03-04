@@ -1,3 +1,4 @@
+import pytest
 from circleguard import (
     KeylessCircleguard,
     Map,
@@ -7,35 +8,40 @@ from circleguard import (
     ReplayPath,
     User,
 )
-from tests.utils import RES, CGTestCase
+from tests.utils import RES
+
+kcg = KeylessCircleguard()
 
 
-class TestReplays(CGTestCase):
+def test_loading_replaypath():
+    r = ReplayPath(RES / "example_replay.osr")
+    kcg.load(r)
+    with pytest.raises(ValueError):
+        r.map_id
+    with pytest.raises(ValueError):
+        r.user_id
+    assert r.mods == Mod.HD + Mod.DT
+    assert r.replay_id == 2029801532
+    assert r.username == "MarthXT"
+    assert r.loaded
 
-    @classmethod
-    def setUpClass(cls):
-        super().setUpClass()
-        cls.kcg = KeylessCircleguard()
 
-    def test_loading_replaypath(self):
-        r = ReplayPath(RES / "example_replay.osr")
-        self.kcg.load(r)
-        self.assertRaises(ValueError, lambda: r.map_id)
-        self.assertRaises(ValueError, lambda: r.user_id)
-        self.assertEqual(r.mods, Mod.HD + Mod.DT, "Mods was not correct")
-        self.assertEqual(r.replay_id, 2029801532, "Replay id was not correct")
-        self.assertEqual(r.username, "MarthXT", "Username was not correct")
-        self.assertTrue(r.loaded, "Loaded status was not correct")
-
-    def test_loading_other_loadables(self):
-        r = ReplayMap(221777, 2757689)
-        m = Map(221777, "1")
-        u = User(12092800, "1")
-        mu = MapUser(221777, 12092800, "1")
-        self.assertRaises(ValueError, lambda: self.kcg.load(r))
-        self.assertRaises(ValueError, lambda: self.kcg.load(m))
-        self.assertRaises(ValueError, lambda: self.kcg.load_info(m))
-        self.assertRaises(ValueError, lambda: self.kcg.load(u))
-        self.assertRaises(ValueError, lambda: self.kcg.load_info(u))
-        self.assertRaises(ValueError, lambda: self.kcg.load(mu))
-        self.assertRaises(ValueError, lambda: self.kcg.load_info(mu))
+def test_loading_other_loadables():
+    r = ReplayMap(221777, 2757689)
+    m = Map(221777, "1")
+    u = User(12092800, "1")
+    mu = MapUser(221777, 12092800, "1")
+    with pytest.raises(ValueError):
+        kcg.load(r)
+    with pytest.raises(ValueError):
+        kcg.load(m)
+    with pytest.raises(ValueError):
+        kcg.load_info(m)
+    with pytest.raises(ValueError):
+        kcg.load(u)
+    with pytest.raises(ValueError):
+        kcg.load_info(u)
+    with pytest.raises(ValueError):
+        kcg.load(mu)
+    with pytest.raises(ValueError):
+        kcg.load_info(mu)
