@@ -1,26 +1,26 @@
 import logging
-from tempfile import TemporaryDirectory
-from typing import Iterable, Union, Tuple
-import weakref
+from collections.abc import Iterable
 from pathlib import Path
+from tempfile import TemporaryDirectory
+from typing import Tuple, Union
 
-from slider import Library, Beatmap
+from slider import Beatmap, Library
 
-from circleguard.loader import Loader
 from circleguard.investigations import Investigations, Snap
-from circleguard.judgment import Judgment, Hit
-from circleguard.utils import convert_statistic, check_param
+from circleguard.judgment import Hit, Judgment
 from circleguard.loadables import (
     Map,
-    User,
     MapUser,
-    ReplayMap,
+    ReplayDir,
     ReplayID,
+    ReplayMap,
     ReplayPath,
     ReplayString,
-    ReplayDir,
+    User,
 )
+from circleguard.loader import Loader
 from circleguard.mod import Mod
+from circleguard.utils import check_param, convert_statistic
 
 
 class Circleguard:
@@ -513,8 +513,9 @@ class Circleguard:
         # we raise an ImportError if the consumer doesn't have matplotlib
         # installed, which is why we have to import it only when this function
         # is called.
-        from circleguard.frametime_graph import FrametimeGraph
         from matplotlib import pyplot
+
+        from circleguard.frametime_graph import FrametimeGraph
 
         self.load(replay)
         frametime_graph = FrametimeGraph(replay, cv, figure, show_expected_frametime)

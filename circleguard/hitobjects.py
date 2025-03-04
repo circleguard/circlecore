@@ -1,7 +1,9 @@
 import numpy as np
-from slider.beatmap import Circle as SliderCircle
-from slider.beatmap import Slider as SliderSlider
-from slider.beatmap import Spinner as SliderSpinner
+from slider.beatmap import (
+    Circle as SliderCircle,
+    Slider as SliderSlider,
+    Spinner as SliderSpinner,
+)
 from slider.mod import circle_radius
 
 from circleguard.mod import Mod

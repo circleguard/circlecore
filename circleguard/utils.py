@@ -1,7 +1,7 @@
-from logging import Formatter
 from copy import copy
 from enum import Enum, IntFlag
-from itertools import product, chain, combinations
+from itertools import chain, combinations, product
+from logging import Formatter
 
 import numpy as np
 
@@ -224,7 +224,7 @@ def hitradius(CS):
     """
     # attempting to match stable hitradius
     return np.float32(
-        64 * ((1.0 - np.float32(0.7) * (float(np.float32(CS)) - 5) / 5)) / 2
+        64 * (1.0 - np.float32(0.7) * (float(np.float32(CS)) - 5) / 5) / 2
     ) * np.float32(1.00041)
 
 
@@ -278,9 +278,7 @@ class ColoredFormatter(Formatter):
 
     def __init__(self, patern):
         Formatter.__init__(self, patern)
-        self.colored_log = "{prefix}{{color}}m{{msg}}{suffix}".format(
-            prefix=self.COLOR_PREFIX, suffix=self.COLOR_SUFFIX
-        )
+        self.colored_log = f"{self.COLOR_PREFIX}{{color}}m{{msg}}{self.COLOR_SUFFIX}"
 
     def format(self, record):
         # c as in colored, not as in copy

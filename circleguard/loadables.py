@@ -1,21 +1,21 @@
 import abc
 import logging
-from pathlib import Path
 import os
-import sqlite3
 import random
+import sqlite3
+from pathlib import Path
 
-import osrparse
-from osrparse import ReplayEventOsu
 import numpy as np
+import osrparse
 import wtc
+from osrparse import ReplayEventOsu
 
-from circleguard.mod import Mod
-from circleguard.utils import TRACE, KEY_MASK, RatelimitWeight
-from circleguard.loader import Loader
-from circleguard.span import Span
 from circleguard.game_version import GameVersion, NoGameVersion
+from circleguard.loader import Loader
 from circleguard.map_info import MapInfo
+from circleguard.mod import Mod
+from circleguard.span import Span
+from circleguard.utils import KEY_MASK, TRACE, RatelimitWeight
 
 
 class Loadable(abc.ABC):

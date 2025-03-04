@@ -4,8 +4,9 @@
 import cProfile
 from pstats import Stats
 
-from circleguard import Circleguard, ReplayPath
 from utils import KEY, RES
+
+from circleguard import Circleguard, ReplayPath
 
 cg = Circleguard(KEY)
 

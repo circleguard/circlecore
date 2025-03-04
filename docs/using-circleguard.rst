@@ -41,13 +41,13 @@ Unstable Rate
 .. code-block:: python
 
     r = ReplayMap(1136506, 846038)
-    print(cg.ur(r)) # 75.45
+    print(cg.ur(r))  # 75.45
 
 You can also get the unconverted unstable rate:
 
 .. code-block:: python
 
-    print(cg.ur(r, cv=False)) # 113.18
+    print(cg.ur(r, cv=False))  # 113.18
 
 Snaps
 -----
@@ -57,7 +57,7 @@ Snaps
 .. code-block:: python
 
     r = ReplayMap(1136506, 6451401)
-    print(cg.snaps(r)) # [<circleguard.investigator.Snap>]
+    print(cg.snaps(r))  # [<circleguard.investigator.Snap>]
 
 You can adjust what counts as "snap" with the ``max_angle`` and ``min_distance`` arguments. See the |cg.snaps|
 documentation for details.
@@ -79,13 +79,13 @@ the frame after it. Typical frametime is ``16.66``. A low frametime is indicativ
 .. code-block:: python
 
     r = ReplayMap(1136506, 846038)
-    print(cg.frametime(r)) # 15.33
+    print(cg.frametime(r))  # 15.33
 
 You can also get the unconverted frametime:
 
 .. code-block:: python
 
-    print(cg.frametime(r, cv=False)) # 23.0
+    print(cg.frametime(r, cv=False))  # 23.0
 
 Frametimes
 ----------
@@ -96,13 +96,13 @@ on a replay's frametime, beyond just its average frametime.
 .. code-block:: python
 
     r = ReplayMap(1136506, 846038)
-    print(cg.frametimes(r)) # [16. 8.67 ... 16.67 16.67]
+    print(cg.frametimes(r))  # [16. 8.67 ... 16.67 16.67]
 
 You can also get the unconverted frametime:
 
 .. code-block:: python
 
-    print(cg.frametimes(r, cv=False)) # [24 13 ... 25 25]
+    print(cg.frametimes(r, cv=False))  # [24 13 ... 25 25]
 
 Judgments
 ---------
@@ -112,7 +112,7 @@ The locations in a replay where a hitobject is hit or missed. Judgments are mark
 .. code-block:: python
 
     r = ReplayMap(221777, 2757689)
-    print(cg.judgments(r)) # a list with lots of elements
+    print(cg.judgments(r))  # a list with lots of elements
 
 This returns a list of |Judgment| objects. See its documentation for details.
 
@@ -125,13 +125,13 @@ The locations in a replay where a hitobject is hit. This is equivalent to callin
 .. code-block:: python
 
     r = ReplayMap(221777, 2757689)
-    print(cg.hits(r)) # a list with lots of elements
+    print(cg.hits(r))  # a list with lots of elements
 
 You can also get only the hits which are within a certain number of pixels to the edge of the hitobject:
 
 .. code-block:: python
 
-    print(cg.hits(r, within=10)) # a list with fewer elements
+    print(cg.hits(r, within=10))  # a list with fewer elements
 
 This returns a list of |Hit| objects. See the |Hit| documentation for details.
 

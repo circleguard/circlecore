@@ -2,8 +2,8 @@ from enum import Enum, auto
 
 import numpy as np
 
-from circleguard.utils import check_param
 from circleguard.hitobjects import Hitobject
+from circleguard.utils import check_param
 
 
 class JudgmentType(Enum):

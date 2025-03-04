@@ -1,6 +1,5 @@
-from tests.utils import CGTestCase
-
 from circleguard import Mod, fuzzy_mods
+from tests.utils import CGTestCase
 
 
 class TestLoader(CGTestCase):
@@ -27,7 +26,7 @@ class TestLoader(CGTestCase):
 
         self.assertRaises(ValueError, lambda: Mod(["DTH"]))
         self.assertRaises(ValueError, lambda: Mod(["DH"]))
-        self.assertRaises(ValueError, lambda: Mod(["DH", int()]))
+        self.assertRaises(ValueError, lambda: Mod(["DH", 0]))
 
     def test_equality_reflexivity(self):
         self.assertEqual(Mod("NC"), Mod("NC"))

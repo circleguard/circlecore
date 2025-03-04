@@ -3,12 +3,12 @@ from datetime import timedelta
 import numpy as np
 from slider.beatmap import Circle, Slider, Spinner as SliderSpinner
 
-from circleguard.mod import Mod
-from circleguard.utils import KEY_MASK
 from circleguard import utils
 from circleguard.game_version import GameVersion
 from circleguard.hitobjects import Hitobject, Spinner
-from circleguard.judgment import JudgmentType, Miss, Hit
+from circleguard.judgment import Hit, JudgmentType, Miss
+from circleguard.mod import Mod
+from circleguard.utils import KEY_MASK
 
 
 class Investigations:

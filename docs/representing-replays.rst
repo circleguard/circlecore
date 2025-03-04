@@ -42,7 +42,7 @@ A |ReplayID| represents a replay that was submitted online and is represented by
 
 .. code-block:: python
 
-    r = ReplayID(2177560145) # cookiezi on freedom dive
+    r = ReplayID(2177560145)  # cookiezi on freedom dive
 
 .. warning::
 

@@ -1,7 +1,7 @@
 import numpy as np
 
-from circleguard import ReplayPath, Mod, Circleguard, order, ReplayMap
-from tests.utils import CGTestCase, DELTA, UR_DELTA, RES, FRAMETIME_LIMIT
+from circleguard import Circleguard, Mod, ReplayMap, ReplayPath, order
+from tests.utils import DELTA, FRAMETIME_LIMIT, RES, UR_DELTA, CGTestCase
 
 
 class TestSnaps(CGTestCase):

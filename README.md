@@ -47,14 +47,14 @@ cg = Circleguard("key")
 # replay on http://osu.ppy.sh/b/221777 by http://osu.ppy.sh/u/2757689
 replay = ReplayMap(221777, 2757689)
 
-print(cg.ur(replay)) # unstable rate
-print(cg.frametime(replay)) # average frametime
-print(cg.frametimes(replay)) # full frametime list
-print(cg.hits(replay)) # where the replay hits hitobjects
-print(cg.snaps(replay)) # any jerky/suspicious movement
+print(cg.ur(replay))  # unstable rate
+print(cg.frametime(replay))  # average frametime
+print(cg.frametimes(replay))  # full frametime list
+print(cg.hits(replay))  # where the replay hits hitobjects
+print(cg.snaps(replay))  # any jerky/suspicious movement
 
 replay2 = ReplayMap(221777, 4196808)
-print(cg.similarity(replay, replay2)) # how similar the replays are
+print(cg.similarity(replay, replay2))  # how similar the replays are
 
 # ReplayMap isn't the only way to represent replays; we can also
 # get a beatmap's top 3 plays

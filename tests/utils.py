@@ -1,8 +1,9 @@
 import os
 import warnings
 from pathlib import Path
-from circleguard import Circleguard
 from unittest import TestCase
+
+from circleguard import Circleguard
 
 KEY = os.environ.get("OSU_API_KEY")
 if not KEY:

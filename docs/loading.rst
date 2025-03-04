@@ -19,24 +19,24 @@ We can illustrate this by trying to access these attributes of replays directly 
     r_map = ReplayMap(221777, 2757689)
     r_id = ReplayID(2177560145)
 
-    print(r_path.path) # "/path/to/your/osr.osr"
-    print(r_path.replay_data) # None
-    print(r_path.map_id) # None
-    print(r_path.user_id) # None
-    print(r_path.replay_id) # None
-    print(r_path.mods) # None
+    print(r_path.path)  # "/path/to/your/osr.osr"
+    print(r_path.replay_data)  # None
+    print(r_path.map_id)  # None
+    print(r_path.user_id)  # None
+    print(r_path.replay_id)  # None
+    print(r_path.mods)  # None
 
-    print(r_map.replay_data) # None
-    print(r_map.map_id) # 221777
-    print(r_map.user_id) # 2757689
-    print(r_map.replay_id) # None
-    print(r_map.mods) # None
+    print(r_map.replay_data)  # None
+    print(r_map.map_id)  # 221777
+    print(r_map.user_id)  # 2757689
+    print(r_map.replay_id)  # None
+    print(r_map.mods)  # None
 
-    print(r_id.replay_data) # None
-    print(r_id.map_id) # None
-    print(r_id.user_id) # None
-    print(r_id.replay_id) # 2177560145
-    print(r_id.mods) # None
+    print(r_id.replay_data)  # None
+    print(r_id.map_id)  # None
+    print(r_id.user_id)  # None
+    print(r_id.replay_id)  # 2177560145
+    print(r_id.mods)  # None
 
 As you can see, not many attributes are available to us. However, we can retrieve more information about a replay by "loading" it.
 A replay is called "unloaded" if it hasn't been loaded yet, and "loaded" if it has.
@@ -51,11 +51,11 @@ proper value:
 
     # now we can access the real values of these attributes
 
-    print(len(r_map.replay_data)) # 26614
-    print(r_map.map_id) # 221777
-    print(r_map.user_id) # 2757689
-    print(r_map.replay_id) # 2832574010
-    print(r_map.mods) # Mod.HDHR
+    print(len(r_map.replay_data))  # 26614
+    print(r_map.map_id)  # 221777
+    print(r_map.user_id)  # 2757689
+    print(r_map.replay_id)  # 2832574010
+    print(r_map.mods)  # Mod.HDHR
 
 .. warning::
 
@@ -71,11 +71,11 @@ data, so almost none of its attributes will be filled, even after loading it:
     r_id = ReplayID(2177560145)
     cg.load(r_id)
 
-    print(len(r_id.replay_data)) # 20611
-    print(r_id.map_id) # None
-    print(r_id.user_id) # None
-    print(r_id.replay_id) # 2177560145
-    print(r_id.mods) # None
+    print(len(r_id.replay_data))  # 20611
+    print(r_id.map_id)  # None
+    print(r_id.user_id)  # None
+    print(r_id.replay_id)  # 2177560145
+    print(r_id.mods)  # None
 
 To find exactly what attributes a replay class provides before and after it's loaded, see its class'
 documentation.
@@ -105,10 +105,10 @@ To ask the |ReplayContainer| to create its replay objects, call |cg.load_info| o
 
     m = Map(221777, span="1-2")
 
-    print(list(m)) # [] since it's not info loaded!
+    print(list(m))  # [] since it's not info loaded!
 
     cg.load_info(m)
-    print(list(m)) # [ReplayMap(...), ReplayMap(...)]
+    print(list(m))  # [ReplayMap(...), ReplayMap(...)]
 
 The reason this does not happen by default / automatically is that info loading requires making api calls. This is a
 (relatively) expensive operation and so is deferred until explicitly requested.
@@ -157,7 +157,7 @@ Creating a |Replay| and then loading it immediately afterwards is a common opera
 .. code-block:: python
 
     r = cg.ReplayMap(221777, 4196808)
-    print(r.loaded) # True
+    print(r.loaded)  # True
     # similarly for other replays
     r2 = cg.ReplayID(2177560145)
     r3 = cg.ReplayPath("/path/to/your/osr.osr")
@@ -168,7 +168,7 @@ convenience methods |cg.Map|, |cg.User|, |cg.MapUser|, and |cg.ReplayDir| to cre
 .. code-block:: python
 
     m = cg.Map(221777, "1-50")
-    print(len(m)) # 50
+    print(len(m))  # 50
     # similarly for other replay containers
     u = cg.User(124493, "1-2")
     mu = cg.MapUser(124493, 129891)
@@ -180,7 +180,7 @@ If you would like to create a fully loaded |ReplayContainer|, not just an info-l
 .. code-block:: python
 
     m = cg.Map(221777, "1-2", load=True)
-    print(m[0].loaded) # True
+    print(m[0].loaded)  # True
 
 Checking State
 --------------
@@ -193,13 +193,13 @@ You can check whether a |Replay| or |ReplayContainer| is unloaded, loaded, or in
     cg = Circleguard("key")
 
     m = Map(221777, span="1")
-    print(m.info_loaded, m.loaded) # False, False
+    print(m.info_loaded, m.loaded)  # False, False
     cg.load_info(m)
-    print(m.info_loaded, m.loaded) # True, False
+    print(m.info_loaded, m.loaded)  # True, False
     cg.load(m)
-    print(m.info_loaded, m.loaded) # True, True
+    print(m.info_loaded, m.loaded)  # True, True
 
     r = ReplayMap(221777, 2757689)
-    print(r.loaded) # False
+    print(r.loaded)  # False
     cg.load(r)
-    print(r.loaded) # True
+    print(r.loaded)  # True

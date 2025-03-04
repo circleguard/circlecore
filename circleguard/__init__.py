@@ -1,46 +1,46 @@
 import logging
 
+from ossapi.ossapi import APIException, InvalidKeyException, ReplayUnavailableException
+
 from circleguard.circleguard import Circleguard, KeylessCircleguard, set_options
-from circleguard.loadables import (
-    Replay,
-    ReplayMap,
-    ReplayPath,
-    Map,
-    User,
-    MapUser,
-    ReplayDir,
-    ReplayContainer,
-    Loadable,
-    ReplayCache,
-    CachedReplay,
-    ReplayID,
-    ReplayString,
-    LoadableContainer,
-    ReplayOssapi,
-)
-from circleguard.mod import Mod
-from circleguard.loader import Loader, NoInfoAvailableException
-from circleguard.version import __version__
+from circleguard.game_version import GameVersion, NoGameVersion
+from circleguard.hitobjects import Circle, Hitobject, Slider, Spinner
 from circleguard.investigations import Snap
-from circleguard.judgment import Judgment, Hit, Miss, JudgmentType
+from circleguard.judgment import Hit, Judgment, JudgmentType, Miss
+from circleguard.loadables import (
+    CachedReplay,
+    Loadable,
+    LoadableContainer,
+    Map,
+    MapUser,
+    Replay,
+    ReplayCache,
+    ReplayContainer,
+    ReplayDir,
+    ReplayID,
+    ReplayMap,
+    ReplayOssapi,
+    ReplayPath,
+    ReplayString,
+    User,
+)
+from circleguard.loader import Loader, NoInfoAvailableException
+from circleguard.mod import Mod
 from circleguard.span import Span
 from circleguard.utils import (
-    convert_statistic,
-    order,
-    Key,
-    RatelimitWeight,
     TRACE,
     ColoredFormatter,
-    replay_pairs,
+    Key,
+    RatelimitWeight,
+    convert_statistic,
     fuzzy_mods,
+    hitradius,
     hitwindow,
     hitwindows,
-    hitradius,
+    order,
+    replay_pairs,
 )
-from circleguard.game_version import GameVersion, NoGameVersion
-from circleguard.hitobjects import Hitobject, Circle, Slider, Spinner
-
-from ossapi.ossapi import APIException, InvalidKeyException, ReplayUnavailableException
+from circleguard.version import __version__
 
 logging.addLevelName(TRACE, "TRACE")
 formatter = ColoredFormatter(

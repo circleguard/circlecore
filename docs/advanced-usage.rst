@@ -104,8 +104,7 @@ to load itself, and is passed a null ``loader``, raise an error:
 .. code-block:: python
 
     if not loader:
-        raise ValueError("A Map cannot be info loaded without api "
-            "access")
+        raise ValueError("A Map cannot be info loaded without api " "access")
 
 If your replay does not need api access, you may safely ignore the ``loader`` argument.
 
@@ -130,8 +129,7 @@ can estimate from the timestamp):
     self.timestamp = info.timestamp
     # estimate version with timestamp, this is only accurate if the user
     # keeps their game up to date
-    self.game_version = GameVersion.from_datetime(self.timestamp,
-        concrete=False)
+    self.game_version = GameVersion.from_datetime(self.timestamp, concrete=False)
     self.username = info.username
     self.mods = info.mods
     self.replay_id = info.replay_id

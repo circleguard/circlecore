@@ -1,8 +1,9 @@
 import cProfile
 from pstats import Stats
 
-from circleguard import Circleguard, ReplayPath
 from utils import KEY, RES
+
+from circleguard import Circleguard, ReplayPath
 
 # TODO not sure how useful this benchmark is tbh, rework or remove
 

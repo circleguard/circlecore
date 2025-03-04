@@ -22,9 +22,9 @@ we load it from the api (or local file in the case of |ReplayPath|), compress th
     r1 = ReplayMap(221777, 2757689)
     r2 = ReplayMap(221777, 2757689)
     print("loading from api")
-    cg.load(r1) # replay gets loaded from the api and cached
+    cg.load(r1)  # replay gets loaded from the api and cached
     print("loading from cache")
-    cg.load(r2) # loaded from our cache, not the api
+    cg.load(r2)  # loaded from our cache, not the api
     # we can do this as many times as we want - we won't ever
     # hit the api ratelimit since we're loading from the cache
     for i in range(0, 5):
@@ -58,7 +58,7 @@ directory the |Circleguard| cache db file is in if you'd like.
 
     cg = Circleguard("key", db_path="./dbs/db.db", slider_dir="./dbs/")
     r = ReplayMap(221777, 2757689)
-    cg.hits(r) # downloads https://osu.ppy.sh/b/221777 and caches it in slider_dir
+    cg.hits(r)  # downloads https://osu.ppy.sh/b/221777 and caches it in slider_dir
 
 If ``slider_dir`` is not passed, we still use slider to download beatmaps, but cache them to a newly created temporary directory
 instead. This means beatmaps will be cached with respect to a single |Circleguard| object, but will not persist across runs.
@@ -81,8 +81,8 @@ when they're loaded:
     cg = Circleguard("key", db_path="./db.db")
     r1 = ReplayMap(221777, 2757689, cache=True)
     r2 = ReplayMap(1524183, 12092800, cache=False)
-    cg.load(r1) # gets cached
-    cg.load(r2) # does not get cached
+    cg.load(r1)  # gets cached
+    cg.load(r2)  # does not get cached
 
 For a |ReplayContainer|, ``cache`` cascades to its |Replay|\s:
 
@@ -90,4 +90,4 @@ For a |ReplayContainer|, ``cache`` cascades to its |Replay|\s:
 
     cg = Circleguard("key", db_path="./db.db")
     m = Map(221777, span="1-2", cache=False)
-    cg.load(m) # neither replay in `m` cached
+    cg.load(m)  # neither replay in `m` cached

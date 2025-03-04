@@ -9,7 +9,6 @@ We use [sphinx](http://www.sphinx-doc.org/en/master/) to build our documentation
 ### Numpy
 
 ```python
-
 def add(a, b):
     """
     Adds `a` and `b`.

@@ -1,5 +1,5 @@
-from circleguard import Loader, InvalidKeyException
-from tests.utils import CGTestCase, KEY
+from circleguard import InvalidKeyException, Loader
+from tests.utils import KEY, CGTestCase
 
 
 class TestLoader(CGTestCase):

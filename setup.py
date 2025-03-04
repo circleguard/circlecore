@@ -1,8 +1,9 @@
-from distutils.core import setup
-from setuptools import find_packages
 import re
+from distutils.core import setup
 
-with open("README.md", "r") as readme:
+from setuptools import find_packages
+
+with open("README.md") as readme:
     long_description = readme.read()
 
 # https://stackoverflow.com/a/7071358

@@ -8,9 +8,9 @@ try:
 except ImportError:
     raise ImportError("psycopg2 must be installed to use PostgresLoader")
 
+from circleguard.circleguard import Circleguard
 from circleguard.loader import Loader
 from circleguard.utils import TRACE
-from circleguard.circleguard import Circleguard
 
 
 class PostgresCircleguard(Circleguard):

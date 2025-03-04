@@ -5,4 +5,4 @@
 # reassess whether it makes sense to leave this or convert our mod imports to
 # import from ossapi instead. I think we will want to convert them, but a
 # problem for future me.
-from ossapi.mod import ModCombination, Mod  # noqa: F401
+from ossapi.mod import Mod, ModCombination  # noqa: F401

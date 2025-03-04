@@ -1,18 +1,17 @@
 from datetime import datetime, timezone
 
 from circleguard import (
-    ReplayMap,
-    ReplayPath,
-    RatelimitWeight,
     Map,
-    User,
     MapUser,
     Mod,
     NoInfoAvailableException,
+    RatelimitWeight,
+    ReplayMap,
+    ReplayPath,
     ReplayString,
+    User,
 )
-
-from tests.utils import CGTestCase, RES
+from tests.utils import RES, CGTestCase
 
 
 class TestReplays(CGTestCase):

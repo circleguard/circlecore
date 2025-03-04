@@ -1,16 +1,16 @@
 import base64
 import logging
-from lzma import LZMAError
-from functools import lru_cache
-from pathlib import Path
 import sqlite3
-import wtc
+from functools import lru_cache
+from lzma import LZMAError
+from pathlib import Path
 
 import osrparse
+import wtc
 from ossapi import OssapiV1, ReplayUnavailableException
 
-from circleguard.utils import TRACE
 from circleguard.span import Span
+from circleguard.utils import TRACE
 
 
 class NoInfoAvailableException(Exception):
@@ -371,7 +371,7 @@ class Loader:
         # a single row
         return replay_data
 
-    @lru_cache()
+    @lru_cache
     def beatmap_id(self, beatmap_hash):
         """
         Retrieves a beatmap id from a corresponding beatmap hash through the
@@ -402,7 +402,7 @@ class Loader:
     # TODO remove in core 6.0.0
     map_id = beatmap_id
 
-    @lru_cache()
+    @lru_cache
     def user_id(self, username):
         """
         Retrieves a user id from a corresponding username through the api.
@@ -437,7 +437,7 @@ class Loader:
             return 0
         return user.user_id
 
-    @lru_cache()
+    @lru_cache
     def username(self, user_id):
         """
         Retrieves the username from a corresponding user id through the api.
