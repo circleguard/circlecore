@@ -88,6 +88,7 @@ class TestSnaps(CGTestCase):
         snaps = self.cg.snaps(r)
         self.assertEqual(len(snaps), 0)
 
+
 class TestSimilarity(CGTestCase):
 
     @classmethod
@@ -101,58 +102,97 @@ class TestSimilarity(CGTestCase):
         cls.time_shifted2 = ReplayPath(RES / "stealing" / "stolen-time-shifted-1-2.osr")
 
     @staticmethod
-    def add_noise_and_positional_translation_to_replay(replay, pixel_offset, std_deviation):
+    def add_noise_and_positional_translation_to_replay(
+        replay, pixel_offset, std_deviation
+    ):
         mean = [pixel_offset, pixel_offset]
-        covariance_matrix = [[std_deviation, std_deviation],[std_deviation,std_deviation]]
-        replay.xy = replay.xy + np.random.default_rng().multivariate_normal(mean, covariance_matrix, len(replay.xy))
+        covariance_matrix = [
+            [std_deviation, std_deviation],
+            [std_deviation, std_deviation],
+        ]
+        replay.xy = replay.xy + np.random.default_rng().multivariate_normal(
+            mean, covariance_matrix, len(replay.xy)
+        )
 
     def test_cheated(self):
         # taken from http://redd.it/bvfv8j, remodded replay by same user (CielXDLP) from HDHR to FLHDHR
         sim = self.cg.similarity(self.stolen1, self.stolen2)
-        self.assertLess(sim, Circleguard.SIM_LIMIT, "Cheated replays were not detected as cheated")
+        self.assertLess(
+            sim, Circleguard.SIM_LIMIT, "Cheated replays were not detected as cheated"
+        )
 
         r1 = self.stolen1
         r2 = self.stolen2
         (earlier, later) = order(r1, r2)
 
-        self.assertAlmostEqual(sim, 2.20867, delta=DELTA, msg="Similarity is not correct")
+        self.assertAlmostEqual(
+            sim, 2.20867, delta=DELTA, msg="Similarity is not correct"
+        )
         self.assertEqual(r1.map_id, r2.map_id, "Replay map ids did not match")
         self.assertEqual(r1.map_id, 1988753, "Replay map id was not correct")
-        self.assertEqual(earlier.mods, Mod.HD + Mod.HR, "Earlier replay mods was not correct")
-        self.assertEqual(later.mods, Mod.FL + Mod.HD + Mod.HR, "Later replay mods was not correct")
-        self.assertEqual(earlier.replay_id, 2801164636, "Earlier replay id was not correct")
+        self.assertEqual(
+            earlier.mods, Mod.HD + Mod.HR, "Earlier replay mods was not correct"
+        )
+        self.assertEqual(
+            later.mods, Mod.FL + Mod.HD + Mod.HR, "Later replay mods was not correct"
+        )
+        self.assertEqual(
+            earlier.replay_id, 2801164636, "Earlier replay id was not correct"
+        )
         self.assertEqual(later.replay_id, 2805164683, "Later replay id was not correct")
         self.assertEqual(r1.username, r2.username, "Replay usernames did not match")
 
     def test_cheated_time_shift(self):
-        sim = self.cg.similarity(self.time_shifted1, self.time_shifted2, method="similarity")
-        self.assertAlmostEqual(sim, 17.30254, delta=DELTA, msg="Similarity is not correct")
+        sim = self.cg.similarity(
+            self.time_shifted1, self.time_shifted2, method="similarity"
+        )
+        self.assertAlmostEqual(
+            sim, 17.30254, delta=DELTA, msg="Similarity is not correct"
+        )
 
         # `similarity` is currently *not* able to detect time shifts. If this
         # changes we want to know! :P
         self.assertGreater(sim, Circleguard.SIM_LIMIT)
 
         # `correlation` should be able to, though.
-        corr = self.cg.similarity(self.time_shifted1, self.time_shifted2, method="correlation")
-        self.assertGreater(corr, Circleguard.CORR_LIMIT, "Cheated replays were not detected as cheated")
-        self.assertAlmostEqual(corr, 0.99734, delta=DELTA, msg="Correlation is not correct")
+        corr = self.cg.similarity(
+            self.time_shifted1, self.time_shifted2, method="correlation"
+        )
+        self.assertGreater(
+            corr, Circleguard.CORR_LIMIT, "Cheated replays were not detected as cheated"
+        )
+        self.assertAlmostEqual(
+            corr, 0.99734, delta=DELTA, msg="Correlation is not correct"
+        )
 
     def test_legitimate(self):
         sim = self.cg.similarity(self.legit1, self.legit2)
-        self.assertGreater(sim, Circleguard.SIM_LIMIT, "Legitimate replays were detected as stolen")
+        self.assertGreater(
+            sim, Circleguard.SIM_LIMIT, "Legitimate replays were detected as stolen"
+        )
 
         r1 = self.legit1
         r2 = self.legit2
         (earlier, later) = order(r1, r2)
 
-        self.assertAlmostEqual(sim, 23.13951, delta=DELTA, msg="Similarity is not correct")
+        self.assertAlmostEqual(
+            sim, 23.13951, delta=DELTA, msg="Similarity is not correct"
+        )
         self.assertEqual(r1.map_id, r2.map_id, "Replay map ids did not match")
         self.assertEqual(r1.map_id, 722238, "Replay map id was not correct")
-        self.assertEqual(earlier.mods, Mod.HD + Mod.NC, "Earlier replay mods was not correct")
-        self.assertEqual(later.mods, Mod.HD + Mod.DT, "Later replay mods was not correct")
-        self.assertEqual(earlier.replay_id, 2157431869, "Earlier replay id was not correct")
+        self.assertEqual(
+            earlier.mods, Mod.HD + Mod.NC, "Earlier replay mods was not correct"
+        )
+        self.assertEqual(
+            later.mods, Mod.HD + Mod.DT, "Later replay mods was not correct"
+        )
+        self.assertEqual(
+            earlier.replay_id, 2157431869, "Earlier replay id was not correct"
+        )
         self.assertEqual(later.replay_id, 2309618113, "Later replay id was not correct")
-        self.assertEqual(earlier.username, "Crissinop", "Earlier username was not correct")
+        self.assertEqual(
+            earlier.username, "Crissinop", "Earlier username was not correct"
+        )
         self.assertEqual(later.username, "TemaZpro", "Later username was not correct")
 
     def test_robustness_to_translation(self):
@@ -163,8 +203,16 @@ class TestSimilarity(CGTestCase):
         sim = self.cg.similarity(self.stolen1, stolen2, method="similarity")
         corr = self.cg.similarity(self.stolen1, stolen2, method="correlation")
 
-        self.assertLess(sim, Circleguard.SIM_LIMIT, "Cheated replays were not detected as cheated with sim")
-        self.assertGreater(corr, Circleguard.CORR_LIMIT, "Cheated replays were not detected as cheated with correlation")
+        self.assertLess(
+            sim,
+            Circleguard.SIM_LIMIT,
+            "Cheated replays were not detected as cheated with sim",
+        )
+        self.assertGreater(
+            corr,
+            Circleguard.CORR_LIMIT,
+            "Cheated replays were not detected as cheated with correlation",
+        )
 
 
 class TestUR(CGTestCase):
@@ -173,17 +221,50 @@ class TestUR(CGTestCase):
         super().setUpClass()
         # TODO check `legit-12.osr` as well once ur calc notelock issues are
         # dealt with, which causes us to be ~3 ur off from its actual ur
-        cls.replays = [ReplayPath(RES / "legit" / f"legit-{i}.osr") for i in range(1, 12)]
-        cls.urs =          [66.74, 66.56, 242.73, 115.54, 254.56, 90.88, 121.62, 163.01, 207.31, 198.79, 138.25]
-        cls.urs_adjusted = [66.73, 63.03, 170.23, 110.76, 182.22, 88.63, 92.53,  104.43, 132.06, 160.68, 104.58]
+        cls.replays = [
+            ReplayPath(RES / "legit" / f"legit-{i}.osr") for i in range(1, 12)
+        ]
+        cls.urs = [
+            66.74,
+            66.56,
+            242.73,
+            115.54,
+            254.56,
+            90.88,
+            121.62,
+            163.01,
+            207.31,
+            198.79,
+            138.25,
+        ]
+        cls.urs_adjusted = [
+            66.73,
+            63.03,
+            170.23,
+            110.76,
+            182.22,
+            88.63,
+            92.53,
+            104.43,
+            132.06,
+            160.68,
+            104.58,
+        ]
 
     def test_ur(self):
         for i, replay in enumerate(self.replays):
-            self.assertAlmostEqual(self.cg.ur(replay), self.urs[i],
-                delta=UR_DELTA, msg=f"ur differs for replay {i} ({replay})")
-            self.assertAlmostEqual(self.cg.ur(replay, adjusted=True),
-                self.urs_adjusted[i], delta=UR_DELTA,
-                msg=f"adjusted ur differs for replay {i} ({replay})")
+            self.assertAlmostEqual(
+                self.cg.ur(replay),
+                self.urs[i],
+                delta=UR_DELTA,
+                msg=f"ur differs for replay {i} ({replay})",
+            )
+            self.assertAlmostEqual(
+                self.cg.ur(replay, adjusted=True),
+                self.urs_adjusted[i],
+                delta=UR_DELTA,
+                msg=f"adjusted ur differs for replay {i} ({replay})",
+            )
 
 
 class TestFrametime(CGTestCase):
@@ -198,12 +279,27 @@ class TestFrametime(CGTestCase):
         cls.legit = ReplayPath(RES / "legit" / "legit-1.osr")
 
     def test_cheated(self):
-        replays = [self.timewarped1, self.timewarped2, self.timewarped3, self.timewarped4]
+        replays = [
+            self.timewarped1,
+            self.timewarped2,
+            self.timewarped3,
+            self.timewarped4,
+        ]
         frametimes = [11.33333, 10.66666, 8, 8.66666]
         for i, replay in enumerate(replays):
             frametime = self.cg.frametime(replay)
-            self.assertAlmostEqual(frametime, frametimes[i], delta=DELTA, msg=f"Frametime was wrong for replay {replay}")
-            self.assertLess(frametime, FRAMETIME_LIMIT, f"Timewarped replay {replay} was not detected as cheated")
+            self.assertAlmostEqual(
+                frametime,
+                frametimes[i],
+                delta=DELTA,
+                msg=f"Frametime was wrong for replay {replay}",
+            )
+            self.assertLess(
+                frametime,
+                FRAMETIME_LIMIT,
+                f"Timewarped replay {replay} was not detected as cheated",
+            )
+
 
 class TestHits(CGTestCase):
     @classmethod

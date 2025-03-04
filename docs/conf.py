@@ -14,7 +14,7 @@ copyright = "2020, Liam DeVoe, samuelhklumpers"
 author = "Liam DeVoe, samuelhklumpers"
 release = "v" + __version__
 version = "v" + __version__
-master_doc = 'index'
+master_doc = "index"
 
 # https://www.sphinx-doc.org/en/master/usage/configuration.html#confval-html_show_copyright
 html_show_copyright = False
@@ -26,11 +26,13 @@ extensions = [
     "sphinx.ext.napoleon",
     "sphinx.ext.intersphinx",
     "sphinx.ext.viewcode",
-    "sphinx.ext.todo"
+    "sphinx.ext.todo",
 ]
 
-intersphinx_mapping = {"python": ("https://docs.python.org/3", None),
-                       "slider": ("https://llllllllll.github.io/slider/", None)}
+intersphinx_mapping = {
+    "python": ("https://docs.python.org/3", None),
+    "slider": ("https://llllllllll.github.io/slider/", None),
+}
 # https://stackoverflow.com/a/37210251
 autodoc_member_order = "bysource"
 

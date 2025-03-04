@@ -5,11 +5,13 @@ import numpy as np
 from circleguard.utils import check_param
 from circleguard.hitobjects import Hitobject
 
+
 class JudgmentType(Enum):
     Hit300 = auto()
     Hit100 = auto()
     Hit50 = auto()
     Miss = auto()
+
 
 class Judgment:
     """
@@ -28,19 +30,22 @@ class Judgment:
     type: :class:`JudgmentType`
         The type of this judgment (either Hit300, Hit100, or Hit50, or Miss).
     """
+
     def __init__(self, hitobject, replay, beatmap, type_):
         # TODO remove `already_converted=True` when
         # https://github.com/llllllllll/slider/issues/80 is fixed
-        self.hitobject = Hitobject.from_slider_hitobj(hitobject, replay,
-            beatmap, True)
+        self.hitobject = Hitobject.from_slider_hitobj(hitobject, replay, beatmap, True)
         self.type = type_
+
 
 class Miss(Judgment):
     """
     A miss on a hitobject when a replay is played against a beatmap.
     """
+
     def __init__(self, hitobject, replay, beatmap):
         super().__init__(hitobject, replay, beatmap, JudgmentType.Miss)
+
 
 class Hit(Judgment):
     """
@@ -62,6 +67,7 @@ class Hit(Judgment):
     type: :class:`JudgmentType`
         The type of this hit (either Hit300, Hit100, or Hit50).
     """
+
     def __init__(self, hitobject, t, xy, replay, beatmap, type_):
         super().__init__(hitobject, replay, beatmap, type_)
         # TODO remove ``t`` in core 6.0.0, ``time`` is more intuitive. ``x`` and
@@ -140,8 +146,11 @@ class Hit(Judgment):
         return self.time - self.hitobject.time
 
     def __eq__(self, other):
-        return (self.hitobject == other.hitobject and self.t == other.t and
-            self.xy == other.xy)
+        return (
+            self.hitobject == other.hitobject
+            and self.t == other.t
+            and self.xy == other.xy
+        )
 
     def __hash__(self):
         return hash((self.hitobject, self.t, self.xy))

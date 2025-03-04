@@ -26,16 +26,17 @@ class RatelimitWeight(Enum):
     This value currently has no effect in circlecore and is reserved for future
     functionality.
     """
-    NONE  = "None"
+
+    NONE = "None"
     LIGHT = "Light"
     HEAVY = "Heavy"
 
 
 class Key(IntFlag):
-    M1    = 1 << 0
-    M2    = 1 << 1
-    K1    = 1 << 2
-    K2    = 1 << 3
+    M1 = 1 << 0
+    M2 = 1 << 1
+    K1 = 1 << 2
+    K2 = 1 << 3
     SMOKE = 1 << 4
 
 
@@ -99,8 +100,10 @@ def order(replay1, replay2):
         later replay.
     """
     if not replay1.timestamp or not replay2.timestamp:
-        raise ValueError("Both replay1 and replay2 must provide a timestamp. "
-            "Replays without a timestamp cannot be ordered.")
+        raise ValueError(
+            "Both replay1 and replay2 must provide a timestamp. "
+            "Replays without a timestamp cannot be ordered."
+        )
     # assume they're passed in order (earliest first); if not, switch them
     order = (replay1, replay2)
     if replay2.timestamp < replay1.timestamp:
@@ -206,6 +209,7 @@ def hitwindow(OD):
     # an int so we replicate this
     return int(150 + 50 * (5 - float(np.float32(OD))) / 5)
 
+
 def hitwindows(OD):
     hitwindow_50 = hitwindow(OD)
     hitwindow_100 = (280 - 16 * OD) / 2
@@ -213,12 +217,16 @@ def hitwindows(OD):
 
     return (hitwindow_50, hitwindow_100, hitwindow_300)
 
+
 def hitradius(CS):
     """
     The radius, in osu!pixels (?) of where a hitobject can be hit.
     """
     # attempting to match stable hitradius
-    return np.float32(64 * ((1.0 - np.float32(0.7) * (float(np.float32(CS)) - 5) / 5)) / 2) * np.float32(1.00041)
+    return np.float32(
+        64 * ((1.0 - np.float32(0.7) * (float(np.float32(CS)) - 5) / 5)) / 2
+    ) * np.float32(1.00041)
+
 
 def filter_outliers(arr, bias=1.5):
     """
@@ -232,7 +240,7 @@ def filter_outliers(arr, bias=1.5):
         Points in ``arr`` which are more than ``IQR * bias`` away from the first
         or third quartile of ``arr`` will be removed.
     """
-    q3, q1 = np.percentile(arr, [75 ,25])
+    q3, q1 = np.percentile(arr, [75, 25])
     iqr = q3 - q1
     lower_limit = q1 - (bias * iqr)
     upper_limit = q3 + (bias * iqr)
@@ -240,6 +248,7 @@ def filter_outliers(arr, bias=1.5):
 
 
 TRACE = 5
+
 
 class ColoredFormatter(Formatter):
     """
@@ -252,26 +261,26 @@ class ColoredFormatter(Formatter):
     Adapted from https://stackoverflow.com/a/46482050.
     """
 
-    COLOR_PREFIX = '\033['
-    COLOR_SUFFIX = '\033[0m'
+    COLOR_PREFIX = "\033["
+    COLOR_SUFFIX = "\033[0m"
     COLOR_MAPPING = {
-        "TRACE"    : 90, # bright black
-        "DEBUG"    : 94, # bright blue
-        "INFO"     : 95, # bright magenta
-        "WARNING"  : 31, # red
-        "ERROR"    : 91, # bright red
-        "CRITICAL" : 41, # white on red bg
-
-        "NAME"     : 32, # green
-        "MESSAGE"  : 93, # bright yellow
-        "FILENAME" : 92, # bright green
-        "LINENO"   : 91  # bright red
+        "TRACE": 90,  # bright black
+        "DEBUG": 94,  # bright blue
+        "INFO": 95,  # bright magenta
+        "WARNING": 31,  # red
+        "ERROR": 91,  # bright red
+        "CRITICAL": 41,  # white on red bg
+        "NAME": 32,  # green
+        "MESSAGE": 93,  # bright yellow
+        "FILENAME": 92,  # bright green
+        "LINENO": 91,  # bright red
     }
 
     def __init__(self, patern):
         Formatter.__init__(self, patern)
         self.colored_log = "{prefix}{{color}}m{{msg}}{suffix}".format(
-                    prefix=self.COLOR_PREFIX, suffix=self.COLOR_SUFFIX)
+            prefix=self.COLOR_PREFIX, suffix=self.COLOR_SUFFIX
+        )
 
     def format(self, record):
         # c as in colored, not as in copy
@@ -283,7 +292,7 @@ class ColoredFormatter(Formatter):
         c_threadName = self.colored_log.format(color=color, msg=threadName)
 
         levelname = c_record.levelname
-        color = self.COLOR_MAPPING.get(levelname, 37) # default to white
+        color = self.COLOR_MAPPING.get(levelname, 37)  # default to white
         c_levelname = self.colored_log.format(color=color, msg=levelname)
 
         name = c_record.name

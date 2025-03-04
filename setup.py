@@ -20,8 +20,8 @@ setup(
     name="circleguard",
     version=VERSION,
     description="A utilities library for osu!. Provides support for parsing "
-        "replays from a file or from the api, as well as support for unstable "
-        "rate, hits, similarity, and frametime calculations.",
+    "replays from a file or from the api, as well as support for unstable "
+    "rate, hits, similarity, and frametime calculations.",
     long_description=long_description,
     long_description_content_type="text/markdown",
     classifiers=[
@@ -30,11 +30,11 @@ setup(
         "License :: OSI Approved :: GNU General Public License v3 (GPLv3)",
         "Operating System :: OS Independent",
     ],
-    keywords = ["osu!, python, cheat-detection, replay-stealing, remodding"],
+    keywords=["osu!, python, cheat-detection, replay-stealing, remodding"],
     author="Liam DeVoe",
     author_email="orionldevoe@gmail.com",
     url="https://github.com/circleguard/circlecore",
-    download_url = "https://github.com/circleguard/circlecore/tarball/v" + VERSION,
+    download_url="https://github.com/circleguard/circlecore/tarball/v" + VERSION,
     packages=find_packages(),
     install_requires=[
         "osrparse~=6.0",
@@ -43,11 +43,7 @@ setup(
         "numpy",
         "requests",
         "slider>=0.5.1",
-        "scipy"
+        "scipy",
     ],
-    extras_require={
-        "graphing": [
-            "matplotlib"
-        ]
-    }
+    extras_require={"graphing": ["matplotlib"]},
 )

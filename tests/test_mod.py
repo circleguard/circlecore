@@ -2,6 +2,7 @@ from tests.utils import CGTestCase
 
 from circleguard import Mod, fuzzy_mods
 
+
 class TestLoader(CGTestCase):
     @classmethod
     def setUpClass(cls):
@@ -32,9 +33,21 @@ class TestLoader(CGTestCase):
         self.assertEqual(Mod("NC"), Mod("NC"))
 
     def test_mod_ordering(self):
-        self.assertEqual(Mod("DTHDSO"), Mod("SOHDDT"), "Identical mods ordered differently were not equal")
-        self.assertEqual(Mod("DTHR").long_name(), Mod("HRDT").long_name(), "Long name of identical mods ordered differently were not equal")
-        self.assertEqual(Mod("SOAPFLEZ").short_name(), Mod("EZSOFLAP").short_name(), "Short name of identical mods ordered differently were not equal")
+        self.assertEqual(
+            Mod("DTHDSO"),
+            Mod("SOHDDT"),
+            "Identical mods ordered differently were not equal",
+        )
+        self.assertEqual(
+            Mod("DTHR").long_name(),
+            Mod("HRDT").long_name(),
+            "Long name of identical mods ordered differently were not equal",
+        )
+        self.assertEqual(
+            Mod("SOAPFLEZ").short_name(),
+            Mod("EZSOFLAP").short_name(),
+            "Short name of identical mods ordered differently were not equal",
+        )
 
         self.assertEqual(Mod("HD").short_name(), "HD")
         self.assertEqual(Mod("HR").long_name(), "HardRock")
@@ -43,8 +56,9 @@ class TestLoader(CGTestCase):
 
     def test_fuzzy_mod(self):
         mods = fuzzy_mods(Mod.HD, [Mod.DT, Mod.EZ])
-        self.assertListEqual(mods,
-            [Mod.HD, Mod.HDDT, Mod.HD + Mod.EZ, Mod.HD + Mod.EZ + Mod.DT])
+        self.assertListEqual(
+            mods, [Mod.HD, Mod.HDDT, Mod.HD + Mod.EZ, Mod.HD + Mod.EZ + Mod.DT]
+        )
 
         mods = fuzzy_mods(Mod.HD, [Mod.DT])
         self.assertListEqual(mods, [Mod.HD, Mod.HD + Mod.DT])

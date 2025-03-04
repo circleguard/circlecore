@@ -10,8 +10,16 @@ from circleguard.loader import Loader
 from circleguard.investigations import Investigations, Snap
 from circleguard.judgment import Judgment, Hit
 from circleguard.utils import convert_statistic, check_param
-from circleguard.loadables import (Map, User, MapUser, ReplayMap, ReplayID,
-    ReplayPath, ReplayString, ReplayDir)
+from circleguard.loadables import (
+    Map,
+    User,
+    MapUser,
+    ReplayMap,
+    ReplayID,
+    ReplayPath,
+    ReplayString,
+    ReplayDir,
+)
 from circleguard.mod import Mod
 
 
@@ -61,6 +69,7 @@ class Circleguard:
         An instance of :class:`~circleguard.loader.Loader` or a subclass
         thereof, which will be used instead of creating a loader if passed.
     """
+
     DEFAULT_ANGLE = 10
     DEFAULT_DISTANCE = 8
     # A good balance between speed and accuracy when calculating correlation.
@@ -75,9 +84,7 @@ class Circleguard:
     SIM_LIMIT = 17
     CORR_LIMIT = 0.99
 
-    def __init__(self, key, db_path=None, slider_dir=None, loader=None,
-        cache=True
-    ):
+    def __init__(self, key, db_path=None, slider_dir=None, loader=None, cache=True):
         self.log = logging.getLogger(__name__)
 
         # allow for people to pass their own loader implementation/subclass.
@@ -98,10 +105,14 @@ class Circleguard:
             self.slider_dir = TemporaryDirectory()
             self.library = Library(self.slider_dir.name)
 
-
-    def similarity(self, replay1, replay2, method="similarity",
-        num_chunks=DEFAULT_CHUNKS, mods_unknown="best") -> \
-        Union[float, Tuple[float]]:
+    def similarity(
+        self,
+        replay1,
+        replay2,
+        method="similarity",
+        num_chunks=DEFAULT_CHUNKS,
+        mods_unknown="best",
+    ) -> Union[float, Tuple[float]]:
         """
         The similarity between ``replay1`` and ``replay2``.
 
@@ -165,9 +176,9 @@ class Circleguard:
 
         self.load(replay1)
         self.load(replay2)
-        return Investigations.similarity(replay1, replay2, method, num_chunks,
-            mods_unknown)
-
+        return Investigations.similarity(
+            replay1, replay2, method, num_chunks, mods_unknown
+        )
 
     def ur(self, replay, cv=True, beatmap=None, adjusted=False) -> float:
         """
@@ -201,8 +212,10 @@ class Circleguard:
 
         beatmap = beatmap or self.beatmap(replay)
         if not beatmap:
-            raise ValueError("The ur of a replay that does not know what map "
-                "it was set on cannot be calculated")
+            raise ValueError(
+                "The ur of a replay that does not know what map "
+                "it was set on cannot be calculated"
+            )
 
         ur = Investigations.ur(replay, beatmap, adjusted)
         if cv:
@@ -210,10 +223,14 @@ class Circleguard:
 
         return ur
 
-
-    def snaps(self, replay, max_angle=DEFAULT_ANGLE,
-        min_distance=DEFAULT_DISTANCE, only_on_hitobjs=True,
-        beatmap=None) -> Iterable[Snap]:
+    def snaps(
+        self,
+        replay,
+        max_angle=DEFAULT_ANGLE,
+        min_distance=DEFAULT_DISTANCE,
+        only_on_hitobjs=True,
+        beatmap=None,
+    ) -> Iterable[Snap]:
         """
         Finds any snaps (sudden, jerky movement) in ``replay``.
 
@@ -259,14 +276,15 @@ class Circleguard:
         if only_on_hitobjs:
             beatmap_ = beatmap or self.beatmap(replay)
             if not beatmap_:
-                raise ValueError("The snaps of a replay that does not know "
+                raise ValueError(
+                    "The snaps of a replay that does not know "
                     "what map it was set on cannot be filtered to include only "
                     "snaps on hit objects. If you cannot retrieve the beatmap, "
                     "you can pass ``only_on_hitobjs=False`` to avoid requiring "
-                    "a beatmap.")
+                    "a beatmap."
+                )
 
         return Investigations.snaps(replay, max_angle, min_distance, beatmap_)
-
 
     def frametime(self, replay, cv=True, mods_unknown="raise") -> float:
         """
@@ -313,16 +331,17 @@ class Circleguard:
             elif mods_unknown == "ht":
                 mods = Mod.HT
             else:
-                raise ValueError("The frametime of a replay that does not know "
+                raise ValueError(
+                    "The frametime of a replay that does not know "
                     "with what mods it was set with cannot be converted. Pass "
                     "a different option to frametime(..., mods_unknown=) if "
-                    "you would like to provide a default mod for conversion.")
+                    "you would like to provide a default mod for conversion."
+                )
             frametime = convert_statistic(frametime, mods, to="cv")
 
         return frametime
 
-    def frametimes(self, replay, cv=True, mods_unknown="raise") \
-        -> Iterable[float]:
+    def frametimes(self, replay, cv=True, mods_unknown="raise") -> Iterable[float]:
         """
         The time (in ms) between each frame in ``replay``.
 
@@ -369,11 +388,13 @@ class Circleguard:
             elif mods_unknown == "ht":
                 mods = Mod.HT
             else:
-                raise ValueError("The frametimes of a replay that does not "
+                raise ValueError(
+                    "The frametimes of a replay that does not "
                     "know with what mods it was set with cannot be converted. "
-                    "Pass one of ``{\"dt\", \"nm\", \"ht\"}`` for "
+                    'Pass one of ``{"dt", "nm", "ht"}`` for '
                     "``mods_unknown`` if you would like to provide a default "
-                    "mod for conversion.")
+                    "mod for conversion."
+                )
             frametimes = convert_statistic(frametimes, mods, to="cv")
         return frametimes
 
@@ -411,8 +432,10 @@ class Circleguard:
 
         beatmap = beatmap or self.beatmap(replay)
         if not beatmap:
-            raise ValueError("The hits of a replay that does not know what map "
-                "it was set on cannot be calculated.")
+            raise ValueError(
+                "The hits of a replay that does not know what map "
+                "it was set on cannot be calculated."
+            )
 
         hits = Investigations.hits(replay, beatmap)
 
@@ -448,13 +471,16 @@ class Circleguard:
 
         beatmap = beatmap or self.beatmap(replay)
         if not beatmap:
-            raise ValueError("The judgments of a replay that does not know "
-                "what map it was set on cannot be calculated.")
+            raise ValueError(
+                "The judgments of a replay that does not know "
+                "what map it was set on cannot be calculated."
+            )
 
         return Investigations.judgments(replay, beatmap)
 
-    def frametime_graph(self, replay, cv=True, figure=None,
-        show_expected_frametime=True):
+    def frametime_graph(
+        self, replay, cv=True, figure=None, show_expected_frametime=True
+    ):
         """
         Uses matplotlib to create a graph of the frametimes of the replay.
 
@@ -489,15 +515,14 @@ class Circleguard:
         # is called.
         from circleguard.frametime_graph import FrametimeGraph
         from matplotlib import pyplot
+
         self.load(replay)
-        frametime_graph = FrametimeGraph(replay, cv, figure,
-            show_expected_frametime)
+        frametime_graph = FrametimeGraph(replay, cv, figure, show_expected_frametime)
         # strictly speaking, I don't think this return is necessary -
         # ``FrametimeGraph`` modifies the passed figure on instantiation,
         # so consumers could just use the figure they passed in instead of the
         # return value here. Returning it anyway feels better though.
         return frametime_graph.figure if figure else pyplot
-
 
     def load(self, loadable):
         """
@@ -513,7 +538,6 @@ class Circleguard:
         This is identical to calling ``loadable.load(cg.loader, cg.cache)``.
         """
         loadable.load(self.loader, self.cache)
-
 
     def load_info(self, replay_container):
         """
@@ -565,8 +589,9 @@ class Circleguard:
         self.load(m) if load else self.load_info(m)
         return m
 
-    def User(self, user_id, span, mods=None, cache=None,
-        available_only=True, load=False) -> User:
+    def User(
+        self, user_id, span, mods=None, cache=None, available_only=True, load=False
+    ) -> User:
         """
         Returns a new, info-loaded :class:`~circleguard.loadables.User`.
 
@@ -594,8 +619,15 @@ class Circleguard:
         self.load(u) if load else self.load_info(u)
         return u
 
-    def MapUser(self, beatmap_id, user_id, span=Loader.MAX_MAP_SPAN, cache=None,
-        available_only=True, load=False) -> MapUser:
+    def MapUser(
+        self,
+        beatmap_id,
+        user_id,
+        span=Loader.MAX_MAP_SPAN,
+        cache=None,
+        available_only=True,
+        load=False,
+    ) -> MapUser:
         """
         Returns a new, info-loaded :class:`~circleguard.loadables.MapUser`.
 
@@ -651,9 +683,9 @@ class Circleguard:
         self.load(r_dir) if load else self.load_info(r_dir)
         return r_dir
 
-
-    def ReplayMap(self, beatmap_id, user_id, mods=None, cache=None, info=None) \
-        -> ReplayMap:
+    def ReplayMap(
+        self, beatmap_id, user_id, mods=None, cache=None, info=None
+    ) -> ReplayMap:
         """
         Returns a new, loaded :class:`~circleguard.loadables.ReplayMap`.
 

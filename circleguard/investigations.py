@@ -97,11 +97,12 @@ class Investigations:
         # Law of cosines, solve for beta
         # AC^2 = AB^2 + BC^2 - 2 * AB * BC * cos(beta)
         # cos(beta) = -(AC^2 - AB^2 - BC^2) / (2 * AB * BC)
-        num = -(AC ** 2 - AB ** 2 - BC ** 2)
-        denom = (2 * AB * BC)
+        num = -(AC**2 - AB**2 - BC**2)
+        denom = 2 * AB * BC
         # use true_divide for handling division by zero
-        cos_beta = np.true_divide(num, denom, out=np.full_like(num, np.nan),
-            where=denom!=0)
+        cos_beta = np.true_divide(
+            num, denom, out=np.full_like(num, np.nan), where=denom != 0
+        )
         # rounding issues makes cos_beta go out of arccos' domain, so restrict
         # it
         cos_beta = np.clip(cos_beta, -1, 1)
@@ -116,7 +117,7 @@ class Investigations:
         mask = dist_mask & angle_mask
 
         snaps = []
-        for (t, xy, b, d) in zip(t[mask], b[mask], beta[mask], min_AB_BC[mask]):
+        for t, xy, b, d in zip(t[mask], b[mask], beta[mask], min_AB_BC[mask]):
             # can't discard any snaps if we don't know the beatmap, so count all
             # of them
             if not beatmap:
@@ -179,8 +180,12 @@ class Investigations:
         # for each order (slice (n - 1,) to (n - 3,)).
         # d3xy is of shape (n - 3, 2) so dtdT is also reshaped from (n - 3,) to
         # (n - 3, 1) to align the axes.
-        jerk = np.divide(d3xy, dtdT[2:, None] ** 3, out=np.zeros_like(d3xy),
-            where=dtdT[2:,None]!=0)
+        jerk = np.divide(
+            d3xy,
+            dtdT[2:, None] ** 3,
+            out=np.zeros_like(d3xy),
+            where=dtdT[2:, None] != 0,
+        )
 
         # take the absolute value of the jerk
         jerk = np.linalg.norm(jerk, axis=1)
@@ -306,9 +311,13 @@ class Investigations:
             # This is wrong for cutting edge replays between those two versions
             # which do not have a concrete version, but that's better than being
             # wrong for stable replays between those two versions.
-            sliderbug_fixed = game_version >= Investigations.VERSION_SLIDERBUG_FIXED_STABLE
+            sliderbug_fixed = (
+                game_version >= Investigations.VERSION_SLIDERBUG_FIXED_STABLE
+            )
         else:
-            sliderbug_fixed = game_version >= Investigations.VERSION_SLIDERBUG_FIXED_CUTTING_EDGE
+            sliderbug_fixed = (
+                game_version >= Investigations.VERSION_SLIDERBUG_FIXED_CUTTING_EDGE
+            )
 
         easy = Mod.EZ in replay.mods
         hard_rock = Mod.HR in replay.mods
@@ -364,7 +373,6 @@ class Investigations:
                 if hitobj_type == 0:
                     notelock_end_time += 1
 
-
             # can't press on hitobjects before hitwindowmiss
             if keydown_t < hitobj_t - 400:
                 keydown_i += 1
@@ -373,7 +381,10 @@ class Investigations:
             if keydown_t <= hitobj_t - hw_50:
                 # pressing on a circle or slider during hitwindowmiss will cause
                 # a miss
-                if np.linalg.norm(keydown_xy - hitobj_xy) <= hitradius and hitobj_type != 2:
+                if (
+                    np.linalg.norm(keydown_xy - hitobj_xy) <= hitradius
+                    and hitobj_type != 2
+                ):
                     # sliders don't disappear after missing
                     # so we skip to the press_i that is after notelock_end_time
                     if hitobj_type == 1 and sliderbug_fixed:
@@ -392,9 +403,11 @@ class Investigations:
                 # so we move to the next object
                 hitobj_i += 1
             else:
-                if (keydown_t < hitobj_t + hw_50 and
-                    np.linalg.norm(keydown_xy - hitobj_xy) <= hitradius and
-                    hitobj_type != 2):
+                if (
+                    keydown_t < hitobj_t + hw_50
+                    and np.linalg.norm(keydown_xy - hitobj_xy) <= hitradius
+                    and hitobj_type != 2
+                ):
 
                     # sliderheads are always 300s even if you click early or
                     # late
@@ -408,8 +421,9 @@ class Investigations:
                     elif abs(keydown_t - hitobj_t) < hw_50:
                         hit_type = JudgmentType.Hit50
 
-                    judgment = Hit(hitobj, keydown_t, keydown_xy,
-                        replay, beatmap, hit_type)
+                    judgment = Hit(
+                        hitobj, keydown_t, keydown_xy, replay, beatmap, hit_type
+                    )
                     judgments.append(judgment)
                     hitobj_hit[hitobj_i] = True
 
@@ -521,7 +535,7 @@ class Investigations:
         """
         # euclidean distance
         distance = xy1 - xy2
-        distance = (distance ** 2).sum(axis=1) ** 0.5
+        distance = (distance**2).sum(axis=1) ** 0.5
         return distance.mean()
 
     @staticmethod
@@ -535,10 +549,10 @@ class Investigations:
         # (eg. cheater inserts replay data during breaks that places them
         # far away from the actual replay)
         horizontal_length = xy1.shape[1] - xy1.shape[1] % num_chunks
-        xy1_parts = np.hsplit(xy1[:,:horizontal_length], num_chunks)
-        xy2_parts = np.hsplit(xy2[:,:horizontal_length], num_chunks)
+        xy1_parts = np.hsplit(xy1[:, :horizontal_length], num_chunks)
+        xy2_parts = np.hsplit(xy2[:, :horizontal_length], num_chunks)
         correlations = []
-        for (xy1_part, xy2_part) in zip(xy1_parts, xy2_parts):
+        for xy1_part, xy2_part in zip(xy1_parts, xy2_parts):
             xy1_part -= np.mean(xy1_part)
             xy2_part -= np.mean(xy2_part)
             norm = np.std(xy1_part) * np.std(xy2_part) * xy1_part.size
@@ -553,7 +567,6 @@ class Investigations:
             correlations.append(max_corr)
         # take the median of all the chunks to reduce the effect of outliers
         return np.median(correlations)
-
 
     @staticmethod
     def remove_duplicate_t(t, data):
@@ -598,8 +611,9 @@ class Investigations:
         --------
         The length of the two passed arrays must be equal.
         """
-        valid = np.all(([0, 0] <= xy1) & (xy1 <= [512, 384]), axis=1) & \
-            np.all(([0, 0] <= xy2) & (xy2 <= [512, 384]), axis=1)
+        valid = np.all(([0, 0] <= xy1) & (xy1 <= [512, 384]), axis=1) & np.all(
+            ([0, 0] <= xy2) & (xy2 <= [512, 384]), axis=1
+        )
         xy1 = xy1[valid]
         xy2 = xy2[valid]
         return (xy1, xy2)
@@ -623,14 +637,18 @@ class Snap:
         ``min(dist_a_b, dist_b_c)`` if ``a``, ``b``, and ``c`` are three
         datapoints with ``b`` being the middle one.
     """
+
     def __init__(self, time, angle, distance):
         self.time = time
         self.angle = angle
         self.distance = distance
 
     def __eq__(self, other):
-        return (self.time == other.time and self.angle == other.angle
-                and self.distance == other.distance)
+        return (
+            self.time == other.time
+            and self.angle == other.angle
+            and self.distance == other.distance
+        )
 
     def __hash__(self):
         return hash((self.time, self.angle, self.distance))

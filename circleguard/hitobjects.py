@@ -16,10 +16,12 @@ from circleguard.mod import Mod
 # HR) because we know with what mods and on what map the hitobject was played
 # with.
 
+
 class Hitobject:
     """
     A Hitobject in osu! gameplay, with a time and a position.
     """
+
     def __init__(self, time, xy):
         # TODO remove ``t`` in core 6.0.0, ``time`` should be preferred
         self.t = time
@@ -77,13 +79,17 @@ class Circle(Hitobject):
     """
     A circle in osu! gameplay, with a time, position, and radius.
     """
+
     def __init__(self, time, xy, radius):
         super().__init__(time, xy)
         self.radius = radius
 
     def __eq__(self, other):
-        return (self.time == other.time and self.xy == other.xy and
-            self.radius == other.radius)
+        return (
+            self.time == other.time
+            and self.xy == other.xy
+            and self.radius == other.radius
+        )
 
     def __hash__(self):
         return hash((self.time, self.xy, self.radius))
@@ -93,13 +99,17 @@ class Slider(Hitobject):
     """
     A slider in osu! gameplay, with a time, position, and radius.
     """
+
     def __init__(self, time, xy, radius):
         super().__init__(time, xy)
         self.radius = radius
 
     def __eq__(self, other):
-        return (self.time == other.time and self.xy == other.xy and
-            self.radius == other.radius)
+        return (
+            self.time == other.time
+            and self.xy == other.xy
+            and self.radius == other.radius
+        )
 
     def __hash__(self):
         return hash((self.time, self.xy, self.radius))
@@ -109,5 +119,6 @@ class Spinner(Hitobject):
     """
     A spinner in osu! gameplay, with a time and position.
     """
+
     def __init__(self, time, xy):
         super().__init__(time, xy)

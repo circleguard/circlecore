@@ -16,8 +16,9 @@ class Span(set):
     def __init__(self, data):
         # allow passing as either span or string
         if not isinstance(data, (Span, str)):
-            raise ValueError(f"Expected data to be a str or Span, got type "
-                f"{type(data)}.")
+            raise ValueError(
+                f"Expected data to be a str or Span, got type " f"{type(data)}."
+            )
         if isinstance(data, Span):
             # python allows initializing a set with a set
             super().__init__(data)
@@ -26,8 +27,10 @@ class Span(set):
             super().__init__(span_set)
 
         if max(self) > 100:
-            raise ValueError("Spans can only range from 1 to 100 inclusive. "
-                f"The largest element passed was {max(self)}")
+            raise ValueError(
+                "Spans can only range from 1 to 100 inclusive. "
+                f"The largest element passed was {max(self)}"
+            )
 
     def _to_set(self, span):
         """

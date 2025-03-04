@@ -1,6 +1,7 @@
 from circleguard import Loader, InvalidKeyException
 from tests.utils import CGTestCase, KEY
 
+
 class TestLoader(CGTestCase):
     @classmethod
     def setUpClass(cls):
@@ -35,4 +36,6 @@ class TestLoader(CGTestCase):
         loader = Loader("incorrect key")
         self.assertRaises(InvalidKeyException, loader.username, 13506780)
         self.assertRaises(InvalidKeyException, loader.user_id, "] [")
-        self.assertRaises(InvalidKeyException, loader.map_id, "9d0a8fec2fe3f778334df6bdc60b113c")
+        self.assertRaises(
+            InvalidKeyException, loader.map_id, "9d0a8fec2fe3f778334df6bdc60b113c"
+        )

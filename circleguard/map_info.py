@@ -1,6 +1,6 @@
 # TODO: remove in core 6.0.0, in favor of ``Replay#map_available`` (and
 # possibly other mechanisms).
-class MapInfo():
+class MapInfo:
     """
     Represents the information necessary to load a beatmap.
 

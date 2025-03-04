@@ -1,7 +1,16 @@
 from datetime import datetime, timezone
 
-from circleguard import (ReplayMap, ReplayPath, RatelimitWeight, Map, User,
-    MapUser, Mod, NoInfoAvailableException, ReplayString)
+from circleguard import (
+    ReplayMap,
+    ReplayPath,
+    RatelimitWeight,
+    Map,
+    User,
+    MapUser,
+    Mod,
+    NoInfoAvailableException,
+    ReplayString,
+)
 
 from tests.utils import CGTestCase, RES
 
@@ -30,8 +39,9 @@ class TestReplays(CGTestCase):
         self.assertEqual(r.max_combo, 186)
         self.assertTrue(r.is_perfect_combo)
         self.assertEqual(r.life_bar_graph, None)
-        self.assertEqual(r.timestamp, datetime(2015, 12, 16, 19, 40, 39,
-            tzinfo=timezone.utc))
+        self.assertEqual(
+            r.timestamp, datetime(2015, 12, 16, 19, 40, 39, tzinfo=timezone.utc)
+        )
 
     def test_loading_replaymap(self):
         # Toy HDHR score on Pretender
@@ -54,8 +64,9 @@ class TestReplays(CGTestCase):
         self.assertEqual(r.score, 89927731)
         self.assertEqual(r.max_combo, 2388)
         self.assertTrue(r.is_perfect_combo)
-        self.assertEqual(r.timestamp, datetime(2019, 6, 19, 3, 22, 44,
-            tzinfo=timezone.utc))
+        self.assertEqual(
+            r.timestamp, datetime(2019, 6, 19, 3, 22, 44, tzinfo=timezone.utc)
+        )
 
     def test_no_replay_raises(self):
         # contrary to loading a Map, where we don't want to raise if the map
@@ -97,7 +108,9 @@ class TestMap(CGTestCase):
         # 4th (kirby mix)
         self.assertEqual(self.map[1].user_id, 9665206)
         # 3rd, 4th, and 5th (toy, kirby mix, dolter)
-        self.assertListEqual([r.user_id for r in self.map[0:3]], [2757689, 9665206, 6920104])
+        self.assertListEqual(
+            [r.user_id for r in self.map[0:3]], [2757689, 9665206, 6920104]
+        )
         # 3rd and 5th (toy and dolter)
         self.assertListEqual([r.user_id for r in self.map[0:3:2]], [2757689, 6920104])
 
@@ -138,7 +151,9 @@ class TestUser(CGTestCase):
         # 2nd (FDFD)
         self.assertEqual(self.user[1].map_id, 2249059)
         # 1st, 2nd, and 3rd (shinkou, FDFD, arkadia)
-        self.assertListEqual([r.map_id for r in self.user[0:3]], [3747453, 2249059, 3645144])
+        self.assertListEqual(
+            [r.map_id for r in self.user[0:3]], [3747453, 2249059, 3645144]
+        )
         # 1st and 3rd (shinkou, arkadia)
         self.assertListEqual([r.map_id for r in self.user[0:3:2]], [3747453, 3645144])
 
@@ -184,6 +199,7 @@ class TestMapUser(CGTestCase):
         # test slicing
         self.assertListEqual([r.map_id for r in self.mu[0:2]], [795627, 795627])
 
+
 class TestReplayString(CGTestCase):
     def test_replay_string_load(self):
         replay_data = open(RES / "example_replay.osr", "rb").read()
@@ -223,17 +239,21 @@ class TestEquality(CGTestCase):
     def setUpClass(cls):
         super().setUpClass()
 
-        cls.user = User(2757689, "1-2") # toy, #1=sidetracked day, #2=View of The River Styx
+        cls.user = User(
+            2757689, "1-2"
+        )  # toy, #1=sidetracked day, #2=View of The River Styx
         cls.user1 = User(2757689, "1-2", cache=False)
         cls.user2 = User(2757689, "1-2", mods=Mod.HT)
         cls.user3 = User(2757689, "1")
 
-        cls.map = Map(1754777, "1-4") #sidetracked day: umbre, karthy, -duckleader-, toy
+        cls.map = Map(
+            1754777, "1-4"
+        )  # sidetracked day: umbre, karthy, -duckleader-, toy
         cls.map1 = Map(1754777, "1-4", cache=False)
         cls.map2 = Map(1754777, "1-4", mods=Mod.HD)
         cls.map3 = Map(1754777, "1-2")
 
-        cls.r = ReplayMap(1754777, 2766034) # umbre +HDHR on sidetracked day
+        cls.r = ReplayMap(1754777, 2766034)  # umbre +HDHR on sidetracked day
         cls.r1 = ReplayMap(1754777, 2766034, cache=True)
         cls.r2 = ReplayMap(1754777, 2766034, mods=Mod.NF)
 

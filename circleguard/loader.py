@@ -15,8 +15,10 @@ from circleguard.span import Span
 
 class NoInfoAvailableException(Exception):
     def __init__(self):
-        super().__init__("No info was available from the api for the given "
-            "arguments.")
+        super().__init__(
+            "No info was available from the api for the given " "arguments."
+        )
+
 
 def check_cache(function):
     """
@@ -51,8 +53,8 @@ def check_cache(function):
             return function(*args, **kwargs)
 
         return osrparse.parse_replay_data(decompressed_lzma, decompressed=True)
-    return wrapper
 
+    return wrapper
 
 
 class Loader:
@@ -104,8 +106,7 @@ class Loader:
             self._conn = sqlite3.connect(str(cache_path))
             self._cursor = self._conn.cursor()
 
-    def replay_info(self, beatmap_id, span=None, user_id=None, mods=None, \
-        limit=True):
+    def replay_info(self, beatmap_id, span=None, user_id=None, mods=None, limit=True):
         """
         Retrieves replay infos from a map's leaderboard.
 
@@ -151,18 +152,22 @@ class Loader:
         # call it twice inside the dict comprehension, it rebinds to the comp
         # scope and takes on different locals.
         locals_ = locals()
-        self.log.log(TRACE, "Loading replay info on map %d with options %s",
-            beatmap_id, {k: locals_[k] for k in locals_ if k != 'self'})
+        self.log.log(
+            TRACE,
+            "Loading replay info on map %d with options %s",
+            beatmap_id,
+            {k: locals_[k] for k in locals_ if k != "self"},
+        )
 
         if not (span or user_id):
-            raise ValueError("One of user_id or span must be passed, but not "
-                "both")
+            raise ValueError("One of user_id or span must be passed, but not " "both")
         api_limit = None
         if span:
             api_limit = max(span)
         mods = None if mods is None else mods.value
-        scores = self.api.get_scores(beatmap_id, mode=0, limit=api_limit,
-            user=user_id, mods=mods)
+        scores = self.api.get_scores(
+            beatmap_id, mode=0, limit=api_limit, user=user_id, mods=mods
+        )
 
         if scores == []:
             # The logic below allows us to load eg
@@ -196,7 +201,6 @@ class Loader:
         # limit only applies if user_id was set
         return scores[0] if (limit and user_id) else scores
 
-
     def get_user_best(self, user_id, span, mods=None):
         """
         Retrieves replay infos from a user's top plays.
@@ -218,8 +222,12 @@ class Loader:
             The replay infos representing the user's top plays.
         """
         locals_ = locals()
-        self.log.log(TRACE, "Loading user best of %s with options %s",
-            user_id, {k: locals_[k] for k in locals_ if k != 'self'})
+        self.log.log(
+            TRACE,
+            "Loading user best of %s with options %s",
+            user_id,
+            {k: locals_[k] for k in locals_ if k != "self"},
+        )
 
         scores = self.api.get_user_best(user_id, mode=0, limit=max(span))
         if scores == []:
@@ -235,9 +243,8 @@ class Loader:
         # weren't that many replay infos returned by the api. eg if there
         # were 4 responses, remove any span above 4
         _span = [x for x in span if x <= len(scores)]
-        scores = [scores[i-1] for i in _span]
+        scores = [scores[i - 1] for i in _span]
         return scores
-
 
     def load_replay_data(self, beatmap_id, user_id, mods=None):
         """
@@ -267,11 +274,17 @@ class Loader:
         the actual api request.
         """
 
-        self.log.log(TRACE, "Requesting replay data by user %d on map %d with "
-            "mods %s", user_id, beatmap_id, mods)
+        self.log.log(
+            TRACE,
+            "Requesting replay data by user %d on map %d with " "mods %s",
+            user_id,
+            beatmap_id,
+            mods,
+        )
         mods = None if mods is None else mods.value
-        content = self.api.get_replay(beatmap_id=beatmap_id, user=user_id,
-            mods=mods, mode=0)
+        content = self.api.get_replay(
+            beatmap_id=beatmap_id, user=user_id, mods=mods, mode=0
+        )
         return base64.b64decode(content)
 
     @check_cache
@@ -304,8 +317,12 @@ class Loader:
         beatmap_id = replay_info.beatmap_id
         mods = replay_info.mods
         if not replay_info.replay_available:
-            self.log.debug("Replay data by user %d on map %d with mods %s not "
-                "available", user_id, beatmap_id, mods)
+            self.log.debug(
+                "Replay data by user %d on map %d with mods %s not " "available",
+                user_id,
+                beatmap_id,
+                mods,
+            )
             return None
 
         lzma_bytes = self.load_replay_data(beatmap_id, user_id, mods)
@@ -313,15 +330,20 @@ class Loader:
         # `self.load_replay_data` error on a `None` value? in other words, I
         # don't see how the decode function could ever return `None`.
         if lzma_bytes is None:
-            raise ReplayUnavailableException("The api guaranteed there "
-                "would be a replay available, but we did not receive any data.")
+            raise ReplayUnavailableException(
+                "The api guaranteed there "
+                "would be a replay available, but we did not receive any data."
+            )
         try:
             replay_data = osrparse.parse_replay_data(lzma_bytes, decoded=True)
         # see https://github.com/circleguard/circlecore/issues/61
         # api sometimes returns corrupt replays
         except LZMAError:
-            self.log.warning("lzma from %r could not be decompressed, api "
-                "returned corrupt replay", replay_info)
+            self.log.warning(
+                "lzma from %r could not be decompressed, api "
+                "returned corrupt replay",
+                replay_info,
+            )
             return None
         if cache:
             self._cache(lzma_bytes, replay_info)
@@ -461,6 +483,7 @@ class Loader:
         self.log.info("Cache not found at path %s, creating cache", path)
         # create dir if nonexistent
         import os
+
         if not os.path.exists(path.parent):
             os.makedirs(path.parent)
         conn = sqlite3.connect(str(path))
@@ -474,7 +497,8 @@ class Loader:
                 `REPLAY_ID` INTEGER NOT NULL,
                 `MODS` INTEGER NOT NULL,
                 PRIMARY KEY(`REPLAY_ID`)
-            )""")
+            )"""
+        )
         # create our index - this does unfortunately add some size (and
         # insertion time) to the db, but it's worth it to get fast lookups on
         # a map, user, or mods, which are all common operations.
@@ -483,7 +507,8 @@ class Loader:
             CREATE INDEX `lookup_index` ON `REPLAYS` (
                 `MAP_ID`, `USER_ID`, `MODS`
             )
-            """)
+            """
+        )
         conn.close()
 
     def _cache(self, lzma_bytes, replay_info):
@@ -509,8 +534,10 @@ class Loader:
         replay_id = replay_info.replay_id
 
         self.log.log(TRACE, "Writing compressed lzma to db")
-        self._cursor.execute("INSERT INTO replays VALUES(?, ?, ?, ?, ?)",
-            [beatmap_id, user_id, compressed_bytes, replay_id, mods])
+        self._cursor.execute(
+            "INSERT INTO replays VALUES(?, ?, ?, ?, ?)",
+            [beatmap_id, user_id, compressed_bytes, replay_id, mods],
+        )
         self._conn.commit()
 
     def _check_cache(self, replay_info):
@@ -534,10 +561,10 @@ class Loader:
         replay_id = replay_info.replay_id
 
         self.log.log(TRACE, "Checking cache for replay info %s", replay_info)
-        result = self._cursor.execute("SELECT replay_data FROM replays WHERE "
-            "replay_id=?", [replay_id]).fetchone()
+        result = self._cursor.execute(
+            "SELECT replay_data FROM replays WHERE " "replay_id=?", [replay_id]
+        ).fetchone()
         if result:
-            self.log.debug("Loading replay for replay info %s from cache",
-                replay_info)
+            self.log.debug("Loading replay for replay info %s from cache", replay_info)
             return wtc.decompress(result[0], decompressed_lzma=True)
         self.log.log(TRACE, "No replay found in cache")

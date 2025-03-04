@@ -2,6 +2,7 @@ import logging
 
 import wtc
 from ossapi import OssapiV1
+
 try:
     import psycopg2
 except ImportError:
@@ -16,20 +17,38 @@ class PostgresCircleguard(Circleguard):
     """
     A postgres variant of the default sqlite-backed circleguard.
     """
-    def __init__(self, key, db_username, db_password, db_host, db_port, db_name,
-        write_to_cache=True, slider_dir=None
+
+    def __init__(
+        self,
+        key,
+        db_username,
+        db_password,
+        db_host,
+        db_port,
+        db_name,
+        write_to_cache=True,
+        slider_dir=None,
     ):
-        loader = PostgresLoader(key, db_username, db_password, db_host, db_port,
-            db_name, write_to_cache)
+        loader = PostgresLoader(
+            key, db_username, db_password, db_host, db_port, db_name, write_to_cache
+        )
         super().__init__(key, loader=loader, slider_dir=slider_dir)
+
 
 class PostgresLoader(Loader):
     """
     A postgres variant of the default sqlite-backed loader.
     """
+
     def __init__(
-        self, key, db_username, db_password, db_host, db_port, db_name,
-        write_to_cache=True
+        self,
+        key,
+        db_username,
+        db_password,
+        db_host,
+        db_port,
+        db_name,
+        write_to_cache=True,
     ):
         self.api = OssapiV1(key)
         self.log = logging.getLogger(__name__)
@@ -44,7 +63,7 @@ class PostgresLoader(Loader):
             password=db_password,
             host=db_host,
             port=db_port,
-            database=db_name
+            database=db_name,
         )
         self._cursor = self._conn.cursor()
 
@@ -69,12 +88,12 @@ class PostgresLoader(Loader):
         replay_id = replay_info.replay_id
 
         self.log.log(TRACE, "Checking cache for replay info %s", replay_info)
-        self._cursor.execute("SELECT replay_data FROM replays WHERE "
-            "replay_id= %s", [replay_id])
+        self._cursor.execute(
+            "SELECT replay_data FROM replays WHERE " "replay_id= %s", [replay_id]
+        )
         result = self._cursor.fetchone()
         if result:
-            self.log.debug("Loading replay for replay info %s from cache",
-                replay_info)
+            self.log.debug("Loading replay for replay info %s from cache", replay_info)
             return wtc.decompress(result[0], decompressed_lzma=True)
         self.log.log(TRACE, "No replay found in cache")
 
@@ -101,6 +120,8 @@ class PostgresLoader(Loader):
         replay_id = replay_info.replay_id
 
         self.log.log(TRACE, "Writing compressed lzma to db")
-        self._cursor.execute("INSERT INTO replays VALUES(%s, %s, %s, %s, %s)",
-            [replay_id, beatmap_id, user_id, compressed_bytes, mods])
+        self._cursor.execute(
+            "INSERT INTO replays VALUES(%s, %s, %s, %s, %s)",
+            [replay_id, beatmap_id, user_id, compressed_bytes, mods],
+        )
         self._conn.commit()

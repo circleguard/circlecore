@@ -1,5 +1,12 @@
-from circleguard import (ReplayPath, ReplayMap, Map, KeylessCircleguard, Mod,
-    User, MapUser)
+from circleguard import (
+    ReplayPath,
+    ReplayMap,
+    Map,
+    KeylessCircleguard,
+    Mod,
+    User,
+    MapUser,
+)
 
 from tests.utils import CGTestCase, RES
 

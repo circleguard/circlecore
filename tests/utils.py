@@ -19,6 +19,7 @@ UR_DELTA = 0.01
 # threshold for frametime
 FRAMETIME_LIMIT = 13
 
+
 class CGTestCase(TestCase):
     @classmethod
     def setUpClass(cls, use_cache=True):
@@ -38,6 +39,6 @@ class CGTestCase(TestCase):
         # https://github.com/biomadeira/pyPDBeREST/commit/71dfe75859a9086
         # b7e415379702cd61ab61fd6e5
         # for implementation
-        warnings.filterwarnings(action="ignore",
-                message="unclosed",
-                category=ResourceWarning)
+        warnings.filterwarnings(
+            action="ignore", message="unclosed", category=ResourceWarning
+        )

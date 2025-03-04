@@ -1,4 +1,5 @@
 import numpy as np
+
 try:
     from matplotlib import pyplot
 except ImportError:
@@ -13,6 +14,7 @@ from circleguard.circleguard import KeylessCircleguard
 # try/catch/pass, but then we can't give a nice error message when people try to
 # use this class without installing matplotlib. Another file isn't the end of
 # the world.
+
 
 class FrametimeGraph:
     # for any frametimes larger than this, chuck them into a single bin.
@@ -37,8 +39,10 @@ class FrametimeGraph:
         # oddities about the frametime graph which make it easier this way.
         frametimes = cg.frametimes(replay, cv=False)
 
-        self.figure.suptitle(f"Frametimes for {replay.username} "
-            f"+{replay.mods.short_name()} on b/{replay.map_id}")
+        self.figure.suptitle(
+            f"Frametimes for {replay.username} "
+            f"+{replay.mods.short_name()} on b/{replay.map_id}"
+        )
 
         self.max_frametime = max(frametimes)
         if self.max_frametime > self.MAX_FRAMETIME:
@@ -50,8 +54,9 @@ class FrametimeGraph:
         frametimes = self.conversion_factor * frametimes
         ax = self.figure.subplots()
 
-        bins = np.arange(0, (self.conversion_factor * self.max_frametime) + 1,
-            self.conversion_factor)
+        bins = np.arange(
+            0, (self.conversion_factor * self.max_frametime) + 1, self.conversion_factor
+        )
         ax.hist(frametimes, bins)
         ax.set_xlabel("Frametime")
         ax.set_ylabel("Count")
@@ -64,8 +69,9 @@ class FrametimeGraph:
     def plot_with_break(self, frametimes):
         # gridspec_kw to make outlier plot smaller than the main one.
         # https://stackoverflow.com/a/35881382
-        ax1, ax2 = self.figure.subplots(1, 2, sharey=True,
-            gridspec_kw={"width_ratios": [3, 1]})
+        ax1, ax2 = self.figure.subplots(
+            1, 2, sharey=True, gridspec_kw={"width_ratios": [3, 1]}
+        )
         ax1.spines["right"].set_visible(False)
         ax2.spines["left"].set_visible(False)
         ax1.set_xlabel("Frametime")
@@ -80,12 +86,12 @@ class FrametimeGraph:
         low_frametimes = self.conversion_factor * low_frametimes
         high_frametimes = self.conversion_factor * high_frametimes
 
-        bins = np.arange(0, (self.conversion_factor * self.MAX_FRAMETIME) + 1,
-            self.conversion_factor)
+        bins = np.arange(
+            0, (self.conversion_factor * self.MAX_FRAMETIME) + 1, self.conversion_factor
+        )
         ax1.hist(low_frametimes, bins)
         # -1 in case high_frametimes has only one frame
-        bins = [min(high_frametimes) - 1, self.conversion_factor *
-            self.max_frametime]
+        bins = [min(high_frametimes) - 1, self.conversion_factor * self.max_frametime]
         ax2.hist(high_frametimes, bins)
 
         if self.show_expected_frametime:
