@@ -1442,7 +1442,7 @@ class ReplayString(ReplayDataOSR):
 
     Parameters
     ----------
-    replay_data_str: str
+    replay_data_str: bytes
         The contents of the replay file as a string.
     cache: bool
         Whether to cache this replay once it is loaded. Note that currently
